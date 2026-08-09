@@ -20,6 +20,7 @@ import {
   makeReplyExcerpt,
   type MessageReplyMeta,
 } from "@/lib/messagerie/message-reply";
+import { presentMessagesForViewer } from "@/lib/messagerie/filter-hidden-messages";
 
 const VALID_CHANNELS = new Set(["INTERNE", "CLIENT", "FOURNISSEUR"]);
 
@@ -93,11 +94,17 @@ export async function GET(request: Request) {
       take: 100,
     });
 
+    const presented = await presentMessagesForViewer(
+      session.user.id,
+      "PROJECT",
+      messages,
+    );
+
     // Compat : tableau brut par défaut ; meta=1 pour canaux V2
     if (searchParams.get("meta") === "1") {
-      return NextResponse.json({ messages, channels });
+      return NextResponse.json({ messages: presented, channels });
     }
-    return NextResponse.json(messages);
+    return NextResponse.json(presented);
   } catch (error) {
     console.error("Erreur récupération messages:", error);
     return NextResponse.json(

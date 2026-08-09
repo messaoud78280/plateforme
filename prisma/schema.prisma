@@ -89,6 +89,7 @@ model User {
   taskMessagesReceived TaskMessage[] @relation("TaskMessagesReceived")
   directMessagesSent   DirectMessage[] @relation("DirectMessagesSent")
   directMessagesReceived DirectMessage[] @relation("DirectMessagesReceived")
+  messageHides         MessageUserHide[]
   notifications      Notification[]
   activities         Activity[]
   alerts             Alert[]
@@ -872,6 +873,9 @@ model Message {
   channel    String   @default("CLIENT")
   /// Pièces jointes messagerie V2C : [{ name, fileUrl, fileSize, mimeType, kind?, durationSec? }]
   attachmentsJson Json?
+  /// Soft-delete « pour tous » (V2C.4.1) — contenu masqué, record conservé
+  deletedAt   DateTime?
+  deletedById String?
   createdAt  DateTime @default(now())
 
   project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -880,6 +884,7 @@ model Message {
 
   @@index([projectId, channel, createdAt])
   @@index([receiverId, read])
+  @@index([deletedAt])
 }
 
 // Documents déposés par les clients (optionnellement liés à un projet ou une tâche)
@@ -999,6 +1004,9 @@ model DirectMessage {
   read           Boolean  @default(false)
   kind           String   @default("USER") // USER | SYSTEM
   payloadJson    Json?
+  /// Soft-delete « pour tous » (V2C.4.1)
+  deletedAt   DateTime?
+  deletedById String?
   createdAt      DateTime @default(now())
 
   sender   User @relation("DirectMessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
@@ -1008,6 +1016,7 @@ model DirectMessage {
   @@index([receiverId])
   @@index([receiverId, read])
   @@index([receiverId, createdAt])
+  @@index([deletedAt])
 }
 
 // Messages sur une tâche (client ↔ agent quand assigné, ou interne gérante ↔ agent)
@@ -1022,6 +1031,9 @@ model TaskMessage {
   kind       String   @default("USER") // USER | SYSTEM
   payloadJson Json?
   attachmentsJson Json? // [{ name, fileUrl, fileSize, mimeType }]
+  /// Soft-delete « pour tous » (V2C.4.1)
+  deletedAt   DateTime?
+  deletedById String?
   createdAt  DateTime @default(now())
 
   task    Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
@@ -1032,6 +1044,22 @@ model TaskMessage {
   @@index([taskId, createdAt])
   @@index([receiverId])
   @@index([receiverId, read])
+  @@index([deletedAt])
+}
+
+/// Masquage personnel « Supprimer pour moi » — persistant, multi-backends (V2C.4.1)
+model MessageUserHide {
+  id          String   @id @default(cuid())
+  userId      String
+  messageKind String   // DIRECT | TASK | PROJECT
+  messageId   String
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, messageKind, messageId])
+  @@index([userId, messageKind])
+  @@index([messageKind, messageId])
 }
 
 // Commentaires sur tâches (optionnellement internes = invisibles client)

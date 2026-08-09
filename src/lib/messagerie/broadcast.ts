@@ -14,6 +14,9 @@ export type MessagerieRealtimePayload = {
   at: string;
   kind: "TASK" | "DIRECT" | "PROJECT";
   conversationKey: string;
+  /** V2C.4.1 — défaut « new » pour les messages classiques */
+  op?: "new" | "deleted_everyone";
+  messageId?: string;
 };
 
 export async function broadcastMessagerieToUser(

@@ -18,6 +18,7 @@ import {
   mergeReplyIntoPayload,
   type MessageReplyMeta,
 } from "@/lib/messagerie/message-reply";
+import { presentMessagesForViewer } from "@/lib/messagerie/filter-hidden-messages";
 
 /** GET /api/tasks/[id]/messages — Messages de la tâche (filtrés par participant).
  * Query : take (défaut 50, max 100) · before=<ISO> (charger plus ancien) · after=<ISO|id> (poll incrémental)
@@ -83,7 +84,13 @@ export async function GET(
         orderBy: { createdAt: "asc" },
         take,
       });
-      return NextResponse.json(newer.map((m) => ({ ...m, linkedBadges: [] as string[] })));
+      const mappedNewer = newer.map((m) => ({ ...m, linkedBadges: [] as string[] }));
+      const presentedNewer = await presentMessagesForViewer(
+        session.user.id,
+        "TASK",
+        mappedNewer,
+      );
+      return NextResponse.json(presentedNewer);
     }
 
     const beforeDate = before ? new Date(before) : null;
@@ -136,9 +143,14 @@ export async function GET(
       ...m,
       linkedBadges: badgesByMessage[m.id] ?? [],
     }));
+    const presented = await presentMessagesForViewer(
+      session.user.id,
+      "TASK",
+      mapped,
+    );
 
     // Compat clients existants : tableau ; meta en header
-    const res = NextResponse.json(mapped);
+    const res = NextResponse.json(presented);
     res.headers.set("X-Has-More", hasMore ? "1" : "0");
     return res;
   } catch (e) {

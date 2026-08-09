@@ -17,6 +17,7 @@ import {
   mergeReplyIntoPayload,
   type MessageReplyMeta,
 } from "@/lib/messagerie/message-reply";
+import { presentMessagesForViewer } from "@/lib/messagerie/filter-hidden-messages";
 
 function canUseDirectMessages(role?: string | null): boolean {
   return isManagerRole(role) || isStaffAgent(role) || role === "CLIENT";
@@ -64,7 +65,12 @@ export async function GET(request: NextRequest) {
         take: 200,
       });
 
-      return NextResponse.json(messages);
+      const presented = await presentMessagesForViewer(
+        session.user.id,
+        "DIRECT",
+        messages,
+      );
+      return NextResponse.json(presented);
     }
 
     const messages = await prisma.directMessage.findMany({
@@ -74,11 +80,15 @@ export async function GET(request: NextRequest) {
       take: 100,
     });
 
-    return NextResponse.json(
-      messages.filter(
-        (m) => m.senderId === session.user!.id || m.receiverId === session.user!.id
-      )
+    const filtered = messages.filter(
+      (m) => m.senderId === session.user!.id || m.receiverId === session.user!.id,
     );
+    const presented = await presentMessagesForViewer(
+      session.user.id,
+      "DIRECT",
+      filtered,
+    );
+    return NextResponse.json(presented);
   } catch (e) {
     console.error(e);
     return NextResponse.json(

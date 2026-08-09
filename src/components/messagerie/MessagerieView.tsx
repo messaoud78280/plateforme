@@ -34,12 +34,18 @@ import {
 } from "@/components/messagerie/MessageReplyQuote";
 import { MessageBubbleChrome } from "@/components/messagerie/MessageBubbleChrome";
 import { MessageInfosPanel } from "@/components/messagerie/MessageInfosPanel";
+import { MessageDeleteDialog } from "@/components/messagerie/MessageDeleteDialog";
 import type { MessageMenuActionId } from "@/components/messagerie/MessageContextMenu";
 import { scopeFromChannel } from "@/lib/messagerie/forward-safety";
 import {
   MessageForwardDialog,
   type ForwardDestOption,
 } from "@/components/messagerie/MessageForwardDialog";
+import {
+  deletedMessageLabel,
+  maybeRedactReplyExcerpt,
+  type MessageDeleteMode,
+} from "@/lib/messagerie/message-delete";
 
 type MessageChannel = "INTERNE" | "CLIENT" | "FOURNISSEUR";
 
@@ -47,6 +53,8 @@ type MessageItem = {
   id: string;
   content: string;
   read: boolean;
+  deletedAt?: string | null;
+  deletedById?: string | null;
   channel?: string;
   attachmentsJson?: MsgAttachment[] | null;
   createdAt: string;
@@ -192,6 +200,12 @@ export function MessagerieView({
   const [forwardOpen, setForwardOpen] = useState(false);
   const [forwardSourceId, setForwardSourceId] = useState<string | null>(null);
   const [flashMsgId, setFlashMsgId] = useState<string | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    ids: string[];
+    isMine: boolean;
+  } | null>(null);
+  const [deletePending, setDeletePending] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   void personalTick;
 
   useEffect(() => {
@@ -326,10 +340,70 @@ export function MessagerieView({
   useEffect(() => {
     return subscribeMessagerieEvents((ev) => {
       if (ev.kind !== "PROJECT") return;
+      if (ev.op === "deleted_everyone" && ev.messageId) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === ev.messageId
+              ? {
+                  ...m,
+                  content: "",
+                  attachmentsJson: null,
+                  deletedAt: ev.at,
+                  deletedById: ev.senderId,
+                }
+              : m,
+          ),
+        );
+        return;
+      }
       if (!selectedProjectId || !ev.href.includes(selectedProjectId)) return;
       void loadMessages(channel);
     });
   }, [selectedProjectId, channel]);
+
+  async function confirmProjectDelete(mode: MessageDeleteMode) {
+    if (!deleteDialog) return;
+    setDeletePending(true);
+    setDeleteError(null);
+    const ids = deleteDialog.ids;
+    const snapshot = messages;
+    if (mode === "me") {
+      setMessages((prev) => prev.filter((m) => !ids.includes(m.id)));
+    } else {
+      setMessages((prev) =>
+        prev.map((m) =>
+          ids.includes(m.id)
+            ? {
+                ...m,
+                content: "",
+                attachmentsJson: null,
+                deletedAt: new Date().toISOString(),
+                deletedById: sessionUserId,
+              }
+            : m,
+        ),
+      );
+    }
+    try {
+      const res = await fetch("/api/messages/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messageKind: "PROJECT",
+          messageIds: ids,
+          mode,
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) throw new Error(data.error || "Suppression impossible");
+      setDeleteDialog(null);
+    } catch (e) {
+      setMessages(snapshot);
+      setDeleteError(e instanceof Error ? e.message : "Erreur de suppression");
+    } finally {
+      setDeletePending(false);
+    }
+  }
 
   async function uploadFiles(
     files: FileList | File[],
@@ -599,8 +673,13 @@ export function MessagerieView({
                   const isMe = m.sender.id === sessionUserId;
                   const atts = Array.isArray(m.attachmentsJson) ? m.attachmentsJson : [];
                   const parsed = parseContentWithReply(m.content || "");
+                  const deletedIds = new Set(
+                    conversationMessages.filter((x) => x.deletedAt).map((x) => x.id),
+                  );
+                  const reply = maybeRedactReplyExcerpt(parsed.reply, deletedIds);
                   const hasText =
                     Boolean(parsed.body) && !atts.some((a) => a.name === m.content);
+                  const deletedLabel = deletedMessageLabel(m, sessionUserId);
                   const ch = (m.channel as MessageChannel) || channel;
                   return (
                     <div
@@ -617,15 +696,15 @@ export function MessagerieView({
                           isMe={isMe}
                           myUserId={sessionUserId}
                           capabilities={{
-                            reply: true,
+                            reply: !m.deletedAt,
                             react: false,
-                            bework: true,
+                            bework: !m.deletedAt,
                             important: true,
                             pin: true,
-                            forward: true,
-                            copy: hasText,
+                            forward: !m.deletedAt,
+                            copy: hasText && !m.deletedAt,
                             infos: true,
-                            delete: false,
+                            delete: !m.deletedAt,
                             select: false,
                           }}
                           isImportant={isMessageImportant("PROJECT", m.id)}
@@ -667,6 +746,12 @@ export function MessagerieView({
                               setForwardOpen(true);
                               return;
                             }
+                            if (action === "delete") {
+                              if (m.deletedAt) return;
+                              setDeleteError(null);
+                              setDeleteDialog({ ids: [m.id], isMine: isMe });
+                              return;
+                            }
                             if (action === "infos") {
                               setInfosData({
                                 senderName: m.sender.name,
@@ -679,18 +764,23 @@ export function MessagerieView({
                                   hour: "2-digit",
                                   minute: "2-digit",
                                 }),
-                                attachmentSummary: atts.length
-                                  ? `${atts.length} pièce(s) jointe(s)`
-                                  : undefined,
-                                replyToLabel: parsed.reply
-                                  ? `${parsed.reply.senderName} — ${parsed.reply.excerpt}`
-                                  : null,
+                                attachmentSummary: m.deletedAt
+                                  ? "Message supprimé"
+                                  : atts.length
+                                    ? `${atts.length} pièce(s) jointe(s)`
+                                    : undefined,
+                                replyToLabel: m.deletedAt
+                                  ? deletedMessageLabel(m, sessionUserId)
+                                  : reply
+                                    ? `${reply.senderName} — ${reply.excerpt}`
+                                    : null,
                               });
                               setInfosOpen(true);
                             }
                           }}
                           onReact={() => {}}
                           footer={
+                            deletedLabel ? null : (
                             <MessageBeworkActions
                               messageId={m.id}
                               messageKind="PROJECT"
@@ -700,6 +790,7 @@ export function MessagerieView({
                               )}
                               isMe={isMe}
                             />
+                            )
                           }
                         >
                           <div
@@ -709,11 +800,17 @@ export function MessagerieView({
                                 : "rounded-tl-md bg-slate-100 text-slate-800"
                             }`}
                           >
+                            {deletedLabel ? (
+                              <p className={`text-[13px] italic ${isMe ? "text-white/80" : "text-slate-500"}`}>
+                                {deletedLabel}
+                              </p>
+                            ) : (
+                              <>
                             <p className="text-xs font-medium opacity-90">{m.sender.name}</p>
-                            {parsed.reply ? (
+                            {reply ? (
                               <div className={isMe ? "text-white/90" : ""}>
                                 <MessageReplyQuote
-                                  reply={parsed.reply}
+                                  reply={reply}
                                   onJump={(id) => {
                                     setFlashMsgId(id);
                                     document
@@ -738,6 +835,8 @@ export function MessagerieView({
                                 isMe={isMe}
                               />
                             ) : null}
+                              </>
+                            )}
                           </div>
                         </MessageBubbleChrome>
                         <p className="mt-1 text-xs text-slate-400">
@@ -1079,6 +1178,22 @@ export function MessagerieView({
         open={infosOpen}
         onClose={() => setInfosOpen(false)}
         data={infosData}
+      />
+      <MessageDeleteDialog
+        open={Boolean(deleteDialog)}
+        isMine={Boolean(deleteDialog?.isMine)}
+        count={deleteDialog?.ids.length ?? 1}
+        pending={deletePending}
+        error={deleteError}
+        onCancel={() => {
+          if (deletePending) return;
+          setDeleteDialog(null);
+          setDeleteError(null);
+        }}
+        onDeleteMe={() => void confirmProjectDelete("me")}
+        onDeleteEveryone={
+          deleteDialog?.isMine ? () => void confirmProjectDelete("everyone") : undefined
+        }
       />
       <MessageForwardDialog
         open={forwardOpen}

@@ -53,7 +53,13 @@ import {
   type ForwardDestOption,
 } from "@/components/messagerie/MessageForwardDialog";
 import { MessageSelectionBar } from "@/components/messagerie/MessageSelectionBar";
+import { MessageDeleteDialog } from "@/components/messagerie/MessageDeleteDialog";
 import type { MessageMenuActionId } from "@/components/messagerie/MessageContextMenu";
+import {
+  deletedMessageLabel,
+  maybeRedactReplyExcerpt,
+  type MessageDeleteMode,
+} from "@/lib/messagerie/message-delete";
 
 const MessageBeworkActions = dynamic(
   () =>
@@ -88,6 +94,8 @@ type TaskMessageItem = {
   linkedBadges?: string[];
   attachmentsJson?: MsgAttachment[] | null;
   payloadJson?: unknown;
+  deletedAt?: string | null;
+  deletedById?: string | null;
   createdAt: string;
   sender: { id: string; name: string };
   receiver: { id: string; name: string };
@@ -153,6 +161,8 @@ type DirectMessageItem = {
   receiverId?: string;
   attachmentsJson?: MsgAttachment[] | null;
   payloadJson?: unknown;
+  deletedAt?: string | null;
+  deletedById?: string | null;
   createdAt: string;
   sender: { id: string; name: string };
   receiver: { id: string; name: string };
@@ -446,6 +456,14 @@ export function MessagerieMissionsView({
   } | null>(null);
   const [threadMsgFilter, setThreadMsgFilter] = useState<"all" | "important" | "pinned">("all");
   const [flashMsgId, setFlashMsgId] = useState<string | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    kind: "DIRECT" | "TASK";
+    ids: string[];
+    isMine: boolean;
+    forceMeOnly: boolean;
+  } | null>(null);
+  const [deletePending, setDeletePending] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     setPinnedIds(loadPins());
@@ -573,6 +591,30 @@ export function MessagerieMissionsView({
   // Realtime : remonter la conversation + rafraîchir le fil ouvert (TASK + DIRECT)
   useEffect(() => {
     return subscribeMessagerieEvents((ev) => {
+      if (ev.op === "deleted_everyone" && ev.messageId) {
+        const patch = (m: TaskMessageItem | DirectMessageItem) =>
+          m.id === ev.messageId
+            ? {
+                ...m,
+                content: "",
+                attachmentsJson: null,
+                deletedAt: ev.at,
+                deletedById: ev.senderId,
+              }
+            : m;
+        if (ev.kind === "TASK") {
+          setMessages((prev) => prev.map(patch as (m: TaskMessageItem) => TaskMessageItem));
+        }
+        if (ev.kind === "DIRECT") {
+          setDirectThreadMessages((prev) =>
+            prev.map(patch as (m: DirectMessageItem) => DirectMessageItem),
+          );
+          setDirectMessages((prev) =>
+            prev.map(patch as (m: DirectMessageItem) => DirectMessageItem),
+          );
+        }
+        return;
+      }
       if (ev.kind === "TASK" && ev.conversationKey.startsWith("TASK:")) {
         const taskId = ev.conversationKey.slice(5);
         setMissions((prev) => {
@@ -1371,9 +1413,10 @@ export function MessagerieMissionsView({
       return;
     }
     if (action === "infos") {
-      const reply = getReplyFromPayload(
-        "payloadJson" in m ? m.payloadJson : null,
-      );
+      const soft = Boolean(m.deletedAt);
+      const reply = soft
+        ? null
+        : getReplyFromPayload("payloadJson" in m ? m.payloadJson : null);
       setInfosData({
         senderName: m.sender.name,
         conversationLabel: ctx.conversationLabel,
@@ -1385,12 +1428,16 @@ export function MessagerieMissionsView({
           hour: "2-digit",
           minute: "2-digit",
         }),
-        attachmentSummary: atts.length
-          ? `${atts.length} pièce${atts.length > 1 ? "s" : ""} jointe${atts.length > 1 ? "s" : ""}`
-          : undefined,
+        attachmentSummary: soft
+          ? "Message supprimé"
+          : atts.length
+            ? `${atts.length} pièce${atts.length > 1 ? "s" : ""} jointe${atts.length > 1 ? "s" : ""}`
+            : undefined,
         replyToLabel: reply
           ? `${reply.senderName} — ${reply.excerpt}`
-          : null,
+          : soft
+            ? deletedMessageLabel(m, sessionUserId)
+            : null,
       });
       setInfosOpen(true);
       return;
@@ -1400,6 +1447,81 @@ export function MessagerieMissionsView({
       document
         .querySelector(`[data-bework-for="${m.id}"] button`)
         ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      return;
+    }
+    if (action === "delete") {
+      if (m.deletedAt) return;
+      const isMine = m.sender.id === sessionUserId;
+      setDeleteError(null);
+      setDeleteDialog({
+        kind,
+        ids: [m.id],
+        isMine,
+        forceMeOnly: false,
+      });
+    }
+  }
+
+  async function confirmDelete(mode: MessageDeleteMode) {
+    if (!deleteDialog) return;
+    setDeletePending(true);
+    setDeleteError(null);
+    const { kind, ids } = deleteDialog;
+    const snapshotDirect = [...selectedDirectThread];
+    const snapshotTask = [...messages];
+
+    // Optimistic UI
+    if (mode === "me") {
+      if (kind === "DIRECT") {
+        setDirectThreadMessages((prev) => prev.filter((m) => !ids.includes(m.id)));
+        setDirectMessages((prev) => prev.filter((m) => !ids.includes(m.id)));
+      } else {
+        setMessages((prev) => prev.filter((m) => !ids.includes(m.id)));
+      }
+    } else {
+      const soft = (m: TaskMessageItem | DirectMessageItem) =>
+        ids.includes(m.id)
+          ? {
+              ...m,
+              content: "",
+              attachmentsJson: null,
+              deletedAt: new Date().toISOString(),
+              deletedById: sessionUserId,
+            }
+          : m;
+      if (kind === "DIRECT") {
+        setDirectThreadMessages((prev) =>
+          prev.map(soft as (m: DirectMessageItem) => DirectMessageItem),
+        );
+      } else {
+        setMessages((prev) => prev.map(soft as (m: TaskMessageItem) => TaskMessageItem));
+      }
+    }
+
+    try {
+      const res = await fetch("/api/messages/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messageKind: kind,
+          messageIds: ids,
+          mode,
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        throw new Error(data.error || "Suppression impossible");
+      }
+      setDeleteDialog(null);
+      setSelectionMode(false);
+      setSelectedMsgIds(new Set());
+    } catch (e) {
+      // Restaurer
+      if (kind === "DIRECT") setDirectThreadMessages(snapshotDirect);
+      else setMessages(snapshotTask);
+      setDeleteError(e instanceof Error ? e.message : "Erreur de suppression");
+    } finally {
+      setDeletePending(false);
     }
   }
 
@@ -1874,6 +1996,7 @@ export function MessagerieMissionsView({
                     ) : null}
                     <MessageSelectionBar
                       count={selectionMode ? selectedMsgIds.size : 0}
+                      canDelete={selectedMsgIds.size > 0}
                       onImportant={() => {
                         setMessagesImportant(
                           [...selectedMsgIds].map((id) => ({ kind: "DIRECT", messageId: id })),
@@ -1888,6 +2011,18 @@ export function MessagerieMissionsView({
                         if (!first) return;
                         setForwardSource({ kind: "DIRECT", id: first, scope: "INTERNAL" });
                         setForwardOpen(true);
+                      }}
+                      onDelete={() => {
+                        const ids = [...selectedMsgIds];
+                        const selected = selectedDirectThread.filter((m) => ids.includes(m.id));
+                        const allMine = selected.every((m) => m.sender.id === sessionUserId);
+                        setDeleteError(null);
+                        setDeleteDialog({
+                          kind: "DIRECT",
+                          ids,
+                          isMine: allMine,
+                          forceMeOnly: true,
+                        });
                       }}
                       onCancel={() => {
                         setSelectionMode(false);
@@ -1907,9 +2042,18 @@ export function MessagerieMissionsView({
                       const atts = Array.isArray(m.attachmentsJson)
                         ? (m.attachmentsJson as MsgAttachment[])
                         : [];
-                      const reply = getReplyFromPayload(m.payloadJson);
+                      const deletedIds = new Set(
+                        selectedDirectThread
+                          .filter((x) => x.deletedAt)
+                          .map((x) => x.id),
+                      );
+                      const reply = maybeRedactReplyExcerpt(
+                        getReplyFromPayload(m.payloadJson),
+                        deletedIds,
+                      );
                       const reactions = getReactionsFromPayload(m.payloadJson);
                       const hasText = Boolean(m.content?.trim());
+                      const deletedLabel = deletedMessageLabel(m, sessionUserId);
                       return (
                         <div
                           key={m.id}
@@ -1922,15 +2066,15 @@ export function MessagerieMissionsView({
                               isMe={isMe}
                               myUserId={sessionUserId}
                               capabilities={{
-                                reply: true,
-                                react: true,
-                                bework: true,
+                                reply: !m.deletedAt,
+                                react: !m.deletedAt,
+                                bework: !m.deletedAt,
                                 important: true,
                                 pin: true,
-                                forward: true,
-                                copy: hasText,
+                                forward: !m.deletedAt,
+                                copy: hasText && !m.deletedAt,
                                 infos: true,
-                                delete: false,
+                                delete: !m.deletedAt,
                                 select: true,
                               }}
                               isImportant={isMessageImportant("DIRECT", m.id)}
@@ -1938,7 +2082,7 @@ export function MessagerieMissionsView({
                               selectionMode={selectionMode}
                               selected={selectedMsgIds.has(m.id)}
                               highlighted={flashMsgId === m.id}
-                              reactions={reactions}
+                              reactions={m.deletedAt ? undefined : reactions}
                               onToggleSelect={() => {
                                 setSelectedMsgIds((prev) => {
                                   const next = new Set(prev);
@@ -1958,6 +2102,7 @@ export function MessagerieMissionsView({
                               }
                               onReact={(emoji) => void reactToMessage("DIRECT", m.id, emoji)}
                               footer={
+                                deletedLabel ? null : (
                                 <div data-bework-for={m.id}>
                                   <MessageBeworkActions
                                     messageId={m.id}
@@ -1970,6 +2115,7 @@ export function MessagerieMissionsView({
                                     agents={agents}
                                   />
                                 </div>
+                                )
                               }
                             >
                               <div
@@ -1979,6 +2125,10 @@ export function MessagerieMissionsView({
                                     : "rounded-tl-sm bg-white text-[#111b21]"
                                 }`}
                               >
+                                {deletedLabel ? (
+                                  <p className="italic text-[13px] text-[#667781]">{deletedLabel}</p>
+                                ) : (
+                                  <>
                                 {!isMe ? (
                                   <p className="text-[12px] font-semibold text-[#00a884]">
                                     {m.sender.name}
@@ -1996,6 +2146,8 @@ export function MessagerieMissionsView({
                                     isMe={isMe}
                                   />
                                 ) : null}
+                                  </>
+                                )}
                                 <p className="mt-0.5 flex justify-end gap-1 text-[11px] text-[#667781]">
                                   {formatMessageTime(m.createdAt)}
                                   {isMe ? (
@@ -2635,6 +2787,7 @@ export function MessagerieMissionsView({
                 <div className="space-y-1.5">
                   <MessageSelectionBar
                     count={selectionMode ? selectedMsgIds.size : 0}
+                    canDelete={selectedMsgIds.size > 0}
                     onImportant={() => {
                       setMessagesImportant(
                         [...selectedMsgIds].map((id) => ({ kind: "TASK", messageId: id })),
@@ -2654,6 +2807,18 @@ export function MessagerieMissionsView({
                         scope: scopeFromTaskInternal(Boolean(src?.isInternal)),
                       });
                       setForwardOpen(true);
+                    }}
+                    onDelete={() => {
+                      const ids = [...selectedMsgIds];
+                      const selected = messages.filter((m) => ids.includes(m.id));
+                      const allMine = selected.every((m) => m.sender.id === sessionUserId);
+                      setDeleteError(null);
+                      setDeleteDialog({
+                        kind: "TASK",
+                        ids,
+                        isMine: allMine,
+                        forceMeOnly: true,
+                      });
                     }}
                     onCancel={() => {
                       setSelectionMode(false);
@@ -2676,11 +2841,18 @@ export function MessagerieMissionsView({
                     const isMe = m.sender.id === sessionUserId;
                     const isSystem = m.kind === "SYSTEM";
                     const atts = Array.isArray(m.attachmentsJson) ? m.attachmentsJson : [];
-                    const reply = getReplyFromPayload(m.payloadJson);
+                    const deletedIds = new Set(
+                      visibleMessages.filter((x) => x.deletedAt).map((x) => x.id),
+                    );
+                    const reply = maybeRedactReplyExcerpt(
+                      getReplyFromPayload(m.payloadJson),
+                      deletedIds,
+                    );
                     const reactions = getReactionsFromPayload(m.payloadJson);
                     const hasText = Boolean(
                       m.content && !atts.some((a) => a.name === m.content),
                     );
+                    const deletedLabel = deletedMessageLabel(m, sessionUserId);
                     const party = selectedMission
                       ? partyForMission(selectedMission)
                       : resolveMessagingPartyType({});
@@ -2705,15 +2877,15 @@ export function MessagerieMissionsView({
                             isMe={isMe}
                             myUserId={sessionUserId}
                             capabilities={{
-                              reply: true,
-                              react: true,
-                              bework: true,
+                              reply: !m.deletedAt,
+                              react: !m.deletedAt,
+                              bework: !m.deletedAt,
                               important: true,
                               pin: true,
-                              forward: true,
-                              copy: hasText,
+                              forward: !m.deletedAt,
+                              copy: hasText && !m.deletedAt,
                               infos: true,
-                              delete: false,
+                              delete: !m.deletedAt,
                               select: true,
                             }}
                             isImportant={isMessageImportant("TASK", m.id)}
@@ -2721,7 +2893,7 @@ export function MessagerieMissionsView({
                             selectionMode={selectionMode}
                             selected={selectedMsgIds.has(m.id)}
                             highlighted={flashMsgId === m.id}
-                            reactions={reactions}
+                            reactions={m.deletedAt ? undefined : reactions}
                             onToggleSelect={() => {
                               setSelectedMsgIds((prev) => {
                                 const next = new Set(prev);
@@ -2741,6 +2913,7 @@ export function MessagerieMissionsView({
                             }
                             onReact={(emoji) => void reactToMessage("TASK", m.id, emoji)}
                             footer={
+                              deletedLabel ? null : (
                               <>
                                 <div data-bework-for={m.id}>
                                   <MessageBeworkActions
@@ -2784,6 +2957,7 @@ export function MessagerieMissionsView({
                                   </div>
                                 ) : null}
                               </>
+                              )
                             }
                           >
                             <div
@@ -2793,6 +2967,10 @@ export function MessagerieMissionsView({
                                   : "rounded-tl-sm bg-white text-[#111b21]"
                               } ${m.isInternal ? "ring-1 ring-amber-400" : ""}`}
                             >
+                              {deletedLabel ? (
+                                <p className="italic text-[13px] text-[#667781]">{deletedLabel}</p>
+                              ) : (
+                                <>
                               {!isMe ? (
                                 <p className="text-[12px] font-semibold text-[#00a884]">
                                   {m.sender.name}
@@ -2815,6 +2993,8 @@ export function MessagerieMissionsView({
                                   isMe={isMe}
                                 />
                               ) : null}
+                                </>
+                              )}
                               <p className="mt-0.5 flex items-center justify-end gap-1 text-[11px] text-[#667781]">
                                 {formatMessageTime(m.createdAt)}
                                 {isMe ? (
@@ -3158,6 +3338,25 @@ export function MessagerieMissionsView({
         open={infosOpen}
         onClose={() => setInfosOpen(false)}
         data={infosData}
+      />
+      <MessageDeleteDialog
+        open={Boolean(deleteDialog)}
+        isMine={Boolean(deleteDialog?.isMine)}
+        forceMeOnly={Boolean(deleteDialog?.forceMeOnly)}
+        count={deleteDialog?.ids.length ?? 1}
+        pending={deletePending}
+        error={deleteError}
+        onCancel={() => {
+          if (deletePending) return;
+          setDeleteDialog(null);
+          setDeleteError(null);
+        }}
+        onDeleteMe={() => void confirmDelete("me")}
+        onDeleteEveryone={
+          deleteDialog && !deleteDialog.forceMeOnly && deleteDialog.isMine
+            ? () => void confirmDelete("everyone")
+            : undefined
+        }
       />
       <MessageForwardDialog
         open={forwardOpen}

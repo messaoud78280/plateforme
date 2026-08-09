@@ -46,6 +46,7 @@
     "test:equipe-acces-v2a": "npx tsx scripts/test-equipe-acces-v2a.ts",
     "test:messagerie-v2c2-legacy-migrate": "npx tsx scripts/test-messagerie-v2c2-legacy-migrate.ts",
     "test:messagerie-v2c4-actions": "npx tsx scripts/test-messagerie-v2c4-actions.ts",
+    "test:messagerie-v2c41-delete": "npx tsx scripts/test-messagerie-v2c41-delete.ts",
     "test:chantiers-v2b-portfolio": "npx tsx scripts/test-chantiers-v2b-portfolio.ts",
     "test:pilotage-v2a-portfolio": "npx tsx scripts/test-pilotage-v2a-portfolio.ts",
     "test:pilotage-v2a1": "npx tsx scripts/test-pilotage-v2a1.ts",

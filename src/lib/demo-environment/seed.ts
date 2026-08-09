@@ -780,18 +780,19 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   };
 }
 
+/** Contacts staff fictifs BeWork — noms distincts des personas démo (Sophie/Karim/Julie). */
 const DEMO_STAFF_CONTACTS = [
   {
     key: "sophie" as const,
     email: "sophie.martin.demo@bework.internal",
-    name: "Sophie Martin",
+    name: "Sophie Lefèvre",
     role: "AGENT" as const,
     service: "Conductrice de travaux — Agence Démo",
   },
   {
     key: "karim" as const,
     email: "karim.benali.demo@bework.internal",
-    name: "Karim Benali",
+    name: "Karim Adjaili",
     role: "AGENT" as const,
     service: "Chef de chantier — Agence Démo",
   },
@@ -800,7 +801,7 @@ const DEMO_STAFF_CONTACTS = [
     email: "laura.bernard.demo@bework.internal",
     name: "Laura Bernard",
     role: "AGENCE" as const,
-    service: "Administration — Agence Démo",
+    service: "Administration — Agence Démo (legacy, hors personas)",
   },
 ];
 
@@ -818,7 +819,14 @@ export async function ensureDemoMessagingStaff(): Promise<
       select: { id: true, name: true },
     });
     if (existing) {
-      out.push({ key: contact.key, id: existing.id, name: existing.name });
+      // Renommer si homonyme personas (Sophie Martin / Karim Benali).
+      if (existing.name !== contact.name) {
+        await prisma.user.update({
+          where: { id: existing.id },
+          data: { name: contact.name, service: contact.service },
+        });
+      }
+      out.push({ key: contact.key, id: existing.id, name: contact.name });
       continue;
     }
     const created = await prisma.user.create({

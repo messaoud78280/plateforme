@@ -847,16 +847,16 @@ export function MessagerieView({
         )}
       </div>
 
-      {/* Colonne droite : informations mission */}
+      {/* Colonne droite : contexte chantier */}
       <aside className="flex w-72 shrink-0 flex-col border-l border-slate-200 bg-slate-50/40">
         <div className="border-b border-slate-200 p-4">
-          <h2 className="text-sm font-semibold text-slate-800">Mission</h2>
+          <h2 className="text-sm font-semibold text-slate-800">Contexte chantier</h2>
         </div>
         {selectedProject ? (
           <div className="flex-1 overflow-y-auto p-4">
             <div className="space-y-4">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Titre</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Chantier</p>
                 <p className="mt-0.5 font-medium text-slate-800">{selectedProject.title}</p>
               </div>
               <div>
@@ -867,28 +867,14 @@ export function MessagerieView({
               </div>
               {selectedProject.assignedTo && (
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Assistant assigné</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Responsable</p>
                   <p className="mt-0.5 text-sm font-medium text-slate-800">{selectedProject.assignedTo.name}</p>
                 </div>
               )}
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Date de création</p>
-                <p className="mt-0.5 text-sm text-slate-700">
-                  {new Date(selectedProject.createdAt).toLocaleDateString("fr-FR", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Crédits estimés</p>
-                <p className="mt-0.5 text-sm text-slate-700">—</p>
-              </div>
 
               {projectDocuments.length > 0 && (
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Pièces jointes</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Documents récents</p>
                   <ul className="mt-2 space-y-1">
                     {projectDocuments.map((doc) => (
                       <li key={doc.id}>
@@ -911,26 +897,26 @@ export function MessagerieView({
                   href={`/dashboard/projets/${selectedProject.id}`}
                   className="block w-full rounded-lg border border-slate-300 bg-white py-2.5 text-center text-sm font-medium text-slate-700 hover:bg-slate-50"
                 >
-                  Voir la demande
+                  Voir le chantier
                 </Link>
                 <Link
                   href="/dashboard/documents"
                   className="block w-full rounded-lg border border-slate-300 bg-white py-2.5 text-center text-sm font-medium text-slate-700 hover:bg-slate-50"
                 >
-                  Ajouter un document
+                  Documents
                 </Link>
                 <Link
-                  href={`/dashboard/projets/${selectedProject.id}`}
+                  href={`/dashboard/agenda?project=${selectedProject.id}`}
                   className="block w-full rounded-lg border border-slate-300 bg-white py-2.5 text-center text-sm font-medium text-slate-700 hover:bg-slate-50"
                 >
-                  Changer priorité
+                  Agenda
                 </Link>
               </div>
             </div>
           </div>
         ) : (
           <div className="flex flex-1 items-center justify-center p-4 text-center text-sm text-slate-500">
-            Sélectionnez une conversation pour voir les détails de la mission.
+            Sélectionnez une conversation pour voir le contexte chantier.
           </div>
         )}
       </aside>

@@ -67,6 +67,7 @@ export async function GET(request: NextRequest) {
       id: t.id,
       title: t.title,
       status: t.status,
+      category: (t as { category?: string | null }).category ?? null,
       priority: (t as { priority?: string | null }).priority ?? null,
       projectId: t.projectId ?? null,
       client: t.client,

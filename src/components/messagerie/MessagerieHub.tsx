@@ -4,6 +4,18 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { MessagerieMissionsView } from "@/components/messagerie/MessagerieMissionsView";
 import { MessagerieView } from "@/components/messagerie/MessagerieView";
+import type { MessagingPartyType } from "@/lib/messagerie/party-type";
+
+export type HubRecipient = {
+  id: string;
+  name: string;
+  role: string;
+  personType?: string | null;
+  permissionProfile?: string | null;
+  company?: string | null;
+  partyType?: MessagingPartyType;
+  shortLabel?: string;
+};
 
 type Props = {
   sessionUserId: string;
@@ -12,7 +24,7 @@ type Props = {
   isClient: boolean;
   canChangeStatus: boolean;
   agents: { id: string; name: string; role?: string }[];
-  recipients: { id: string; name: string; role: string }[];
+  recipients: HubRecipient[];
   managerId: string | null;
   /** Externes : ouvrir directement les fils chantier. */
   preferChantiers?: boolean;
@@ -40,12 +52,14 @@ export function MessagerieHub(props: Props) {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 items-center gap-2 border-b border-white/10 bg-[#0b141a] px-3 py-2">
+      <div className="flex shrink-0 items-center gap-1.5 border-b border-slate-200 bg-white px-3 py-2">
         <button
           type="button"
           onClick={() => setView("missions")}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
-            view === "missions" ? "bg-[#1d4ed8] text-white" : "text-slate-300 hover:bg-white/10"
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+            view === "missions"
+              ? "bg-[#1e3a5f] text-white"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
           }`}
         >
           Conversations
@@ -53,16 +67,19 @@ export function MessagerieHub(props: Props) {
         <button
           type="button"
           onClick={() => setView("chantiers")}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
-            view === "chantiers" ? "bg-[#1d4ed8] text-white" : "text-slate-300 hover:bg-white/10"
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+            view === "chantiers"
+              ? "bg-[#1e3a5f] text-white"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
           }`}
+          title="Filtrer les fils par chantier (Interne · Client · Fournisseur)"
         >
-          Chantiers
+          Par chantier
         </button>
-        <p className="ml-auto hidden max-w-md truncate text-xs text-slate-400 sm:block">
+        <p className="ml-auto hidden max-w-md truncate text-[11px] text-slate-400 sm:block">
           {view === "chantiers"
-            ? "Fils chantier : Interne · Client · Fournisseur — ne mélangez pas"
-            : "Messages récents en haut · comme WhatsApp"}
+            ? "Contexte chantier · Interne / Client / Fournisseur"
+            : "Une messagerie · récents en premier"}
         </p>
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">

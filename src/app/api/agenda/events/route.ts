@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import type { AgendaEventType } from "@prisma/client";
+import type { AgendaEventType, Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import {
   agendaEventAccessWhere,
   agendaEventInclude,
   agendaEventListInclude,
-  agendaEventLiteInclude,
   resolveAgendaOwnerUserId,
 } from "@/lib/agenda/access";
 import { listLinkedAgendaItems } from "@/lib/agenda/linked-sources";
@@ -21,6 +20,7 @@ import {
   serializePurchaseOrderForAgenda,
 } from "@/lib/agenda/serialize-event";
 import { isInternalPurchaseOrderActor } from "@/lib/purchase-orders/access";
+import { fetchAllAgendaEventsLite } from "@/lib/agenda/fetch-lite";
 
 const VALID_TYPES: Set<string> = new Set(AGENDA_EVENT_TYPES.map((t) => t.id));
 /** Création manuelle interdite — livraisons = PurchaseOrder. */
@@ -59,10 +59,12 @@ export async function GET(request: Request) {
   const type = searchParams.get("type");
   const q = searchParams.get("q")?.trim();
   const includeLinked = searchParams.get("linked") === "1";
-  const lite = searchParams.get("lite") === "1";
+  const liteParam = searchParams.get("lite") === "1";
   const rangeMs = from && to ? to.getTime() - from.getTime() : 0;
   const yearLike = rangeMs > 1000 * 60 * 60 * 24 * 120; // > ~4 mois
-  const take = lite || yearLike ? 800 : 500;
+  /** Plage annuelle / lite : projection légère + pagination complète (pas de take 800 silencieux). */
+  const lite = liteParam || yearLike;
+  const take = 500;
 
   try {
     const accessWhere = await agendaEventAccessWhere(session.user, {
@@ -70,47 +72,100 @@ export async function GET(request: Request) {
       projectId: projectId || null,
     });
 
-    const events = await prisma.agendaEvent.findMany({
-      where: {
-        AND: [
-          accessWhere,
-          ...(from && to ? [{ startAt: { lte: to }, endAt: { gte: from } }] : []),
-          ...(type && VALID_TYPES.has(type) ? [{ type: type as AgendaEventType }] : []),
-          ...(q
-            ? [
-                {
-                  OR: [
-                    { title: { contains: q, mode: "insensitive" as const } },
-                    { description: { contains: q, mode: "insensitive" as const } },
-                    { location: { contains: q, mode: "insensitive" as const } },
-                    { project: { title: { contains: q, mode: "insensitive" as const } } },
-                    { responsible: { name: { contains: q, mode: "insensitive" as const } } },
-                    {
-                      purchaseOrder: {
-                        OR: [
-                          { number: { contains: q, mode: "insensitive" as const } },
-                          { subject: { contains: q, mode: "insensitive" as const } },
-                          {
-                            externalOrganization: {
-                              OR: [
-                                { name: { contains: q, mode: "insensitive" as const } },
-                                { tradeName: { contains: q, mode: "insensitive" as const } },
-                              ],
-                            },
+    const where: Prisma.AgendaEventWhereInput = {
+      AND: [
+        accessWhere,
+        ...(from && to ? [{ startAt: { lte: to }, endAt: { gte: from } }] : []),
+        ...(type && VALID_TYPES.has(type) ? [{ type: type as AgendaEventType }] : []),
+        ...(q
+          ? [
+              {
+                OR: [
+                  { title: { contains: q, mode: "insensitive" as const } },
+                  { description: { contains: q, mode: "insensitive" as const } },
+                  { location: { contains: q, mode: "insensitive" as const } },
+                  { project: { title: { contains: q, mode: "insensitive" as const } } },
+                  { responsible: { name: { contains: q, mode: "insensitive" as const } } },
+                  {
+                    purchaseOrder: {
+                      OR: [
+                        { number: { contains: q, mode: "insensitive" as const } },
+                        { subject: { contains: q, mode: "insensitive" as const } },
+                        {
+                          externalOrganization: {
+                            OR: [
+                              { name: { contains: q, mode: "insensitive" as const } },
+                              { tradeName: { contains: q, mode: "insensitive" as const } },
+                            ],
                           },
-                        ],
-                      },
+                        },
+                      ],
                     },
-                  ],
-                },
-              ]
-            : []),
-        ],
-      },
-      include: lite ? agendaEventLiteInclude : agendaEventListInclude,
-      orderBy: { startAt: "asc" },
-      take,
-    });
+                  },
+                ],
+              },
+            ]
+          : []),
+      ],
+    };
+
+    let eventsComplete = true;
+    let eventsFetched = 0;
+    let events: Array<{
+      id: string;
+      title: string;
+      description: string | null;
+      location: string | null;
+      type: string;
+      status: string;
+      startAt: Date;
+      endAt: Date;
+      allDay: boolean;
+      projectId: string | null;
+      responsibleId: string | null;
+      reminderMinutes: number | null;
+      recurrence: string | null;
+      createdById: string;
+      purchaseOrderId: string | null;
+      followUpSheetId: string | null;
+      sourceMessageKind: string | null;
+      sourceMessageId: string | null;
+      project: { id: string; title: string; siteCity?: string | null; siteAddress?: string | null } | null;
+      responsible: { id: string; name: string | null; email?: string | null } | null;
+      followUpSheet: {
+        id: string;
+        title?: string;
+        nextActionAt: Date | null;
+        nextActionDone: boolean;
+        urgencyOverride: string | null;
+        status?: string;
+      } | null;
+      purchaseOrder: Parameters<typeof serializePurchaseOrderForAgenda>[0];
+      createdBy?: { id: string; name: string | null; email: string };
+      attendees?: Array<{
+        id: string;
+        status: string;
+        user: { id: string; name: string | null; email: string };
+      }>;
+    }>;
+
+    if (lite) {
+      const liteResult = await fetchAllAgendaEventsLite(where);
+      events = liteResult.rows;
+      eventsComplete = liteResult.complete;
+      eventsFetched = liteResult.fetched;
+    } else {
+      const listRows = await prisma.agendaEvent.findMany({
+        where,
+        include: agendaEventListInclude,
+        orderBy: { startAt: "asc" },
+        take,
+      });
+      events = listRows;
+      eventsFetched = listRows.length;
+      // take atteint → échantillon potentiellement tronqué (pas pour la vue Année)
+      eventsComplete = listRows.length < take;
+    }
 
     const sourceTaskIds = lite
       ? []
@@ -289,7 +344,14 @@ export async function GET(request: Request) {
       (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime(),
     );
 
-    return NextResponse.json({ events: merged });
+    return NextResponse.json({
+      events: merged,
+      meta: {
+        complete: eventsComplete,
+        fetched: eventsFetched,
+        lite,
+      },
+    });
   } catch (error) {
     console.error("GET /api/agenda/events", error);
     return NextResponse.json({ error: "Erreur chargement agenda" }, { status: 500 });

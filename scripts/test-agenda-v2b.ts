@@ -17,6 +17,11 @@ import {
   dayKey,
   eventsForDay,
 } from "../src/lib/agenda/period-summary";
+import {
+  AGENDA_LITE_BATCH,
+  AGENDA_LITE_HARD_CAP,
+  canTrustPeriodSummary,
+} from "../src/lib/agenda/fetch-lite";
 import type { AgendaEventDTO } from "../src/components/agenda/agenda-types";
 
 function ev(partial: Partial<AgendaEventDTO> & { id: string; title: string }): AgendaEventDTO {
@@ -147,12 +152,24 @@ function testDayActivity() {
   assert.ok(info!.types.has("LIVRAISON"));
 }
 
+function testLiteFetchGuards() {
+  assert.ok(AGENDA_LITE_BATCH >= 500);
+  assert.ok(AGENDA_LITE_HARD_CAP > AGENDA_LITE_BATCH);
+  // Ancien plafond 800 : le hard cap doit le dépasser largement
+  assert.ok(AGENDA_LITE_HARD_CAP > 800);
+  assert.equal(canTrustPeriodSummary({ complete: true }), true);
+  assert.equal(canTrustPeriodSummary({ complete: false }), false);
+  assert.equal(canTrustPeriodSummary(undefined), true);
+  assert.equal(canTrustPeriodSummary(null), true);
+}
+
 function main() {
   testIsoWeek();
   testWeekendSoft();
   testPeriodSummary();
   testPickKeyEvents();
   testDayActivity();
+  testLiteFetchGuards();
   console.log("OK — AGENDA-V2B tests passed");
 }
 

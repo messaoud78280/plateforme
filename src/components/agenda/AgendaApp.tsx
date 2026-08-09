@@ -30,6 +30,7 @@ import {
 import { AGENDA_LAYER_FILTERS, type AgendaLayerId } from "@/lib/agenda/serialize-event";
 import type { AgendaScope } from "@/lib/agenda/types";
 import { summarizePeriod } from "@/lib/agenda/period-summary";
+import { canTrustPeriodSummary } from "@/lib/agenda/fetch-lite";
 import type {
   AgendaEventDTO,
   AgendaProjectOption,
@@ -68,6 +69,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
   const [cursor, setCursor] = useState(() => startOfDay(new Date()));
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [events, setEvents] = useState<AgendaEventDTO[]>([]);
+  const [eventsComplete, setEventsComplete] = useState(true);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [searchDebounced, setSearchDebounced] = useState("");
@@ -113,12 +115,16 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
       });
       if (!res.ok) {
         setEvents([]);
+        setEventsComplete(true);
         return;
       }
       const data = await res.json();
       setEvents(Array.isArray(data.events) ? data.events : []);
+      // Ne jamais présenter un résumé / radar comme complet si l’API a tronqué
+      setEventsComplete(canTrustPeriodSummary(data.meta));
     } catch {
       setEvents([]);
+      setEventsComplete(true);
     } finally {
       setLoading(false);
     }
@@ -767,8 +773,8 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
           </div>
         ) : null}
 
-        {/* Résumé période compact */}
-        {!loading && periodSummary.total > 0 ? (
+        {/* Résumé période — uniquement si jeu de données complet */}
+        {!loading && eventsComplete && periodSummary.total > 0 ? (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 border-b border-slate-100 px-4 py-1.5 text-[11px] text-slate-500">
             <span className="font-semibold uppercase tracking-wide text-slate-400">
               {view === "year"

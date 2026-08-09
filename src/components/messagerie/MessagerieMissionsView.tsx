@@ -1411,11 +1411,12 @@ export function MessagerieMissionsView({
               {loadingDirectMessages ? (
                 <li className="p-4 text-sm text-[#667781]">Chargement…</li>
               ) : (() => {
-                const filtered = directConversations.filter(
-                  (c) =>
-                    !listSearch.trim() ||
-                    c.user.name.toLowerCase().includes(listSearch.toLowerCase()),
-                );
+                const hideLegacyLaura = !recipients.some((r) => r.name === "Laura Bernard");
+                const filtered = directConversations.filter((c) => {
+                  if (hideLegacyLaura && c.user.name === "Laura Bernard") return false;
+                  if (!listSearch.trim()) return true;
+                  return c.user.name.toLowerCase().includes(listSearch.toLowerCase());
+                });
                 if (filtered.length === 0) {
                   return (
                     <li className="p-4 text-center">

@@ -224,6 +224,10 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
     loginIdentifier: demo.loginIdentifier,
     companyName: demo.companyName,
   });
+  const { ensureDemoStaffDisplayNames } = await import("./demo-staff-names");
+  await ensureDemoStaffDisplayNames();
+  const { ensureDemoMessagingStaff } = await import("./seed");
+  await ensureDemoMessagingStaff();
   const { purgeDemoLegacyInbox } = await import("./cleanup-legacy-inbox");
   await purgeDemoLegacyInbox(demoId);
   const { ensureVictorHugoCoherence } = await import("./coherence-victor-hugo");

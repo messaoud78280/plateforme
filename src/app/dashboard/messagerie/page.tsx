@@ -6,6 +6,10 @@ import { MessagerieHub } from "@/components/messagerie/MessagerieHub";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import type { MessagingPartyType } from "@/lib/messagerie/party-type";
 import { resolveMessagingPartyType } from "@/lib/messagerie/party-type";
+import {
+  DEMO_STAFF_CONTACTS,
+  isDemoStaffHiddenFromMessaging,
+} from "@/lib/demo-environment/demo-staff-names";
 
 export type MessagerieRecipient = {
   id: string;
@@ -116,8 +120,8 @@ export default async function MessageriePage() {
         const byId = new Map<string, MessagerieRecipient>();
         for (const m of members) {
           if (!m.user || m.user.id === session.user.id) continue;
-          // Masquer les faux contacts staff @bework.internal en démo (homonymes Sophie/Karim).
-          if (isDemoSession && m.user.email?.endsWith("@bework.internal")) continue;
+          // Laura Bernard (legacy) masquée — Lefèvre / Adjaili OK si présents.
+          if (isDemoSession && isDemoStaffHiddenFromMessaging(m.user.email)) continue;
           byId.set(m.user.id, toRecipient(m.user));
         }
 
@@ -140,6 +144,23 @@ export default async function MessageriePage() {
         for (const u of externals) {
           if (u.id === session.user.id) continue;
           byId.set(u.id, toRecipient(u));
+        }
+
+        // Staff démo visibles (Sophie Lefèvre, Karim Adjaili) — hors org, pour Contacts.
+        if (isDemoSession) {
+          const visibleStaffEmails = DEMO_STAFF_CONTACTS.filter((c) => c.showInDemoMessaging).map(
+            (c) => c.email,
+          );
+          if (visibleStaffEmails.length > 0) {
+            const staffUsers = await prisma.user.findMany({
+              where: { email: { in: visibleStaffEmails } },
+              select: USER_SELECT,
+            });
+            for (const u of staffUsers) {
+              if (u.id === session.user.id) continue;
+              byId.set(u.id, toRecipient(u));
+            }
+          }
         }
 
         recipients = [...byId.values()].sort((a, b) => a.name.localeCompare(b.name, "fr"));

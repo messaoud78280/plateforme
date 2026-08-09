@@ -7,6 +7,11 @@ import {
   TaskStatus,
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  DEMO_STAFF_CONTACTS,
+  ensureDemoStaffDisplayNames,
+  type DemoStaffKey,
+} from "./demo-staff-names";
 
 function daysFromNow(n: number): Date {
   const d = new Date();
@@ -780,38 +785,13 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   };
 }
 
-/** Contacts staff fictifs BeWork — noms distincts des personas démo (Sophie/Karim/Julie). */
-const DEMO_STAFF_CONTACTS = [
-  {
-    key: "sophie" as const,
-    email: "sophie.martin.demo@bework.internal",
-    name: "Sophie Lefèvre",
-    role: "AGENT" as const,
-    service: "Conductrice de travaux — Agence Démo",
-  },
-  {
-    key: "karim" as const,
-    email: "karim.benali.demo@bework.internal",
-    name: "Karim Adjaili",
-    role: "AGENT" as const,
-    service: "Chef de chantier — Agence Démo",
-  },
-  {
-    key: "laura" as const,
-    email: "laura.bernard.demo@bework.internal",
-    name: "Laura Bernard",
-    role: "AGENCE" as const,
-    service: "Administration — Agence Démo (legacy, hors personas)",
-  },
-];
-
-/** Crée / réutilise 3 contacts fictifs BeWork pour tester la messagerie côté client. */
+/** Crée / réutilise 3 contacts staff BeWork — noms distincts des personas démo. */
 export async function ensureDemoMessagingStaff(): Promise<
-  { key: "sophie" | "karim" | "laura"; id: string; name: string }[]
+  { key: DemoStaffKey; id: string; name: string }[]
 > {
   const bcrypt = await import("bcryptjs");
   const password = await bcrypt.hash("DemoStaffNeverLogin!", 10);
-  const out: { key: "sophie" | "karim" | "laura"; id: string; name: string }[] = [];
+  const out: { key: DemoStaffKey; id: string; name: string }[] = [];
 
   for (const contact of DEMO_STAFF_CONTACTS) {
     const existing = await prisma.user.findUnique({
@@ -819,13 +799,6 @@ export async function ensureDemoMessagingStaff(): Promise<
       select: { id: true, name: true },
     });
     if (existing) {
-      // Renommer si homonyme personas (Sophie Martin / Karim Benali).
-      if (existing.name !== contact.name) {
-        await prisma.user.update({
-          where: { id: existing.id },
-          data: { name: contact.name, service: contact.service },
-        });
-      }
       out.push({ key: contact.key, id: existing.id, name: contact.name });
       continue;
     }
@@ -835,16 +808,20 @@ export async function ensureDemoMessagingStaff(): Promise<
         password,
         name: contact.name,
         role: contact.role,
-        company: "BeWork — Agence Démo",
+        company: contact.company,
         service: contact.service,
         accountStatus: "APPROVED",
         contractStatus: "SIGNED",
+        personType: "INTERNAL",
+        permissionProfile: contact.role === "AGENCE" ? "ADMINISTRATIF" : "CONDUCTEUR",
       },
       select: { id: true, name: true },
     });
     out.push({ key: contact.key, id: created.id, name: created.name });
   }
 
+  // Aligne toujours les noms visibles (homonymes legacy → Lefèvre / Adjaili).
+  await ensureDemoStaffDisplayNames();
   return out;
 }
 
@@ -879,14 +856,15 @@ export async function seedDemoDirectConversations(opts: {
         senderId: sophieId,
         receiverId: clientId,
         content:
-          "Bonjour Marc 👋 Sophie à l’agence. On peut suivre Victor Hugo ici — photos et PDF bienvenus.",
+          "Bonjour Marc 👋 Sophie Lefèvre (agence BeWork). On peut suivre Victor Hugo ici — photos et PDF bienvenus.",
         read: false,
         createdAt: hoursAgo(26),
       },
       {
         senderId: clientId,
         receiverId: sophieId,
-        content: "Parfait Sophie. Je vous envoie les plans terrasse dès que le fournisseur répond.",
+        content:
+          "Parfait Sophie Lefèvre. Je vous envoie les plans terrasse dès que le fournisseur répond.",
         read: true,
         createdAt: hoursAgo(24),
       },
@@ -901,14 +879,14 @@ export async function seedDemoDirectConversations(opts: {
         senderId: karimId,
         receiverId: clientId,
         content:
-          "Karim — chantier République : nacelle OK pour jeudi. Vous validez l’accès livraison côté cour ?",
+          "Karim Adjaili — chantier République : nacelle OK pour jeudi. Vous validez l’accès livraison côté cour ?",
         read: false,
         createdAt: hoursAgo(8),
       },
       {
         senderId: clientId,
         receiverId: karimId,
-        content: "Accès validé côté cour, 7h–16h. Merci Karim.",
+        content: "Accès validé côté cour, 7h–16h. Merci Karim Adjaili.",
         read: true,
         createdAt: hoursAgo(6),
       },
@@ -916,7 +894,7 @@ export async function seedDemoDirectConversations(opts: {
         senderId: lauraId,
         receiverId: clientId,
         content:
-          "Laura (admin) — BC membrane et isolant prêts pour validation. Dites-moi si je joins les BL.",
+          "Laura Bernard (support BeWork legacy) — BC membrane et isolant prêts. Julie côté ABC peut aussi suivre.",
         read: false,
         createdAt: hoursAgo(3),
       },
@@ -964,7 +942,14 @@ export async function enrichDemoTaskThreads(opts: {
           taskId: t.id,
           senderId: assignee,
           receiverId: clientId,
-          content: coherentOpener(t.title, assignee === sophieId ? "Sophie" : assignee === karimId ? "Karim" : "Laura"),
+          content: coherentOpener(
+            t.title,
+            assignee === sophieId
+              ? "Sophie Lefèvre"
+              : assignee === karimId
+                ? "Karim Adjaili"
+                : "Laura Bernard",
+          ),
           kind: "USER",
           createdAt: daysFromNow(-4),
         },
@@ -1075,7 +1060,11 @@ export async function rewriteDemoTaskConversations(opts: {
     await prisma.taskMessage.deleteMany({ where: { taskId: t.id } });
 
     const who =
-      assignee === sophieId ? "Sophie" : assignee === karimId ? "Karim" : "Laura";
+      assignee === sophieId
+        ? "Sophie Lefèvre"
+        : assignee === karimId
+          ? "Karim Adjaili"
+          : "Laura Bernard";
 
     const thread = demoThreadForTitle(t.title, who);
     await prisma.taskMessage.createMany({

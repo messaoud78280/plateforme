@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { canManageBeWorkDico } from "@/lib/be-work-devis-access";
 import { prisma } from "@/lib/prisma";
-import { DOCUMENTS_BUCKET, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
+import { DOCUMENTS_BUCKET, buildDocumentsStorageRef, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
 import { createServiceRoleClient } from "@/lib/supabase";
 
 // Image illustrative d'une fiche Dico BTP : téléversée directement depuis la fiche.
@@ -83,8 +83,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Échec de l'envoi de l'image." }, { status: 500 });
   }
 
-  const { data: urlData } = supabase.storage.from(DOCUMENTS_BUCKET).getPublicUrl(storagePath);
-  const imageUrl = urlData.publicUrl;
+  const imageUrl = buildDocumentsStorageRef(storagePath);
 
   try {
     await prisma.btpDictionaryTerm.update({ where: { id: termId }, data: { imageUrl } });
@@ -103,5 +102,53 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, imageUrl });
+  return NextResponse.json({
+    ok: true,
+    imageUrl,
+    displayUrl: `/api/dico-btp/image?termId=${encodeURIComponent(termId)}`,
+  });
+}
+
+/** GET — Stream image dico après session (bucket documents privé). */
+export async function GET(request: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  }
+
+  const termId = new URL(request.url).searchParams.get("termId")?.trim();
+  if (!termId) {
+    return NextResponse.json({ error: "termId requis" }, { status: 400 });
+  }
+
+  const term = await prisma.btpDictionaryTerm.findUnique({
+    where: { id: termId },
+    select: { imageUrl: true },
+  });
+  if (!term?.imageUrl) {
+    return NextResponse.json({ error: "Image introuvable" }, { status: 404 });
+  }
+
+  const path = extractStoragePathFromUrl(term.imageUrl, DOCUMENTS_BUCKET);
+  if (!path) {
+    return NextResponse.json({ error: "Référence invalide" }, { status: 400 });
+  }
+
+  const supabase = createServiceRoleClient();
+  if (!supabase) {
+    return NextResponse.json({ error: "Stockage indisponible" }, { status: 503 });
+  }
+
+  const { data, error } = await supabase.storage.from(DOCUMENTS_BUCKET).download(path);
+  if (error || !data) {
+    return NextResponse.json({ error: "Lecture impossible" }, { status: 502 });
+  }
+
+  return new NextResponse(data, {
+    status: 200,
+    headers: {
+      "Content-Type": data.type || "image/jpeg",
+      "Cache-Control": "private, max-age=300",
+    },
+  });
 }

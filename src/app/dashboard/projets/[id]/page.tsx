@@ -406,7 +406,7 @@ export default async function ProjetDetailPage({
               >
                 <span className="truncate text-sm text-slate-800">{doc.name}</span>
                 <a
-                  href={doc.fileUrl}
+                  href={`/api/documents/${doc.id}/download`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm font-medium text-blue-600 hover:underline"

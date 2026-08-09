@@ -5,8 +5,7 @@ import { getPpspsSessionMarkdownForExport } from "@/lib/skills/ppsps-session-ser
 import type { PpspsExportFormat } from "@/lib/skills/ppsps-types";
 import { createServiceRoleClient } from "@/lib/supabase";
 import { prisma } from "@/lib/prisma";
-
-const BUCKET = "documents";
+import { buildDocumentsStorageRef, DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
 
 export async function savePpspsSessionToProject(opts: {
   userId: string;
@@ -48,7 +47,7 @@ export async function savePpspsSessionToProject(opts: {
   }
 
   const storagePath = `projects/${opts.projectId}/ppsps/${Date.now()}-${fileName}`;
-  const { error: uploadError } = await supabase.storage.from(BUCKET).upload(storagePath, buffer, {
+  const { error: uploadError } = await supabase.storage.from(DOCUMENTS_BUCKET).upload(storagePath, buffer, {
     contentType: mimeType,
     upsert: false,
   });
@@ -56,13 +55,13 @@ export async function savePpspsSessionToProject(opts: {
     throw new Error(`Échec upload : ${uploadError.message}`);
   }
 
-  const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
+  const fileUrl = buildDocumentsStorageRef(storagePath);
 
   const doc = await prisma.document.create({
     data: {
       name: `${title} (${format.toUpperCase()})`,
       category: "AUTRE",
-      fileUrl: urlData.publicUrl,
+      fileUrl,
       fileSize: buffer.length,
       mimeType,
       status: "TRAITE",
@@ -81,5 +80,5 @@ export async function savePpspsSessionToProject(opts: {
     },
   });
 
-  return { documentId: doc.id, fileUrl: urlData.publicUrl, format };
+  return { documentId: doc.id, fileUrl, format };
 }

@@ -413,7 +413,269 @@ export async function resolveDocumentAccessByStoredUrl(
   if (poDoc) return resolvePurchaseOrderDocument(user, poDoc.id);
   if (legacy) return resolveLegacyDocument(user, legacy.id);
 
+  // Annexes (rapports, RDV, pilotage, skills, dico) — même bucket, ACL métier
+  const annex = await resolveAnnexByStoredUrl(user, url);
+  if (annex) return annex;
+
   return deny(403, "Fichier non rattaché à une ressource autorisée.");
+}
+
+async function okDocumentsRef(
+  user: DocumentAccessUser,
+  opts: {
+    resourceId: string;
+    kind: DocumentAccessKind;
+    fileName: string;
+    mimeType: string | null;
+    storedUrl: string;
+    projectId?: string | null;
+    allowIf: () => Promise<boolean> | boolean;
+  },
+): Promise<DocumentAccessResult> {
+  if (!(await opts.allowIf())) return deny(403, "Non autorisé.");
+  const path = extractStoragePathFromUrl(opts.storedUrl, DOCUMENTS_BUCKET);
+  if (!path) return deny(400, "Référence stockage invalide.");
+  return {
+    ok: true,
+    kind: opts.kind,
+    resourceId: opts.resourceId,
+    bucket: DOCUMENTS_BUCKET,
+    path,
+    fileName: opts.fileName,
+    mimeType: opts.mimeType,
+    storedUrl: opts.storedUrl,
+  };
+}
+
+async function resolveAnnexByStoredUrl(
+  user: DocumentAccessUser,
+  url: string,
+): Promise<DocumentAccessResult | null> {
+  const reportAtt = await prisma.reportAttachment.findFirst({
+    where: { fileUrl: url },
+    select: {
+      id: true,
+      name: true,
+      mimeType: true,
+      fileUrl: true,
+      report: { select: { projectId: true, authorId: true } },
+    },
+  });
+  if (reportAtt) {
+    return okDocumentsRef(user, {
+      resourceId: reportAtt.id,
+      kind: "LEGACY_DOCUMENT",
+      fileName: reportAtt.name,
+      mimeType: reportAtt.mimeType,
+      storedUrl: reportAtt.fileUrl,
+      allowIf: async () => {
+        if (reportAtt.report.authorId === user.id) return true;
+        const a = await canAccessChantierProject(user, reportAtt.report.projectId);
+        return a.ok;
+      },
+    });
+  }
+
+  const apptAtt = await prisma.appointmentAttachment.findFirst({
+    where: { fileUrl: url },
+    select: {
+      id: true,
+      name: true,
+      mimeType: true,
+      fileUrl: true,
+      appointment: {
+        select: { organizerId: true, clientId: true, projectId: true },
+      },
+    },
+  });
+  if (apptAtt) {
+    return okDocumentsRef(user, {
+      resourceId: apptAtt.id,
+      kind: "LEGACY_DOCUMENT",
+      fileName: apptAtt.name,
+      mimeType: apptAtt.mimeType,
+      storedUrl: apptAtt.fileUrl,
+      allowIf: async () => {
+        const a = apptAtt.appointment;
+        if (a.organizerId === user.id || a.clientId === user.id) return true;
+        if (user.role === "MANAGER" || user.role === "AGENCE") return true;
+        if (a.projectId) {
+          const access = await canAccessChantierProject(user, a.projectId);
+          return access.ok;
+        }
+        return false;
+      },
+    });
+  }
+
+  const market = await prisma.pilotageMarketDocument.findFirst({
+    where: { fileUrl: url },
+    select: {
+      id: true,
+      title: true,
+      fileName: true,
+      mimeType: true,
+      fileUrl: true,
+      chantierFileId: true,
+      pilotage: { select: { projectId: true } },
+    },
+  });
+  if (market?.fileUrl) {
+    if (market.chantierFileId) return resolveChantierFile(user, market.chantierFileId);
+    return okDocumentsRef(user, {
+      resourceId: market.id,
+      kind: "CHANTIER_FILE",
+      fileName: market.fileName || market.title,
+      mimeType: market.mimeType,
+      storedUrl: market.fileUrl,
+      allowIf: async () => (await canAccessChantierProject(user, market.pilotage.projectId)).ok,
+    });
+  }
+
+  const photo = await prisma.pilotagePhoto.findFirst({
+    where: { fileUrl: url },
+    select: {
+      id: true,
+      title: true,
+      fileUrl: true,
+      pilotage: { select: { projectId: true } },
+    },
+  });
+  if (photo) {
+    return okDocumentsRef(user, {
+      resourceId: photo.id,
+      kind: "CHANTIER_FILE",
+      fileName: photo.title || "photo",
+      mimeType: null,
+      storedUrl: photo.fileUrl,
+      allowIf: async () => (await canAccessChantierProject(user, photo.pilotage.projectId)).ok,
+    });
+  }
+
+  const plan = await prisma.planRegister.findFirst({
+    where: { OR: [{ fileUrl: url }, { proofUrl: url }] },
+    select: {
+      id: true,
+      title: true,
+      fileUrl: true,
+      proofUrl: true,
+      pilotage: { select: { projectId: true } },
+    },
+  });
+  if (plan) {
+    const stored = plan.fileUrl === url ? plan.fileUrl : plan.proofUrl;
+    if (stored) {
+      return okDocumentsRef(user, {
+        resourceId: plan.id,
+        kind: "CHANTIER_FILE",
+        fileName: plan.title,
+        mimeType: null,
+        storedUrl: stored,
+        allowIf: async () => (await canAccessChantierProject(user, plan.pilotage.projectId)).ok,
+      });
+    }
+  }
+
+  const doe = await prisma.doeItem.findFirst({
+    where: { fileUrl: url },
+    select: {
+      id: true,
+      title: true,
+      fileUrl: true,
+      pilotage: { select: { projectId: true } },
+    },
+  });
+  if (doe?.fileUrl) {
+    return okDocumentsRef(user, {
+      resourceId: doe.id,
+      kind: "CHANTIER_FILE",
+      fileName: doe.title,
+      mimeType: null,
+      storedUrl: doe.fileUrl,
+      allowIf: async () => (await canAccessChantierProject(user, doe.pilotage.projectId)).ok,
+    });
+  }
+
+  const subDoc = await prisma.pilotageSubcontractorDoc.findFirst({
+    where: { fileUrl: url },
+    select: {
+      id: true,
+      docType: true,
+      fileUrl: true,
+      subcontractor: { select: { pilotage: { select: { projectId: true } } } },
+    },
+  });
+  if (subDoc?.fileUrl) {
+    return okDocumentsRef(user, {
+      resourceId: subDoc.id,
+      kind: "CHANTIER_FILE",
+      fileName: subDoc.docType,
+      mimeType: null,
+      storedUrl: subDoc.fileUrl,
+      allowIf: async () =>
+        (await canAccessChantierProject(user, subDoc.subcontractor.pilotage.projectId)).ok,
+    });
+  }
+
+  const cctp = await prisma.skillCctpFile.findFirst({
+    where: { storageUrl: url },
+    select: {
+      id: true,
+      fileName: true,
+      mimeType: true,
+      storageUrl: true,
+      session: { select: { userId: true } },
+    },
+  });
+  if (cctp?.storageUrl) {
+    return okDocumentsRef(user, {
+      resourceId: cctp.id,
+      kind: "LEGACY_DOCUMENT",
+      fileName: cctp.fileName,
+      mimeType: cctp.mimeType,
+      storedUrl: cctp.storageUrl,
+      allowIf: () => cctp.session.userId === user.id || user.role === "MANAGER" || user.role === "AGENCE",
+    });
+  }
+
+  const ppsps = await prisma.skillPpspsFile.findFirst({
+    where: { storageUrl: url },
+    select: {
+      id: true,
+      fileName: true,
+      mimeType: true,
+      storageUrl: true,
+      session: { select: { userId: true } },
+    },
+  });
+  if (ppsps?.storageUrl) {
+    return okDocumentsRef(user, {
+      resourceId: ppsps.id,
+      kind: "LEGACY_DOCUMENT",
+      fileName: ppsps.fileName,
+      mimeType: ppsps.mimeType,
+      storedUrl: ppsps.storageUrl,
+      allowIf: () =>
+        ppsps.session.userId === user.id || user.role === "MANAGER" || user.role === "AGENCE",
+    });
+  }
+
+  const dico = await prisma.btpDictionaryTerm.findFirst({
+    where: { imageUrl: url },
+    select: { id: true, term: true, imageUrl: true },
+  });
+  if (dico?.imageUrl) {
+    return okDocumentsRef(user, {
+      resourceId: dico.id,
+      kind: "LEGACY_DOCUMENT",
+      fileName: dico.term,
+      mimeType: "image/jpeg",
+      storedUrl: dico.imageUrl,
+      allowIf: () => Boolean(user.id),
+    });
+  }
+
+  return null;
 }
 
 /** Signed URL courte — jamais de fallback URL publique après ACL. */

@@ -1,6 +1,5 @@
 import { createServiceRoleClient } from "@/lib/supabase";
-
-const BUCKET = "documents";
+import { buildDocumentsStorageRef, DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
 
 export async function uploadCctpSkillFile(opts: {
   userId: string;
@@ -15,7 +14,7 @@ export async function uploadCctpSkillFile(opts: {
   const safeName = opts.fileName.replace(/[^a-zA-Z0-9._-àâäéèêëïîôùûüçÀÂÄÉÈÊËÏÎÔÙÛÜÇ ]/g, "_");
   const storagePath = `skill-cctp/${opts.userId}/${opts.sessionId}/${Date.now()}-${safeName}`;
 
-  const { error } = await supabase.storage.from(BUCKET).upload(storagePath, opts.buffer, {
+  const { error } = await supabase.storage.from(DOCUMENTS_BUCKET).upload(storagePath, opts.buffer, {
     contentType: opts.mimeType || "application/octet-stream",
     upsert: false,
   });
@@ -25,6 +24,5 @@ export async function uploadCctpSkillFile(opts: {
     return null;
   }
 
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
-  return { storagePath, storageUrl: data.publicUrl };
+  return { storagePath, storageUrl: buildDocumentsStorageRef(storagePath) };
 }

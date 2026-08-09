@@ -1,5 +1,4 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { isFeatureEnabled } from "@/lib/feature-flags";
 import { DOCUMENTS_BUCKET, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
 
 export type ResolveDownloadUrlResult = {
@@ -9,9 +8,8 @@ export type ResolveDownloadUrlResult = {
 };
 
 /**
- * Résout une URL de téléchargement.
- * - Flag on : URL signée (TTL) si le path est extractible.
- * - Échec ou flag off : URL stockée (compatibilité bucket encore public / anciennes lignes).
+ * Résout une URL de téléchargement via signed URL uniquement.
+ * GED-V2A.2 : aucun fallback getPublicUrl / URL publique.
  */
 export async function resolveDownloadUrl(
   supabase: SupabaseClient,
@@ -19,25 +17,21 @@ export async function resolveDownloadUrl(
   options?: { bucket?: string; expiresIn?: number }
 ): Promise<ResolveDownloadUrlResult> {
   const bucket = options?.bucket ?? DOCUMENTS_BUCKET;
-  const expiresIn = options?.expiresIn ?? 60 * 60;
+  const expiresIn = Math.min(20 * 60, Math.max(60, options?.expiresIn ?? 15 * 60));
 
   if (!storedUrl) {
-    return { url: storedUrl, signed: false, fallback: true };
-  }
-
-  if (!isFeatureEnabled("secureStorageSignedUrls")) {
-    return { url: storedUrl, signed: false, fallback: true };
+    return { url: "", signed: false, fallback: false };
   }
 
   const path = extractStoragePathFromUrl(storedUrl, bucket);
   if (!path) {
-    return { url: storedUrl, signed: false, fallback: true };
+    return { url: "", signed: false, fallback: false };
   }
 
   const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
   if (error || !data?.signedUrl) {
     console.error("resolveDownloadUrl:", error?.message ?? "signedUrl manquante", { bucket, path });
-    return { url: storedUrl, signed: false, fallback: true };
+    return { url: "", signed: false, fallback: false };
   }
 
   return { url: data.signedUrl, signed: true, fallback: false };

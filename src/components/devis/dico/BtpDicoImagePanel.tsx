@@ -19,15 +19,19 @@ export function BtpDicoImagePanel({
   const [pendingRemove, startRemove] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  const displaySrc = imageUrl
+    ? `/api/dico-btp/image?termId=${encodeURIComponent(termId)}`
+    : null;
+
   // Lecture seule pour les non-gérants : image affichée si présente, sinon rien.
   if (!canManage) {
-    if (!imageUrl) return null;
+    if (!displaySrc) return null;
     return (
       <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
         <h2 className="font-heading mb-3 text-sm font-bold text-slate-900">Image</h2>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={imageUrl}
+          src={displaySrc}
           alt="Illustration de la fiche"
           className="max-h-64 w-full rounded-xl border border-slate-200 object-contain"
         />
@@ -87,11 +91,11 @@ export function BtpDicoImagePanel({
     <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
       <h2 className="font-heading mb-3 text-sm font-bold text-slate-900">Image</h2>
 
-      {imageUrl ? (
+      {displaySrc ? (
         <div className="space-y-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={imageUrl}
+            src={displaySrc}
             alt="Illustration de la fiche"
             className="max-h-64 w-full rounded-xl border border-slate-200 object-contain"
           />

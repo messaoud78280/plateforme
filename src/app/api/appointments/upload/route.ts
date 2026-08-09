@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { createServerClient } from "@/lib/supabase";
+import { createServiceRoleClient } from "@/lib/supabase";
+import { buildDocumentsStorageRef, DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_TYPES = [
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
-  const supabase = createServerClient();
+  const supabase = createServiceRoleClient();
   if (!supabase) {
     return NextResponse.json(
       { error: "Stockage non configuré" },
@@ -47,12 +48,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Type de fichier non autorisé (PDF, images, Word, Excel, texte)" }, { status: 400 });
     }
 
-    const ext = file.name.split(".").pop() || "bin";
-    const path = `appointments/${session.user.id}/${Date.now()}-${file.name}`;
+    const path = `appointments/${session.user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
 
     const buf = await file.arrayBuffer();
     const { error: uploadError } = await supabase.storage
-      .from("documents")
+      .from(DOCUMENTS_BUCKET)
       .upload(path, buf, { contentType: mimeType, upsert: false });
 
     if (uploadError) {
@@ -60,8 +60,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Erreur lors de l'upload" }, { status: 500 });
     }
 
-    const { data: urlData } = supabase.storage.from("documents").getPublicUrl(path);
-    const fileUrl = urlData.publicUrl;
+    const fileUrl = buildDocumentsStorageRef(path);
 
     return NextResponse.json({
       name: file.name,

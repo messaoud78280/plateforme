@@ -41,6 +41,8 @@
     "test:messagerie-v2c-media": "npx tsx scripts/test-messagerie-v2c-media.ts",
     "test:messagerie-v2c1-hardening": "npx tsx scripts/test-messagerie-v2c1-hardening.ts",
     "migrate:messagerie-legacy-media": "npx tsx scripts/migrate-messagerie-legacy-media.ts",
+    "migrate:documents-storage-refs": "npx tsx scripts/migrate-documents-storage-refs.ts",
+    "test:documents-storage-refs": "npx tsx scripts/test-documents-storage-refs.ts",
     "test:messagerie-v2c2-legacy-migrate": "npx tsx scripts/test-messagerie-v2c2-legacy-migrate.ts",
     "process:attention-escalations": "npx tsx scripts/process-attention-escalations.ts",
     "notifications:run-attention-escalations": "npx tsx scripts/run-attention-escalations.ts",

@@ -12,6 +12,12 @@ import {
   downloadStorageObject,
   extractStoragePathFromUrl,
 } from "@/lib/storage/supabase-object";
+import {
+  buildMessagerieStorageRef,
+  MESSAGERIE_MEDIA_BUCKET,
+  parseMessagerieStorageRef,
+  isMessagerieMediaPath,
+} from "@/lib/messagerie/media-storage";
 import { isBeworkStaff } from "@/lib/authz";
 
 const DM_MAX_BYTES = 10 * 1024 * 1024;
@@ -127,22 +133,31 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const size = file.fileSize ?? 0;
 
   if (size > 0 && size <= DM_MAX_BYTES) {
-    const sourcePath = extractStoragePathFromUrl(file.fileUrl, DOCUMENTS_BUCKET);
+    const parsedMsg = parseMessagerieStorageRef(file.fileUrl);
+    let sourceBucket = DOCUMENTS_BUCKET;
+    let sourcePath: string | null = null;
+    if (parsedMsg && isMessagerieMediaPath(parsedMsg.bucket, parsedMsg.path)) {
+      sourceBucket = parsedMsg.bucket;
+      sourcePath = parsedMsg.path;
+    } else {
+      sourcePath = extractStoragePathFromUrl(file.fileUrl, DOCUMENTS_BUCKET);
+    }
     if (sourcePath) {
-      const downloaded = await downloadStorageObject(supabase, DOCUMENTS_BUCKET, sourcePath);
+      const downloaded = await downloadStorageObject(supabase, sourceBucket, sourcePath);
       if (downloaded) {
         const buf = Buffer.from(await downloaded.blob.arrayBuffer());
-        const destPath = `dm/${session.user.id}/${Date.now()}-${safeStorageName(file.name)}`;
+        const destPath = `v2c/${session.user.id}/${Date.now()}-${safeStorageName(file.name)}`;
         const mime = file.mimeType || downloaded.contentType || "application/octet-stream";
-        const { error: upErr } = await supabase.storage.from(DOCUMENTS_BUCKET).upload(destPath, buf, {
-          contentType: mime,
-          upsert: false,
-        });
+        const { error: upErr } = await supabase.storage
+          .from(MESSAGERIE_MEDIA_BUCKET)
+          .upload(destPath, buf, {
+            contentType: mime,
+            upsert: false,
+          });
         if (!upErr) {
-          const { data: urlData } = supabase.storage.from(DOCUMENTS_BUCKET).getPublicUrl(destPath);
           attachments.push({
             name: file.name,
-            fileUrl: urlData.publicUrl,
+            fileUrl: buildMessagerieStorageRef(MESSAGERIE_MEDIA_BUCKET, destPath),
             fileSize: buf.length,
             mimeType: mime,
           });

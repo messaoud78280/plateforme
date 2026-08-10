@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
 import { documentDownloadHref } from "@/lib/documents/download-url";
 import { badgeIcon } from "@/lib/messagerie/message-links";
 import { WA_CHAT_BG, waBubbleTime, waListTime } from "@/components/messagerie/wa-theme";
-import { subscribeMessagerieEvents } from "@/lib/perf/messagerie-unread-bus";
+import { getMessagerieUnread, subscribeMessagerieEvents } from "@/lib/perf/messagerie-unread-bus";
 import { compressImageForMessagerie } from "@/lib/messagerie/compress-image";
 import {
   formatMediaPreview,
@@ -180,9 +180,60 @@ type DirectMessageItem = {
   createdAt: string;
   sender: { id: string; name: string };
   receiver: { id: string; name: string };
+  /** Optimistic / échec envoi */
+  kind?: "pending" | "failed" | string;
+  /** Texte saisi (hors preview média) pour Réessayer */
+  originalContent?: string;
 };
 
 type AttachmentItem = MsgAttachment;
+
+/** Conserve les messages temp/failed pendant un refetch serveur (évite disparition après envoi). */
+function mergeServerMessagesWithPending<
+  T extends {
+    id: string;
+    content?: string;
+    createdAt: string;
+    senderId?: string;
+    sender?: { id: string };
+    kind?: string;
+  },
+>(server: T[], prev: T[], sessionUserId: string): T[] {
+  const pending = prev.filter(
+    (m) =>
+      String(m.id).startsWith("temp-") ||
+      m.kind === "pending" ||
+      m.kind === "failed",
+  );
+  if (pending.length === 0) return server;
+
+  const serverIds = new Set(server.map((m) => m.id));
+  const kept: T[] = [];
+  for (const p of pending) {
+    if (serverIds.has(p.id)) continue;
+    if (p.kind === "failed") {
+      kept.push(p);
+      continue;
+    }
+    const matched = server.some((s) => {
+      const sid = s.senderId ?? s.sender?.id;
+      return (
+        sid === sessionUserId &&
+        (s.content ?? "") === (p.content ?? "") &&
+        Math.abs(new Date(s.createdAt).getTime() - new Date(p.createdAt).getTime()) < 120_000
+      );
+    });
+    if (!matched) kept.push(p);
+  }
+  const merged = [...server, ...kept];
+  merged.sort((a, b) => {
+    const ta = new Date(a.createdAt).getTime();
+    const tb = new Date(b.createdAt).getTime();
+    if (ta !== tb) return ta - tb;
+    return String(a.id).localeCompare(String(b.id));
+  });
+  return merged;
+}
 
 type FilterId = "envoyer" | "messages-directs" | "inbox" | "mes-missions" | "en-attente-client" | "en-cours" | "terminees";
 type ListChip = "tous" | "non-lus" | "internes" | "externes" | "clients" | "fournisseurs";
@@ -572,6 +623,7 @@ export function MessagerieMissionsView({
   recipients = [],
 }: MessagerieMissionsViewProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [missions, setMissions] = useState<MissionItem[]>([]);
   const [projectChannels, setProjectChannels] = useState<InboxProjectChannelItem[]>([]);
   const [selectedChannelId, setSelectedChannelId] = useState<string>("");
@@ -588,8 +640,13 @@ export function MessagerieMissionsView({
   const [loading, setLoading] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [mobileShowThread, setMobileShowThread] = useState(false);
+  const mobileShowThreadRef = useRef(mobileShowThread);
+  mobileShowThreadRef.current = mobileShowThread;
   const stickToBottomRef = useRef(true);
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const selectedTaskIdRef = useRef(selectedTaskId);
+  selectedTaskIdRef.current = selectedTaskId;
+  const syncingUrlRef = useRef(false);
   const [sendContent, setSendContent] = useState("");
   const [sending, setSending] = useState(false);
   const [internalNote, setInternalNote] = useState(false);
@@ -603,6 +660,8 @@ export function MessagerieMissionsView({
   const [loadingDirectMessages, setLoadingDirectMessages] = useState(false);
   const [loadingDirectThread, setLoadingDirectThread] = useState(false);
   const [selectedDirectContactId, setSelectedDirectContactId] = useState<string>("");
+  const selectedDirectContactIdRef = useRef(selectedDirectContactId);
+  selectedDirectContactIdRef.current = selectedDirectContactId;
   const [replyDirectContent, setReplyDirectContent] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
   const [directAttachments, setDirectAttachments] = useState<AttachmentItem[]>([]);
@@ -734,10 +793,62 @@ export function MessagerieMissionsView({
       const res = await fetch(`/api/messages/direct?with=${encodeURIComponent(contactId)}`);
       if (res.ok) {
         const data = await res.json();
-        setDirectThreadMessages(Array.isArray(data) ? data : []);
+        const server = Array.isArray(data) ? (data as DirectMessageItem[]) : [];
+        setDirectThreadMessages((prev) =>
+          mergeServerMessagesWithPending(server, prev, sessionUserId),
+        );
       }
     } finally {
       setLoadingDirectThread(false);
+    }
+  }
+
+  /** URL = source de vérité conversation (mobile + partage de lien). */
+  function replaceMessagerieQuery(next: { task?: string | null; with?: string | null }) {
+    const params = new URLSearchParams(
+      typeof window !== "undefined" ? window.location.search : searchParams.toString(),
+    );
+    if (next.task) {
+      params.set("task", next.task);
+      params.delete("with");
+    } else if (next.with) {
+      params.set("with", next.with);
+      params.delete("task");
+    } else {
+      params.delete("task");
+      params.delete("with");
+    }
+    params.delete("messageId");
+    params.delete("tab");
+    const qs = params.toString();
+    syncingUrlRef.current = true;
+    router.replace(qs ? `/dashboard/messagerie?${qs}` : "/dashboard/messagerie", {
+      scroll: false,
+    });
+    window.setTimeout(() => {
+      syncingUrlRef.current = false;
+    }, 0);
+  }
+
+  function closeMobileThread() {
+    setMobileShowThread(false);
+    setSelectedTaskId("");
+    setSelectedDirectContactId("");
+    setSelectedChannelId("");
+    replaceMessagerieQuery({});
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("bework:messagerie-thread-close"));
+    }
+  }
+
+  function openMissionDiscussion(missionId: string) {
+    setSelectedDirectContactId("");
+    setSelectedChannelId("");
+    setSelectedTaskId(missionId);
+    setMobileShowThread(true);
+    replaceMessagerieQuery({ task: missionId });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("bework:messagerie-thread-open"));
     }
   }
 
@@ -760,9 +871,7 @@ export function MessagerieMissionsView({
           const data = await missionsRes.json();
           const list = Array.isArray(data) ? (data as MissionItem[]) : [];
           setMissions(sortMissionsByLastMessage(list));
-          if (!selectedTaskId && !selectedDirectContactId && !selectedChannelId && list.length > 0) {
-            setSelectedTaskId(list[0]!.id);
-          }
+          // Mobile : jamais d’auto-sélection — liste seule tant que l’utilisateur / deep-link n’ouvre pas.
         }
         if (Array.isArray(directsData)) setDirectMessages(directsData);
         if (channelsRes && channelsRes.ok) {
@@ -928,12 +1037,11 @@ export function MessagerieMissionsView({
       return;
     }
     let cancelled = false;
-    setMessages([]);
     setHasMoreMessages(false);
     setLoadingMessages(true);
     stickToBottomRef.current = true;
     setPendingNewCount(0);
-    setMobileShowThread(true);
+    // Ne PAS forcer mobileShowThread ici — uniquement clic / deep-link URL.
 
     // Optimistic WhatsApp : badge vert disparaît dès l’ouverture
     setMissions((prev) =>
@@ -941,6 +1049,8 @@ export function MessagerieMissionsView({
     );
 
     const taskId = selectedTaskId;
+    setMessages([]);
+
     Promise.all([
       fetch(`/api/tasks/${taskId}/messages?take=50`).then(async (r) => {
         if (!r.ok) return { messages: [] as TaskMessageItem[], hasMore: false };
@@ -954,8 +1064,11 @@ export function MessagerieMissionsView({
     ])
       .then(([payload]) => {
         if (cancelled) return;
-        setMessages(payload.messages);
+        setMessages((prev) =>
+          mergeServerMessagesWithPending(payload.messages, prev, sessionUserId),
+        );
         setHasMoreMessages(payload.hasMore);
+        void getMessagerieUnread(true);
       })
       .finally(() => {
         if (!cancelled) setLoadingMessages(false);
@@ -963,7 +1076,7 @@ export function MessagerieMissionsView({
     return () => {
       cancelled = true;
     };
-  }, [selectedTaskId]);
+  }, [selectedTaskId, sessionUserId]);
 
   useEffect(() => {
     if (filter === "envoyer" || !selectedDirectContactId) {
@@ -1007,6 +1120,7 @@ export function MessagerieMissionsView({
             ),
           );
         }
+        void getMessagerieUnread(true);
       })
       .catch(() => {
         setDirectMessages((prev) =>
@@ -1020,37 +1134,81 @@ export function MessagerieMissionsView({
       });
   }, [filter, selectedDirectContactId, sessionUserId]);
 
-  // Deep-link ?task=&messageId= / ?tab=messages-directs&with=&messageId=
+  // Deep-link / sync URL → state (source de vérité = conversationId dans l’URL)
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get("tab");
-    const task = params.get("task");
-    const messageId = params.get("messageId");
-    const withUser = params.get("with");
+    if (syncingUrlRef.current) return;
+    const task = searchParams.get("task");
+    const withUser = searchParams.get("with");
+    const messageId = searchParams.get("messageId");
+    const tab = searchParams.get("tab");
+
+    if (messageId) highlightMessageId.current = messageId;
+
+    if (task) {
+      setFilter("inbox");
+      if (selectedTaskIdRef.current !== task) setSelectedTaskId(task);
+      setSelectedDirectContactId("");
+      setMobileShowThread(true);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("bework:messagerie-thread-open"));
+      }
+      return;
+    }
+
     if (tab === "messages-directs" || withUser) {
       setFilter("inbox");
       if (withUser) {
         setSelectedTaskId("");
-        setSelectedDirectContactId(withUser);
+        if (selectedDirectContactIdRef.current !== withUser) {
+          setSelectedDirectContactId(withUser);
+        }
         setMobileShowThread(true);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("bework:messagerie-thread-open"));
+        }
+      }
+      return;
+    }
+
+    // Pas de conversation dans l’URL → liste (surtout mobile / clic Messages)
+    if (
+      selectedTaskIdRef.current ||
+      selectedDirectContactIdRef.current ||
+      mobileShowThreadRef.current
+    ) {
+      setSelectedTaskId("");
+      setSelectedDirectContactId("");
+      setMobileShowThread(false);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("bework:messagerie-thread-close"));
       }
     }
-    if (task) {
-      setSelectedTaskId(task);
-      setSelectedDirectContactId("");
-      setMobileShowThread(true);
-    }
-    if (messageId) highlightMessageId.current = messageId;
 
     if (messageId && !task && tab !== "messages-directs") {
       void fetch(`/api/messages/locate?kind=TASK&id=${encodeURIComponent(messageId)}`)
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
-          if (d?.taskId) setSelectedTaskId(d.taskId);
+          if (d?.taskId) {
+            setSelectedTaskId(d.taskId);
+            setMobileShowThread(true);
+            replaceMessagerieQuery({ task: d.taskId });
+          }
         })
         .catch(() => {});
     }
+  }, [searchParams]);
+
+  // Clic « Messages » bottom nav / demande explicite de revenir à la liste
+  useEffect(() => {
+    const onShowList = () => {
+      setMobileShowThread(false);
+      setSelectedTaskId("");
+      setSelectedDirectContactId("");
+      setSelectedChannelId("");
+      replaceMessagerieQuery({});
+    };
+    window.addEventListener("bework:messagerie-show-list", onShowList);
+    return () => window.removeEventListener("bework:messagerie-show-list", onShowList);
   }, []);
 
   useEffect(() => {
@@ -1083,9 +1241,11 @@ export function MessagerieMissionsView({
     if (!selectedTaskId || filter === "envoyer") return;
     const interval = setInterval(() => {
       if (typeof document !== "undefined" && document.hidden) return;
-      const last = messagesRef.current[messagesRef.current.length - 1];
-      const q = last?.id
-        ? `?after=${encodeURIComponent(last.id)}&take=30`
+      const lastReal = [...messagesRef.current]
+        .reverse()
+        .find((m) => !String(m.id).startsWith("temp-"));
+      const q = lastReal?.id
+        ? `?after=${encodeURIComponent(lastReal.id)}&take=30`
         : "?take=50";
       fetch(`/api/tasks/${selectedTaskId}/messages${q}`)
         .then((r) => (r.ok ? r.json() : []))
@@ -1364,7 +1524,11 @@ export function MessagerieMissionsView({
     await sendDirectReply(replyDirectContent.trim(), replyAttachments);
   }
 
-  async function sendDirectReply(content: string, attachments: AttachmentItem[]) {
+  async function sendDirectReply(
+    content: string,
+    attachments: AttachmentItem[],
+    opts?: { retryTempId?: string },
+  ) {
     const hasContent = content.length > 0;
     const hasAttachments = attachments.length > 0;
     if ((!hasContent && !hasAttachments) || !selectedDirectContactId || sendingReply) return;
@@ -1372,7 +1536,7 @@ export function MessagerieMissionsView({
     sendLockRef.current = true;
 
     const replySnapshot = replyTarget;
-    const tempId = `temp-d-${Date.now()}`;
+    const tempId = opts?.retryTempId ?? `temp-d-${Date.now()}`;
     const preview =
       formatMediaPreview(content, attachments) || content || "Pièce jointe";
     const optimistic: DirectMessageItem = {
@@ -1389,14 +1553,26 @@ export function MessagerieMissionsView({
         id: selectedDirectContactId,
         name: selectedDirectContact?.name ?? "",
       },
+      kind: "pending",
+      originalContent: content,
     };
 
     setSendingReply(true);
-    setReplyDirectContent("");
-    setReplyAttachments([]);
-    setReplyTarget(null);
-    setDirectThreadMessages((prev) => [...prev, optimistic]);
-    setDirectMessages((prev) => [optimistic, ...prev]);
+    setDirectSendError(null);
+    if (!opts?.retryTempId) {
+      setReplyDirectContent("");
+      setReplyAttachments([]);
+      setReplyTarget(null);
+      setDirectThreadMessages((prev) => [...prev, optimistic]);
+      setDirectMessages((prev) => [optimistic, ...prev]);
+    } else {
+      setDirectThreadMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...optimistic, createdAt: m.createdAt } : m)),
+      );
+      setDirectMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...optimistic, createdAt: m.createdAt } : m)),
+      );
+    }
     stickToBottomRef.current = true;
 
     try {
@@ -1412,22 +1588,47 @@ export function MessagerieMissionsView({
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data?.id) {
-        setDirectThreadMessages((prev) =>
-          prev.map((m) => (m.id === tempId ? { ...data } : m)),
-        );
-        setDirectMessages((prev) =>
-          prev.map((m) => (m.id === tempId ? { ...data } : m)),
-        );
+        setDirectThreadMessages((prev) => {
+          const withoutTemp = prev.filter((m) => m.id !== tempId && m.id !== data.id);
+          return [...withoutTemp, data as DirectMessageItem].sort((a, b) => {
+            const ta = new Date(a.createdAt).getTime();
+            const tb = new Date(b.createdAt).getTime();
+            if (ta !== tb) return ta - tb;
+            return String(a.id).localeCompare(String(b.id));
+          });
+        });
+        setDirectMessages((prev) => {
+          const withoutTemp = prev.filter((m) => m.id !== tempId && m.id !== data.id);
+          return [data as DirectMessageItem, ...withoutTemp];
+        });
       } else {
-        setDirectThreadMessages((prev) => prev.filter((m) => m.id !== tempId));
-        setReplyDirectContent(content);
-        setReplyAttachments(attachments);
+        setDirectThreadMessages((prev) =>
+          prev.map((m) =>
+            m.id === tempId
+              ? {
+                  ...m,
+                  kind: "failed",
+                  originalContent: content,
+                  attachmentsJson: hasAttachments ? attachments : null,
+                }
+              : m,
+          ),
+        );
         setDirectSendError(data?.error ?? "Échec de l’envoi — réessayez");
       }
     } catch {
-      setDirectThreadMessages((prev) => prev.filter((m) => m.id !== tempId));
-      setReplyDirectContent(content);
-      setReplyAttachments(attachments);
+      setDirectThreadMessages((prev) =>
+        prev.map((m) =>
+          m.id === tempId
+            ? {
+                ...m,
+                kind: "failed",
+                originalContent: content,
+                attachmentsJson: hasAttachments ? attachments : null,
+              }
+            : m,
+        ),
+      );
       setDirectSendError("Erreur réseau — réessayez");
     } finally {
       setSendingReply(false);
@@ -1971,6 +2172,10 @@ export function MessagerieMissionsView({
     setMobileShowThread(true);
     setDirectAttemptedSend(false);
     setDirectSendError(null);
+    replaceMessagerieQuery({ with: userId });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("bework:messagerie-thread-open"));
+    }
   }
 
   function openChannelDiscussion(ch: InboxProjectChannelItem) {
@@ -2013,12 +2218,7 @@ export function MessagerieMissionsView({
         selected={selectedTaskId === d.mission.id}
         sessionUserId={sessionUserId}
         pinned={pinned}
-        onSelect={() => {
-          setSelectedDirectContactId("");
-          setSelectedChannelId("");
-          setSelectedTaskId(d.mission.id);
-          setMobileShowThread(true);
-        }}
+        onSelect={() => openMissionDiscussion(d.mission.id)}
         onTogglePin={() => togglePin(d.mission.id)}
         formatRelativeTime={formatRelativeTime}
       />
@@ -2552,11 +2752,11 @@ export function MessagerieMissionsView({
           {unifiedDiscussions.length === 0 ? (
             <li className="p-4">
               <div className="rounded-xl bg-[#f0f2f5] p-4 text-center">
-                <p className="text-sm font-medium text-[#111b21]">Aucune discussion</p>
+                <p className="text-sm font-medium text-[#111b21]">Aucun message pour le moment.</p>
                 <p className="mt-1 text-xs text-[#667781]">
                   {isClient
                     ? "Créez une mission ou écrivez à un contact pour démarrer."
-                    : "Utilisez + Nouveau pour démarrer une discussion."}
+                    : "Touchez + Nouveau pour démarrer une discussion."}
                 </p>
                 <button
                   type="button"
@@ -2599,9 +2799,9 @@ export function MessagerieMissionsView({
                     type="button"
                     className="rounded-full p-2 text-[#54656f] hover:bg-[#e9edef] md:hidden"
                     aria-label="Retour aux discussions"
-                    onClick={() => setMobileShowThread(false)}
+                    onClick={() => closeMobileThread()}
                   >
-                    ← Discussions
+                    ←
                   </button>
                   <Avatar
                     name={(selectedDirectContact as { name?: string } | undefined)?.name ?? "Contact"}
@@ -2804,12 +3004,49 @@ export function MessagerieMissionsView({
                                 ) : null}
                                   </>
                                 )}
-                                <p className="mt-0.5 flex justify-end gap-1 text-[11px] text-[#667781]">
+                                <p className="mt-0.5 flex flex-wrap items-center justify-end gap-1 text-[11px] text-[#667781]">
                                   {formatMessageTime(m.createdAt)}
                                   {isMe ? (
-                                    <span className="text-[#53bdeb]" title="Envoyé">
-                                      ✓
-                                    </span>
+                                    m.kind === "pending" ? (
+                                      <span className="text-[#8696a0]" title="Envoi…">
+                                        Envoi…
+                                      </span>
+                                    ) : m.kind === "failed" ? (
+                                      <span className="inline-flex items-center gap-1.5">
+                                        <span className="font-medium text-red-600">Non envoyé</span>
+                                        <button
+                                          type="button"
+                                          className="font-semibold text-[#00a884] underline"
+                                          disabled={sendingReply}
+                                          onClick={() => {
+                                            const attsRetry = Array.isArray(m.attachmentsJson)
+                                              ? m.attachmentsJson
+                                              : [];
+                                            const text =
+                                              typeof m.originalContent === "string"
+                                                ? m.originalContent
+                                                : (m.content || "")
+                                                    .replace(/\s*—\s*Échec$/i, "")
+                                                    .trim();
+                                            const isMediaPreview =
+                                              text.startsWith("🎤") ||
+                                              text.startsWith("📷") ||
+                                              text.startsWith("📎");
+                                            void sendDirectReply(
+                                              isMediaPreview && attsRetry.length ? "" : text,
+                                              attsRetry,
+                                              { retryTempId: m.id },
+                                            );
+                                          }}
+                                        >
+                                          Réessayer
+                                        </button>
+                                      </span>
+                                    ) : (
+                                      <span className="text-[#53bdeb]" title="Envoyé">
+                                        ✓
+                                      </span>
+                                    )
                                   ) : null}
                                 </p>
                               </div>
@@ -2827,7 +3064,7 @@ export function MessagerieMissionsView({
                       onClear={() => setReplyTarget(null)}
                     />
                   ) : null}
-                  <p className="mb-1.5 px-1 text-[11px] font-semibold text-violet-800">
+                  <p className="mb-1.5 hidden px-1 text-[11px] font-semibold text-violet-800 md:block">
                     🔒 Message interne
                   </p>
                   <input
@@ -3018,9 +3255,9 @@ export function MessagerieMissionsView({
                 type="button"
                 className="rounded-full p-2 text-[#54656f] hover:bg-[#e9edef] md:hidden"
                 aria-label="Retour aux discussions"
-                onClick={() => setMobileShowThread(false)}
+                onClick={() => closeMobileThread()}
               >
-                ← Discussions
+                ←
               </button>
               <Avatar name={selectedMission.client.name || selectedMission.title} size="sm" />
               <div className="min-w-0 flex-1">
@@ -3404,30 +3641,33 @@ export function MessagerieMissionsView({
                                       Envoi…
                                     </span>
                                   ) : m.kind === "failed" ? (
-                                    <button
-                                      type="button"
-                                      className="font-medium text-red-600 underline"
-                                      title="Échec — Réessayer"
-                                      onClick={() => {
-                                        const attsRetry = Array.isArray(m.attachmentsJson)
-                                          ? m.attachmentsJson
-                                          : [];
-                                        const text = (m.content || "")
-                                          .replace(/\s*—\s*Échec$/i, "")
-                                          .trim();
-                                        setMessages((prev) => prev.filter((x) => x.id !== m.id));
-                                        void sendMissionMessage(
-                                          text.startsWith("🎤") ||
-                                            text.startsWith("📷") ||
-                                            text.startsWith("📎")
-                                            ? ""
-                                            : text,
-                                          attsRetry,
-                                        );
-                                      }}
-                                    >
-                                      Échec — Réessayer
-                                    </button>
+                                    <span className="inline-flex items-center gap-1.5">
+                                      <span className="font-medium text-red-600">Non envoyé</span>
+                                      <button
+                                        type="button"
+                                        className="font-semibold text-[#00a884] underline"
+                                        title="Réessayer"
+                                        onClick={() => {
+                                          const attsRetry = Array.isArray(m.attachmentsJson)
+                                            ? m.attachmentsJson
+                                            : [];
+                                          const text = (m.content || "")
+                                            .replace(/\s*—\s*Échec$/i, "")
+                                            .trim();
+                                          setMessages((prev) => prev.filter((x) => x.id !== m.id));
+                                          void sendMissionMessage(
+                                            text.startsWith("🎤") ||
+                                              text.startsWith("📷") ||
+                                              text.startsWith("📎")
+                                              ? ""
+                                              : text,
+                                            attsRetry,
+                                          );
+                                        }}
+                                      >
+                                        Réessayer
+                                      </button>
+                                    </span>
                                   ) : (
                                     <span className="text-[#53bdeb]" title="Envoyé">
                                       ✓
@@ -3475,7 +3715,7 @@ export function MessagerieMissionsView({
                 />
               ) : null}
               <p
-                className={`mb-1.5 px-1 text-[11px] font-semibold ${messagingPartyToneClass(
+                className={`mb-1 hidden px-1 text-[10px] font-medium md:mb-1.5 md:block md:text-[11px] md:font-semibold ${messagingPartyToneClass(
                   partyForMission(selectedMission).partyType,
                 )}`}
               >
@@ -3692,9 +3932,11 @@ export function MessagerieMissionsView({
           </>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center bg-[#f0f2f5] p-8 text-center">
-            <p className="text-lg font-medium text-[#41525d]">BeWork Messagerie</p>
-            <p className="mt-2 max-w-sm text-sm text-[#667781]">
-              Sélectionnez une discussion à gauche pour afficher la conversation.
+            <p className="text-base font-medium text-[#41525d]">
+              Choisissez une conversation pour commencer.
+            </p>
+            <p className="mt-1 max-w-sm text-sm text-[#667781]">
+              Sélectionnez une discussion à gauche.
             </p>
           </div>
         )}

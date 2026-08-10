@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   AlertCircle,
   Briefcase,
@@ -52,7 +52,18 @@ export function MobileBottomNav({
   permissionProfile?: string | null;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const msgBadge = useMessagerieUnread();
+
+  /** Conversation plein écran : URL = source de vérité. */
+  const hideForThread =
+    pathname.startsWith("/dashboard/messagerie") &&
+    Boolean(
+      searchParams.get("task") ||
+        searchParams.get("with") ||
+        searchParams.get("channelId"),
+    );
 
   const isSupplier =
     personType === "SUPPLIER" || permissionProfile === "FOURNISSEUR";
@@ -62,6 +73,10 @@ export function MobileBottomNav({
   const tabs = (
     isSupplier ? SUPPLIER_TABS : isClient ? CLIENT_TABS : INTERNAL_TABS
   ).filter((tab) => isHrefAllowedForPersona(tab.href, personType, permissionProfile));
+
+  if (hideForThread) {
+    return null;
+  }
 
   return (
     <nav
@@ -79,6 +94,22 @@ export function MobileBottomNav({
           <Link
             key={tab.href}
             href={tab.href}
+            onClick={(e) => {
+              if (!isMsg) return;
+              // Toujours revenir à la LISTE (jamais un fil en cache / query).
+              if (
+                pathname.startsWith("/dashboard/messagerie") &&
+                (searchParams.get("task") ||
+                  searchParams.get("with") ||
+                  searchParams.toString())
+              ) {
+                e.preventDefault();
+                window.dispatchEvent(new Event("bework:messagerie-show-list"));
+                router.replace("/dashboard/messagerie");
+              } else if (pathname.startsWith("/dashboard/messagerie")) {
+                window.dispatchEvent(new Event("bework:messagerie-show-list"));
+              }
+            }}
             className={cn(
               "relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] font-semibold",
               active ? "text-[#1e3a5f]" : "text-slate-500",

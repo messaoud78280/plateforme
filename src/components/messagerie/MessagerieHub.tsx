@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { MessagerieMissionsView } from "@/components/messagerie/MessagerieMissionsView";
 import { MessagerieView } from "@/components/messagerie/MessagerieView";
 import type { MessagingPartyType } from "@/lib/messagerie/party-type";
+import { cn } from "@/lib/cn";
 
 export type HubRecipient = {
   id: string;
@@ -38,30 +39,39 @@ export function MessagerieHub(props: Props) {
   const channelParam = searchParams.get("channel");
   const channelIdParam = searchParams.get("channelId");
   const externalOrgParam = searchParams.get("externalOrganizationId");
+  /** Conversation ouverte — masquer le chrome Hub sur mobile. */
+  const threadOpen = Boolean(
+    searchParams.get("task") ||
+      searchParams.get("with") ||
+      searchParams.get("channelId"),
+  );
 
   const initialView = useMemo(() => {
     if (viewParam === "chantiers" || viewParam === "missions") return viewParam;
     return props.preferChantiers ? "chantiers" : "missions";
   }, [viewParam, props.preferChantiers]);
 
-  const [view, setView] = useState<"missions" | "chantiers">(initialView);
-
-  useEffect(() => {
-    if (viewParam === "chantiers" || viewParam === "missions") {
-      setView(viewParam);
-    }
-  }, [viewParam]);
+  const [userView, setUserView] = useState<"missions" | "chantiers" | null>(null);
+  const view: "missions" | "chantiers" =
+    viewParam === "chantiers" || viewParam === "missions"
+      ? viewParam
+      : (userView ?? initialView);
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
-      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-3 py-2.5">
+      <div
+        className={cn(
+          "flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-3 py-2.5",
+          threadOpen && "hidden md:flex",
+        )}
+      >
         <h1 className="mr-1 text-base font-bold tracking-tight text-[#1e3a5f] md:text-lg">
           Messagerie
         </h1>
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={() => setView("missions")}
+            onClick={() => setUserView("missions")}
             className={`min-h-9 rounded-full px-3.5 py-1.5 text-xs font-semibold ${
               view === "missions"
                 ? "bg-[#1e3a5f] text-white"
@@ -73,7 +83,7 @@ export function MessagerieHub(props: Props) {
           </button>
           <button
             type="button"
-            onClick={() => setView("chantiers")}
+            onClick={() => setUserView("chantiers")}
             className={`min-h-9 rounded-full px-3.5 py-1.5 text-xs font-semibold ${
               view === "chantiers"
                 ? "bg-[#1e3a5f] text-white"

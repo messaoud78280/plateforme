@@ -114,7 +114,9 @@ export function MessageBeworkActions({
   }
 
   return (
-    <div className={`relative mt-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 ${open ? "opacity-100" : ""}`}>
+    <div
+      className={`relative mt-0.5 hidden opacity-0 transition-opacity md:block md:group-hover:opacity-100 md:focus-within:opacity-100 ${open ? "md:opacity-100" : ""}`}
+    >
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

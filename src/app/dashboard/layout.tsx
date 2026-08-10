@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { getCachedServerSession } from "@/lib/auth/cached-session";
 import { SEO_NOINDEX_ROBOTS } from "@/lib/seo-search-engines";
 import { OutilsCommunication } from "@/components/OutilsCommunication";
@@ -161,10 +162,12 @@ export default async function DashboardLayout({
           <DashboardMain>{children}</DashboardMain>
           <RoleOnboarding userId={session.user.id} role={session.user.role} />
           <MessagerieToastListener />
-          <MobileBottomNav
-            personType={personType}
-            permissionProfile={permissionProfile}
-          />
+          <Suspense fallback={null}>
+            <MobileBottomNav
+              personType={personType}
+              permissionProfile={permissionProfile}
+            />
+          </Suspense>
           {isDemo ? <DemoCommercialTourLazy /> : null}
         </UiPreferencesProvider>
       </div>

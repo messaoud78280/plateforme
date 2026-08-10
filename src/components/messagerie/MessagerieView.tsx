@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PhotoPreviewGrid } from "@/components/messagerie/PhotoPreviewGrid";
 import { MessageBeworkActions } from "@/components/messagerie/MessageBeworkActions";
 import { MessagerieAttachmentsBlock } from "@/components/messagerie/MessagerieSecureMedia";
@@ -198,6 +199,9 @@ export function MessagerieView({
   initialExternalOrganizationId?: string | null;
   hideNewDemande?: boolean;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const syncingUrlRef = useRef(false);
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [allowedChannels, setAllowedChannels] = useState<MessageChannel[]>(["CLIENT"]);
@@ -219,6 +223,9 @@ export function MessagerieView({
     initialChannelId ? "thread" : initialProjectId ? "channels" : "projects",
   );
   const [selectedChannelId, setSelectedChannelId] = useState<string>(initialChannelId ?? "");
+  const selectedChannelIdRef = useRef(selectedChannelId);
+  selectedChannelIdRef.current = selectedChannelId;
+  const selectedProjectIdRef = useRef(initialProjectId ?? "");
   const [participants, setParticipants] = useState<ChannelParticipant[]>([]);
   const [participantsOpen, setParticipantsOpen] = useState(false);
   const [canManageParticipants, setCanManageParticipants] = useState(false);
@@ -244,6 +251,7 @@ export function MessagerieView({
   const [projectDocuments, setProjectDocuments] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProjectId, setSelectedProjectId] = useState<string>(initialProjectId ?? "");
+  selectedProjectIdRef.current = selectedProjectId;
   const [sendContent, setSendContent] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -344,32 +352,76 @@ export function MessagerieView({
     return list;
   }
 
+  function replaceChantierQuery(next: {
+    project?: string | null;
+    channelId?: string | null;
+    channel?: string | null;
+  }) {
+    const params = new URLSearchParams(
+      typeof window !== "undefined" ? window.location.search : searchParams.toString(),
+    );
+    params.set("view", "chantiers");
+    if (next.project) params.set("project", next.project);
+    else params.delete("project");
+    if (next.channelId) params.set("channelId", next.channelId);
+    else params.delete("channelId");
+    if (next.channel) params.set("channel", next.channel);
+    else if (!next.channelId) params.delete("channel");
+    const qs = params.toString();
+    syncingUrlRef.current = true;
+    router.replace(`/dashboard/messagerie?${qs}`, { scroll: false });
+    window.setTimeout(() => {
+      syncingUrlRef.current = false;
+    }, 0);
+  }
+
+  function legacyChannelFromType(type: string): MessageChannel {
+    if (type === "INTERNAL") return "INTERNE";
+    if (type === "SUPPLIER") return "FOURNISSEUR";
+    if (type === "SUBCONTRACTOR") return "SOUS_TRAITANT";
+    return "CLIENT";
+  }
+
   function selectChannel(projectId: string, ch: ProjectChannelItem) {
+    const legacy = legacyChannelFromType(ch.type);
     setSelectedProjectId(projectId);
     setExpandedProjectId(projectId);
     setSelectedChannelId(ch.id);
-    setChannel(
-      ch.type === "INTERNAL"
-        ? "INTERNE"
-        : ch.type === "SUPPLIER"
-          ? "FOURNISSEUR"
-          : ch.type === "SUBCONTRACTOR"
-            ? "SOUS_TRAITANT"
-            : "CLIENT",
-    );
+    setChannel(legacy);
     setMobileLevel("thread");
     setMobileShowThread(true);
     setParticipantsOpen(false);
+    replaceChantierQuery({ project: projectId, channelId: ch.id, channel: legacy });
   }
 
   async function expandProject(projectId: string) {
     setExpandedProjectId(projectId);
     setSelectedProjectId(projectId);
+    setSelectedChannelId("");
     setMobileLevel("channels");
     setMobileShowThread(false);
+    replaceChantierQuery({ project: projectId, channelId: null });
     if (!channelsByProject[projectId]) {
       await loadProjectChannels(projectId);
     }
+  }
+
+  function backToProjectChannels() {
+    setMobileShowThread(false);
+    setMobileLevel("channels");
+    setSelectedChannelId("");
+    if (selectedProjectId) {
+      replaceChantierQuery({ project: selectedProjectId, channelId: null });
+    }
+  }
+
+  function backToProjectsList() {
+    setMobileLevel("projects");
+    setExpandedProjectId("");
+    setSelectedProjectId("");
+    setSelectedChannelId("");
+    setMobileShowThread(false);
+    replaceChantierQuery({ project: null, channelId: null });
   }
 
   async function loadMessagesForChannel(channelId: string) {
@@ -402,39 +454,22 @@ export function MessagerieView({
           const projs = await projRes.json();
           const list = Array.isArray(projs) ? projs : projs.projects ?? [];
           setProjects(list);
-          const pid = selectedProjectId || initialProjectId || list[0]?.id || "";
+          // URL / props = source de vérité — pas d’auto-sélection list[0]
+          const pid = selectedProjectId || initialProjectId || "";
           if (pid) {
             if (!selectedProjectId) setSelectedProjectId(pid);
             setExpandedProjectId(pid);
             const channels = await loadProjectChannels(pid);
-            let chId = selectedChannelId || initialChannelId || "";
-            if (!chId && channels.length) {
-              const wantedType =
-                channel === "INTERNE"
-                  ? "INTERNAL"
-                  : channel === "FOURNISSEUR"
-                    ? "SUPPLIER"
-                    : channel === "SOUS_TRAITANT"
-                      ? "SUBCONTRACTOR"
-                      : "CLIENT";
-              const match =
-                channels.find((c) => c.type === wantedType) ||
-                (initialExternalOrganizationId
-                  ? channels.find(
-                      (c) => c.externalOrganizationId === initialExternalOrganizationId,
-                    )
-                  : null) ||
-                channels[0];
-              chId = match?.id ?? "";
-            }
-            if (chId) {
+            const chId = selectedChannelId || initialChannelId || "";
+            if (chId && channels.some((c) => c.id === chId)) {
               setSelectedChannelId(chId);
               await loadMessagesForChannel(chId);
-            } else {
-              await loadMessages(channel);
+            } else if (chId && !channels.some((c) => c.id === chId)) {
+              // channelId invalide / hors ACL → rester au niveau chantier
+              setSelectedChannelId("");
+              setMobileShowThread(false);
+              setMobileLevel("channels");
             }
-          } else {
-            await loadMessages(channel);
           }
         }
       } catch {
@@ -452,34 +487,65 @@ export function MessagerieView({
     void (async () => {
       const channels = await loadProjectChannels(selectedProjectId);
       setExpandedProjectId(selectedProjectId);
-      // Ne pas forcer un autre channel si déjà valide (évite stale composer)
+      // Ne jamais forcer channels[0] — uniquement si channel déjà choisi / deep-link
       if (selectedChannelId && channels.some((c) => c.id === selectedChannelId)) {
         return;
       }
-      // Deep-link / premier chargement uniquement
-      if (!selectedChannelId && channels.length) {
-        const wantedType =
-          channel === "INTERNE"
-            ? "INTERNAL"
-            : channel === "FOURNISSEUR"
-              ? "SUPPLIER"
-              : channel === "SOUS_TRAITANT"
-                ? "SUBCONTRACTOR"
-                : null;
-        const match =
-          (wantedType ? channels.find((c) => c.type === wantedType) : null) ||
-          (initialExternalOrganizationId
-            ? channels.find((c) => c.externalOrganizationId === initialExternalOrganizationId)
-            : null) ||
-          channels[0];
-        if (match) {
-          setSelectedChannelId(match.id);
-          await loadMessagesForChannel(match.id);
-        }
+      if (selectedChannelId && !channels.some((c) => c.id === selectedChannelId)) {
+        setSelectedChannelId("");
+        setMobileShowThread(false);
+        if (mobileLevel === "thread") setMobileLevel("channels");
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProjectId]);
+
+  // Sync URL → état (back/forward / refresh)
+  useEffect(() => {
+    if (syncingUrlRef.current) return;
+    if (searchParams.get("view") !== "chantiers") return;
+    const project = searchParams.get("project") ?? "";
+    const channelId = searchParams.get("channelId") ?? "";
+    const chParam = searchParams.get("channel");
+
+    if (channelId) {
+      if (project && selectedProjectIdRef.current !== project) {
+        setSelectedProjectId(project);
+        setExpandedProjectId(project);
+      }
+      if (selectedChannelIdRef.current !== channelId) {
+        setSelectedChannelId(channelId);
+      }
+      setMobileLevel("thread");
+      setMobileShowThread(true);
+      if (
+        chParam === "INTERNE" ||
+        chParam === "FOURNISSEUR" ||
+        chParam === "CLIENT" ||
+        chParam === "SOUS_TRAITANT"
+      ) {
+        setChannel(chParam);
+      }
+      return;
+    }
+
+    if (project) {
+      if (selectedProjectIdRef.current !== project) {
+        setSelectedProjectId(project);
+        setExpandedProjectId(project);
+      }
+      setSelectedChannelId("");
+      setMobileLevel("channels");
+      setMobileShowThread(false);
+      return;
+    }
+
+    setSelectedProjectId("");
+    setExpandedProjectId("");
+    setSelectedChannelId("");
+    setMobileLevel("projects");
+    setMobileShowThread(false);
+  }, [searchParams]);
 
   useEffect(() => {
     if (loading || !selectedChannelId) return;
@@ -834,10 +900,7 @@ export function MessagerieView({
             <ContextBackButton
               label="Chantiers"
               fallbackHref="/dashboard/messagerie?view=chantiers"
-              onBack={() => {
-                setMobileLevel("projects");
-                setExpandedProjectId("");
-              }}
+              onBack={() => backToProjectsList()}
             />
           ) : (
             <h2 className="text-base font-semibold text-slate-900">Par chantier</h2>
@@ -944,17 +1007,14 @@ export function MessagerieView({
           mobileShowThread ? "flex" : "hidden md:flex"
         }`}
       >
-        {selectedProjectId && selectedProject ? (
+        {selectedProjectId && selectedProject && selectedChannelId ? (
           <>
             <div className="shrink-0 border-b border-slate-100 px-4 py-3">
               <div className="mb-2 flex items-center gap-2 md:hidden">
                 <ContextBackButton
                   label={selectedProject.title}
-                  fallbackHref="/dashboard/messagerie?view=chantiers"
-                  onBack={() => {
-                    setMobileShowThread(false);
-                    setMobileLevel("channels");
-                  }}
+                  fallbackHref={`/dashboard/messagerie?view=chantiers&project=${encodeURIComponent(selectedProjectId)}`}
+                  onBack={() => backToProjectChannels()}
                 />
                 <button
                   type="button"
@@ -1487,7 +1547,14 @@ export function MessagerieView({
           </>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-            <p className="text-slate-500">Sélectionnez une conversation.</p>
+            <p className="text-base font-medium text-slate-700">
+              Choisissez une conversation pour commencer.
+            </p>
+            <p className="mt-1 text-sm text-slate-500">
+              {selectedProjectId
+                ? "Sélectionnez un fil à gauche (client, fournisseur, interne…)."
+                : "Ouvrez un chantier puis une conversation."}
+            </p>
             {projects.length > 0 && conversationsList.length === 0 && (
               <p className="mt-2 text-sm text-slate-500">
                 Envoyez un premier message depuis un projet pour démarrer.

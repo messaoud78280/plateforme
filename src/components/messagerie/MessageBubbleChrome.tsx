@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Star } from "lucide-react";
 import {
   MessageContextMenu,
@@ -70,6 +70,19 @@ export function MessageBubbleChrome({
       longPressTimer.current = null;
     }
   };
+
+  // Mobile : fermer menus/réactions au scroll
+  useEffect(() => {
+    if (!menuOpen && !reactOpen) return;
+    const close = () => {
+      setMenuOpen(false);
+      setReactOpen(false);
+      setAnchor(null);
+      setReactAnchor(null);
+    };
+    window.addEventListener("scroll", close, true);
+    return () => window.removeEventListener("scroll", close, true);
+  }, [menuOpen, reactOpen]);
 
   return (
     <div

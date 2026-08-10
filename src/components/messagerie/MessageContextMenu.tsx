@@ -171,10 +171,10 @@ type QuickProps = {
   onMore: (anchor: { x: number; y: number }) => void;
 };
 
-/** Barre discrète : visible au touch mobile, au hover desktop — 🙂 ↩ ••• */
+/** Barre discrète : desktop hover uniquement — jamais permanente sur mobile. */
 export function MessageQuickHoverBar({ onReply, onReact, onMore }: QuickProps) {
   return (
-    <div className="absolute -top-3 right-1 z-10 flex items-center gap-0.5 rounded-full border border-slate-200/80 bg-white/95 px-0.5 py-0.5 shadow-sm opacity-100 transition-opacity duration-150 md:opacity-0 md:group-hover:opacity-100">
+    <div className="absolute -top-3 right-1 z-10 hidden items-center gap-0.5 rounded-full border border-slate-200/80 bg-white/95 px-0.5 py-0.5 opacity-0 shadow-sm transition-opacity duration-150 md:flex md:group-hover:opacity-100">
       {onReact ? (
         <button
           type="button"

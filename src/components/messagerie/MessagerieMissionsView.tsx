@@ -1229,14 +1229,29 @@ export function MessagerieMissionsView({
   useEffect(() => {
     const mid = highlightMessageId.current;
     if (!mid) return;
+    let clearTimer: number | undefined;
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const t = window.setTimeout(() => {
       const el = document.getElementById(`msg-${mid}`);
-      if (!el) return;
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      el.classList.add("ring-2", "ring-amber-400", "rounded-2xl");
+      if (!el) {
+        // Message hors page chargée / inaccessible — pas de surbrillance arbitraire
+        highlightMessageId.current = null;
+        return;
+      }
+      el.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "center",
+      });
+      setFlashMsgId(mid);
       highlightMessageId.current = null;
+      clearTimer = window.setTimeout(() => setFlashMsgId(null), reduceMotion ? 1600 : 2200);
     }, 350);
-    return () => window.clearTimeout(t);
+    return () => {
+      window.clearTimeout(t);
+      if (clearTimer) window.clearTimeout(clearTimer);
+    };
   }, [messages, directThreadMessages, selectedTaskId, selectedDirectContactId]);
 
   // Rafraîchissement secours (realtime = source principale). Pause onglet caché.
@@ -1730,10 +1745,16 @@ export function MessagerieMissionsView({
   function jumpToMessage(messageId: string) {
     highlightMessageId.current = messageId;
     setFlashMsgId(messageId);
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const el = document.getElementById(`msg-${messageId}`);
     if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      window.setTimeout(() => setFlashMsgId(null), 1600);
+      el.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "center",
+      });
+      window.setTimeout(() => setFlashMsgId(null), reduceMotion ? 1600 : 2200);
       return;
     }
     // Message plus ancien : charger une page supplémentaire si possible
@@ -1753,11 +1774,11 @@ export function MessagerieMissionsView({
             });
             window.setTimeout(() => {
               document.getElementById(`msg-${messageId}`)?.scrollIntoView({
-                behavior: "smooth",
+                behavior: reduceMotion ? "auto" : "smooth",
                 block: "center",
               });
               setFlashMsgId(messageId);
-              window.setTimeout(() => setFlashMsgId(null), 1600);
+              window.setTimeout(() => setFlashMsgId(null), reduceMotion ? 1600 : 2200);
             }, 200);
           });
       }

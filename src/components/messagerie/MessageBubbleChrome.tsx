@@ -87,9 +87,7 @@ export function MessageBubbleChrome({
   return (
     <div
       data-message-id={messageId}
-      className={`group relative flex w-full gap-2 ${isMe ? "flex-row-reverse" : ""} ${
-        highlighted ? "rounded-lg ring-2 ring-[#1e3a5f]/40 ring-offset-2" : ""
-      }`}
+      className={`group relative flex w-full gap-2 ${isMe ? "flex-row-reverse" : ""}`}
       onContextMenu={(e) => {
         if (selectionMode) return;
         e.preventDefault();
@@ -157,7 +155,9 @@ export function MessageBubbleChrome({
           />
         ) : null}
 
-        <div className="relative">
+        <div
+          className={`relative w-fit max-w-full ${highlighted ? "msg-deeplink-focus" : ""}`}
+        >
           {(isImportant || isPinned) && (
             <span
               className={`absolute -top-1 ${isMe ? "-left-1" : "-right-1"} z-[1] flex gap-0.5`}

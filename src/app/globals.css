@@ -431,6 +431,41 @@ body {
 }
 
 @layer utilities {
+  /**
+   * Focus deep-link Messagerie (?messageId=) — halo discret sur la BULLE uniquement.
+   * Ne pas appliquer sur un wrapper pleine largeur (évite le grand rectangle orange).
+   */
+  .msg-deeplink-focus {
+    border-radius: 0.75rem;
+    box-shadow:
+      0 0 0 2px rgba(30, 58, 95, 0.22),
+      0 0 0 6px rgba(30, 58, 95, 0.08);
+    background-color: rgba(30, 58, 95, 0.04);
+    animation: msg-deeplink-focus-fade 2.2s ease-out forwards;
+  }
+
+  @keyframes msg-deeplink-focus-fade {
+    0%,
+    55% {
+      box-shadow:
+        0 0 0 2px rgba(30, 58, 95, 0.22),
+        0 0 0 6px rgba(30, 58, 95, 0.08);
+      background-color: rgba(30, 58, 95, 0.04);
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+      background-color: transparent;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .msg-deeplink-focus {
+      animation: none;
+      box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.28);
+      background-color: rgba(30, 58, 95, 0.06);
+    }
+  }
+
   /** Titres & zones fortes — Rajdhani */
   .font-heading {
     font-family: var(--font-heading-family);

@@ -8,7 +8,6 @@ export const MESSAGERIE_MEDIA_BUCKET = "messagerie";
 export const LEGACY_DM_PREFIX = "dm/";
 
 export const MESSAGERIE_MEDIA_MAX_BYTES = 15 * 1024 * 1024;
-export const MESSAGERIE_VOICE_MAX_SECONDS = 120;
 /** TTL signed URL médias messagerie (15 min). */
 export const MESSAGERIE_SIGNED_URL_TTL_SEC = 15 * 60;
 

@@ -16,7 +16,6 @@ import {
   isImageAttachment,
   type MsgAttachment,
 } from "@/lib/messagerie/media-preview";
-import { VoiceRecorderPanel } from "@/components/messagerie/VoiceRecorderPanel";
 import { PhotoPreviewGrid } from "@/components/messagerie/PhotoPreviewGrid";
 import { MessagerieAttachmentsBlock } from "@/components/messagerie/MessagerieSecureMedia";
 import { MESSAGERIE_MEDIA_MAX_BYTES } from "@/lib/messagerie/media-storage";
@@ -614,7 +613,6 @@ export function MessagerieMissionsView({
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
   const [pendingNewCount, setPendingNewCount] = useState(0);
-  const [voiceOpen, setVoiceOpen] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [photoPreview, setPhotoPreview] = useState<{
     files: File[];
@@ -1302,7 +1300,7 @@ export function MessagerieMissionsView({
         let file = raw;
         if (file.size > MESSAGERIE_MEDIA_MAX_BYTES) {
           alert(
-            `« ${file.name} » dépasse 15 Mo. Compressez la photo ou raccourcissez le vocal, puis réessayez.`,
+            `« ${file.name} » dépasse 15 Mo. Compressez la photo ou choisissez un fichier plus léger, puis réessayez.`,
           );
           continue;
         }
@@ -2863,23 +2861,6 @@ export function MessagerieMissionsView({
                   {uploadProgress ? (
                     <p className="mb-1.5 px-1 text-xs font-semibold text-[#008069]">{uploadProgress}</p>
                   ) : null}
-                  {voiceOpen && selectedDirectContactId && !selectedTaskId ? (
-                    <div className="mb-2">
-                      <VoiceRecorderPanel
-                        sending={uploadingAttach || sendingReply}
-                        onCancel={() => setVoiceOpen(false)}
-                        onSend={async (file, durationSec) => {
-                          const uploaded = await uploadFiles([file], setReplyAttachments, {
-                            durationSec,
-                          });
-                          setVoiceOpen(false);
-                          if (uploaded.length) {
-                            await sendDirectReply("", uploaded);
-                          }
-                        }}
-                      />
-                    </div>
-                  ) : null}
                   {photoPreview && selectedDirectContactId && !selectedTaskId ? (
                     <div className="mb-2 rounded-2xl border border-[#d1d7db] bg-white p-3 shadow-sm">
                       <p className="mb-2 text-sm font-semibold text-[#111b21]">
@@ -2953,7 +2934,6 @@ export function MessagerieMissionsView({
                         <button
                           type="button"
                           onClick={() => {
-                            setVoiceOpen(false);
                             setDirectAttachMenuOpen((v) => !v);
                           }}
                           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#54656f] hover:bg-[#e9edef]"
@@ -3001,21 +2981,6 @@ export function MessagerieMissionsView({
                         disabled={sendingReply}
                         className="min-h-[44px] max-h-32 min-w-0 flex-1 resize-none rounded-[24px] border-0 bg-white px-4 py-3 text-[15px] text-[#111b21] placeholder:text-[#667781] focus:outline-none disabled:opacity-60"
                       />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDirectAttachMenuOpen(false);
-                          setVoiceOpen((v) => !v);
-                        }}
-                        className={`mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
-                          voiceOpen ? "bg-[#00a884] text-white" : "text-[#54656f] hover:bg-[#e9edef]"
-                        }`}
-                        title="Message vocal"
-                      >
-                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z" />
-                        </svg>
-                      </button>
                       <button
                         type="submit"
                         disabled={
@@ -3543,23 +3508,6 @@ export function MessagerieMissionsView({
               {uploadProgress ? (
                 <p className="mb-1.5 px-1 text-xs font-semibold text-[#008069]">{uploadProgress}</p>
               ) : null}
-              {voiceOpen ? (
-                <div className="mb-2">
-                  <VoiceRecorderPanel
-                    sending={uploadingAttach || sending}
-                    onCancel={() => setVoiceOpen(false)}
-                    onSend={async (file, durationSec) => {
-                      const uploaded = await uploadFiles([file], setMissionAttachments, {
-                        durationSec,
-                      });
-                      setVoiceOpen(false);
-                      if (uploaded.length) {
-                        await sendMissionMessage("", uploaded);
-                      }
-                    }}
-                  />
-                </div>
-              ) : null}
               {photoPreview ? (
                 <div className="mb-2 rounded-2xl border border-[#d1d7db] bg-white p-3 shadow-sm">
                   <p className="mb-2 text-sm font-semibold text-[#111b21]">
@@ -3629,7 +3577,6 @@ export function MessagerieMissionsView({
                   <button
                     type="button"
                     onClick={() => {
-                      setVoiceOpen(false);
                       setAttachMenuOpen((v) => !v);
                     }}
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#54656f] hover:bg-[#e9edef]"
@@ -3681,21 +3628,6 @@ export function MessagerieMissionsView({
                     }}
                   />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAttachMenuOpen(false);
-                    setVoiceOpen((v) => !v);
-                  }}
-                  className={`mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
-                    voiceOpen ? "bg-[#00a884] text-white" : "text-[#54656f] hover:bg-[#e9edef]"
-                  }`}
-                  title="Message vocal"
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z" />
-                  </svg>
-                </button>
                 <button
                   type="submit"
                   disabled={sending || (!sendContent.trim() && missionAttachments.length === 0)}

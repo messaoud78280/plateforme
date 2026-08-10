@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
-import { VoiceRecorderPanel } from "@/components/messagerie/VoiceRecorderPanel";
 import { PhotoPreviewGrid } from "@/components/messagerie/PhotoPreviewGrid";
 import { MessageBeworkActions } from "@/components/messagerie/MessageBeworkActions";
 import { MessagerieAttachmentsBlock } from "@/components/messagerie/MessagerieSecureMedia";
@@ -247,7 +246,6 @@ export function MessagerieView({
   const [attachments, setAttachments] = useState<MsgAttachment[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
-  const [voiceOpen, setVoiceOpen] = useState(false);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<{ files: File[]; comment: string } | null>(
     null,
@@ -651,7 +649,7 @@ export function MessagerieView({
         let file = raw;
         if (file.size > MESSAGERIE_MEDIA_MAX_BYTES) {
           setError(
-            `« ${file.name} » dépasse 15 Mo. Compressez la photo ou raccourcissez le vocal, puis réessayez.`,
+            `« ${file.name} » dépasse 15 Mo. Compressez la photo ou choisissez un fichier plus léger, puis réessayez.`,
           );
           continue;
         }
@@ -1332,19 +1330,6 @@ export function MessagerieView({
               {uploadProgress ? (
                 <p className="mb-2 text-xs font-semibold text-[#1d4ed8]">{uploadProgress}</p>
               ) : null}
-              {voiceOpen ? (
-                <div className="mb-2">
-                  <VoiceRecorderPanel
-                    sending={uploading || sending}
-                    onCancel={() => setVoiceOpen(false)}
-                    onSend={async (file, durationSec) => {
-                      const uploaded = await uploadFiles([file], { durationSec });
-                      setVoiceOpen(false);
-                      if (uploaded.length) await sendMessage("", uploaded);
-                    }}
-                  />
-                </div>
-              ) : null}
               {photoPreview ? (
                 <div className="mb-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
                   <p className="mb-2 text-sm font-semibold text-slate-800">
@@ -1410,7 +1395,6 @@ export function MessagerieView({
                     <button
                       type="button"
                       onClick={() => {
-                        setVoiceOpen(false);
                         setAttachMenuOpen((v) => !v);
                       }}
                       className="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100"
@@ -1460,21 +1444,6 @@ export function MessagerieView({
                       }
                     }}
                   />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAttachMenuOpen(false);
-                      setVoiceOpen((v) => !v);
-                    }}
-                    className={`mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
-                      voiceOpen ? "bg-[#1d4ed8] text-white" : "text-slate-600 hover:bg-slate-100"
-                    }`}
-                    title="Message vocal"
-                  >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z" />
-                    </svg>
-                  </button>
                   <button
                     type="submit"
                     disabled={sending || (!sendContent.trim() && attachments.length === 0)}

@@ -91,13 +91,13 @@ export function isBillingDoneStatus(status: string): boolean {
 export function resolveBillingPrimaryAction(status: string): string {
   switch (status) {
     case "A_FACTURER":
-      return "Préparer la facture";
+      return "Préparer la facturation";
     case "TRAVAUX_TERMINES":
       return "Préparer la facturation";
     case "CR_A_RECUPERER":
       return "Récupérer le CR puis facturer";
     case "ATTENTE_REGLEMENT":
-      return "Suivre le règlement";
+      return "Relancer le suivi client";
     case "FACTURE":
     case "TERMINE":
       return "Voir le dossier";

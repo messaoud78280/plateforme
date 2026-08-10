@@ -495,6 +495,7 @@ export function FollowUpDetailClient({
               type="number"
               value={edit.amountHt}
               onChange={(e) => setEdit({ ...edit, amountHt: e.target.value })}
+              placeholder="Montant non renseigné"
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
             />
           </label>

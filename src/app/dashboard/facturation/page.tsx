@@ -17,8 +17,8 @@ const FILTERS: { id: BillingFilter; label: string }[] = [
   { id: "all", label: "Tous" },
   { id: "a_facturer", label: "À facturer" },
   { id: "en_attente", label: "En attente" },
-  { id: "en_retard", label: "En retard" },
-  { id: "soldes", label: "Soldés" },
+  { id: "en_retard", label: "Oublis" },
+  { id: "soldes", label: "Clôturés" },
 ];
 
 export default async function FacturationPage({
@@ -73,7 +73,7 @@ export default async function FacturationPage({
       <PageHeader
         eyebrow="Pilotage"
         title="Facturation"
-        description="Suivez ce qui risque d’être oublié : dossiers à facturer, actions en attente, retards."
+        description="Anti-oubli : dossiers arrivés à l’étape facturation, actions attendues, oublis internes."
         actions={
           <Link
             href={withReturnTo("/dashboard/a-traiter", "/dashboard/facturation")}

@@ -18,7 +18,7 @@ function read(rel: string) {
 }
 
 function testPureHelpers() {
-  assert.equal(resolveBillingPrimaryAction("A_FACTURER"), "Préparer la facture");
+  assert.equal(resolveBillingPrimaryAction("A_FACTURER"), "Préparer la facturation");
   assert.equal(resolveBillingPrimaryAction("TRAVAUX_TERMINES"), "Préparer la facturation");
   assert.ok(isBillingPipelineStatus("A_FACTURER"));
   assert.equal(
@@ -57,13 +57,21 @@ function testSurfaces() {
   assert.match(page, /Tout est à jour/);
   assert.doesNotMatch(page, /€/);
   assert.doesNotMatch(page, /Portefeuille/);
+  assert.doesNotMatch(page, /Impayé|Encaissement|Solde restant/);
+  assert.match(page, /Oublis/);
+  assert.match(page, /Clôturés/);
   const snap = read("src/lib/facturation/snapshot.ts");
   assert.match(snap, /BILLING_PENDING/);
   assert.match(snap, /loadAttentionForSheets/);
+  assert.match(snap, /action interne de facturation/);
   assert.doesNotMatch(snap, /amountHt|amountPaid|balance/);
+  assert.doesNotMatch(snap, /Action financière requise/);
   const seed = read("src/lib/demo-environment/billing-anti-oubli-demo.ts");
   assert.match(seed, /A_FACTURER/);
   assert.match(seed, /TRAVAUX_TERMINES/);
+  assert.match(seed, /chantierStatus: \"TERMINE\"/);
+  assert.match(seed, /amountHt: null/);
+  assert.doesNotMatch(seed, /facture de solde/);
   assert.doesNotMatch(seed, /prisma\.invoice/);
   assert.doesNotMatch(seed, /ABC Promotion/);
   const accueil = read("src/components/dashboard/AccueilOpsHome.tsx");

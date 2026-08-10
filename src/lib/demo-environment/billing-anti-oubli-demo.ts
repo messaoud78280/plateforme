@@ -27,6 +27,13 @@ async function resolveJulieId(opts: {
   return julie?.id ?? null;
 }
 
+async function alignProjectChantierTerminé(projectId: string) {
+  await prisma.project.update({
+    where: { id: projectId },
+    data: { chantierStatus: "TERMINE" },
+  });
+}
+
 async function ensureSheetStatus(opts: {
   sheetId: string;
   authorId: string;
@@ -46,6 +53,7 @@ async function ensureSheetStatus(opts: {
       nextActionAt: daysAgo(-2),
       nextActionDone: false,
       urgencyOverride: null,
+      amountHt: null,
       ...(opts.assigneeId ? { assigneeId: opts.assigneeId } : {}),
     },
   });
@@ -111,12 +119,15 @@ export async function ensureBillingAntiOubliDemo(opts: {
         clientId: opts.rootUserId,
         organizationId: opts.organizationId,
         status: "EN_COURS",
+        chantierStatus: "TERMINE",
         siteCity: "Lyon",
         siteAddress: "12 rue Alpha",
       },
       select: { id: true, title: true },
     });
     created.push(`project:${alphaProject.id}`);
+  } else {
+    await alignProjectChantierTerminé(alphaProject.id);
   }
 
   let alphaSheet = await prisma.followUpSheet.findFirst({
@@ -146,9 +157,10 @@ export async function ensureBillingAntiOubliDemo(opts: {
         receivedAt: daysAgo(20),
         status: "A_FACTURER",
         colorKey: colorKeyForStatus("A_FACTURER"),
-        nextAction: "Préparer la facture de solde",
+        nextAction: "Préparer la facturation",
         nextActionAt: daysAgo(-2),
         nextActionDone: false,
+        amountHt: null,
         notes: "Mini-seed facturation V1A-lite — aucun montant.",
       },
       select: { id: true, status: true },
@@ -167,7 +179,7 @@ export async function ensureBillingAntiOubliDemo(opts: {
       sheetId: alphaSheet.id,
       authorId: opts.rootUserId,
       status: "A_FACTURER",
-      nextAction: "Préparer la facture de solde",
+      nextAction: "Préparer la facturation",
       assigneeId,
       daysInStep: 5,
       fromLabel: "Travaux terminés",
@@ -179,7 +191,7 @@ export async function ensureBillingAntiOubliDemo(opts: {
       sheetId: alphaSheet.id,
       authorId: opts.rootUserId,
       status: "A_FACTURER",
-      nextAction: "Préparer la facture de solde",
+      nextAction: "Préparer la facturation",
       assigneeId,
       daysInStep: 5,
       fromLabel: "Travaux terminés",
@@ -197,6 +209,7 @@ export async function ensureBillingAntiOubliDemo(opts: {
     select: { id: true, title: true },
   });
   if (repProject) {
+    await alignProjectChantierTerminé(repProject.id);
     let repSheet = await prisma.followUpSheet.findFirst({
       where: {
         organizationId: opts.organizationId,
@@ -216,7 +229,7 @@ export async function ensureBillingAntiOubliDemo(opts: {
           title: "Chantier République",
           clientName,
           siteAddress: "Place de la République",
-          workObject: "Travaux terminés récemment",
+          workObject: "Travaux terminés — facturation à préparer",
           osNumber: "4590",
           receivedAt: daysAgo(30),
           status: "TRAVAUX_TERMINES",
@@ -224,6 +237,7 @@ export async function ensureBillingAntiOubliDemo(opts: {
           nextAction: "Préparer la facturation",
           nextActionAt: daysAgo(-3),
           nextActionDone: false,
+          amountHt: null,
           notes: "Mini-seed facturation V1A-lite — aucun montant.",
         },
         select: { id: true, status: true },

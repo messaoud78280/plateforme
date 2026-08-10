@@ -209,27 +209,27 @@ export async function getBillingSnapshot(opts: {
       count: enAttente,
       hint:
         enAttente === 1
-          ? "1 règlement à suivre"
-          : `${enAttente} règlements à suivre`,
+          ? "1 suite côté client"
+          : `${enAttente} suites côté client`,
       href: `${FACTURATION_HREF}?filtre=en_attente`,
     });
   }
   if (enRetard > 0) {
     kpis.push({
       key: "en_retard",
-      label: "En retard",
+      label: "Oublis",
       count: enRetard,
       hint:
         enRetard === 1
-          ? "1 oubli de facturation"
-          : `${enRetard} oublis de facturation`,
+          ? "1 action interne de facturation en retard"
+          : `${enRetard} actions internes de facturation en retard`,
       href: `${FACTURATION_HREF}?filtre=en_retard`,
     });
   }
   if (soldes > 0) {
     kpis.push({
       key: "soldes",
-      label: "Soldés",
+      label: "Clôturés",
       count: soldes,
       hint:
         soldes === 1 ? "1 dossier clôturé" : `${soldes} dossiers clôturés`,
@@ -297,7 +297,7 @@ export async function getProjectBillingHint(opts: {
     show: true,
     label:
       snap.attention.length > 0
-        ? "Action financière requise"
+        ? "Facturation à préparer"
         : "À facturer",
     count: n,
     href: withReturnTo(

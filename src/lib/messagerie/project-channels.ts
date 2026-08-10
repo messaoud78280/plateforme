@@ -273,7 +273,12 @@ export async function isChannelParticipant(
 
 /**
  * ACL lecture/écriture canal.
- * Politique retrait : plus d’accès dès que non-participant (sauf messages déjà lus hors ligne — API refuse).
+ * V2C.6A — 3 notions distinctes :
+ * - canView  : participant OU supervision DIRECTION/MANAGER
+ * - canWrite : participant, OU superviseur (qui devient participant au 1er envoi)
+ * - participant : ligne ProjectChannelParticipant (seul pour notif / unread / Discussions)
+ *
+ * Retrait participant → plus d’accès (sauf supervision Direction en lecture).
  */
 export async function canAccessProjectChannel(
   userId: string,
@@ -326,6 +331,10 @@ export async function canAccessProjectChannel(
     }
   }
 
+  const isSupervisor =
+    isInternalPerson(user.personType) &&
+    (user.permissionProfile === "DIRECTION" || String(user.role ?? "") === "MANAGER");
+
   // Accès chantier de base
   const { canAccessProjectMessaging } = await import("@/lib/messaging/access");
   const projectOk = await canAccessProjectMessaging(user, channel.project);
@@ -344,11 +353,8 @@ export async function canAccessProjectChannel(
       const scoped = await userHasProjectScope(userId, channel.project, "messages");
       const role = String(user.role ?? "");
       if (!scoped && role !== "MANAGER" && user.permissionProfile !== "DIRECTION") {
-        // Direction peut superviser lecture sans être participant affiché — lecture seule
         if (mode === "write") return false;
-        if (user.permissionProfile === "DIRECTION" || role === "MANAGER") {
-          return true; // canView sans participation
-        }
+        if (isSupervisor) return true;
         return false;
       }
     } else {
@@ -359,12 +365,8 @@ export async function canAccessProjectChannel(
   const participant = await isChannelParticipant(channelId, userId);
   if (participant) return true;
 
-  // Direction / Manager : lecture supervision sans être dans la liste participants
-  if (
-    mode === "read" &&
-    isInternalPerson(user.personType) &&
-    (user.permissionProfile === "DIRECTION" || String(user.role ?? "") === "MANAGER")
-  ) {
+  // Supervision Direction/Manager : lecture + écriture (écriture → devient participant)
+  if (isSupervisor) {
     return true;
   }
 
@@ -382,6 +384,9 @@ export type ProjectChannelListItem = {
   participantCount: number;
   unreadCount: number;
   lastMessageAt: string | null;
+  /** V2C.6A — membre explicite vs supervision */
+  isParticipant: boolean;
+  accessMode: "participant" | "supervision";
 };
 
 /** Liste légère des canaux visibles pour un utilisateur sur un chantier. */
@@ -435,13 +440,18 @@ export async function listProjectChannelsForUser(
       hostCompanyName: hostName,
     });
 
-    const unreadCount = await prisma.messageChannelReceipt.count({
-      where: {
-        userId,
-        read: false,
-        message: { channelId: ch.id, deletedAt: null },
-      },
-    });
+    const isParticipant = await isChannelParticipant(ch.id, userId);
+
+    // Unread : uniquement pour les participants (supervision = consultation à la demande)
+    const unreadCount = isParticipant
+      ? await prisma.messageChannelReceipt.count({
+          where: {
+            userId,
+            read: false,
+            message: { channelId: ch.id, deletedAt: null },
+          },
+        })
+      : 0;
 
     const last = await prisma.message.findFirst({
       where: { channelId: ch.id, deletedAt: null },
@@ -460,6 +470,8 @@ export async function listProjectChannelsForUser(
       participantCount: ch._count.participants,
       unreadCount,
       lastMessageAt: last?.createdAt.toISOString() ?? null,
+      isParticipant,
+      accessMode: isParticipant ? "participant" : "supervision",
     });
   }
 
@@ -647,7 +659,8 @@ export async function listChannelParticipantUsers(channelId: string) {
           permissionProfile: true,
           company: true,
           accessStatus: true,
-          externalOrganization: { select: { name: true, tradeName: true } },
+          jobTitle: true,
+          externalOrganization: { select: { name: true, tradeName: true, type: true } },
         },
       },
     },
@@ -655,16 +668,148 @@ export async function listChannelParticipantUsers(channelId: string) {
   });
   return rows
     .filter((r) => isActiveAccess(r.user.accessStatus))
-    .map((r) => ({
-      id: r.user.id,
-      name: r.user.name,
-      personType: r.user.personType,
-      permissionProfile: r.user.permissionProfile,
-      company:
+    .map((r) => {
+      const company =
         r.user.externalOrganization?.tradeName ||
         r.user.externalOrganization?.name ||
-        r.user.company,
-    }));
+        r.user.company;
+      return {
+        id: r.user.id,
+        name: r.user.name,
+        personType: r.user.personType,
+        permissionProfile: r.user.permissionProfile,
+        company,
+        roleLabel: participantRoleLabel({
+          personType: r.user.personType,
+          permissionProfile: r.user.permissionProfile,
+          jobTitle: r.user.jobTitle,
+          externalOrgType: r.user.externalOrganization?.type,
+        }),
+        subtitle: [company, participantRoleLabel({
+          personType: r.user.personType,
+          permissionProfile: r.user.permissionProfile,
+          jobTitle: r.user.jobTitle,
+          externalOrgType: r.user.externalOrganization?.type,
+        })].filter(Boolean).join(" · "),
+      };
+    });
+}
+
+function participantRoleLabel(opts: {
+  personType?: string | null;
+  permissionProfile?: string | null;
+  jobTitle?: string | null;
+  externalOrgType?: string | null;
+}): string {
+  if (opts.jobTitle?.trim()) return opts.jobTitle.trim();
+  const profile = (opts.permissionProfile ?? "").toUpperCase();
+  if (profile === "DIRECTION") return "Direction";
+  if (profile === "CONDUCTEUR") return "Conducteur de travaux";
+  if (profile === "ADMINISTRATIF") return "Administratif";
+  if (profile === "CHEF_CHANTIER") return "Chef de chantier";
+  if (opts.personType === "CLIENT_EXT" || opts.externalOrgType === "CLIENT_EXT") return "Client";
+  if (opts.personType === "SUPPLIER" || opts.externalOrgType === "SUPPLIER") return "Fournisseur";
+  if (opts.personType === "SUBCONTRACTOR") return "Sous-traitant";
+  if (opts.personType === "INTERNAL" || !opts.personType) return "Interne";
+  return "Contact";
+}
+
+/** Candidats pour « Gérer les participants » (internes tenant + externes org canal). */
+export async function listChannelParticipantCandidates(channelId: string): Promise<{
+  internals: { id: string; name: string; roleLabel: string; company: string | null }[];
+  externals: { id: string; name: string; roleLabel: string; company: string | null }[];
+}> {
+  const channel = await prisma.projectChannel.findUnique({
+    where: { id: channelId },
+    select: {
+      type: true,
+      externalOrganizationId: true,
+      project: {
+        select: {
+          organizationId: true,
+          organization: { select: { name: true } },
+        },
+      },
+      externalOrganization: { select: { name: true, tradeName: true, type: true } },
+    },
+  });
+  if (!channel) return { internals: [], externals: [] };
+
+  const hostName = channel.project.organization?.name || DEMO_BRAND.companyName;
+  const internals: { id: string; name: string; roleLabel: string; company: string | null }[] = [];
+
+  if (channel.project.organizationId) {
+    const members = await prisma.organizationMember.findMany({
+      where: { organizationId: channel.project.organizationId },
+      select: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            personType: true,
+            permissionProfile: true,
+            accessStatus: true,
+            jobTitle: true,
+            company: true,
+          },
+        },
+      },
+    });
+    for (const m of members) {
+      if (!m.user || !isInternalPerson(m.user.personType)) continue;
+      if (!isActiveAccess(m.user.accessStatus)) continue;
+      internals.push({
+        id: m.user.id,
+        name: m.user.name,
+        roleLabel: participantRoleLabel({
+          personType: m.user.personType,
+          permissionProfile: m.user.permissionProfile,
+          jobTitle: m.user.jobTitle,
+        }),
+        company: m.user.company || hostName,
+      });
+    }
+  }
+
+  const externals: { id: string; name: string; roleLabel: string; company: string | null }[] = [];
+  if (channel.type !== "INTERNAL" && channel.externalOrganizationId) {
+    const people = await prisma.user.findMany({
+      where: {
+        externalOrganizationId: channel.externalOrganizationId,
+        accessStatus: { in: ["ACTIVE", "INVITED"] },
+      },
+      select: {
+        id: true,
+        name: true,
+        personType: true,
+        permissionProfile: true,
+        jobTitle: true,
+        company: true,
+      },
+      take: 40,
+    });
+    const orgLabel =
+      channel.externalOrganization?.tradeName ||
+      channel.externalOrganization?.name ||
+      null;
+    for (const p of people) {
+      externals.push({
+        id: p.id,
+        name: p.name,
+        roleLabel: participantRoleLabel({
+          personType: p.personType,
+          permissionProfile: p.permissionProfile,
+          jobTitle: p.jobTitle,
+          externalOrgType: channel.externalOrganization?.type,
+        }),
+        company: orgLabel || p.company,
+      });
+    }
+  }
+
+  internals.sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  externals.sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  return { internals, externals };
 }
 
 /** Destinataires notif / realtime : participants actifs hors auteur. */
@@ -684,9 +829,9 @@ export async function listChannelNotifyUserIds(
 }
 
 /**
- * MESSAGERIE-V2C.7.1 — Projection Discussions : canaux accessibles avec activité.
- * Batch (pas 1 requête ACL + unread par canal).
- * ACL = participant, ou supervision DIRECTION/MANAGER interne.
+ * MESSAGERIE-V2C.7.1 / V2C.6A — Projection Discussions.
+ * UNIQUEMENT les canaux où l’utilisateur est PARTICIPANT (pas la supervision globale).
+ * Par chantier reste la vue pour explorer / superviser.
  */
 export type InboxProjectChannelItem = {
   id: string;
@@ -716,54 +861,22 @@ export async function listInboxProjectChannelsForUser(
     where: { id: userId },
     select: {
       id: true,
-      role: true,
       personType: true,
-      permissionProfile: true,
       accessStatus: true,
       externalOrganizationId: true,
-      organizationMemberships: { select: { organizationId: true }, take: 5 },
     },
   });
   if (!user || !isActiveAccess(user.accessStatus)) return [];
 
+  // V2C.6A — Discussions = boîte personnelle : participants uniquement
   const participantRows = await prisma.projectChannelParticipant.findMany({
     where: { userId },
     select: { channelId: true },
   });
-  const channelIdSet = new Set(participantRows.map((r) => r.channelId));
+  const ids = participantRows.map((r) => r.channelId);
+  if (ids.length === 0) return [];
 
   const isInternal = isInternalPerson(user.personType);
-  const isSupervisor =
-    isInternal &&
-    (user.permissionProfile === "DIRECTION" || String(user.role ?? "") === "MANAGER");
-
-  if (isSupervisor) {
-    const orgIds = user.organizationMemberships.map((m) => m.organizationId).filter(Boolean);
-    if (orgIds.length > 0) {
-      const supervised = await prisma.projectChannel.findMany({
-        where: { project: { organizationId: { in: orgIds } } },
-        select: { id: true },
-        take: 200,
-      });
-      for (const c of supervised) channelIdSet.add(c.id);
-    }
-  }
-
-  // Externes : uniquement canaux de leur org (via participation déjà filtrée, renfort)
-  if (!isInternal && user.externalOrganizationId) {
-    const orgChannels = await prisma.projectChannel.findMany({
-      where: { externalOrganizationId: user.externalOrganizationId },
-      select: { id: true },
-      take: 100,
-    });
-    for (const c of orgChannels) {
-      // Ne pas ouvrir les canaux sans participation (ACL stricte externe)
-      if (participantRows.some((p) => p.channelId === c.id)) channelIdSet.add(c.id);
-    }
-  }
-
-  const ids = [...channelIdSet];
-  if (ids.length === 0) return [];
 
   const channels = await prisma.projectChannel.findMany({
     where: { id: { in: ids } },
@@ -781,16 +894,12 @@ export async function listInboxProjectChannelsForUser(
     take: 200,
   });
 
-  // Filtre ACL rapide en mémoire (aligné canAccessProjectChannel — sans N requêtes)
-  const participantSet = new Set(participantRows.map((r) => r.channelId));
   const accessible = channels.filter((ch) => {
     if (ch.type === "INTERNAL" && !isInternal) return false;
     if (ch.externalOrganizationId && !isInternal) {
       if (user.externalOrganizationId !== ch.externalOrganizationId) return false;
     }
-    if (participantSet.has(ch.id)) return true;
-    if (isSupervisor) return true;
-    return false;
+    return true;
   });
   if (accessible.length === 0) return [];
 
@@ -841,7 +950,6 @@ export async function listInboxProjectChannelsForUser(
   const items: InboxProjectChannelItem[] = [];
   for (const ch of accessible) {
     const last = lastByChannel.get(ch.id);
-    // Discussions : uniquement canaux avec activité (Par chantier garde les vides)
     if (!last) continue;
 
     const type = ch.type as ProjectChannelType;
@@ -853,10 +961,7 @@ export async function listInboxProjectChannelsForUser(
       hostCompanyName: hostName,
     });
     const projectTitle = ch.project.title;
-    const listTitle =
-      type === "INTERNAL"
-        ? `${display.title} — ${projectTitle}`
-        : `${display.title} — ${projectTitle}`;
+    const listTitle = `${display.title} — ${projectTitle}`;
 
     const q = new URLSearchParams({
       view: "chantiers",

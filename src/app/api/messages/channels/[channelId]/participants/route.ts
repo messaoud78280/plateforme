@@ -6,6 +6,8 @@ import {
   addChannelParticipant,
   canAccessProjectChannel,
   canManageProjectChannelParticipants,
+  isChannelParticipant,
+  listChannelParticipantCandidates,
   listChannelParticipantUsers,
   removeChannelParticipant,
 } from "@/lib/messagerie/project-channels";
@@ -14,6 +16,7 @@ type Ctx = { params: Promise<{ channelId: string }> };
 
 /**
  * GET /api/messages/channels/[channelId]/participants
+ * V2C.6A — liste + mode accès + candidats si gestion autorisée.
  */
 export async function GET(_request: Request, ctx: Ctx) {
   const session = await getServerSession(authOptions);
@@ -33,7 +36,13 @@ export async function GET(_request: Request, ctx: Ctx) {
       type: true,
       projectId: true,
       externalOrganizationId: true,
-      project: { select: { id: true, title: true } },
+      project: {
+        select: {
+          id: true,
+          title: true,
+          organization: { select: { name: true } },
+        },
+      },
       externalOrganization: { select: { name: true, tradeName: true, type: true } },
     },
   });
@@ -41,22 +50,45 @@ export async function GET(_request: Request, ctx: Ctx) {
     return NextResponse.json({ error: "Canal introuvable" }, { status: 404 });
   }
 
-  const participants = await listChannelParticipantUsers(channelId);
-  const canManage = await canManageProjectChannelParticipants(
-    session.user.id,
-    channel.projectId,
-  );
+  const [participants, isParticipant, canManage] = await Promise.all([
+    listChannelParticipantUsers(channelId),
+    isChannelParticipant(channelId, session.user.id),
+    canManageProjectChannelParticipants(session.user.id, channel.projectId),
+  ]);
+
+  const me = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { name: true, permissionProfile: true, role: true, personType: true },
+  });
+  const isSupervisor =
+    !isParticipant &&
+    (me?.permissionProfile === "DIRECTION" || String(me?.role ?? "") === "MANAGER");
+
+  let candidates: Awaited<ReturnType<typeof listChannelParticipantCandidates>> | null = null;
+  if (canManage) {
+    candidates = await listChannelParticipantCandidates(channelId);
+  }
 
   return NextResponse.json({
     channel,
     participants,
     canManage,
+    isParticipant,
+    isSupervisor,
+    supervisor: isSupervisor
+      ? {
+          id: session.user.id,
+          name: me?.name ?? "Direction",
+          roleLabel: "Direction",
+        }
+      : null,
+    candidates,
   });
 }
 
 /**
  * PUT /api/messages/channels/[channelId]/participants
- * Body: { userIds: string[] } — remplace la liste (internes + org du canal uniquement).
+ * Body: { userIds: string[] } — remplace la liste (internes tenant + org du canal uniquement).
  */
 export async function PUT(request: Request, ctx: Ctx) {
   const session = await getServerSession(authOptions);
@@ -72,6 +104,7 @@ export async function PUT(request: Request, ctx: Ctx) {
       type: true,
       projectId: true,
       externalOrganizationId: true,
+      project: { select: { organizationId: true } },
     },
   });
   if (!channel) {
@@ -94,6 +127,16 @@ export async function PUT(request: Request, ctx: Ctx) {
     return NextResponse.json({ error: "userIds requis" }, { status: 400 });
   }
 
+  const hostOrgId = channel.project.organizationId;
+  const hostMemberIds = new Set<string>();
+  if (hostOrgId) {
+    const members = await prisma.organizationMember.findMany({
+      where: { organizationId: hostOrgId },
+      select: { userId: true },
+    });
+    for (const m of members) hostMemberIds.add(m.userId);
+  }
+
   const users = await prisma.user.findMany({
     where: { id: { in: userIds } },
     select: {
@@ -110,14 +153,16 @@ export async function PUT(request: Request, ctx: Ctx) {
     const internal = !u.personType || u.personType === "INTERNAL";
     if (channel.type === "INTERNAL") {
       if (!internal) continue;
+      if (hostOrgId && !hostMemberIds.has(u.id)) continue;
       allowedIds.push(u.id);
       continue;
     }
     if (internal) {
+      if (hostOrgId && !hostMemberIds.has(u.id)) continue;
       allowedIds.push(u.id);
       continue;
     }
-    // Externe : uniquement la même org que le canal
+    // Externe : uniquement la même org que le canal (jamais ABC dans Point.P)
     if (
       channel.externalOrganizationId &&
       u.externalOrganizationId === channel.externalOrganizationId

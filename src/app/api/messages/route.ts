@@ -242,6 +242,11 @@ export async function POST(request: Request) {
       resolvedChannelId = ch.id;
       channelType = ch.type as ProjectChannelType;
       legacyChannel = legacyChannelFromType(channelType) as MessageChannel;
+      // V2C.6A — premier envoi (y compris superviseur) → participant visible, pas de fantôme
+      await addChannelParticipant({
+        channelId: resolvedChannelId,
+        userId: session.user.id,
+      });
     } else {
       const canMessage = await canAccessProjectMessaging(session.user, project);
       if (!canMessage) {

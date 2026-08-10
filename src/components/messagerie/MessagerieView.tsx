@@ -60,6 +60,8 @@ type ProjectChannelItem = {
   participantCount: number;
   unreadCount: number;
   lastMessageAt: string | null;
+  isParticipant?: boolean;
+  accessMode?: "participant" | "supervision";
 };
 
 type MessageItem = {
@@ -83,6 +85,15 @@ type ChannelParticipant = {
   personType?: string | null;
   permissionProfile?: string | null;
   company?: string | null;
+  roleLabel?: string | null;
+  subtitle?: string | null;
+};
+
+type ParticipantCandidate = {
+  id: string;
+  name: string;
+  roleLabel: string;
+  company: string | null;
 };
 
 const CHANNEL_LABELS: Record<MessageChannel, string> = {
@@ -94,9 +105,9 @@ const CHANNEL_LABELS: Record<MessageChannel, string> = {
 
 const CHANNEL_HINT: Record<MessageChannel, string> = {
   INTERNE: "Visible uniquement par l’équipe autorisée.",
-  CLIENT: "Visible par les participants de ce canal client.",
-  FOURNISSEUR: "Visible par les participants de ce canal fournisseur.",
-  SOUS_TRAITANT: "Visible par les participants de ce canal sous-traitant.",
+  CLIENT: "Visible par les participants de ce canal.",
+  FOURNISSEUR: "Visible par les participants de ce canal.",
+  SOUS_TRAITANT: "Visible par les participants de ce canal.",
 };
 
 type ProjectItem = {
@@ -204,6 +215,21 @@ export function MessagerieView({
   const [selectedChannelId, setSelectedChannelId] = useState<string>(initialChannelId ?? "");
   const [participants, setParticipants] = useState<ChannelParticipant[]>([]);
   const [participantsOpen, setParticipantsOpen] = useState(false);
+  const [canManageParticipants, setCanManageParticipants] = useState(false);
+  const [isChannelParticipant, setIsChannelParticipant] = useState(true);
+  const [isChannelSupervisor, setIsChannelSupervisor] = useState(false);
+  const [supervisorInfo, setSupervisorInfo] = useState<{
+    id: string;
+    name: string;
+    roleLabel: string;
+  } | null>(null);
+  const [manageOpen, setManageOpen] = useState(false);
+  const [manageSaving, setManageSaving] = useState(false);
+  const [manageSelected, setManageSelected] = useState<Set<string>>(new Set());
+  const [manageCandidates, setManageCandidates] = useState<{
+    internals: ParticipantCandidate[];
+    externals: ParticipantCandidate[];
+  }>({ internals: [], externals: [] });
   const [mobileShowThread, setMobileShowThread] = useState(Boolean(initialChannelId));
   const [projectDocuments, setProjectDocuments] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -389,14 +415,32 @@ export function MessagerieView({
   useEffect(() => {
     if (!selectedChannelId) {
       setParticipants([]);
+      setCanManageParticipants(false);
+      setIsChannelParticipant(true);
+      setIsChannelSupervisor(false);
+      setSupervisorInfo(null);
+      setManageOpen(false);
       return;
     }
     fetch(`/api/messages/channels/${encodeURIComponent(selectedChannelId)}/participants`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         setParticipants(Array.isArray(data?.participants) ? data.participants : []);
+        setCanManageParticipants(Boolean(data?.canManage));
+        setIsChannelParticipant(data?.isParticipant !== false);
+        setIsChannelSupervisor(Boolean(data?.isSupervisor));
+        setSupervisorInfo(data?.supervisor ?? null);
+        if (data?.candidates) {
+          setManageCandidates({
+            internals: Array.isArray(data.candidates.internals) ? data.candidates.internals : [],
+            externals: Array.isArray(data.candidates.externals) ? data.candidates.externals : [],
+          });
+        }
       })
-      .catch(() => setParticipants([]));
+      .catch(() => {
+        setParticipants([]);
+        setCanManageParticipants(false);
+      });
   }, [selectedChannelId]);
 
   useEffect(() => {
@@ -650,6 +694,21 @@ export function MessagerieView({
             : m,
         ),
       );
+      // V2C.6A — après envoi, l’auteur est participant (plus de supervision)
+      if (isChannelSupervisor) {
+        setIsChannelSupervisor(false);
+        setIsChannelParticipant(true);
+        setSupervisorInfo(null);
+        if (selectedChannelId) {
+          void fetch(
+            `/api/messages/channels/${encodeURIComponent(selectedChannelId)}/participants`,
+          )
+            .then((r) => (r.ok ? r.json() : null))
+            .then((d) => {
+              if (Array.isArray(d?.participants)) setParticipants(d.participants);
+            });
+        }
+      }
     } catch {
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setSendContent(content);
@@ -745,6 +804,9 @@ export function MessagerieView({
                           {ch.type === "INTERNAL" ? `🔒 ${ch.title}` : ch.title}
                         </p>
                         <p className="mt-0.5 text-[11px] font-medium text-slate-500">{ch.metaLabel}</p>
+                        {ch.accessMode === "supervision" ? (
+                          <p className="mt-0.5 text-[10px] font-medium text-slate-400">Supervision</p>
+                        ) : null}
                       </div>
                       {ch.unreadCount > 0 ? (
                         <span className="inline-flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full bg-[#1e3a5f] px-1.5 text-[10px] font-bold text-white">
@@ -802,6 +864,11 @@ export function MessagerieView({
                 >
                   {selectedChannel?.metaLabel ?? CHANNEL_LABELS[channel]}
                 </span>
+                {isChannelSupervisor ? (
+                  <span className="rounded-md bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-800">
+                    Supervision
+                  </span>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => setParticipantsOpen((v) => !v)}
@@ -811,29 +878,95 @@ export function MessagerieView({
                 </button>
               </div>
               {participantsOpen ? (
-                <ul className="mt-2 max-h-36 space-y-1 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2">
-                  {participants.map((p) => (
-                    <li key={p.id} className="flex items-center gap-2 px-1 py-1 text-xs">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1e3a5f] text-[10px] font-bold text-white">
-                        {p.name
-                          .split(/\s+/)
-                          .slice(0, 2)
-                          .map((x) => x[0]?.toUpperCase() ?? "")
-                          .join("")}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block font-semibold text-slate-800">{p.name}</span>
-                        <span className="text-slate-500">
-                          {[p.company, p.permissionProfile].filter(Boolean).join(" · ")}
+                <div className="mt-2 max-h-48 space-y-2 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2">
+                  <p className="px-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    Participants
+                  </p>
+                  <ul className="space-y-1">
+                    {participants.map((p) => (
+                      <li key={p.id} className="flex items-center gap-2 px-1 py-1 text-xs">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1e3a5f] text-[10px] font-bold text-white">
+                          {p.name
+                            .split(/\s+/)
+                            .slice(0, 2)
+                            .map((x) => x[0]?.toUpperCase() ?? "")
+                            .join("")}
                         </span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                        <span className="min-w-0">
+                          <span className="block font-semibold text-slate-800">{p.name}</span>
+                          <span className="text-slate-500">
+                            {p.subtitle ||
+                              [p.company, p.roleLabel || p.permissionProfile]
+                                .filter(Boolean)
+                                .join(" · ")}
+                          </span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {isChannelSupervisor && supervisorInfo ? (
+                    <>
+                      <p className="px-1 pt-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                        Supervision
+                      </p>
+                      <div className="flex items-center gap-2 px-1 py-1 text-xs">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-700 text-[10px] font-bold text-white">
+                          {supervisorInfo.name
+                            .split(/\s+/)
+                            .slice(0, 2)
+                            .map((x) => x[0]?.toUpperCase() ?? "")
+                            .join("")}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block font-semibold text-slate-800">
+                            {supervisorInfo.name}
+                          </span>
+                          <span className="text-slate-500">{supervisorInfo.roleLabel}</span>
+                        </span>
+                      </div>
+                    </>
+                  ) : null}
+                  {canManageParticipants ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setManageSelected(new Set(participants.map((p) => p.id)));
+                        setManageOpen(true);
+                      }}
+                      className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs font-semibold text-[#1e3a5f] hover:bg-slate-50"
+                    >
+                      Gérer les participants
+                    </button>
+                  ) : null}
+                </div>
               ) : null}
-              <p className="mt-2 text-[11px] text-slate-500">
-                {selectedChannel?.composerHint ?? CHANNEL_HINT[channel]}
-              </p>
+              <div className="mt-2 rounded-lg bg-slate-50 px-2.5 py-2 text-[11px] text-slate-600">
+                {selectedChannel?.type === "INTERNAL" || channel === "INTERNE" ? (
+                  <>
+                    <p className="font-semibold text-slate-800">
+                      🔒 {selectedChannel?.title ?? "Équipe"}
+                    </p>
+                    <p className="mt-0.5">
+                      {selectedChannel?.composerHint ?? CHANNEL_HINT.INTERNE}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-semibold text-slate-800">
+                      Message à {selectedChannel?.title ?? "l’organisation"} · EXTERNE
+                    </p>
+                    <p className="mt-0.5">
+                      {selectedChannel?.composerHint ?? CHANNEL_HINT[channel]}
+                    </p>
+                  </>
+                )}
+                {isChannelSupervisor ? (
+                  <p className="mt-1 text-[10px] font-medium text-violet-700">
+                    Vous consultez en supervision. Au premier message, vous rejoignez les
+                    participants.
+                  </p>
+                ) : null}
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4">
@@ -1314,6 +1447,54 @@ export function MessagerieView({
                 </div>
               )}
 
+              {selectedChannelId ? (
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Participants du canal
+                  </p>
+                  <ul className="mt-2 space-y-1.5">
+                    {participants.slice(0, 4).map((p) => (
+                      <li key={p.id} className="text-xs">
+                        <span className="font-semibold text-slate-800">{p.name}</span>
+                        <span className="block text-slate-500">
+                          {p.subtitle ||
+                            [p.company, p.roleLabel].filter(Boolean).join(" · ")}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {participants.length > 4 ? (
+                    <button
+                      type="button"
+                      onClick={() => setParticipantsOpen(true)}
+                      className="mt-2 text-xs font-semibold text-[#1e3a5f] hover:underline"
+                    >
+                      Voir les participants
+                    </button>
+                  ) : participants.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => setParticipantsOpen(true)}
+                      className="mt-2 text-xs font-semibold text-[#1e3a5f] hover:underline"
+                    >
+                      Voir les participants
+                    </button>
+                  ) : null}
+                  {canManageParticipants ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setManageSelected(new Set(participants.map((p) => p.id)));
+                        setManageOpen(true);
+                      }}
+                      className="mt-2 block text-xs font-semibold text-[#1e3a5f] hover:underline"
+                    >
+                      Gérer les participants
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+
               <div className="space-y-2 border-t border-slate-200 pt-4">
                 <Link
                   href={`/dashboard/projets/${selectedProject.id}`}
@@ -1406,6 +1587,136 @@ export function MessagerieView({
           if (!res.ok) throw new Error(data?.error || "Transfert impossible");
         }}
       />
+      {manageOpen && selectedChannelId ? (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 p-4 sm:items-center">
+          <div className="max-h-[85vh] w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Gérer les participants</h3>
+                <p className="text-[11px] text-slate-500">
+                  {selectedChannel?.title} · {selectedProject?.title}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setManageOpen(false)}
+                className="rounded-full px-2 py-1 text-slate-500 hover:bg-slate-100"
+              >
+                ×
+              </button>
+            </div>
+            <div className="max-h-[55vh] space-y-4 overflow-y-auto px-4 py-3">
+              {manageCandidates.internals.length > 0 ? (
+                <div>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    Internes disponibles
+                  </p>
+                  <ul className="space-y-1">
+                    {manageCandidates.internals.map((c) => (
+                      <li key={c.id}>
+                        <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50">
+                          <input
+                            type="checkbox"
+                            checked={manageSelected.has(c.id)}
+                            onChange={() => {
+                              setManageSelected((prev) => {
+                                const next = new Set(prev);
+                                if (next.has(c.id)) next.delete(c.id);
+                                else next.add(c.id);
+                                return next;
+                              });
+                            }}
+                          />
+                          <span className="min-w-0 text-sm">
+                            <span className="font-medium text-slate-800">{c.name}</span>
+                            <span className="block text-[11px] text-slate-500">
+                              {[c.company, c.roleLabel].filter(Boolean).join(" · ")}
+                            </span>
+                          </span>
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {manageCandidates.externals.length > 0 ? (
+                <div>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    {selectedChannel?.title ?? "Organisation externe"}
+                  </p>
+                  <ul className="space-y-1">
+                    {manageCandidates.externals.map((c) => (
+                      <li key={c.id}>
+                        <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50">
+                          <input
+                            type="checkbox"
+                            checked={manageSelected.has(c.id)}
+                            onChange={() => {
+                              setManageSelected((prev) => {
+                                const next = new Set(prev);
+                                if (next.has(c.id)) next.delete(c.id);
+                                else next.add(c.id);
+                                return next;
+                              });
+                            }}
+                          />
+                          <span className="min-w-0 text-sm">
+                            <span className="font-medium text-slate-800">{c.name}</span>
+                            <span className="block text-[11px] text-slate-500">
+                              {[c.company, c.roleLabel].filter(Boolean).join(" · ")}
+                            </span>
+                          </span>
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+            <div className="flex justify-end gap-2 border-t border-slate-200 px-4 py-3">
+              <button
+                type="button"
+                onClick={() => setManageOpen(false)}
+                className="rounded-full px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                disabled={manageSaving}
+                onClick={async () => {
+                  if (!selectedChannelId) return;
+                  setManageSaving(true);
+                  try {
+                    const res = await fetch(
+                      `/api/messages/channels/${encodeURIComponent(selectedChannelId)}/participants`,
+                      {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ userIds: [...manageSelected] }),
+                      },
+                    );
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data?.error || "Enregistrement impossible");
+                    setParticipants(Array.isArray(data.participants) ? data.participants : []);
+                    setIsChannelParticipant(manageSelected.has(sessionUserId));
+                    setIsChannelSupervisor(false);
+                    setManageOpen(false);
+                    if (selectedProjectId) void loadProjectChannels(selectedProjectId);
+                  } catch (e) {
+                    alert(e instanceof Error ? e.message : "Erreur");
+                  } finally {
+                    setManageSaving(false);
+                  }
+                }}
+                className="rounded-full bg-[#1e3a5f] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[#162d4a] disabled:opacity-50"
+              >
+                {manageSaving ? "…" : "Enregistrer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {copiedHint ? (
         <div className="fixed bottom-6 left-1/2 z-[100] -translate-x-1/2 rounded-full bg-[#1e3a5f] px-4 py-2 text-sm font-medium text-white shadow-lg">
           Copié

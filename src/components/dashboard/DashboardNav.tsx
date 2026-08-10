@@ -122,8 +122,8 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/devis" pathname={pathname} activeClass={active}>
               Analyses
             </NavLink>
-            <NavLink href="/dashboard/skills" pathname={pathname} activeClass={active}>
-              Skills
+            <NavLink href="/dashboard/assistant-ia" pathname={pathname} activeClass={active}>
+              Assistant IA
             </NavLink>
             <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
               Messagerie
@@ -178,8 +178,8 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/devis" pathname={pathname} activeClass={active}>
               Analyses
             </NavLink>
-            <NavLink href="/dashboard/skills" pathname={pathname} activeClass={active}>
-              Skills
+            <NavLink href="/dashboard/assistant-ia" pathname={pathname} activeClass={active}>
+              Assistant IA
             </NavLink>
             <NavLink href="/dashboard/parametres" pathname={pathname} activeClass={active}>
               Paramètres

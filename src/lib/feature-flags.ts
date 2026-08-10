@@ -12,7 +12,8 @@ export type FeatureFlagKey =
   | "clientDeliverableValidation"
   | "secureStorageSignedUrls"
   | "gedLinkWithoutCopy"
-  | "organizationMultiUser";
+  | "organizationMultiUser"
+  | "aiFeaturesEnabled";
 
 const DEFAULTS: Record<FeatureFlagKey, boolean> = {
   commandCenterUi: true,
@@ -27,6 +28,11 @@ const DEFAULTS: Record<FeatureFlagKey, boolean> = {
   gedLinkWithoutCopy: true,
   /** Organisation multi-users — schéma déployé ; dual-read clientId + organizationId */
   organizationMultiUser: true,
+  /**
+   * ASSISTANT-IA — exécution outils (LLM). Défaut off.
+   * Catalogue /discovery toujours accessible aux internes ; pas de clé API requise.
+   */
+  aiFeaturesEnabled: false,
 };
 
 function envBool(name: string): boolean | undefined {
@@ -46,6 +52,7 @@ const ENV_KEYS: Record<FeatureFlagKey, string> = {
   secureStorageSignedUrls: "NEXT_PUBLIC_FF_SECURE_STORAGE_SIGNED_URLS",
   gedLinkWithoutCopy: "NEXT_PUBLIC_FF_GED_LINK_WITHOUT_COPY",
   organizationMultiUser: "NEXT_PUBLIC_FF_ORGANIZATION_MULTI_USER",
+  aiFeaturesEnabled: "NEXT_PUBLIC_FF_AI_FEATURES",
 };
 
 export function isFeatureEnabled(flag: FeatureFlagKey): boolean {
@@ -60,5 +67,6 @@ export const FEATURE_FLAG_DOCS = [
   "URLs signées : NEXT_PUBLIC_FF_SECURE_STORAGE_SIGNED_URLS (défaut on).",
   "GED sans copie : NEXT_PUBLIC_FF_GED_LINK_WITHOUT_COPY (défaut on).",
   "Organisation multi-users : NEXT_PUBLIC_FF_ORGANIZATION_MULTI_USER (défaut on).",
+  "Assistant IA exécution : NEXT_PUBLIC_FF_AI_FEATURES (défaut off — catalogue sans API).",
   "Retour arrière : désactiver le flag concerné ou NEXT_PUBLIC_FF_LEGACY_UI_FALLBACK=true.",
 ] as const;

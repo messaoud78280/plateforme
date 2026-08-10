@@ -18,6 +18,7 @@ export const DASHBOARD_ROOT_PATHS = new Set([
   "/dashboard/documents",
   "/dashboard/pilotage-travaux",
   "/dashboard/facturation",
+  "/dashboard/assistant-ia",
 ]);
 
 /**
@@ -185,6 +186,9 @@ export function contextBackLabelForHref(
   }
   if (path === "/dashboard/facturation" || path.startsWith("/dashboard/facturation/")) {
     return "Retour à la facturation";
+  }
+  if (path === "/dashboard/assistant-ia" || path.startsWith("/dashboard/assistant-ia/")) {
+    return "Retour à l’Assistant IA";
   }
   if (path === "/dashboard/documents") return "Retour aux documents";
   if (path === "/dashboard/fiches-suivi") return "Retour aux fiches de suivi";

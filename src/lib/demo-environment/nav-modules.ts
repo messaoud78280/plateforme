@@ -23,6 +23,7 @@ const CLIENT_NAV_GATES: NavModuleGate[] = [
   { href: "/dashboard/rapports", modules: ["direction"] },
   { href: "/dashboard/equipe", modules: ["dashboard"] },
   { href: "/dashboard/skills", modules: ["ia", "marches"] },
+  { href: "/dashboard/assistant-ia", modules: ["ia", "marches"] },
   { href: "/dashboard/abonnement", modules: [] }, // masqué en démo
   { href: "/dashboard/parametres", modules: ["dashboard"] },
 ];

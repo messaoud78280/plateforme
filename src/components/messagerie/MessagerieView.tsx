@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { VoiceRecorderPanel } from "@/components/messagerie/VoiceRecorderPanel";
 import { PhotoPreviewGrid } from "@/components/messagerie/PhotoPreviewGrid";
@@ -41,6 +41,8 @@ import {
   MessageForwardDialog,
   type ForwardDestOption,
 } from "@/components/messagerie/MessageForwardDialog";
+import { ContextBackButton } from "@/components/ui/ContextBackButton";
+import { resolveActiveChannelPresentation } from "@/lib/messagerie/resolve-active-channel-presentation";
 import {
   deletedMessageLabel,
   maybeRedactReplyExcerpt,
@@ -101,13 +103,6 @@ const CHANNEL_LABELS: Record<MessageChannel, string> = {
   CLIENT: "Client · Externe",
   FOURNISSEUR: "Fournisseur · Externe",
   SOUS_TRAITANT: "Sous-traitant · Externe",
-};
-
-const CHANNEL_HINT: Record<MessageChannel, string> = {
-  INTERNE: "Visible uniquement par l’équipe autorisée.",
-  CLIENT: "Visible par les participants de ce canal.",
-  FOURNISSEUR: "Visible par les participants de ce canal.",
-  SOUS_TRAITANT: "Visible par les participants de ce canal.",
 };
 
 type ProjectItem = {
@@ -212,6 +207,14 @@ export function MessagerieView({
       : "CLIENT",
   );
   const [projectChannels, setProjectChannels] = useState<ProjectChannelItem[]>([]);
+  const [channelsByProject, setChannelsByProject] = useState<
+    Record<string, ProjectChannelItem[]>
+  >({});
+  const [expandedProjectId, setExpandedProjectId] = useState<string>(initialProjectId ?? "");
+  const [contextOpen, setContextOpen] = useState(false);
+  const [mobileLevel, setMobileLevel] = useState<"projects" | "channels" | "thread">(
+    initialChannelId ? "thread" : initialProjectId ? "channels" : "projects",
+  );
   const [selectedChannelId, setSelectedChannelId] = useState<string>(initialChannelId ?? "");
   const [participants, setParticipants] = useState<ChannelParticipant[]>([]);
   const [participantsOpen, setParticipantsOpen] = useState(false);
@@ -272,8 +275,36 @@ export function MessagerieView({
   void initialExternalOrganizationId;
   void allowedChannels;
 
+  const selectedProject = projects.find((p) => p.id === selectedProjectId);
+
   const selectedChannel =
-    projectChannels.find((c) => c.id === selectedChannelId) ?? null;
+    (selectedProjectId
+      ? channelsByProject[selectedProjectId]?.find((c) => c.id === selectedChannelId)
+      : undefined) ??
+    projectChannels.find((c) => c.id === selectedChannelId) ??
+    Object.values(channelsByProject)
+      .flat()
+      .find((c) => c.id === selectedChannelId) ??
+    null;
+
+  const presentation = useMemo(
+    () =>
+      resolveActiveChannelPresentation(selectedChannel, {
+        projectTitle: selectedProject?.title ?? null,
+        participantCount:
+          participants.length > 0
+            ? participants.length
+            : (selectedChannel?.participantCount ?? 0),
+      }),
+    [selectedChannel, selectedProject?.title, participants.length],
+  );
+
+  // P0 — le legacy `channel` suit TOUJOURS le channel réellement sélectionné
+  useEffect(() => {
+    if (presentation.channelId) {
+      setChannel(presentation.legacyChannel);
+    }
+  }, [presentation.channelId, presentation.legacyChannel]);
 
   useEffect(() => {
     if (
@@ -297,12 +328,42 @@ export function MessagerieView({
     const res = await fetch(`/api/messages/channels?projectId=${encodeURIComponent(projectId)}`);
     if (!res.ok) {
       setProjectChannels([]);
+      setChannelsByProject((prev) => ({ ...prev, [projectId]: [] }));
       return [];
     }
     const data = await res.json();
     const list = Array.isArray(data.channels) ? (data.channels as ProjectChannelItem[]) : [];
     setProjectChannels(list);
+    setChannelsByProject((prev) => ({ ...prev, [projectId]: list }));
     return list;
+  }
+
+  function selectChannel(projectId: string, ch: ProjectChannelItem) {
+    setSelectedProjectId(projectId);
+    setExpandedProjectId(projectId);
+    setSelectedChannelId(ch.id);
+    setChannel(
+      ch.type === "INTERNAL"
+        ? "INTERNE"
+        : ch.type === "SUPPLIER"
+          ? "FOURNISSEUR"
+          : ch.type === "SUBCONTRACTOR"
+            ? "SOUS_TRAITANT"
+            : "CLIENT",
+    );
+    setMobileLevel("thread");
+    setMobileShowThread(true);
+    setParticipantsOpen(false);
+  }
+
+  async function expandProject(projectId: string) {
+    setExpandedProjectId(projectId);
+    setSelectedProjectId(projectId);
+    setMobileLevel("channels");
+    setMobileShowThread(false);
+    if (!channelsByProject[projectId]) {
+      await loadProjectChannels(projectId);
+    }
   }
 
   async function loadMessagesForChannel(channelId: string) {
@@ -338,6 +399,7 @@ export function MessagerieView({
           const pid = selectedProjectId || initialProjectId || list[0]?.id || "";
           if (pid) {
             if (!selectedProjectId) setSelectedProjectId(pid);
+            setExpandedProjectId(pid);
             const channels = await loadProjectChannels(pid);
             let chId = selectedChannelId || initialChannelId || "";
             if (!chId && channels.length) {
@@ -383,8 +445,13 @@ export function MessagerieView({
     if (loading || !selectedProjectId) return;
     void (async () => {
       const channels = await loadProjectChannels(selectedProjectId);
-      let chId = selectedChannelId;
-      if (!chId || !channels.some((c) => c.id === chId)) {
+      setExpandedProjectId(selectedProjectId);
+      // Ne pas forcer un autre channel si déjà valide (évite stale composer)
+      if (selectedChannelId && channels.some((c) => c.id === selectedChannelId)) {
+        return;
+      }
+      // Deep-link / premier chargement uniquement
+      if (!selectedChannelId && channels.length) {
         const wantedType =
           channel === "INTERNE"
             ? "INTERNAL"
@@ -392,17 +459,18 @@ export function MessagerieView({
               ? "SUPPLIER"
               : channel === "SOUS_TRAITANT"
                 ? "SUBCONTRACTOR"
-                : "CLIENT";
+                : null;
         const match =
-          channels.find((c) => c.type === wantedType) ||
+          (wantedType ? channels.find((c) => c.type === wantedType) : null) ||
           (initialExternalOrganizationId
             ? channels.find((c) => c.externalOrganizationId === initialExternalOrganizationId)
             : null) ||
           channels[0];
-        chId = match?.id ?? "";
-        setSelectedChannelId(chId);
+        if (match) {
+          setSelectedChannelId(match.id);
+          await loadMessagesForChannel(match.id);
+        }
       }
-      if (chId) await loadMessagesForChannel(chId);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProjectId]);
@@ -461,7 +529,6 @@ export function MessagerieView({
   const conversationsList = projects
     .slice()
     .sort((a, b) => a.title.localeCompare(b.title, "fr"));
-  const selectedProject = projects.find((p) => p.id === selectedProjectId);
   const conversationMessages = selectedChannelId
     ? allMessages.filter(
         (m) =>
@@ -738,93 +805,115 @@ export function MessagerieView({
   }
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] overflow-hidden rounded-2xl surface-metallic-light">
-      {/* Colonne gauche : conversations */}
-      <aside className="flex w-80 shrink-0 flex-col border-r border-slate-200 bg-slate-50/60">
-        <div className="border-b border-slate-200 p-4">
-          <h2 className="text-sm font-semibold text-slate-800">Chantiers</h2>
-          <p className="mt-0.5 text-xs text-slate-500">Canaux par périmètre</p>
-        </div>
-        <ul className="max-h-36 shrink-0 overflow-y-auto border-b border-slate-200">
-          {conversationsList.length === 0 ? (
-            <li className="p-4 text-center text-sm text-slate-500">Aucun chantier.</li>
+    <div className="relative flex h-[calc(100vh-12rem)] overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/80">
+      {/* Colonne gauche : chantiers → conversations imbriquées */}
+      <aside
+        className={`w-full shrink-0 flex-col border-r border-slate-200 bg-white md:flex md:w-[min(100%,340px)] ${
+          mobileShowThread ? "hidden md:flex" : "flex"
+        }`}
+      >
+        <div className="border-b border-slate-100 px-4 py-3 md:hidden">
+          {mobileLevel === "channels" && selectedProject ? (
+            <ContextBackButton
+              label="Chantiers"
+              fallbackHref="/dashboard/messagerie?view=chantiers"
+              onBack={() => {
+                setMobileLevel("projects");
+                setExpandedProjectId("");
+              }}
+            />
           ) : (
-            conversationsList.map((p) => (
-              <li key={p.id}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedProjectId(p.id);
-                    setMobileShowThread(false);
-                  }}
-                  className={`w-full border-l-2 px-4 py-2.5 text-left transition ${
-                    selectedProjectId === p.id
-                      ? "border-[#1e3a5f] bg-white shadow-sm"
-                      : "border-transparent hover:bg-slate-100/80"
-                  }`}
-                >
-                  <p className="truncate text-sm font-semibold text-slate-800">{p.title}</p>
-                </button>
-              </li>
-            ))
+            <h2 className="text-base font-semibold text-slate-900">Par chantier</h2>
           )}
-        </ul>
-        {selectedProjectId ? (
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <p className="px-4 pt-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Conversations
-            </p>
-            <ul className="pb-2">
-              {projectChannels.map((ch) => (
-                <li key={ch.id}>
+        </div>
+        <div className="hidden border-b border-slate-100 px-4 py-3 md:block">
+          <h2 className="text-sm font-semibold text-slate-900">Par chantier</h2>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto py-1">
+          {conversationsList.length === 0 ? (
+            <p className="p-4 text-center text-sm text-slate-500">Aucun chantier.</p>
+          ) : (
+            conversationsList.map((p) => {
+              const expanded = expandedProjectId === p.id;
+              const channels = channelsByProject[p.id] ?? (p.id === selectedProjectId ? projectChannels : []);
+              return (
+                <div key={p.id} className={`${mobileLevel === "channels" && selectedProjectId !== p.id ? "hidden md:block" : ""}`}>
                   <button
                     type="button"
                     onClick={() => {
-                      setSelectedChannelId(ch.id);
-                      setChannel(
-                        ch.type === "INTERNAL"
-                          ? "INTERNE"
-                          : ch.type === "SUPPLIER"
-                            ? "FOURNISSEUR"
-                            : ch.type === "SUBCONTRACTOR"
-                              ? "SOUS_TRAITANT"
-                              : "CLIENT",
-                      );
-                      setMobileShowThread(true);
+                      if (expanded && mobileLevel !== "channels") {
+                        setExpandedProjectId("");
+                      } else {
+                        void expandProject(p.id);
+                      }
                     }}
-                    className={`w-full px-4 py-3 text-left transition ${
-                      selectedChannelId === ch.id
-                        ? "bg-white shadow-sm ring-1 ring-inset ring-[#1e3a5f]/15"
-                        : "hover:bg-slate-100/80"
+                    className={`flex w-full items-center gap-2 px-3 py-2.5 text-left transition motion-safe:duration-150 ${
+                      selectedProjectId === p.id ? "bg-slate-50" : "hover:bg-slate-50/80"
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-800">
-                          {ch.type === "INTERNAL" ? `🔒 ${ch.title}` : ch.title}
-                        </p>
-                        <p className="mt-0.5 text-[11px] font-medium text-slate-500">{ch.metaLabel}</p>
-                        {ch.accessMode === "supervision" ? (
-                          <p className="mt-0.5 text-[10px] font-medium text-slate-400">Supervision</p>
-                        ) : null}
-                      </div>
-                      {ch.unreadCount > 0 ? (
-                        <span className="inline-flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full bg-[#1e3a5f] px-1.5 text-[10px] font-bold text-white">
-                          {ch.unreadCount}
-                        </span>
-                      ) : null}
-                    </div>
+                    <span className="w-4 shrink-0 text-xs text-slate-400">{expanded ? "▾" : "›"}</span>
+                    <span className="min-w-0 flex-1 truncate text-[13px] font-semibold uppercase tracking-wide text-slate-700">
+                      {p.title}
+                    </span>
                   </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
+                  {expanded ? (
+                    <ul className="pb-2 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-150">
+                      {channels.length === 0 ? (
+                        <li className="px-8 py-2 text-xs text-slate-400">Chargement…</li>
+                      ) : (
+                        channels.map((ch) => {
+                          const shortMeta =
+                            ch.type === "INTERNAL"
+                              ? "Interne"
+                              : ch.type === "SUPPLIER"
+                                ? "Fournisseur"
+                                : ch.type === "CLIENT"
+                                  ? "Client"
+                                  : ch.metaLabel?.replace(" · Externe", "") || "";
+                          const icon =
+                            ch.type === "INTERNAL" ? "🔒" : ch.type === "SUPPLIER" ? "🏢" : "👤";
+                          return (
+                            <li key={ch.id}>
+                              <button
+                                type="button"
+                                onClick={() => selectChannel(p.id, ch)}
+                                className={`flex w-full items-start gap-2 py-2 pl-8 pr-3 text-left transition motion-safe:duration-150 ${
+                                  selectedChannelId === ch.id
+                                    ? "bg-[#1e3a5f]/[0.06] ring-1 ring-inset ring-[#1e3a5f]/10"
+                                    : "hover:bg-slate-50"
+                                }`}
+                              >
+                                <span className="mt-0.5 text-xs" aria-hidden>
+                                  {icon}
+                                </span>
+                                <span className="min-w-0 flex-1">
+                                  <span className="block truncate text-sm font-medium text-slate-900">
+                                    {ch.title}
+                                  </span>
+                                  <span className="text-[11px] text-slate-500">{shortMeta}</span>
+                                </span>
+                                {ch.unreadCount > 0 ? (
+                                  <span className="mt-0.5 inline-flex h-5 min-w-[18px] shrink-0 items-center justify-center rounded-full bg-[#1e3a5f] px-1 text-[10px] font-bold text-white">
+                                    {ch.unreadCount}
+                                  </span>
+                                ) : null}
+                              </button>
+                            </li>
+                          );
+                        })
+                      )}
+                    </ul>
+                  ) : null}
+                </div>
+              );
+            })
+          )}
+        </div>
         {!hideNewDemande ? (
-          <div className="border-t border-slate-200 p-3">
+          <div className="border-t border-slate-100 p-3">
             <Link
               href="/dashboard/nouvelle-demande"
-              className="block w-full rounded-lg bg-[#1d4ed8] py-2.5 text-center text-sm font-medium text-white hover:bg-[#1e40af]"
+              className="block w-full rounded-xl bg-[#1e3a5f] py-2.5 text-center text-sm font-medium text-white hover:bg-[#162d4a]"
             >
               Créer une demande
             </Link>
@@ -833,52 +922,79 @@ export function MessagerieView({
       </aside>
 
       {/* Zone centrale : chat */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div
+        className={`min-w-0 flex-1 flex-col ${
+          mobileShowThread ? "flex" : "hidden md:flex"
+        }`}
+      >
         {selectedProjectId && selectedProject ? (
           <>
-            <div className="shrink-0 border-b border-slate-200 px-4 py-3">
-              <button
-                type="button"
-                className="mb-2 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-slate-500 md:hidden"
-                onClick={() => setMobileShowThread(false)}
-              >
-                ← {selectedProject.title}
-              </button>
-              <p className="text-[11px] font-medium text-slate-400">{selectedProject.title}</p>
-              <div className="mt-1 flex flex-wrap items-center gap-2">
-                <h3 className="font-semibold text-slate-800">
-                  {selectedChannel
-                    ? selectedChannel.type === "INTERNAL"
-                      ? `🔒 ${selectedChannel.title}`
-                      : selectedChannel.title
-                    : CHANNEL_LABELS[channel]}
-                </h3>
-                <span
-                  className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${
-                    (selectedChannel?.type ?? "") === "INTERNAL" || channel === "INTERNE"
-                      ? "bg-slate-100 text-slate-700"
-                      : (selectedChannel?.type ?? "") === "SUPPLIER" || channel === "FOURNISSEUR"
-                        ? "bg-amber-50 text-amber-800"
-                        : "bg-sky-50 text-sky-800"
-                  }`}
-                >
-                  {selectedChannel?.metaLabel ?? CHANNEL_LABELS[channel]}
-                </span>
-                {isChannelSupervisor ? (
-                  <span className="rounded-md bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-800">
-                    Supervision
-                  </span>
-                ) : null}
+            <div className="shrink-0 border-b border-slate-100 px-4 py-3">
+              <div className="mb-2 flex items-center gap-2 md:hidden">
+                <ContextBackButton
+                  label={selectedProject.title}
+                  fallbackHref="/dashboard/messagerie?view=chantiers"
+                  onBack={() => {
+                    setMobileShowThread(false);
+                    setMobileLevel("channels");
+                  }}
+                />
                 <button
                   type="button"
-                  onClick={() => setParticipantsOpen((v) => !v)}
-                  className="text-xs font-semibold text-[#1e3a5f] hover:underline"
+                  onClick={() => setContextOpen(true)}
+                  className="ml-auto rounded-full p-2 text-slate-500 hover:bg-slate-100"
+                  title="Contexte"
+                  aria-label="Contexte chantier"
                 >
-                  {participants.length || selectedChannel?.participantCount || 0} participants
+                  ⓘ
                 </button>
               </div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="truncate text-[17px] font-semibold text-slate-900">
+                    {presentation.scopeType === "INTERNAL"
+                      ? `🔒 ${presentation.displayName}`
+                      : presentation.displayName}
+                  </h3>
+                  <p className="mt-0.5 truncate text-[12px] text-slate-500">
+                    {[
+                      presentation.scopeBadge,
+                      presentation.projectTitle,
+                      presentation.participantCount > 0
+                        ? `${presentation.participantCount} participant${presentation.participantCount > 1 ? "s" : ""}`
+                        : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                </div>
+                <div className="hidden shrink-0 items-center gap-1 md:flex">
+                  <button
+                    type="button"
+                    onClick={() => setParticipantsOpen((v) => !v)}
+                    className="rounded-full px-2.5 py-1 text-xs font-semibold text-[#1e3a5f] hover:bg-slate-100"
+                  >
+                    {presentation.participantCount || "—"} participants
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setContextOpen((v) => !v)}
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      contextOpen ? "bg-slate-100 text-slate-800" : "text-slate-500 hover:bg-slate-100"
+                    }`}
+                    title="Contexte"
+                  >
+                    ⓘ
+                  </button>
+                </div>
+              </div>
+              {isChannelSupervisor ? (
+                <p className="mt-1 text-[11px] font-medium text-violet-700">
+                  Supervision — au premier message, vous rejoignez les participants.
+                </p>
+              ) : null}
               {participantsOpen ? (
-                <div className="mt-2 max-h-48 space-y-2 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2">
+                <div className="mt-2 max-h-44 space-y-2 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
                   <p className="px-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
                     Participants
                   </p>
@@ -904,73 +1020,23 @@ export function MessagerieView({
                       </li>
                     ))}
                   </ul>
-                  {isChannelSupervisor && supervisorInfo ? (
-                    <>
-                      <p className="px-1 pt-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                        Supervision
-                      </p>
-                      <div className="flex items-center gap-2 px-1 py-1 text-xs">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-700 text-[10px] font-bold text-white">
-                          {supervisorInfo.name
-                            .split(/\s+/)
-                            .slice(0, 2)
-                            .map((x) => x[0]?.toUpperCase() ?? "")
-                            .join("")}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block font-semibold text-slate-800">
-                            {supervisorInfo.name}
-                          </span>
-                          <span className="text-slate-500">{supervisorInfo.roleLabel}</span>
-                        </span>
-                      </div>
-                    </>
-                  ) : null}
-                  {canManageParticipants ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setManageSelected(new Set(participants.map((p) => p.id)));
-                        setManageOpen(true);
-                      }}
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs font-semibold text-[#1e3a5f] hover:bg-slate-50"
-                    >
-                      Gérer les participants
-                    </button>
-                  ) : null}
                 </div>
               ) : null}
-              <div className="mt-2 rounded-lg bg-slate-50 px-2.5 py-2 text-[11px] text-slate-600">
-                {selectedChannel?.type === "INTERNAL" || channel === "INTERNE" ? (
-                  <>
-                    <p className="font-semibold text-slate-800">
-                      🔒 {selectedChannel?.title ?? "Équipe"}
-                    </p>
-                    <p className="mt-0.5">
-                      {selectedChannel?.composerHint ?? CHANNEL_HINT.INTERNE}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="font-semibold text-slate-800">
-                      Message à {selectedChannel?.title ?? "l’organisation"} · EXTERNE
-                    </p>
-                    <p className="mt-0.5">
-                      {selectedChannel?.composerHint ?? CHANNEL_HINT[channel]}
-                    </p>
-                  </>
-                )}
-                {isChannelSupervisor ? (
-                  <p className="mt-1 text-[10px] font-medium text-violet-700">
-                    Vous consultez en supervision. Au premier message, vous rejoignez les
-                    participants.
-                  </p>
-                ) : null}
-              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4">
               <div className="space-y-4">
+                {conversationMessages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+                    <p className="text-base font-semibold text-slate-800">{presentation.displayName}</p>
+                    <p className="mt-2 max-w-sm text-sm text-slate-500">
+                      Aucun message pour le moment.
+                      {presentation.scopeType === "INTERNAL"
+                        ? " Démarrez la conversation avec votre équipe."
+                        : " Démarrez la conversation."}
+                    </p>
+                  </div>
+                ) : null}
                 {conversationMessages.map((m) => {
                   const isMe = m.sender.id === sessionUserId;
                   const atts = Array.isArray(m.attachmentsJson) ? m.attachmentsJson : [];
@@ -1160,19 +1226,19 @@ export function MessagerieView({
                 />
               ) : null}
               <p
-                className={`mb-2 rounded-lg px-3 py-1.5 text-xs font-semibold ${
-                  channel === "INTERNE"
-                    ? "bg-slate-100 text-slate-700"
-                    : channel === "FOURNISSEUR"
-                      ? "bg-amber-50 text-amber-900"
-                      : "bg-sky-50 text-sky-900"
+                className={`mb-2 rounded-xl px-3 py-2 text-xs font-semibold ${
+                  presentation.scopeType === "INTERNAL"
+                    ? "bg-slate-100 text-slate-800"
+                    : presentation.scopeType === "SUPPLIER"
+                      ? "bg-amber-50/80 text-amber-950"
+                      : presentation.scopeType === "CLIENT"
+                        ? "bg-sky-50/80 text-sky-950"
+                        : "bg-slate-50 text-slate-700"
                 }`}
+                data-channel-scope={presentation.scopeType}
+                data-testid="channel-composer-scope"
               >
-                {channel === "INTERNE"
-                  ? `Message INTERNE · ${selectedProject.title}`
-                  : channel === "FOURNISSEUR"
-                    ? `Message à Point.P / fournisseur · EXTERNE · ${selectedProject.title}`
-                    : `Message client · EXTERNE · ${selectedProject.title}`}
+                {presentation.composerLabel}
               </p>
               <div className="mb-2 flex flex-wrap gap-1">
                 {QUICK_REPLIES.map((text) => (
@@ -1402,10 +1468,19 @@ export function MessagerieView({
         )}
       </div>
 
-      {/* Colonne droite : contexte chantier */}
-      <aside className="flex w-72 shrink-0 flex-col border-l border-slate-200 bg-slate-50/40">
-        <div className="border-b border-slate-200 p-4">
-          <h2 className="text-sm font-semibold text-slate-800">Contexte chantier</h2>
+      {/* Colonne droite : contexte (facultatif) */}
+      {contextOpen ? (
+      <aside className="absolute inset-y-0 right-0 z-30 flex w-[min(100%,288px)] shrink-0 flex-col border-l border-slate-200 bg-white shadow-xl md:static md:shadow-none">
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+          <h2 className="text-sm font-semibold text-slate-800">Contexte</h2>
+          <button
+            type="button"
+            onClick={() => setContextOpen(false)}
+            className="rounded-full px-2 py-1 text-slate-500 hover:bg-slate-100"
+            aria-label="Fermer"
+          >
+            ×
+          </button>
         </div>
         {selectedProject ? (
           <div className="flex-1 overflow-y-auto p-4">
@@ -1523,6 +1598,7 @@ export function MessagerieView({
           </div>
         )}
       </aside>
+      ) : null}
 
       <MessageInfosPanel
         open={infosOpen}

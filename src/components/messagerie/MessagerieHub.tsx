@@ -74,13 +74,10 @@ export function MessagerieHub(props: Props) {
               ? "bg-[#1e3a5f] text-white"
               : "bg-slate-100 text-slate-600 hover:bg-slate-200"
           }`}
-          title="Canaux par chantier"
+          title="Conversations par chantier"
         >
           Par chantier
         </button>
-        <p className="ml-auto hidden max-w-md truncate text-[11px] text-slate-400 sm:block">
-          {view === "chantiers" ? "Contexte chantier · Interne / Client / Fournisseur" : null}
-        </p>
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">
         {view === "missions" ? (

@@ -13,7 +13,20 @@ import {
 } from "@/lib/follow-up/urgency";
 import type { FollowUpCardData } from "@/components/follow-up/FollowUpPostItCard";
 import type { SerializedAttention } from "@/lib/follow-up/attention";
+import { isPhaseStart, phaseForStatus } from "@/lib/follow-up/phases";
+import { isFollowUpUrgentLevel } from "@/lib/follow-up/kpi";
 import { cn } from "@/lib/cn";
+
+/** Sous-processus visibles discrètement (pas un 2e statut). */
+const SUBPROCESS_CHIP: Partial<Record<string, string>> = {
+  COMMANDE_FOURNISSEUR: "Commande",
+  COMMANDE_PASSEE: "Commande",
+  ATTENTE_FOURNISSEUR: "Fournisseur",
+  AVENANT: "Avenant",
+  A_FACTURER: "Facturation",
+  FACTURE: "Facturation",
+  ATTENTE_REGLEMENT: "Règlement",
+};
 
 export type KanbanColumn = {
   statusKey: string;
@@ -239,11 +252,17 @@ function KanbanCard({
         ) : null}
       </div>
 
-      {(ref || sheet.workObject) && (
+      {(ref || sheet.workObject || sheet.clientName) && (
         <p className="mt-0.5 text-[11px] text-slate-500 line-clamp-1">
-          {[ref, sheet.workObject].filter(Boolean).join(" · ")}
+          {[sheet.clientName, ref, sheet.workObject].filter(Boolean).join(" · ")}
         </p>
       )}
+
+      {SUBPROCESS_CHIP[sheet.status] ? (
+        <p className="mt-1 text-[10px] font-medium text-slate-400">
+          {SUBPROCESS_CHIP[sheet.status]}
+        </p>
+      ) : null}
 
       {sheet.nextAction ? (
         <p className="mt-1.5 text-xs leading-snug text-slate-800">
@@ -311,8 +330,24 @@ export function FollowUpKanban({
   const [filterUrgency, setFilterUrgency] = useState<string>("all");
   const [filterClient, setFilterClient] = useState<string>("all");
   const [mineOnly, setMineOnly] = useState(false);
+  const [hideEmpty, setHideEmpty] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const sheetsKey = sheets.map((s) => `${s.id}:${s.status}:${s.nextAction ?? ""}`).join("|");
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    function onWheel(e: WheelEvent) {
+      if (!el) return;
+      if (e.shiftKey && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }
+    }
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
 
   const syncFromProps = useCallback(() => {
     setLocalSheets(sheets);
@@ -345,7 +380,12 @@ export function FollowUpKanban({
     return localSheets.filter((s) => {
       if (mineOnly && currentUserId && s.assigneeId !== currentUserId) return false;
       if (filterAssignee !== "all" && s.assigneeId !== filterAssignee) return false;
-      if (filterUrgency !== "all" && s.urgency !== filterUrgency) return false;
+      if (
+        filterUrgency !== "all" &&
+        (s.attention?.effectiveUrgency ?? s.urgency) !== filterUrgency
+      ) {
+        return false;
+      }
       if (filterClient !== "all" && (s.clientName ?? "") !== filterClient) return false;
       if (!query) return true;
       const hay = [
@@ -373,10 +413,9 @@ export function FollowUpKanban({
   ]);
 
   const summary = useMemo(() => {
-    const urgent = filtered.filter((s) => {
-    const u = s.attention?.effectiveUrgency ?? s.urgency;
-    return u === "URGENT" || u === "CRITIQUE";
-  }).length;
+    const urgent = filtered.filter((s) =>
+      isFollowUpUrgentLevel(s.attention?.effectiveUrgency ?? s.urgency),
+    ).length;
     const aFacturer = filtered.filter(
       (s) => s.status === "A_FACTURER" || s.status === "TRAVAUX_TERMINES",
     ).length;
@@ -384,13 +423,22 @@ export function FollowUpKanban({
   }, [filtered]);
 
   const cols = useMemo(() => {
-    const hasOrphan = filtered.some((s) => !columns.some((c) => c.statusKey === s.status));
-    if (!hasOrphan) return columns;
+    const occupied = new Set(filtered.map((s) => s.status));
+    let base = columns;
+    if (hideEmpty && dragId === null) {
+      base = columns.filter(
+        (c) => occupied.has(c.statusKey) || c.statusKey === "__AUTRES__",
+      );
+    }
+    const hasOrphan = filtered.some((s) => !base.some((c) => c.statusKey === s.status));
+    if (!hasOrphan) return base;
     return [
-      ...columns,
+      ...base,
       { statusKey: "__AUTRES__", label: "Autres", colorKey: "jaune", sortOrder: 9999 },
     ];
-  }, [columns, filtered]);
+  }, [columns, filtered, hideEmpty, dragId]);
+
+  const colKeys = useMemo(() => cols.map((c) => c.statusKey), [cols]);
 
   const byStatus = useMemo(() => {
     const map = new Map<string, KanbanSheet[]>();
@@ -542,6 +590,15 @@ export function FollowUpKanban({
           />
           Mes fiches
         </label>
+        <label className="flex items-center gap-1.5 pb-1.5 text-xs font-medium text-slate-700">
+          <input
+            type="checkbox"
+            checked={hideEmpty}
+            onChange={(e) => setHideEmpty(e.target.checked)}
+            className="rounded border-slate-300"
+          />
+          Masquer les étapes vides
+        </label>
         <p className="ml-auto pb-1.5 text-xs text-slate-600">
           <span className="font-bold text-slate-900">{summary.total}</span> dossiers
           {summary.urgent > 0 ? (
@@ -566,105 +623,140 @@ export function FollowUpKanban({
       ) : (
         <p className="text-xs text-slate-500">
           Glissez une fiche vers une autre colonne, ou utilisez ··· → Changer d’étape.
+          {hideEmpty ? " Pendant un glisser-déposer, toutes les étapes réapparaissent." : null}
         </p>
       )}
 
-      <div className="-mx-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6">
-        <div className="flex min-w-max gap-3">
-          {cols.map((col) => {
-            const items = byStatus.get(col.statusKey) ?? [];
-            const accent = POSTIT_COLORS[col.colorKey] ?? POSTIT_COLORS.jaune;
-            const isOver = overStatus === col.statusKey && canEdit;
-            return (
-              <section
-                key={col.statusKey}
-                className={cn(
-                  "flex w-[260px] shrink-0 flex-col rounded-2xl border bg-slate-50/80 transition",
-                  isOver
-                    ? "border-[#1e3a5f] bg-[#1e3a5f]/5 ring-2 ring-[#1e3a5f]/20"
-                    : "border-slate-200",
-                )}
-                aria-label={`${col.label}, ${items.length} fiche(s)`}
-                onDragOver={(e) => {
-                  if (!canEdit || col.statusKey === "__AUTRES__") return;
-                  e.preventDefault();
-                  e.dataTransfer.dropEffect = "move";
-                  setOverStatus(col.statusKey);
-                }}
-                onDragLeave={() => {
-                  setOverStatus((s) => (s === col.statusKey ? null : s));
-                }}
-                onDrop={(e) => {
-                  if (!canEdit || col.statusKey === "__AUTRES__") return;
-                  e.preventDefault();
-                  const id = e.dataTransfer.getData("text/plain");
-                  setOverStatus(null);
-                  setDragId(null);
-                  if (id) void moveSheet(id, col.statusKey, "kanban");
-                }}
-              >
-                <header className={cn("rounded-t-2xl border-b px-3 py-2", accent.bg, accent.border)}>
-                  <div className="flex items-center justify-between gap-2">
-                    <h3
-                      className={cn(
-                        "flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide",
-                        accent.text,
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "h-2 w-2 shrink-0 rounded-full",
-                          col.colorKey === "bleu"
-                            ? "bg-sky-500"
-                            : col.colorKey === "jaune"
-                              ? "bg-amber-500"
-                              : col.colorKey === "orange"
-                                ? "bg-orange-500"
-                                : col.colorKey === "violet"
-                                  ? "bg-violet-500"
-                                  : col.colorKey === "vert"
-                                    ? "bg-emerald-500"
-                                    : "bg-slate-400",
-                        )}
-                        aria-hidden
-                      />
-                      {col.label}
-                    </h3>
-                    <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-bold tabular-nums text-slate-700">
-                      {items.length}
-                    </span>
-                  </div>
-                </header>
-                <ul className="flex max-h-[70vh] flex-col gap-1.5 overflow-y-auto p-1.5">
-                  {items.length === 0 ? (
-                    <li className="rounded-lg border border-dashed border-slate-200 bg-white/60 px-3 py-5 text-center text-xs text-slate-400">
-                      {isOver ? "Déposer ici" : "Aucune fiche"}
-                    </li>
-                  ) : (
-                    items.map((s) => (
-                      <li
-                        key={s.id}
-                        onDragStart={() => setDragId(s.id)}
-                        onDragEnd={() => {
-                          setDragId(null);
-                          setOverStatus(null);
-                        }}
-                      >
-                        <KanbanCard
-                          sheet={s}
-                          canEdit={canEdit && busyId !== s.id}
-                          columns={cols}
-                          onMove={moveSheet}
-                          dragging={dragId === s.id}
-                        />
-                      </li>
-                    ))
+      <div className="relative">
+        <div
+          ref={scrollRef}
+          className="follow-up-kanban-scroll -mx-4 overflow-x-auto overscroll-x-contain px-4 pb-3 sm:-mx-6 sm:px-6"
+          style={{
+            scrollbarWidth: "thin",
+            scrollbarColor: "#94a3b8 #e2e8f0",
+          }}
+        >
+          <div className="flex min-w-max gap-3 pt-5">
+            {cols.map((col) => {
+              const items = byStatus.get(col.statusKey) ?? [];
+              const accent = POSTIT_COLORS[col.colorKey] ?? POSTIT_COLORS.jaune;
+              const isOver = overStatus === col.statusKey && canEdit;
+              const phase = phaseForStatus(col.statusKey);
+              const showPhase = isPhaseStart(col.statusKey, colKeys) && phase;
+              return (
+                <section
+                  key={col.statusKey}
+                  className={cn(
+                    "relative flex w-[260px] shrink-0 flex-col rounded-2xl border bg-slate-50/80 transition",
+                    isOver
+                      ? "border-[#1e3a5f] bg-[#1e3a5f]/5 ring-2 ring-[#1e3a5f]/20"
+                      : "border-slate-200",
                   )}
-                </ul>
-              </section>
-            );
-          })}
+                  aria-label={`${col.label}, ${items.length} fiche(s)`}
+                  onDragOver={(e) => {
+                    if (!canEdit || col.statusKey === "__AUTRES__") return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    setOverStatus(col.statusKey);
+                  }}
+                  onDragLeave={() => {
+                    setOverStatus((s) => (s === col.statusKey ? null : s));
+                  }}
+                  onDrop={(e) => {
+                    if (!canEdit || col.statusKey === "__AUTRES__") return;
+                    e.preventDefault();
+                    const id = e.dataTransfer.getData("text/plain");
+                    setOverStatus(null);
+                    setDragId(null);
+                    if (id) void moveSheet(id, col.statusKey, "kanban");
+                  }}
+                >
+                  {showPhase ? (
+                    <span className="absolute -top-5 left-0 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      {phase.label}
+                    </span>
+                  ) : null}
+                  <header className={cn("rounded-t-2xl border-b px-3 py-2", accent.bg, accent.border)}>
+                    <div className="flex items-center justify-between gap-2">
+                      <h3
+                        className={cn(
+                          "flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide",
+                          accent.text,
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "h-2 w-2 shrink-0 rounded-full",
+                            col.colorKey === "bleu"
+                              ? "bg-sky-500"
+                              : col.colorKey === "jaune"
+                                ? "bg-amber-500"
+                                : col.colorKey === "orange"
+                                  ? "bg-orange-500"
+                                  : col.colorKey === "violet"
+                                    ? "bg-violet-500"
+                                    : col.colorKey === "vert"
+                                      ? "bg-emerald-500"
+                                      : "bg-slate-400",
+                          )}
+                          aria-hidden
+                        />
+                        {col.label}
+                      </h3>
+                      <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-bold tabular-nums text-slate-700">
+                        {items.length}
+                      </span>
+                    </div>
+                  </header>
+                  <ul
+                    className={cn(
+                      "flex flex-col gap-1.5 overflow-y-auto p-1.5",
+                      items.length === 0 ? "min-h-[2.5rem]" : "max-h-[70vh]",
+                    )}
+                  >
+                    {items.length === 0 ? (
+                      <li className="px-2 py-1.5 text-center text-[10px] text-slate-300">
+                        {isOver ? "Déposer ici" : "—"}
+                      </li>
+                    ) : (
+                      items.map((s) => (
+                        <li
+                          key={s.id}
+                          onDragStart={() => setDragId(s.id)}
+                          onDragEnd={() => {
+                            setDragId(null);
+                            setOverStatus(null);
+                          }}
+                        >
+                          <KanbanCard
+                            sheet={s}
+                            canEdit={canEdit && busyId !== s.id}
+                            columns={columns}
+                            onMove={moveSheet}
+                            dragging={dragId === s.id}
+                          />
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </section>
+              );
+            })}
+            {/* Indicateur de suite horizontale */}
+            <div
+              className="flex w-8 shrink-0 items-center justify-center self-stretch text-slate-300"
+              aria-hidden
+            >
+              <span className="text-lg font-light">›</span>
+            </div>
+          </div>
         </div>
+        <p className="mt-1 text-center text-[10px] text-slate-400 sm:hidden">
+          Faites glisser horizontalement pour voir les autres étapes
+        </p>
+        <p className="mt-1 hidden text-center text-[10px] text-slate-400 sm:block">
+          Défilement horizontal · trackpad · Shift + molette
+        </p>
       </div>
     </div>
   );

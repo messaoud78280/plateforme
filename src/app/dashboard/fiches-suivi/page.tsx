@@ -17,6 +17,7 @@ import { canEditFollowUpBoard } from "@/lib/follow-up/access";
 import { loadAttentionForSheets, urgencyLabelFor } from "@/lib/follow-up/attention/batch";
 import { URGENCY_LABELS } from "@/lib/follow-up/types";
 import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
+import { isFollowUpUrgentLevel, sheetEffectiveUrgency } from "@/lib/follow-up/kpi";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,36 @@ export default async function FichesSuiviPage({
   endWeek.setDate(endWeek.getDate() + (day === 0 ? 0 : 7 - day));
   endWeek.setHours(23, 59, 59, 999);
 
+  const orgId = await ensureOrganizationForOwner(ownerUserId);
+
+  let workflowSteps: {
+    statusKey: string;
+    label: string;
+    colorKey: string;
+    sortOrder: number;
+    visibleOnBoard: boolean;
+    delayHours: number | null;
+    alertOrangeHours: number | null;
+    alertRedHours: number | null;
+    escalateHours: number | null;
+  }[] = [];
+  if (orgId) {
+    const workflow = await ensureDefaultWorkflow(orgId);
+    workflowSteps = workflow.steps
+      .filter((s) => s.statusKey !== "ARCHIVE")
+      .map((s) => ({
+        statusKey: s.statusKey,
+        label: s.label,
+        colorKey: s.colorKey,
+        sortOrder: s.sortOrder,
+        visibleOnBoard: s.visibleOnBoard !== false,
+        delayHours: s.delayHours,
+        alertOrangeHours: s.alertOrangeHours,
+        alertRedHours: s.alertRedHours,
+        escalateHours: s.escalateHours,
+      }));
+  }
+
   const allSheets = await prisma.followUpSheet.findMany({
     where: {
       AND: [accessWhere, { status: { not: "ARCHIVE" } }],
@@ -64,7 +95,63 @@ export default async function FichesSuiviPage({
     take: 200,
   });
 
-  const allItems = allSheets.map((s) => serializeFollowUpSheet(s, settings.thresholds));
+  const serialized = allSheets.map((s) => serializeFollowUpSheet(s, settings.thresholds));
+
+  // Temps dans l’étape = dernière transition statut (timeline)
+  const sheetIds = serialized.map((i) => i.id);
+  const statusEnteredAt = new Map<string, string>();
+  if (sheetIds.length > 0) {
+    const statusEvents = await prisma.followUpTimelineEvent.findMany({
+      where: { sheetId: { in: sheetIds }, kind: "statut" },
+      select: { sheetId: true, occurredAt: true },
+      orderBy: { occurredAt: "desc" },
+    });
+    for (const e of statusEvents) {
+      if (!statusEnteredAt.has(e.sheetId)) {
+        statusEnteredAt.set(e.sheetId, e.occurredAt.toISOString());
+      }
+    }
+  }
+
+  const withEntered = serialized.map((i) => ({
+    ...i,
+    statusEnteredAt: statusEnteredAt.get(i.id) ?? null,
+  }));
+
+  // W3 — attention pour TOUTES les fiches (KPI + cartes = même source)
+  const { byId: attentionMap } = await loadAttentionForSheets({
+    sheets: withEntered.map((i) => ({
+      id: i.id,
+      status: i.status,
+      title: i.title,
+      nextActionAt: i.nextActionAt,
+      nextActionDone: i.nextActionDone,
+      urgencyOverride: i.urgencyOverride,
+      statusEnteredAt: i.statusEnteredAt,
+    })),
+    organizationId: orgId,
+    workflowSteps: workflowSteps.map((s) => ({
+      statusKey: s.statusKey,
+      label: s.label,
+      delayHours: s.delayHours,
+      alertOrangeHours: s.alertOrangeHours,
+      alertRedHours: s.alertRedHours,
+      escalateHours: s.escalateHours,
+    })),
+    thresholds: settings.thresholds,
+  });
+
+  const allItems = withEntered.map((i) => {
+    const attention = attentionMap.get(i.id);
+    if (!attention) return i;
+    const level = attention.effectiveUrgency;
+    return {
+      ...i,
+      urgency: level,
+      urgencyLabel: URGENCY_LABELS[level] ?? urgencyLabelFor(level),
+      attention,
+    };
+  });
 
   let items = allItems;
   if (filter === "overdue") {
@@ -90,7 +177,7 @@ export default async function FichesSuiviPage({
       ["NOUVEAU", "A_PLANIFIER", "A_ANALYSER"].includes(i.status),
     );
   } else if (filter === "urgent") {
-    items = allItems.filter((i) => ["IMPORTANT", "URGENT", "CRITIQUE"].includes(i.urgency));
+    items = allItems.filter((i) => isFollowUpUrgentLevel(sheetEffectiveUrgency(i)));
   } else if (filter === "non-preparees") {
     items = allItems.filter(
       (i) =>
@@ -103,7 +190,7 @@ export default async function FichesSuiviPage({
   const counters = [
     {
       label: "Urgences",
-      value: allItems.filter((i) => i.urgency === "URGENT" || i.urgency === "CRITIQUE").length,
+      value: allItems.filter((i) => isFollowUpUrgentLevel(sheetEffectiveUrgency(i))).length,
       href: `/dashboard/fiches-suivi?view=${view}&filter=urgent`,
       emphasize: true,
     },
@@ -161,91 +248,23 @@ export default async function FichesSuiviPage({
     },
   ];
 
-  let kanbanColumns: { statusKey: string; label: string; colorKey: string; sortOrder: number }[] =
-    [];
-  let kanbanSheets = items;
-  if (view === "tableau") {
-    const orgId = await ensureOrganizationForOwner(ownerUserId);
-    let workflowSteps: {
-      statusKey: string;
-      label: string;
-      colorKey: string;
-      sortOrder: number;
-      delayHours: number | null;
-      alertOrangeHours: number | null;
-      alertRedHours: number | null;
-      escalateHours: number | null;
-    }[] = [];
-    if (orgId) {
-      const workflow = await ensureDefaultWorkflow(orgId);
-      workflowSteps = workflow.steps.filter((s) => s.statusKey !== "ARCHIVE");
-      kanbanColumns = workflowSteps
-        .slice()
-        .sort((a, b) => a.sortOrder - b.sortOrder)
-        .map((s) => ({
-          statusKey: s.statusKey,
-          label: s.label,
-          colorKey: s.colorKey,
-          sortOrder: s.sortOrder,
-        }));
-    }
-
-    // Temps dans l’étape = dernière transition statut (timeline), jamais updatedAt seul
-    const sheetIds = items.map((i) => i.id);
-    const statusEnteredAt = new Map<string, string>();
-    if (sheetIds.length > 0) {
-      const statusEvents = await prisma.followUpTimelineEvent.findMany({
-        where: { sheetId: { in: sheetIds }, kind: "statut" },
-        select: { sheetId: true, occurredAt: true },
-        orderBy: { occurredAt: "desc" },
-      });
-      for (const e of statusEvents) {
-        if (!statusEnteredAt.has(e.sheetId)) {
-          statusEnteredAt.set(e.sheetId, e.occurredAt.toISOString());
-        }
-      }
-    }
-
-    const withEntered = items.map((i) => ({
-      ...i,
-      statusEnteredAt: statusEnteredAt.get(i.id) ?? null,
+  const occupiedStatuses = new Set<string>(items.map((i) => i.status));
+  const kanbanColumns = workflowSteps
+    .filter(
+      (s) =>
+        s.visibleOnBoard ||
+        occupiedStatuses.has(s.statusKey),
+    )
+    .slice()
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((s) => ({
+      statusKey: s.statusKey,
+      label: s.label,
+      colorKey: s.colorKey,
+      sortOrder: s.sortOrder,
     }));
 
-    // W3-A : un seul batch (timeline déjà chargée + agenda + steps) — pas de N+1
-    const { byId: attentionMap } = await loadAttentionForSheets({
-      sheets: withEntered.map((i) => ({
-        id: i.id,
-        status: i.status,
-        title: i.title,
-        nextActionAt: i.nextActionAt,
-        nextActionDone: i.nextActionDone,
-        urgencyOverride: i.urgencyOverride,
-        statusEnteredAt: i.statusEnteredAt,
-      })),
-      organizationId: orgId,
-      workflowSteps: workflowSteps.map((s) => ({
-        statusKey: s.statusKey,
-        label: s.label,
-        delayHours: s.delayHours,
-        alertOrangeHours: s.alertOrangeHours,
-        alertRedHours: s.alertRedHours,
-        escalateHours: s.escalateHours,
-      })),
-      thresholds: settings.thresholds,
-    });
-
-    kanbanSheets = withEntered.map((i) => {
-      const attention = attentionMap.get(i.id);
-      if (!attention) return i;
-      const level = attention.effectiveUrgency;
-      return {
-        ...i,
-        urgency: level,
-        urgencyLabel: URGENCY_LABELS[level] ?? urgencyLabelFor(level),
-        attention,
-      };
-    });
-  }
+  const kanbanSheets = items;
 
   return (
     <div
@@ -259,7 +278,7 @@ export default async function FichesSuiviPage({
         title="Fiches de suivi"
         description={
           view === "tableau"
-            ? "Tableau de suivi : chaque colonne = une étape de votre processus métier."
+            ? "Tableau de suivi : chaque colonne = une étape. Glissez pour avancer — comme un post-it sur un dossier."
             : "Mur de post-it numérique : 1 OS / 1 commande = 1 fiche. Filtrez, regroupez, agissez."
         }
         actions={

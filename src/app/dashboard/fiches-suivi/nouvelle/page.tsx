@@ -26,13 +26,28 @@ export default async function NouvelleFichePage({
     where: isBeworkStaff(session.user)
       ? {}
       : await projectWhereForClientUser(session.user.id),
-    select: { id: true, title: true },
+    select: {
+      id: true,
+      title: true,
+      siteAddress: true,
+      siteCity: true,
+      assignedToId: true,
+      client: { select: { name: true, company: true } },
+    },
     orderBy: { title: "asc" },
     take: 80,
   });
 
-  // ownerUserId reserved for future assignee default
   void ownerUserId;
+
+  const projectsForForm = projects.map((p) => ({
+    id: p.id,
+    title: p.title,
+    siteAddress: p.siteAddress,
+    siteCity: p.siteCity,
+    assignedToId: p.assignedToId,
+    clientName: (p.client.company || p.client.name || "").trim() || null,
+  }));
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6">
@@ -40,9 +55,9 @@ export default async function NouvelleFichePage({
       <PageHeader
         eyebrow="Création rapide"
         title="Nouvelle fiche"
-        description="Client, chantier, OS ou commande, objet — puis créez. Le reste s’ajoute ensuite."
+        description="Choisissez le chantier — client et adresse sont repris. Le reste se complète ensuite."
       />
-      <FollowUpCreateForm projects={projects} defaultProjectId={projectIdParam ?? null} />
+      <FollowUpCreateForm projects={projectsForForm} defaultProjectId={projectIdParam ?? null} />
     </div>
   );
 }

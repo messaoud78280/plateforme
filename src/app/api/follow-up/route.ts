@@ -12,6 +12,8 @@ import { serializeFollowUpSheet } from "@/lib/follow-up/serialize";
 import { appendFollowUpTimeline } from "@/lib/follow-up/timeline";
 import { getFollowUpSettings } from "@/lib/follow-up/settings";
 import { isBeworkStaff } from "@/lib/authz";
+import { ensureOrganizationForOwner } from "@/lib/organization/access";
+import { ensureDefaultWorkflow } from "@/lib/workflow/service";
 
 const VALID_STATUS = new Set<string>([
   "NOUVEAU",
@@ -146,46 +148,104 @@ export async function POST(request: Request) {
 
   try {
     const body = (await request.json()) as Record<string, unknown>;
-    const title = String(body.title ?? body.clientName ?? "").trim();
-    if (!title) {
-      return NextResponse.json({ error: "Indiquez au moins le chantier / client" }, { status: 400 });
-    }
+    const projectId = body.projectId ? String(body.projectId) : null;
 
     const ownerUserId = isBeworkStaff(session.user)
       ? String(body.ownerUserId || session.user.id)
       : await resolveFollowUpOwnerUserId(session.user.id);
 
+    const orgId = await ensureOrganizationForOwner(ownerUserId);
+    let firstStatus: FollowUpSheetStatus = "NOUVEAU";
+    let firstNextAction = "Analyser le dossier";
+    let firstColorKey: string | null = null;
+    if (orgId) {
+      const workflow = await ensureDefaultWorkflow(orgId);
+      const first = workflow.steps
+        .filter((s) => s.statusKey !== "ARCHIVE")
+        .slice()
+        .sort((a, b) => a.sortOrder - b.sortOrder)[0];
+      if (first && VALID_STATUS.has(first.statusKey)) {
+        firstStatus = first.statusKey as FollowUpSheetStatus;
+        if (first.nextActionLabel) firstNextAction = first.nextActionLabel;
+        if (first.colorKey) firstColorKey = first.colorKey;
+      }
+    }
+
+    let resolvedTitle = String(body.title ?? "").trim();
+    let resolvedClient = String(body.clientName ?? "").trim();
+    let resolvedAddress = String(body.siteAddress ?? "").trim() || undefined;
+    let resolvedAssignee =
+      body.assigneeId != null && String(body.assigneeId).trim()
+        ? String(body.assigneeId)
+        : session.user.id;
+
+    if (projectId) {
+      const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        select: {
+          id: true,
+          title: true,
+          siteAddress: true,
+          siteCity: true,
+          assignedToId: true,
+          client: { select: { name: true, company: true } },
+        },
+      });
+      if (!project) {
+        return NextResponse.json({ error: "Chantier introuvable" }, { status: 400 });
+      }
+      if (!resolvedTitle) resolvedTitle = project.title;
+      if (!resolvedClient) {
+        resolvedClient =
+          (project.client.company || project.client.name || "").trim() || project.title;
+      }
+      if (!resolvedAddress) {
+        resolvedAddress =
+          [project.siteAddress, project.siteCity].filter(Boolean).join(", ") || undefined;
+      }
+      if (!body.assigneeId && project.assignedToId) {
+        resolvedAssignee = project.assignedToId;
+      }
+    }
+
+    if (!resolvedTitle && !resolvedClient) {
+      return NextResponse.json(
+        { error: "Indiquez un chantier, un client ou un titre" },
+        { status: 400 },
+      );
+    }
+    if (!resolvedTitle) resolvedTitle = resolvedClient;
+    if (!resolvedClient) resolvedClient = resolvedTitle;
+
     const status =
       body.status && VALID_STATUS.has(String(body.status))
         ? (String(body.status) as FollowUpSheetStatus)
-        : "NOUVEAU";
+        : firstStatus;
 
     const nextActionAt = body.nextActionAt ? new Date(String(body.nextActionAt)) : null;
     const receivedAt = body.receivedAt ? new Date(String(body.receivedAt)) : new Date();
-
-    const org = await prisma.organization.findUnique({
-      where: { ownerUserId },
-      select: { id: true },
-    });
 
     const sheet = await prisma.followUpSheet.create({
       data: {
         ownerUserId,
         createdById: session.user.id,
-        organizationId: org?.id,
-        projectId: body.projectId ? String(body.projectId) : undefined,
-        assigneeId: body.assigneeId ? String(body.assigneeId) : session.user.id,
-        title,
-        clientName: body.clientName ? String(body.clientName) : title,
-        siteAddress: body.siteAddress ? String(body.siteAddress) : undefined,
+        organizationId: orgId ?? undefined,
+        projectId: projectId ?? undefined,
+        assigneeId: resolvedAssignee,
+        title: resolvedTitle,
+        clientName: resolvedClient,
+        siteAddress: resolvedAddress,
         workObject: body.workObject ? String(body.workObject) : undefined,
         orderNumber: body.orderNumber ? String(body.orderNumber) : undefined,
         osNumber: body.osNumber ? String(body.osNumber) : undefined,
         reference: body.reference ? String(body.reference) : undefined,
         receivedAt,
         status,
-        colorKey: colorKeyForStatus(status),
-        nextAction: body.nextAction ? String(body.nextAction) : "Analyser le dossier",
+        colorKey:
+          body.status && VALID_STATUS.has(String(body.status))
+            ? colorKeyForStatus(status)
+            : (firstColorKey ?? colorKeyForStatus(status)),
+        nextAction: body.nextAction ? String(body.nextAction) : firstNextAction,
         nextActionAt: nextActionAt && !Number.isNaN(nextActionAt.getTime()) ? nextActionAt : undefined,
         notes: body.notes ? String(body.notes) : undefined,
         reminderOffsets: DEFAULT_REMINDER_OFFSETS_HOURS,

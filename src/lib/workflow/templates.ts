@@ -23,7 +23,18 @@ export type WorkflowTemplate = {
   steps: WorkflowTemplateStep[];
 };
 
-/** Template chantier standard démo PME BTP — clés = FollowUpSheetStatus. */
+/**
+ * Template chantier standard démo PME BTP — clés = FollowUpSheetStatus.
+ *
+ * FICHES-SUIVI-V2B — AUDIT (ne pas migrer destructivement) :
+ * La chaîne mélange état opérationnel principal (A) et sous-processus (B) :
+ * - A : NOUVEAU → A_ANALYSER → A_PLANIFIER → PLANIFIE → INTERVENTION_PREVUE → EN_COURS → TRAVAUX_TERMINES → TERMINE
+ * - B fournisseur : COMMANDE_FOURNISSEUR, COMMANDE_PASSEE, ATTENTE_FOURNISSEUR
+ * - B avenant : AVENANT
+ * - B facturation : CR_A_RECUPERER, A_FACTURER, FACTURE, ATTENTE_REGLEMENT
+ * Simplification recommandée (future, hors scope V2B) : colonnes A + flags B sur carte.
+ * visibleOnBoard:false = étapes secondaires (respectées côté board V2B).
+ */
 export const TEMPLATE_CHANTIER_STANDARD: WorkflowTemplate = {
   templateKey: "CHANTIER_STANDARD",
   name: "Chantier standard",

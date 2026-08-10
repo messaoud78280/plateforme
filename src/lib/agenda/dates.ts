@@ -143,15 +143,15 @@ export function rangeForView(
 
 /**
  * Horaires chantier BTP (AGENDA-V2A.2).
- * Pas de préférences entreprise en DB → défaut 07:00–19:00.
- * Plage étendue 06:00–22:00 accessible à la demande.
+ * Plage affichée par défaut : 06:00–22:00 (étendue).
+ * Repli optionnel UI : 07:00–19:00 (travail).
  */
 export const WORK_HOUR_START = 7;
 export const WORK_HOUR_END = 19;
 export const EXTENDED_HOUR_START = 6;
 export const EXTENDED_HOUR_END = 22;
 
-/** Compat : alias de la plage travail (grille par défaut). */
+/** Compat : alias plage travail (repli UI). */
 export const HOUR_START = WORK_HOUR_START;
 export const HOUR_END = WORK_HOUR_END;
 

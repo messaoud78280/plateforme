@@ -27,6 +27,7 @@
     "db:backfill-project-lifecycle": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/backfill-project-lifecycle-status.ts",
     "db:normalize-work-item-lots": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/normalize-work-item-lots.ts",
     "db:harmonize-lots-remote": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/run-remote-harmonization.ts --apply",
+    "test:agenda-v2a2-time-scroll": "npx tsx scripts/test-agenda-v2a2-time-scroll.ts",
     "test:platform-isolation": "npx tsx scripts/test-platform-isolation-v1.ts",
     "test:platform-isolation-v1-1": "npx tsx scripts/test-platform-isolation-v1-1.ts",
     "test:demo-environment": "node --import tsx scripts/test-demo-environment.ts",

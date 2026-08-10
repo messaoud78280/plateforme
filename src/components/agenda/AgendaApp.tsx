@@ -1071,6 +1071,10 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
             </div>
           ) : null}
 
+          {/*
+            Jour/Semaine : absolute inset-0 + min-h-0 dans AgendaDayWeekView
+            pour TimeGrid overflow-y-auto (06→22) sans clipping parent.
+          */}
           {view === "day" || view === "week" ? (
             <AgendaDayWeekView
               mode={view}

@@ -66,6 +66,10 @@ const SLOT_QUICK_TYPES = [
   { type: "AUTRE", label: "Autre" },
 ] as const;
 
+/** Marge pour labels horaires (translate -50 %) — 06:00 / 22:00 visibles. */
+const GRID_EDGE_PAD_TOP = 12;
+const GRID_EDGE_PAD_BOTTOM = 28;
+
 function snapMinutes(mins: number, step = 15): number {
   return Math.round(mins / step) * step;
 }
@@ -83,8 +87,11 @@ export function AgendaDayWeekView({
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const hourPxRef = useRef(pxPerHour);
+  /** Clé mode+date+plage — scroll initial une seule fois par contexte. */
+  const initialScrollKeyRef = useRef<string | null>(null);
   const [now, setNow] = useState(() => new Date());
-  const [extended, setExtended] = useState(false);
+  /** Plage métier 06–22 par défaut ; repli 07–19 optionnel. */
+  const [extended, setExtended] = useState(true);
   const autoExtendedRef = useRef(false);
   const [slotMenu, setSlotMenu] = useState<{
     dayIndex: number;
@@ -161,12 +168,15 @@ export function AgendaDayWeekView({
     }
   }, [events]);
 
-  // Scroll initial vers l’heure actuelle ; conserver la zone visible au zoom
+  // Scroll initial vers l’heure actuelle ; conserver la zone visible au zoom.
+  // Pas de re-scroll sur clic événement / filtre / re-render.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     const prevPx = hourPxRef.current;
-    if (prevPx !== pxPerHour && prevPx > 0) {
+    const contextKey = `${mode}:${startOfDay(cursor).toISOString()}:${extended ? "ext" : "work"}`;
+
+    if (prevPx !== pxPerHour && prevPx > 0 && initialScrollKeyRef.current !== null) {
       const midY = el.scrollTop + el.clientHeight / 2;
       const midMins = gridTopMin + (midY / prevPx) * 60;
       const newY = ((midMins - gridTopMin) / 60) * pxPerHour;
@@ -175,10 +185,16 @@ export function AgendaDayWeekView({
       return;
     }
     hourPxRef.current = pxPerHour;
+
+    if (initialScrollKeyRef.current === contextKey) return;
+    initialScrollKeyRef.current = contextKey;
+
     const mins = minutesSinceMidnight(new Date());
-    const y = minutesToY(Math.max(gridTopMin, Math.min(mins, gridBottomMin - 60)));
-    el.scrollTop = Math.max(0, y - 80);
-  }, [minutesToY, gridTopMin, gridBottomMin, extended, pxPerHour]);
+    const focus = Math.max(gridTopMin, Math.min(mins, gridBottomMin - 60));
+    // Fenêtre ~2 h avant l’heure actuelle (ex. 16:00 → ~14:00 en haut)
+    const windowStart = Math.max(gridTopMin, focus - 120);
+    el.scrollTop = Math.max(0, minutesToY(windowStart));
+  }, [mode, cursor, extended, pxPerHour, minutesToY, gridTopMin, gridBottomMin]);
 
   const allDayEvents = useMemo(
     () =>
@@ -274,10 +290,20 @@ export function AgendaDayWeekView({
       if (!grid) return;
       const currentDays = daysRef.current;
       const rect = grid.getBoundingClientRect();
-      const y = e.clientY - rect.top + (scrollRef.current?.scrollTop ?? 0);
+      // Y dans le référentiel grille (rect déjà scrollé) — ne pas re-ajouter scrollTop.
+      const y = e.clientY - rect.top;
       const deltaY = y - d.originY;
       const topMin = (extended ? EXTENDED_HOUR_START : WORK_HOUR_START) * 60;
       const bottomMin = ((extended ? EXTENDED_HOUR_END : WORK_HOUR_END) + 1) * 60;
+
+      // Auto-scroll près des bords du TimeGrid
+      const sc = scrollRef.current;
+      if (sc) {
+        const scRect = sc.getBoundingClientRect();
+        const edge = 40;
+        if (e.clientY < scRect.top + edge) sc.scrollTop = Math.max(0, sc.scrollTop - 12);
+        else if (e.clientY > scRect.bottom - edge) sc.scrollTop += 12;
+      }
 
       if (d.kind === "move") {
         const deltaMins = snapMinutes((deltaY / hourPxRef.current) * 60);
@@ -350,7 +376,7 @@ export function AgendaDayWeekView({
     const grid = document.getElementById("agenda-timed-grid");
     if (!grid) return;
     const rect = grid.getBoundingClientRect();
-    const y = e.clientY - rect.top + (scrollRef.current?.scrollTop ?? 0);
+    const y = e.clientY - rect.top;
     const { start, end } = getEventTimes(ev);
     dragRef.current = {
       kind: "move",
@@ -369,7 +395,7 @@ export function AgendaDayWeekView({
     const grid = document.getElementById("agenda-timed-grid");
     if (!grid) return;
     const rect = grid.getBoundingClientRect();
-    const y = e.clientY - rect.top + (scrollRef.current?.scrollTop ?? 0);
+    const y = e.clientY - rect.top;
     const { start, end } = getEventTimes(ev);
     dragRef.current = {
       kind: "resize",
@@ -386,7 +412,7 @@ export function AgendaDayWeekView({
     const grid = document.getElementById("agenda-timed-grid");
     if (!grid) return;
     const rect = grid.getBoundingClientRect();
-    const y = e.clientY - rect.top + (scrollRef.current?.scrollTop ?? 0);
+    const y = e.clientY - rect.top;
     let mins = snapMinutes(yToMinutes(y));
     mins = Math.max(gridTopMin, Math.min(gridBottomMin - 60, mins));
     const day = days[dayIndex]!;
@@ -427,7 +453,7 @@ export function AgendaDayWeekView({
       .sort((a, b) => a.startAt.localeCompare(b.startAt));
 
     return (
-      <div className="flex h-full flex-col overflow-y-auto px-3 py-3">
+      <div className="flex h-full min-h-0 flex-col overflow-y-auto px-3 py-3">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm font-semibold capitalize text-[#1e3a5f]">
             {day.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
@@ -548,8 +574,9 @@ export function AgendaDayWeekView({
   }
 
   return (
-    <div className="relative flex h-full flex-col">
-      <div className="flex border-b border-slate-200/80">
+    <div className="absolute inset-0 flex min-h-0 flex-col bg-white">
+      {/* Header jours — hors scroll (sticky / fixe comme Apple Calendar) */}
+      <div className="z-20 flex shrink-0 border-b border-slate-200/80 bg-white">
         <div className="flex w-14 shrink-0 flex-col items-center justify-center gap-0.5">
           {mode === "week" ? (
             <span className="text-[10px] font-bold tabular-nums text-[#1e3a5f]/70">
@@ -589,9 +616,9 @@ export function AgendaDayWeekView({
         </div>
       </div>
 
-      {/* TOUTE LA JOURNÉE — toujours visible */}
-      <div className="flex border-b border-slate-200/80">
-        <div className="flex w-14 shrink-0 items-start justify-end pr-1.5 pt-2 text-[9px] font-bold uppercase leading-tight tracking-wide text-slate-400">
+      {/* TOUTE LA JOURNÉE — compacte si vide */}
+      <div className="z-20 flex shrink-0 border-b border-slate-200/80 bg-white">
+        <div className="flex w-14 shrink-0 items-start justify-end pr-1.5 pt-1.5 text-[9px] font-bold uppercase leading-tight tracking-wide text-slate-400">
           Toute la
           <br />
           journée
@@ -610,9 +637,9 @@ export function AgendaDayWeekView({
             return (
               <div
                 key={d.toISOString()}
-                className={`min-h-[40px] space-y-0.5 border-l border-slate-100 p-1 ${
-                  isToday ? "bg-[#1e3a5f]/[0.03]" : ""
-                }`}
+                className={`space-y-0.5 border-l border-slate-100 p-1 ${
+                  dayEvents.length > 0 ? "min-h-[40px]" : "min-h-[28px]"
+                } ${isToday ? "bg-[#1e3a5f]/[0.03]" : ""}`}
                 onDoubleClick={() => {
                   const start = startOfDay(d);
                   const end = new Date(start);
@@ -653,18 +680,8 @@ export function AgendaDayWeekView({
         </div>
       </div>
 
-      {!extended ? (
-        <div className="flex items-center justify-center border-b border-slate-100 bg-slate-50/50 py-0.5">
-          <button
-            type="button"
-            onClick={() => setExtended(true)}
-            className="text-[10px] font-semibold text-slate-400 hover:text-slate-600"
-          >
-            Afficher 06:00 – 22:00
-          </button>
-        </div>
-      ) : (
-        <div className="flex items-center justify-center border-b border-slate-100 bg-slate-50/50 py-0.5">
+      <div className="flex shrink-0 items-center justify-center border-b border-slate-100 bg-slate-50/50 py-0.5">
+        {extended ? (
           <button
             type="button"
             onClick={() => setExtended(false)}
@@ -672,12 +689,36 @@ export function AgendaDayWeekView({
           >
             Revenir à 07:00 – 19:00
           </button>
-        </div>
-      )}
+        ) : (
+          <button
+            type="button"
+            onClick={() => setExtended(true)}
+            className="text-[10px] font-semibold text-slate-400 hover:text-slate-600"
+          >
+            Afficher 06:00 – 22:00
+          </button>
+        )}
+      </div>
 
-      <div ref={scrollRef} className="relative min-h-0 flex-1 overflow-y-auto">
-        <div className="flex" style={{ height: gridHeight }}>
-          <div className="relative w-14 shrink-0">
+      {/*
+        AGENDA-V2A.2 — TimeGrid scrollable 06→22.
+        Parent flex min-h-0 + overflow-y-auto : la journée défile, le cadre reste.
+      */}
+      <div
+        ref={scrollRef}
+        className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-gutter:stable] [scrollbar-width:thin]"
+        data-agenda-time-scroll
+      >
+        {/* Pads haut/bas : labels 06:00 / 22:00 non coupés (translate -50 %) */}
+        <div
+          className="flex"
+          style={{
+            height: gridHeight + GRID_EDGE_PAD_TOP + GRID_EDGE_PAD_BOTTOM,
+            paddingTop: GRID_EDGE_PAD_TOP,
+            paddingBottom: GRID_EDGE_PAD_BOTTOM,
+          }}
+        >
+          <div className="relative w-14 shrink-0" style={{ height: gridHeight }}>
             {hours.map((h) => (
               <div
                 key={h}

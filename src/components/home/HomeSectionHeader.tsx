@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { HOME_EYEBROW, HOME_H2, HOME_LEAD } from "@/components/home/homeSectionStyles";
 
 type HomeSectionHeaderProps = {
   id: string;
@@ -6,26 +7,26 @@ type HomeSectionHeaderProps = {
   title: ReactNode;
   lead?: ReactNode;
   className?: string;
+  align?: "center" | "left";
 };
 
-/** En-tête de section standardisé (H2 + lead). */
-export function HomeSectionHeader({ id, eyebrow, title, lead, className = "" }: HomeSectionHeaderProps) {
+/** En-tête de section — typographie forte, peu de bruit. */
+export function HomeSectionHeader({
+  id,
+  eyebrow,
+  title,
+  lead,
+  className = "",
+  align = "center",
+}: HomeSectionHeaderProps) {
+  const alignCls = align === "left" ? "text-left" : "mx-auto max-w-3xl text-center";
   return (
-    <header className={`mx-auto max-w-3xl text-center ${className}`.trim()}>
-      {eyebrow ? (
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">{eyebrow}</p>
-      ) : null}
-      <h2
-        id={id}
-        className={`font-display text-balance text-[1.625rem] font-extrabold leading-[1.15] tracking-tight text-[#0f172a] sm:text-[1.875rem] md:text-[2.5rem] ${
-          eyebrow ? "mt-3" : ""
-        }`}
-      >
+    <header className={`${alignCls} ${className}`.trim()}>
+      {eyebrow ? <p className={HOME_EYEBROW}>{eyebrow}</p> : null}
+      <h2 id={id} className={`${HOME_H2} ${eyebrow ? "mt-3" : ""}`}>
         {title}
       </h2>
-      {lead ? (
-        <div className="mt-4 text-[0.9375rem] leading-relaxed text-slate-600 sm:mt-6 sm:text-base md:text-lg md:leading-relaxed">{lead}</div>
-      ) : null}
+      {lead ? <div className={`${HOME_LEAD} ${align === "center" ? "mx-auto" : ""}`}>{lead}</div> : null}
     </header>
   );
 }

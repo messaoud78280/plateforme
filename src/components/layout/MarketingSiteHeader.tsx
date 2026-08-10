@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
-import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingDisclosure } from "@/components/marketing/MarketingDisclosure";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { MarketingHeaderBlueprintDecor } from "@/components/layout/MarketingHeaderBlueprintDecor";
@@ -33,33 +32,33 @@ const SOLUTION_MENU_ENTRIES: {
   icon: SolutionMenuIconId;
 }[] = [
   {
-    href: "/#plateforme",
-    title: "Plateforme interne",
-    description: "Équipes, chantiers, documents et tableaux de bord.",
-    icon: "folder",
-  },
-  {
-    href: "/#outils-ia",
-    title: "Solutions IA métier",
-    description: "Analyser CCTP, CCAP, DCE et préparer des CR.",
+    href: "/#solutions",
+    title: "Solutions IA",
+    description: "Applications, automatisations, analyse documentaire, intégrations.",
     icon: "document",
   },
   {
-    href: "/#marches",
-    title: "Marchés publics et privés",
-    description: "Classer, analyser et suivre les dossiers de consultation.",
-    icon: "devis",
+    href: "/#plateforme",
+    title: "Plateforme BeWork",
+    description: "Environnement métier complet — preuve de notre savoir-faire.",
+    icon: "folder",
   },
   {
-    href: "/#suivi-chantier",
-    title: "Suivi opérationnel",
-    description: "Du marché remporté jusqu’à la réception.",
+    href: "/#cas-usage",
+    title: "Cas d’usage",
+    description: "Situations concrètes à étudier avec vos équipes.",
     icon: "calendar",
   },
   {
-    href: "/#partenaire",
-    title: "Partenaire technologique",
-    description: "Configuration, formation, maintenance et évolution.",
+    href: "/notre-facon-de-travailler",
+    title: "Notre approche",
+    description: "Comprendre, concevoir, déployer, former, faire évoluer.",
+    icon: "devis",
+  },
+  {
+    href: "/#besoin",
+    title: "Parler d’un besoin",
+    description: "Expliquez votre idée — nous étudions la solution.",
     icon: "cart",
   },
 ];
@@ -104,10 +103,10 @@ const RESOURCE_MENU_ENTRIES: {
 ];
 
 const REASSURANCE = [
-  "Socle BeWork commun",
-  "Configuré à votre organisation",
-  "IA spécialisée BTP",
-  "Validations humaines",
+  "Solutions IA sur mesure",
+  "Expertise BTP",
+  "Plateforme métier",
+  "Accompagnement à l’adoption",
 ];
 
 const NAV_LINK =
@@ -250,10 +249,13 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               <IconUser className="h-4 w-4 shrink-0 text-slate-600" aria-hidden />
               <span className="whitespace-nowrap">Connexion</span>
             </Link>
-            <CalendlyBookingLink trackLocation="header-desktop" className={HEADER_BTN_PRIMARY}>
-              <IconCalendar className="h-4 w-4 shrink-0 text-white" aria-hidden />
-              <span className="whitespace-nowrap">Demander une démo</span>
-            </CalendlyBookingLink>
+            <Link
+              href="/#besoin"
+              className={HEADER_BTN_PRIMARY}
+              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-desktop-besoin")}
+            >
+              <span className="whitespace-nowrap">Parler de mon besoin</span>
+            </Link>
           </div>
 
           <nav
@@ -279,14 +281,14 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   setResourcesOpen(false);
                 }}
               >
-                <span className="whitespace-nowrap">Plateforme</span>
+                <span className="whitespace-nowrap">Solutions</span>
                 <ChevronDown accent={solutionsOpen} className={solutionsOpen ? "rotate-180" : ""} />
               </button>
 
               {solutionsOpen ? (
                 <nav
                   className="bework-header-dropdown-enter absolute left-0 top-full z-[70] mt-2.5 hidden max-h-[min(70vh,calc(100dvh-5rem))] w-[min(30rem,calc(100vw-1.25rem))] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-200 bg-[#f8fafc] py-4 shadow-md shadow-slate-900/[0.08] lg:block"
-                  aria-label="Plateforme BeWork"
+                  aria-label="Solutions BeWork"
                   role="menu"
                 >
                   <p className="px-5 pb-3 text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]/95">
@@ -320,11 +322,11 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   </ul>
                   <div className="mt-3 border-t border-slate-200/80 px-5 pt-3">
                     <Link
-                      href="/#plateforme"
+                      href="/#solutions"
                       className="inline-flex items-center gap-1 text-base font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
                       onClick={() => setSolutionsOpen(false)}
                     >
-                      Voir la plateforme
+                      Voir les solutions
                       <span aria-hidden>→</span>
                     </Link>
                   </div>
@@ -332,17 +334,17 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               ) : null}
             </div>
 
-            <Link href="/#outils-ia" className={`${NAV_LINK} whitespace-nowrap`}>
+            <Link href="/#solutions" className={`${NAV_LINK} whitespace-nowrap`}>
               Solutions IA
             </Link>
-            <Link href="/#marches" className={`${NAV_LINK} whitespace-nowrap`}>
-              Marchés
+            <Link href="/#plateforme" className={`${NAV_LINK} whitespace-nowrap`}>
+              Plateforme
             </Link>
-            <Link href="/#partenaire" className={`${NAV_LINK} whitespace-nowrap`}>
-              Partenaire
+            <Link href="/#cas-usage" className={`${NAV_LINK} whitespace-nowrap`}>
+              Cas d&apos;usage
             </Link>
             <Link href="/notre-facon-de-travailler" className={`${NAV_LINK} whitespace-nowrap`}>
-              À propos
+              Notre approche
             </Link>
 
             <div
@@ -469,17 +471,17 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 Plateforme
               </Link>
               <Link
-                href="/contact#formulaire"
+                href="/#besoin"
                 className={HEADER_BTN_PRIMARY}
                 onClick={() => setMobileOpen(false)}
-                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-mobile-demo")}
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-mobile-besoin")}
               >
-                Demander une démo
+                Parler de mon besoin
               </Link>
             </div>
 
             <nav className="flex flex-col gap-2" aria-label="Navigation mobile">
-              <MarketingDisclosure title="Plateforme">
+              <MarketingDisclosure title="Solutions">
                 <ul className="divide-y divide-slate-100">
                   {SOLUTION_MENU_ENTRIES.map((item) => (
                     <li key={item.href}>
@@ -505,43 +507,50 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 </ul>
                 <div className="border-t border-slate-100 px-4 py-3 sm:px-5">
                   <Link
-                    href="/#methode"
+                    href="/notre-facon-de-travailler"
                     className="inline-flex items-center gap-1 text-sm font-semibold text-[#1d4ed8]"
                     onClick={() => setMobileOpen(false)}
                   >
-                    Méthode de déploiement
+                    Notre approche
                     <span aria-hidden>→</span>
                   </Link>
                 </div>
               </MarketingDisclosure>
 
               <Link
-                href="/#outils-ia"
+                href="/#solutions"
                 className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
                 onClick={() => setMobileOpen(false)}
               >
                 Solutions IA
               </Link>
               <Link
-                href="/#marches"
+                href="/#plateforme"
                 className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
                 onClick={() => setMobileOpen(false)}
               >
-                Marchés publics et privés
+                Plateforme
               </Link>
               <Link
-                href="/#partenaire"
+                href="/#cas-usage"
                 className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
                 onClick={() => setMobileOpen(false)}
               >
-                Partenaire technologique
+                Cas d&apos;usage
               </Link>
               <Link
                 href="/notre-facon-de-travailler"
                 className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
                 onClick={() => setMobileOpen(false)}
               >
-                À propos
+                Notre approche
+              </Link>
+              <Link
+                href="/tarifs"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
+                onClick={() => setMobileOpen(false)}
+              >
+                Tarifs
               </Link>
 
               <MarketingDisclosure title="Ressources BTP">
@@ -597,14 +606,14 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 <IconUser className="h-[18px] w-[18px] text-slate-700" aria-hidden />
                 Connexion
               </Link>
-              <CalendlyBookingLink
-                trackLocation="header-mobile-footer"
+              <Link
+                href="/#besoin"
                 className={`${HEADER_BTN_PRIMARY} w-full`}
                 onClick={() => setMobileOpen(false)}
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-mobile-footer-besoin")}
               >
-                <IconCalendar className="h-[18px] w-[18px]" aria-hidden />
-                Demander une démo
-              </CalendlyBookingLink>
+                Parler de mon besoin
+              </Link>
             </div>
           </div>
         </div>
@@ -848,27 +857,6 @@ function IconUser({ className }: { className?: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-    </svg>
-  );
-}
-
-function IconCalendar({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden
-      stroke="currentColor"
-      strokeWidth="1.65"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3" y="5" width="18" height="16" rx="2" />
-      <path d="M16 3v4M8 3v4M3 11h18" />
     </svg>
   );
 }

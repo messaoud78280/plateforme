@@ -55,7 +55,18 @@ export function labelMarketType(value: string): string {
 }
 
 export function labelMainNeed(value: string): string {
-  return needLabels[value] ?? value;
+  if (needLabels[value]) return needLabels[value];
+  // Intents formulaire « idée » (homepage repositionnée)
+  const ideaLabels: Record<string, string> = {
+    automatiser_processus: "Automatiser un processus",
+    exploiter_documents_ia: "Exploiter mes documents avec l'IA",
+    creer_outil_metier: "Créer un outil métier",
+    connecter_logiciels: "Connecter mes logiciels",
+    creer_plateforme: "Créer une plateforme",
+    decouvrir_bework: "Découvrir BeWork",
+    ne_sais_pas_encore: "Je ne sais pas encore",
+  };
+  return ideaLabels[value] ?? value;
 }
 
 export function labelProjectStage(value: string): string {

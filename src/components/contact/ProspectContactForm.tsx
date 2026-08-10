@@ -6,6 +6,7 @@ import {
   MARKET_TYPE_OPTIONS,
   PROJECT_STAGE_OPTIONS,
 } from "@/lib/contact-form-options";
+import { IDEA_INTENT_OPTIONS } from "@/lib/contact-idea-intents";
 
 const INPUT_CLASS =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/20";
@@ -14,8 +15,8 @@ const LABEL_CLASS = "mb-1.5 block text-sm font-semibold text-slate-800";
 export type ProspectContactFormProps = {
   /** Valeur enregistrée en base (`ContactRequest.source`). */
   source?: string;
-  /** Variante compacte pour la homepage. */
-  variant?: "default" | "compact";
+  /** default = formulaire classique ; compact = homepage démo ; idea = besoin / idée. */
+  variant?: "default" | "compact" | "idea";
 };
 
 export function ProspectContactForm({
@@ -23,6 +24,7 @@ export function ProspectContactForm({
   variant = "default",
 }: ProspectContactFormProps) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const isIdea = variant === "idea";
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,16 +41,18 @@ export function ProspectContactForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           companyName: data.get("companyName"),
+          contactName: data.get("contactName"),
           email: data.get("email"),
           phone: data.get("phone"),
-          marketType: data.get("marketType"),
+          marketType: data.get("marketType") || (isIdea ? "autre" : ""),
           tradeActivity: data.get("tradeActivity"),
-          mainNeed: data.get("mainNeed"),
+          mainNeed: data.get("mainNeed") || (isIdea ? "ne_sais_pas_encore" : ""),
           projectStage: data.get("projectStage"),
           message: data.get("message"),
           consent: data.get("consent") === "on",
           source,
           website: data.get("website"),
+          formKind: isIdea ? "idea" : "standard",
         }),
       });
 
@@ -77,11 +81,147 @@ export function ProspectContactForm({
     );
   }
 
+  if (isIdea) {
+    return (
+      <form onSubmit={onSubmit} className="space-y-5" noValidate>
+        <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden>
+          <label htmlFor="website">Site web</label>
+          <input type="text" id="website" name="website" tabIndex={-1} autoComplete="off" />
+        </div>
+
+        <div>
+          <label htmlFor="message" className={LABEL_CLASS}>
+            Que souhaitez-vous améliorer, automatiser ou créer&nbsp;? <span className="text-red-600">*</span>
+          </label>
+          <textarea
+            id="message"
+            name="message"
+            required
+            rows={4}
+            maxLength={2000}
+            className={`${INPUT_CLASS} resize-y`}
+            placeholder="Décrivez votre idée ou votre problème en quelques phrases…"
+          />
+        </div>
+
+        <fieldset>
+          <legend className={`${LABEL_CLASS} mb-2`}>Je souhaite</legend>
+          <div className="space-y-2">
+            {IDEA_INTENT_OPTIONS.map((o) => (
+              <label
+                key={o.value}
+                className="flex cursor-pointer items-center gap-3 rounded-lg px-1 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+              >
+                <input
+                  type="radio"
+                  name="mainNeed"
+                  value={o.value}
+                  className="h-4 w-4 border-slate-300 text-[#1d4ed8] focus:ring-[#1d4ed8]"
+                />
+                {o.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="contactName" className={LABEL_CLASS}>
+              Nom <span className="text-red-600">*</span>
+            </label>
+            <input
+              id="contactName"
+              name="contactName"
+              type="text"
+              required
+              autoComplete="name"
+              className={INPUT_CLASS}
+              placeholder="Votre nom"
+            />
+          </div>
+          <div>
+            <label htmlFor="companyName" className={LABEL_CLASS}>
+              Entreprise <span className="text-red-600">*</span>
+            </label>
+            <input
+              id="companyName"
+              name="companyName"
+              type="text"
+              required
+              autoComplete="organization"
+              className={INPUT_CLASS}
+              placeholder="Nom de l'entreprise"
+            />
+          </div>
+          <div>
+            <label htmlFor="email" className={LABEL_CLASS}>
+              Email <span className="text-red-600">*</span>
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              className={INPUT_CLASS}
+              placeholder="vous@entreprise.fr"
+            />
+          </div>
+          <div>
+            <label htmlFor="phone" className={LABEL_CLASS}>
+              Téléphone
+            </label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              autoComplete="tel"
+              className={INPUT_CLASS}
+              placeholder="06 12 34 56 78"
+            />
+          </div>
+        </div>
+
+        <input type="hidden" name="marketType" value="autre" />
+
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 bg-slate-50/80 px-4 py-3.5">
+          <input
+            type="checkbox"
+            name="consent"
+            required
+            className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-[#1d4ed8] focus:ring-[#1d4ed8]"
+          />
+          <span className="text-sm leading-relaxed text-slate-700">
+            J&apos;accepte d&apos;être recontacté par BeWork au sujet de ma demande.{" "}
+            <span className="text-red-600">*</span>
+          </span>
+        </label>
+
+        {status === "error" && (
+          <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            Une erreur est survenue. Vous pouvez nous écrire directement à{" "}
+            <a href="mailto:contact@bework.fr" className="font-semibold underline">
+              contact@bework.fr
+            </a>
+            .
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={status === "loading"}
+          className="inline-flex h-11 w-full shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-[#1d4ed8] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1e40af] disabled:cursor-not-allowed disabled:opacity-70 sm:h-12 sm:w-auto sm:text-[0.9375rem]"
+        >
+          {status === "loading" ? "Envoi en cours…" : "Étudier mon besoin"}
+        </button>
+      </form>
+    );
+  }
+
   const gridClass = variant === "compact" ? "grid gap-5 sm:grid-cols-2" : "grid gap-5 md:grid-cols-2";
 
   return (
     <form onSubmit={onSubmit} className="space-y-5" noValidate>
-      {/* Honeypot anti-spam */}
       <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden>
         <label htmlFor="website">Site web</label>
         <input type="text" id="website" name="website" tabIndex={-1} autoComplete="off" />
@@ -231,7 +371,7 @@ export function ProspectContactForm({
       <button
         type="submit"
         disabled={status === "loading"}
-        className="inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-[#1d4ed8] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1e40af] disabled:cursor-not-allowed disabled:opacity-70 sm:h-12 sm:w-auto sm:text-[0.9375rem] w-full"
+        className="inline-flex h-11 w-full shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-[#1d4ed8] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1e40af] disabled:cursor-not-allowed disabled:opacity-70 sm:h-12 sm:w-auto sm:text-[0.9375rem]"
       >
         {status === "loading" ? "Envoi en cours…" : "Demander une démonstration personnalisée"}
       </button>

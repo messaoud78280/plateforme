@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
 
   let body: {
     companyName?: string;
+    contactName?: string;
     email?: string;
     phone?: string;
     marketType?: string;
@@ -83,6 +84,7 @@ export async function POST(request: NextRequest) {
     consent?: boolean;
     source?: string;
     website?: string;
+    formKind?: string;
   };
 
   try {
@@ -96,23 +98,30 @@ export async function POST(request: NextRequest) {
   }
 
   const companyName = String(body.companyName ?? "").trim();
+  const contactNameRaw = String(body.contactName ?? "").trim();
   const email = String(body.email ?? "").trim().toLowerCase();
   const phone = String(body.phone ?? "").trim();
-  const marketType = String(body.marketType ?? "").trim();
+  const isIdea = String(body.formKind ?? "").trim() === "idea";
+  const marketType = String(body.marketType ?? "").trim() || (isIdea ? "autre" : "");
   const tradeActivity = String(body.tradeActivity ?? "").trim();
-  const mainNeed = String(body.mainNeed ?? "").trim();
+  const mainNeed = String(body.mainNeed ?? "").trim() || (isIdea ? "ne_sais_pas_encore" : "");
   const projectStage = String(body.projectStage ?? "").trim();
   const rawMessage = String(body.message ?? "").trim();
   const stageLine = projectStage ? `Étape : ${labelProjectStage(projectStage)}` : "";
   const message = [stageLine, rawMessage].filter(Boolean).join("\n\n").slice(0, 2000);
   const source = String(body.source ?? "homepage_contact_form").trim().slice(0, 120) || "homepage_contact_form";
   const consent = body.consent === true;
+  const contactName = contactNameRaw || companyName;
 
   if (!companyName || !email || !marketType || !mainNeed) {
     return NextResponse.json(
       { error: "Nom / entreprise, email, type de marché et besoin principal sont requis." },
       { status: 400 }
     );
+  }
+
+  if (isIdea && !rawMessage) {
+    return NextResponse.json({ error: "Décrivez votre besoin ou votre idée." }, { status: 400 });
   }
 
   if (!isValidEmail(email)) {
@@ -129,7 +138,7 @@ export async function POST(request: NextRequest) {
     await prisma.contactRequest.create({
       data: {
         structure: companyName,
-        contactName: companyName,
+        contactName,
         email,
         phone: phone || null,
         marketType,
@@ -140,7 +149,7 @@ export async function POST(request: NextRequest) {
         source,
       },
     });
-  } catch (e) {
+  } catch {
     console.error("[contact] ContactRequest create error");
     return NextResponse.json(
       { error: "Erreur lors de l’enregistrement de la demande." },
@@ -164,6 +173,7 @@ export async function POST(request: NextRequest) {
 
   <ul style="list-style: none; padding: 0;">
     <li><strong>Entreprise :</strong> ${escapeHtml(companyName)}</li>
+    <li><strong>Contact :</strong> ${escapeHtml(contactName)}</li>
     <li><strong>Email :</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></li>
     ${phone ? `<li><strong>Téléphone :</strong> ${escapeHtml(phone)}</li>` : ""}
     <li><strong>Effectif :</strong> ${escapeHtml(labelMarketType(marketType))}</li>

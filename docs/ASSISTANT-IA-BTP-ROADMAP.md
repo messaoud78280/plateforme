@@ -1,71 +1,39 @@
 # Assistant IA BTP — Roadmap
 
-> Catalogue V1 livré sans clé API ni appel LLM.  
+> Catalogue V1A : expérience produit sans clé API ni appel LLM.  
 > L’IA propose ; l’utilisateur valide. Permissions BeWork inchangées.
 
-## Principes
-
-- **Outils métier BTP**, pas un ChatGPT générique.
-- Marchés **privés** (contrat, devis accepté, CCTP, conditions particulières, CR…).
-- Sélection **explicite** des documents à analyser.
-- L’IA ne contourne jamais `organizationId`, ProjectAccess, GED ACL, messagerie ACL.
-- Pas d’affirmation juridique définitive (« points à examiner »).
-- Pas d’envoi / création silencieuse.
-
-## PHASE 1 — Marché privé / synthèse
+## PHASE 1 — Analyse marché privé
 
 - Analyser un marché privé
 - Obligations & délais
 - Risques du marché (points à examiner)
-- Traçabilité minimale des analyses (utilisateur, date, sources, résultat)
+- Travaux supplémentaires & avenants (préparation)
 
 ## PHASE 2 — CR → Actions / DOE / rédaction
 
-- Compte rendu → Actions (validation case par case)
+- Compte rendu → Actions
 - Contrôler un DOE
-- Rédiger un courrier (brouillon uniquement)
-- Travaux supplémentaires & avenants (préparation justificatifs)
+- Rédiger un courrier BTP (brouillon)
 
-## PHASE 3 — Assistant contextuel connecté BeWork
+## PHASE 3 — Assistant contextuel chantier
 
-Boutons contextuels (hors V1) :
+- Entrées depuis chantier / GED / CR
+- Champ contextuel secondaire aux outils spécialisés
 
-- Depuis un chantier : analyser / synthétiser
-- Depuis Documents : analyser la sélection
-- Depuis un CR : transformer en actions
-- Champ « Demandez à BeWork » (secondaire aux outils)
+## PHASE 4 — Automatisations contrôlées
 
-## PHASE 4 — Automatisations IA contrôlées
-
-- Quotas organisation / taille documents / coûts
-- Logs, rétention, politique provider
+- Quotas, coûts, logs
 - Automatisations uniquement après validation humaine
 
-## Provider (remplaçable)
+## Avant toute activation
 
-Architecture future légère :
+- ACL BeWork (organizationId, ProjectAccess, GED, messagerie)
+- Confidentialité / minimisation / isolation tenant
+- Validation humaine systématique
+- Traçabilité des analyses et actions acceptées / rejetées
+- Choix du provider (remplaçable)
+- Coûts et quotas par organisation
 
-```
-AIProvider (interface)
-  → OpenAI
-  → autre provider éventuel
-```
-
-Pas de SDK dans le bundle tant que `configured === false`.  
-Flag : `NEXT_PUBLIC_FF_AI_FEATURES` (défaut off).
-
-## Sécurité future (obligatoire avant activation)
-
-- Données privées / minimisation
-- Isolation tenant
-- ACL BeWork strictes
-- Logs d’analyse + actions acceptées / rejetées
-- Rétention et localisation des données (UE selon exigences)
-- Politique du provider
-
-## Coûts (à définir à l’activation)
-
-- Limites d’usage et taille de documents
-- Estimation coût / analyse
-- Quotas par organisation
-- Aucun billing IA dans la V1 catalogue
+Flag exécution future : `NEXT_PUBLIC_FF_AI_FEATURES` (défaut off).  
+Aucun SDK LLM dans le bundle tant que non configuré.

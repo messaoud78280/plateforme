@@ -124,8 +124,10 @@ function testNoFakeAnalysis() {
   );
   assert.doesNotMatch(hub + detail, /setTimeout/);
   assert.doesNotMatch(hub + detail, /ANALYSE TERMINÉE/);
-  assert.match(detail, /IA disponible sur activation/);
-  console.log("✓ pas de fausse analyse");
+  assert.doesNotMatch(hub + detail, /Posez une question/);
+  assert.match(detail, /AssistantIaActivateButton|Activer cet outil/);
+  assert.match(hub, /L’IA propose/);
+  console.log("✓ pas de fausse analyse / pas de chatbot");
 }
 
 function testNavPointsToAssistant() {
@@ -142,7 +144,8 @@ function testRoadmap() {
   const md = readFileSync(join(root, "docs/ASSISTANT-IA-BTP-ROADMAP.md"), "utf8");
   assert.match(md, /PHASE 1/);
   assert.match(md, /PHASE 4/);
-  assert.match(md, /AIProvider/);
+  assert.match(md, /validation humaine/i);
+  assert.match(md, /quotas|coûts/i);
   console.log("✓ roadmap documentée");
 }
 
@@ -166,4 +169,4 @@ for (const t of tests) {
   }
 }
 if (failed) process.exit(1);
-console.log("\nASSISTANT-IA-V1 — ALL PASS");
+console.log("\nASSISTANT-IA-V1A — ALL PASS");

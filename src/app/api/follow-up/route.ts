@@ -14,6 +14,7 @@ import { getFollowUpSettings } from "@/lib/follow-up/settings";
 import { isBeworkStaff } from "@/lib/authz";
 import { ensureOrganizationForOwner } from "@/lib/organization/access";
 import { ensureDefaultWorkflow } from "@/lib/workflow/service";
+import { isFollowUpUrgentLevel } from "@/lib/follow-up/kpi";
 
 const VALID_STATUS = new Set<string>([
   "NOUVEAU",
@@ -111,15 +112,14 @@ export async function GET(request: Request) {
 
     let items = sheets.map((s) => serializeFollowUpSheet(s, settings.thresholds));
     if (filter === "urgent") {
-      items = items.filter((i) =>
-        ["IMPORTANT", "URGENT", "CRITIQUE"].includes(i.urgency),
-      );
+      // Aligné page / KPI : URGENT|CRITIQUE uniquement (pas IMPORTANT)
+      items = items.filter((i) => isFollowUpUrgentLevel(i.urgency));
     }
 
     const counts = {
       total: items.length,
       critique: items.filter((i) => i.urgency === "CRITIQUE").length,
-      urgent: items.filter((i) => i.urgency === "URGENT" || i.urgency === "CRITIQUE").length,
+      urgent: items.filter((i) => isFollowUpUrgentLevel(i.urgency)).length,
       today: items.filter((i) => {
         if (!i.nextActionAt || i.nextActionDone) return false;
         const d = new Date(i.nextActionAt);

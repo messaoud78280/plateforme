@@ -83,7 +83,7 @@ export function FollowUpCreateForm({
     setError(null);
 
     if (!noProject && !projectId) {
-      setError("Sélectionnez un chantier, ou cochez « Pas encore de chantier ».");
+      setError("Sélectionnez un chantier, ou utilisez « Pas encore de chantier ».");
       setSaving(false);
       return;
     }

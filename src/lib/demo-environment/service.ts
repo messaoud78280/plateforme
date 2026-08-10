@@ -246,9 +246,10 @@ export async function resetDemoEnvironment(demoId: string): Promise<{ ok: true }
       includeMarches: modules.includes("marches"),
       loginIdentifier: demo.loginIdentifier,
     });
+    await enrichDemoPersonas(demoId);
     await prisma.demoEnvironment.update({
       where: { id: demoId },
-      data: { seedVersion: "v6-setrim-scenario", companyName, logoUrl, internalName },
+      data: { seedVersion: "v6-setrim-cleanup-v2", companyName, logoUrl, internalName },
     });
   }
   return { ok: true };
@@ -321,9 +322,15 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
     karimUserId: karim?.id ?? null,
     loginIdentifier: demo.loginIdentifier,
   });
+  const { applyDemoBrand, purgeAbcPromotionClientLabelsForOrg } = await import("./apply-brand");
+  await applyDemoBrand({ loginIdentifier: demo.loginIdentifier });
+  await purgeAbcPromotionClientLabelsForOrg({
+    organizationId: demo.organizationId,
+    loginIdentifier: demo.loginIdentifier,
+  });
   await prisma.demoEnvironment.update({
     where: { id: demoId },
-    data: { seedVersion: "v4-demo-cleanup" },
+    data: { seedVersion: "v6-setrim-cleanup-v2" },
   });
   return { ok: true };
 }

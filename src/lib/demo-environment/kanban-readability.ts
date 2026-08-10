@@ -1,15 +1,16 @@
 /**
- * W2-C / W3 — Distribue les fiches ABC pour un Kanban lisible + destinataires notifs.
+ * W2-C / W3 — Distribue les fiches SETRIM pour un Kanban lisible + destinataires notifs.
  * Pas de doublon Les Lilas. Pas d’urgence forcée.
  */
 import type { FollowUpSheetStatus, FollowUpUrgency } from "@prisma/client";
-import { OrganizationMemberRole, UserRole } from "@prisma/client";
+import { OrganizationMemberRole, TaskStatus, UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { appendFollowUpTimeline } from "@/lib/follow-up/timeline";
 import { colorKeyForStatus } from "@/lib/follow-up/types";
 import { syncAttentionNotificationsForOwner } from "@/lib/follow-up/attention/sync-notifications";
 import { demoPersonaEmail, DEMO_PERSONAS } from "@/lib/demo-environment/personas";
+import { DEMO_SCENARIO } from "@/lib/demo-environment/scenario";
 
 function daysAgo(n: number): Date {
   const d = new Date();
@@ -160,6 +161,67 @@ async function ensureJulieAdministratif(opts: {
   return julie.id;
 }
 
+/** 2–3 tâches chantier Les Jardins — idempotent (aucune création si déjà présentes). */
+async function ensureJardinsDemoTasks(opts: {
+  projectId: string;
+  clientId: string;
+  organizationId: string;
+  karimId: string;
+  julieId: string;
+}): Promise<void> {
+  const existing = await prisma.task.count({
+    where: { projectId: opts.projectId },
+  });
+  if (existing > 0) return;
+
+  const desiredSoon = daysAgo(-3); // échéance relative (helpers démo)
+  const desiredLater = daysAgo(-7);
+
+  await prisma.task.createMany({
+    data: [
+      {
+        title: "Préparer le dossier de démarrage",
+        description:
+          "Réunir OS, plans et accès chantier avant démarrage — Responsable : Julie Martin.",
+        status: TaskStatus.EN_ATTENTE,
+        priority: "PRIORITAIRE",
+        clientId: opts.clientId,
+        organizationId: opts.organizationId,
+        projectId: opts.projectId,
+        assignedToId: opts.julieId,
+        category: "Tâche chantier",
+        desiredDate: desiredLater,
+      },
+      {
+        title: "Vérifier les plans avant intervention",
+        description:
+          "Contrôle plans toiture-terrasse / relevés — Responsable : Karim Benali.",
+        status: TaskStatus.EN_COURS,
+        priority: "STANDARD",
+        clientId: opts.clientId,
+        organizationId: opts.organizationId,
+        projectId: opts.projectId,
+        assignedToId: opts.karimId,
+        category: "Tâche chantier",
+        desiredDate: desiredSoon,
+      },
+      {
+        title: "Confirmer la date d’intervention",
+        description:
+          "Valider créneau avec le syndic avant pose — Responsable : Karim Benali.",
+        status: TaskStatus.EN_ATTENTE,
+        priority: "STANDARD",
+        clientId: opts.clientId,
+        organizationId: opts.organizationId,
+        projectId: opts.projectId,
+        assignedToId: opts.karimId,
+        category: "Tâche chantier",
+        desiredDate: daysAgo(-10),
+      },
+    ],
+  });
+}
+
 export async function ensureKanbanReadabilityDemo(opts: {
   rootUserId: string;
   organizationId: string;
@@ -228,7 +290,7 @@ export async function ensureKanbanReadabilityDemo(opts: {
         urgencyOverride: null,
         title: "Résidence Les Lilas — OS-4587",
         workObject: "OS-4587 — Réfection étanchéité terrasse inaccessible",
-        clientName: "Syndic Horizon Copro",
+        clientName: DEMO_SCENARIO.client.name,
         daysInStep: 2,
         fromLabel: "Commande",
         toLabel: "Attente fournisseur",
@@ -239,7 +301,7 @@ export async function ensureKanbanReadabilityDemo(opts: {
         data: {
           title: "Résidence Les Lilas — OS-4587",
           workObject: "OS-4587 — Réfection étanchéité terrasse inaccessible",
-          clientName: "Syndic Horizon Copro",
+          clientName: DEMO_SCENARIO.client.name,
           osNumber: "4587",
           orderNumber: "BC-2026-043",
           assigneeId: karimId,
@@ -363,7 +425,7 @@ export async function ensureKanbanReadabilityDemo(opts: {
         organizationId: opts.organizationId,
         projectId: jardins.id,
         title: "Résidence Les Jardins",
-        clientName: "Syndic Horizon Copro",
+        clientName: DEMO_SCENARIO.client.name,
         siteAddress: "4 allée des Jardins, Villeurbanne",
         workObject: "OS reçu — étanchéité toiture-terrasse",
         osNumber: "4612",
@@ -403,13 +465,21 @@ export async function ensureKanbanReadabilityDemo(opts: {
       urgencyOverride: null,
       title: "Résidence Les Jardins",
       workObject: "OS reçu — étanchéité toiture-terrasse",
-      clientName: "Syndic Horizon Copro",
+      clientName: DEMO_SCENARIO.client.name,
       // 2 j ≈ delayHours 48 → IMPORTANT (calculé, non forcé)
       daysInStep: 2,
       fromLabel: "OS reçu",
       toLabel: "À planifier",
     });
   }
+
+  await ensureJardinsDemoTasks({
+    projectId: jardins.id,
+    clientId: opts.rootUserId,
+    organizationId: opts.organizationId,
+    karimId,
+    julieId,
+  });
 
   // W3-C1 : créer les notifications internes (idempotent)
   try {

@@ -34,6 +34,54 @@ function shouldRewriteInternalName(internalName: string | null | undefined): boo
   return /ABC/i.test(internalName) || /Étanchéité \(Démo/i.test(internalName);
 }
 
+const ABC_PROMOTION_RE = /ABC\s*Promotion/i;
+
+/**
+ * DEMO-SETRIM-CLEANUP-V2 — remplace le libellé client legacy « ABC Promotion »
+ * par le client scénario (Syndic Horizon Copro), sans toucher SETRIM (org hôte).
+ * Scope : organisation démo uniquement.
+ */
+export async function purgeAbcPromotionClientLabelsForOrg(opts: {
+  organizationId: string;
+  loginIdentifier?: string | null;
+}): Promise<string[]> {
+  const changes: string[] = [];
+  const target = DEMO_PERSONAS.client.company;
+  const tag = opts.loginIdentifier ? `[${opts.loginIdentifier}]` : "[demo]";
+
+  const sheets = await prisma.followUpSheet.updateMany({
+    where: {
+      organizationId: opts.organizationId,
+      clientName: { contains: "ABC Promotion" },
+    },
+    data: { clientName: target },
+  });
+  if (sheets.count > 0) {
+    changes.push(`${tag} FollowUpSheet.clientName: ABC Promotion → ${target} (×${sheets.count})`);
+  }
+
+  // Variantes typo / casse via scan ciblé (pas de replace global hors org)
+  const leftover = await prisma.followUpSheet.findMany({
+    where: {
+      organizationId: opts.organizationId,
+      clientName: { contains: "ABC", mode: "insensitive" },
+    },
+    select: { id: true, clientName: true },
+    take: 50,
+  });
+  for (const row of leftover) {
+    if (!row.clientName || !ABC_PROMOTION_RE.test(row.clientName)) continue;
+    if (row.clientName === target) continue;
+    await prisma.followUpSheet.update({
+      where: { id: row.id },
+      data: { clientName: target },
+    });
+    changes.push(`${tag} FollowUpSheet ${row.id}: « ${row.clientName} » → ${target}`);
+  }
+
+  return changes;
+}
+
 /**
  * Applique DEMO_BRAND sur les environnements démo concernés.
  * @param loginIdentifier — optionnel, cible une démo précise (ex. bework-demo)
@@ -239,6 +287,15 @@ export async function applyDemoBrand(opts?: {
         changes.push(
           `[${demo.loginIdentifier}] ExternalOrg: ${extClient.name} → ${DEMO_PERSONAS.client.company}`,
         );
+        demoChanged = true;
+      }
+
+      const purged = await purgeAbcPromotionClientLabelsForOrg({
+        organizationId: demo.organizationId,
+        loginIdentifier: demo.loginIdentifier,
+      });
+      if (purged.length > 0) {
+        changes.push(...purged);
         demoChanged = true;
       }
     }

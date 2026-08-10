@@ -62,11 +62,12 @@ function testPresentationDenisNotClient() {
     },
     assignedTo: null,
     hostOrganizationName: "SETRIM",
-    clientOrganizationName: "ABC Promotion",
+    clientOrganizationName: "Syndic Horizon Copro",
     followUpClientName: null,
   });
-  assert.equal(p.clientLabel, "ABC Promotion");
+  assert.equal(p.clientLabel, "Syndic Horizon Copro");
   assert.notEqual(p.clientLabel, "Denis Buret");
+  assert.notEqual(p.clientLabel, "ABC Promotion");
   assert.equal(p.responsibleDisplay, "Responsable à définir");
 
   const withSophie = buildProjectPresentation({
@@ -74,12 +75,22 @@ function testPresentationDenisNotClient() {
     client: { name: "Denis Buret", personType: "INTERNAL", company: "SETRIM" },
     assignedTo: { name: "Sophie Martin", personType: "CLIENT_EXT" },
     hostOrganizationName: "SETRIM",
-    clientExtLabels: ["ABC Promotion"],
+    clientExtLabels: ["Syndic Horizon Copro"],
     internalManager: "Karim Benali",
   });
-  assert.equal(withSophie.clientLabel, "ABC Promotion");
+  assert.equal(withSophie.clientLabel, "Syndic Horizon Copro");
   assert.equal(withSophie.responsibleLabel, "Karim Benali");
-  console.log("✓ Denis ≠ client · Sophie ≠ responsable");
+
+  const ignoresAbcRelic = buildProjectPresentation({
+    title: "Les Jardins",
+    client: { name: "Denis Buret", personType: "INTERNAL", company: "SETRIM" },
+    assignedTo: null,
+    hostOrganizationName: "SETRIM",
+    clientOrganizationName: "Syndic Horizon Copro",
+    followUpClientName: "ABC Promotion",
+  });
+  assert.equal(ignoresAbcRelic.clientLabel, "Syndic Horizon Copro");
+  console.log("✓ Denis ≠ client · Sophie ≠ responsable · ABC ignoré");
 }
 
 function testWiring() {
@@ -96,7 +107,8 @@ function testWiring() {
     join(process.cwd(), "src/components/messagerie/MessagerieView.tsx"),
     "utf8",
   );
-  assert.match(view, /Vous consultez cette conversation en supervision/);
+  assert.match(view, /Vous consultez cette conversation/);
+  assert.doesNotMatch(view, /en supervision/);
   assert.match(view, /role="dialog"/);
   assert.doesNotMatch(view, /text-violet-700/);
   console.log("✓ câblage V2");

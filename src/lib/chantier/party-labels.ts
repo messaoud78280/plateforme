@@ -61,6 +61,12 @@ function isHostCompany(
   return label.trim().toLowerCase() === host.trim().toLowerCase();
 }
 
+/** Reliquat scénario démo — ne jamais afficher comme client. */
+function isLegacyDemoClientLabel(label: string | null | undefined): boolean {
+  if (!label?.trim()) return false;
+  return /ABC\s*Promotion/i.test(label);
+}
+
 /**
  * Résout client + responsable pour header / liste.
  * Ne jamais afficher un INTERNE (Denis Direction) comme client.
@@ -114,6 +120,7 @@ export function resolveChantierHeaderParties(opts: {
   for (const c of candidates) {
     if (!c) continue;
     if (isHostCompany(c, host)) continue;
+    if (isLegacyDemoClientLabel(c)) continue;
     // Ne jamais prendre le nom d’un user INTERNE
     if (client && isInternalChantierResponsible(client) && c === norm(client.name)) {
       continue;

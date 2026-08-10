@@ -343,7 +343,7 @@ export default async function ProjetDetailPage({
   const canDeleteChantier = canDeleteChantierProject(session.user, project);
 
   let agents: { id: string; name: string; email: string }[] = [];
-  if (isAgence) {
+  if (isStaff) {
     agents = await prisma.user.findMany({
       where: { role: { in: ["AGENT", "AGENCE"] } },
       select: { id: true, name: true, email: true },
@@ -473,7 +473,7 @@ export default async function ProjetDetailPage({
       clientName={project.client.name}
       missions={missionsRows}
       agents={agents.map((a) => ({ id: a.id, name: a.name }))}
-      isAgence={isAgence}
+      canCreate={isStaff}
     />
   );
 

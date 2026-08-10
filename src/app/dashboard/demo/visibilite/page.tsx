@@ -4,7 +4,6 @@ import Link from "next/link";
 import { authOptions } from "@/lib/auth";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { DEMO_BRAND } from "@/lib/demo-environment/brand";
 import {
   DEMO_PERSONA_KEYS,
   DEMO_PERSONAS,
@@ -20,7 +19,7 @@ export default async function DemoVisibilitePage() {
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/demo/visibilite");
   if (!session.user.isDemo) redirect("/dashboard");
 
-  const company = session.user.demoCompanyName ?? DEMO_BRAND.companyName;
+  const company = session.user.demoCompanyName?.trim() || "Démonstration";
 
   return (
     <div className="space-y-8">

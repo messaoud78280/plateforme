@@ -1231,6 +1231,11 @@ export async function clearDemoEnvironmentData(clientId: string) {
   if (orgId) {
     await prisma.purchaseOrder.deleteMany({ where: { organizationId: orgId } });
     await prisma.agendaEvent.deleteMany({ where: { organizationId: orgId } });
+    // Fiches : scope org (personas) + owner root — jamais un deleteMany global.
+    await prisma.followUpTimelineEvent.deleteMany({
+      where: { sheet: { organizationId: orgId } },
+    });
+    await prisma.followUpSheet.deleteMany({ where: { organizationId: orgId } });
   }
 
   await prisma.$transaction([

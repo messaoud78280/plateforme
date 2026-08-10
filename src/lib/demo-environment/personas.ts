@@ -1,5 +1,10 @@
-/** Personas démo — identité entreprise via DEMO_BRAND (SETRIM-DEMO-V1). */
+/**
+ * Personas démo — scopés par plateforme.
+ * DEMO_PERSONAS = scénario SETRIM (Denis / Julie / Karim / Sophie / Thomas).
+ * BeWork interne n’a pas de « Voir comme » client.
+ */
 
+import type { PlatformKey } from "@/lib/platform/config";
 import {
   DEMO_BRAND,
   demoBrandContactFullName,
@@ -83,6 +88,42 @@ export const DEMO_PERSONAS: Record<DemoPersonaKey, DemoPersonaDef> = {
     externalOrgType: "SUPPLIER",
   },
 };
+
+/**
+ * Personas pour une plateforme démo.
+ * SETRIM → Denis/Julie/Karim/Sophie/Thomas.
+ * Autre démo → même rôles, noms génériques + company hôte (pas SETRIM en dur).
+ * BeWork interne → aucun persona « Voir comme ».
+ */
+export function getDemoPersonasForPlatform(
+  platformKey: PlatformKey,
+  hostCompany?: string | null,
+): Record<DemoPersonaKey, DemoPersonaDef> | null {
+  if (platformKey === "bework_internal") return null;
+  if (platformKey === "setrim") return DEMO_PERSONAS;
+
+  const host = (hostCompany?.trim() || "Démonstration").trim();
+  return {
+    direction: {
+      ...DEMO_PERSONAS.direction,
+      name: "Direction",
+      company: host,
+      jobTitle: "Direction",
+    },
+    conducteur: {
+      ...DEMO_PERSONAS.conducteur,
+      name: "Conducteur travaux",
+      company: host,
+    },
+    administratif: {
+      ...DEMO_PERSONAS.administratif,
+      name: "Administratif",
+      company: host,
+    },
+    client: { ...DEMO_PERSONAS.client },
+    fournisseur: { ...DEMO_PERSONAS.fournisseur },
+  };
+}
 
 export function demoPersonaEmail(loginIdentifier: string, suffix: string | null): string {
   const base = loginIdentifier.trim().toLowerCase().replace(/@.*$/, "");

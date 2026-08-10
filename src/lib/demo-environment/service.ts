@@ -24,6 +24,7 @@ import {
   resolveDemoCompanyName,
 } from "./brand";
 import { DEMO_PERSONAS } from "./personas";
+import { getPlatformConfigForOrganization } from "@/lib/platform/config";
 
 export type CreateDemoEnvironmentInput = {
   companyName: string;
@@ -150,7 +151,7 @@ export async function createDemoEnvironment(
           internalName,
           sector: input.sector?.trim() || null,
           employeeCount: input.employeeCount ?? null,
-          logoUrl: demoBrandDefaultLogoUrl(input.logoUrl),
+          logoUrl: demoBrandDefaultLogoUrl(input.logoUrl, companyName),
           templateKey,
           modulesEnabled,
           rolesConfig: DEFAULT_FICTIONAL_ROLES,
@@ -203,7 +204,7 @@ export async function resetDemoEnvironment(demoId: string): Promise<{ ok: true }
   if (!demo) return { ok: false, error: "Démonstration introuvable." };
 
   const companyName = resolveDemoCompanyName(demo.companyName);
-  const logoUrl = demoBrandDefaultLogoUrl(demo.logoUrl);
+  const logoUrl = demoBrandDefaultLogoUrl(demo.logoUrl, companyName);
   const internalName =
     demo.internalName?.includes("ABC") || !demo.internalName?.trim()
       ? `Démo — ${companyName}`
@@ -225,15 +226,30 @@ export async function resetDemoEnvironment(demoId: string): Promise<{ ok: true }
       data: { name: companyName },
     });
   }
-  await prisma.user.update({
-    where: { id: demo.rootUserId },
-    data: {
-      name: demoBrandContactFullName(),
-      company: companyName,
-      service: DEMO_BRAND.contactRoleLabel,
-      jobTitle: DEMO_BRAND.contactRoleLabel,
-    },
+
+  // Identité Direction SETRIM (Denis) uniquement pour platformKey setrim — pas les autres démos.
+  const platform = getPlatformConfigForOrganization({
+    organizationId: demo.organizationId,
+    isDemo: true,
+    companyName,
+    logoUrl,
   });
+  if (platform.key === "setrim") {
+    await prisma.user.update({
+      where: { id: demo.rootUserId },
+      data: {
+        name: demoBrandContactFullName(),
+        company: companyName,
+        service: DEMO_BRAND.contactRoleLabel,
+        jobTitle: DEMO_BRAND.contactRoleLabel,
+      },
+    });
+  } else {
+    await prisma.user.update({
+      where: { id: demo.rootUserId },
+      data: { company: companyName },
+    });
+  }
 
   await clearDemoEnvironmentData(demo.rootUserId);
   if (demo.organizationId) {
@@ -261,7 +277,7 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
   if (!demo?.organizationId) return { ok: false, error: "Démonstration introuvable." };
 
   const companyName = resolveDemoCompanyName(demo.companyName);
-  const logoUrl = demoBrandDefaultLogoUrl(demo.logoUrl);
+  const logoUrl = demoBrandDefaultLogoUrl(demo.logoUrl, companyName);
   if (companyName !== demo.companyName || logoUrl !== demo.logoUrl) {
     await prisma.demoEnvironment.update({
       where: { id: demoId },

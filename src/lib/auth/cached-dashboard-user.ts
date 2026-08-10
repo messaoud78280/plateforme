@@ -17,6 +17,6 @@ export const getCachedClientGate = cache(async (userId: string) => {
 export const getCachedDemoExpiry = cache(async (demoEnvironmentId: string) => {
   return prisma.demoEnvironment.findUnique({
     where: { id: demoEnvironmentId },
-    select: { expiresAt: true, companyName: true },
+    select: { expiresAt: true, companyName: true, logoUrl: true, organizationId: true },
   });
 });

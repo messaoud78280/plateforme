@@ -20,7 +20,7 @@ export type AssistantIaTool = {
   family: AssistantIaFamily;
   title: string;
   description: string;
-  /** Mis en avant sur le hub (ex. marché privé SETRIM). */
+  /** Mis en avant sur le hub (ex. analyse marché privé). */
   featured?: boolean;
   featuredLabel?: string;
   /** Capacités / extractions futures. */

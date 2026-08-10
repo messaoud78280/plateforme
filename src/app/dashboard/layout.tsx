@@ -25,8 +25,10 @@ import { UiPreferencesProvider } from "@/components/system/UiPreferences";
 import { DashboardMain } from "@/components/dashboard/DashboardMain";
 import { resolveBeWorkEnvironment } from "@/lib/environment";
 import { resolveDemoAccessForUser } from "@/lib/demo-environment/access";
-import { DEMO_BRAND } from "@/lib/demo-environment/brand";
 import { isDemoEmail } from "@/lib/demo-environment/constants";
+import {
+  getCurrentPlatformConfig,
+} from "@/lib/platform/config";
 import {
   isExternalPortalUser,
   personaHomeLabel,
@@ -90,10 +92,21 @@ export default async function DashboardLayout({
   });
 
   let demoExpiresIso: string | null = null;
+  let demoLogoUrl: string | null = null;
+  let demoOrganizationId: string | null = null;
   if (isDemo && session.user.demoEnvironmentId) {
     const demo = await getCachedDemoExpiry(session.user.demoEnvironmentId);
     demoExpiresIso = demo?.expiresAt?.toISOString() ?? null;
+    demoLogoUrl = demo?.logoUrl?.trim() || null;
+    demoOrganizationId = demo?.organizationId ?? null;
   }
+
+  const platform = getCurrentPlatformConfig({
+    organizationId: demoOrganizationId,
+    isDemo,
+    companyName,
+    logoUrl: demoLogoUrl,
+  });
 
   return (
     <div className="flex min-h-dvh bg-[color:var(--cc-surface-muted)]">
@@ -107,7 +120,11 @@ export default async function DashboardLayout({
         demoModules={session.user.demoModules ?? null}
         personType={personType}
         permissionProfile={permissionProfile}
-        demoLogoUrl={isDemo ? DEMO_BRAND.logoPath : null}
+        demoLogoUrl={isDemo ? platform.branding.logo : null}
+        productSecondaryLabel={platform.branding.productSecondaryLabel}
+        contactRoleFallback={
+          isDemo ? platform.branding.contactRoleLabel || null : null
+        }
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <EnvironmentBanner environment={env} />
@@ -124,11 +141,11 @@ export default async function DashboardLayout({
                   : "Espace de travail"}
             </p>
             <p className="truncate text-[12px] font-medium text-bework-muted">
-              {isDemo ? DEMO_BRAND.productSecondaryLabel : "BeWork"}
+              {platform.branding.productSecondaryLabel}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            {isDemo ? <DemoViewAsSwitcher /> : null}
+            {isDemo && platform.features.demoViewAs ? <DemoViewAsSwitcher /> : null}
             {session.user?.role === "CLIENT" && !isDemo && !external ? (
               <Link href="/dashboard/nouvelle-demande" className="btn-cc-primary !text-xs sm:!text-sm">
                 + Nouvelle tâche
@@ -168,7 +185,7 @@ export default async function DashboardLayout({
               permissionProfile={permissionProfile}
             />
           </Suspense>
-          {isDemo ? <DemoCommercialTourLazy /> : null}
+          {isDemo && platform.commercialDemo ? <DemoCommercialTourLazy /> : null}
         </UiPreferencesProvider>
       </div>
     </div>

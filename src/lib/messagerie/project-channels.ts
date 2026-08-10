@@ -5,7 +5,7 @@
  */
 
 import { prisma } from "@/lib/prisma";
-import { DEMO_BRAND } from "@/lib/demo-environment/brand";
+import { resolveHostCompanyLabel } from "@/lib/platform/config";
 
 export type ProjectChannelType =
   | "INTERNAL"
@@ -77,7 +77,7 @@ export function getProjectChannelDisplay(params: {
   orgTradeName?: string | null;
   hostCompanyName?: string | null;
 }): ProjectChannelDisplay {
-  const host = (params.hostCompanyName?.trim() || DEMO_BRAND.companyName).trim();
+  const host = resolveHostCompanyLabel(params.hostCompanyName, "hôte");
   const orgLabel =
     (params.orgTradeName?.trim() || params.orgName?.trim() || "").trim() || "Organisation";
 
@@ -413,7 +413,7 @@ export async function listProjectChannelsForUser(
   });
   if (!project) return [];
 
-  const hostName = project.organization?.name || DEMO_BRAND.companyName;
+  const hostName = resolveHostCompanyLabel(project.organization?.name);
 
   let channels = await prisma.projectChannel.findMany({
     where: { projectId },
@@ -744,7 +744,7 @@ export async function listChannelParticipantCandidates(channelId: string): Promi
   });
   if (!channel) return { internals: [], externals: [] };
 
-  const hostName = channel.project.organization?.name || DEMO_BRAND.companyName;
+  const hostName = resolveHostCompanyLabel(channel.project.organization?.name);
   const internals: { id: string; name: string; roleLabel: string; company: string | null }[] = [];
 
   if (channel.project.organizationId) {
@@ -966,7 +966,7 @@ export async function listInboxProjectChannelsForUser(
     if (!last) continue;
 
     const type = ch.type as ProjectChannelType;
-    const hostName = ch.project.organization?.name || DEMO_BRAND.companyName;
+    const hostName = resolveHostCompanyLabel(ch.project.organization?.name);
     const display = getProjectChannelDisplay({
       type,
       orgName: ch.externalOrganization?.name,

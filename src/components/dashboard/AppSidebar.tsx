@@ -6,7 +6,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
-import { DEMO_BRAND } from "@/lib/demo-environment/brand";
 import {
   AlertCircle,
   Briefcase,
@@ -185,6 +184,8 @@ export function AppSidebar({
   personType,
   permissionProfile,
   demoLogoUrl,
+  productSecondaryLabel,
+  contactRoleFallback,
 }: {
   role?: string | null;
   userName?: string | null;
@@ -195,6 +196,9 @@ export function AppSidebar({
   personType?: string | null;
   permissionProfile?: string | null;
   demoLogoUrl?: string | null;
+  /** Issu de PlatformConfig — jamais DEMO_BRAND global. */
+  productSecondaryLabel?: string | null;
+  contactRoleFallback?: string | null;
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(() => {
@@ -261,9 +265,11 @@ export function AppSidebar({
     .slice(0, 2)
     .toUpperCase();
 
-  const demoCompanyLabel = companyName?.trim() || DEMO_BRAND.companyDisplayName;
-  const brandLogo = isDemo ? demoLogoUrl || DEMO_BRAND.logoPath : null;
-  const companyInitial = (demoCompanyLabel[0] || "S").toUpperCase();
+  const demoCompanyLabel = companyName?.trim() || (isDemo ? "Démonstration" : "BeWork");
+  const brandLogo = isDemo ? demoLogoUrl || null : null;
+  const companyInitial = (demoCompanyLabel[0] || "D").toUpperCase();
+  const secondaryLabel = productSecondaryLabel?.trim() || (isDemo ? "Démonstration BeWork" : "BeWork");
+  const roleFallback = contactRoleFallback?.trim() || "";
 
   const navBody = (
     <>
@@ -307,7 +313,7 @@ export function AppSidebar({
                     {demoCompanyLabel}
                   </span>
                   <span className="block truncate text-[12px] font-medium text-bework-muted">
-                    {DEMO_BRAND.productSecondaryLabel}
+                    {secondaryLabel}
                   </span>
                 </>
               ) : (
@@ -398,7 +404,7 @@ export function AppSidebar({
             <span className="min-w-0">
               <span className="block truncate text-xs font-semibold text-bework-ink">{userName ?? "Utilisateur"}</span>
               <span className="block truncate text-[11px] text-bework-muted">
-                {userRoleLabel ?? (isDemo ? DEMO_BRAND.contactRoleLabel : role ?? "")}
+                {userRoleLabel ?? (isDemo ? roleFallback : role ?? "")}
               </span>
             </span>
           ) : null}

@@ -30,7 +30,6 @@ import {
   resolveDemoPersonaKey,
 } from "@/components/demo-environment/DemoPersonaHomes";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
-import { DEMO_BRAND } from "@/lib/demo-environment/brand";
 import { projectWhereForClientUser } from "@/lib/organization/access";
 import { loadAccueilOps } from "@/lib/accueil/load-accueil-ops";
 import { AccueilOpsHome } from "@/components/dashboard/AccueilOpsHome";
@@ -659,7 +658,7 @@ export default async function DashboardPage({
       select: { personType: true, permissionProfile: true, name: true },
     });
     const personaKey = resolveDemoPersonaKey(portal?.permissionProfile, portal?.personType);
-    const hostName = session.user.demoCompanyName ?? DEMO_BRAND.companyName;
+    const hostName = session.user.demoCompanyName ?? "votre entreprise";
     const firstName = (portal?.name ?? session.user.name ?? "vous").split(" ")[0] ?? "vous";
     const projectWhere = await projectWhereForClientUser(clientId);
 

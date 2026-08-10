@@ -114,7 +114,7 @@ export async function applyDemoBrand(opts?: {
 
   const targetName = DEMO_BRAND.companyName;
   const contactName = demoBrandContactFullName();
-  const logoUrl = demoBrandDefaultLogoUrl(null);
+  const logoUrl = demoBrandDefaultLogoUrl(null, targetName);
 
   for (const demo of demos) {
     const companyBefore = demo.companyName;

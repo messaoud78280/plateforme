@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { projectWhereForClientUser } from "@/lib/organization/access";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
-import { DEMO_BRAND } from "@/lib/demo-environment/brand";
 import { isInternalPurchaseOrderActor } from "@/lib/purchase-orders/access";
 import { loadDocumentHub } from "@/lib/ged/document-hub";
 import {
@@ -86,9 +85,7 @@ export default async function DocumentsPage({
     const sort = HUB_SORTS.has(sortParam) ? sortParam : "recent";
 
     const projectWhere = await projectWhereForClientUser(session.user.id);
-    const hostCompany =
-      session.user.demoCompanyName ??
-      (external ? DEMO_BRAND.companyName : null);
+    const hostCompany = session.user.demoCompanyName ?? null;
 
     const [hub, projects] = await Promise.all([
       loadDocumentHub({

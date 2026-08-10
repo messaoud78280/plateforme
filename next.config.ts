@@ -4,6 +4,12 @@ const nextConfig: NextConfig = {
   // Important: évite que Next.js "inférence" un mauvais workspace root
   // (multiple lockfiles) et charge des envs inattendues.
   outputFileTracingRoot: __dirname,
+  // Railway Metal : webpack Next 16 peut OOM à 4 Go — réduire la pression mémoire.
+  experimental: {
+    webpackMemoryOptimizations: true,
+    cpus: 1,
+  },
+  productionBrowserSourceMaps: false,
   images: {
     qualities: [100, 75, 70],
   },

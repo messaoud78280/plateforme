@@ -322,6 +322,12 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
     karimUserId: karim?.id ?? null,
     loginIdentifier: demo.loginIdentifier,
   });
+  const { ensureBillingAntiOubliDemo } = await import("./billing-anti-oubli-demo");
+  await ensureBillingAntiOubliDemo({
+    rootUserId: demo.rootUserId,
+    organizationId: demo.organizationId,
+    loginIdentifier: demo.loginIdentifier,
+  });
   const { applyDemoBrand, purgeAbcPromotionClientLabelsForOrg } = await import("./apply-brand");
   await applyDemoBrand({ loginIdentifier: demo.loginIdentifier });
   await purgeAbcPromotionClientLabelsForOrg({
@@ -330,7 +336,7 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
   });
   await prisma.demoEnvironment.update({
     where: { id: demoId },
-    data: { seedVersion: "v6-setrim-cleanup-v2" },
+    data: { seedVersion: "v6-facturation-v1a-lite" },
   });
   return { ok: true };
 }

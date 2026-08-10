@@ -17,6 +17,7 @@ export const DASHBOARD_ROOT_PATHS = new Set([
   "/dashboard/taches",
   "/dashboard/documents",
   "/dashboard/pilotage-travaux",
+  "/dashboard/facturation",
 ]);
 
 /**
@@ -181,6 +182,9 @@ export function contextBackLabelForHref(
   }
   if (path === "/dashboard/a-traiter" || path === "/dashboard/pilotage-travaux/a-traiter") {
     return "Retour à À traiter";
+  }
+  if (path === "/dashboard/facturation" || path.startsWith("/dashboard/facturation/")) {
+    return "Retour à la facturation";
   }
   if (path === "/dashboard/documents") return "Retour aux documents";
   if (path === "/dashboard/fiches-suivi") return "Retour aux fiches de suivi";

@@ -34,6 +34,7 @@ const ALLOWED_HREFS: Record<PersonaNavKey, string[] | null> = {
     "/dashboard/messagerie",
     "/dashboard/fiches-suivi",
     "/dashboard/livraisons",
+    "/dashboard/facturation",
     "/dashboard/parametres",
   ],
   CHEF_CHANTIER: [
@@ -47,6 +48,7 @@ const ALLOWED_HREFS: Record<PersonaNavKey, string[] | null> = {
     "/dashboard/documents",
     "/dashboard/messagerie",
     "/dashboard/fiches-suivi",
+    "/dashboard/facturation",
     "/dashboard/parametres",
   ],
   CLIENT: [

@@ -8,14 +8,22 @@ import { serializeFollowUpSheet } from "@/lib/follow-up/serialize";
 import { loadAttentionForSheets, urgencyLabelFor } from "@/lib/follow-up/attention/batch";
 import { URGENCY_LABELS } from "@/lib/follow-up/types";
 import { FollowUpDetailClient } from "@/components/follow-up/FollowUpDetailClient";
+import {
+  contextBackLabelForHref,
+  sanitizeInternalReturnTo,
+} from "@/lib/navigation/safe-return-to";
 
 export const dynamic = "force-dynamic";
 
-type Props = { params: Promise<{ id: string }> };
+type Props = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ returnTo?: string }>;
+};
 
-export default async function FicheSuiviDetailPage({ params }: Props) {
+export default async function FicheSuiviDetailPage({ params, searchParams }: Props) {
   const session = await getServerSession(authOptions);
   const { id } = await params;
+  const sp = await searchParams;
   if (!session?.user?.id) redirect(`/connexion?callbackUrl=/dashboard/fiches-suivi/${id}`);
 
   if (!(await canAccessFollowUpSheet(session.user, id))) notFound();
@@ -46,6 +54,12 @@ export default async function FicheSuiviDetailPage({ params }: Props) {
   const attention = attentionMap.get(data.id);
   const level = attention?.effectiveUrgency ?? data.urgency;
 
+  const backHref = sanitizeInternalReturnTo(sp.returnTo, "/dashboard/fiches-suivi");
+  const backLabel =
+    backHref === "/dashboard/fiches-suivi"
+      ? "← Fiches de suivi"
+      : `← ${contextBackLabelForHref(backHref).replace(/^Retour (à la |à l'|à |aux )?/i, "")}`;
+
   return (
     <FollowUpDetailClient
       sheet={{
@@ -54,6 +68,8 @@ export default async function FicheSuiviDetailPage({ params }: Props) {
         urgencyLabel: URGENCY_LABELS[level] ?? urgencyLabelFor(level),
         attention: attention ?? null,
       }}
+      backHref={backHref}
+      backLabel={backLabel.startsWith("←") ? backLabel : `← ${backLabel}`}
     />
   );
 }

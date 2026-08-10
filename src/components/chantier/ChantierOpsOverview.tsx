@@ -152,9 +152,11 @@ export function ChantierQuickActions({
 export function ChantierOpsOverview({
   ops,
   mode = "internal",
+  billingHint,
 }: {
   ops: ChantierOpsSummary;
   mode?: "internal" | "external";
+  billingHint?: { label: string; count: number; href: string } | null;
 }) {
   const c = ops.counts;
 
@@ -239,6 +241,22 @@ export function ChantierOpsOverview({
               ))}
             </ul>
           )}
+        </Section>
+      ) : null}
+
+      {mode === "internal" && billingHint ? (
+        <Section
+          title="Facturation"
+          count={billingHint.count}
+          action={{ href: billingHint.href, label: "Voir" }}
+        >
+          <p className="text-sm font-medium text-slate-800">{billingHint.label}</p>
+          <Link
+            href={billingHint.href}
+            className="mt-2 inline-block text-xs font-semibold text-[#1d4ed8] hover:underline"
+          >
+            Voir la facturation →
+          </Link>
         </Section>
       ) : null}
 

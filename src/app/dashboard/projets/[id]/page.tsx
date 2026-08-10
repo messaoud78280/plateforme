@@ -235,7 +235,7 @@ export default async function ProjetDetailPage({
     actorProfile?.personType !== "CLIENT_EXT" &&
     actorProfile?.personType !== "SUPPLIER";
 
-  const [chantierFolders, missingCount, ops, contractuelRaw] = await Promise.all([
+  const [chantierFolders, missingCount, ops, contractuelRaw, billingHint] = await Promise.all([
     canSeeDocuments
       ? prisma.chantierFolder.findMany({
           where: { projectId: id },
@@ -289,6 +289,20 @@ export default async function ProjetDetailPage({
             },
           },
         })
+      : Promise.resolve(null),
+    !isExternalViewer
+      ? import("@/lib/facturation/snapshot")
+          .then(({ getProjectBillingHint }) =>
+            getProjectBillingHint({
+              user: {
+                id: session.user.id,
+                role: session.user.role,
+                personType: session.user.personType ?? null,
+              },
+              projectId: id,
+            }),
+          )
+          .catch(() => null)
       : Promise.resolve(null),
   ]);
 
@@ -760,6 +774,15 @@ export default async function ProjetDetailPage({
             <ChantierOpsOverview
               ops={ops}
               mode={isExternalViewer ? "external" : "internal"}
+              billingHint={
+                billingHint
+                  ? {
+                      label: billingHint.label,
+                      count: billingHint.count,
+                      href: billingHint.href,
+                    }
+                  : null
+              }
             />
           ) : undefined
         }

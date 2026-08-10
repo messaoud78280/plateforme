@@ -78,6 +78,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
         label: "Pilotage",
         items: [
           { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
+          { href: "/dashboard/facturation", label: "Facturation", icon: Wallet },
           { href: "/dashboard/rapports", label: "Rapports", icon: Briefcase },
           { href: "/dashboard/skills", label: "Assistant IA", icon: Sparkles },
         ],
@@ -115,6 +116,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
         items: [
           { href: "/dashboard/agents", label: "Agents", icon: Users },
           { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
+          { href: "/dashboard/facturation", label: "Facturation", icon: Wallet },
           { href: "/dashboard/messages", label: "RDV", icon: CalendarDays },
           { href: "/dashboard/fiches-suivi", label: "Fiches suivi", icon: StickyNote },
         ],
@@ -151,6 +153,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
           { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
           { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList },
           { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
+          { href: "/dashboard/facturation", label: "Facturation", icon: Wallet },
         ],
       },
       {

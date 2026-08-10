@@ -14,6 +14,7 @@ const PREFETCH_HREFS = [
   "/dashboard/commandes",
   "/dashboard/documents",
   "/dashboard/livraisons",
+  "/dashboard/facturation",
 ] as const;
 
 /** Prefetch ciblé des pages autorisées pour le persona — pas toute l’app (PERF-V1A). */

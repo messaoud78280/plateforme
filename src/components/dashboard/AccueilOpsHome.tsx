@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { AccueilOpsSummary } from "@/lib/accueil/load-accueil-ops";
 import { MessagesHomeBanner } from "@/components/dashboard/MessagesHomeBanner";
+import { FacturationHomeBanner } from "@/components/dashboard/FacturationHomeBanner";
 import { cn } from "@/lib/cn";
 
 function fmtTime(iso: string) {
@@ -245,6 +246,9 @@ export function AccueilOpsHome({
 
           {/* 1b — MESSAGES (réflexe principal, sans écraser À traiter) */}
           <MessagesHomeBanner variant="card" />
+
+          {/* 1c — FACTURATION anti-oubli (masqué si rien) */}
+          <FacturationHomeBanner />
 
           {/* 2 — AUJOURD’HUI */}
           <section data-demo-target="accueil-aujourdhui">

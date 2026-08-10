@@ -89,7 +89,15 @@ function toLocalInput(iso: string | null): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
+export function FollowUpDetailClient({
+  sheet: initial,
+  backHref = "/dashboard/fiches-suivi",
+  backLabel = "← Fiches de suivi",
+}: {
+  sheet: Sheet;
+  backHref?: string;
+  backLabel?: string;
+}) {
   const [sheet, setSheet] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [postponeOpen, setPostponeOpen] = useState(false);
@@ -184,8 +192,8 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link href="/dashboard/fiches-suivi" className="text-sm font-semibold text-[#1e3a5f]">
-          ← Fiches de suivi
+        <Link href={backHref} className="text-sm font-semibold text-[#1e3a5f]">
+          {backLabel}
         </Link>
         <Link
           href="/dashboard/agenda"

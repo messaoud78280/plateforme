@@ -28,7 +28,16 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
   const [assigneeId, setAssigneeId] = useState<string>("all");
   const [clientName, setClientName] = useState<string>("all");
   const [projectTitle, setProjectTitle] = useState<string>("all");
-  const [category, setCategory] = useState<AttentionProblemCategory | "all">("all");
+  const [category, setCategory] = useState<AttentionProblemCategory | "all">(() => {
+    if (typeof window === "undefined") return "all";
+    try {
+      const c = new URLSearchParams(window.location.search).get("category");
+      if (c && c in ATTENTION_CATEGORY_LABELS) return c as AttentionProblemCategory;
+    } catch {
+      // ignore
+    }
+    return "all";
+  });
   const [subjectType, setSubjectType] = useState<AttentionSubjectType | "all">("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -178,7 +187,10 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
             className="mt-1 block rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
           >
             <option value="all">Tous</option>
-            {(Object.keys(ATTENTION_CATEGORY_LABELS) as AttentionProblemCategory[]).map((k) => (
+            <option value="FACTURATION">Facturation</option>
+            {(Object.keys(ATTENTION_CATEGORY_LABELS) as AttentionProblemCategory[])
+              .filter((k) => k !== "FACTURATION")
+              .map((k) => (
               <option key={k} value={k}>
                 {ATTENTION_CATEGORY_LABELS[k]}
               </option>

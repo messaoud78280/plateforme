@@ -25,6 +25,12 @@ import {
   BILLING_PIPELINE_STATUSES,
   BILLING_WAITING_STATUSES,
 } from "@/lib/facturation/types";
+import {
+  withPerfLog,
+  timedBranch,
+  runWithPerfContext,
+  summarizePerfQueries,
+} from "@/lib/perf/server-timing";
 
 const FACTURATION_HREF = "/dashboard/facturation";
 
@@ -42,8 +48,13 @@ export async function getBillingSnapshot(opts: {
   projectId?: string | null;
   now?: Date;
 }): Promise<BillingSnapshot> {
+  return runWithPerfContext(() =>
+    withPerfLog("facturation.total", async () => {
   const now = opts.now ?? new Date();
-  const accessWhere = await followUpSheetAccessWhere(opts.user);
+  const accessWhere = await timedBranch(
+    "facturation.accessWhere",
+    followUpSheetAccessWhere(opts.user),
+  );
 
   const statusFilter = [
     ...BILLING_PIPELINE_STATUSES,
@@ -51,7 +62,9 @@ export async function getBillingSnapshot(opts: {
     ...BILLING_DONE_STATUSES,
   ];
 
-  const sheets = await prisma.followUpSheet.findMany({
+  const sheets = await timedBranch(
+    "facturation.sheets",
+    prisma.followUpSheet.findMany({
     where: {
       AND: [
         accessWhere,
@@ -76,12 +89,15 @@ export async function getBillingSnapshot(opts: {
     },
     orderBy: [{ updatedAt: "desc" }],
     take: 200,
-  });
+  }),
+  );
 
   const organizationId =
     sheets.find((s) => s.organizationId)?.organizationId ?? null;
 
-  const attentionBatch = await loadAttentionForSheets({
+  const attentionBatch = await timedBranch(
+    "facturation.attention",
+    loadAttentionForSheets({
     sheets: sheets.map((s) => ({
       id: s.id,
       status: s.status,
@@ -92,7 +108,8 @@ export async function getBillingSnapshot(opts: {
     })),
     organizationId,
     now,
-  });
+  }),
+  );
 
   const items: BillingListItem[] = [];
   const attentionPreview: BillingSnapshot["attention"] = [];
@@ -313,6 +330,16 @@ export async function getBillingSnapshot(opts: {
     invoiceCount,
     situationCount,
   };
+    }).finally(() => {
+      const s = summarizePerfQueries(5);
+      if (s.count > 0) {
+        console.info(`[perf] facturation.queries count=${s.count}`);
+        for (const q of s.top) {
+          console.info(`[perf] facturation.top ${q.model}.${q.action} ${q.ms}ms`);
+        }
+      }
+    }),
+  );
 }
 
 /** Synthèse compacte pour un chantier (cockpit). */

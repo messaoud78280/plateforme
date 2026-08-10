@@ -32,7 +32,12 @@ import {
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
 import { ttlGet, ttlSet } from "@/lib/perf/ttl-cache";
-import { withPerfLog } from "@/lib/perf/server-timing";
+import {
+  withPerfLog,
+  timedBranch,
+  runWithPerfContext,
+  summarizePerfQueries,
+} from "@/lib/perf/server-timing";
 
 export type ATraiterSection = "bloquant" | "a_valider" | "urgent" | "relance";
 
@@ -81,9 +86,9 @@ export async function collectATraiter(
   },
   opts?: { light?: boolean; countOnly?: boolean; homePreview?: boolean; mineOnly?: boolean },
 ): Promise<ATraiterSnapshot> {
-  return withPerfLog(
-    `collectATraiter${opts?.countOnly ? ":count" : opts?.homePreview ? ":home" : opts?.light ? ":light" : ""}`,
-    async () => {
+  const label = `a-traiter${opts?.countOnly ? ".count" : opts?.homePreview ? ".home" : opts?.light ? ".light" : ".full"}`;
+  return runWithPerfContext(() =>
+    withPerfLog(label, async () => {
   const homePreview = Boolean(opts?.homePreview);
   const light = Boolean(opts?.light) || Boolean(opts?.countOnly) || homePreview;
   const countOnly = Boolean(opts?.countOnly);
@@ -94,8 +99,14 @@ export async function collectATraiter(
   const externalPortal =
     user.personType === "CLIENT_EXT" || user.personType === "SUPPLIER";
 
-  // Accueil : attention seule (pas collectForStaff/Client — PERF)
-  if (!countOnly && !homePreview) {
+  const agentOnly = isAgent(sessionUser) && !isAgencyOrManager(sessionUser);
+  const mineOnly = Boolean(opts?.mineOnly) || agentOnly;
+  /** Plafond d’échantillon attention pour le badge — jamais présenté comme exact si atteint. */
+  const attentionTake = countOnly ? 200 : homePreview ? 12 : undefined;
+
+  // Items métier + attention : indépendants → parallèle (évite waterfall staff→attention).
+  const itemsPromise = (async () => {
+    if (countOnly || homePreview) return;
     if (isClientRole(sessionUser) && !externalPortal) {
       await collectForClient(user.id, items);
     } else if (isAgencyOrManager(sessionUser) || isAgent(sessionUser)) {
@@ -103,26 +114,23 @@ export async function collectATraiter(
     } else if (isClientRole(sessionUser) && externalPortal) {
       await collectForClient(user.id, items);
     }
-  }
+  })();
 
-  const agentOnly = isAgent(sessionUser) && !isAgencyOrManager(sessionUser);
-  const mineOnly = Boolean(opts?.mineOnly) || agentOnly;
-  /** Plafond d’échantillon attention pour le badge — jamais présenté comme exact si atteint. */
-  const attentionTake = countOnly ? 200 : homePreview ? 12 : undefined;
-  const attentionResult =
-    externalPortal
-      ? { cards: [] as ATraiterAttentionCard[], capped: false }
-      : await collectUnifiedAttentionCards(
-          {
-            id: user.id,
-            role: user.role,
-            personType: user.personType,
-            permissionProfile: (user as { permissionProfile?: string | null }).permissionProfile,
-          },
-          mineOnly ? user.id : null,
-          light,
-          attentionTake,
-        );
+  const attentionPromise = externalPortal
+    ? Promise.resolve({ cards: [] as ATraiterAttentionCard[], capped: false })
+    : collectUnifiedAttentionCards(
+        {
+          id: user.id,
+          role: user.role,
+          personType: user.personType,
+          permissionProfile: (user as { permissionProfile?: string | null }).permissionProfile,
+        },
+        mineOnly ? user.id : null,
+        light,
+        attentionTake,
+      );
+
+  const [, attentionResult] = await Promise.all([itemsPromise, attentionPromise]);
   const attentionCards = attentionResult.cards;
   const attentionCapped = Boolean(
     (countOnly || homePreview) && attentionResult.capped,
@@ -169,7 +177,16 @@ export async function collectATraiter(
           : items.length),
     attentionCapped,
   };
-  });
+    }).finally(() => {
+      const s = summarizePerfQueries(5);
+      if (s.count > 0) {
+        console.info(`[perf] ${label}.queries count=${s.count}`);
+        for (const q of s.top) {
+          console.info(`[perf] ${label}.top ${q.model}.${q.action} ${q.ms}ms`);
+        }
+      }
+    }),
+  );
 }
 
 /** Compteurs SQL hot pour badge — sans findMany détail. */
@@ -580,9 +597,32 @@ async function collectUnifiedAttentionCards(
   light = false,
   takeOverride?: number,
 ): Promise<{ cards: ATraiterAttentionCard[]; capped: boolean }> {
+  // Une seule résolution org pour Follow-up + PO (évite double ensureOrganizationForOwner).
+  const sharedOrgId = isInternalPurchaseOrderActor(sessionUser)
+    ? await resolvePurchaseOrderOrgId(sessionUser)
+    : null;
+
   const [followUp, purchaseOrder] = await Promise.all([
-    collectFollowUpAttentionCards(sessionUser, assigneeOnlyId, light, takeOverride),
-    collectPurchaseOrderAttentionCards(sessionUser, assigneeOnlyId, light, takeOverride),
+    timedBranch(
+      "a-traiter.followUpAttention",
+      collectFollowUpAttentionCards(
+        sessionUser,
+        assigneeOnlyId,
+        light,
+        takeOverride,
+        sharedOrgId,
+      ),
+    ),
+    timedBranch(
+      "a-traiter.purchaseOrderAttention",
+      collectPurchaseOrderAttentionCards(
+        sessionUser,
+        assigneeOnlyId,
+        light,
+        takeOverride,
+        sharedOrgId,
+      ),
+    ),
   ]);
   const take = takeOverride ?? (light ? 40 : 120);
   const capped =
@@ -600,12 +640,19 @@ async function collectFollowUpAttentionCards(
   assigneeOnlyId: string | null,
   light = false,
   takeOverride?: number,
+  sharedOrgId?: string | null,
 ): Promise<{ cards: ATraiterAttentionCard[]; sampled: number }> {
   try {
-    const accessWhere = await followUpSheetAccessWhere(sessionUser);
-    const ownerUserId = await resolveFollowUpOwnerUserId(sessionUser.id);
+    // accessWhere // ownerUserId : indépendants → parallèle (évite waterfall session).
+    const [accessWhere, ownerUserId] = await Promise.all([
+      followUpSheetAccessWhere(sessionUser),
+      resolveFollowUpOwnerUserId(sessionUser.id),
+    ]);
     const settings = await getFollowUpSettings(ownerUserId);
-    const orgId = await ensureOrganizationForOwner(ownerUserId);
+    const orgId =
+      sharedOrgId !== undefined
+        ? sharedOrgId
+        : await ensureOrganizationForOwner(ownerUserId);
     const take = takeOverride ?? (light ? 40 : 120);
 
     const sheets = await prisma.followUpSheet.findMany({
@@ -701,11 +748,15 @@ async function collectPurchaseOrderAttentionCards(
   assigneeOnlyId: string | null,
   light = false,
   takeOverride?: number,
+  sharedOrgId?: string | null,
 ): Promise<{ cards: ATraiterAttentionCard[]; sampled: number }> {
   try {
     if (!isInternalPurchaseOrderActor(sessionUser)) return { cards: [], sampled: 0 };
 
-    const orgId = await resolvePurchaseOrderOrgId(sessionUser);
+    const orgId =
+      sharedOrgId !== undefined
+        ? sharedOrgId
+        : await resolvePurchaseOrderOrgId(sessionUser);
     if (!orgId) return { cards: [], sampled: 0 };
 
     const take = takeOverride ?? (light ? 40 : 120);

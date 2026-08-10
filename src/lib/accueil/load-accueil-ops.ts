@@ -9,7 +9,12 @@ import type { ATraiterAttentionCard } from "@/lib/a-traiter/attention-board";
 import { projectWhereForClientUser } from "@/lib/organization/access";
 import { PURCHASE_ORDER_STATUS_LABELS } from "@/lib/purchase-orders/status";
 import { purchaseOrderAttentionActionUrl } from "@/lib/purchase-orders/attention/sync-notifications";
-import { withPerfLog } from "@/lib/perf/server-timing";
+import {
+  withPerfLog,
+  timedBranch,
+  runWithPerfContext,
+  summarizePerfQueries,
+} from "@/lib/perf/server-timing";
 
 const PO_WATCH: PurchaseOrderStatus[] = [
   "A_VALIDER",
@@ -166,7 +171,8 @@ export async function loadAccueilOps(opts: {
   scope?: AccueilScope;
   now?: Date;
 }): Promise<AccueilOpsSummary> {
-  return withPerfLog("loadAccueilOps", async () => {
+  return runWithPerfContext(() =>
+    withPerfLog("accueil.total", async () => {
     const now = opts.now ?? new Date();
     const profile = (opts.permissionProfile ?? "").toUpperCase();
     const isDirection =
@@ -198,113 +204,134 @@ export async function loadAccueilOps(opts: {
 
     const [attentionSnap, projects, agendaToday, agendaSoon, ordersRaw, tasksRaw, teamEvents] =
       await Promise.all([
-        previewATraiterForHome(
-          {
-            id: opts.userId,
-            role: opts.role,
-            personType: opts.personType,
-          },
-          { mineOnly },
-        ),
-        prisma.project.findMany({
-          where: projectWhere,
-          select: { id: true, title: true },
-          orderBy: { updatedAt: "desc" },
-          take: 20,
-        }),
-        prisma.agendaEvent.findMany({
-          where: {
-            project: projectWhere,
-            status: { not: "ANNULE" },
-            startAt: { gte: day0, lte: day1 },
-          },
-          orderBy: { startAt: "asc" },
-          take: 6,
-          select: {
-            id: true,
-            title: true,
-            startAt: true,
-            type: true,
-            status: true,
-            projectId: true,
-            project: { select: { title: true } },
-          },
-        }),
-        prisma.agendaEvent.findMany({
-          where: {
-            project: projectWhere,
-            status: { not: "ANNULE" },
-            startAt: { gt: day1, lte: soon },
-          },
-          orderBy: { startAt: "asc" },
-          take: 6,
-          select: {
-            id: true,
-            title: true,
-            startAt: true,
-            type: true,
-            status: true,
-            projectId: true,
-            project: { select: { title: true } },
-          },
-        }),
-        prisma.purchaseOrder.findMany({
-          where: {
-            project: projectWhere,
-            status: { in: PO_WATCH },
-            ...(mineOnly ? { responsibleId: opts.userId } : {}),
-          },
-          orderBy: { updatedAt: "desc" },
-          take: 12,
-          select: {
-            id: true,
-            number: true,
-            status: true,
-            confirmedDeliveryAt: true,
-            requestedDeliveryAt: true,
-            proposedDeliveryStatus: true,
-            sharedWithSupplier: true,
-            project: { select: { title: true } },
-            externalOrganization: { select: { name: true, tradeName: true } },
-            lines: {
-              select: { quantity: true, receivedQty: true },
-              take: 40,
+        timedBranch(
+          "accueil.attention",
+          previewATraiterForHome(
+            {
+              id: opts.userId,
+              role: opts.role,
+              personType: opts.personType,
             },
-          },
-        }),
-        prisma.task.findMany({
-          where: {
-            status: { not: TaskStatus.COMPLETE },
-            project: projectWhere,
-            ...(mineOnly ? { assignedToId: opts.userId } : {}),
-          },
-          orderBy: [{ desiredDate: "asc" }, { updatedAt: "desc" }],
-          take: 12,
-          select: {
-            id: true,
-            title: true,
-            desiredDate: true,
-            assignedTo: { select: { name: true } },
-            project: { select: { title: true } },
-          },
-        }),
-        prisma.agendaEvent.findMany({
-          where: {
-            project: projectWhere,
-            status: { not: "ANNULE" },
-            startAt: { lte: day1 },
-            endAt: { gte: day0 },
-            responsibleId: { not: null },
-          },
-          orderBy: { startAt: "asc" },
-          take: 10,
-          select: {
-            id: true,
-            title: true,
-            responsible: { select: { id: true, name: true } },
-            project: { select: { title: true } },
-          },
-        }),
+            { mineOnly },
+          ),
+        ),
+        timedBranch(
+          "accueil.projects",
+          prisma.project.findMany({
+            where: projectWhere,
+            select: { id: true, title: true },
+            orderBy: { updatedAt: "desc" },
+            take: 20,
+          }),
+        ),
+        timedBranch(
+          "accueil.agendaToday",
+          prisma.agendaEvent.findMany({
+            where: {
+              project: projectWhere,
+              status: { not: "ANNULE" },
+              startAt: { gte: day0, lte: day1 },
+            },
+            orderBy: { startAt: "asc" },
+            take: 6,
+            select: {
+              id: true,
+              title: true,
+              startAt: true,
+              type: true,
+              status: true,
+              projectId: true,
+              project: { select: { title: true } },
+            },
+          }),
+        ),
+        timedBranch(
+          "accueil.agendaSoon",
+          prisma.agendaEvent.findMany({
+            where: {
+              project: projectWhere,
+              status: { not: "ANNULE" },
+              startAt: { gt: day1, lte: soon },
+            },
+            orderBy: { startAt: "asc" },
+            take: 6,
+            select: {
+              id: true,
+              title: true,
+              startAt: true,
+              type: true,
+              status: true,
+              projectId: true,
+              project: { select: { title: true } },
+            },
+          }),
+        ),
+        timedBranch(
+          "accueil.orders",
+          prisma.purchaseOrder.findMany({
+            where: {
+              project: projectWhere,
+              status: { in: PO_WATCH },
+              ...(mineOnly ? { responsibleId: opts.userId } : {}),
+            },
+            orderBy: { updatedAt: "desc" },
+            take: 12,
+            select: {
+              id: true,
+              number: true,
+              status: true,
+              confirmedDeliveryAt: true,
+              requestedDeliveryAt: true,
+              proposedDeliveryStatus: true,
+              sharedWithSupplier: true,
+              project: { select: { title: true } },
+              externalOrganization: { select: { name: true, tradeName: true } },
+              lines: {
+                select: { quantity: true, receivedQty: true },
+                take: 40,
+              },
+            },
+          }),
+        ),
+        timedBranch(
+          "accueil.tasks",
+          prisma.task.findMany({
+            where: {
+              status: { not: TaskStatus.COMPLETE },
+              project: projectWhere,
+              ...(mineOnly ? { assignedToId: opts.userId } : {}),
+            },
+            orderBy: [{ desiredDate: "asc" }, { updatedAt: "desc" }],
+            take: 12,
+            select: {
+              id: true,
+              title: true,
+              desiredDate: true,
+              assignedTo: { select: { name: true } },
+              project: { select: { title: true } },
+            },
+          }),
+        ),
+        timedBranch(
+          "accueil.teamEvents",
+          prisma.agendaEvent.findMany({
+            where: {
+              project: projectWhere,
+              status: { not: "ANNULE" },
+              startAt: { lte: day1 },
+              endAt: { gte: day0 },
+              responsibleId: { not: null },
+            },
+            orderBy: { startAt: "asc" },
+            take: 10,
+            select: {
+              id: true,
+              title: true,
+              responsible: { select: { id: true, name: true } },
+              project: { select: { title: true } },
+            },
+          }),
+        ),
       ]);
 
     const projectIds = projects.map((p) => p.id);
@@ -440,7 +467,9 @@ export async function loadAccueilOps(opts: {
       .map(({ score: _s, ...rest }) => rest);
 
     const agendaSource = agendaToday.length > 0 ? agendaToday : agendaSoon;
-    const agendaTitle = agendaToday.length > 0 ? "Aujourd’hui" : "Prochainement";
+    const agendaTitle = (
+      agendaToday.length > 0 ? "Aujourd’hui" : "Prochainement"
+    ) as AccueilOpsSummary["agendaTitle"];
 
     const issueStatuses = new Set([
       "A_CONFIRMER",
@@ -597,5 +626,14 @@ export async function loadAccueilOps(opts: {
         nouveauDocument: "/dashboard/documents",
       },
     };
-  });
+    }).finally(() => {
+      const s = summarizePerfQueries(5);
+      if (s.count > 0) {
+        console.info(`[perf] accueil.queries count=${s.count}`);
+        for (const q of s.top) {
+          console.info(`[perf] accueil.top ${q.model}.${q.action} ${q.ms}ms`);
+        }
+      }
+    }),
+  );
 }

@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { isPerfLogEnabled, recordPerfQuery } from "@/lib/perf/server-timing";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
@@ -17,19 +18,63 @@ function getConnectionUrl(): string {
 
 const connectionUrl = getConnectionUrl();
 
-// En production, ne pas faire planter l'app au chargement si DATABASE_URL manque
-// (évite "Application error" au premier rendu). La première requête DB échouera proprement.
 if (!connectionUrl && process.env.NODE_ENV === "production") {
   console.error(
-    "[Prisma] DATABASE_URL (ou DIRECT_URL) manquant. Vérifiez les variables d'environnement Railway."
+    "[Prisma] DATABASE_URL (ou DIRECT_URL) manquant. Vérifiez les variables d'environnement Railway.",
   );
 }
 
-export const prisma: PrismaClient =
+const enablePerfQuery = isPerfLogEnabled();
+
+const baseClient =
   globalForPrisma.prisma ??
   new PrismaClient({
     datasourceUrl: connectionUrl || "postgresql://localhost:5432/placeholder",
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    log: ["error"],
   });
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+/**
+ * PERF_DEBUG : extension dans le même AsyncLocalStorage que l’appelant
+ * ($on('query') sortait du contexte ALS → compteur à 0).
+ */
+function withPerfExtension(client: PrismaClient): PrismaClient {
+  if (!enablePerfQuery) return client;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const extended = (client as any).$extends({
+    query: {
+      $allModels: {
+        async $allOperations({
+          model,
+          operation,
+          args,
+          query,
+        }: {
+          model?: string;
+          operation: string;
+          args: unknown;
+          query: (args: unknown) => Promise<unknown>;
+        }) {
+          const t0 = Date.now();
+          try {
+            return await query(args);
+          } finally {
+            const ms = Date.now() - t0;
+            recordPerfQuery({
+              model: model ?? "sql",
+              action: operation,
+              ms,
+            });
+            if (ms >= 40) {
+              console.info(`[perf] prisma.${model ?? "sql"}.${operation} ${ms}ms`);
+            }
+          }
+        },
+      },
+    },
+  });
+  return extended as PrismaClient;
+}
+
+export const prisma: PrismaClient = withPerfExtension(baseClient);
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = baseClient;

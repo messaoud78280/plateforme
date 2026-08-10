@@ -16,6 +16,7 @@ import {
   isMessagingAccessActive,
   type DirectAclUser,
 } from "@/lib/messaging/direct-acl";
+import { withPerfLog, timedBranch, runWithPerfContext } from "@/lib/perf/server-timing";
 
 function sortMessagerieRecipients(list: MessagerieRecipient[]): MessagerieRecipient[] {
   const priority = new Map<string, number>([
@@ -137,6 +138,8 @@ function keepIfMessageable(
 }
 
 export default async function MessageriePage() {
+  return runWithPerfContext(() =>
+    withPerfLog("messagerie.page", async () => {
   const session = await getCachedServerSession();
 
   if (!session?.user?.id) {
@@ -185,10 +188,33 @@ export default async function MessageriePage() {
     if (isManager || isAgent || (isClient && meInternal)) {
       // Pair internes + externes liés à l’organisation (personas démo incluses).
       if (orgId && senderAcl) {
-        const members = await prisma.organizationMember.findMany({
-          where: { organizationId: orgId },
-          select: { user: { select: USER_SELECT } },
-        });
+        const [members, externals] = await Promise.all([
+          timedBranch(
+            "messagerie.orgMembers",
+            prisma.organizationMember.findMany({
+              where: { organizationId: orgId },
+              select: { user: { select: USER_SELECT } },
+            }),
+          ),
+          timedBranch(
+            "messagerie.externals",
+            prisma.user.findMany({
+              where: {
+                personType: { in: ["CLIENT_EXT", "SUPPLIER", "SUBCONTRACTOR"] },
+                OR: [
+                  { externalOrganization: { hostOrganizationId: orgId } },
+                  {
+                    projectAccesses: {
+                      some: { project: { organizationId: orgId } },
+                    },
+                  },
+                ],
+              },
+              select: USER_SELECT,
+              take: 80,
+            }),
+          ),
+        ]);
         const byId = new Map<string, MessagerieRecipient>();
         for (const m of members) {
           if (!m.user || m.user.id === session.user.id) continue;
@@ -197,22 +223,6 @@ export default async function MessageriePage() {
           if (rec) byId.set(rec.id, rec);
         }
 
-        // Externes Point.P / syndic via ProjectAccess / ExternalOrganization host
-        const externals = await prisma.user.findMany({
-          where: {
-            personType: { in: ["CLIENT_EXT", "SUPPLIER", "SUBCONTRACTOR"] },
-            OR: [
-              { externalOrganization: { hostOrganizationId: orgId } },
-              {
-                projectAccesses: {
-                  some: { project: { organizationId: orgId } },
-                },
-              },
-            ],
-          },
-          select: USER_SELECT,
-          take: 80,
-        });
         for (const u of externals) {
           if (u.id === session.user.id) continue;
           const rec = keepIfMessageable(senderAcl, u);
@@ -225,10 +235,13 @@ export default async function MessageriePage() {
             (c) => c.email,
           );
           if (visibleStaffEmails.length > 0) {
-            const staffUsers = await prisma.user.findMany({
-              where: { email: { in: visibleStaffEmails } },
-              select: USER_SELECT,
-            });
+            const staffUsers = await timedBranch(
+              "messagerie.demoStaff",
+              prisma.user.findMany({
+                where: { email: { in: visibleStaffEmails } },
+                select: USER_SELECT,
+              }),
+            );
             for (const u of staffUsers) {
               if (u.id === session.user.id) continue;
               if (isDemoStaffHiddenFromMessaging(u.email)) continue;
@@ -361,5 +374,7 @@ export default async function MessageriePage() {
         />
       </Suspense>
     </div>
+  );
+    }),
   );
 }

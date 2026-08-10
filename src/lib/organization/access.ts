@@ -30,17 +30,25 @@ export async function ensureOrganizationForOwner(ownerUserId: string): Promise<s
     select: { id: true },
   });
   if (existing) {
-    await prisma.organizationMember.upsert({
+    // Lecture seule si déjà membre — évite upsert write à chaque Accueil / À traiter.
+    const membership = await prisma.organizationMember.findUnique({
       where: {
-        organizationId_userId: { organizationId: existing.id, userId: ownerUserId },
+        organizationId_userId: {
+          organizationId: existing.id,
+          userId: ownerUserId,
+        },
       },
-      create: {
-        organizationId: existing.id,
-        userId: ownerUserId,
-        role: "OWNER",
-      },
-      update: { role: "OWNER" },
+      select: { id: true },
     });
+    if (!membership) {
+      await prisma.organizationMember.create({
+        data: {
+          organizationId: existing.id,
+          userId: ownerUserId,
+          role: "OWNER",
+        },
+      });
+    }
     return existing.id;
   }
 

@@ -26,6 +26,12 @@ import {
 } from "@/lib/messagerie/resolve-conversation";
 import { CHANTIER_STATUS_LABELS } from "@/lib/chantier-dossier/constants";
 import { isSharedVisibility } from "@/lib/equipe-acces/project-access";
+import {
+  withPerfLog,
+  timedBranch,
+  runWithPerfContext,
+  summarizePerfQueries,
+} from "@/lib/perf/server-timing";
 
 const OPEN_TASK = { not: TaskStatus.COMPLETE };
 
@@ -197,6 +203,8 @@ export async function loadChantierCockpitOps(opts: {
   /** Vue externe : pas d’attention / commandes / tâches internes. */
   externalViewer?: boolean;
 }): Promise<ChantierOpsSummary> {
+  return runWithPerfContext(() =>
+    withPerfLog("cockpit.total", async () => {
   const now = opts.now ?? new Date();
   const projectId = opts.projectId;
   const day0 = startOfDay(now);
@@ -299,13 +307,17 @@ export async function loadChantierCockpitOps(opts: {
     tasksRaw,
     messagesRaw,
     docsRaw,
-    sheetsList,
   ] = await Promise.all([
-    prisma.project.findUnique({
+    timedBranch(
+      "cockpit.project",
+      prisma.project.findUnique({
       where: { id: projectId },
       select: { organizationId: true },
     }),
-    prisma.followUpSheet.findMany({
+    ),
+    timedBranch(
+      "cockpit.sheets",
+      prisma.followUpSheet.findMany({
       where: {
         projectId,
         status: { notIn: ["TERMINE", "ARCHIVE"] },
@@ -329,7 +341,10 @@ export async function loadChantierCockpitOps(opts: {
         assignee: { select: { name: true } },
       },
     }),
-    prisma.purchaseOrder.findMany({
+    ),
+    timedBranch(
+      "cockpit.orders",
+      prisma.purchaseOrder.findMany({
       where: { projectId, status: { in: PO_ACTIVE } },
       take: 20,
       orderBy: { updatedAt: "desc" },
@@ -391,7 +406,10 @@ export async function loadChantierCockpitOps(opts: {
         },
       },
     }),
-    prisma.agendaEvent.findMany({
+    ),
+    timedBranch(
+      "cockpit.agenda",
+      prisma.agendaEvent.findMany({
       where: {
         projectId,
         status: { not: "ANNULE" },
@@ -408,7 +426,10 @@ export async function loadChantierCockpitOps(opts: {
         purchaseOrderId: true,
       },
     }),
-    prisma.agendaEvent.findMany({
+    ),
+    timedBranch(
+      "cockpit.teamEvents",
+      prisma.agendaEvent.findMany({
       where: {
         projectId,
         status: { not: "ANNULE" },
@@ -426,10 +447,16 @@ export async function loadChantierCockpitOps(opts: {
         responsible: { select: { id: true, name: true } },
       },
     }),
-    prisma.task.count({
+    ),
+    timedBranch(
+      "cockpit.openTasksCount",
+      prisma.task.count({
       where: { projectId, status: OPEN_TASK },
     }),
-    prisma.agendaEvent.count({
+    ),
+    timedBranch(
+      "cockpit.deliveriesWeek",
+      prisma.agendaEvent.count({
       where: {
         projectId,
         type: "LIVRAISON",
@@ -437,13 +464,19 @@ export async function loadChantierCockpitOps(opts: {
         startAt: { gte: day0, lte: weekEnd },
       },
     }),
-    prisma.purchaseOrder.count({
+    ),
+    timedBranch(
+      "cockpit.ordersToConfirm",
+      prisma.purchaseOrder.count({
       where: {
         projectId,
         status: { in: ["A_CONFIRMER", "ENVOYEE_FOURNISSEUR", "A_VALIDER"] },
       },
     }),
-    prisma.task.findMany({
+    ),
+    timedBranch(
+      "cockpit.tasks",
+      prisma.task.findMany({
       where: { projectId, status: OPEN_TASK },
       orderBy: [{ desiredDate: "asc" }, { updatedAt: "desc" }],
       take: 8,
@@ -454,7 +487,10 @@ export async function loadChantierCockpitOps(opts: {
         assignedTo: { select: { name: true } },
       },
     }),
-    prisma.message.findMany({
+    ),
+    timedBranch(
+      "cockpit.messages",
+      prisma.message.findMany({
       where: { projectId },
       orderBy: { createdAt: "desc" },
       take: 3,
@@ -466,29 +502,29 @@ export async function loadChantierCockpitOps(opts: {
         sender: { select: { name: true } },
       },
     }),
-    prisma.chantierFile.findMany({
+    ),
+    timedBranch(
+      "cockpit.documents",
+      prisma.chantierFile.findMany({
       where: { projectId },
       orderBy: { createdAt: "desc" },
       take: 5,
       select: { id: true, name: true, createdAt: true, fileUrl: true },
     }),
-    prisma.followUpSheet.findMany({
-      where: {
-        projectId,
-        status: { notIn: ["TERMINE", "ARCHIVE"] },
-      },
-      orderBy: { updatedAt: "desc" },
-      take: 4,
-      select: { id: true, title: true, status: true },
-    }),
+    ),
   ]);
+
+  // Dérivé de sheetsRaw — évite 2e findMany FollowUpSheet identique.
+  const sheetsList = sheetsRaw.slice(0, 4);
 
   const organizationId =
     projectOrg?.organizationId ??
     sheetsRaw.find((s) => s.organizationId)?.organizationId ??
     null;
 
-  const attentionBatch = await loadAttentionForSheets({
+  const attentionBatch = await timedBranch(
+    "cockpit.loadAttention",
+    loadAttentionForSheets({
     sheets: sheetsRaw.map((s) => ({
       id: s.id,
       status: s.status,
@@ -499,7 +535,8 @@ export async function loadChantierCockpitOps(opts: {
     })),
     organizationId,
     now,
-  });
+  }),
+  );
 
   const cards: ATraiterAttentionCard[] = [];
   for (const s of sheetsRaw) {
@@ -764,6 +801,16 @@ export async function loadChantierCockpitOps(opts: {
     })),
     links,
   };
+    }).finally(() => {
+      const s = summarizePerfQueries(5);
+      if (s.count > 0) {
+        console.info(`[perf] cockpit.queries count=${s.count}`);
+        for (const q of s.top) {
+          console.info(`[perf] cockpit.top ${q.model}.${q.action} ${q.ms}ms`);
+        }
+      }
+    }),
+  );
 }
 
 export function chantierStatusDisplayLabel(status: string) {

@@ -13,6 +13,11 @@ import {
 } from "@/lib/purchase-orders/attention/evaluate";
 import type { PurchaseOrderAttentionInput } from "@/lib/purchase-orders/attention/types";
 import { PURCHASE_ORDER_STATUS_LABELS } from "@/lib/purchase-orders/status";
+import {
+  withPerfLog,
+  runWithPerfContext,
+  summarizePerfQueries,
+} from "@/lib/perf/server-timing";
 
 export type PurchaseOrderListDeliveryKind = "confirmed" | "proposed" | "requested" | "none";
 
@@ -122,6 +127,8 @@ export async function loadPurchaseOrdersListView(opts: {
   take?: number;
   now?: Date;
 }): Promise<{ rows: PurchaseOrderListRow[]; summary: PurchaseOrderListSummary }> {
+  return runWithPerfContext(() =>
+    withPerfLog("commandes.listView", async () => {
   const take = opts.take ?? 80;
   const now = opts.now ?? new Date();
 
@@ -327,4 +334,14 @@ export async function loadPurchaseOrdersListView(opts: {
       needingAttention,
     },
   };
+    }).finally(() => {
+      const s = summarizePerfQueries(5);
+      if (s.count > 0) {
+        console.info(`[perf] commandes.queries count=${s.count}`);
+        for (const q of s.top) {
+          console.info(`[perf] commandes.top ${q.model}.${q.action} ${q.ms}ms`);
+        }
+      }
+    }),
+  );
 }

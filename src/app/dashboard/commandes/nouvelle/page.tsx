@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { BackLink } from "@/components/ui/BackLink";
+import { ContextBackButton } from "@/components/ui/ContextBackButton";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { CreatePurchaseOrderForm } from "@/components/purchase-orders/CreatePurchaseOrderForm";
 import {
@@ -10,19 +10,21 @@ import {
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
 import { projectWhereForClientUser } from "@/lib/organization/access";
+import { sanitizeInternalReturnTo } from "@/lib/navigation/safe-return-to";
 
 export const dynamic = "force-dynamic";
 
 export default async function NouvelleCommandePage({
   searchParams,
 }: {
-  searchParams: Promise<{ projectId?: string }>;
+  searchParams: Promise<{ projectId?: string; returnTo?: string }>;
 }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/commandes/nouvelle");
   if (!isInternalPurchaseOrderActor(session.user)) redirect("/dashboard/commandes");
 
-  const { projectId: projectIdParam } = await searchParams;
+  const { projectId: projectIdParam, returnTo: returnToRaw } = await searchParams;
+  const returnTo = sanitizeInternalReturnTo(returnToRaw, "/dashboard/commandes");
 
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) redirect("/dashboard/commandes");
@@ -53,7 +55,11 @@ export default async function NouvelleCommandePage({
 
   return (
     <div className="space-y-6">
-      <BackLink href="/dashboard/commandes">Commandes</BackLink>
+      <ContextBackButton
+        label="Retour aux commandes"
+        fallbackHref="/dashboard/commandes"
+        returnTo={returnTo}
+      />
       <PageHeader
         eyebrow="Commandes"
         title="Nouvelle commande"

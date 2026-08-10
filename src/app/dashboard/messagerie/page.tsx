@@ -10,11 +10,25 @@ import {
   DEMO_STAFF_CONTACTS,
   isDemoStaffHiddenFromMessaging,
 } from "@/lib/demo-environment/demo-staff-names";
+import { DEMO_PERSONAS } from "@/lib/demo-environment/personas";
 import {
   evaluateDirectMessageAcl,
   isMessagingAccessActive,
   type DirectAclUser,
 } from "@/lib/messaging/direct-acl";
+
+function sortMessagerieRecipients(list: MessagerieRecipient[]): MessagerieRecipient[] {
+  const priority = new Map<string, number>([
+    [DEMO_PERSONAS.administratif.name, 0],
+    [DEMO_PERSONAS.conducteur.name, 1],
+  ]);
+  return [...list].sort((a, b) => {
+    const pa = priority.has(a.name) ? (priority.get(a.name) as number) : a.partyType === "INTERNAL" ? 10 : 20;
+    const pb = priority.has(b.name) ? (priority.get(b.name) as number) : b.partyType === "INTERNAL" ? 10 : 20;
+    if (pa !== pb) return pa - pb;
+    return a.name.localeCompare(b.name, "fr");
+  });
+}
 
 export type MessagerieRecipient = {
   id: string;
@@ -205,7 +219,7 @@ export default async function MessageriePage() {
           if (rec) byId.set(rec.id, rec);
         }
 
-        // Staff démo visibles (Sophie Lefèvre, Karim Adjaili) — hors org, filtrés par ACL.
+        // Staff démo optionnels (showInDemoMessaging) — hors org, filtrés par ACL.
         if (isDemoSession) {
           const visibleStaffEmails = DEMO_STAFF_CONTACTS.filter((c) => c.showInDemoMessaging).map(
             (c) => c.email,
@@ -224,7 +238,7 @@ export default async function MessageriePage() {
           }
         }
 
-        recipients = [...byId.values()].sort((a, b) => a.name.localeCompare(b.name, "fr"));
+        recipients = sortMessagerieRecipients([...byId.values()]);
         agents = recipients
           .filter((r) => r.partyType === "INTERNAL")
           .map((r) => ({ id: r.id, name: r.name, role: r.role }));
@@ -276,7 +290,7 @@ export default async function MessageriePage() {
           if (u.id === session.user.id) continue;
           map.set(u.id, toRecipient(u));
         }
-        recipients = [...map.values()].sort((a, b) => a.name.localeCompare(b.name, "fr"));
+        recipients = sortMessagerieRecipients([...map.values()]);
       }
     } else if (isClient) {
       const [assignedAgents, managers] = await Promise.all([

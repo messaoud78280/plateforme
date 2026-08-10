@@ -345,7 +345,7 @@ function AttentionCard({
           card.category === "RECEPTION" ||
           card.category === "BL") ? (
           <Link
-            href={`/dashboard/commandes/${card.subjectId}/reception`}
+            href={`/dashboard/commandes/${card.subjectId}/reception?returnTo=${encodeURIComponent("/dashboard/a-traiter")}`}
             className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
           >
             Réceptionner

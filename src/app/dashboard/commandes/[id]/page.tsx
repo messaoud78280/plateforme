@@ -12,19 +12,23 @@ import { sanitizeOrderForSupplier } from "@/lib/purchase-orders/supplier-collabo
 import { getPurchaseOrderReceivingState } from "@/lib/purchase-orders/receiving";
 import { canReceivePurchaseOrder } from "@/lib/purchase-orders/receiving";
 import { PurchaseOrderDetailClient } from "@/components/purchase-orders/PurchaseOrderDetailClient";
+import { sanitizeInternalReturnTo } from "@/lib/navigation/safe-return-to";
 
 export const dynamic = "force-dynamic";
 
 export default async function CommandeDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ returnTo?: string }>;
 }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/commandes");
   if (!canListPurchaseOrders(session.user)) redirect("/dashboard");
 
   const { id } = await params;
+  const { returnTo: returnToRaw } = await searchParams;
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) redirect("/dashboard/commandes");
 
@@ -68,6 +72,7 @@ export default async function CommandeDetailPage({
       }
       isSupplierView={isSupplier}
       receiving={receiving}
+      returnTo={sanitizeInternalReturnTo(returnToRaw, "/dashboard/commandes")}
     />
   );
 }

@@ -12,6 +12,11 @@ import {
 } from "@/lib/purchase-orders/supplier-ui";
 import type { PurchaseOrderStatus } from "@prisma/client";
 import { PurchaseOrderMessagerieLink } from "@/components/messagerie/MessagerieContextLinks";
+import { ContextBackButton } from "@/components/ui/ContextBackButton";
+import {
+  contextBackLabelForHref,
+  sanitizeInternalReturnTo,
+} from "@/lib/navigation/safe-return-to";
 
 const FOCUS_IDS: Record<string, string> = {
   proposal: "po-focus-proposal",
@@ -141,12 +146,15 @@ export function PurchaseOrderDetailClient({
   canReceive = false,
   isSupplierView = false,
   receiving = null,
+  returnTo: returnToProp = null,
 }: {
   order: OrderDetail;
   canAct: boolean;
   canReceive?: boolean;
   isSupplierView?: boolean;
   receiving?: ReceivingState;
+  /** Chemin interne validé (?returnTo=) — ex. À traiter / chantier. */
+  returnTo?: string | null;
 }) {
   const [order, setOrder] = useState(initial);
   const [busy, setBusy] = useState(false);
@@ -158,6 +166,9 @@ export function PurchaseOrderDetailClient({
   const [refuseKey, setRefuseKey] = useState<string>("STOCK");
   const [shareContactId, setShareContactId] = useState(order.contact?.id ?? "");
   const [focusHighlight, setFocusHighlight] = useState<string | null>(null);
+
+  const safeReturnTo = sanitizeInternalReturnTo(returnToProp, "/dashboard/commandes");
+  const backLabel = contextBackLabelForHref(safeReturnTo, "Retour aux commandes");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -252,9 +263,11 @@ export function PurchaseOrderDetailClient({
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link href="/dashboard/commandes" className="text-sm font-semibold text-[#1e3a5f]">
-          ← Commandes
-        </Link>
+        <ContextBackButton
+          label={backLabel}
+          fallbackHref="/dashboard/commandes"
+          returnTo={safeReturnTo}
+        />
         {!isSupplierView && order.followUpSheet ? (
           <Link
             href={`/dashboard/fiches-suivi/${order.followUpSheet.id}`}

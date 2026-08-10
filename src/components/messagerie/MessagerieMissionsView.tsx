@@ -60,6 +60,8 @@ import {
   maybeRedactReplyExcerpt,
   type MessageDeleteMode,
 } from "@/lib/messagerie/message-delete";
+import { ContextBackButton } from "@/components/ui/ContextBackButton";
+import { DEMO_PERSONAS } from "@/lib/demo-environment/personas";
 
 const MessageBeworkActions = dynamic(
   () =>
@@ -416,6 +418,8 @@ export function MessagerieMissionsView({
   const [dragOver, setDragOver] = useState(false);
   const [listSearch, setListSearch] = useState("");
   const [recipientSearch, setRecipientSearch] = useState("");
+  /** Après sélection : replier la liste au profit de la fiche destinataire. */
+  const [recipientPickerOpen, setRecipientPickerOpen] = useState(true);
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
   const [pendingNewCount, setPendingNewCount] = useState(0);
@@ -1614,6 +1618,16 @@ export function MessagerieMissionsView({
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
+  function openNewMessageComposer() {
+    setFilter("envoyer");
+    setDirectRecipientId("");
+    setRecipientPickerOpen(true);
+    setRecipientSearch("");
+    setDirectAttemptedSend(false);
+    setDirectSendError(null);
+    setMobileShowThread(false);
+  }
+
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center bg-[#f0f2f5]">
@@ -1626,7 +1640,21 @@ export function MessagerieMissionsView({
     <div className="mx-auto flex h-full min-h-0 w-full max-w-[1600px] overflow-hidden bg-[#f0f2f5] shadow-2xl">
       {/* Pas de rail d’icônes abstraites — navigation dans la colonne liste */}
       {filter === "envoyer" ? (
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-white p-6">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-white p-4 sm:p-6">
+          <ContextBackButton
+            label="Retour aux conversations"
+            fallbackHref="/dashboard/messagerie"
+            onBack={() => {
+              setFilter("messages-directs");
+              setDirectRecipientId("");
+              setRecipientPickerOpen(true);
+              setRecipientSearch("");
+              setDirectAttemptedSend(false);
+              setDirectSendError(null);
+              setMobileShowThread(false);
+            }}
+            className="mb-3"
+          />
           <h2 className="mb-1 text-lg font-semibold text-[#111b21]">Nouveau message</h2>
           <p className="mb-4 text-sm text-[#667781]">À qui souhaitez-vous écrire ?</p>
           <form
@@ -1637,79 +1665,213 @@ export function MessagerieMissionsView({
             className="space-y-4"
           >
             <div>
-              <input
-                id="recipient-search"
-                type="search"
-                value={recipientSearch}
-                onChange={(e) => setRecipientSearch(e.target.value)}
-                placeholder="Rechercher Karim, Point.P, Horizon Copro, Les Lilas…"
-                autoFocus
-                className="mb-3 w-full rounded-xl border border-[#d1d7db] px-4 py-3 text-sm text-[#111b21] focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/15"
-              />
-              <ul className="max-h-72 overflow-y-auto rounded-xl border border-[#e9edef]">
-                {recipients
-                  .filter((r) => r.id !== sessionUserId)
-                  .filter((r) => {
-                    if (!recipientSearch.trim()) return true;
-                    const q = recipientSearch.toLowerCase();
-                    const party = partyForRecipient(r);
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">À</p>
+              {directRecipientId && !recipientPickerOpen ? (
+                (() => {
+                  const chosen = recipients.find((r) => r.id === directRecipientId);
+                  if (!chosen) return null;
+                  const party = partyForRecipient(chosen);
+                  const initials = chosen.name
+                    .split(/\s+/)
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((p) => p[0]?.toUpperCase() ?? "")
+                    .join("");
+                  const subtitle =
+                    party.partyType === "INTERNAL"
+                      ? `${internalProfileLabel(chosen.permissionProfile)} · Interne`
+                      : [chosen.company, party.shortLabel].filter(Boolean).join(" · ");
+                  return (
+                    <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#1e3a5f]/25 bg-[#eef2f7] px-3 py-3">
+                      <span
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1e3a5f] text-xs font-bold text-white"
+                        aria-hidden
+                      >
+                        {initials || "?"}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-[#111b21]">{chosen.name}</p>
+                        <p className="text-[11px] font-medium text-slate-500">{subtitle}</p>
+                      </div>
+                      <button
+                        type="button"
+                        aria-label="Retirer le destinataire"
+                        onClick={() => {
+                          setDirectRecipientId("");
+                          setRecipientPickerOpen(true);
+                          setDirectAttemptedSend(false);
+                          setDirectSendError(null);
+                        }}
+                        className="flex h-10 w-10 items-center justify-center rounded-full text-slate-500 hover:bg-white hover:text-red-600"
+                      >
+                        ×
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRecipientPickerOpen(true)}
+                        className="rounded-lg px-2.5 py-2 text-xs font-semibold text-[#1e3a5f] hover:bg-white"
+                      >
+                        Changer
+                      </button>
+                    </div>
+                  );
+                })()
+              ) : null}
+
+              {recipientPickerOpen || !directRecipientId ? (
+                <>
+                  <input
+                    id="recipient-search"
+                    type="search"
+                    value={recipientSearch}
+                    onChange={(e) => setRecipientSearch(e.target.value)}
+                    placeholder="Rechercher Karim, Point.P, un client, un chantier…"
+                    autoFocus
+                    className="mb-3 w-full rounded-xl border border-[#d1d7db] px-4 py-3 text-sm text-[#111b21] focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/15"
+                  />
+                  {(() => {
+                    const priorityNames = new Set([
+                      DEMO_PERSONAS.administratif.name,
+                      DEMO_PERSONAS.conducteur.name,
+                    ]);
+                    const q = recipientSearch.trim().toLowerCase();
+                    const filtered = recipients
+                      .filter((r) => r.id !== sessionUserId)
+                      .filter((r) => {
+                        if (!q) return true;
+                        const party = partyForRecipient(r);
+                        return (
+                          r.name.toLowerCase().includes(q) ||
+                          (r.company ?? "").toLowerCase().includes(q) ||
+                          party.shortLabel.toLowerCase().includes(q) ||
+                          (r.permissionProfile ?? "").toLowerCase().includes(q)
+                        );
+                      })
+                      .sort((a, b) => {
+                        if (!q) {
+                          const ta = partyForRecipient(a).partyType;
+                          const tb = partyForRecipient(b).partyType;
+                          const pa = priorityNames.has(a.name) ? 0 : ta === "INTERNAL" ? 1 : 2;
+                          const pb = priorityNames.has(b.name) ? 0 : tb === "INTERNAL" ? 1 : 2;
+                          if (pa !== pb) return pa - pb;
+                          if (priorityNames.has(a.name) && priorityNames.has(b.name)) {
+                            if (a.name === DEMO_PERSONAS.administratif.name) return -1;
+                            if (b.name === DEMO_PERSONAS.administratif.name) return 1;
+                          }
+                        }
+                        return a.name.localeCompare(b.name, "fr");
+                      });
+
+                    const groups: { key: string; label: string; items: typeof filtered }[] = [
+                      { key: "team", label: "Équipe", items: [] },
+                      { key: "clients", label: "Clients", items: [] },
+                      { key: "suppliers", label: "Fournisseurs", items: [] },
+                      { key: "other", label: "Autres", items: [] },
+                    ];
+                    for (const r of filtered) {
+                      const party = partyForRecipient(r);
+                      if (party.partyType === "INTERNAL") groups[0].items.push(r);
+                      else if (party.partyType === "CLIENT") groups[1].items.push(r);
+                      else if (party.partyType === "SUPPLIER") groups[2].items.push(r);
+                      else groups[3].items.push(r);
+                    }
+                    const visibleGroups = groups.filter((g) => g.items.length > 0);
+                    const showGroupHeaders = visibleGroups.length > 1 && filtered.length >= 4;
+
                     return (
-                      r.name.toLowerCase().includes(q) ||
-                      (r.company ?? "").toLowerCase().includes(q) ||
-                      party.shortLabel.toLowerCase().includes(q) ||
-                      (r.permissionProfile ?? "").toLowerCase().includes(q)
-                    );
-                  })
-                  .map((r) => {
-                    const party = partyForRecipient(r);
-                    const selected = directRecipientId === r.id;
-                    const subtitle =
-                      party.partyType === "INTERNAL"
-                        ? `${internalProfileLabel(r.permissionProfile)} · Interne`
-                        : [r.company, party.shortLabel].filter(Boolean).join(" · ");
-                    return (
-                      <li key={r.id}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDirectRecipientId(r.id);
-                            setDirectAttemptedSend(false);
-                            setDirectSendError(null);
-                            // Conversation existante → ouvrir le fil directement
-                            const existing = directConversations.find((c) => c.user.id === r.id);
-                            if (existing?.lastMessage) {
-                              setSelectedDirectContactId(r.id);
-                              setFilter("messages-directs");
-                              setMobileShowThread(true);
-                            }
-                          }}
-                          className={`flex w-full items-start gap-3 px-3 py-3 text-left text-sm ${
-                            selected ? "bg-[#eef2f7]" : "hover:bg-[#f8fafc]"
-                          }`}
-                        >
-                          <Avatar name={r.name} size="sm" />
-                          <span className="min-w-0 flex-1">
-                            <span className="block font-semibold text-[#111b21]">
-                              {r.name}
-                              {r.company && party.partyType !== "INTERNAL" ? (
-                                <span className="font-normal text-slate-500"> — {r.company}</span>
+                      <ul className="max-h-72 overflow-y-auto rounded-xl border border-[#e9edef]">
+                        {filtered.length === 0 ? (
+                          <li className="px-3 py-4 text-sm text-[#667781]">Aucun contact trouvé.</li>
+                        ) : (
+                          visibleGroups.map((group) => (
+                            <li key={group.key} className="list-none">
+                              {showGroupHeaders ? (
+                                <p className="sticky top-0 bg-[#f8fafc] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                  {group.label}
+                                </p>
                               ) : null}
-                            </span>
-                            <span
-                              className={`mt-0.5 block text-[11px] font-semibold ${messagingPartyToneClass(
-                                party.partyType,
-                              )}`}
-                            >
-                              {formatPartyBadge(party)}
-                              {party.partyType === "INTERNAL" ? ` · ${internalProfileLabel(r.permissionProfile)}` : null}
-                            </span>
-                            <span className="sr-only">{subtitle}</span>
-                          </span>
-                        </button>
-                      </li>
+                              <ul>
+                                {group.items.map((r) => {
+                                  const party = partyForRecipient(r);
+                                  const selected = directRecipientId === r.id;
+                                  const subtitle =
+                                    party.partyType === "INTERNAL"
+                                      ? `${internalProfileLabel(r.permissionProfile)} · Interne`
+                                      : [r.company, party.shortLabel].filter(Boolean).join(" · ");
+                                  return (
+                                    <li key={r.id}>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setDirectRecipientId(r.id);
+                                          setDirectAttemptedSend(false);
+                                          setDirectSendError(null);
+                                          const existing = directConversations.find(
+                                            (c) => c.user.id === r.id,
+                                          );
+                                          if (existing?.lastMessage) {
+                                            setSelectedDirectContactId(r.id);
+                                            setFilter("messages-directs");
+                                            setMobileShowThread(true);
+                                            setRecipientPickerOpen(true);
+                                            return;
+                                          }
+                                          setRecipientPickerOpen(false);
+                                          setRecipientSearch("");
+                                        }}
+                                        className={`flex w-full items-start gap-3 px-3 py-3 text-left text-sm transition-colors ${
+                                          selected
+                                            ? "bg-[#dbe7f3] ring-1 ring-inset ring-[#1e3a5f]/20"
+                                            : "hover:bg-[#f8fafc]"
+                                        }`}
+                                      >
+                                        <Avatar name={r.name} size="sm" />
+                                        <span className="min-w-0 flex-1">
+                                          <span className="flex items-center gap-2">
+                                            <span className="block font-semibold text-[#111b21]">
+                                              {r.name}
+                                              {r.company && party.partyType !== "INTERNAL" ? (
+                                                <span className="font-normal text-slate-500">
+                                                  {" "}
+                                                  — {r.company}
+                                                </span>
+                                              ) : null}
+                                            </span>
+                                            {selected ? (
+                                              <span
+                                                className="ml-auto shrink-0 text-[#1e3a5f]"
+                                                aria-hidden
+                                              >
+                                                ✓
+                                              </span>
+                                            ) : null}
+                                          </span>
+                                          <span
+                                            className={`mt-0.5 block text-[11px] font-semibold ${messagingPartyToneClass(
+                                              party.partyType,
+                                            )}`}
+                                          >
+                                            {formatPartyBadge(party)}
+                                            {party.partyType === "INTERNAL"
+                                              ? ` · ${internalProfileLabel(r.permissionProfile)}`
+                                              : null}
+                                          </span>
+                                          <span className="sr-only">{subtitle}</span>
+                                        </span>
+                                      </button>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </li>
+                          ))
+                        )}
+                      </ul>
                     );
-                  })}
-              </ul>
+                  })()}
+                </>
+              ) : null}
+
               {directAttemptedSend && !directRecipientId ? (
                 <p className="mt-2 text-xs text-red-600">Choisissez un destinataire pour envoyer.</p>
               ) : null}
@@ -1727,15 +1889,22 @@ export function MessagerieMissionsView({
               {(() => {
                 const chosen = recipients.find((r) => r.id === directRecipientId);
                 const party = chosen ? partyForRecipient(chosen) : null;
+                if (!party) return null;
+                const visibility =
+                  party.partyType === "INTERNAL"
+                    ? "Visible uniquement par les participants autorisés."
+                    : chosen?.company
+                      ? `Visible par ${chosen.company}`
+                      : party.visibilityHint;
                 return (
-                  <p className={`mb-2 text-[11px] font-semibold ${party ? messagingPartyToneClass(party.partyType) : ""}`}>
-                    {party
-                      ? party.partyType === "INTERNAL"
-                        ? "Message INTERNE"
-                        : `Message à ${chosen?.company || chosen?.name} · EXTERNE`
-                      : null}
-                    {party ? ` — ${party.visibilityHint}` : null}
-                  </p>
+                  <div className="mb-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                    <p
+                      className={`text-[12px] font-semibold ${messagingPartyToneClass(party.partyType)}`}
+                    >
+                      {party.partyType === "INTERNAL" ? "🔒 Interne" : party.shortLabel}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-slate-500">{visibility}</p>
+                  </div>
                 );
               })()}
               <label htmlFor="direct-content" className="mb-1.5 block text-sm font-medium text-[#111b21]">
@@ -1745,7 +1914,7 @@ export function MessagerieMissionsView({
                 id="direct-content"
                 value={directContent}
                 onChange={(e) => setDirectContent(e.target.value)}
-                placeholder="Tapez un message"
+                placeholder="Écrire un message..."
                 rows={3}
                 disabled={sendingDirect}
                 className="w-full rounded-lg border border-[#d1d7db] px-4 py-2.5 text-sm placeholder:text-[#8696a0] focus:border-[#00a884] focus:outline-none focus:ring-2 focus:ring-[#00a884]/20 disabled:opacity-60"
@@ -1762,7 +1931,7 @@ export function MessagerieMissionsView({
                 <div className="flex flex-wrap items-center gap-2">
                   <label
                     htmlFor={directFileId}
-                    className={`flex cursor-pointer items-center gap-2 rounded-full border border-[#d1d7db] bg-white px-3 py-2 text-sm text-[#54656f] hover:bg-[#f0f2f5] ${
+                    className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-[#d1d7db] bg-white px-3 py-2 text-sm text-[#54656f] hover:bg-[#f0f2f5] ${
                       uploadingAttach || sendingDirect ? "pointer-events-none opacity-50" : ""
                     }`}
                   >
@@ -1788,9 +1957,11 @@ export function MessagerieMissionsView({
               <button
                 type="submit"
                 disabled={
-                  sendingDirect || (!directContent.trim() && directAttachments.length === 0)
+                  sendingDirect ||
+                  !directRecipientId ||
+                  (!directContent.trim() && directAttachments.length === 0)
                 }
-                className="mt-3 rounded-full bg-[#1e3a5f] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#152a45] disabled:opacity-50"
+                className="mt-3 min-h-11 rounded-full bg-[#1e3a5f] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#152a45] disabled:opacity-50"
               >
                 {sendingDirect ? "Envoi…" : "Envoyer"}
               </button>
@@ -1822,7 +1993,7 @@ export function MessagerieMissionsView({
                 <button
                   type="button"
                   title="Nouveau message"
-                  onClick={() => setFilter("envoyer")}
+                  onClick={() => openNewMessageComposer()}
                   className="flex h-9 w-9 items-center justify-center rounded-full text-[#54656f] hover:bg-[#f0f2f5]"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -1857,7 +2028,7 @@ export function MessagerieMissionsView({
                       </p>
                       <button
                         type="button"
-                        onClick={() => setFilter("envoyer")}
+                        onClick={() => openNewMessageComposer()}
                         className="mt-3 rounded-full bg-[#00a884] px-4 py-2 text-sm font-medium text-white"
                       >
                         Nouveau message
@@ -2450,7 +2621,10 @@ export function MessagerieMissionsView({
               <button
                 type="button"
                 title="+ Nouveau message"
-                onClick={() => setFilter(showEnvoyerTab ? "envoyer" : "inbox")}
+                onClick={() => {
+                  if (showEnvoyerTab) openNewMessageComposer();
+                  else setFilter("inbox");
+                }}
                 className="flex h-9 items-center gap-1 rounded-full bg-[#00a884] px-3 text-sm font-semibold text-white hover:bg-[#008f72]"
               >
                 <span className="text-lg leading-none">+</span>

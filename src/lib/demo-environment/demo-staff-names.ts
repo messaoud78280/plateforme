@@ -45,7 +45,8 @@ export const DEMO_STAFF_CONTACTS: DemoStaffContactDef[] = [
     role: "AGENT",
     service: "Conductrice de travaux — Agence BeWork (démo)",
     company: "BeWork — Agence Démo",
-    showInDemoMessaging: true,
+    /** Masquée des suggestions Nouveau message — historique DM conservé. */
+    showInDemoMessaging: false,
   },
   {
     key: "karim",
@@ -54,7 +55,8 @@ export const DEMO_STAFF_CONTACTS: DemoStaffContactDef[] = [
     role: "AGENT",
     service: "Chef de chantier — Agence BeWork (démo)",
     company: "BeWork — Agence Démo",
-    showInDemoMessaging: true,
+    /** Masqué des suggestions Nouveau message — historique DM conservé. */
+    showInDemoMessaging: false,
   },
   {
     key: "laura",

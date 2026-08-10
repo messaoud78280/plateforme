@@ -36,7 +36,7 @@ export default async function NouvelleFichePage({
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6">
-      <BackLink href="/dashboard/fiches-suivi">Fiches de suivi</BackLink>
+      <BackLink href="/dashboard/fiches-suivi">Retour aux fiches de suivi</BackLink>
       <PageHeader
         eyebrow="Création rapide"
         title="Nouvelle fiche"

@@ -11,14 +11,20 @@ import {
   getPurchaseOrderReceivingState,
 } from "@/lib/purchase-orders/receiving";
 import { ReceivePurchaseOrderForm } from "@/components/purchase-orders/ReceivePurchaseOrderForm";
-import { BackLink } from "@/components/ui/BackLink";
+import { ContextBackButton } from "@/components/ui/ContextBackButton";
+import {
+  contextBackLabelForHref,
+  sanitizeInternalReturnTo,
+} from "@/lib/navigation/safe-return-to";
 
 export const dynamic = "force-dynamic";
 
 export default async function ReceptionCommandePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ returnTo?: string }>;
 }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion");
@@ -27,6 +33,7 @@ export default async function ReceptionCommandePage({
   }
 
   const { id } = await params;
+  const { returnTo: returnToRaw } = await searchParams;
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) redirect("/dashboard/commandes");
 
@@ -49,10 +56,17 @@ export default async function ReceptionCommandePage({
     redirect(`/dashboard/commandes/${order.id}`);
   }
 
+  const fallback = `/dashboard/commandes/${order.id}`;
+  const returnTo = sanitizeInternalReturnTo(returnToRaw, fallback);
+
   return (
     <div className="space-y-4">
       <div className="px-1">
-        <BackLink href={`/dashboard/commandes/${order.id}`}>Commande</BackLink>
+        <ContextBackButton
+          label={contextBackLabelForHref(returnTo, "Retour à la commande")}
+          fallbackHref={fallback}
+          returnTo={returnTo}
+        />
       </div>
       <ReceivePurchaseOrderForm
         orderId={order.id}

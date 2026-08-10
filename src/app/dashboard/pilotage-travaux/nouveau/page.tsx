@@ -57,7 +57,7 @@ export default async function NouveauPilotagePage({
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <BackLink href={PILOTAGE_LIST_PATH}>Pilotage travaux</BackLink>
+      <BackLink href={PILOTAGE_LIST_PATH}>Retour au pilotage</BackLink>
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Suivi contractuel du chantier</h1>
         <p className="mt-1 text-sm text-slate-600">

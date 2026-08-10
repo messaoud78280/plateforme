@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { createQuoteProject } from "@/app/dashboard/devis/quote-actions";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
+import { BackLink } from "@/components/ui/BackLink";
 
 export default async function NouveauProjetPage() {
   await requireBeWorkDevisSession();
 
   return (
     <div className="mx-auto max-w-xl space-y-6 px-1">
+      <BackLink href="/dashboard/devis/projets">Retour aux projets devis</BackLink>
       <header>
         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1e3a5f]/80">Projets</p>
         <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">Nouveau projet client</h1>

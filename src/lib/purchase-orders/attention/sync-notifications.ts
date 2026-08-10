@@ -18,6 +18,7 @@ import { purchaseOrderAttentionEpisodeKey } from "@/lib/purchase-orders/attentio
 import { loadPurchaseOrderAttentionInput } from "@/lib/purchase-orders/attention/load-input";
 import type { PurchaseOrderAttentionInput } from "@/lib/purchase-orders/attention/types";
 import type { SyncAttentionResult } from "@/lib/follow-up/attention/sync-notifications";
+import { sanitizeInternalReturnTo } from "@/lib/navigation/safe-return-to";
 
 function isInternalPerson(personType: string | null | undefined): boolean {
   if (!personType) return true;
@@ -57,10 +58,18 @@ export function purchaseOrderAttentionFocusForCode(
 export function purchaseOrderAttentionActionUrl(
   orderId: string,
   code: string | null | undefined,
+  opts?: { returnTo?: string },
 ): string {
   const base = `/dashboard/commandes/${orderId}`;
+  const params = new URLSearchParams();
   const focus = purchaseOrderAttentionFocusForCode(code);
-  return focus ? `${base}?focus=${focus}` : base;
+  if (focus) params.set("focus", focus);
+  if (opts?.returnTo?.trim().startsWith("/dashboard")) {
+    const safe = sanitizeInternalReturnTo(opts.returnTo, "/dashboard");
+    params.set("returnTo", safe);
+  }
+  const q = params.toString();
+  return q ? `${base}?${q}` : base;
 }
 
 /**

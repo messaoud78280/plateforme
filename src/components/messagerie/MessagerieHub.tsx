@@ -77,9 +77,7 @@ export function MessagerieHub(props: Props) {
           Par chantier
         </button>
         <p className="ml-auto hidden max-w-md truncate text-[11px] text-slate-400 sm:block">
-          {view === "chantiers"
-            ? "Contexte chantier · Interne / Client / Fournisseur"
-            : "Une messagerie · récents en premier"}
+          {view === "chantiers" ? "Contexte chantier · Interne / Client / Fournisseur" : null}
         </p>
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">

@@ -260,7 +260,9 @@ export function buildPurchaseOrderAttentionCard(opts: {
     categoryLabel: ATTENTION_CATEGORY_LABELS[category],
     relatedAgendaId: relatedAgenda,
     relatedTaskId: null,
-    actionUrl: purchaseOrderAttentionActionUrl(order.id, primary?.code),
+    actionUrl: purchaseOrderAttentionActionUrl(order.id, primary?.code, {
+      returnTo: "/dashboard/a-traiter",
+    }),
     actionLabel: primary?.actionLabel || "Voir la commande",
     supplierMessageUrl,
     searchExtra: (order.lineDesignations ?? []).join(" "),

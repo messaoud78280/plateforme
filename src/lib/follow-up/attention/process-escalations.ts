@@ -202,171 +202,181 @@ export async function processAttentionEscalations(opts?: {
   for (const [ownerUserId, ownerSheets] of byOwner) {
     try {
       const settings = await getFollowUpSettings(ownerUserId);
-      const orgId = ownerSheets[0]?.organizationId ?? null;
-      let steps: {
-        statusKey: string;
-        reminderHours: number | null;
-        escalateHours: number | null;
-        delayHours: number | null;
-      }[] = [];
-      if (orgId) {
-        try {
-          const wf = await ensureDefaultWorkflow(orgId);
-          steps = wf.steps.map((s) => ({
-            statusKey: s.statusKey,
-            reminderHours: s.reminderHours,
-            escalateHours: s.escalateHours,
-            delayHours: s.delayHours,
-          }));
-        } catch {
-          steps = [];
-        }
+
+      const byOrg = new Map<string | null, typeof ownerSheets>();
+      for (const s of ownerSheets) {
+        const key = s.organizationId ?? null;
+        const list = byOrg.get(key) ?? [];
+        list.push(s);
+        byOrg.set(key, list);
       }
-      const stepByKey = new Map(steps.map((s) => [s.statusKey, s]));
 
-      const { byId: attentionMap, statusEnteredAt, statusEpisodeKey } =
-        await loadAttentionForSheets({
-          sheets: ownerSheets.map((s) => ({
-            id: s.id,
-            status: s.status,
-            title: s.title,
-            nextActionAt: s.nextActionAt?.toISOString() ?? null,
-            nextActionDone: s.nextActionDone,
-            urgencyOverride: s.urgencyOverride,
-          })),
-          organizationId: orgId,
-          thresholds: settings.thresholds,
-          now,
-        });
-
-      for (const sheet of ownerSheets) {
-        result.examined += 1;
-        try {
-          const attention = attentionMap.get(sheet.id);
-          if (!attention || !shouldNotifyAttentionLevel(attention.effectiveUrgency)) {
-            result.skipped += 1;
-            continue;
+      for (const [orgId, orgSheets] of byOrg) {
+        let steps: {
+          statusKey: string;
+          reminderHours: number | null;
+          escalateHours: number | null;
+          delayHours: number | null;
+        }[] = [];
+        if (orgId) {
+          try {
+            const wf = await ensureDefaultWorkflow(orgId);
+            steps = wf.steps.map((s) => ({
+              statusKey: s.statusKey,
+              reminderHours: s.reminderHours,
+              escalateHours: s.escalateHours,
+              delayHours: s.delayHours,
+            }));
+          } catch {
+            steps = [];
           }
-          const primary = attention.attentionItems[0];
-          if (!primary?.code || !attention.primaryReason) {
-            result.skipped += 1;
-            continue;
-          }
+        }
+        const stepByKey = new Map(steps.map((s) => [s.statusKey, s]));
 
-          const responsibleId = await resolveAttentionRecipient(sheet);
-          if (!responsibleId) {
-            result.skipped += 1;
-            continue;
-          }
-
-          const escalateToId = await resolveEscalationRecipient({
-            organizationId: sheet.organizationId,
-            ownerUserId: sheet.ownerUserId,
-            responsibleId,
-          });
-
-          const level = attention.effectiveUrgency as UrgencyLevel;
-          const userIds = [responsibleId, escalateToId].filter(Boolean) as string[];
-          const existing = await prisma.notification.findMany({
-            where: {
-              userId: { in: userIds },
-              dedupeKey: { contains: `:${sheet.id}:` },
-            },
-            select: { dedupeKey: true, userId: true, type: true, createdAt: true },
-          });
-
-          const scoped = existing.filter((n) => {
-            const k = n.dedupeKey ?? "";
-            return k.includes(`:${sheet.id}:`);
-          });
-
-          const step = stepByKey.get(sheet.status) ?? null;
-          const enteredIso = statusEnteredAt.get(sheet.id) ?? null;
-          const episode = statusEpisodeKey.get(sheet.id) ?? null;
-          const plan = evaluateAttentionEscalation({
-            sheetId: sheet.id,
-            sheetTitle: sheet.title,
-            code: primary.code,
-            level,
-            primaryReason: attention.primaryReason,
-            statusEnteredAt: enteredIso,
-            statusEpisodeKey: episode,
-            responsibleId,
-            escalateToId,
-            responsibleName: sheet.assignee?.name ?? null,
-            workflowStep: step,
-            existingNotifications: scoped,
+        const { byId: attentionMap, statusEnteredAt, statusEpisodeKey } =
+          await loadAttentionForSheets({
+            sheets: orgSheets.map((s) => ({
+              id: s.id,
+              status: s.status,
+              title: s.title,
+              nextActionAt: s.nextActionAt?.toISOString() ?? null,
+              nextActionDone: s.nextActionDone,
+              urgencyOverride: s.urgencyOverride,
+            })),
+            organizationId: orgId,
+            thresholds: settings.thresholds,
             now,
           });
 
-          if (
-            plan.action === "NONE" ||
-            !plan.recipientId ||
-            !plan.dedupeKey ||
-            !plan.notificationType
-          ) {
-            result.unchanged += 1;
-            continue;
-          }
-
-          const recipient = await prisma.user.findUnique({
-            where: { id: plan.recipientId },
-            select: { id: true, personType: true },
-          });
-          if (
-            !recipient ||
-            isExternalPerson(recipient.personType) ||
-            !isInternalPerson(recipient.personType)
-          ) {
-            result.skipped += 1;
-            continue;
-          }
-          if (sheet.organizationId) {
-            const membership = await prisma.organizationMember.findFirst({
-              where: {
-                organizationId: sheet.organizationId,
-                userId: plan.recipientId,
-              },
-              select: { id: true },
-            });
-            if (!membership && plan.recipientId !== sheet.ownerUserId) {
+        for (const sheet of orgSheets) {
+          result.examined += 1;
+          try {
+            const attention = attentionMap.get(sheet.id);
+            if (!attention || !shouldNotifyAttentionLevel(attention.effectiveUrgency)) {
               result.skipped += 1;
               continue;
             }
-          }
+            const primary = attention.attentionItems[0];
+            if (!primary?.code || !attention.primaryReason) {
+              result.skipped += 1;
+              continue;
+            }
 
-          const exists = await prisma.notification.findUnique({
-            where: { dedupeKey: plan.dedupeKey },
-            select: { id: true },
-          });
-          if (exists) {
-            result.unchanged += 1;
-            continue;
-          }
-          await prisma.notification.create({
-            data: {
-              userId: plan.recipientId,
-              type: plan.notificationType,
-              title: plan.title ?? "Attention BeWork",
-              message: plan.message ?? plan.problemReason,
-              actionUrl: `/dashboard/fiches-suivi/${sheet.id}`,
-              dedupeKey: plan.dedupeKey,
-            },
-          });
-          if (plan.action === "REMIND") result.reminded += 1;
-          else result.escalated += 1;
-        } catch (e: unknown) {
-          const code =
-            e && typeof e === "object" && "code" in e
-              ? String((e as { code?: string }).code)
-              : "";
-          if (code === "P2002") {
-            result.unchanged += 1;
-          } else {
-            const msg = e instanceof Error ? e.message : String(e);
-            result.errors.push(`sheet:${sheet.id}`);
-            console.error(`[processAttentionEscalations] sheet ${sheet.id}`, msg);
-            result.skipped += 1;
+            const responsibleId = await resolveAttentionRecipient(sheet);
+            if (!responsibleId) {
+              result.skipped += 1;
+              continue;
+            }
+
+            const escalateToId = await resolveEscalationRecipient({
+              organizationId: sheet.organizationId,
+              ownerUserId: sheet.ownerUserId,
+              responsibleId,
+            });
+
+            const level = attention.effectiveUrgency as UrgencyLevel;
+            const userIds = [responsibleId, escalateToId].filter(Boolean) as string[];
+            const existing = await prisma.notification.findMany({
+              where: {
+                userId: { in: userIds },
+                dedupeKey: { contains: `:${sheet.id}:` },
+              },
+              select: { dedupeKey: true, userId: true, type: true, createdAt: true },
+            });
+
+            const scoped = existing.filter((n) => {
+              const k = n.dedupeKey ?? "";
+              return k.includes(`:${sheet.id}:`);
+            });
+
+            const step = stepByKey.get(sheet.status) ?? null;
+            const enteredIso = statusEnteredAt.get(sheet.id) ?? null;
+            const episode = statusEpisodeKey.get(sheet.id) ?? null;
+            const plan = evaluateAttentionEscalation({
+              sheetId: sheet.id,
+              sheetTitle: sheet.title,
+              code: primary.code,
+              level,
+              primaryReason: attention.primaryReason,
+              statusEnteredAt: enteredIso,
+              statusEpisodeKey: episode,
+              responsibleId,
+              escalateToId,
+              responsibleName: sheet.assignee?.name ?? null,
+              workflowStep: step,
+              existingNotifications: scoped,
+              now,
+            });
+
+            if (
+              plan.action === "NONE" ||
+              !plan.recipientId ||
+              !plan.dedupeKey ||
+              !plan.notificationType
+            ) {
+              result.unchanged += 1;
+              continue;
+            }
+
+            const recipient = await prisma.user.findUnique({
+              where: { id: plan.recipientId },
+              select: { id: true, personType: true },
+            });
+            if (
+              !recipient ||
+              isExternalPerson(recipient.personType) ||
+              !isInternalPerson(recipient.personType)
+            ) {
+              result.skipped += 1;
+              continue;
+            }
+            if (sheet.organizationId) {
+              const membership = await prisma.organizationMember.findFirst({
+                where: {
+                  organizationId: sheet.organizationId,
+                  userId: plan.recipientId,
+                },
+                select: { id: true },
+              });
+              if (!membership && plan.recipientId !== sheet.ownerUserId) {
+                result.skipped += 1;
+                continue;
+              }
+            }
+
+            const exists = await prisma.notification.findUnique({
+              where: { dedupeKey: plan.dedupeKey },
+              select: { id: true },
+            });
+            if (exists) {
+              result.unchanged += 1;
+              continue;
+            }
+            await prisma.notification.create({
+              data: {
+                userId: plan.recipientId,
+                type: plan.notificationType,
+                title: plan.title ?? "Attention BeWork",
+                message: plan.message ?? plan.problemReason,
+                actionUrl: `/dashboard/fiches-suivi/${sheet.id}`,
+                dedupeKey: plan.dedupeKey,
+              },
+            });
+            if (plan.action === "REMIND") result.reminded += 1;
+            else result.escalated += 1;
+          } catch (e: unknown) {
+            const code =
+              e && typeof e === "object" && "code" in e
+                ? String((e as { code?: string }).code)
+                : "";
+            if (code === "P2002") {
+              result.unchanged += 1;
+            } else {
+              const msg = e instanceof Error ? e.message : String(e);
+              result.errors.push(`sheet:${sheet.id}`);
+              console.error(`[processAttentionEscalations] sheet ${sheet.id}`, msg);
+              result.skipped += 1;
+            }
           }
         }
       }

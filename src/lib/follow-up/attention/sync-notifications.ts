@@ -7,6 +7,7 @@
  */
 import { prisma } from "@/lib/prisma";
 import { loadAttentionForSheets } from "@/lib/follow-up/attention/batch";
+import type { SerializedAttention } from "@/lib/follow-up/attention/evaluate";
 import {
   buildLegacyAttentionDedupeKey,
   buildStagedAttentionDedupeKey,
@@ -74,6 +75,7 @@ export type SyncAttentionResult = {
 /**
  * Pour chaque fiche : diagnostique W3-A → crée au plus une notif INITIAL par épisode.
  * Idempotent : N appels avec le même état = même base.
+ * Multi-tenant : charge le workflow par organizationId (pas sheets[0] pour tout le batch).
  */
 export async function syncAttentionNotificationsForSheets(
   sheets: SheetNotifyRow[],
@@ -90,19 +92,36 @@ export async function syncAttentionNotificationsForSheets(
   const ownerId = opts?.thresholdsOwnerUserId ?? sheets[0]?.ownerUserId;
   const settings = ownerId ? await getFollowUpSettings(ownerId) : undefined;
 
-  const { byId, statusEnteredAt, statusEpisodeKey } = await loadAttentionForSheets({
-    sheets: sheets.map((s) => ({
-      id: s.id,
-      status: s.status,
-      title: s.title,
-      nextActionAt: s.nextActionAt?.toISOString() ?? null,
-      nextActionDone: s.nextActionDone,
-      urgencyOverride: s.urgencyOverride,
-    })),
-    organizationId: sheets[0]?.organizationId ?? null,
-    thresholds: settings?.thresholds,
-    now: opts?.now,
-  });
+  const byOrg = new Map<string | null, SheetNotifyRow[]>();
+  for (const sheet of sheets) {
+    const key = sheet.organizationId ?? null;
+    const list = byOrg.get(key) ?? [];
+    list.push(sheet);
+    byOrg.set(key, list);
+  }
+
+  const byId = new Map<string, SerializedAttention>();
+  const statusEnteredAt = new Map<string, string>();
+  const statusEpisodeKey = new Map<string, string>();
+
+  for (const [organizationId, orgSheets] of byOrg) {
+    const batch = await loadAttentionForSheets({
+      sheets: orgSheets.map((s) => ({
+        id: s.id,
+        status: s.status,
+        title: s.title,
+        nextActionAt: s.nextActionAt?.toISOString() ?? null,
+        nextActionDone: s.nextActionDone,
+        urgencyOverride: s.urgencyOverride,
+      })),
+      organizationId,
+      thresholds: settings?.thresholds,
+      now: opts?.now,
+    });
+    for (const [id, att] of batch.byId) byId.set(id, att);
+    for (const [id, iso] of batch.statusEnteredAt) statusEnteredAt.set(id, iso);
+    for (const [id, key] of batch.statusEpisodeKey) statusEpisodeKey.set(id, key);
+  }
 
   for (const sheet of sheets) {
     const attention = byId.get(sheet.id);

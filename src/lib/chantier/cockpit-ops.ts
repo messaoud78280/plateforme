@@ -288,6 +288,7 @@ export async function loadChantierCockpitOps(opts: {
   }
 
   const [
+    projectOrg,
     sheetsRaw,
     ordersRaw,
     agenda,
@@ -300,6 +301,10 @@ export async function loadChantierCockpitOps(opts: {
     docsRaw,
     sheetsList,
   ] = await Promise.all([
+    prisma.project.findUnique({
+      where: { id: projectId },
+      select: { organizationId: true },
+    }),
     prisma.followUpSheet.findMany({
       where: {
         projectId,
@@ -311,6 +316,7 @@ export async function loadChantierCockpitOps(opts: {
         id: true,
         title: true,
         status: true,
+        organizationId: true,
         nextAction: true,
         nextActionAt: true,
         nextActionDone: true,
@@ -477,6 +483,11 @@ export async function loadChantierCockpitOps(opts: {
     }),
   ]);
 
+  const organizationId =
+    projectOrg?.organizationId ??
+    sheetsRaw.find((s) => s.organizationId)?.organizationId ??
+    null;
+
   const attentionBatch = await loadAttentionForSheets({
     sheets: sheetsRaw.map((s) => ({
       id: s.id,
@@ -486,6 +497,7 @@ export async function loadChantierCockpitOps(opts: {
       nextActionDone: s.nextActionDone,
       urgencyOverride: s.urgencyOverride,
     })),
+    organizationId,
     now,
   });
 

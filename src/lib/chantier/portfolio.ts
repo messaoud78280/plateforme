@@ -330,6 +330,7 @@ export async function loadProjectsPortfolio(opts: {
               select: {
                 id: true,
                 projectId: true,
+                organizationId: true,
                 status: true,
                 title: true,
                 clientName: true,
@@ -363,6 +364,8 @@ export async function loadProjectsPortfolio(opts: {
           : Promise.resolve([]),
       ]);
 
+    // Attention FollowUp : batch unique — loadAttentionForSheets résout l’org par fiche
+    // (portfolio multi-tenant). Ne pas forcer un seul organizationId.
     const [sheetAttention, ...poAttBatches] = await Promise.all([
       sheets.length
         ? loadAttentionForSheets({

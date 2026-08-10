@@ -442,20 +442,35 @@ export function ChantiersPortfolioList({
                     )}
                     <AttentionBlock row={row} />
                     {row.nextDelivery ? (
-                      <p className="text-[12.5px] text-slate-600">
-                        {row.nextDelivery.supplierName} ·{" "}
-                        {formatWhen(row.nextDelivery.requestedAt ?? row.nextDelivery.at)}
-                        {row.nextDelivery.statusHint
-                          ? ` · ${row.nextDelivery.statusHint}`
-                          : ""}
-                      </p>
+                      <div className="text-[12.5px] leading-snug text-slate-600">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-slate-400">
+                          Livraison
+                        </p>
+                        <p>
+                          {row.nextDelivery.supplierName}
+                          <span className="text-slate-500">
+                            {" "}
+                            · {formatWhen(row.nextDelivery.requestedAt ?? row.nextDelivery.at)}
+                            {row.nextDelivery.statusHint
+                              ? ` · ${row.nextDelivery.statusHint}`
+                              : ""}
+                          </span>
+                        </p>
+                      </div>
                     ) : row.nextEvent ? (
                       <p className="text-[12.5px] text-slate-600">
                         {row.nextEvent.title} · {formatWhen(row.nextEvent.startAt)}
                       </p>
                     ) : null}
-                    <div className="flex items-center justify-between gap-2">
-                      <TaskLine row={row} />
+                    {row.overdueTasks > 0 || row.openTasks > 0 ? (
+                      <div className="text-[12.5px] leading-snug">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-slate-400">
+                          Tâches
+                        </p>
+                        <TaskLine row={row} />
+                      </div>
+                    ) : null}
+                    <div className="flex items-center justify-end gap-2">
                       <span
                         className="text-lg font-light text-slate-300 transition-transform duration-160 group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"
                         aria-hidden

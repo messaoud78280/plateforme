@@ -985,17 +985,23 @@ export function MessagerieView({
                       .join(" · ")}
                   </p>
                 </div>
-                <div className="hidden shrink-0 items-center gap-1 md:flex">
+                <div className="relative hidden shrink-0 items-center gap-1 md:flex">
                   <button
                     type="button"
-                    onClick={() => setParticipantsOpen((v) => !v)}
+                    onClick={() => {
+                      setContextOpen(false);
+                      setParticipantsOpen((v) => !v);
+                    }}
                     className="rounded-full px-2.5 py-1 text-xs font-semibold text-[#1e3a5f] hover:bg-slate-100"
                   >
                     {presentation.participantCount || "—"} participants
                   </button>
                   <button
                     type="button"
-                    onClick={() => setContextOpen((v) => !v)}
+                    onClick={() => {
+                      setParticipantsOpen(false);
+                      setContextOpen((v) => !v);
+                    }}
                     className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                       contextOpen ? "bg-slate-100 text-slate-800" : "text-slate-500 hover:bg-slate-100"
                     }`}
@@ -1003,63 +1009,79 @@ export function MessagerieView({
                   >
                     ⓘ
                   </button>
-                </div>
-              </div>
-              {isChannelSupervisor ? (
-                <p className="mt-1 text-[11px] font-medium text-violet-700">
-                  Supervision — au premier message, vous rejoignez les participants.
-                </p>
-              ) : null}
-              {participantsOpen ? (
-                <div className="mt-2 max-h-44 space-y-2 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
-                  <p className="px-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                    Participants
-                  </p>
-                  <ul className="space-y-1">
-                    {participants.map((p) => (
-                      <li key={p.id} className="flex items-center gap-2 px-1 py-1 text-xs">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1e3a5f] text-[10px] font-bold text-white">
-                          {p.name
-                            .split(/\s+/)
-                            .slice(0, 2)
-                            .map((x) => x[0]?.toUpperCase() ?? "")
-                            .join("")}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block font-semibold text-slate-800">{p.name}</span>
-                          <span className="text-slate-500">
-                            {p.subtitle ||
-                              [p.company, p.roleLabel || p.permissionProfile]
-                                .filter(Boolean)
-                                .join(" · ")}
-                          </span>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  {isChannelSupervisor && supervisorInfo ? (
+                  {participantsOpen ? (
                     <>
-                      <p className="px-1 pt-2 text-[10px] font-bold uppercase tracking-wide text-violet-500">
-                        Supervision
-                      </p>
-                      <div className="flex items-center gap-2 px-1 py-1 text-xs">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-700 text-[10px] font-bold text-white">
-                          {supervisorInfo.name
-                            .split(/\s+/)
-                            .slice(0, 2)
-                            .map((x) => x[0]?.toUpperCase() ?? "")
-                            .join("")}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block font-semibold text-slate-800">
-                            {supervisorInfo.name}
-                          </span>
-                          <span className="text-slate-500">{supervisorInfo.roleLabel}</span>
-                        </span>
+                      <button
+                        type="button"
+                        className="fixed inset-0 z-40 cursor-default bg-transparent"
+                        aria-label="Fermer participants"
+                        onClick={() => setParticipantsOpen(false)}
+                      />
+                      <div
+                        role="dialog"
+                        aria-label="Participants"
+                        className="absolute right-0 top-9 z-50 max-h-64 w-72 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-lg"
+                      >
+                        <p className="px-1 pb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                          Participants
+                        </p>
+                        <ul className="space-y-0.5">
+                          {participants.map((p) => (
+                            <li
+                              key={p.id}
+                              className="flex items-center gap-2 rounded-lg px-1 py-1.5 text-xs"
+                            >
+                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1e3a5f] text-[10px] font-bold text-white">
+                                {p.name
+                                  .split(/\s+/)
+                                  .slice(0, 2)
+                                  .map((x) => x[0]?.toUpperCase() ?? "")
+                                  .join("")}
+                              </span>
+                              <span className="min-w-0">
+                                <span className="block font-semibold text-slate-800">{p.name}</span>
+                                <span className="text-slate-500">
+                                  {p.subtitle ||
+                                    [p.company, p.roleLabel || p.permissionProfile]
+                                      .filter(Boolean)
+                                      .join(" · ")}
+                                </span>
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                        {isChannelSupervisor && supervisorInfo ? (
+                          <>
+                            <p className="px-1 pt-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                              Supervision
+                            </p>
+                            <div className="flex items-center gap-2 px-1 py-1.5 text-xs">
+                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-600 text-[10px] font-bold text-white">
+                                {supervisorInfo.name
+                                  .split(/\s+/)
+                                  .slice(0, 2)
+                                  .map((x) => x[0]?.toUpperCase() ?? "")
+                                  .join("")}
+                              </span>
+                              <span className="min-w-0">
+                                <span className="block font-semibold text-slate-800">
+                                  {supervisorInfo.name}
+                                </span>
+                                <span className="text-slate-500">{supervisorInfo.roleLabel}</span>
+                              </span>
+                            </div>
+                          </>
+                        ) : null}
                       </div>
                     </>
                   ) : null}
                 </div>
+              </div>
+              {isChannelSupervisor ? (
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Vous consultez cette conversation en supervision. Si vous écrivez, vous
+                  rejoindrez les participants.
+                </p>
               ) : null}
             </div>
 

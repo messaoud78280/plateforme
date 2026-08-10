@@ -15,6 +15,7 @@ import {
   resolvePortfolioDelivery,
   type PortfolioDeliverySnapshot,
 } from "@/lib/chantier/portfolio-delivery";
+import { buildProjectPresentation } from "@/lib/chantier/party-labels";
 
 const PO_WATCH: PurchaseOrderStatus[] = [
   "A_VALIDER",
@@ -196,6 +197,8 @@ export async function loadProjectsPortfolio(opts: {
               name: true,
               company: true,
               personType: true,
+              role: true,
+              accessStatus: true,
             },
           },
           assignedTo: {
@@ -528,12 +531,30 @@ export async function loadProjectsPortfolio(opts: {
       const sameDelivery = isSameDeliveryAsAgendaEvent(del, nextRaw ?? null);
       const next = nextRaw && !sameDelivery ? nextRaw : null;
 
-      let responsibleName: string | null = null;
+      const presented = buildProjectPresentation({
+        title: p.title,
+        client: {
+          name: p.client.name,
+          company: p.client.company,
+          personType: p.client.personType,
+          role: p.client.role,
+          accessStatus: p.client.accessStatus,
+        },
+        assignedTo: p.assignedTo,
+        internalManager: p.internalManager,
+        hostOrganizationName: p.organization?.name ?? null,
+        clientExtLabels: [
+          sheetClientByProject.get(p.id) || "",
+          clientExtByProject.get(p.id) || "",
+        ].filter(Boolean),
+        followUpClientName: sheetClientByProject.get(p.id) ?? null,
+      });
+
+      let responsibleName = presented.responsibleLabel;
       let responsibleRoleLabel: string | null = null;
       let responsibleSource: PortfolioProjectRow["responsibleSource"] = null;
 
-      if (p.assignedTo && isInternalAssignee(p.assignedTo)) {
-        responsibleName = p.assignedTo.name;
+      if (p.assignedTo && presented.responsibleIsInternal && responsibleName === p.assignedTo.name) {
         responsibleRoleLabel = displayUserRoleLabel({
           role: p.assignedTo.role,
           personType: p.assignedTo.personType,
@@ -541,26 +562,12 @@ export async function loadProjectsPortfolio(opts: {
           jobTitle: p.assignedTo.jobTitle,
         });
         responsibleSource = "assignedTo";
-      } else if (p.internalManager?.trim()) {
-        // Ne jamais afficher un CLIENT_EXT connu comme responsable interne
-        const im = p.internalManager.trim();
-        const looksExternal =
-          im.toLowerCase() === "sophie martin" ||
-          (p.client.personType === "CLIENT_EXT" && im === p.client.name);
-        if (!looksExternal) {
-          responsibleName = im;
-          responsibleRoleLabel = "Conducteur de travaux";
-          responsibleSource = "internalManager";
-        }
+      } else if (responsibleName && p.internalManager?.trim() === responsibleName) {
+        responsibleRoleLabel = "Conducteur de travaux";
+        responsibleSource = "internalManager";
       }
 
-      const clientLabel =
-        sheetClientByProject.get(p.id) ||
-        clientExtByProject.get(p.id) ||
-        p.client.company?.trim() ||
-        (p.client.personType === "CLIENT_EXT" ? p.client.name : null) ||
-        p.organization?.name?.trim() ||
-        null;
+      const clientLabel = presented.clientLabel;
 
       const attentionScore =
         att.crit * 10 +

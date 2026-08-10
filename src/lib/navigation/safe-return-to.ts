@@ -82,18 +82,41 @@ export function isSafeDashboardHref(href: string): boolean {
 
 /**
  * Ajoute ?returnTo=… à un href interne (valeur sanitizée).
- * Ne pas utiliser sur les pages racines sans valeur métier.
+ * Strip le returnTo imbriqué pour éviter les boucles A↔B.
  */
 export function withReturnTo(href: string, returnTo: string | null | undefined): string {
   const safeTarget = sanitizeInternalReturnTo(href, "/dashboard");
   if (!returnTo?.trim()) return safeTarget;
-  const safeReturn = sanitizeInternalReturnTo(returnTo, safeTarget);
+  const stripped = stripNestedReturnTo(returnTo);
+  const safeReturn = sanitizeInternalReturnTo(stripped, safeTarget);
+  // Ne pas réinjecter si la cible est déjà le même path (boucle)
+  try {
+    const t = new URL(safeTarget, "https://bework.local");
+    const r = new URL(safeReturn, "https://bework.local");
+    if (t.pathname === r.pathname && t.search === r.search) return safeTarget;
+  } catch {
+    /* ignore */
+  }
   try {
     const u = new URL(safeTarget, "https://bework.local");
     u.searchParams.set("returnTo", safeReturn);
     return `${u.pathname}${u.search}${u.hash}`;
   } catch {
     return safeTarget;
+  }
+}
+
+/** Alias produit NAVIGATION-V2. */
+export const buildContextualHref = withReturnTo;
+
+/** Retire returnTo imbriqué d’un chemin (un seul niveau parent). */
+export function stripNestedReturnTo(href: string): string {
+  try {
+    const u = new URL(href.trim(), "https://bework.local");
+    u.searchParams.delete("returnTo");
+    return `${u.pathname}${u.search}${u.hash}`;
+  } catch {
+    return href;
   }
 }
 
@@ -124,6 +147,20 @@ export function messagerieReturnTo(opts: {
   return "/dashboard/messagerie";
 }
 
+function messagerieHasConversationContext(href: string): boolean {
+  try {
+    const u = new URL(href, "https://bework.local");
+    if (u.searchParams.get("channelId")) return true;
+    if (u.searchParams.get("project")) return true;
+    if (u.searchParams.get("task")) return true;
+    if (u.searchParams.get("with")) return true;
+    if (u.searchParams.get("view") === "chantiers") return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 /** Libellé français cohérent selon le chemin de retour. */
 export function contextBackLabelForHref(
   href: string,
@@ -132,7 +169,9 @@ export function contextBackLabelForHref(
   const path = href.split(/[?#]/)[0] ?? href;
 
   if (path === "/dashboard/messagerie" || path.startsWith("/dashboard/messagerie/")) {
-    return "Retour à la Messagerie";
+    return messagerieHasConversationContext(href)
+      ? "Retour à la conversation"
+      : "Retour à la Messagerie";
   }
   if (path === "/dashboard/commandes") return "Retour aux commandes";
   if (path === "/dashboard/taches") return "Retour aux tâches";
@@ -157,6 +196,19 @@ export function contextBackLabelForHref(
   if (path.startsWith("/dashboard/pilotage-travaux")) return "Retour au pilotage";
 
   return fallbackLabel.startsWith("Retour") ? fallbackLabel : `Retour ${fallbackLabel}`;
+}
+
+/** Libellé court mobile. */
+export function contextBackLabelShort(href: string): string {
+  const full = contextBackLabelForHref(href);
+  if (full === "Retour à la conversation") return "Conversation";
+  if (full === "Retour à la Messagerie") return "Messagerie";
+  if (full === "Retour aux chantiers") return "Chantiers";
+  if (full === "Retour à À traiter") return "À traiter";
+  if (full === "Retour à l'Agenda") return "Agenda";
+  if (full === "Retour aux commandes") return "Commandes";
+  if (full === "Retour au chantier") return "Chantier";
+  return full.replace(/^Retour (à la |à l'|à |aux )?/i, "").replace(/^./, (c) => c.toUpperCase());
 }
 
 /**

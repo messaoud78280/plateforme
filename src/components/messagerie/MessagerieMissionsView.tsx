@@ -1066,13 +1066,15 @@ export function MessagerieMissionsView({
     return () => window.clearTimeout(t);
   }, [messages, directThreadMessages, selectedTaskId, selectedDirectContactId]);
 
-  // Rafraîchissement automatique des messages directs (toutes les 7 s)
+  // Rafraîchissement secours (realtime = source principale). Pause onglet caché.
   useEffect(() => {
     if (filter === "envoyer" || !selectedDirectContactId) return;
-    const interval = setInterval(() => {
+    const tick = () => {
+      if (typeof document !== "undefined" && document.hidden) return;
       void refreshDirectIndex().then((data) => setDirectMessages(data));
       void refreshDirectThread(selectedDirectContactId);
-    }, 7000);
+    };
+    const interval = setInterval(tick, 30_000);
     return () => clearInterval(interval);
   }, [filter, selectedDirectContactId]);
 
@@ -1080,6 +1082,7 @@ export function MessagerieMissionsView({
   useEffect(() => {
     if (!selectedTaskId || filter === "envoyer") return;
     const interval = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
       const last = messagesRef.current[messagesRef.current.length - 1];
       const q = last?.id
         ? `?after=${encodeURIComponent(last.id)}&take=30`
@@ -1109,7 +1112,7 @@ export function MessagerieMissionsView({
           );
         })
         .catch(() => {});
-    }, 7000);
+    }, 30_000);
     return () => clearInterval(interval);
   }, [selectedTaskId, filter, sessionUserId]);
 
@@ -1117,6 +1120,7 @@ export function MessagerieMissionsView({
   useEffect(() => {
     if (filter === "envoyer" || filter === "messages-directs") return;
     const interval = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
       fetch(`/api/tasks/messagerie?filter=${filter}`)
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => {
@@ -1124,7 +1128,7 @@ export function MessagerieMissionsView({
           setMissions(sortMissionsByLastMessage(data as MissionItem[]));
         })
         .catch(() => {});
-    }, 10000);
+    }, 45_000);
     return () => clearInterval(interval);
   }, [filter]);
 

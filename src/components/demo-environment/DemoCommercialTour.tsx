@@ -182,19 +182,17 @@ export function DemoCommercialTour() {
       if (target.promptSearch) {
         setPhase("tour");
         openGlobalSearch();
-        startTransition(() => router.refresh());
+        // Pas de router.refresh : l’ouverture Cmd+K est purement client.
         return;
       }
 
       const href = resolveStepHref(target, ctx);
       setPhase("tour");
       if (href) {
+        // push charge déjà le RSC — refresh doublerait le travail serveur (PERF-V2A).
         startTransition(() => {
           router.push(href);
-          router.refresh();
         });
-      } else {
-        startTransition(() => router.refresh());
       }
     },
     [ctx, router, startTransition],
@@ -221,6 +219,7 @@ export function DemoCommercialTour() {
       const current = await fetchCurrentDemoPersona();
       if (current !== target.persona) {
         await switchDemoPersona(target.persona as DemoPersonaKey);
+        // Soft refresh pour refléter la session persona — pas de navigation.
         startTransition(() => router.refresh());
       }
     }

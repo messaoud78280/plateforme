@@ -18,7 +18,7 @@ import { SkipLink } from "@/components/ui/SkipLink";
 import { EnvironmentBanner } from "@/components/system/EnvironmentBanner";
 import { DemoTenantBanner } from "@/components/demo-environment/DemoTenantBanner";
 import { DemoViewAsSwitcher } from "@/components/demo-environment/DemoViewAsSwitcher";
-import { DemoCommercialTour } from "@/components/demo-environment/DemoCommercialTour";
+import dynamic from "next/dynamic";
 import { RoleOnboarding } from "@/components/onboarding/RoleOnboarding";
 import { UiPreferencesProvider } from "@/components/system/UiPreferences";
 import { DashboardMain } from "@/components/dashboard/DashboardMain";
@@ -33,6 +33,15 @@ import {
 import { displayUserRoleLabel } from "@/lib/equipe-acces/display-role";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+
+/** Tour commercial — chargé seulement en DEMO, hors chemin critique SSR. */
+const DemoCommercialTour = dynamic(
+  () =>
+    import("@/components/demo-environment/DemoCommercialTour").then((m) => ({
+      default: m.DemoCommercialTour,
+    })),
+  { ssr: false },
+);
 
 export const metadata: Metadata = {
   robots: SEO_NOINDEX_ROBOTS,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { OPEN_DEMO_TOUR_EVENT } from "@/lib/demo-environment/open-demo-tour-event";
 
 type PersonaOpt = { key: string; label: string; name: string };
@@ -10,6 +10,7 @@ const PERSONA_CHANGED = "bework:persona-changed";
 
 export function DemoViewAsSwitcher() {
   const router = useRouter();
+  const pathname = usePathname();
   const [personas, setPersonas] = useState<PersonaOpt[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -56,8 +57,12 @@ export function DemoViewAsSwitcher() {
       );
       if (result.ok) {
         startTransition(() => {
-          router.replace("/dashboard");
-          router.refresh();
+          // Déjà sur Accueil → refresh session ; sinon navigation suffit (évite double RSC).
+          if (pathname === "/dashboard" || pathname === "/dashboard/") {
+            router.refresh();
+          } else {
+            router.replace("/dashboard");
+          }
         });
         return;
       }

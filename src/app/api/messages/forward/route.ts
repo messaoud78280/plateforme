@@ -250,7 +250,9 @@ export async function POST(request: Request) {
         destScope = "EXTERNAL";
       }
 
-      const safety = evaluateForwardSafety(source.scope, destScope);
+      const safety = evaluateForwardSafety(source.scope, destScope, {
+        destLabel: task.title || undefined,
+      });
       if (safety.ok && safety.needsConfirm && !confirmExternal) {
         return NextResponse.json(
           { error: safety.warning, needsConfirm: true },
@@ -351,7 +353,25 @@ export async function POST(request: Request) {
     }
 
     destScope = scopeFromChannel(channel);
-    const safety = evaluateForwardSafety(source.scope, destScope);
+    let destLabel = project.title;
+    if (channel === "CLIENT" || channel === "FOURNISSEUR") {
+      const orgCh = await prisma.projectChannel.findFirst({
+        where: {
+          projectId: project.id,
+          type: channel === "CLIENT" ? "CLIENT" : "SUPPLIER",
+        },
+        include: {
+          externalOrganization: { select: { name: true, tradeName: true } },
+        },
+      });
+      destLabel =
+        orgCh?.externalOrganization?.tradeName ||
+        orgCh?.externalOrganization?.name ||
+        project.title;
+    }
+    const safety = evaluateForwardSafety(source.scope, destScope, {
+      destLabel,
+    });
     if (safety.ok && safety.needsConfirm && !confirmExternal) {
       return NextResponse.json(
         { error: safety.warning, needsConfirm: true },

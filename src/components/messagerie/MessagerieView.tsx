@@ -226,6 +226,10 @@ export function MessagerieView({
     name: string;
     roleLabel: string;
   } | null>(null);
+  const [participateConfirm, setParticipateConfirm] = useState<{
+    content: string;
+    atts: MsgAttachment[];
+  } | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
   const [manageSaving, setManageSaving] = useState(false);
   const [manageSelected, setManageSelected] = useState<Set<string>>(new Set());
@@ -686,16 +690,14 @@ export function MessagerieView({
     }
   }
 
-  async function sendMessage(content: string, atts: MsgAttachment[]) {
+  async function sendMessage(content: string, atts: MsgAttachment[], opts?: { skipParticipateConfirm?: boolean }) {
     if ((!content && atts.length === 0) || !selectedProjectId || sending) return;
     if (sendLockRef.current) return;
 
-    // V2C.6C — superviseur non participant : confirmation avant de rejoindre le fil
-    if (isChannelSupervisor) {
-      const ok = window.confirm(
-        "Participer à cette conversation ?\n\nVotre message vous ajoute aux participants visibles. Les autres sauront que vous faites partie du fil.",
-      );
-      if (!ok) return;
+    // RECETTE-V1 — superviseur non participant : dialogue BeWork avant join
+    if (isChannelSupervisor && !opts?.skipParticipateConfirm) {
+      setParticipateConfirm({ content, atts });
+      return;
     }
 
     sendLockRef.current = true;
@@ -756,7 +758,11 @@ export function MessagerieView({
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
         setSendContent(content);
         setAttachments(atts);
-        setError(data.error ?? "Échec de l’envoi — réessayez.");
+        setError(
+          data?.code === "CHANNEL_MEMBERSHIP_REQUIRED"
+            ? data.error ?? "Impossible de rejoindre la conversation. Message non envoyé."
+            : (data.error ?? "Échec de l’envoi — réessayez."),
+        );
         return;
       }
       setMessages((prev) =>
@@ -770,7 +776,7 @@ export function MessagerieView({
             : m,
         ),
       );
-      // V2C.6A — après envoi, l’auteur est participant (plus de supervision)
+      // Après envoi réussi, l’auteur est participant (garanti serveur)
       if (isChannelSupervisor) {
         setIsChannelSupervisor(false);
         setIsChannelParticipant(true);
@@ -1694,6 +1700,45 @@ export function MessagerieView({
           if (!res.ok) throw new Error(data?.error || "Transfert impossible");
         }}
       />
+      {participateConfirm ? (
+        <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+            <p className="text-sm font-semibold text-[#1e3a5f]">
+              Participer à cette conversation ?
+            </p>
+            <p className="mt-2 text-[13px] leading-relaxed text-slate-700">
+              {(selectedChannel?.title || "Ce fil")} verra désormais{" "}
+              {supervisorInfo?.name || "vous"} comme participant. Les autres sauront que vous
+              faites partie du fil.
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                onClick={() => setParticipateConfirm(null)}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                disabled={sending}
+                className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+                onClick={() => {
+                  const pending = participateConfirm;
+                  setParticipateConfirm(null);
+                  if (pending) {
+                    void sendMessage(pending.content, pending.atts, {
+                      skipParticipateConfirm: true,
+                    });
+                  }
+                }}
+              >
+                Participer et envoyer
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {manageOpen && selectedChannelId ? (
         <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 p-4 sm:items-center">
           <div className="max-h-[85vh] w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl">
@@ -1811,7 +1856,7 @@ export function MessagerieView({
                     setManageOpen(false);
                     if (selectedProjectId) void loadProjectChannels(selectedProjectId);
                   } catch (e) {
-                    alert(e instanceof Error ? e.message : "Erreur");
+                    setError(e instanceof Error ? e.message : "Erreur d’enregistrement");
                   } finally {
                     setManageSaving(false);
                   }

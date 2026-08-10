@@ -37,11 +37,13 @@ export function evaluateForwardSafety(
   opts?: { destLabel?: string },
 ): ForwardSafetyResult {
   if (sourceScope === "INTERNAL" && destScope === "EXTERNAL") {
-    const dest = opts?.destLabel ? ` (${opts.destLabel})` : "";
+    const dest = (opts?.destLabel || "").trim();
     return {
       ok: true,
       needsConfirm: true,
-      warning: `Vous allez partager un message interne avec un destinataire externe${dest}.`,
+      warning: dest
+        ? `Vous allez partager un message interne avec ${dest}.`
+        : "Vous allez partager un message interne avec un destinataire externe.",
     };
   }
   if (sourceScope === "EXTERNAL" && destScope === "EXTERNAL") {

@@ -63,7 +63,9 @@ export function MessageForwardDialog({
   }
 
   function pick(dest: ForwardDestOption) {
-    const safety = evaluateForwardSafety(sourceScope, dest.scope);
+    const safety = evaluateForwardSafety(sourceScope, dest.scope, {
+      destLabel: dest.label,
+    });
     if (!safety.ok) {
       setError(safety.error);
       return;
@@ -129,7 +131,7 @@ export function MessageForwardDialog({
       {pending && warning ? (
         <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-sm rounded-[var(--bw-radius-panel,1.125rem)] bg-white p-5 shadow-xl">
-            <p className="text-sm font-semibold text-[#1e3a5f]">Changement de périmètre</p>
+            <p className="text-sm font-semibold text-[#1e3a5f]">Partage hors équipe</p>
             <p className="mt-2 text-[13px] leading-relaxed text-slate-700">{warning}</p>
             <p className="mt-1 text-[12px] text-amber-800">
               Destination : {pending.label}

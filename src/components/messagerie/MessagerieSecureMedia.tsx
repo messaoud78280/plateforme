@@ -111,14 +111,16 @@ export function MessagerieSecureAudio({ messageKind, messageId, attachment }: Pr
 
 export function MessagerieSecureFile({ messageKind, messageId, attachment, isMe }: Props) {
   const [busy, setBusy] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   async function open() {
     if (busy) return;
     setBusy(true);
+    setFileError(null);
     try {
       const url = await resolveSignedUrl(messageKind, messageId, attachment.fileUrl);
       if (url) window.open(url, "_blank", "noopener,noreferrer");
-      else alert("Accès document refusé.");
+      else setFileError("Accès document refusé.");
     } finally {
       setBusy(false);
     }
@@ -139,15 +141,18 @@ export function MessagerieSecureFile({ messageKind, messageId, attachment, isMe 
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => void open()}
-      disabled={busy}
-      className="flex w-full items-center gap-2 rounded-lg bg-black/5 px-2 py-2 text-left text-xs text-[#111b21] disabled:opacity-50"
-    >
-      📄 {attachment.name}
-      <span className="text-[10px] text-[#667781]">{busy ? "…" : "Ouvrir"}</span>
-    </button>
+    <div>
+      <button
+        type="button"
+        onClick={() => void open()}
+        disabled={busy}
+        className="flex w-full items-center gap-2 rounded-lg bg-black/5 px-2 py-2 text-left text-xs text-[#111b21] disabled:opacity-50"
+      >
+        📄 {attachment.name}
+        <span className="text-[10px] text-[#667781]">{busy ? "…" : "Ouvrir"}</span>
+      </button>
+      {fileError ? <p className="mt-1 text-[11px] text-red-600">{fileError}</p> : null}
+    </div>
   );
 }
 

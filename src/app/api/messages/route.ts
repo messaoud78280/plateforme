@@ -21,15 +21,17 @@ import {
 } from "@/lib/messagerie/message-reply";
 import { presentMessagesForViewer } from "@/lib/messagerie/filter-hidden-messages";
 import {
-  addChannelParticipant,
   canAccessProjectChannel,
   ensureProjectChannel,
   legacyChannelFromType,
-  listChannelNotifyUserIds,
   resolveProjectChannelForContext,
   typeFromLegacyChannel,
   type ProjectChannelType,
 } from "@/lib/messagerie/project-channels";
+import {
+  ChannelSendMembershipError,
+  createChannelMessageWithSenderMembership,
+} from "@/lib/messagerie/channel-send-guarantee";
 
 const VALID_CHANNELS = new Set(["INTERNE", "CLIENT", "FOURNISSEUR", "SOUS_TRAITANT"]);
 
@@ -242,11 +244,6 @@ export async function POST(request: Request) {
       resolvedChannelId = ch.id;
       channelType = ch.type as ProjectChannelType;
       legacyChannel = legacyChannelFromType(channelType) as MessageChannel;
-      // V2C.6A — premier envoi (y compris superviseur) → participant visible, pas de fantôme
-      await addChannelParticipant({
-        channelId: resolvedChannelId,
-        userId: session.user.id,
-      });
     } else {
       const canMessage = await canAccessProjectMessaging(session.user, project);
       if (!canMessage) {
@@ -286,10 +283,6 @@ export async function POST(request: Request) {
           );
         }
       }
-      await addChannelParticipant({
-        channelId: resolvedChannelId,
-        userId: session.user.id,
-      });
     }
 
     const isAgence = isAgencyOrManager(session.user);
@@ -313,6 +306,8 @@ export async function POST(request: Request) {
         select: { id: true },
       });
       if (!asParticipant) {
+        // Superviseur premier envoi : destinataire peut ne pas être encore listé ;
+        // on accepte uniquement si déjà participant, sinon fallback autre participant.
         return NextResponse.json(
           { error: "Destinataire hors canal." },
           { status: 400 },
@@ -331,52 +326,32 @@ export async function POST(request: Request) {
       finalReceiverId = project.clientId;
     }
 
-    // S’assurer que le destinataire technique est participant
-    await addChannelParticipant({
-      channelId: resolvedChannelId,
-      userId: finalReceiverId,
-    });
-
     const storedContent =
       text || formatMediaPreview("", attachments) || "Pièce jointe";
 
-    const message = await prisma.message.create({
-      data: {
-        content: storedContent,
+    // RECETTE-V1 P0 — join auteur + message atomiques (superviseur inclus)
+    let message;
+    let notifyIds: string[];
+    try {
+      const created = await createChannelMessageWithSenderMembership({
+        channelId: resolvedChannelId,
         projectId,
         senderId: session.user.id,
         receiverId: finalReceiverId,
-        channel: legacyChannel,
-        channelId: resolvedChannelId,
-        ...(attachments.length > 0 ? { attachmentsJson: attachments } : {}),
-      },
-      include: {
-        project: { select: { id: true, title: true } },
-        sender: { select: { id: true, name: true } },
-        receiver: { select: { id: true, name: true } },
-        projectChannel: {
-          select: {
-            id: true,
-            type: true,
-            externalOrganizationId: true,
-          },
-        },
-      },
-    });
-
-    const notifyIds = await listChannelNotifyUserIds(
-      resolvedChannelId,
-      session.user.id,
-    );
-    if (notifyIds.length > 0) {
-      await prisma.messageChannelReceipt.createMany({
-        data: notifyIds.map((userId) => ({
-          messageId: message.id,
-          userId,
-          read: false,
-        })),
-        skipDuplicates: true,
+        content: storedContent,
+        legacyChannel,
+        attachments: attachments.length > 0 ? attachments : undefined,
       });
+      message = created.message;
+      notifyIds = created.notifyUserIds;
+    } catch (e) {
+      if (e instanceof ChannelSendMembershipError) {
+        return NextResponse.json(
+          { error: e.message, code: e.code },
+          { status: 409 },
+        );
+      }
+      throw e;
     }
 
     const preview = formatMediaPreview(text, attachments).slice(0, 80);

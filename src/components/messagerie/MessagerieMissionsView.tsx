@@ -3313,7 +3313,7 @@ export function MessagerieMissionsView({
                             }}
                             onAction={(id) =>
                               handleMessageMenuAction("TASK", m, id, {
-                                conversationLabel: selectedMission?.title ?? "Mission",
+                                conversationLabel: selectedMission?.title ?? "Discussion",
                                 partyLabel: m.isInternal
                                   ? "🔒 Interne"
                                   : formatPartyBadge(party),

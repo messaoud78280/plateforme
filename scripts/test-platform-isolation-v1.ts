@@ -38,6 +38,7 @@ function testConfigsDistinct() {
   const bework = getPlatformConfigForOrganization({ isDemo: false });
   const setrim = getPlatformConfigForOrganization({
     isDemo: true,
+    loginIdentifier: "bework-demo",
     companyName: "SETRIM",
     logoUrl: DEMO_BRAND.logoPath,
   });
@@ -49,6 +50,7 @@ function testConfigsDistinct() {
   const generic = getPlatformConfigForOrganization({
     isDemo: true,
     companyName: "Dupont Étanchéité",
+    loginIdentifier: "dupont",
   });
 
   assert.equal(bework.key, "bework_internal");

@@ -75,7 +75,7 @@ function testOtherTenantBlocked() {
   console.log("ok autre tenant refusé");
 }
 
-function testDemoStaffAllowed() {
+function testDemoStaffNoLongerCrossTenant() {
   const denis = actor({
     id: "denis",
     role: "CLIENT",
@@ -100,18 +100,11 @@ function testDemoStaffAllowed() {
     email: "sophie.martin.demo@bework.internal",
     organizationIds: [],
   });
-  const laura = actor({
-    id: "laura",
-    role: "AGENCE",
-    personType: "INTERNAL",
-    permissionProfile: "ADMINISTRATIF",
-    email: "laura.bernard.demo@bework.internal",
-    organizationIds: [],
-  });
-  assert.equal(evaluateDirectMessageAcl(denis, adjaili).ok, true);
-  assert.equal(evaluateDirectMessageAcl(denis, lefevre).ok, true);
-  assert.equal(evaluateDirectMessageAcl(denis, laura).ok, false);
-  console.log("ok staff démo Lefèvre/Adjaili OK, Laura refusée");
+  // PLATFORM-ISOLATION-V1.1 — plus de bypass @bework.internal hors org / mission
+  assert.equal(evaluateDirectMessageAcl(denis, adjaili).ok, false);
+  assert.equal(evaluateDirectMessageAcl(denis, lefevre).ok, false);
+  assert.equal(evaluateDirectMessageAcl(denis, adjaili, { taskLinked: true }).ok, true);
+  console.log("ok staff @bework.internal refusé sans lien org/mission");
 }
 
 function testExternalHost() {
@@ -181,7 +174,7 @@ function testWiring() {
 function main() {
   testInternalSameTenant();
   testOtherTenantBlocked();
-  testDemoStaffAllowed();
+  testDemoStaffNoLongerCrossTenant();
   testExternalHost();
   testPortalClientNeedsLink();
   testWiring();

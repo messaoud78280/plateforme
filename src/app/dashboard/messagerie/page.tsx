@@ -301,6 +301,8 @@ export default async function MessageriePage() {
         const map = new Map<string, MessagerieRecipient>();
         for (const u of [...agentsRes, ...managersRes, ...clients]) {
           if (u.id === session.user.id) continue;
+          // Isolation : BeWork interne ne liste pas les comptes démo client
+          if (u.email?.endsWith("@demo.bework.local")) continue;
           map.set(u.id, toRecipient(u));
         }
         recipients = sortMessagerieRecipients([...map.values()]);

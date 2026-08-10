@@ -30,6 +30,11 @@ export type SeedDemoOptions = {
   includeMarches?: boolean;
   /** Identifiant login (ex. bework-demo) pour emails personas. */
   loginIdentifier?: string | null;
+  /**
+   * Staff @bework.internal partagés — SETRIM legacy uniquement.
+   * false = aucune contamination multi-démo (Client B / generic).
+   */
+  allowSharedBeworkStaff?: boolean;
 };
 
 /**
@@ -38,6 +43,7 @@ export type SeedDemoOptions = {
  */
 export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   const { clientId, organizationId, companyName, sector, includeMarches } = opts;
+  const allowSharedBeworkStaff = opts.allowSharedBeworkStaff === true;
   const métier = sector?.trim() || "BTP";
 
   const primary = demoScenarioProject("primary");
@@ -547,20 +553,23 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
 
   void ficheAlpha;
 
-  // —— Contacts & messagerie démo (clients + équipe BeWork) ——
-  const staffContacts = await ensureDemoMessagingStaff();
-  const primaryStaff = staffContacts[0]?.id ?? clientId;
-  const sophie = staffContacts.find((s) => s.key === "sophie")?.id ?? primaryStaff;
-  const karim = staffContacts.find((s) => s.key === "karim")?.id ?? primaryStaff;
-  const laura = staffContacts.find((s) => s.key === "laura")?.id ?? primaryStaff;
+  // —— Contacts & messagerie démo ——
+  // Staff @bework.internal = singleton global (legacy SETRIM). Jamais pour Client B.
+  let sophie = clientId;
+  let karim = clientId;
+  let laura = clientId;
+  let staffId = clientId;
 
-  // —— Scénario messagerie Action BeWork (Point.P / Les Lilas) ——
-  const agentUser = await prisma.user.findFirst({
-    where: { role: { in: ["AGENT", "AGENCE", "MANAGER"] }, id: { not: clientId } },
-    select: { id: true },
-  });
-  const staffId = sophie || agentUser?.id || clientId;
+  if (allowSharedBeworkStaff) {
+    const staffContacts = await ensureDemoMessagingStaff();
+    const primaryStaff = staffContacts[0]?.id ?? clientId;
+    sophie = staffContacts.find((s) => s.key === "sophie")?.id ?? primaryStaff;
+    karim = staffContacts.find((s) => s.key === "karim")?.id ?? primaryStaff;
+    laura = staffContacts.find((s) => s.key === "laura")?.id ?? primaryStaff;
+    staffId = sophie || clientId;
+  }
 
+  // —— Scénario messagerie Action (Point.P / Les Lilas) ——
   const taskBc043 = await prisma.task.findFirst({
     where: {
       clientId,
@@ -656,21 +665,23 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   void taskRelance;
   void taskCr;
 
-  // Conversations directes multi-contacts (onglet Contacts)
-  await seedDemoDirectConversations({
-    clientId,
-    sophieId: sophie,
-    karimId: karim,
-    lauraId: laura,
-  });
+  if (allowSharedBeworkStaff) {
+    // Conversations directes multi-contacts (onglet Contacts) — SETRIM legacy only
+    await seedDemoDirectConversations({
+      clientId,
+      sophieId: sophie,
+      karimId: karim,
+      lauraId: laura,
+    });
 
-  // Assignation diversifiée + fils mission plus riches
-  await enrichDemoTaskThreads({
-    clientId,
-    sophieId: sophie,
-    karimId: karim,
-    lauraId: laura,
-  });
+    await enrichDemoTaskThreads({
+      clientId,
+      organizationId,
+      sophieId: sophie,
+      karimId: karim,
+      lauraId: laura,
+    });
+  }
 
   const loginIdentifier =
     opts.loginIdentifier ||
@@ -680,7 +691,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         select: { loginIdentifier: true },
       })
     )?.loginIdentifier ||
-    "bework-demo";
+    "demo";
 
   // —— Personas loginables (Direction / Conducteur / Administratif / Client / Fournisseur) ——
   try {
@@ -693,6 +704,34 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     });
   } catch (e) {
     console.error("[demo-seed] personas:", e);
+  }
+
+  // Après personas : assignations scopées org (toutes plateformes, sans staff global)
+  if (!allowSharedBeworkStaff) {
+    try {
+      await enrichDemoTaskThreads({
+        clientId,
+        organizationId,
+        sophieId: clientId,
+        karimId: clientId,
+        lauraId: clientId,
+      });
+    } catch (e) {
+      console.error("[demo-seed] enrich tasks (no shared staff):", e);
+    }
+  } else {
+    // Re-enrich SETRIM avec personas désormais créés (scope org)
+    try {
+      await enrichDemoTaskThreads({
+        clientId,
+        organizationId,
+        sophieId: sophie,
+        karimId: karim,
+        lauraId: laura,
+      });
+    } catch (e) {
+      console.error("[demo-seed] enrich tasks setrim:", e);
+    }
   }
 
   // —— Purge inbox legacy si un seed partiel a laissé d’anciennes Alert ——
@@ -919,18 +958,22 @@ export async function seedDemoDirectConversations(opts: {
  */
 export async function enrichDemoTaskThreads(opts: {
   clientId: string;
+  organizationId: string;
   sophieId: string;
   karimId: string;
   lauraId: string;
 }) {
-  const { clientId, sophieId, karimId, lauraId } = opts;
+  const { clientId, organizationId, sophieId, karimId, lauraId } = opts;
   void lauraId; // conservé pour signature / conversations directes legacy
 
   await ensureDemoStaffDisplayNames();
 
+  const orgMember = { organizationMemberships: { some: { organizationId } } };
+
   const [personaKarim, personaJulie] = await Promise.all([
     prisma.user.findFirst({
       where: {
+        ...orgMember,
         personType: "INTERNAL",
         permissionProfile: "CONDUCTEUR",
         OR: [
@@ -943,6 +986,7 @@ export async function enrichDemoTaskThreads(opts: {
     }),
     prisma.user.findFirst({
       where: {
+        ...orgMember,
         personType: "INTERNAL",
         permissionProfile: "ADMINISTRATIF",
         OR: [
@@ -954,7 +998,7 @@ export async function enrichDemoTaskThreads(opts: {
       select: { id: true },
     }),
   ]);
-  /** Jamais CLIENT_EXT Sophie Martin ; staff Lefèvre uniquement en fallback messagerie. */
+  /** Jamais CLIENT_EXT Sophie Martin ; staff Lefèvre uniquement en fallback messagerie SETRIM. */
   const karimPersonaId = personaKarim?.id ?? karimId;
   const juliePersonaId = personaJulie?.id ?? sophieId;
 
@@ -1055,8 +1099,30 @@ function coherentClientReply(title: string): string {
   return `Merci, c’est noté. Je reste dispo si vous avez besoin d’un document.`;
 }
 
-/** Enrichit messagerie d’un client démo existant (sans tout réinitialiser). */
+/** Enrichit messagerie d’un client démo existant (sans tout réinitialiser). SETRIM legacy only. */
 export async function enrichExistingDemoMessaging(clientId: string) {
+  const demo = await prisma.demoEnvironment.findFirst({
+    where: { rootUserId: clientId },
+    select: { organizationId: true, loginIdentifier: true, companyName: true },
+  });
+  const { getPlatformConfigForOrganization } = await import("@/lib/platform/config");
+  const platform = getPlatformConfigForOrganization({
+    organizationId: demo?.organizationId,
+    isDemo: true,
+    loginIdentifier: demo?.loginIdentifier,
+    companyName: demo?.companyName,
+  });
+  if (platform.key !== "setrim" || !demo?.organizationId) {
+    console.warn(
+      "[demo-seed] enrichExistingDemoMessaging ignoré — staff partagé réservé à SETRIM",
+    );
+    return {
+      staff: [] as { name: string; id: string }[],
+      directCount: 0,
+      taskMessageCount: 0,
+    };
+  }
+
   const staff = await ensureDemoMessagingStaff();
   const sophie = staff.find((s) => s.key === "sophie")!.id;
   const karim = staff.find((s) => s.key === "karim")!.id;
@@ -1072,7 +1138,13 @@ export async function enrichExistingDemoMessaging(clientId: string) {
   });
 
   await seedDemoDirectConversations({ clientId, sophieId: sophie, karimId: karim, lauraId: laura });
-  await enrichDemoTaskThreads({ clientId, sophieId: sophie, karimId: karim, lauraId: laura });
+  await enrichDemoTaskThreads({
+    clientId,
+    organizationId: demo.organizationId,
+    sophieId: sophie,
+    karimId: karim,
+    lauraId: laura,
+  });
 
   // Remplace les vieux messages « [démo-thread-…] » par des échanges naturels
   await rewriteDemoTaskConversations({ clientId, sophieId: sophie, karimId: karim, lauraId: laura });

@@ -13,7 +13,7 @@ import {
 import { PageHeader } from "@/components/ui/PageHeader";
 import {
   ASSISTANT_IA_FAMILIES,
-  toolsByFamily,
+  ASSISTANT_IA_TOOLS,
   type AssistantIaTool,
 } from "@/lib/assistant-ia/tools";
 import type { AIProviderStatus } from "@/lib/assistant-ia/status";
@@ -80,7 +80,15 @@ function ToolRow({ tool }: { tool: AssistantIaTool }) {
   );
 }
 
-export function AssistantIaHub({ status }: { status: AIProviderStatus }) {
+export function AssistantIaHub({
+  status,
+  tools,
+}: {
+  status: AIProviderStatus;
+  /** Filtré par PlatformConfig — défaut = catalogue CORE complet. */
+  tools?: AssistantIaTool[];
+}) {
+  const catalog = tools ?? ASSISTANT_IA_TOOLS;
   return (
     <div className="mx-auto max-w-3xl space-y-10" data-testid="assistant-ia-hub">
       <PageHeader
@@ -102,7 +110,8 @@ export function AssistantIaHub({ status }: { status: AIProviderStatus }) {
       </p>
 
       {ASSISTANT_IA_FAMILIES.map((family) => {
-        const tools = toolsByFamily(family.id);
+        const familyTools = catalog.filter((t) => t.family === family.id);
+        if (familyTools.length === 0) return null;
         return (
           <section key={family.id} aria-labelledby={`ia-family-${family.id}`} className="space-y-3">
             <div className="px-0.5">
@@ -115,7 +124,7 @@ export function AssistantIaHub({ status }: { status: AIProviderStatus }) {
               <p className="mt-0.5 text-[13px] text-slate-400">{family.subtitle}</p>
             </div>
             <ul className="space-y-2">
-              {tools.map((tool) => (
+              {familyTools.map((tool) => (
                 <li key={tool.id}>
                   <ToolRow tool={tool} />
                 </li>

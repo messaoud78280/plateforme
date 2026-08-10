@@ -3,7 +3,7 @@
 > BeWork n’est plus une plateforme unique personnalisée à la main.
 > BeWork est un **éditeur de plateformes métier BTP** : socle commun + configurations indépendantes.
 
-Document de référence — **PLATFORM-ISOLATION-V1**.
+Document de référence — **PLATFORM-ISOLATION-V1 / V1.1**.
 
 ---
 
@@ -31,6 +31,8 @@ Briques partagées volontairement :
 
 **Règle :** une amélioration CORE volontaire bénéficie à toutes les plateformes qui utilisent ce module.
 
+**Exemple volontaire :** correction responsive Messagerie → SETRIM + BeWork Internal + Client Test en bénéficient. C’est NORMAL.
+
 **Interdit dans le CORE :**
 
 - nom client en dur (`SETRIM`, `Denis Buret`, logo SETRIM)
@@ -39,94 +41,107 @@ Briques partagées volontairement :
 
 ### NIVEAU 2 — CONFIGURATION PAR ORGANISATION
 
-Résolue via `getPlatformConfigForOrganization` / `getCurrentPlatformConfig`
-(`src/lib/platform/config.ts`) à partir de :
+Résolue via `getPlatformConfigForOrganization` (`src/lib/platform/config.ts`).
 
-- `organizationId`
-- `isDemo`
-- `companyName` / `logoUrl` (affichage, pas clé de comportement)
-- `platformKey` explicite (futur / tests)
+#### Identité V1.1 (ordre de priorité)
 
-Contient notamment :
+| Priorité | Signal | Exemple |
+|----------|--------|---------|
+| 1 | `platformKey` explicite | tests / futur DB |
+| 2 | `DemoEnvironment.loginIdentifier` via registre | `bework-demo` → `setrim` |
+| 3 | `isDemo` sans login connu | → `generic_demo` (neutre) |
+| 4 | `organizationId` + non-démo | → `neutral_client` |
+| 5 | session staff sans org client | → `bework_internal` |
+
+**INTERDIT comme clé :** `companyName` / displayName (peut changer sans changer la plateforme).
+
+Registre actuel : `PLATFORM_KEY_BY_LOGIN_IDENTIFIER`  
+(`bework-demo` / `setrim` → setrim · `client-test` → client_test).
+
+Pour créer **Client B** : choisir un `loginIdentifier` unique (ex. `client-b`), l’ajouter au registre **seulement** si une config dédiée est nécessaire ; sinon → `generic_demo` neutre.
+
+#### Fallback inconnu
+
+| Cas | Config |
+|-----|--------|
+| Démo inconnue | `generic_demo` — **jamais SETRIM** |
+| Org client inconnue | `neutral_client` — **jamais BeWork interne** |
+| Staff BeWork | `bework_internal` |
+
+#### Contenu PlatformConfig
 
 | Champ | Rôle |
 |--------|------|
-| `key` | `bework_internal` · `setrim` · `client_test` · `generic_demo` |
+| `key` | `bework_internal` · `setrim` · `client_test` · `generic_demo` · `neutral_client` |
 | `branding` | nom, logo, libellé secondaire |
-| `demoMode` | environnement démo |
-| `internalPlatform` | BeWork interne |
-| `commercialDemo` | tour commercial / scénario vente |
-| `features` | modules / outils IA filtrables |
-
-**Exemples :**
-
-- **BeWork interne** — branding BeWork, pas de « Voir comme », pas de tour commercial SETRIM
-- **SETRIM** — logo SETRIM, personas Denis/Julie/Karim/Sophie/Thomas, tour commercial
-- **Client Test** (fixture) — features réduites, sans polluer l’UI commerciale
+| `demoMode` / `internalPlatform` / `commercialDemo` | modes |
+| `features` | modules / `aiTools` |
 
 `DEMO_BRAND` / `SETRIM_DEMO_BRAND` = **template de création** SETRIM uniquement.
-Runtime UI = PlatformConfig + `DemoEnvironment` (org-scopé).
 
 ### NIVEAU 3 — DÉPLOIEMENT DÉDIÉ (optionnel, futur)
 
-Pour certains gros clients :
-
-- instance dédiée
-- base dédiée
-- domaine dédié
-
-**Pas nécessaire pour chaque client.** Non implémenté en V1.
-L’isolation multi-tenant actuelle (une DB, `organizationId`) suffit si les mutations restent scopées.
+Instance / base / domaine dédiés pour gros clients. **Non implémenté.**
 
 ---
 
-## Règle de développement (obligatoire)
+## Staff @bework.internal (dette documentée)
 
-| Type de changement | Impact |
-|--------------------|--------|
-| **CORE CHANGE** | Volontaire — peut toucher toutes les plateformes utilisant le module |
-| **PLATFORM CONFIG CHANGE** | Uniquement l’organisation / `platformKey` concerné |
-| **CLIENT CUSTOM FEATURE** | Activée seulement pour les orgs qui ont le flag / outil |
+Comptes singleton globaux (Lefèvre / Adjaili / Laura) — **legacy SETRIM uniquement**.
 
----
+- `allowSharedBeworkStaff` / `allowsSharedBeworkInternalStaff` → `true` seulement si `platform.key === "setrim"`
+- ACL directe : plus de bypass cross-tenant vers ces emails
+- Nouvelle démo Client B : **ne doit pas** appeler `ensureDemoMessagingStaff`
 
-## Isolation des données
-
-- `DemoEnvironment` ↔ `Organization` (1:1)
-- Reset / seed / enrich : toujours `demoId` → `organizationId` / `rootUserId`
-- Interdit : `deleteMany` / `updateMany` / replace global sans scope org
-- Interdit : migrer ABC→SETRIM ou Marc→Denis hors org SETRIM
-
-Tables souvent scopées directement : `Project`, `PurchaseOrder`, `AgendaEvent`, `FollowUpSheet`, …
-Sinon dérivable via relations (`Task` → projet / client, `Notification` → user → org).
-
-**Aucune migration Prisma dans cette passe.** Si un jour `platformKey` doit vivre en DB : proposer une migration dédiée, ne pas l’appliquer sans validation.
+Personas démo : emails `{login}+{suffix}@demo.bework.local` (déjà isolés par login).  
+Convention future possible : `julie@setrim.demo.bework.local` — **non migrée** (auth actuelle OK).
 
 ---
 
-## Helpers
+## Règle de développement
 
-```ts
-getPlatformConfigForOrganization({ organizationId, isDemo, companyName, logoUrl, platformKey })
-getCurrentPlatformConfig(...)
-isInternalBeworkPlatform(config)
-isCommercialDemoPlatform(config)
-isSetrimPlatform(config)
-resolveHostCompanyLabel(orgName) // neutre — jamais « SETRIM » en fallback
-getDemoPersonasForPlatform(platformKey, hostCompany)
+| Type | Impact |
+|------|--------|
+| **CORE CHANGE** | Volontaire — toutes les plateformes du module |
+| **PLATFORM CONFIG CHANGE** | Uniquement l’org / login / platformKey |
+| **CLIENT CUSTOM FEATURE** | Orgs avec le flag / outil |
+
+Exemple config : SETRIM active Commandes fournisseurs → BeWork Internal inchangé.
+
+---
+
+## platformKey en DB — verdict V1.1
+
+**NÉCESSAIRE MAINTENANT = NON**
+
+Pourquoi : `loginIdentifier` unique + registre code suffit pour les démos ; `organizationId` isole les données ; displayName n’est plus une clé.
+
+**Migration future proposée (ne pas appliquer sans GO) :**
+
+```prisma
+model DemoEnvironment {
+  platformKey String? // setrim | client_test | generic_demo | …
+}
+model Organization {
+  platformKey String?
+}
 ```
+
+Backfill : `bework-demo` → `setrim` ; autres démos → `generic_demo`.  
+Rollback : colonne nullable. Tests : résolution prioritaire `platformKey` DB > login > fallback.
 
 ---
 
 ## Tests
 
-- `scripts/test-platform-isolation-v1.ts` — configs distinctes, pas de fuite SETRIM hors démo SETRIM, fixtures Client Test
-- Tests manuels croisés : reset SETRIM ≠ impact BeWork ; donnée BeWork ≠ impact SETRIM
+- `npm run test:platform-isolation` (V1)
+- `npm run test:platform-isolation-v1-1`
+- `npx tsx scripts/test-messagerie-direct-acl-v2c5.ts`
 
 ---
 
-## Périmètre V1 vs hors scope
+## Périmètre
 
-**Corrigé / consolidé :** branding runtime, fallbacks CORE, PlatformConfig, personas par plateforme, reset/seed scopés, tour commercial lié à `commercialDemo`, doc.
+**V1.1 :** identité loginIdentifier, fallbacks neutres, staff SETRIM-only, ACL, filtre messagerie BeWork, aiTools filtrés, docs.
 
-**Hors scope :** refonte ACL, Supabase, DB par client, multi-repos, migration Prisma, LLM, moteurs métier.
+**Hors scope :** migration Prisma, refonte ACL globale, LLM, moteurs métier.

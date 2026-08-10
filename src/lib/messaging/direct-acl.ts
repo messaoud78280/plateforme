@@ -4,8 +4,6 @@
  */
 
 import { prisma } from "@/lib/prisma";
-import { isDemoEmail } from "@/lib/demo-environment/constants";
-import { isDemoStaffVisibleInMessaging } from "@/lib/demo-environment/demo-staff-names";
 import { isManagerRole, isStaffAgent } from "@/lib/messaging/access";
 
 export type DirectAclUser = {
@@ -86,16 +84,8 @@ export function evaluateDirectMessageAcl(
     }
   }
 
-  // Démo : staff BeWork visible (Lefèvre / Adjaili) joignable par persona DEMO interne
-  if (
-    sInternal &&
-    isDemoEmail(sender.email) &&
-    isDemoStaffVisibleInMessaging(recipient.email)
-  ) {
-    return { ok: true };
-  }
-
   // Staff BeWork (MANAGER / AGENT / AGENCE) : peut écrire aux rôles messageables
+  // (plateforme interne BeWork — pas un bypass multi-démo).
   if (isManagerRole(sender.role) || isStaffAgent(sender.role)) {
     return { ok: true };
   }
@@ -115,11 +105,11 @@ export function evaluateDirectMessageAcl(
     };
   }
 
-  // Client role mais interne sans même org (cas limite) → staff lié
+  // Client role mais interne sans même org → uniquement manager / agent lié mission
+  // (plus de bypass @bework.internal cross-tenant).
   if (sender.role === "CLIENT" && sInternal) {
     if (["AGENCE", "AGENT", "MANAGER"].includes(recipient.role)) {
       if (recipient.role === "MANAGER" || opts?.taskLinked) return { ok: true };
-      if (isDemoStaffVisibleInMessaging(recipient.email)) return { ok: true };
     }
   }
 
@@ -180,8 +170,7 @@ export async function canDirectMessageUser(
     sender.role === "CLIENT" &&
     isInternalMessagingPerson(sender) &&
     ["AGENCE", "AGENT"].includes(recipient.role) &&
-    !shareOrganization(sender, recipient) &&
-    !isDemoStaffVisibleInMessaging(recipient.email);
+    !shareOrganization(sender, recipient);
 
   if (needsTaskCheck || needsTaskCheckInternalEdge) {
     const linked = await prisma.task.findFirst({

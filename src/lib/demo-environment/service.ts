@@ -111,6 +111,15 @@ export async function createDemoEnvironment(
 
   const hashed = await bcrypt.hash(passwordOnce, 12);
   const internalName = (input.internalName?.trim() || `Démo — ${companyName}`).slice(0, 120);
+  const platformAtCreate = getPlatformConfigForOrganization({
+    isDemo: true,
+    loginIdentifier,
+    companyName,
+  });
+  const rootDisplayName =
+    platformAtCreate.key === "setrim" ? demoBrandContactFullName() : "Direction";
+  const rootRoleLabel =
+    platformAtCreate.key === "setrim" ? DEMO_BRAND.contactRoleLabel : "Direction";
 
   try {
     const result = await prisma.$transaction(async (tx) => {
@@ -118,11 +127,11 @@ export async function createDemoEnvironment(
         data: {
           email,
           password: hashed,
-          name: demoBrandContactFullName(),
+          name: rootDisplayName,
           role: UserRole.CLIENT,
           company: companyName,
-          service: DEMO_BRAND.contactRoleLabel,
-          jobTitle: DEMO_BRAND.contactRoleLabel,
+          service: rootRoleLabel,
+          jobTitle: rootRoleLabel,
           formeJuridique: "SAS",
           secteurActivite: input.sector?.trim() || undefined,
           accountStatus: ClientAccountStatus.APPROVED,
@@ -178,6 +187,13 @@ export async function createDemoEnvironment(
       sector: input.sector,
       includeMarches: modulesEnabled.includes("marches"),
       loginIdentifier,
+      allowSharedBeworkStaff:
+        getPlatformConfigForOrganization({
+          isDemo: true,
+          loginIdentifier,
+          companyName,
+          organizationId: result.organization.id,
+        }).key === "setrim",
     });
     await prisma.demoEnvironment.update({
       where: { id: result.demo.id },
@@ -233,6 +249,7 @@ export async function resetDemoEnvironment(demoId: string): Promise<{ ok: true }
     isDemo: true,
     companyName,
     logoUrl,
+    loginIdentifier: demo.loginIdentifier,
   });
   if (platform.key === "setrim") {
     await prisma.user.update({
@@ -261,6 +278,7 @@ export async function resetDemoEnvironment(demoId: string): Promise<{ ok: true }
       sector: demo.sector,
       includeMarches: modules.includes("marches"),
       loginIdentifier: demo.loginIdentifier,
+      allowSharedBeworkStaff: platform.key === "setrim",
     });
     await enrichDemoPersonas(demoId);
     await prisma.demoEnvironment.update({
@@ -303,10 +321,21 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
     loginIdentifier: demo.loginIdentifier,
     companyName,
   });
-  const { ensureDemoStaffDisplayNames } = await import("./demo-staff-names");
-  await ensureDemoStaffDisplayNames();
-  const { ensureDemoMessagingStaff } = await import("./seed");
-  await ensureDemoMessagingStaff();
+
+  const platform = getPlatformConfigForOrganization({
+    organizationId: demo.organizationId,
+    isDemo: true,
+    companyName,
+    logoUrl,
+    loginIdentifier: demo.loginIdentifier,
+  });
+  if (platform.key === "setrim") {
+    const { ensureDemoStaffDisplayNames } = await import("./demo-staff-names");
+    await ensureDemoStaffDisplayNames();
+    const { ensureDemoMessagingStaff } = await import("./seed");
+    await ensureDemoMessagingStaff();
+  }
+
   const { purgeDemoLegacyInbox } = await import("./cleanup-legacy-inbox");
   await purgeDemoLegacyInbox(demoId);
   const { cleanupDemoMessagerieNotificationHrefs } = await import(

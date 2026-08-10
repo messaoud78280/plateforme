@@ -94,11 +94,13 @@ export default async function DashboardLayout({
   let demoExpiresIso: string | null = null;
   let demoLogoUrl: string | null = null;
   let demoOrganizationId: string | null = null;
+  let demoLoginIdentifier: string | null = null;
   if (isDemo && session.user.demoEnvironmentId) {
     const demo = await getCachedDemoExpiry(session.user.demoEnvironmentId);
     demoExpiresIso = demo?.expiresAt?.toISOString() ?? null;
     demoLogoUrl = demo?.logoUrl?.trim() || null;
     demoOrganizationId = demo?.organizationId ?? null;
+    demoLoginIdentifier = demo?.loginIdentifier ?? null;
   }
 
   const platform = getCurrentPlatformConfig({
@@ -106,6 +108,7 @@ export default async function DashboardLayout({
     isDemo,
     companyName,
     logoUrl: demoLogoUrl,
+    loginIdentifier: demoLoginIdentifier,
   });
 
   return (

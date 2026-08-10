@@ -283,3 +283,12 @@ export function getAssistantIaTool(id: string): AssistantIaTool | undefined {
 export function toolsByFamily(family: AssistantIaFamily): AssistantIaTool[] {
   return ASSISTANT_IA_TOOLS.filter((t) => t.family === family);
 }
+
+/** Filtre catalogue selon PlatformConfig.features.aiTools (pas d’exécution LLM). */
+export function filterAssistantIaToolsForPlatform(
+  aiTools: string[] | "all",
+): AssistantIaTool[] {
+  if (aiTools === "all") return [...ASSISTANT_IA_TOOLS];
+  const set = new Set(aiTools);
+  return ASSISTANT_IA_TOOLS.filter((t) => set.has(t.id));
+}

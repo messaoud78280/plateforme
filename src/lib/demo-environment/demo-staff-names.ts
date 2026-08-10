@@ -91,6 +91,10 @@ export function isDemoStaffVisibleInMessaging(email: string | null | undefined):
 /**
  * Aligne les noms visibles des comptes staff legacy (@bework.internal uniquement).
  * Ne touche jamais aux emails persona @demo.bework.local.
+ *
+ * ATTENTION PLATFORM-ISOLATION : ces users sont des *singletons globaux*.
+ * Ne pas les rattacher à une nouvelle démo Client B.
+ * Appeler uniquement pour la plateforme SETRIM (legacy).
  */
 export async function ensureDemoStaffDisplayNames(): Promise<{
   renamed: { email: string; from: string; to: string }[];

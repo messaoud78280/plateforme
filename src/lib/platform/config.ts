@@ -1,11 +1,15 @@
 /**
- * PLATFORM-ISOLATION-V1 — configuration de plateforme par organisation.
+ * PLATFORM-ISOLATION-V1.1 — configuration de plateforme par organisation.
  *
- * BeWork = éditeur de plateformes métier BTP.
- * CORE commun + config par org + données isolées.
+ * Identité stable (priorité) :
+ * 1. platformKey explicite
+ * 2. loginIdentifier (DemoEnvironment) via registre connu
+ * 3. isDemo → generic_demo neutre
+ * 4. organisation client non-démo inconnue → NEUTRAL_CLIENT
+ * 5. BeWork interne → uniquement si !isDemo et pas d’org client / clé interne
  *
- * DEMO_BRAND (SETRIM) = template de *création* pour la démo SETRIM,
- * jamais un fallback runtime pour BeWork interne ou un autre client.
+ * INTERDIT comme clé de comportement : companyName / displayName.
+ * DEMO_BRAND = template création SETRIM uniquement.
  */
 
 import { DEMO_BRAND } from "@/lib/demo-environment/brand";
@@ -15,7 +19,8 @@ export type PlatformKey =
   | "bework_internal"
   | "setrim"
   | "client_test"
-  | "generic_demo";
+  | "generic_demo"
+  | "neutral_client";
 
 export type PlatformFeatures = {
   assistantIa: boolean;
@@ -49,7 +54,8 @@ export type PlatformConfig = {
 
 const BEWORK_AI_ALL = "all" as const;
 
-const SETRIM_AI_TOOLS = [
+/** Ids catalogue Assistant IA — SETRIM (marchés privés + chantier). */
+export const SETRIM_AI_TOOL_IDS = [
   "analyser-marche-prive",
   "obligations-delais",
   "risques-marche",
@@ -58,6 +64,12 @@ const SETRIM_AI_TOOLS = [
   "cr-vers-actions",
   "controler-doe",
   "rediger-courrier",
+] as const;
+
+/** Fixture Client Test — DOE / CR (pas d’analyse marché privée). */
+export const CLIENT_TEST_AI_TOOL_IDS = [
+  "controler-doe",
+  "cr-vers-actions",
 ] as const;
 
 export const BEWORK_INTERNAL_FEATURES: PlatformFeatures = {
@@ -79,10 +91,9 @@ export const SETRIM_DEMO_FEATURES: PlatformFeatures = {
   pilotage: true,
   commercialTour: true,
   demoViewAs: true,
-  aiTools: [...SETRIM_AI_TOOLS],
+  aiTools: [...SETRIM_AI_TOOL_IDS],
 };
 
-/** Fixture minimale — prouve multi-config sans polluer l’UI. */
 export const CLIENT_TEST_FEATURES: PlatformFeatures = {
   assistantIa: true,
   facturation: false,
@@ -91,7 +102,31 @@ export const CLIENT_TEST_FEATURES: PlatformFeatures = {
   pilotage: true,
   commercialTour: false,
   demoViewAs: false,
-  aiTools: ["controler-doe", "cr-vers-actions"],
+  aiTools: [...CLIENT_TEST_AI_TOOL_IDS],
+};
+
+/** Démo inconnue — CORE neutre, jamais SETRIM. */
+export const GENERIC_DEMO_FEATURES: PlatformFeatures = {
+  assistantIa: true,
+  facturation: true,
+  purchaseOrders: true,
+  suppliers: true,
+  pilotage: true,
+  commercialTour: false,
+  demoViewAs: true,
+  aiTools: BEWORK_AI_ALL,
+};
+
+/** Org client réelle / inconnue — jamais BeWork interne ni SETRIM. */
+export const NEUTRAL_CLIENT_FEATURES: PlatformFeatures = {
+  assistantIa: true,
+  facturation: true,
+  purchaseOrders: true,
+  suppliers: true,
+  pilotage: true,
+  commercialTour: false,
+  demoViewAs: false,
+  aiTools: BEWORK_AI_ALL,
 };
 
 export const BEWORK_INTERNAL_CONFIG: PlatformConfig = {
@@ -110,7 +145,6 @@ export const BEWORK_INTERNAL_CONFIG: PlatformConfig = {
   features: BEWORK_INTERNAL_FEATURES,
 };
 
-/** Template SETRIM — création / reset démo commerciale uniquement. */
 export const SETRIM_PLATFORM_TEMPLATE: PlatformConfig = {
   organizationId: null,
   key: "setrim",
@@ -143,94 +177,141 @@ export const CLIENT_TEST_PLATFORM_CONFIG: PlatformConfig = {
   features: CLIENT_TEST_FEATURES,
 };
 
+export const GENERIC_DEMO_CONFIG: PlatformConfig = {
+  organizationId: null,
+  key: "generic_demo",
+  branding: {
+    displayName: "Démonstration",
+    shortName: "Démo",
+    logo: null,
+    productSecondaryLabel: "Démonstration BeWork",
+    contactRoleLabel: "Direction",
+  },
+  demoMode: true,
+  internalPlatform: false,
+  commercialDemo: false,
+  features: GENERIC_DEMO_FEATURES,
+};
+
+export const NEUTRAL_CLIENT_CONFIG: PlatformConfig = {
+  organizationId: null,
+  key: "neutral_client",
+  branding: {
+    displayName: "Organisation",
+    shortName: "Org",
+    logo: null,
+    productSecondaryLabel: "Plateforme BeWork",
+    contactRoleLabel: "",
+  },
+  demoMode: false,
+  internalPlatform: false,
+  commercialDemo: false,
+  features: NEUTRAL_CLIENT_FEATURES,
+};
+
+/**
+ * Registre loginIdentifier → platformKey.
+ * Étendre ici à la création d’une nouvelle démo (ex. client-b → setrim|generic|custom).
+ * Pas de migration DB requise pour V1.1.
+ */
+export const PLATFORM_KEY_BY_LOGIN_IDENTIFIER: Readonly<Record<string, PlatformKey>> = {
+  "bework-demo": "setrim",
+  setrim: "setrim",
+  "client-test": "client_test",
+  "client_test": "client_test",
+};
+
 export type ResolvePlatformInput = {
   organizationId?: string | null;
   isDemo?: boolean;
-  /** Nom stocké sur DemoEnvironment / session — pas une clé de comportement. */
+  /** Affichage uniquement — JAMAIS clé de comportement. */
   companyName?: string | null;
   logoUrl?: string | null;
-  /** Si fourni explicitement (futur DB), prioritaire. */
+  /** DemoEnvironment.loginIdentifier — identité démo stable. */
+  loginIdentifier?: string | null;
+  /** Si fourni (futur DB / tests), prioritaire. */
   platformKey?: PlatformKey | null;
 };
 
-function isSetrimCompanyName(name: string | null | undefined): boolean {
-  if (!name?.trim()) return false;
-  const n = name.trim();
-  if (n === DEMO_BRAND.companyName || n === DEMO_BRAND.companyDisplayName) return true;
-  return DEMO_BRAND.legacyCompanyNames.some((legacy) => legacy === n);
+export function resolvePlatformKeyFromLoginIdentifier(
+  loginIdentifier?: string | null,
+): PlatformKey | null {
+  const id = loginIdentifier?.trim().toLowerCase();
+  if (!id) return null;
+  return PLATFORM_KEY_BY_LOGIN_IDENTIFIER[id] ?? null;
+}
+
+function withOrg(base: PlatformConfig, orgId: string | null): PlatformConfig {
+  return { ...base, organizationId: orgId };
+}
+
+function withDisplay(
+  base: PlatformConfig,
+  input: ResolvePlatformInput,
+  opts?: { setrimLogoFallback?: boolean },
+): PlatformConfig {
+  const display = input.companyName?.trim() || base.branding.displayName;
+  const logo =
+    input.logoUrl?.trim() ||
+    (opts?.setrimLogoFallback ? DEMO_BRAND.logoPath : base.branding.logo);
+  return {
+    ...base,
+    organizationId: input.organizationId?.trim() || null,
+    branding: {
+      ...base.branding,
+      displayName: display,
+      shortName: display,
+      logo,
+    },
+  };
+}
+
+function configForKey(key: PlatformKey, input: ResolvePlatformInput): PlatformConfig {
+  switch (key) {
+    case "bework_internal":
+      return withOrg(BEWORK_INTERNAL_CONFIG, input.organizationId?.trim() || null);
+    case "setrim":
+      return withDisplay(SETRIM_PLATFORM_TEMPLATE, input, { setrimLogoFallback: true });
+    case "client_test":
+      return withDisplay(CLIENT_TEST_PLATFORM_CONFIG, input);
+    case "generic_demo":
+      return withDisplay(GENERIC_DEMO_CONFIG, input);
+    case "neutral_client":
+      return withDisplay(NEUTRAL_CLIENT_CONFIG, input);
+  }
 }
 
 /**
- * Résout la config plateforme.
- * Priorité : platformKey explicite → démo SETRIM (nom) → démo générique → BeWork interne.
+ * Résout la config plateforme — pur, sans cache mutable, sans singleton.
  */
 export function getPlatformConfigForOrganization(
   input: ResolvePlatformInput = {},
 ): PlatformConfig {
   const orgId = input.organizationId?.trim() || null;
 
-  if (
-    input.platformKey === "bework_internal" ||
-    (!input.isDemo && !input.platformKey)
-  ) {
-    return { ...BEWORK_INTERNAL_CONFIG, organizationId: orgId };
+  if (input.platformKey) {
+    return configForKey(input.platformKey, input);
   }
 
-  if (input.platformKey === "client_test") {
-    return {
-      ...CLIENT_TEST_PLATFORM_CONFIG,
-      organizationId: orgId,
-      branding: {
-        ...CLIENT_TEST_PLATFORM_CONFIG.branding,
-        displayName: input.companyName?.trim() || CLIENT_TEST_PLATFORM_CONFIG.branding.displayName,
-        logo: input.logoUrl?.trim() || null,
-      },
-    };
+  const fromLogin = resolvePlatformKeyFromLoginIdentifier(input.loginIdentifier);
+  if (fromLogin) {
+    return configForKey(fromLogin, input);
   }
 
-  if (input.platformKey === "setrim" || (input.isDemo && isSetrimCompanyName(input.companyName))) {
-    const display =
-      input.companyName?.trim() && !DEMO_BRAND.legacyCompanyNames.includes(input.companyName.trim())
-        ? input.companyName.trim()
-        : DEMO_BRAND.companyDisplayName;
-    return {
-      ...SETRIM_PLATFORM_TEMPLATE,
-      organizationId: orgId,
-      branding: {
-        ...SETRIM_PLATFORM_TEMPLATE.branding,
-        displayName: display,
-        shortName: display,
-        logo: input.logoUrl?.trim() || DEMO_BRAND.logoPath,
-      },
-    };
+  // Démo sans login connu → neutre (jamais SETRIM via companyName)
+  if (input.isDemo) {
+    return withDisplay(GENERIC_DEMO_CONFIG, { ...input, organizationId: orgId });
   }
 
-  if (input.isDemo || input.platformKey === "generic_demo") {
-    const display = input.companyName?.trim() || "Démonstration";
-    return {
-      organizationId: orgId,
-      key: "generic_demo",
-      branding: {
-        displayName: display,
-        shortName: display,
-        logo: input.logoUrl?.trim() || null,
-        productSecondaryLabel: "Démonstration BeWork",
-        contactRoleLabel: "Direction",
-      },
-      demoMode: true,
-      internalPlatform: false,
-      commercialDemo: false,
-      features: {
-        ...SETRIM_DEMO_FEATURES,
-        commercialTour: false,
-      },
-    };
+  // Org client non-démo sans clé → neutre (jamais BeWork interne par défaut)
+  if (orgId) {
+    return withDisplay(NEUTRAL_CLIENT_CONFIG, { ...input, organizationId: orgId });
   }
 
-  return { ...BEWORK_INTERNAL_CONFIG, organizationId: orgId };
+  // Session staff BeWork (pas démo, pas org client)
+  return withOrg(BEWORK_INTERNAL_CONFIG, null);
 }
 
-/** Alias lisible pour le runtime session / layout. */
 export function getCurrentPlatformConfig(
   input: ResolvePlatformInput,
 ): PlatformConfig {
@@ -267,6 +348,11 @@ export function isSetrimPlatform(
   return cfg.key === "setrim";
 }
 
+/** Staff @bework.internal partagés — autorisés uniquement pour SETRIM legacy. */
+export function allowsSharedBeworkInternalStaff(config: PlatformConfig): boolean {
+  return config.key === "setrim";
+}
+
 /** Libellé hôte neutre — jamais SETRIM en fallback core. */
 export function resolveHostCompanyLabel(
   hostCompanyName?: string | null,
@@ -274,4 +360,18 @@ export function resolveHostCompanyLabel(
 ): string {
   const t = hostCompanyName?.trim();
   return t || fallback;
+}
+
+/**
+ * Filtre le catalogue Assistant IA selon PlatformConfig.features.aiTools.
+ * CORE reste intact ; les moteurs LLM ne sont pas concernés.
+ */
+export function filterAiToolIdsForPlatform(
+  config: PlatformConfig,
+  catalogIds: readonly string[],
+): string[] {
+  const allowed = config.features.aiTools;
+  if (allowed === "all") return [...catalogIds];
+  const set = new Set(allowed);
+  return catalogIds.filter((id) => set.has(id));
 }

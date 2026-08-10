@@ -1,5 +1,5 @@
 /**
- * Métadonnées SEO/GEO centralisées — repositionnement plateforme interne BTP.
+ * Métadonnées SEO/GEO centralisées — solutions IA sur mesure + plateformes métier BTP.
  * Titles ~45–60 car. · descriptions ~140–160 car. · hreflang francophonie.
  * URLs historiques conservées ; copy recentrée éditeur / intégrateur / outils IA pour vos équipes.
  */
@@ -12,7 +12,6 @@ import {
   SEO_KEYWORDS_ASSISTANT_TRAVAUX,
   SEO_KEYWORDS_GEO_SCOPE,
   SEO_KEYWORDS_PLATEFORME,
-  SEO_KEYWORDS_TECHNIQUE,
 } from "@/lib/seo-keywords";
 
 export type PublicPageSeo = {
@@ -232,32 +231,31 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     keywords: ["cas clients BTP", "retour expérience BTP", "plateforme chantier"],
   },
   "/faq": {
-    title: "FAQ BeWork : plateforme, IA, Chorus Pro, DOE",
+    title: "FAQ BeWork : solutions IA, plateforme, marchés",
     description: metaDescriptionFrancophonie(
-      "FAQ BeWork : plateforme interne BTP, outils IA, marché public, Chorus Pro, DOE, abonnement, rôles et validations humaines",
+      "FAQ BeWork : solutions IA sur mesure, plateforme métier, analyse DCE, Chorus Pro, DOE, formation, adoption et étude de besoin",
     ),
     keywords: [
       "FAQ BeWork",
-      "plateforme interne BTP",
-      "gestion marché public BTP",
-      "facturation Chorus Pro BTP",
-      "DOE marché public BTP",
+      "solutions IA BTP",
+      "plateforme métier BTP",
+      "étude besoin IA",
       "abonnement plateforme BTP",
     ],
   },
   "/contact": {
-    title: "Contact BeWork — démonstration plateforme BTP",
+    title: "Contact BeWork — parler de votre besoin IA",
     description: metaDescriptionFrancophonie(
-      "Contactez BeWork : présentez votre organisation pour une démonstration ou une étude de plateforme interne BTP — modules, IA et accompagnement",
+      "Contactez BeWork : décrivez votre idée, processus ou besoin IA — étude de solution sur mesure ou découverte de la plateforme métier",
     ),
-    keywords: ["contact BeWork", "démonstration plateforme BTP", "étude déploiement BTP"],
+    keywords: ["contact BeWork", "étude besoin IA BTP", "solution IA sur mesure BTP", "démonstration plateforme BTP"],
   },
   "/notre-facon-de-travailler": {
-    title: "Notre façon de travailler — méthode de déploiement BeWork",
+    title: "Notre approche — concevoir, former, faire évoluer",
     description: metaDescriptionFrancophonie(
-      "Méthode BeWork : diagnostic, composition, configuration, formation, déploiement et évolution — plateforme pour vos équipes",
+      "Approche BeWork : comprendre le métier, concevoir la solution IA ou plateforme, déployer, former les équipes et accompagner l’adoption",
     ),
-    keywords: ["méthode BeWork", "déploiement plateforme BTP", "partenaire évolution BTP"],
+    keywords: ["méthode BeWork", "formation équipes IA BTP", "conception solution IA", "adoption outil métier"],
   },
   "/assistants-administratifs-taches": {
     title: "Capacités plateforme BeWork : AO, DCE et marchés",

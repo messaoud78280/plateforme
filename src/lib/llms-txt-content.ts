@@ -1,5 +1,5 @@
 import { BEWORK_VALUE_PILLAR_LABELS } from "@/lib/bework-value-pillars";
-import { RESOURCE_PDF_CATALOG, RESOURCE_PDF_GUIDES, RESOURCE_PDF_TUTOS } from "@/content/resource-pdf-catalog";
+import { RESOURCE_PDF_GUIDES, RESOURCE_PDF_TUTOS } from "@/content/resource-pdf-catalog";
 import { RESOURCE_TUTO_ITEMS } from "@/content/resource-tutos";
 import { BLOG_ARTICLES_SEO } from "@/content/blog-articles-seo";
 import { ASSISTANT_TRAVAUX_VILLE_PATHS, ASSISTANT_TRAVAUX_VILLES } from "@/lib/assistant-travaux-villes";
@@ -68,7 +68,7 @@ export function buildLlmsTxt(): string {
 
   return `# BeWork
 
-> Signature : « ${BEWORK_BRAND_SIGNATURE} ». ${BEWORK_AEO_DEFINITION} Marchés : France, Belgique, Suisse et Luxembourg. Capacités plateforme : candidatures, analyse DCE, organisation de réponse, suivi admin post-attribution (Chorus Pro, réserves, DOE). Slogan : « ${BEWORK_SLOGAN} ». Accroche : « ${BEWORK_SLOGAN_DECISION} ».
+> Signature : « ${BEWORK_BRAND_SIGNATURE} ». ${BEWORK_AEO_DEFINITION} Marchés : France, Belgique, Suisse et Luxembourg. Offres : solutions IA sur mesure (applications, automatisations, analyse documentaire, intégrations) et plateformes métier (dont la plateforme BeWork). Slogan : « ${BEWORK_SLOGAN} ». Accroche : « ${BEWORK_SLOGAN_DECISION} ».
 
 ${buildLlmsAiPolicySection()}
 
@@ -111,13 +111,13 @@ ${line("Cas clients", "/cas-clients")}
 
 ## Pages clés
 
-${line("Accueil", "/", "Plateformes internes intelligentes pour le BTP.")}
+${line("Accueil", "/", "Solutions IA sur mesure et plateformes métier pour le BTP.")}
 ${line("Capacités plateforme (AO, DCE, marchés)", "/assistants-administratifs-taches", "Modules et workflows : candidatures/DCE, organisation de réponse et suivi admin marché public — utilisés par vos équipes.")}
 ${line("Services", "/services")}
-${line("Tarifs", "/tarifs", "Mise en place + abonnement sur étude — bework.fr/tarifs.")}
-${line("Contact & démonstration", "/contact")}
+${line("Tarifs", "/tarifs", "Projet IA ou plateforme — sur étude — bework.fr/tarifs.")}
+${line("Contact & étude de besoin", "/contact")}
 ${line("FAQ", "/faq")}
-${line("Notre façon de travailler", "/notre-facon-de-travailler", "Diagnostic, configuration, formation, évolution.")}
+${line("Notre façon de travailler", "/notre-facon-de-travailler", "Comprendre, concevoir, déployer, former, accompagner, évoluer.")}
 
 ## Déploiement par pays (URLs historiques)
 

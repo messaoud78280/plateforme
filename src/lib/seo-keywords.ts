@@ -1,29 +1,44 @@
 /**
- * Expressions cibles — positionnement éditeur / plateforme interne BTP.
+ * Expressions cibles SEO / AEO — positionnement BeWork :
+ * concepteur de solutions IA sur mesure + plateformes métier pour le BTP.
  * Google utilise surtout le contenu et les titres ; `keywords` reste un signal secondaire.
  */
 
-/** Niche principale : plateformes internes intelligentes pour le BTP. */
+/** Niche principale : solutions IA sur mesure BTP. */
+export const SEO_KEYWORDS_SOLUTIONS_IA = [
+  "solutions IA sur mesure BTP",
+  "conception solution IA BTP",
+  "IA métier BTP",
+  "automatisation BTP",
+  "analyse documentaire BTP",
+  "agent IA chantier",
+  "assistant IA BTP",
+  "intégration IA entreprise BTP",
+  "outil métier IA BTP",
+  "recherche intelligente documents BTP",
+  "IA CCTP CCAP DCE",
+  "technologie construite autour de l'entreprise",
+] as const;
+
+/** Plateforme BeWork — offre majeure et preuve de savoir-faire (conservée pour SEO). */
 export const SEO_KEYWORDS_PLATEFORME = [
-  "plateformes internes intelligentes pour le BTP",
+  "plateforme métier BTP",
   "plateforme interne BTP",
   "plateforme intelligente BTP",
-  "plateformes internes BTP",
-  "éditeur plateforme BTP",
+  "plateformes internes intelligentes pour le BTP",
   "logiciel chantier BTP",
   "environnement numérique BTP",
-  "plateforme métier BTP",
   "outils IA BTP",
-  "IA spécialisée BTP",
   "centralisation documents chantier",
   "pilotage chantier BTP",
   "gestion documentaire BTP",
   "workflow chantier BTP",
+  "éditeur logiciel BTP",
 ] as const;
 
 /**
  * Requêtes historiques « assistant travaux » — conservées pour capturer l’intention,
- * reformulées vers plateforme + outils IA pour les équipes du client (pas exécution externalisée).
+ * reformulées vers solutions IA + plateforme (pas exécution externalisée).
  */
 export const SEO_KEYWORDS_ASSISTANT_TRAVAUX = [
   "assistant travaux BTP",
@@ -38,16 +53,16 @@ export const SEO_KEYWORDS_ASSISTANT_TRAVAUX = [
   "aide administrative chantier",
 ] as const;
 
-/** Partenaire d’évolution / intégrateur (remplace prestataire administratif externalisé). */
+/** Partenaire de conception / déploiement / évolution. */
 export const SEO_KEYWORDS_PARTENAIRE_CORE = [
   "partenaire technologique BTP",
-  "intégrateur plateforme BTP",
-  "éditeur logiciel BTP",
-  "déploiement plateforme métier",
-  "évolution plateforme chantier",
+  "concepteur solution IA BTP",
+  "intégrateur IA BTP",
+  "déploiement solution métier BTP",
   "accompagnement digitalisation BTP",
-  "configuration plateforme BTP",
-  "maintenance plateforme métier",
+  "formation équipes IA BTP",
+  "adoption outil IA entreprise",
+  "évolution solution métier",
 ] as const;
 
 export const SEO_KEYWORDS_BTP_PME = [
@@ -66,7 +81,7 @@ export const SEO_KEYWORDS_BTP_PME = [
 
 /** Personae terrain & direction. */
 export const SEO_KEYWORDS_PERSONAS_BTP = [
-  "conducteur de travaux plateforme",
+  "conducteur de travaux IA",
   "suivi administratif chantier",
   "coordination documentaire chantier",
   "chef de chantier documents",
@@ -78,12 +93,13 @@ export const SEO_KEYWORDS_PERSONAS_BTP = [
 
 /** Signaux géographiques francophones. */
 export const SEO_KEYWORDS_GEO_SCOPE = [
+  "solutions IA BTP France",
   "plateforme BTP France",
-  "logiciel chantier Belgique",
+  "IA chantier Belgique",
   "plateforme métier BTP Suisse",
   "organisation administrative BTP Luxembourg",
   "Île-de-France BTP gestion bureau",
-  "BTP Wallonie plateforme",
+  "BTP Wallonie IA",
   "Suisse romande digitalisation chantier",
   "plateforme BTP PACA",
   "BTP Auvergne-Rhône-Alpes outils",
@@ -92,7 +108,7 @@ export const SEO_KEYWORDS_GEO_SCOPE = [
   "Hauts-de-France gestion chantier",
 ] as const;
 
-/** Exécution de marché public (capacités plateforme). */
+/** Exécution de marché public (capacités plateforme / IA documentaire). */
 export const SEO_KEYWORDS_MARCHES_PUBLIC_EXECUTION = [
   "gestion marché public BTP",
   "suivi administratif accord-cadre travaux",
@@ -157,6 +173,7 @@ export const SEO_KEYWORDS_TECHNIQUE = [
 
 /** Liste fusionnée layout racine. */
 export const SEO_KEYWORDS_GLOBAL: string[] = [
+  ...SEO_KEYWORDS_SOLUTIONS_IA,
   ...SEO_KEYWORDS_PLATEFORME,
   ...SEO_KEYWORDS_PARTENAIRE_CORE,
   ...SEO_KEYWORDS_BTP_PME,
@@ -164,13 +181,11 @@ export const SEO_KEYWORDS_GLOBAL: string[] = [
   ...SEO_KEYWORDS_GEO_SCOPE.slice(0, 8),
   ...SEO_KEYWORDS_TECHNIQUE.slice(0, 6),
   "BeWork",
-  "mise en place plateforme BTP",
-  "abonnement plateforme métier",
+  "étude besoin IA BTP",
   "France Belgique Suisse Luxembourg",
-  "démonstration plateforme BTP",
 ];
 
-/** Marchés travaux — capacités plateforme (pas prestation exécutante). */
+/** Marchés travaux — capacités plateforme / IA (pas prestation exécutante). */
 export const SEO_KEYWORDS_MARCHES_TRAVAUX = [
   "analyse DCE",
   "mémoire technique BTP",
@@ -192,6 +207,7 @@ export const SEO_KEYWORDS_MARCHES_TRAVAUX = [
 ] as const;
 
 export const SEO_KEYWORDS_HOME: string[] = [
+  ...SEO_KEYWORDS_SOLUTIONS_IA,
   ...SEO_KEYWORDS_PLATEFORME,
   ...SEO_KEYWORDS_MARCHES_TRAVAUX,
   ...SEO_KEYWORDS_BTP_PME,
@@ -203,30 +219,35 @@ export const SEO_KEYWORDS_HOME: string[] = [
 
 /**
  * Signature courte officielle BeWork (header, titres SEO, OG, JSON-LD, llms.txt).
- * Formulation exacte — ne pas altérer (singulier, « métiers », « IA », etc.).
  */
-export const BEWORK_BRAND_SIGNATURE = "Plateformes internes intelligentes pour le BTP";
+export const BEWORK_BRAND_SIGNATURE = "Solutions IA sur mesure pour le BTP";
+
+/** Signature institutionnelle (footer, clôture). */
+export const BEWORK_BRAND_INSTITUTIONAL = "Plateformes métier. Solutions IA. Expertise BTP.";
 
 /** Slogan BeWork — contenu, OG, JSON-LD, llms.txt. */
-export const BEWORK_SLOGAN = "Vos équipes pilotent. BeWork fait évoluer leur plateforme.";
+export const BEWORK_SLOGAN = "Vous imaginez le besoin. Nous concevons la solution.";
 
 /** Accroche complémentaire (home / AEO). */
 export const BEWORK_SLOGAN_DECISION =
-  "BeWork configure, forme et fait évoluer l’environnement numérique. Vous restez maître des opérations, des données et des décisions.";
+  "Nous partons de votre métier, formons vos équipes et faisons évoluer la solution avec vous — jusqu’à l’usage réel au quotidien.";
 
 /** Phrase de positionnement citables par les IA / extraits AEO. */
 export const BEWORK_AEO_DEFINITION =
-  "BeWork conçoit, déploie et fait évoluer des plateformes internes intelligentes pour les entreprises du BTP. Chaque solution repose sur un socle technologique commun, enrichi de modules, de workflows et d’outils IA adaptés à l’organisation du client. Les collaborateurs de l’entreprise utilisent la plateforme au quotidien, tandis que BeWork assure son hébergement, sa maintenance, sa sécurité et son évolution.";
+  "BeWork conçoit des solutions IA sur mesure et des plateformes métier pour les entreprises du BTP. Nous partons d’un problème, d’un processus, de documents ou d’outils existants, puis étudions et construisons la solution adaptée : applications, automatisations, assistants, analyse documentaire, intégrations ou environnement complet. La plateforme BeWork est une offre majeure et une démonstration de ce savoir-faire. Les équipes du client utilisent la solution ; BeWork conçoit, déploie, forme, accompagne et fait évoluer.";
 
 /** Title SEO / OG racine (aligné home). */
 export const SEO_SITE_TITLE_DEFAULT = `BeWork | ${BEWORK_BRAND_SIGNATURE}`;
 
 export const SEO_SITE_TITLE_OG = `BeWork — ${BEWORK_BRAND_SIGNATURE}`;
 
-/** Meta description site (layout racine) — ≤160 car. */
+/** Meta description site (layout racine) — ≤160 car. avant suffixe geo éventuel. */
 export const SEO_VALUE_PROPOSITION =
-  "BeWork : plateformes internes intelligentes pour le BTP — conçues, déployées et évolutives. Vos équipes les utilisent au quotidien. FR · BE · CH · LU.";
+  "BeWork : solutions IA sur mesure et plateformes métier pour le BTP. Expliquez votre besoin — conception, déploiement, formation. FR · BE · CH · LU.";
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Plateformes internes intelligentes pour le BTP : socle BeWork, modules adaptés, IA métier, évolution continue. FR · BE · CH · LU.";
+  "Solutions IA sur mesure et plateformes métier pour le BTP — conçues autour de votre entreprise.";
+
+/** Tagline institutionnelle (OG image, footer). */
+export const BEWORK_TECH_AROUND_YOU = "La technologie construite autour de votre entreprise.";

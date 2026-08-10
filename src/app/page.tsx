@@ -25,12 +25,12 @@ import {
   hreflangFrancophonieLanguages,
   metaDescriptionFrancophonie,
 } from "@/lib/seo-francophonie";
-import { BEWORK_BRAND_SIGNATURE, SEO_KEYWORDS_HOME } from "@/lib/seo-keywords";
+import { BEWORK_BRAND_SIGNATURE, SEO_KEYWORDS_HOME, SEO_SITE_TITLE_DEFAULT, SEO_VALUE_PROPOSITION } from "@/lib/seo-keywords";
 import { SITE_URL } from "@/lib/site";
 
-const HOME_META_TITLE = "BeWork | Solutions IA sur mesure pour le BTP";
+const HOME_META_TITLE = SEO_SITE_TITLE_DEFAULT;
 const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
-  "BeWork conçoit des solutions IA et des plateformes métier pour les entreprises du BTP — autour de vos processus, documents, données et outils existants",
+  "BeWork conçoit des solutions IA sur mesure et des plateformes métier pour le BTP — autour de vos processus, documents, données et outils",
 );
 
 const HOME_FAQ_ITEMS = [
@@ -122,8 +122,7 @@ const homeJsonLd = {
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#service`,
       name: "BeWork — solutions IA et plateformes métier pour le BTP",
-      description:
-        "Conception de solutions IA sur mesure et de plateformes métier pour les entreprises du BTP, autour de leurs processus, documents, données et outils.",
+      description: SEO_VALUE_PROPOSITION,
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),
       url: SITE_URL,
@@ -142,7 +141,7 @@ const homeJsonLd = {
         "@type": "Offer",
         priceCurrency: "EUR",
         description:
-          "Mise en place initiale et abonnement mensuel sur étude — ou projet IA sur mesure selon le besoin.",
+          "Projet IA sur mesure ou plateforme BeWork — mise en place et accompagnement sur étude.",
         url: `${SITE_URL}/contact`,
       },
     },

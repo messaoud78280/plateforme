@@ -48,12 +48,12 @@ export default function ContactPage() {
       <main className="px-4 py-10 sm:py-12 md:py-16">
         <div className="mx-auto max-w-3xl">
           <h1 className="font-heading text-metallic-black text-[1.75rem] font-bold tracking-tight text-balance sm:text-3xl md:text-4xl">
-            Contact & échange
+            Parlez-nous de votre besoin
           </h1>
           <p className="mt-4 text-[0.9375rem] font-medium leading-relaxed text-black sm:text-base md:text-lg">
-            Décrivez votre contexte en quelques champs : BeWork qualifie votre demande et vous recontacte pour un{" "}
-            <strong className="font-semibold text-black">échange ciblé</strong> sur vos marchés et votre charge
-            administrative.
+            Solution IA, automatisation, analyse documentaire, intégration à vos outils, ou plateforme métier —
+            décrivez simplement ce que vous voulez améliorer. BeWork étudie et vous recontacte pour un{" "}
+            <strong className="font-semibold text-black">échange adapté</strong>.
           </p>
 
           <div

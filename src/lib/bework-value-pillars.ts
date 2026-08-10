@@ -6,34 +6,34 @@ export type BeWorkValuePillar = {
 
 export const BEWORK_VALUE_PILLARS: readonly BeWorkValuePillar[] = [
   {
-    label: "Socle plateforme configurable",
+    label: "Solutions IA autour de votre besoin",
     detail:
-      "Un socle technologique commun, adapté à l’organisation du client : modules, workflows, rôles et droits selon vos métiers BTP.",
+      "Nous partons d’un problème, d’une idée ou d’un processus — pas d’un catalogue figé — et étudions la solution utile pour votre entreprise.",
   },
   {
-    label: "Expertise métier marchés et chantiers",
+    label: "Expertise métier BTP",
     detail:
-      "Candidatures, DCE, pièces marché, situations, réserves et DOE : la plateforme est conçue pour le réel administratif chantier — pas un outil générique.",
+      "Documents, marchés, chantiers, validations : la conception s’appuie sur le réel du BTP, pas sur une IA générique.",
   },
   {
-    label: "IA spécialisée + validation humaine",
+    label: "Simple devant, puissante derrière",
     detail:
-      "L’IA structure et accélère dans votre environnement. Vos collaborateurs restent responsables des analyses finales et des engagements contractuels.",
+      "Interfaces conçues pour les utilisateurs métier. La complexité technique reste en arrière-plan — formation et adoption incluses.",
   },
   {
-    label: "Confidentialité et isolation multi-entreprises",
+    label: "Plateforme BeWork comme preuve",
+    detail:
+      "Nous avons déjà construit un environnement métier complet : démonstration concrète de notre capacité à concevoir des systèmes pour le BTP.",
+  },
+  {
+    label: "Confidentialité et isolation",
     detail:
       "Accès contrôlés, traçabilité, hébergement principal en Europe selon engagements contractuels — données métier isolées par entreprise.",
   },
   {
-    label: "Mise en place puis évolution continue",
+    label: "Accompagnement jusqu’à l’usage réel",
     detail:
-      "Diagnostic, configuration, formation, puis abonnement : maintenance, sécurité et évolutions selon votre formule — sans inventer de prix hors étude.",
-  },
-  {
-    label: "Partenaire, pas exécutant",
-    detail:
-      "BeWork équipe et fait évoluer la plateforme. Les opérations quotidiennes restent chez vos équipes — BeWork n’est ni secrétariat exécutant ni bureau d’études.",
+      "Concevoir, déployer, former, accompagner l’adoption, puis faire évoluer la solution selon les retours — pas une livraison « jetée ».",
   },
 ] as const;
 

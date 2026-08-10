@@ -55,42 +55,42 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
   return [
     {
       question: "Qui est BeWork ?",
-      answer: `BeWork — ${BEWORK_BRAND_SIGNATURE}. ${BEWORK_AEO_DEFINITION} Société française : éditeur et partenaire d’évolution en France, Belgique, Suisse et Luxembourg.`,
+      answer: `BeWork — ${BEWORK_BRAND_SIGNATURE}. ${BEWORK_AEO_DEFINITION} Société française : concepteur de solutions IA et de plateformes métier en France, Belgique, Suisse et Luxembourg.`,
     },
     {
       question: "À qui s’adresse BeWork ?",
       answer:
-        "PME BTP, entreprises générales, artisans structurés, dirigeants, chargés d’affaires et conducteurs de travaux qui veulent des plateformes internes intelligentes pour centraliser marchés, chantiers, documents et outils IA — utilisées par leurs propres équipes.",
+        "PME BTP, entreprises générales, artisans structurés, dirigeants, chargés d’affaires et conducteurs de travaux qui veulent une solution IA, une automatisation, une analyse documentaire, une intégration à leurs outils, ou une plateforme métier — sans devoir tout reconstruire seuls.",
     },
     {
       question: "Quel problème BeWork résout-il ?",
       answer:
-        "Informations et outils dispersés : DCE, candidatures, pièces marché, documents chantier, validations et suivis. BeWork déploie une plateforme interne intelligente adaptée pour centraliser ces usages, sans se substituer aux décisions ni aux engagements contractuels du client.",
+        "Temps perdu sur des tâches répétitives, documents difficiles à exploiter, information dispersée, outils qui ne dialoguent pas, idées métier sans logiciel adapté. BeWork étudie le besoin et construit la solution autour de l’entreprise — sans se substituer aux décisions ni aux engagements contractuels du client.",
     },
     {
       question: "Quels services BeWork propose-t-il ?",
       answer:
-        "Conception, déploiement et évolution de plateformes internes intelligentes pour le BTP : diagnostic, configuration des modules et workflows, rôles et droits, outils IA, formation, maintenance, sécurité et accompagnement d’évolution. Les collaborateurs du client réalisent les opérations quotidiennes.",
+        "Conception de solutions IA sur mesure (applications, agents, automatisations, analyse documentaire, recherche, intégrations), conception de plateformes métier, formation des équipes, accompagnement à l’adoption et évolution continue. La plateforme BeWork est une offre majeure et une preuve de savoir-faire.",
     },
     {
       question: "Pourquoi faire confiance à BeWork ?",
       answer:
-        "Expertise métier BTP, socle technologique commun configurable, confidentialité et isolation multi-entreprises, hébergement principal en Europe selon les engagements contractuels. BeWork n’est ni un secrétariat exécutant, ni un bureau d’études, ni un cabinet juridique.",
+        "Expertise métier BTP, solutions pensées pour être utilisées (simples devant), confidentialité et isolation multi-entreprises, hébergement principal en Europe selon les engagements contractuels. BeWork n’est ni un secrétariat exécutant, ni un bureau d’études, ni un cabinet juridique.",
     },
     {
       question: "Combien coûte BeWork ?",
       answer:
-        `Mise en place initiale puis abonnement mensuel, sur étude personnalisée (utilisateurs, modules, personnalisation, IA, accompagnement). Aucune grille publique fixe — détail sur bework.fr/tarifs. ${priceFromLabel ? `Référence historique éventuelle à partir de ${priceFromLabel} € HT : à confirmer selon le nouveau modèle.` : ""}`.trim(),
+        `Projet IA sur mesure ou plateforme BeWork : proposition sur étude (périmètre, utilisateurs, intégrations, formation, accompagnement). Aucune grille publique fixe — détail sur bework.fr/tarifs. ${priceFromLabel ? `Référence historique éventuelle à partir de ${priceFromLabel} € HT : à confirmer selon le modèle retenu.` : ""}`.trim(),
     },
     {
       question: "Comment commencer avec BeWork ?",
       answer:
-        "Demander une démonstration ou une étude via /contact. BeWork diagnostique l’organisation, configure la plateforme, forme les équipes, puis vos collaborateurs l’utilisent au quotidien.",
+        "Parler de votre besoin via bework.fr/#besoin ou /contact. Expliquez ce que vous voulez améliorer, automatiser ou créer — sans jargon technique. BeWork étudie la faisabilité, propose une approche, puis conçoit, déploie et forme.",
     },
     {
-      question: "Qui utilise la plateforme au quotidien ?",
+      question: "Dois-je adopter toute la plateforme BeWork ?",
       answer:
-        "Exclusivement les collaborateurs autorisés de l’entreprise cliente. BeWork intervient sur la conception, le paramétrage, le support, la maintenance et l’évolution — pas pour exécuter les missions opérationnelles à la place du client.",
+        "Non. Vous pouvez venir pour un besoin IA précis, une intégration à vos logiciels existants, ou une plateforme complète. BeWork part de votre besoin, pas d’un catalogue obligatoire.",
     },
   ] as const;
 }

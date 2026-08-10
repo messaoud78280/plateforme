@@ -9,18 +9,18 @@ import { absoluteUrl } from "@/lib/site";
 
 export const TARIFS_PAGE_PATH = "/tarifs" as const;
 
-export const TARIFS_SEO_TITLE = "Tarification BeWork | Plateforme BTP sur étude";
+export const TARIFS_SEO_TITLE = "Tarification BeWork | Solutions IA et plateforme sur étude";
 
 export const TARIFS_SEO_DESCRIPTION =
-  "Tarification BeWork : plateforme interne BTP adaptée à votre organisation. Le tarif dépend des utilisateurs, modules, personnalisation, outils IA et accompagnement — sans grille publique fixe.";
+  "Tarification BeWork : projet IA sur mesure ou plateforme métier BTP. Le tarif dépend du périmètre, des utilisateurs, des intégrations, de la formation et de l’accompagnement — sans grille publique fixe.";
 
 export const TARIFS_SEO_KEYWORDS = [
-  "tarification plateforme BTP",
-  "étude personnalisée BeWork",
-  "plateforme interne BTP",
+  "tarification solution IA BTP",
+  "étude projet IA BeWork",
+  "plateforme métier BTP",
   "modules IA BTP",
   "abonnement plateforme BTP",
-  "analyse marché public BTP",
+  "conception solution IA sur mesure",
   ...SEO_KEYWORDS_BTP_PME.slice(0, 6),
 ] as const;
 

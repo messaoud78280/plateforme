@@ -13,6 +13,7 @@ export type AgendaPurchaseOrderSummary = {
   status: string;
   sharedWithSupplier: boolean;
   supplierName: string | null;
+  supplierOrganizationId: string | null;
   linesSummary: string | null;
   requestedDeliveryAt: string | null;
   confirmedDeliveryAt: string | null;
@@ -37,7 +38,8 @@ type PoInclude = {
   proposedDeliveryAt: Date | null;
   proposedDeliveryStatus: string | null;
   legacyTaskId: string | null;
-  externalOrganization?: { name: string; tradeName: string | null } | null;
+  externalOrganizationId?: string | null;
+  externalOrganization?: { id?: string; name: string; tradeName: string | null } | null;
   lines?: { designation: string; quantity: unknown; unit: string }[];
 } | null;
 
@@ -81,6 +83,8 @@ export function serializePurchaseOrderForAgenda(
     sharedWithSupplier: shared,
     supplierName:
       po.externalOrganization?.tradeName || po.externalOrganization?.name || null,
+    supplierOrganizationId:
+      po.externalOrganizationId ?? po.externalOrganization?.id ?? null,
     linesSummary,
     requestedDeliveryAt: po.requestedDeliveryAt?.toISOString() ?? null,
     confirmedDeliveryAt: po.confirmedDeliveryAt?.toISOString() ?? null,

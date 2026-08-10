@@ -6,6 +6,7 @@ import {
   taskMessagerieWhere,
   taskMessageVisibilityRelationWhere,
 } from "@/lib/messaging/access";
+import { excludeLegacyPurchaseOrderTasksWhere } from "@/lib/tasks/legacy-purchase-order";
 
 /** GET /api/tasks/messagerie?filter=inbox|mes-missions|en-attente-client|en-cours|terminees
  * Retourne les tâches avec lastMessage et unreadCount pour la messagerie missions */
@@ -19,7 +20,9 @@ export async function GET(request: NextRequest) {
   const filter = searchParams.get("filter") ?? "inbox";
 
   try {
-    let taskWhere: Record<string, unknown> = taskMessagerieWhere(session.user);
+    let taskWhere: Record<string, unknown> = {
+      AND: [taskMessagerieWhere(session.user), excludeLegacyPurchaseOrderTasksWhere],
+    };
 
     const statusFilters: Record<string, string[]> = {
       inbox: [], // toutes (avec priorité aux non lus)

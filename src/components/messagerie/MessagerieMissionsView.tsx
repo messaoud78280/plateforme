@@ -48,6 +48,8 @@ import {
 } from "@/components/messagerie/MessageReplyQuote";
 import { MessageBubbleChrome } from "@/components/messagerie/MessageBubbleChrome";
 import { MessageInfosPanel } from "@/components/messagerie/MessageInfosPanel";
+import type { InboxProjectChannelItem } from "@/lib/messagerie/project-channels";
+import { shouldHideTaskAgainstProjectChannels } from "@/lib/tasks/legacy-purchase-order";
 import {
   MessageForwardDialog,
   type ForwardDestOption,
@@ -320,6 +322,7 @@ function MissionRow({
               )}`}
             >
               {formatPartyBadge(partyForMission(m))}
+              {" · Tâche"}
               {m.projectName ? ` · ${m.projectName}` : null}
             </p>
             {m.lastMessage ? (
@@ -455,6 +458,95 @@ function DirectRow({
   );
 }
 
+function partyTypeFromChannelType(type: string): MessagingPartyType {
+  switch (type) {
+    case "INTERNAL":
+      return "INTERNAL";
+    case "CLIENT":
+      return "CLIENT";
+    case "SUPPLIER":
+      return "SUPPLIER";
+    case "SUBCONTRACTOR":
+      return "SUBCONTRACTOR";
+    default:
+      return "PARTNER";
+  }
+}
+
+function ChannelRow({
+  ch,
+  selected,
+  onSelect,
+  formatRelativeTime: fmt,
+}: {
+  ch: InboxProjectChannelItem;
+  selected: boolean;
+  onSelect: () => void;
+  formatRelativeTime: (d: string) => string;
+}) {
+  const unread = ch.unreadCount > 0;
+  const party = partyTypeFromChannelType(ch.type);
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={onSelect}
+        className={`flex w-full gap-3 px-3 py-2 text-left transition ${
+          selected ? "bg-[#f0f2f5]" : "hover:bg-[#f5f6f6]"
+        }`}
+      >
+        <div className="relative">
+          <Avatar name={ch.title} size="sm" />
+          {unread ? (
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#00a884] ring-2 ring-white" />
+          ) : null}
+        </div>
+        <div className="min-w-0 flex-1 border-b border-[#f0f2f5] pb-3">
+          <div className="flex items-baseline justify-between gap-2">
+            <p
+              className={`truncate text-[15px] ${
+                unread ? "font-bold text-[#111b21]" : "font-medium text-[#111b21]"
+              }`}
+            >
+              {ch.listTitle}
+            </p>
+            <span
+              className={`shrink-0 text-[11px] ${
+                unread ? "font-semibold text-[#00a884]" : "text-[#667781]"
+              }`}
+            >
+              {ch.lastMessageAt ? fmt(ch.lastMessageAt) : ""}
+            </span>
+          </div>
+          <p className={`mt-0.5 truncate text-[12px] font-semibold ${messagingPartyToneClass(party)}`}>
+            {ch.type === "INTERNAL" ? `🔒 ${ch.metaLabel}` : ch.metaLabel}
+          </p>
+          {ch.lastMessage ? (
+            <p
+              className={`mt-0.5 truncate text-[13px] ${
+                unread ? "font-semibold text-[#111b21]" : "text-[#667781]"
+              }`}
+            >
+              {`${ch.lastMessage.senderName.split(/\s+/)[0] ?? ""} : `}
+              {formatMediaPreview(ch.lastMessage.content, null)}
+            </p>
+          ) : null}
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            <span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-[#667781] bg-[#f0f2f5]">
+              Chantier
+            </span>
+            {unread ? (
+              <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#00a884] px-1.5 text-[10px] font-bold text-white">
+                {ch.unreadCount}
+              </span>
+            ) : null}
+          </div>
+        </div>
+      </button>
+    </li>
+  );
+}
+
 interface MessagerieMissionsViewProps {
   sessionUserId: string;
   isAgence: boolean;
@@ -478,6 +570,8 @@ export function MessagerieMissionsView({
 }: MessagerieMissionsViewProps) {
   const router = useRouter();
   const [missions, setMissions] = useState<MissionItem[]>([]);
+  const [projectChannels, setProjectChannels] = useState<InboxProjectChannelItem[]>([]);
+  const [selectedChannelId, setSelectedChannelId] = useState<string>("");
   const [filter, setFilter] = useState<FilterId>("inbox");
   const [listChip, setListChip] = useState<ListChip>("tous");
   const [moreOpen, setMoreOpen] = useState(false);
@@ -655,19 +749,25 @@ export function MessagerieMissionsView({
     async function load() {
       try {
         const missionFilter = filter === "messages-directs" ? "inbox" : filter;
-        const [missionsRes, directsData] = await Promise.all([
+        const [missionsRes, directsData, channelsRes] = await Promise.all([
           fetch(`/api/tasks/messagerie?filter=${missionFilter}`),
           refreshDirectIndex().catch(() => [] as DirectMessageItem[]),
+          fetch("/api/messages/channels/inbox").catch(() => null),
         ]);
         if (missionsRes.ok) {
           const data = await missionsRes.json();
           const list = Array.isArray(data) ? (data as MissionItem[]) : [];
           setMissions(sortMissionsByLastMessage(list));
-          if (!selectedTaskId && !selectedDirectContactId && list.length > 0) {
+          if (!selectedTaskId && !selectedDirectContactId && !selectedChannelId && list.length > 0) {
             setSelectedTaskId(list[0]!.id);
           }
         }
         if (Array.isArray(directsData)) setDirectMessages(directsData);
+        if (channelsRes && channelsRes.ok) {
+          const data = await channelsRes.json();
+          const list = Array.isArray(data?.channels) ? (data.channels as InboxProjectChannelItem[]) : [];
+          setProjectChannels(list);
+        }
       } finally {
         setLoading(false);
         setLoadingDirectMessages(false);
@@ -776,8 +876,49 @@ export function MessagerieMissionsView({
           void refreshDirectThread(selectedDirectContactId);
         }
       }
+      if (ev.kind === "PROJECT") {
+        // conversationKey = PROJECT:{projectId}:{channelId}
+        const parts = ev.conversationKey.split(":");
+        const channelId = parts[2] ?? "";
+        const projectId = parts[1] ?? "";
+        if (!channelId) {
+          void fetch("/api/messages/channels/inbox")
+            .then((r) => (r.ok ? r.json() : null))
+            .then((data) => {
+              if (Array.isArray(data?.channels)) setProjectChannels(data.channels);
+            });
+          return;
+        }
+        setProjectChannels((prev) => {
+          const idx = prev.findIndex((c) => c.id === channelId);
+          if (idx < 0) {
+            void fetch("/api/messages/channels/inbox")
+              .then((r) => (r.ok ? r.json() : null))
+              .then((data) => {
+                if (Array.isArray(data?.channels)) setProjectChannels(data.channels);
+              });
+            return prev;
+          }
+          const item = prev[idx]!;
+          const next = [...prev];
+          next.splice(idx, 1);
+          next.unshift({
+            ...item,
+            unreadCount:
+              selectedChannelId === channelId ? item.unreadCount : item.unreadCount + 1,
+            lastMessageAt: ev.at,
+            lastMessage: {
+              content: ev.preview,
+              createdAt: ev.at,
+              senderName: ev.senderName,
+            },
+          });
+          return next;
+        });
+        void projectId;
+      }
     });
-  }, [selectedTaskId, selectedDirectContactId, filter, sessionUserId]);
+  }, [selectedTaskId, selectedDirectContactId, selectedChannelId, filter, sessionUserId]);
 
   useEffect(() => {
     if (!selectedTaskId) {
@@ -1662,7 +1803,22 @@ export function MessagerieMissionsView({
     });
 
   const filteredMissions = (() => {
-    let list = missions;
+    let list = missions.filter(
+      (m) =>
+        !shouldHideTaskAgainstProjectChannels(
+          {
+            id: m.id,
+            title: m.title,
+            category: m.category,
+            projectId: m.projectId,
+          },
+          projectChannels.map((c) => ({
+            projectId: c.projectId,
+            type: c.type,
+            title: c.title,
+          })),
+        ),
+    );
     if (listChip === "non-lus") list = list.filter((m) => m.unreadCount > 0);
     if (listChip === "internes") {
       list = list.filter((m) => !partyForMission(m).external);
@@ -1690,7 +1846,7 @@ export function MessagerieMissionsView({
     return sortMissionsByLastMessage(list);
   })();
 
-  /** Discussions = directs avec historique + missions (même tri lastMessageAt). */
+  /** Discussions = directs + missions + channels chantier (même tri lastMessageAt). */
   const filteredDirectConversations = (() => {
     let list = directConversations.filter((c) => c.lastMessage != null);
     if (listChip === "non-lus") list = list.filter((c) => c.unread > 0);
@@ -1721,9 +1877,29 @@ export function MessagerieMissionsView({
     return list;
   })();
 
+  const filteredProjectChannels = (() => {
+    let list = projectChannels;
+    if (listChip === "non-lus") list = list.filter((c) => c.unreadCount > 0);
+    if (listChip === "internes") list = list.filter((c) => !c.external);
+    if (listChip === "externes") list = list.filter((c) => c.external);
+    if (listChip === "clients") list = list.filter((c) => c.type === "CLIENT");
+    if (listChip === "fournisseurs") list = list.filter((c) => c.type === "SUPPLIER");
+    if (listSearch.trim()) {
+      const q = listSearch.toLowerCase();
+      list = list.filter(
+        (c) =>
+          c.listTitle.toLowerCase().includes(q) ||
+          c.projectTitle.toLowerCase().includes(q) ||
+          (c.lastMessage?.content ?? "").toLowerCase().includes(q),
+      );
+    }
+    return list;
+  })();
+
   type UnifiedDiscussion =
     | { kind: "DIRECT"; at: number; conv: (typeof filteredDirectConversations)[number] }
-    | { kind: "TASK"; at: number; mission: MissionItem };
+    | { kind: "TASK"; at: number; mission: MissionItem }
+    | { kind: "CHANNEL"; at: number; channel: InboxProjectChannelItem };
 
   const unifiedDiscussions: UnifiedDiscussion[] = (() => {
     const items: UnifiedDiscussion[] = [];
@@ -1741,18 +1917,28 @@ export function MessagerieMissionsView({
         mission,
       });
     }
+    for (const channel of filteredProjectChannels) {
+      items.push({
+        kind: "CHANNEL",
+        at: channel.lastMessageAt ? new Date(channel.lastMessageAt).getTime() : 0,
+        channel,
+      });
+    }
     items.sort((a, b) => b.at - a.at);
     return items;
   })();
 
+  function discussionPinKey(d: UnifiedDiscussion): string {
+    if (d.kind === "TASK") return d.mission.id;
+    if (d.kind === "DIRECT") return `direct:${d.conv.user.id}`;
+    return `channel:${d.channel.id}`;
+  }
+
   const pinnedDiscussions = unifiedDiscussions.filter((d) =>
-    d.kind === "TASK" ? pinnedIds.includes(d.mission.id) : pinnedIds.includes(`direct:${d.conv.user.id}`),
+    pinnedIds.includes(discussionPinKey(d)),
   );
   const recentDiscussions = unifiedDiscussions.filter(
-    (d) =>
-      !(d.kind === "TASK"
-        ? pinnedIds.includes(d.mission.id)
-        : pinnedIds.includes(`direct:${d.conv.user.id}`)),
+    (d) => !pinnedIds.includes(discussionPinKey(d)),
   );
 
   function togglePin(taskId: string) {
@@ -1773,11 +1959,64 @@ export function MessagerieMissionsView({
 
   function openDirectDiscussion(userId: string) {
     setSelectedTaskId("");
+    setSelectedChannelId("");
     setSelectedDirectContactId(userId);
     setFilter("inbox");
     setMobileShowThread(true);
     setDirectAttemptedSend(false);
     setDirectSendError(null);
+  }
+
+  function openChannelDiscussion(ch: InboxProjectChannelItem) {
+    setSelectedTaskId("");
+    setSelectedDirectContactId("");
+    setSelectedChannelId(ch.id);
+    // Même historique / unread que Par chantier (pas de clone).
+    router.push(ch.href);
+  }
+
+  function renderUnifiedRow(d: UnifiedDiscussion, pinned: boolean) {
+    if (d.kind === "DIRECT") {
+      return (
+        <DirectRow
+          key={`${pinned ? "pin-" : ""}direct-${d.conv.user.id}`}
+          conv={d.conv}
+          selected={selectedDirectContactId === d.conv.user.id && !selectedTaskId}
+          sessionUserId={sessionUserId}
+          recipient={recipients.find((r) => r.id === d.conv.user.id)}
+          onSelect={() => openDirectDiscussion(d.conv.user.id)}
+          formatRelativeTime={formatRelativeTime}
+        />
+      );
+    }
+    if (d.kind === "CHANNEL") {
+      return (
+        <ChannelRow
+          key={`${pinned ? "pin-" : ""}channel-${d.channel.id}`}
+          ch={d.channel}
+          selected={selectedChannelId === d.channel.id}
+          onSelect={() => openChannelDiscussion(d.channel)}
+          formatRelativeTime={formatRelativeTime}
+        />
+      );
+    }
+    return (
+      <MissionRow
+        key={`${pinned ? "pin-" : ""}${d.mission.id}`}
+        m={d.mission}
+        selected={selectedTaskId === d.mission.id}
+        sessionUserId={sessionUserId}
+        pinned={pinned}
+        onSelect={() => {
+          setSelectedDirectContactId("");
+          setSelectedChannelId("");
+          setSelectedTaskId(d.mission.id);
+          setMobileShowThread(true);
+        }}
+        onTogglePin={() => togglePin(d.mission.id)}
+        formatRelativeTime={formatRelativeTime}
+      />
+    );
   }
 
   function openNewMessageComposer() {
@@ -2327,67 +2566,13 @@ export function MessagerieMissionsView({
                   Épinglées
                 </li>
               ) : null}
-              {pinnedDiscussions.map((d) =>
-                d.kind === "DIRECT" ? (
-                  <DirectRow
-                    key={`pin-direct-${d.conv.user.id}`}
-                    conv={d.conv}
-                    selected={selectedDirectContactId === d.conv.user.id && !selectedTaskId}
-                    sessionUserId={sessionUserId}
-                    recipient={recipients.find((r) => r.id === d.conv.user.id)}
-                    onSelect={() => openDirectDiscussion(d.conv.user.id)}
-                    formatRelativeTime={formatRelativeTime}
-                  />
-                ) : (
-                  <MissionRow
-                    key={`pin-${d.mission.id}`}
-                    m={d.mission}
-                    selected={selectedTaskId === d.mission.id}
-                    sessionUserId={sessionUserId}
-                    pinned
-                    onSelect={() => {
-                      setSelectedDirectContactId("");
-                      setSelectedTaskId(d.mission.id);
-                      setMobileShowThread(true);
-                    }}
-                    onTogglePin={() => togglePin(d.mission.id)}
-                    formatRelativeTime={formatRelativeTime}
-                  />
-                ),
-              )}
+              {pinnedDiscussions.map((d) => renderUnifiedRow(d, true))}
               {pinnedDiscussions.length > 0 ? (
                 <li className="sticky top-0 z-10 bg-[#f0f2f5] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[#667781]">
                   Récentes
                 </li>
               ) : null}
-              {recentDiscussions.map((d) =>
-                d.kind === "DIRECT" ? (
-                  <DirectRow
-                    key={`direct-${d.conv.user.id}`}
-                    conv={d.conv}
-                    selected={selectedDirectContactId === d.conv.user.id && !selectedTaskId}
-                    sessionUserId={sessionUserId}
-                    recipient={recipients.find((r) => r.id === d.conv.user.id)}
-                    onSelect={() => openDirectDiscussion(d.conv.user.id)}
-                    formatRelativeTime={formatRelativeTime}
-                  />
-                ) : (
-                  <MissionRow
-                    key={d.mission.id}
-                    m={d.mission}
-                    selected={selectedTaskId === d.mission.id}
-                    sessionUserId={sessionUserId}
-                    pinned={false}
-                    onSelect={() => {
-                      setSelectedDirectContactId("");
-                      setSelectedTaskId(d.mission.id);
-                      setMobileShowThread(true);
-                    }}
-                    onTogglePin={() => togglePin(d.mission.id)}
-                    formatRelativeTime={formatRelativeTime}
-                  />
-                ),
-              )}
+              {recentDiscussions.map((d) => renderUnifiedRow(d, false))}
             </>
           )}
         </ul>

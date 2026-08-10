@@ -97,7 +97,7 @@ function RowMenu({
             </Link>
             {row.canMessage && row.projectId ? (
               <Link
-                href={projectSupplierHref(row.projectId)}
+                href={projectSupplierHref(row.projectId, row.supplierId)}
                 className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
               >
                 Message fournisseur

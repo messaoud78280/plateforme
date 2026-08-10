@@ -22,6 +22,7 @@ import {
 } from "@/lib/agenda/types";
 import { AGENDA_STATUS_LABELS } from "@/lib/agenda/serialize-event";
 import { URGENCY_STYLES } from "@/lib/follow-up/types";
+import { projectSupplierHref } from "@/lib/messagerie/resolve-conversation";
 
 type Props = {
   cursor: Date;
@@ -570,8 +571,11 @@ export function AgendaSidePanel({
               {po?.canOpen || po?.id ? (
                 <Link
                   href={
-                    po.id && selectedEvent.project?.id
-                      ? `/dashboard/messagerie?view=chantiers&project=${encodeURIComponent(selectedEvent.project.id)}&channel=FOURNISSEUR`
+                    selectedEvent.project?.id
+                      ? projectSupplierHref(
+                          selectedEvent.project.id,
+                          po.supplierOrganizationId,
+                        )
                       : po.legacyTaskId
                         ? `/dashboard/messagerie?task=${po.legacyTaskId}`
                         : `/dashboard/messagerie?view=chantiers&channel=FOURNISSEUR`

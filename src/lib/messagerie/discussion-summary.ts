@@ -1,13 +1,24 @@
 /**
- * MESSAGERIE-V2C.7 — Projection UI unifiée (lecture seule, pas d’unification DB).
+ * MESSAGERIE-V2C.7 / V2C.7.1 — Projection UI unifiée (lecture seule, pas d’unification DB).
  *
- * Agrège DirectMessage + TaskMessage (+ ProjectChannel via Par chantier / deep-links).
- * Ne fusionne pas les tables.
+ * Agrège :
+ * - DirectMessage
+ * - TaskMessage (hors BC / POINT.P legacy masqués)
+ * - ProjectChannel (activité récente, ACL = Par chantier)
  *
- * Doublons métier connus (à ne pas afficher deux fois dans Discussions) :
- * - TaskMessage legacy « POINT.P — … BC-2026-xxx » vs ProjectChannel FOURNISSEUR Point.P
- *   → deep-links commande / livraison ciblent le channel (resolveConversationForContext).
- * - Ne pas supprimer les TaskMessage historiques en DB.
+ * Ne fusionne pas les tables. Ne recopie jamais Message → Direct/Task.
+ *
+ * ## Règle de déduplication BC / fournisseur (V2C.7.1)
+ *
+ * Si un TaskMessage legacy représente le même contexte métier qu’un
+ * ProjectChannel SUPPLIER (ex. « POINT.P — Résidence … BC-2026-043 ») :
+ * - le channel est la source active dans Discussions
+ * - le TaskMessage reste en DB (historique)
+ * - il est exclu de la liste globale (`excludeLegacyPurchaseOrderTasksWhere`
+ *   + `shouldHideTaskAgainstProjectChannels`)
+ *
+ * Deep-links commande / agenda / cockpit → `resolveConversationForContext`
+ * (channel Point.P), jamais un clone DirectMessage.
  */
 
 export type DiscussionSourceType = "DIRECT" | "TASK" | "PROJECT_CHANNEL";
@@ -26,7 +37,10 @@ export type DiscussionSummary = {
   /** Périmètre réel (qui peut lire) — pas le sujet métier. */
   partyType: string;
   partyBadge: string;
+  /** Contexte : Tâche | Chantier | Commande — distinct du périmètre. */
+  contextLabel?: string | null;
   projectName?: string | null;
+  href?: string;
 };
 
 export function discussionSortKey(d: DiscussionSummary): number {

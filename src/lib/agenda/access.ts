@@ -108,7 +108,8 @@ export const agendaEventInclude = {
       proposedDeliveryAt: true,
       proposedDeliveryStatus: true,
       legacyTaskId: true,
-      externalOrganization: { select: { name: true, tradeName: true } },
+      externalOrganizationId: true,
+      externalOrganization: { select: { id: true, name: true, tradeName: true } },
       lines: {
         orderBy: { sortOrder: "asc" as const },
         take: 4,
@@ -148,7 +149,8 @@ export const agendaEventListInclude = {
       proposedDeliveryAt: true,
       proposedDeliveryStatus: true,
       legacyTaskId: true,
-      externalOrganization: { select: { name: true, tradeName: true } },
+      externalOrganizationId: true,
+      externalOrganization: { select: { id: true, name: true, tradeName: true } },
     },
   },
   attendees: {
@@ -181,7 +183,8 @@ export const agendaEventLiteInclude = {
       proposedDeliveryAt: true,
       proposedDeliveryStatus: true,
       legacyTaskId: true,
-      externalOrganization: { select: { name: true, tradeName: true } },
+      externalOrganizationId: true,
+      externalOrganization: { select: { id: true, name: true, tradeName: true } },
     },
   },
 } satisfies Prisma.AgendaEventInclude;

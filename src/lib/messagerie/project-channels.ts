@@ -682,3 +682,217 @@ export async function listChannelNotifyUserIds(
   });
   return rows.map((r) => r.userId);
 }
+
+/**
+ * MESSAGERIE-V2C.7.1 — Projection Discussions : canaux accessibles avec activité.
+ * Batch (pas 1 requête ACL + unread par canal).
+ * ACL = participant, ou supervision DIRECTION/MANAGER interne.
+ */
+export type InboxProjectChannelItem = {
+  id: string;
+  type: ProjectChannelType;
+  externalOrganizationId: string | null;
+  projectId: string;
+  projectTitle: string;
+  title: string;
+  /** Titre liste : « Point.P — Résidence Les Lilas » */
+  listTitle: string;
+  metaLabel: string;
+  external: boolean;
+  unreadCount: number;
+  lastMessageAt: string | null;
+  lastMessage: {
+    content: string;
+    createdAt: string;
+    senderName: string;
+  } | null;
+  href: string;
+};
+
+export async function listInboxProjectChannelsForUser(
+  userId: string,
+): Promise<InboxProjectChannelItem[]> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      role: true,
+      personType: true,
+      permissionProfile: true,
+      accessStatus: true,
+      externalOrganizationId: true,
+      organizationMemberships: { select: { organizationId: true }, take: 5 },
+    },
+  });
+  if (!user || !isActiveAccess(user.accessStatus)) return [];
+
+  const participantRows = await prisma.projectChannelParticipant.findMany({
+    where: { userId },
+    select: { channelId: true },
+  });
+  const channelIdSet = new Set(participantRows.map((r) => r.channelId));
+
+  const isInternal = isInternalPerson(user.personType);
+  const isSupervisor =
+    isInternal &&
+    (user.permissionProfile === "DIRECTION" || String(user.role ?? "") === "MANAGER");
+
+  if (isSupervisor) {
+    const orgIds = user.organizationMemberships.map((m) => m.organizationId).filter(Boolean);
+    if (orgIds.length > 0) {
+      const supervised = await prisma.projectChannel.findMany({
+        where: { project: { organizationId: { in: orgIds } } },
+        select: { id: true },
+        take: 200,
+      });
+      for (const c of supervised) channelIdSet.add(c.id);
+    }
+  }
+
+  // Externes : uniquement canaux de leur org (via participation déjà filtrée, renfort)
+  if (!isInternal && user.externalOrganizationId) {
+    const orgChannels = await prisma.projectChannel.findMany({
+      where: { externalOrganizationId: user.externalOrganizationId },
+      select: { id: true },
+      take: 100,
+    });
+    for (const c of orgChannels) {
+      // Ne pas ouvrir les canaux sans participation (ACL stricte externe)
+      if (participantRows.some((p) => p.channelId === c.id)) channelIdSet.add(c.id);
+    }
+  }
+
+  const ids = [...channelIdSet];
+  if (ids.length === 0) return [];
+
+  const channels = await prisma.projectChannel.findMany({
+    where: { id: { in: ids } },
+    include: {
+      project: {
+        select: {
+          id: true,
+          title: true,
+          organizationId: true,
+          organization: { select: { name: true } },
+        },
+      },
+      externalOrganization: { select: { name: true, tradeName: true, type: true } },
+    },
+    take: 200,
+  });
+
+  // Filtre ACL rapide en mémoire (aligné canAccessProjectChannel — sans N requêtes)
+  const participantSet = new Set(participantRows.map((r) => r.channelId));
+  const accessible = channels.filter((ch) => {
+    if (ch.type === "INTERNAL" && !isInternal) return false;
+    if (ch.externalOrganizationId && !isInternal) {
+      if (user.externalOrganizationId !== ch.externalOrganizationId) return false;
+    }
+    if (participantSet.has(ch.id)) return true;
+    if (isSupervisor) return true;
+    return false;
+  });
+  if (accessible.length === 0) return [];
+
+  const accessibleIds = accessible.map((c) => c.id);
+
+  const [unreadRows, recentMessages] = await Promise.all([
+    prisma.messageChannelReceipt.findMany({
+      where: {
+        userId,
+        read: false,
+        message: { channelId: { in: accessibleIds }, deletedAt: null },
+      },
+      select: { message: { select: { channelId: true } } },
+    }),
+    prisma.message.findMany({
+      where: { channelId: { in: accessibleIds }, deletedAt: null },
+      orderBy: { createdAt: "desc" },
+      take: Math.min(accessibleIds.length * 4, 400),
+      select: {
+        channelId: true,
+        content: true,
+        createdAt: true,
+        sender: { select: { name: true } },
+      },
+    }),
+  ]);
+
+  const unreadByChannel = new Map<string, number>();
+  for (const row of unreadRows) {
+    const cid = row.message.channelId;
+    if (!cid) continue;
+    unreadByChannel.set(cid, (unreadByChannel.get(cid) ?? 0) + 1);
+  }
+
+  const lastByChannel = new Map<
+    string,
+    { content: string; createdAt: Date; senderName: string }
+  >();
+  for (const m of recentMessages) {
+    if (!m.channelId || lastByChannel.has(m.channelId)) continue;
+    lastByChannel.set(m.channelId, {
+      content: m.content,
+      createdAt: m.createdAt,
+      senderName: m.sender.name,
+    });
+  }
+
+  const items: InboxProjectChannelItem[] = [];
+  for (const ch of accessible) {
+    const last = lastByChannel.get(ch.id);
+    // Discussions : uniquement canaux avec activité (Par chantier garde les vides)
+    if (!last) continue;
+
+    const type = ch.type as ProjectChannelType;
+    const hostName = ch.project.organization?.name || DEMO_BRAND.companyName;
+    const display = getProjectChannelDisplay({
+      type,
+      orgName: ch.externalOrganization?.name,
+      orgTradeName: ch.externalOrganization?.tradeName,
+      hostCompanyName: hostName,
+    });
+    const projectTitle = ch.project.title;
+    const listTitle =
+      type === "INTERNAL"
+        ? `${display.title} — ${projectTitle}`
+        : `${display.title} — ${projectTitle}`;
+
+    const q = new URLSearchParams({
+      view: "chantiers",
+      project: ch.projectId,
+      channelId: ch.id,
+    });
+    if (ch.externalOrganizationId) {
+      q.set("externalOrganizationId", ch.externalOrganizationId);
+    }
+
+    items.push({
+      id: ch.id,
+      type,
+      externalOrganizationId: ch.externalOrganizationId,
+      projectId: ch.projectId,
+      projectTitle,
+      title: display.title,
+      listTitle,
+      metaLabel: display.metaLabel,
+      external: display.external,
+      unreadCount: unreadByChannel.get(ch.id) ?? 0,
+      lastMessageAt: last.createdAt.toISOString(),
+      lastMessage: {
+        content: last.content,
+        createdAt: last.createdAt.toISOString(),
+        senderName: last.senderName,
+      },
+      href: `/dashboard/messagerie?${q.toString()}`,
+    });
+  }
+
+  items.sort((a, b) => {
+    const ta = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
+    const tb = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
+    return tb - ta;
+  });
+  return items;
+}
+

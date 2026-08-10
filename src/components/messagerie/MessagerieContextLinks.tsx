@@ -12,7 +12,14 @@ const btn =
   "inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#1e3a5f] shadow-sm hover:bg-slate-50";
 
 /** Raccourcis Messagerie depuis un chantier — ouvre le fil existant (pas de doublon). */
-export function ProjectMessagerieLinks({ projectId }: { projectId: string }) {
+export function ProjectMessagerieLinks({
+  projectId,
+  supplierOrganizationId,
+}: {
+  projectId: string;
+  /** Si connu : canal Point.P exact (évite ambiguïté multi-fournisseurs). */
+  supplierOrganizationId?: string | null;
+}) {
   return (
     <div className="flex flex-wrap gap-2">
       <Link href={projectTeamHref(projectId)} className={btn}>
@@ -21,7 +28,7 @@ export function ProjectMessagerieLinks({ projectId }: { projectId: string }) {
       <Link href={projectClientHref(projectId)} className={btn}>
         💬 Client
       </Link>
-      <Link href={projectSupplierHref(projectId)} className={btn}>
+      <Link href={projectSupplierHref(projectId, supplierOrganizationId)} className={btn}>
         💬 Fournisseur
       </Link>
     </div>

@@ -677,7 +677,7 @@ export default async function ProjetDetailPage({
                   projectTeamHref(project.id),
                   `/dashboard/projets/${project.id}`,
                 )}
-                className="inline-flex rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#1e3a5f] hover:bg-slate-50"
+                className="inline-flex min-h-10 items-center rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#152a45]"
               >
                 Message équipe
               </Link>

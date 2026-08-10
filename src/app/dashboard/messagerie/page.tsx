@@ -337,8 +337,16 @@ export default async function MessageriePage() {
   const external = isExternalPortalUser(personType);
 
   return (
-    <div className="-mx-3 -mb-6 -mt-2 flex h-[calc(100dvh-11rem)] min-h-[420px] min-w-0 flex-col overflow-hidden bg-[#111b21] sm:-mx-5 sm:-mb-8 sm:h-[calc(100dvh-12rem)]">
-      <Suspense fallback={<p className="p-4 text-sm text-slate-300">Chargement messagerie…</p>}>
+    <div className="flex h-[calc(100dvh-3.5rem-3.75rem-env(safe-area-inset-bottom))] min-h-[420px] min-w-0 flex-col overflow-hidden bg-white lg:h-[calc(100dvh-4rem)]">
+      <Suspense
+        fallback={
+          <div className="flex flex-1 flex-col gap-2 p-4" aria-hidden>
+            <div className="h-10 animate-pulse rounded-lg bg-slate-100" />
+            <div className="h-16 animate-pulse rounded-lg bg-slate-100" />
+            <div className="h-16 animate-pulse rounded-lg bg-slate-100" />
+          </div>
+        }
+      >
         <MessagerieHub
           sessionUserId={session.user.id}
           isAgence={isManager}

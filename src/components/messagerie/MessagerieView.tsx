@@ -1078,8 +1078,8 @@ export function MessagerieView({
                 </div>
               </div>
               {isChannelSupervisor ? (
-                <p className="mt-1 text-[11px] text-slate-500">
-                  Vous consultez cette conversation en supervision. Si vous écrivez, vous
+                <p className="mt-1 text-[12px] leading-snug text-slate-500">
+                  Vous consultez cette conversation. Si vous envoyez un message, vous
                   rejoindrez les participants.
                 </p>
               ) : null}
@@ -1279,7 +1279,7 @@ export function MessagerieView({
               </div>
             </div>
 
-            <div className="shrink-0 border-t border-slate-200 p-4">
+            <div className="shrink-0 border-t border-slate-200 bg-[#f8fafc] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:p-4 md:pb-4">
               {replyTarget ? (
                 <MessageReplyComposerBanner
                   reply={replyTarget}
@@ -1301,7 +1301,7 @@ export function MessagerieView({
               >
                 {presentation.composerLabel}
               </p>
-              <div className="mb-2 flex flex-wrap gap-1">
+              <div className="mb-2 hidden flex-wrap gap-1 md:flex">
                 {QUICK_REPLIES.map((text) => (
                   <button
                     key={text}
@@ -1415,69 +1415,72 @@ export function MessagerieView({
                   ))}
                 </div>
               ) : null}
-              <form onSubmit={handleSend} className="flex gap-2">
-                <div className="relative flex min-w-0 flex-1 items-end gap-2">
-                  <div className="relative mb-0.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAttachMenuOpen((v) => !v);
-                      }}
-                      className="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100"
-                      title="Joindre"
-                    >
-                      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                      </svg>
-                    </button>
-                    {attachMenuOpen ? (
-                      <div className="absolute bottom-12 left-0 z-30 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
-                        <label
-                          htmlFor="chantier-camera-input"
-                          className="block cursor-pointer px-3 py-2.5 text-sm hover:bg-slate-50"
-                        >
-                          Prendre une photo
-                        </label>
-                        <label
-                          htmlFor="chantier-photo-input"
-                          className="block cursor-pointer px-3 py-2.5 text-sm hover:bg-slate-50"
-                        >
-                          Choisir une photo
-                        </label>
-                        <label
-                          htmlFor="chantier-doc-input"
-                          className="block cursor-pointer px-3 py-2.5 text-sm hover:bg-slate-50"
-                          onClick={() => setAttachMenuOpen(false)}
-                        >
-                          Document
-                        </label>
-                      </div>
-                    ) : null}
-                  </div>
-                  <textarea
-                    value={sendContent}
-                    onChange={(e) => setSendContent(e.target.value)}
-                    placeholder="Écrire un message..."
-                    rows={2}
-                    className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/20"
-                    disabled={sending}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        if ((sendContent.trim() || attachments.length > 0) && !sending) {
-                          void (e.currentTarget.form as HTMLFormElement | null)?.requestSubmit();
-                        }
-                      }
-                    }}
-                  />
+              <form onSubmit={handleSend} className="flex items-end gap-2">
+                <div className="relative mb-0.5">
                   <button
-                    type="submit"
-                    disabled={sending || (!sendContent.trim() && attachments.length === 0)}
-                    className="mb-0.5 shrink-0 rounded-xl bg-[#1d4ed8] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af] disabled:opacity-50"
+                    type="button"
+                    onClick={() => {
+                      setAttachMenuOpen((v) => !v);
+                    }}
+                    className="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100"
+                    title="Joindre"
+                    aria-label="Joindre une photo ou un document"
                   >
-                    Envoyer
+                    <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                    </svg>
                   </button>
+                  {attachMenuOpen ? (
+                    <div className="absolute bottom-12 left-0 z-30 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+                      <label
+                        htmlFor="chantier-camera-input"
+                        className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm hover:bg-slate-50"
+                      >
+                        Caméra
+                      </label>
+                      <label
+                        htmlFor="chantier-photo-input"
+                        className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm hover:bg-slate-50"
+                      >
+                        Photo
+                      </label>
+                      <label
+                        htmlFor="chantier-doc-input"
+                        className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm hover:bg-slate-50"
+                        onClick={() => setAttachMenuOpen(false)}
+                      >
+                        Document
+                      </label>
+                    </div>
+                  ) : null}
                 </div>
+                <textarea
+                  value={sendContent}
+                  onChange={(e) => setSendContent(e.target.value)}
+                  placeholder="Écrire un message…"
+                  rows={1}
+                  className="min-h-[44px] max-h-32 min-w-0 flex-1 resize-none rounded-[24px] border border-slate-200 bg-white px-4 py-2.5 text-[15px] placeholder:text-slate-400 focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/15"
+                  disabled={sending}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      if ((sendContent.trim() || attachments.length > 0) && !sending) {
+                        void (e.currentTarget.form as HTMLFormElement | null)?.requestSubmit();
+                      }
+                    }
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={sending || (!sendContent.trim() && attachments.length === 0)}
+                  className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1e3a5f] text-white hover:bg-[#152a45] disabled:opacity-40"
+                  title="Envoyer"
+                  aria-label="Envoyer"
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                  </svg>
+                </button>
               </form>
               {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
             </div>

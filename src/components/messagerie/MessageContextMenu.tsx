@@ -171,15 +171,15 @@ type QuickProps = {
   onMore: (anchor: { x: number; y: number }) => void;
 };
 
-/** Barre discrète au hover desktop : 🙂 ↩ ••• */
+/** Barre discrète : visible au touch mobile, au hover desktop — 🙂 ↩ ••• */
 export function MessageQuickHoverBar({ onReply, onReact, onMore }: QuickProps) {
   return (
-    <div className="absolute -top-3 right-1 z-10 flex items-center gap-0.5 rounded-full border border-slate-200/80 bg-white/95 px-0.5 py-0.5 shadow-sm opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+    <div className="absolute -top-3 right-1 z-10 flex items-center gap-0.5 rounded-full border border-slate-200/80 bg-white/95 px-0.5 py-0.5 shadow-sm opacity-100 transition-opacity duration-150 md:opacity-0 md:group-hover:opacity-100">
       {onReact ? (
         <button
           type="button"
           aria-label="Réagir"
-          className="rounded-full px-1.5 py-0.5 text-[13px] hover:bg-slate-50"
+          className="min-h-8 min-w-8 rounded-full px-1.5 py-0.5 text-[13px] hover:bg-slate-50"
           onClick={(e) => {
             e.stopPropagation();
             onReact();
@@ -192,7 +192,7 @@ export function MessageQuickHoverBar({ onReply, onReact, onMore }: QuickProps) {
         <button
           type="button"
           aria-label="Répondre"
-          className="rounded-full px-1.5 py-0.5 text-[12px] text-slate-600 hover:bg-slate-50"
+          className="min-h-8 min-w-8 rounded-full px-1.5 py-0.5 text-[12px] text-slate-600 hover:bg-slate-50"
           onClick={(e) => {
             e.stopPropagation();
             onReply();

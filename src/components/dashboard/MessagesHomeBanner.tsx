@@ -17,8 +17,10 @@ type PreviewItem = {
   unread: number;
 };
 
+type Variant = "card" | "aside";
+
 /** Bloc Accueil Messages — bus realtime existant, pas de nouvelle subscription. */
-export function MessagesHomeBanner() {
+export function MessagesHomeBanner({ variant = "aside" }: { variant?: Variant }) {
   const [total, setTotal] = useState(0);
   const [items, setItems] = useState<PreviewItem[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -65,9 +67,19 @@ export function MessagesHomeBanner() {
     };
   }, [scheduleReload]);
 
+  const previews = items.slice(0, 3);
+  const isCard = variant === "card";
+
   if (!loaded) {
     return (
-      <section className="border-b border-slate-200/80 pb-4">
+      <section
+        className={cn(
+          isCard
+            ? "rounded-2xl border border-[#1e3a5f]/15 bg-white p-4 shadow-sm sm:p-5"
+            : "border-b border-slate-200/80 pb-4",
+        )}
+        aria-busy
+      >
         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
           Messages
         </p>
@@ -77,40 +89,61 @@ export function MessagesHomeBanner() {
   }
 
   return (
-    <section className="border-b border-slate-200/80 pb-4 last:border-b-0 last:pb-0">
+    <section
+      className={cn(
+        isCard
+          ? "rounded-2xl border border-[#1e3a5f]/15 bg-white p-4 shadow-sm sm:p-5"
+          : "border-b border-slate-200/80 pb-4 last:border-b-0 last:pb-0",
+      )}
+      data-testid="accueil-messages"
+    >
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
+        <h2
+          className={cn(
+            isCard
+              ? "text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]"
+              : "text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500",
+          )}
+        >
           Messages
           {total > 0 ? (
-            <span className="ml-2 tabular-nums text-slate-900">{total}</span>
+            <span className="ml-2.5 tabular-nums text-slate-900">
+              {total} nouveau{total > 1 ? "x" : ""}
+            </span>
           ) : null}
         </h2>
         <Link
           href="/dashboard/messagerie"
           className="text-xs font-semibold text-[#1d4ed8] hover:underline"
         >
-          Voir
+          Voir la messagerie →
         </Link>
       </div>
-      {total <= 0 || items.length === 0 ? (
-        <p className="mt-2.5 text-sm text-slate-500">Pas de nouveau message.</p>
+      {total <= 0 || previews.length === 0 ? (
+        <p className="mt-3 text-sm text-slate-500">Pas de nouveau message.</p>
       ) : (
-        <ul className="mt-2.5 space-y-2">
-          {items.slice(0, 3).map((it) => (
+        <ul className="mt-3 space-y-1.5">
+          {previews.map((it) => (
             <li key={it.id}>
               <Link
                 href={it.href}
-                className="block rounded-lg px-2 py-1.5 hover:bg-slate-50"
+                className="flex min-h-[44px] items-center justify-between gap-2 rounded-xl px-2.5 py-2 hover:bg-slate-50"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <p className="truncate text-sm font-semibold text-slate-900">{it.title}</p>
-                  {it.unread > 0 ? (
-                    <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#1e3a5f] px-1.5 text-[10px] font-bold text-white">
-                      {it.unread}
+                <span className="min-w-0">
+                  <span className="block truncate text-[15px] font-semibold text-slate-900">
+                    {it.title}
+                  </span>
+                  {it.preview ? (
+                    <span className="mt-0.5 block truncate text-[13px] text-slate-600">
+                      {it.preview}
                     </span>
                   ) : null}
-                </div>
-                <p className="mt-0.5 truncate text-xs text-slate-600">{it.preview}</p>
+                </span>
+                {it.unread > 0 ? (
+                  <span className="inline-flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full bg-[#1e3a5f] px-1.5 text-[10px] font-bold text-white">
+                    {it.unread}
+                  </span>
+                ) : null}
               </Link>
             </li>
           ))}

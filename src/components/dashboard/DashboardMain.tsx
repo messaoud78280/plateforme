@@ -3,12 +3,13 @@
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 
-/** Conteneur principal dashboard — Agenda & Planning full-bleed ; reste ~1520. */
+/** Conteneur principal dashboard — Agenda, Planning & Messagerie full-bleed ; reste ~1520. */
 export function DashboardMain({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAgenda = Boolean(pathname?.startsWith("/dashboard/agenda"));
   const isPlanning = Boolean(pathname?.startsWith("/dashboard/planning"));
-  const fullBleed = isAgenda || isPlanning;
+  const isMessagerie = Boolean(pathname?.startsWith("/dashboard/messagerie"));
+  const fullBleed = isAgenda || isPlanning || isMessagerie;
 
   return (
     <main
@@ -17,8 +18,8 @@ export function DashboardMain({ children }: { children: React.ReactNode }) {
       className={cn(
         "cc-enter w-full min-w-0 flex-1 outline-none",
         fullBleed
-          ? isAgenda
-            ? "max-w-none px-0 py-0 pb-20 lg:pb-0"
+          ? isAgenda || isMessagerie
+            ? "max-w-none px-0 py-0 pb-[calc(3.75rem+env(safe-area-inset-bottom))] lg:pb-0"
             : "max-w-none px-3 py-4 pb-20 sm:px-4 lg:px-5 lg:pb-6"
           : "mx-auto max-w-dashboard px-3 py-6 pb-24 sm:px-5 sm:py-7 lg:pb-8",
       )}

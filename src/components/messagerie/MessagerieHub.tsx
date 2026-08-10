@@ -53,31 +53,38 @@ export function MessagerieHub(props: Props) {
   }, [viewParam]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 items-center gap-1.5 border-b border-slate-200 bg-white px-3 py-2">
-        <button
-          type="button"
-          onClick={() => setView("missions")}
-          className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-            view === "missions"
-              ? "bg-[#1e3a5f] text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-          }`}
-        >
-          Discussions
-        </button>
-        <button
-          type="button"
-          onClick={() => setView("chantiers")}
-          className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-            view === "chantiers"
-              ? "bg-[#1e3a5f] text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-          }`}
-          title="Conversations par chantier"
-        >
-          Par chantier
-        </button>
+    <div className="flex h-full min-h-0 flex-col bg-white">
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-3 py-2.5">
+        <h1 className="mr-1 text-base font-bold tracking-tight text-[#1e3a5f] md:text-lg">
+          Messagerie
+        </h1>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setView("missions")}
+            className={`min-h-9 rounded-full px-3.5 py-1.5 text-xs font-semibold ${
+              view === "missions"
+                ? "bg-[#1e3a5f] text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+            aria-pressed={view === "missions"}
+          >
+            Discussions
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("chantiers")}
+            className={`min-h-9 rounded-full px-3.5 py-1.5 text-xs font-semibold ${
+              view === "chantiers"
+                ? "bg-[#1e3a5f] text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+            aria-pressed={view === "chantiers"}
+            title="Conversations par chantier"
+          >
+            Par chantier
+          </button>
+        </div>
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">
         {view === "missions" ? (

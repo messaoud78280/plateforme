@@ -403,7 +403,7 @@ function DirectRow({
       <button
         type="button"
         onClick={onSelect}
-        className={`flex w-full gap-3 px-3 py-2 text-left transition ${
+        className={`flex min-h-[52px] w-full gap-3 px-3 py-2.5 text-left transition ${
           selected ? "bg-[#f0f2f5]" : "hover:bg-[#f5f6f6]"
         }`}
       >
@@ -413,17 +413,17 @@ function DirectRow({
             <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#00a884] ring-2 ring-white" />
           ) : null}
         </div>
-        <div className="min-w-0 flex-1 border-b border-[#f0f2f5] pb-3">
+        <div className="min-w-0 flex-1 border-b border-[#f0f2f5] pb-2.5">
           <div className="flex items-baseline justify-between gap-2">
             <p
-              className={`truncate text-[15px] ${
-                unread ? "font-bold text-[#111b21]" : "font-medium text-[#111b21]"
+              className={`truncate text-[16px] ${
+                unread ? "font-bold text-[#111b21]" : "font-semibold text-[#111b21]"
               }`}
             >
               {conv.user.name}
             </p>
             <span
-              className={`shrink-0 text-[11px] ${
+              className={`shrink-0 text-[12px] ${
                 unread ? "font-semibold text-[#00a884]" : "text-[#667781]"
               }`}
             >
@@ -433,7 +433,7 @@ function DirectRow({
           <p className={`mt-0.5 truncate text-[12px] font-semibold ${messagingPartyToneClass(party.partyType)}`}>
             {formatPartyBadge(party)}
             {party.partyType === "INTERNAL"
-              ? ` · ${internalProfileLabel(recipient?.permissionProfile)}`
+              ? null
               : recipient?.company
                 ? ` · ${recipient.company}`
                 : null}
@@ -494,7 +494,7 @@ function ChannelRow({
       <button
         type="button"
         onClick={onSelect}
-        className={`flex w-full gap-3 px-3 py-2 text-left transition ${
+        className={`flex min-h-[52px] w-full gap-3 px-3 py-2.5 text-left transition ${
           selected ? "bg-[#f0f2f5]" : "hover:bg-[#f5f6f6]"
         }`}
       >
@@ -504,17 +504,17 @@ function ChannelRow({
             <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#00a884] ring-2 ring-white" />
           ) : null}
         </div>
-        <div className="min-w-0 flex-1 border-b border-[#f0f2f5] pb-3">
+        <div className="min-w-0 flex-1 border-b border-[#f0f2f5] pb-2.5">
           <div className="flex items-baseline justify-between gap-2">
             <p
-              className={`truncate text-[15px] ${
-                unread ? "font-bold text-[#111b21]" : "font-medium text-[#111b21]"
+              className={`truncate text-[16px] ${
+                unread ? "font-bold text-[#111b21]" : "font-semibold text-[#111b21]"
               }`}
             >
               {ch.listTitle}
             </p>
             <span
-              className={`shrink-0 text-[11px] ${
+              className={`shrink-0 text-[12px] ${
                 unread ? "font-semibold text-[#00a884]" : "text-[#667781]"
               }`}
             >
@@ -2396,7 +2396,9 @@ export function MessagerieMissionsView({
       >
         <div className="border-b border-[#e9edef] px-4 pb-3 pt-3">
           <div className="mb-3 flex items-center justify-between gap-2">
-            <h2 className="text-[22px] font-bold tracking-tight text-[#111b21]">Discussions</h2>
+            <h2 className="text-[20px] font-bold tracking-tight text-[#111b21] md:text-[22px]">
+              Discussions
+            </h2>
             <div className="relative flex items-center gap-1">
               <button
                 type="button"
@@ -2405,10 +2407,10 @@ export function MessagerieMissionsView({
                   if (showEnvoyerTab) openNewMessageComposer();
                   else setFilter("inbox");
                 }}
-                className="flex h-9 items-center gap-1 rounded-full bg-[#00a884] px-3 text-sm font-semibold text-white hover:bg-[#008f72]"
+                className="flex h-10 min-w-10 items-center justify-center gap-1 rounded-full bg-[#00a884] px-3 text-sm font-semibold text-white hover:bg-[#008f72]"
               >
                 <span className="text-lg leading-none">+</span>
-                <span className="hidden sm:inline">Nouveau</span>
+                <span>Nouveau</span>
               </button>
               <button
                 type="button"
@@ -2630,7 +2632,11 @@ export function MessagerieMissionsView({
                 <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3" style={WA_CHAT_BG}>
                   <div className="space-y-1.5">
                     {loadingDirectThread && selectedDirectThread.length === 0 ? (
-                      <p className="text-sm text-[#667781]">Chargement…</p>
+                      <div className="space-y-2 py-2" aria-hidden>
+                        <div className="h-10 w-3/5 animate-pulse rounded-2xl bg-[#e9edef]" />
+                        <div className="ml-auto h-10 w-2/5 animate-pulse rounded-2xl bg-[#e9edef]" />
+                        <div className="h-10 w-1/2 animate-pulse rounded-2xl bg-[#e9edef]" />
+                      </div>
                     ) : null}
                     {!loadingDirectThread && selectedDirectThread.length === 0 ? (
                       <div className="flex h-full items-center justify-center py-16">
@@ -2810,7 +2816,7 @@ export function MessagerieMissionsView({
                     })}
                   </div>
                 </div>
-                <div className="z-20 shrink-0 border-t border-[#d1d7db] bg-[#f0f2f5] px-3 py-2.5">
+                <div className="z-20 shrink-0 border-t border-[#d1d7db] bg-[#f0f2f5] px-3 py-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] md:pb-2.5">
                   {replyTarget ? (
                     <MessageReplyComposerBanner
                       reply={replyTarget}
@@ -2951,19 +2957,19 @@ export function MessagerieMissionsView({
                           <div className="absolute bottom-12 left-0 z-30 w-48 overflow-hidden rounded-xl border border-[#d1d7db] bg-white shadow-lg">
                             <label
                               htmlFor={replyCameraId}
-                              className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                              className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
                             >
-                              Prendre une photo
+                              Caméra
                             </label>
                             <label
                               htmlFor={replyPhotoId}
-                              className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                              className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
                             >
-                              Choisir une photo
+                              Photo
                             </label>
                             <label
                               htmlFor={replyDocId}
-                              className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                              className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
                               onClick={() => setDirectAttachMenuOpen(false)}
                             >
                               Document
@@ -3457,7 +3463,7 @@ export function MessagerieMissionsView({
               )}
             </div>
 
-            <div className="z-20 shrink-0 border-t border-[#d1d7db] bg-[#f0f2f5] px-3 py-2.5">
+            <div className="z-20 shrink-0 border-t border-[#d1d7db] bg-[#f0f2f5] px-3 py-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] md:pb-2.5">
               {replyTarget ? (
                 <MessageReplyComposerBanner
                   reply={replyTarget}
@@ -3605,25 +3611,25 @@ export function MessagerieMissionsView({
                   </button>
                   {attachMenuOpen ? (
                     <div className="absolute bottom-12 left-0 z-30 w-48 overflow-hidden rounded-xl border border-[#d1d7db] bg-white shadow-lg">
-                      <label
-                        htmlFor="mission-camera-input"
-                        className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
-                      >
-                        Prendre une photo
-                      </label>
-                      <label
-                        htmlFor={missionPhotoId}
-                        className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
-                      >
-                        Choisir une photo
-                      </label>
-                      <label
-                        htmlFor={missionFileId}
-                        className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
-                        onClick={() => setAttachMenuOpen(false)}
-                      >
-                        Document
-                      </label>
+                        <label
+                          htmlFor="mission-camera-input"
+                          className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                        >
+                          Caméra
+                        </label>
+                        <label
+                          htmlFor={missionPhotoId}
+                          className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                        >
+                          Photo
+                        </label>
+                        <label
+                          htmlFor={missionFileId}
+                          className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                          onClick={() => setAttachMenuOpen(false)}
+                        >
+                          Document
+                        </label>
                     </div>
                   ) : null}
                 </div>

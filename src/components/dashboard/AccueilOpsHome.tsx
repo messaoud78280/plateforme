@@ -243,6 +243,9 @@ export function AccueilOpsHome({
             ) : null}
           </section>
 
+          {/* 1b — MESSAGES (réflexe principal, sans écraser À traiter) */}
+          <MessagesHomeBanner variant="card" />
+
           {/* 2 — AUJOURD’HUI */}
           <section data-demo-target="accueil-aujourdhui">
             <div className="flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">
@@ -372,8 +375,6 @@ export function AccueilOpsHome({
 
         {/* Colonne secondaire */}
         <aside className="space-y-0 rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 lg:sticky lg:top-4 lg:self-start">
-          <MessagesHomeBanner />
-
           {ops.orders.length > 0 ? (
             <SideSection
               title="Commandes & livraisons"

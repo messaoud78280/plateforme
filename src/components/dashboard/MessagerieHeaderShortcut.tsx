@@ -25,7 +25,20 @@ function formatAt(iso: string) {
   return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
-/** Raccourci header 💬 — badge via poll partagé ; aperçu au clic uniquement. */
+function MessagerieIconBadge({ total }: { total: number }) {
+  return (
+    <span className="relative inline-flex">
+      <MessageSquare className="h-5 w-5" aria-hidden />
+      {total > 0 ? (
+        <span className="absolute -right-1.5 -top-1.5 inline-flex min-w-[1.15rem] items-center justify-center rounded-full bg-[#00a884] px-1 text-[10px] font-bold leading-none text-white">
+          {total > 99 ? "99+" : total}
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
+/** Raccourci header 💬 — mobile : Messagerie directe ; desktop : aperçu 3 non lus. */
 export function MessagerieHeaderShortcut() {
   const total = useMessagerieUnread();
   const [items, setItems] = useState<PreviewItem[]>([]);
@@ -35,84 +48,100 @@ export function MessagerieHeaderShortcut() {
       const res = await fetch("/api/messagerie/preview", { cache: "no-store" });
       if (!res.ok) return;
       const data = (await res.json()) as { items?: PreviewItem[] };
-      setItems(Array.isArray(data.items) ? data.items : []);
+      setItems(Array.isArray(data.items) ? data.items.slice(0, 3) : []);
     } catch {
       // silencieux
     }
   }, []);
 
+  const triggerClass =
+    "relative shrink-0 rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-[#1e3a5f]";
+
   return (
-    <HeaderDropdown
-      panelId="messagerie-header-preview"
-      width={340}
-      align="right"
-      trigger={({ onClick, expanded, triggerRef }) => (
-        <button
-          ref={triggerRef}
-          type="button"
-          onClick={() => {
-            onClick();
-            if (!expanded) void loadPreview();
-          }}
-          className="relative shrink-0 rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-800"
-          aria-label={total > 0 ? `Messagerie, ${total} non lus` : "Messagerie"}
-          title="Messagerie"
-          data-header-slot="messagerie"
-          aria-expanded={expanded}
+    <>
+      {/* Mobile / tablette portrait : ouvrir Messagerie directement */}
+      <Link
+        href="/dashboard/messagerie"
+        className={cn(triggerClass, "lg:hidden")}
+        aria-label={total > 0 ? `Messagerie, ${total} non lus` : "Messagerie"}
+        title="Messagerie"
+        data-header-slot="messagerie"
+      >
+        <MessagerieIconBadge total={total} />
+      </Link>
+
+      {/* Desktop : aperçu rapide (max 3) */}
+      <div className="hidden lg:block">
+        <HeaderDropdown
+          panelId="messagerie-header-preview"
+          width={340}
+          align="right"
+          trigger={({ onClick, expanded, triggerRef }) => (
+            <button
+              ref={triggerRef}
+              type="button"
+              onClick={() => {
+                onClick();
+                if (!expanded) void loadPreview();
+              }}
+              className={triggerClass}
+              aria-label={total > 0 ? `Messagerie, ${total} non lus` : "Messagerie"}
+              title="Messages"
+              data-header-slot="messagerie"
+              aria-expanded={expanded}
+            >
+              <MessagerieIconBadge total={total} />
+            </button>
+          )}
         >
-          <MessageSquare className="h-5 w-5" aria-hidden />
-          {total > 0 ? (
-            <span className="absolute -right-0.5 -top-0.5 inline-flex min-w-[1.1rem] items-center justify-center rounded-full bg-[#00a884] px-1 text-[10px] font-bold text-white">
-              {total > 99 ? "99+" : total}
-            </span>
+          <div className="px-3 py-2">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              Messages
+            </p>
+            <p className="mt-0.5 text-sm font-semibold text-slate-900">
+              {total > 0
+                ? `${total} non lu${total > 1 ? "s" : ""}`
+                : "Aucun message non lu"}
+            </p>
+          </div>
+          {items.length > 0 ? (
+            <ul className="border-t border-slate-100">
+              {items.map((it) => (
+                <li key={it.id}>
+                  <Link href={it.href} className="block px-3 py-2.5 hover:bg-slate-50">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className="truncate text-sm font-bold text-slate-900">{it.title}</p>
+                      <span className="shrink-0 text-[11px] font-semibold text-[#00a884]">
+                        {formatAt(it.at)}
+                      </span>
+                    </div>
+                    <div className="mt-0.5 flex items-center justify-between gap-2">
+                      <p className="truncate text-xs text-slate-600">{it.preview}</p>
+                      {it.unread > 0 ? (
+                        <span
+                          className={cn(
+                            "inline-flex shrink-0 rounded-full bg-[#00a884] px-1.5 py-0.5 text-[10px] font-bold text-white",
+                          )}
+                        >
+                          {it.unread}
+                        </span>
+                      ) : null}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           ) : null}
-        </button>
-      )}
-    >
-      <div className="px-3 py-2">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-          Messages non lus
-        </p>
-        <p className="mt-0.5 text-sm font-semibold text-slate-900">
-          {total > 0
-            ? `${total} conversation${total > 1 ? "s" : ""}`
-            : "Aucun message non lu"}
-        </p>
+          <div className="border-t border-slate-100 px-3 py-2">
+            <Link
+              href="/dashboard/messagerie"
+              className="block rounded-lg bg-[#1e3a5f] px-3 py-2 text-center text-xs font-bold text-white hover:bg-[#0f2744]"
+            >
+              Voir tous les messages
+            </Link>
+          </div>
+        </HeaderDropdown>
       </div>
-      {items.length > 0 ? (
-        <ul className="max-h-72 overflow-y-auto border-t border-slate-100">
-          {items.map((it) => (
-            <li key={it.id}>
-              <Link href={it.href} className="block px-3 py-2.5 hover:bg-slate-50">
-                <div className="flex items-baseline justify-between gap-2">
-                  <p className="truncate text-sm font-bold text-slate-900">{it.title}</p>
-                  <span className="shrink-0 text-[11px] font-semibold text-[#00a884]">
-                    {formatAt(it.at)}
-                  </span>
-                </div>
-                <p className="mt-0.5 truncate text-xs text-slate-600">{it.preview}</p>
-                {it.unread > 1 ? (
-                  <span
-                    className={cn(
-                      "mt-1 inline-flex rounded-full bg-[#00a884] px-1.5 py-0.5 text-[10px] font-bold text-white",
-                    )}
-                  >
-                    {it.unread}
-                  </span>
-                ) : null}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      <div className="border-t border-slate-100 px-3 py-2">
-        <Link
-          href="/dashboard/messagerie"
-          className="block rounded-lg bg-[#1e3a5f] px-3 py-2 text-center text-xs font-bold text-white hover:bg-[#0f2744]"
-        >
-          Voir tous les messages
-        </Link>
-      </div>
-    </HeaderDropdown>
+    </>
   );
 }

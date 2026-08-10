@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   clearTourState,
   readTourState,
@@ -21,11 +21,19 @@ import {
   switchDemoPersona,
 } from "@/lib/demo-environment/switch-persona-client";
 import type { DemoPersonaKey } from "@/lib/demo-environment/personas";
+import { OPEN_DEMO_TOUR_EVENT } from "@/lib/demo-environment/open-demo-tour-event";
 
 type Phase = "idle" | "choose" | "tour" | "busy";
 
+export { OPEN_DEMO_TOUR_EVENT };
+
 function openGlobalSearch() {
   window.dispatchEvent(new CustomEvent("bework:open-global-search"));
+}
+
+function isAccueilPath(pathname: string | null): boolean {
+  if (!pathname) return false;
+  return pathname === "/dashboard" || pathname === "/dashboard/";
 }
 
 function applyHighlight(target: string | undefined) {
@@ -39,6 +47,7 @@ function applyHighlight(target: string | undefined) {
 
 export function DemoCommercialTour() {
   const router = useRouter();
+  const pathname = usePathname();
   const [, startTransition] = useTransition();
   const [phase, setPhase] = useState<Phase>("idle");
   const [mode, setMode] = useState<DemoTourMode | null>(null);
@@ -73,6 +82,14 @@ export function DemoCommercialTour() {
   }, []);
 
   useEffect(() => {
+    function onOpenTour() {
+      setPhase((p) => (p === "idle" ? "choose" : p));
+    }
+    window.addEventListener(OPEN_DEMO_TOUR_EVENT, onOpenTour);
+    return () => window.removeEventListener(OPEN_DEMO_TOUR_EVENT, onOpenTour);
+  }, []);
+
+  useEffect(() => {
     if (phase !== "tour" && phase !== "choose") return;
     let cancelled = false;
     void (async () => {
@@ -95,7 +112,6 @@ export function DemoCommercialTour() {
     return stepsForMode(mode).filter((s) => stepAvailable(s, ctx));
   }, [mode, ctx]);
 
-  // Quand le contexte live arrive, les étapes require* apparaissent — clamp l’index
   useEffect(() => {
     if (!activeSteps.length) return;
     if (stepIndex > activeSteps.length - 1) {
@@ -244,7 +260,6 @@ export function DemoCommercialTour() {
       }
       setResetConfirm(false);
       setBusyMsg("Scénario réinitialisé (v4-demo-cleanup).");
-      // Recharger le contexte après reset
       const ctxRes = await fetch("/api/demo/commercial-context", { cache: "no-store" });
       if (ctxRes.ok) {
         const payload = (await ctxRes.json()) as { context?: DemoCommercialContext };
@@ -256,7 +271,6 @@ export function DemoCommercialTour() {
     }
   }, [router, startTransition]);
 
-  // Styles surbrillance (injectés une fois)
   useEffect(() => {
     const id = "demo-commercial-tour-style";
     if (document.getElementById(id)) return;
@@ -274,17 +288,18 @@ export function DemoCommercialTour() {
     document.head.appendChild(style);
   }, []);
 
-  if (!desktop && phase === "idle") {
-    return null;
-  }
+  /** Launcher flottant : Accueil desktop uniquement — jamais Messagerie / zones denses / mobile. */
+  const showFloatingLauncher =
+    phase === "idle" && desktop && isAccueilPath(pathname);
 
   return (
     <>
-      {phase === "idle" ? (
+      {showFloatingLauncher ? (
         <button
           type="button"
+          data-testid="demo-tour-launcher"
           onClick={() => setPhase("choose")}
-          className="fixed bottom-20 right-4 z-40 hidden items-center gap-1.5 rounded-full border border-[#1e3a5f]/25 bg-white/95 px-3 py-2 text-xs font-semibold text-[#1e3a5f] shadow-md backdrop-blur hover:bg-[#1e3a5f] hover:text-white md:bottom-6 md:flex"
+          className="fixed bottom-6 right-5 z-30 hidden items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-xs font-semibold text-[#1e3a5f] shadow-sm hover:border-[#1e3a5f]/30 hover:bg-slate-50 md:flex"
           title="Parcours de démonstration commerciale"
         >
           <span aria-hidden>▶</span>
@@ -376,6 +391,7 @@ export function DemoCommercialTour() {
             side === "right" ? "right-3" : "left-3"
           }`}
           aria-label="Guide démo BeWork"
+          data-testid="demo-tour-panel"
         >
           <div className="flex items-start justify-between gap-2 border-b border-slate-100 px-3.5 py-2.5">
             <div>
@@ -498,9 +514,11 @@ export function DemoCommercialTour() {
         </aside>
       ) : null}
 
-      {/* Mobile : barre compacte si tour déjà actif */}
       {(phase === "tour" || phase === "busy") && step && !desktop ? (
-        <div className="fixed inset-x-0 bottom-16 z-40 border-t border-slate-200 bg-white/95 px-3 py-2 shadow-lg backdrop-blur md:hidden">
+        <div
+          className="fixed inset-x-0 bottom-16 z-40 border-t border-slate-200 bg-white/95 px-3 py-2 shadow-lg backdrop-blur md:hidden"
+          data-testid="demo-tour-mobile-bar"
+        >
           <p className="text-[10px] font-bold uppercase tracking-wide text-[#1e3a5f]/70">
             Démo · {stepIndex + 1}/{activeSteps.length}
           </p>

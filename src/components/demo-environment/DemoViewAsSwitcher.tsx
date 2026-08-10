@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { OPEN_DEMO_TOUR_EVENT } from "@/lib/demo-environment/open-demo-tour-event";
 
 type PersonaOpt = { key: string; label: string; name: string };
 
@@ -45,7 +46,7 @@ export function DemoViewAsSwitcher() {
   async function onChange(persona: string) {
     if (persona === current || loading || pending) return;
     setLoading(true);
-    setCurrent(persona); // feedback immédiat du sélecteur
+    setCurrent(persona);
     try {
       const { switchDemoPersona } = await import(
         "@/lib/demo-environment/switch-persona-client"
@@ -54,14 +55,13 @@ export function DemoViewAsSwitcher() {
         persona as import("@/lib/demo-environment/personas").DemoPersonaKey,
       );
       if (result.ok) {
-        // Soft refresh RSC (cookie session déjà maj) — pas de full reload
         startTransition(() => {
           router.replace("/dashboard");
           router.refresh();
         });
         return;
       }
-      await load(); // rollback sélecteur
+      await load();
     } catch {
       await load();
     } finally {
@@ -74,18 +74,22 @@ export function DemoViewAsSwitcher() {
   const busy = loading || pending;
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-amber-200/80 bg-amber-50/90 px-2 py-1">
+    <div
+      className="flex items-center gap-1.5 rounded-lg border border-amber-200/80 bg-amber-50/90 px-2 py-1"
+      data-testid="demo-header-controls"
+    >
       <label className="hidden text-[10px] font-bold uppercase tracking-wide text-amber-900 sm:block">
-        Voir comme
+        Démo
       </label>
       <div className="relative flex items-center gap-1.5">
         <select
           value={current ?? "direction"}
           disabled={busy}
           onChange={(e) => void onChange(e.target.value)}
-          className="max-w-[220px] rounded-md border border-amber-300 bg-white px-2 py-1 text-xs font-semibold text-slate-800 disabled:opacity-70 sm:max-w-[240px]"
+          className="max-w-[160px] rounded-md border border-amber-300 bg-white px-2 py-1 text-xs font-semibold text-slate-800 disabled:opacity-70 sm:max-w-[200px]"
           title={companyName ? `Démo ${companyName}` : "Basculer le profil démo"}
           aria-busy={busy}
+          aria-label="Voir comme"
         >
           {personas.map((p) => (
             <option key={p.key} value={p.key}>
@@ -104,6 +108,17 @@ export function DemoViewAsSwitcher() {
           />
         ) : null}
       </div>
+      <button
+        type="button"
+        data-testid="demo-tour-menu-launch"
+        onClick={() => {
+          window.dispatchEvent(new CustomEvent(OPEN_DEMO_TOUR_EVENT));
+        }}
+        className="inline-flex rounded-md border border-amber-300/80 bg-white px-2 py-1 text-[11px] font-semibold text-amber-950 hover:bg-amber-100/80"
+        title="Lancer la présentation commerciale BeWork"
+      >
+        ▶ Présenter
+      </button>
     </div>
   );
 }

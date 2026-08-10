@@ -32,14 +32,17 @@ export function ProjectMessagerieLinks({ projectId }: { projectId: string }) {
 export function PurchaseOrderMessagerieLink({
   projectId,
   supplierName,
+  externalOrganizationId,
 }: {
   projectId: string | null | undefined;
   supplierName?: string | null;
+  externalOrganizationId?: string | null;
 }) {
   const href = resolveConversationHref({
     kind: "purchase_order",
     projectId,
     supplierName,
+    externalOrganizationId,
   });
   const label = supplierName
     ? `💬 Contacter ${supplierName}`

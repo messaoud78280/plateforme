@@ -98,6 +98,7 @@ export async function canAccessMessagerieMedia(
       select: {
         id: true,
         channel: true,
+        channelId: true,
         attachmentsJson: true,
         senderId: true,
         receiverId: true,
@@ -114,6 +115,15 @@ export async function canAccessMessagerieMedia(
     if (!m) return { ok: false, status: 404, error: "Message introuvable." };
     if (!attachmentMatches(m.attachmentsJson, params.fileUrl)) {
       return { ok: false, status: 403, error: "Pièce jointe non liée à ce message." };
+    }
+
+    if (m.channelId) {
+      const { canAccessProjectChannel } = await import("@/lib/messagerie/project-channels");
+      const ok = await canAccessProjectChannel(user.id, m.channelId, "read");
+      if (!ok) {
+        return { ok: false, status: 403, error: "Non autorisé." };
+      }
+      return { ok: true, bucket: parsed.bucket, path: parsed.path };
     }
 
     const projectOk = await canAccessProjectMessaging(user, m.project);
@@ -136,8 +146,12 @@ export async function canAccessMessagerieMedia(
     if (channel === "INTERNE") {
       const pt = dbUser?.personType;
       if (
-        user.role === "CLIENT" &&
-        (pt === "CLIENT" || pt === "FOURNISSEUR" || pt === "SOUS_TRAITANT" || pt === "PARTENAIRE")
+        pt === "CLIENT_EXT" ||
+        pt === "SUPPLIER" ||
+        pt === "SUBCONTRACTOR" ||
+        pt === "PARTNER" ||
+        pt === "MOE" ||
+        pt === "CONTROL_OFFICE"
       ) {
         return { ok: false, status: 403, error: "Fil interne — accès refusé." };
       }

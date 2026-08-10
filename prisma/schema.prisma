@@ -78,6 +78,9 @@ model User {
   invitationsSent     Invitation[]
   messagesSent       Message[]  @relation("SentMessages")
   messagesReceived   Message[]  @relation("ReceivedMessages")
+  messageChannelReceipts MessageChannelReceipt[] @relation("MessageChannelReceipts")
+  projectChannelParticipants ProjectChannelParticipant[] @relation("ProjectChannelParticipants")
+  projectChannelParticipantsAdded ProjectChannelParticipant[] @relation("ProjectChannelParticipantAddedBy")
   projects           Project[]  @relation("ClientProjects")
   projectsAssigned   Project[]  @relation("AssignedProjects")
   documents          Document[]
@@ -235,6 +238,7 @@ model ExternalOrganization {
   people           User[]       @relation("ExternalOrgPeople")
   contacts         ExternalOrgContact[]
   purchaseOrders   PurchaseOrder[]
+  projectChannels  ProjectChannel[]
 
   @@index([hostOrganizationId])
   @@index([hostOrganizationId, type])
@@ -695,6 +699,7 @@ model Project {
   chantierFiles   ChantierFile[]
   worksitePilotages WorksitePilotage[]
   projectAccesses ProjectAccess[]
+  projectChannels ProjectChannel[]
 
   @@index([organizationId])
 }
@@ -869,8 +874,10 @@ model Message {
   senderId   String
   receiverId String
   read       Boolean  @default(false)
-  /// Fil chantier V2 : INTERNE | CLIENT | FOURNISSEUR
+  /// Fil chantier V2 (legacy) : INTERNE | CLIENT | FOURNISSEUR | SOUS_TRAITANT
   channel    String   @default("CLIENT")
+  /// Canal chantier V2C.6 — périmètre de confidentialité (nullable = legacy à backfiller)
+  channelId  String?
   /// Pièces jointes messagerie V2C : [{ name, fileUrl, fileSize, mimeType, kind?, durationSec? }]
   attachmentsJson Json?
   /// Soft-delete « pour tous » (V2C.4.1) — contenu masqué, record conservé
@@ -878,13 +885,74 @@ model Message {
   deletedById String?
   createdAt  DateTime @default(now())
 
-  project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  sender   User    @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver User    @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  project         Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectChannel  ProjectChannel? @relation(fields: [channelId], references: [id], onDelete: SetNull)
+  sender          User            @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver        User            @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  channelReceipts MessageChannelReceipt[]
 
   @@index([projectId, channel, createdAt])
+  @@index([channelId, createdAt])
   @@index([receiverId, read])
   @@index([deletedAt])
+}
+
+/// Accusé de lecture par participant de canal (V2C.6) — unread par user × message.
+model MessageChannelReceipt {
+  id        String    @id @default(cuid())
+  messageId String
+  userId    String
+  read      Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation("MessageChannelReceipts", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([userId, read])
+  @@index([messageId])
+}
+
+/// Canal de messagerie chantier — périmètre de confidentialité (V2C.6).
+/// Un chantier = conteneur ; un canal = qui peut lire.
+model ProjectChannel {
+  id                     String   @id @default(cuid())
+  projectId              String
+  /// INTERNAL | CLIENT | SUPPLIER | SUBCONTRACTOR | PARTNER | MOE | CONTROL_OFFICE
+  type                   String
+  /// Null pour INTERNAL ; obligatoire pour canaux externes (isolation org).
+  externalOrganizationId String?
+  /// Clé anti-doublon : `{projectId}:{type}:{externalOrganizationId|internal}`
+  dedupeKey              String   @unique
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  project              Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  externalOrganization ExternalOrganization? @relation(fields: [externalOrganizationId], references: [id], onDelete: SetNull)
+  participants         ProjectChannelParticipant[]
+  messages             Message[]
+
+  @@index([projectId, type])
+  @@index([externalOrganizationId])
+}
+
+/// Membre explicite d’un canal chantier (V2C.6).
+/// Retrait = plus d’accès lecture/écriture/unread/realtime (politique stricte).
+model ProjectChannelParticipant {
+  id        String   @id @default(cuid())
+  channelId String
+  userId    String
+  addedById String?
+  createdAt DateTime @default(now())
+
+  channel ProjectChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User           @relation("ProjectChannelParticipants", fields: [userId], references: [id], onDelete: Cascade)
+  addedBy User?          @relation("ProjectChannelParticipantAddedBy", fields: [addedById], references: [id], onDelete: SetNull)
+
+  @@unique([channelId, userId])
+  @@index([userId])
+  @@index([channelId])
 }
 
 // Documents déposés par les clients (optionnellement liés à un projet ou une tâche)

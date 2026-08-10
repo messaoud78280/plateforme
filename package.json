@@ -48,6 +48,7 @@
     "test:messagerie-v2c2-legacy-migrate": "npx tsx scripts/test-messagerie-v2c2-legacy-migrate.ts",
     "test:messagerie-v2c4-actions": "npx tsx scripts/test-messagerie-v2c4-actions.ts",
     "test:messagerie-v2c41-delete": "npx tsx scripts/test-messagerie-v2c41-delete.ts",
+    "db:backfill-project-channels": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/backfill-project-channels-v2c6.ts",
     "test:chantiers-v2b-portfolio": "npx tsx scripts/test-chantiers-v2b-portfolio.ts",
     "test:chantiers-v2b1-coherence": "npx tsx scripts/test-chantiers-v2b1-coherence.ts",
     "test:pilotage-v2a-portfolio": "npx tsx scripts/test-pilotage-v2a-portfolio.ts",

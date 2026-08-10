@@ -711,6 +711,98 @@ export async function ensureVictorHugoCoherence(opts: {
 
   void isBc043;
 
+  // V2C.6 — canaux chantier (Équipe / Client / Point.P) + seed messages
+  try {
+    const { bootstrapDefaultChannelsForProject, ensureProjectChannel, addChannelParticipant } =
+      await import("@/lib/messagerie/project-channels");
+    await bootstrapDefaultChannelsForProject(project.id);
+
+    const internalCh = await ensureProjectChannel({
+      projectId: project.id,
+      type: "INTERNAL",
+    });
+    // Direction visible sur canal interne (pas auto partout)
+    await addChannelParticipant({
+      channelId: internalCh.id,
+      userId: opts.rootUserId,
+    });
+
+    const hasInternalMsg = await prisma.message.findFirst({
+      where: { projectId: project.id, channel: "INTERNE" },
+      select: { id: true },
+    });
+    if (!hasInternalMsg) {
+      const karim = await prisma.user.findFirst({
+        where: { name: "Karim Benali" },
+        select: { id: true },
+      });
+      const julie = await prisma.user.findFirst({
+        where: { name: "Julie Martin" },
+        select: { id: true },
+      });
+      if (karim && julie) {
+        await addChannelParticipant({ channelId: internalCh.id, userId: karim.id });
+        await addChannelParticipant({ channelId: internalCh.id, userId: julie.id });
+        await prisma.message.create({
+          data: {
+            projectId: project.id,
+            senderId: karim.id,
+            receiverId: julie.id,
+            channel: "INTERNE",
+            channelId: internalCh.id,
+            content:
+              "Point interne — membrane Point.P : on valide les détails avant de répondre au syndic.",
+          },
+        });
+      }
+    }
+
+    if (purchaseOrderId) {
+      const po = await prisma.purchaseOrder.findUnique({
+        where: { id: purchaseOrderId },
+        select: { externalOrganizationId: true },
+      });
+      if (po?.externalOrganizationId) {
+        const supplierCh = await ensureProjectChannel({
+          projectId: project.id,
+          type: "SUPPLIER",
+          externalOrganizationId: po.externalOrganizationId,
+        });
+        const thomas = await prisma.user.findFirst({
+          where: {
+            OR: [{ name: "Thomas Bernard" }, { externalOrganizationId: po.externalOrganizationId }],
+            personType: "SUPPLIER",
+          },
+          select: { id: true },
+        });
+        const karim = await prisma.user.findFirst({
+          where: { name: "Karim Benali" },
+          select: { id: true },
+        });
+        if (thomas) await addChannelParticipant({ channelId: supplierCh.id, userId: thomas.id });
+        if (karim) await addChannelParticipant({ channelId: supplierCh.id, userId: karim.id });
+        const hasSupplierMsg = await prisma.message.findFirst({
+          where: { channelId: supplierCh.id },
+          select: { id: true },
+        });
+        if (!hasSupplierMsg && thomas && karim) {
+          await prisma.message.create({
+            data: {
+              projectId: project.id,
+              senderId: thomas.id,
+              receiverId: karim.id,
+              channel: "FOURNISSEUR",
+              channelId: supplierCh.id,
+              content: "Livraison membrane confirmée — créneau à valider sur chantier.",
+            },
+          });
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[v2c6] bootstrap canaux Victor Hugo:", e);
+  }
+
   return {
     projectId: project.id,
     sheetId: sheet.id,

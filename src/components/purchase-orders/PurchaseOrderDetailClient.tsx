@@ -319,6 +319,7 @@ export function PurchaseOrderDetailClient({
             <PurchaseOrderMessagerieLink
               projectId={order.project.id}
               supplierName={supplierLabel}
+              externalOrganizationId={order.externalOrganization.id}
             />
           </div>
         ) : null}

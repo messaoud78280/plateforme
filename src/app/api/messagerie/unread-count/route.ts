@@ -22,7 +22,7 @@ export async function GET() {
   if (cached) return NextResponse.json(cached);
 
   try {
-    const [taskUnread, directUnread, projectUnread] = await Promise.all([
+    const [taskUnread, directUnread, projectUnread, channelUnreadCount] = await Promise.all([
       prisma.taskMessage.groupBy({
         by: ["taskId"],
         where: { receiverId: userId, read: false },
@@ -35,17 +35,22 @@ export async function GET() {
       }),
       prisma.message.groupBy({
         by: ["projectId"],
-        where: { receiverId: userId, read: false },
+        where: { receiverId: userId, read: false, channelId: null },
         _count: { id: true },
+      }),
+      prisma.messageChannelReceipt.count({
+        where: { userId, read: false },
       }),
     ]);
 
+    const channelConvCount = channelUnreadCount > 0 ? 1 : 0;
     const conversations =
-      taskUnread.length + directUnread.length + projectUnread.length;
+      taskUnread.length + directUnread.length + projectUnread.length + channelConvCount;
     const messages =
       taskUnread.reduce((s, r) => s + r._count.id, 0) +
       directUnread.reduce((s, r) => s + r._count.id, 0) +
-      projectUnread.reduce((s, r) => s + r._count.id, 0);
+      projectUnread.reduce((s, r) => s + r._count.id, 0) +
+      channelUnreadCount;
 
     const payload = {
       total: conversations,

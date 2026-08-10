@@ -34,13 +34,22 @@ export type ForwardSafetyResult =
 export function evaluateForwardSafety(
   sourceScope: ForwardScope,
   destScope: ForwardScope,
+  opts?: { destLabel?: string },
 ): ForwardSafetyResult {
   if (sourceScope === "INTERNAL" && destScope === "EXTERNAL") {
+    const dest = opts?.destLabel ? ` (${opts.destLabel})` : "";
+    return {
+      ok: true,
+      needsConfirm: true,
+      warning: `Vous allez partager un message interne avec un destinataire externe${dest}.`,
+    };
+  }
+  if (sourceScope === "EXTERNAL" && destScope === "EXTERNAL") {
     return {
       ok: true,
       needsConfirm: true,
       warning:
-        "Vous allez transférer un message interne à un destinataire externe.",
+        "Vous allez transférer un message entre deux périmètres externes. Confirmez uniquement si c’est intentionnel.",
     };
   }
   return { ok: true, needsConfirm: false };

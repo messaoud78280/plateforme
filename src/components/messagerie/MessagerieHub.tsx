@@ -36,6 +36,8 @@ export function MessagerieHub(props: Props) {
   const viewParam = searchParams.get("view");
   const projectParam = searchParams.get("project");
   const channelParam = searchParams.get("channel");
+  const channelIdParam = searchParams.get("channelId");
+  const externalOrgParam = searchParams.get("externalOrganizationId");
 
   const initialView = useMemo(() => {
     if (viewParam === "chantiers" || viewParam === "missions") return viewParam;
@@ -98,6 +100,8 @@ export function MessagerieHub(props: Props) {
               sessionUserId={props.sessionUserId}
               initialProjectId={projectParam}
               initialChannel={channelParam}
+              initialChannelId={channelIdParam}
+              initialExternalOrganizationId={externalOrgParam}
               hideNewDemande={props.hideNewDemande}
             />
           </div>

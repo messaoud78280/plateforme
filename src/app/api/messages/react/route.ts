@@ -89,7 +89,7 @@ export async function POST(request: Request) {
         senderName: session.user.name ?? "Quelqu’un",
         title: "Réaction",
         preview: emoji ? `${emoji} sur un message` : "Réaction retirée",
-        href: `/dashboard/messagerie?tab=messages-directs&with=${session.user.id}`,
+        href: `/dashboard/messagerie?with=${session.user.id}`,
         at: new Date().toISOString(),
         kind: "DIRECT",
         conversationKey: `DIRECT:${otherId}`,

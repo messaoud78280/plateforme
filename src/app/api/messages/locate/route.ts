@@ -43,7 +43,7 @@ export async function GET(request: Request) {
       kind: "DIRECT",
       messageId: m.id,
       contactId: otherId,
-      href: `/dashboard/messagerie?tab=messages-directs&with=${otherId}&messageId=${m.id}`,
+      href: `/dashboard/messagerie?with=${otherId}&messageId=${m.id}`,
     });
   }
 

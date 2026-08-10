@@ -293,6 +293,10 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
   await ensureDemoMessagingStaff();
   const { purgeDemoLegacyInbox } = await import("./cleanup-legacy-inbox");
   await purgeDemoLegacyInbox(demoId);
+  const { cleanupDemoMessagerieNotificationHrefs } = await import(
+    "./cleanup-messagerie-notification-hrefs"
+  );
+  await cleanupDemoMessagerieNotificationHrefs(demoId);
   const { ensureVictorHugoCoherence } = await import("./coherence-victor-hugo");
   await ensureVictorHugoCoherence({
     rootUserId: demo.rootUserId,

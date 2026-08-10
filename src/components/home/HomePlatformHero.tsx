@@ -8,11 +8,11 @@ export function HomePlatformHero() {
     <section id="hero" className="relative overflow-x-clip bg-white pb-16 pt-10 sm:pb-20 sm:pt-14 md:pb-24 md:pt-16">
       <div className="container-site">
         <div className="mx-auto max-w-4xl text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+          <p className="font-display text-balance text-sm font-extrabold uppercase tracking-[0.12em] text-[#0a0a0a] sm:text-base md:text-lg lg:text-xl">
             BeWork — Solutions IA sur mesure pour le BTP
           </p>
 
-          <h1 className="font-display mx-auto mt-5 max-w-[22ch] text-balance text-[2.125rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0a0a0a] sm:mt-6 sm:max-w-none sm:text-[3.25rem] md:text-[3.75rem] lg:text-[4.1rem]">
+          <h1 className="font-display mx-auto mt-6 max-w-[22ch] text-balance text-[2.125rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0a0a0a] sm:mt-8 sm:max-w-none sm:text-[3.25rem] md:text-[3.75rem] lg:text-[4.1rem]">
             <span className="block">Imaginez ce que l&apos;IA pourrait faire</span>
             <span className="block">pour votre entreprise.</span>
             <span className="mt-2 block text-slate-500 sm:mt-3">Nous le construisons.</span>

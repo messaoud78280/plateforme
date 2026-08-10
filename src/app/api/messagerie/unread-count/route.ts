@@ -22,7 +22,14 @@ export async function GET() {
   if (cached) return NextResponse.json(cached);
 
   try {
-    const [taskUnread, directUnread, projectUnread, channelUnreadCount] = await Promise.all([
+    const participantChannelIds = (
+      await prisma.projectChannelParticipant.findMany({
+        where: { userId },
+        select: { channelId: true },
+      })
+    ).map((r) => r.channelId);
+
+    const [taskUnread, directUnread, projectUnread, channelReceipts] = await Promise.all([
       prisma.taskMessage.groupBy({
         by: ["taskId"],
         where: { receiverId: userId, read: false },
@@ -38,12 +45,29 @@ export async function GET() {
         where: { receiverId: userId, read: false, channelId: null },
         _count: { id: true },
       }),
-      prisma.messageChannelReceipt.count({
-        where: { userId, read: false },
-      }),
+      // V2C.6C — unread canal uniquement si encore participant
+      participantChannelIds.length === 0
+        ? Promise.resolve([] as { message: { channelId: string | null } }[])
+        : prisma.messageChannelReceipt.findMany({
+            where: {
+              userId,
+              read: false,
+              message: {
+                channelId: { in: participantChannelIds },
+                deletedAt: null,
+              },
+            },
+            select: { message: { select: { channelId: true } } },
+          }),
     ]);
 
-    const channelConvCount = channelUnreadCount > 0 ? 1 : 0;
+    const channelIdsWithUnread = new Set(
+      channelReceipts
+        .map((r) => r.message.channelId)
+        .filter((id): id is string => Boolean(id)),
+    );
+    const channelUnreadCount = channelReceipts.length;
+    const channelConvCount = channelIdsWithUnread.size;
     const conversations =
       taskUnread.length + directUnread.length + projectUnread.length + channelConvCount;
     const messages =

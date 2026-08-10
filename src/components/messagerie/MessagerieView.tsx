@@ -689,6 +689,15 @@ export function MessagerieView({
   async function sendMessage(content: string, atts: MsgAttachment[]) {
     if ((!content && atts.length === 0) || !selectedProjectId || sending) return;
     if (sendLockRef.current) return;
+
+    // V2C.6C — superviseur non participant : confirmation avant de rejoindre le fil
+    if (isChannelSupervisor) {
+      const ok = window.confirm(
+        "Participer à cette conversation ?\n\nVotre message vous ajoute aux participants visibles. Les autres sauront que vous faites partie du fil.",
+      );
+      if (!ok) return;
+    }
+
     sendLockRef.current = true;
     setError("");
     const tempId = `temp-${Date.now()}`;
@@ -1020,6 +1029,28 @@ export function MessagerieView({
                       </li>
                     ))}
                   </ul>
+                  {isChannelSupervisor && supervisorInfo ? (
+                    <>
+                      <p className="px-1 pt-2 text-[10px] font-bold uppercase tracking-wide text-violet-500">
+                        Supervision
+                      </p>
+                      <div className="flex items-center gap-2 px-1 py-1 text-xs">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-700 text-[10px] font-bold text-white">
+                          {supervisorInfo.name
+                            .split(/\s+/)
+                            .slice(0, 2)
+                            .map((x) => x[0]?.toUpperCase() ?? "")
+                            .join("")}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block font-semibold text-slate-800">
+                            {supervisorInfo.name}
+                          </span>
+                          <span className="text-slate-500">{supervisorInfo.roleLabel}</span>
+                        </span>
+                      </div>
+                    </>
+                  ) : null}
                 </div>
               ) : null}
             </div>

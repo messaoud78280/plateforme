@@ -252,6 +252,13 @@ export async function removeChannelParticipant(params: {
   await prisma.projectChannelParticipant.deleteMany({
     where: { channelId: params.channelId, userId: params.userId },
   });
+  // V2C.6C — plus d’unread / notif pour un ex-participant
+  await prisma.messageChannelReceipt.deleteMany({
+    where: {
+      userId: params.userId,
+      message: { channelId: params.channelId },
+    },
+  });
 }
 
 export async function isChannelParticipant(
@@ -273,10 +280,12 @@ export async function isChannelParticipant(
 
 /**
  * ACL lecture/écriture canal.
- * V2C.6A — 3 notions distinctes :
+ * V2C.6A / V2C.6C — 3 notions distinctes :
  * - canView  : participant OU supervision DIRECTION/MANAGER
  * - canWrite : participant, OU superviseur (qui devient participant au 1er envoi)
- * - participant : ligne ProjectChannelParticipant (seul pour notif / unread / Discussions)
+ * - participant : ligne ProjectChannelParticipant (seul pour notif / unread / Discussions / realtime)
+ *
+ * Voir aussi : channel-membership-policy.ts
  *
  * Retrait participant → plus d’accès (sauf supervision Direction en lecture).
  */
@@ -812,7 +821,10 @@ export async function listChannelParticipantCandidates(channelId: string): Promi
   return { internals, externals };
 }
 
-/** Destinataires notif / realtime : participants actifs hors auteur. */
+/**
+ * Destinataires notif / realtime : participants actifs hors auteur.
+ * Superviseurs non participants exclus (channel-membership-policy).
+ */
 export async function listChannelNotifyUserIds(
   channelId: string,
   excludeUserId: string,
@@ -868,7 +880,8 @@ export async function listInboxProjectChannelsForUser(
   });
   if (!user || !isActiveAccess(user.accessStatus)) return [];
 
-  // V2C.6A — Discussions = boîte personnelle : participants uniquement
+  // V2C.6A / V2C.6C — Discussions = boîte personnelle : participants uniquement
+  // (supervision Direction → Par chantier, pas ici)
   const participantRows = await prisma.projectChannelParticipant.findMany({
     where: { userId },
     select: { channelId: true },

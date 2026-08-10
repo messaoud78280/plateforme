@@ -68,9 +68,13 @@ export type PurchaseOrderAttentionInput = {
   requestedById?: string | null;
   responsibleName?: string | null;
   requestedByName?: string | null;
+  /** Lignes commandées — qty exactes (pas de troncature). */
   lines: PurchaseOrderAttentionLineInput[];
+  /** Receipts actifs (+ hasBlDocument). */
   receipts: PurchaseOrderAttentionReceiptInput[];
+  /** Lignes de réception liées aux receipts actifs. */
   receiptLines: PurchaseOrderAttentionReceiptLineInput[];
+  /** Agenda livraison lié (optionnel). */
   agendaEventId?: string | null;
 };
 

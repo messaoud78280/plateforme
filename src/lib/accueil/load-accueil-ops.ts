@@ -200,21 +200,27 @@ export async function loadAccueilOps(opts: {
       month: "long",
     });
 
-    const projectWhere = await projectWhereForClientUser(opts.userId);
+    // Attention n’a pas besoin de projectWhere — démarrer en parallèle (chemin critique).
+    const attentionPromise = timedBranch(
+      "accueil.attention",
+      previewATraiterForHome(
+        {
+          id: opts.userId,
+          role: opts.role,
+          personType: opts.personType,
+        },
+        { mineOnly },
+      ),
+    );
+
+    const projectWhere = await timedBranch(
+      "accueil.projectWhere",
+      projectWhereForClientUser(opts.userId),
+    );
 
     const [attentionSnap, projects, agendaToday, agendaSoon, ordersRaw, tasksRaw, teamEvents] =
       await Promise.all([
-        timedBranch(
-          "accueil.attention",
-          previewATraiterForHome(
-            {
-              id: opts.userId,
-              role: opts.role,
-              personType: opts.personType,
-            },
-            { mineOnly },
-          ),
-        ),
+        attentionPromise,
         timedBranch(
           "accueil.projects",
           prisma.project.findMany({

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { MoreHorizontal } from "lucide-react";
 import type { AgendaEventDTO, AgendaView } from "./agenda-types";
 import { pickKeyEvents, eventsForDay as eventsOnDay } from "@/lib/agenda/period-summary";
 import {
@@ -21,8 +22,14 @@ import {
   agendaTypeMeta,
 } from "@/lib/agenda/types";
 import { AGENDA_STATUS_LABELS } from "@/lib/agenda/serialize-event";
+import {
+  canMarkAgendaEventComplete,
+  canRespondToAgendaInvitation,
+  resolveAgendaPrimaryAction,
+} from "@/lib/agenda/panel-actions";
 import { URGENCY_STYLES } from "@/lib/follow-up/types";
 import { projectSupplierHref } from "@/lib/messagerie/resolve-conversation";
+import { cn } from "@/lib/cn";
 
 type Props = {
   cursor: Date;
@@ -85,9 +92,28 @@ export function AgendaSidePanel({
   onStatusChange,
 }: Props) {
   const [miniOpen, setMiniOpen] = useState(false);
+  const [participantsOpen, setParticipantsOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
   const month = startOfMonth(cursor);
   const days = monthGrid(cursor);
   const today = new Date();
+
+  useEffect(() => {
+    setParticipantsOpen(false);
+    setMoreOpen(false);
+  }, [selectedEvent?.id]);
+
+  useEffect(() => {
+    if (!moreOpen) return;
+    function onDoc(e: MouseEvent) {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setMoreOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [moreOpen]);
 
   const meta = selectedEvent ? agendaTypeMeta(selectedEvent.type) : null;
   const start = selectedEvent ? new Date(selectedEvent.startAt) : null;
@@ -425,12 +451,7 @@ export function AgendaSidePanel({
                     Chantier
                   </dt>
                   <dd>
-                    <Link
-                      href={`/dashboard/projets/${selectedEvent.project.id}`}
-                      className="font-medium text-[#1d4ed8] hover:underline"
-                    >
-                      {selectedEvent.project.title}
-                    </Link>
+                    <p className="font-medium text-slate-800">{selectedEvent.project.title}</p>
                     {selectedEvent.location ? (
                       <span className="block text-xs text-slate-500">{selectedEvent.location}</span>
                     ) : selectedEvent.project.siteCity ? (
@@ -438,6 +459,12 @@ export function AgendaSidePanel({
                         {selectedEvent.project.siteCity}
                       </span>
                     ) : null}
+                    <Link
+                      href={`/dashboard/projets/${selectedEvent.project.id}`}
+                      className="mt-1 inline-block text-xs font-semibold text-[#1d4ed8] hover:underline"
+                    >
+                      Voir le chantier
+                    </Link>
                   </dd>
                 </div>
               ) : selectedEvent.location ? (
@@ -482,12 +509,35 @@ export function AgendaSidePanel({
               {selectedEvent.attendees.length > 0 && selectedEvent.type !== "LIVRAISON" ? (
                 <div>
                   <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                    Avec qui
+                    Participants
                   </dt>
-                  <dd className="space-y-0.5 text-slate-700">
-                    {selectedEvent.attendees.map((a) => (
-                      <div key={a.id}>{a.user.name || a.user.email}</div>
-                    ))}
+                  <dd>
+                    <button
+                      type="button"
+                      onClick={() => setParticipantsOpen((o) => !o)}
+                      className="text-left text-sm font-medium text-slate-700 hover:text-[#1e3a5f]"
+                    >
+                      Participants · {selectedEvent.attendees.length}
+                      <span className="ml-1 text-[11px] font-normal text-slate-400">
+                        {participantsOpen ? "masquer" : "voir"}
+                      </span>
+                    </button>
+                    {participantsOpen ? (
+                      <ul className="mt-1.5 space-y-0.5 text-sm text-slate-600">
+                        {selectedEvent.attendees.map((a) => (
+                          <li key={a.id} className="flex items-baseline justify-between gap-2">
+                            <span>{a.user.name || a.user.email}</span>
+                            <span className="text-[10px] uppercase tracking-wide text-slate-400">
+                              {a.status === "ACCEPTE"
+                                ? "OK"
+                                : a.status === "REFUSE"
+                                  ? "Refus"
+                                  : "En attente"}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
                   </dd>
                 </div>
               ) : null}
@@ -531,151 +581,204 @@ export function AgendaSidePanel({
               ) : null}
             </dl>
 
-            {/* Liens rapides — uniquement si relation */}
-            <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
-              {po?.canReceive ? (
-                <Link
-                  href={`/dashboard/commandes/${po.id}/reception`}
-                  className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900 hover:bg-emerald-100"
-                >
-                  Réceptionner
-                </Link>
-              ) : null}
-              {po?.canOpen ? (
-                <Link
-                  href={`/dashboard/commandes/${po.id}`}
-                  className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162d4a]"
-                >
-                  Voir commande
-                </Link>
-              ) : null}
-              {selectedEvent.project ? (
-                <Link
-                  href={`/dashboard/projets/${selectedEvent.project.id}`}
-                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  Chantier
-                </Link>
-              ) : null}
-              {(selectedEvent.followUpSheet || selectedEvent.followUpSheetId) && !po ? (
-                <Link
-                  href={
-                    selectedEvent.href ||
-                    `/dashboard/fiches-suivi/${selectedEvent.followUpSheet?.id ?? selectedEvent.followUpSheetId}`
-                  }
-                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  Fiche
-                </Link>
-              ) : null}
-              {po?.canOpen || po?.id ? (
-                <Link
-                  href={
-                    selectedEvent.project?.id
-                      ? projectSupplierHref(
-                          selectedEvent.project.id,
-                          po.supplierOrganizationId,
-                        )
-                      : po.legacyTaskId
-                        ? `/dashboard/messagerie?task=${po.legacyTaskId}`
-                        : `/dashboard/messagerie?view=chantiers&channel=FOURNISSEUR`
-                  }
-                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  {po.supplierName
-                    ? `💬 Contacter ${po.supplierName}`
-                    : "💬 Contacter le fournisseur"}
-                </Link>
-              ) : selectedEvent.sourceMessageHref ? (
-                <Link
-                  href={selectedEvent.sourceMessageHref}
-                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  Message
-                </Link>
-              ) : null}
+            {/* Actions — 1 primaire + liens métier + ••• secondaires */}
+            {(() => {
+              const showRsvp = canRespondToAgendaInvitation(selectedEvent, currentUserId);
+              const showComplete =
+                Boolean(onStatusChange) && canMarkAgendaEventComplete(selectedEvent);
+              const primary = resolveAgendaPrimaryAction(selectedEvent, currentUserId);
+              const canEdit = !selectedEvent.readOnly && !po;
+              const btnPrimary =
+                "rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-semibold text-white hover:bg-[#162d4a]";
+              const btnSecondary =
+                "rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50";
+              const btnSoft =
+                "rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-900 hover:bg-emerald-100";
 
-              {selectedEvent.readOnly ? (
-                selectedEvent.href && !po ? (
-                  <Link
-                    href={selectedEvent.href}
-                    className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162d4a]"
-                  >
-                    Ouvrir la source
-                  </Link>
-                ) : null
-              ) : (
-                <>
-                  {onStatusChange && !po ? (
-                    <div className="mb-1 flex w-full flex-wrap gap-1.5">
-                      {selectedEvent.status !== "TERMINE" ? (
-                        <button
-                          type="button"
-                          onClick={() => onStatusChange("TERMINE")}
-                          className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900 hover:bg-emerald-100"
-                        >
-                          Marquer terminé
-                        </button>
-                      ) : null}
-                    </div>
-                  ) : null}
-                  {currentUserId &&
-                  onRsvp &&
-                  !po &&
-                  (selectedEvent.attendees.some((a) => a.user.id === currentUserId) ||
-                    selectedEvent.responsibleId === currentUserId) ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => onRsvp("ACCEPTE")}
-                        className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
-                      >
+              return (
+                <div className="space-y-2.5 border-t border-slate-100 pt-3">
+                  {/* Action principale */}
+                  {primary?.kind === "rsvp_accept" && onRsvp ? (
+                    <div className="flex flex-wrap gap-2">
+                      <button type="button" onClick={() => onRsvp("ACCEPTE")} className={btnSoft}>
                         Accepter
                       </button>
                       <button
                         type="button"
                         onClick={() => onRsvp("REFUSE")}
-                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                        className={btnSecondary}
                       >
                         Refuser
                       </button>
-                    </>
+                    </div>
                   ) : null}
-                  {!po ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={onEdit}
-                        className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162d4a]"
-                      >
-                        Modifier
-                      </button>
-                      <button
-                        type="button"
-                        onClick={onDuplicate}
-                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                      >
-                        Dupliquer
-                      </button>
-                      <button
-                        type="button"
-                        onClick={onDelete}
-                        className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
-                      >
-                        Supprimer
-                      </button>
-                    </>
-                  ) : (
-                    <Link
-                      href={`/dashboard/commandes/${po.id}`}
-                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                    >
-                      Modifier la livraison
+                  {primary?.kind === "receive_po" && po ? (
+                    <Link href={`/dashboard/commandes/${po.id}/reception`} className={btnSoft}>
+                      Réceptionner
                     </Link>
-                  )}
-                </>
-              )}
-            </div>
+                  ) : null}
+                  {primary?.kind === "complete" && onStatusChange ? (
+                    <button
+                      type="button"
+                      onClick={() => onStatusChange("TERMINE")}
+                      className={btnSoft}
+                    >
+                      Marquer terminé
+                    </button>
+                  ) : null}
+                  {primary?.kind === "edit" ? (
+                    <button type="button" onClick={onEdit} className={cn(btnPrimary, "w-full")}>
+                      Modifier
+                    </button>
+                  ) : null}
+                  {primary?.kind === "open_po" ? (
+                    <Link href={primary.href} className={cn(btnPrimary, "inline-flex")}>
+                      Voir commande
+                    </Link>
+                  ) : null}
+                  {primary?.kind === "open_source" ? (
+                    <Link href={primary.href} className={cn(btnPrimary, "inline-flex")}>
+                      Ouvrir la source
+                    </Link>
+                  ) : null}
+
+                  {/* Liens contextuels (pas au même niveau que Modifier) */}
+                  <div className="flex flex-wrap gap-2">
+                    {po?.canOpen && primary?.kind !== "open_po" && primary?.kind !== "receive_po" ? (
+                      <Link href={`/dashboard/commandes/${po.id}`} className={btnSecondary}>
+                        Voir commande
+                      </Link>
+                    ) : null}
+                    {po?.canReceive && primary?.kind !== "receive_po" ? (
+                      <Link
+                        href={`/dashboard/commandes/${po.id}/reception`}
+                        className={btnSecondary}
+                      >
+                        Réceptionner
+                      </Link>
+                    ) : null}
+                    {(selectedEvent.followUpSheet || selectedEvent.followUpSheetId) && !po ? (
+                      <Link
+                        href={
+                          selectedEvent.href ||
+                          `/dashboard/fiches-suivi/${selectedEvent.followUpSheet?.id ?? selectedEvent.followUpSheetId}`
+                        }
+                        className={btnSecondary}
+                      >
+                        Fiche
+                      </Link>
+                    ) : null}
+                    {po?.canOpen || po?.id ? (
+                      <Link
+                        href={
+                          selectedEvent.project?.id
+                            ? projectSupplierHref(
+                                selectedEvent.project.id,
+                                po.supplierOrganizationId,
+                              )
+                            : po.legacyTaskId
+                              ? `/dashboard/messagerie?task=${po.legacyTaskId}`
+                              : `/dashboard/messagerie?view=chantiers&channel=FOURNISSEUR`
+                        }
+                        className={btnSecondary}
+                      >
+                        {po.supplierName
+                          ? `Contacter ${po.supplierName}`
+                          : "Contacter le fournisseur"}
+                      </Link>
+                    ) : selectedEvent.sourceMessageHref ? (
+                      <Link href={selectedEvent.sourceMessageHref} className={btnSecondary}>
+                        Message
+                      </Link>
+                    ) : null}
+                  </div>
+
+                  {/* Secondaires : ••• */}
+                  {!selectedEvent.readOnly || po ? (
+                    <div className="relative flex items-center gap-2" ref={moreRef}>
+                      {canEdit && primary?.kind !== "edit" ? (
+                        <button type="button" onClick={onEdit} className={btnSecondary}>
+                          Modifier
+                        </button>
+                      ) : null}
+                      {showComplete && primary?.kind !== "complete" && onStatusChange ? (
+                        <button
+                          type="button"
+                          onClick={() => onStatusChange("TERMINE")}
+                          className={btnSecondary}
+                        >
+                          Marquer terminé
+                        </button>
+                      ) : null}
+                      {showRsvp && primary?.kind !== "rsvp_accept" && onRsvp ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => onRsvp("ACCEPTE")}
+                            className={btnSecondary}
+                          >
+                            Accepter
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onRsvp("REFUSE")}
+                            className={btnSecondary}
+                          >
+                            Refuser
+                          </button>
+                        </>
+                      ) : null}
+
+                      {!selectedEvent.readOnly && !po ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setMoreOpen((o) => !o)}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50"
+                            aria-label="Autres actions"
+                            aria-expanded={moreOpen}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </button>
+                          {moreOpen ? (
+                            <div className="absolute bottom-full left-0 z-30 mb-1 min-w-[10rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMoreOpen(false);
+                                  onDuplicate();
+                                }}
+                                className="block w-full px-3 py-2 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                              >
+                                Dupliquer
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMoreOpen(false);
+                                  onDelete();
+                                }}
+                                className="block w-full px-3 py-2 text-left text-xs font-semibold text-red-600 hover:bg-red-50"
+                              >
+                                Supprimer
+                              </button>
+                            </div>
+                          ) : null}
+                        </>
+                      ) : po && !selectedEvent.readOnly ? (
+                        <Link href={`/dashboard/commandes/${po.id}`} className={btnSecondary}>
+                          Modifier la livraison
+                        </Link>
+                      ) : null}
+                    </div>
+                  ) : selectedEvent.href && !po ? (
+                    <Link href={selectedEvent.href} className={btnSecondary}>
+                      Ouvrir la source
+                    </Link>
+                  ) : null}
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>

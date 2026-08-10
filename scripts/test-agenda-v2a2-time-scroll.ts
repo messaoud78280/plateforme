@@ -41,8 +41,8 @@ function testDayWeekScrollStructure() {
   assert.ok(src.includes("overflow-y-auto"));
   assert.ok(src.includes("GRID_EDGE_PAD_TOP"));
   assert.ok(src.includes("GRID_EDGE_PAD_BOTTOM"));
-  assert.ok(src.includes('useState(true)')); // extended défaut 06–22
-  assert.ok(src.includes("initialScrollKeyRef"));
+  assert.ok(src.includes("EXTENDED_HOUR_START"));
+  assert.ok(!src.includes("Afficher 06:00"));
   assert.ok(!src.includes("h-[900px]") && !src.includes("max-h-[700px]"));
   // Y drag sans double scrollTop
   assert.ok(src.includes("ne pas re-ajouter scrollTop") || src.includes("clientY - rect.top"));

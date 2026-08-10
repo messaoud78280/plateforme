@@ -6,6 +6,15 @@ import { URGENCY_LABELS } from "@/lib/follow-up/types";
 import { resolveDeliverySchedule } from "@/lib/purchase-orders/sync-delivery";
 import type { PurchaseOrderStatus } from "@prisma/client";
 
+/** Types dont startAt = échéance → urgence calculée OK (pas les réunions). */
+export const AGENDA_DUE_URGENCY_TYPES = new Set([
+  "ECHEANCE",
+  "SITUATION",
+  "FACTURATION",
+  "CONTROLE",
+  "LEVEE_RESERVES",
+]);
+
 export type AgendaPurchaseOrderSummary = {
   id: string;
   number: string;
@@ -101,6 +110,7 @@ export function serializePurchaseOrderForAgenda(
 export function buildAgendaUrgency(opts: {
   startAt: Date;
   status: string;
+  type?: string;
   followUpSheet?: {
     nextActionAt: Date | null;
     nextActionDone: boolean;
@@ -108,15 +118,24 @@ export function buildAgendaUrgency(opts: {
   } | null;
 }) {
   const sheet = opts.followUpSheet;
-  const urgency = sheet
-    ? computeUrgencyFromDue(sheet.nextActionAt ?? opts.startAt, {
-        nextActionDone: sheet.nextActionDone,
-        override: sheet.urgencyOverride as never,
-      })
-    : computeUrgencyFromDue(opts.startAt, {
-        nextActionDone: opts.status === "TERMINE",
-      });
-  return { urgency, urgencyLabel: URGENCY_LABELS[urgency] };
+  if (sheet) {
+    const urgency = computeUrgencyFromDue(sheet.nextActionAt ?? opts.startAt, {
+      nextActionDone: sheet.nextActionDone,
+      override: sheet.urgencyOverride as never,
+    });
+    return { urgency, urgencyLabel: URGENCY_LABELS[urgency] };
+  }
+
+  // Échéances métier uniquement — jamais « réunion proche = urgent ».
+  const type = opts.type ?? "";
+  if (AGENDA_DUE_URGENCY_TYPES.has(type)) {
+    const urgency = computeUrgencyFromDue(opts.startAt, {
+      nextActionDone: opts.status === "TERMINE",
+    });
+    return { urgency, urgencyLabel: URGENCY_LABELS[urgency] };
+  }
+
+  return { urgency: "NORMAL" as const, urgencyLabel: URGENCY_LABELS.NORMAL };
 }
 
 export const AGENDA_STATUS_LABELS: Record<string, string> = {

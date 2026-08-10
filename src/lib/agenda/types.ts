@@ -4,7 +4,7 @@
  */
 
 export const AGENDA_EVENT_TYPES = [
-  { id: "REUNION_CHANTIER", label: "Réunion de chantier", colorKey: "reunion" },
+  { id: "REUNION_CHANTIER", label: "Réunion chantier", colorKey: "reunion" },
   { id: "VISITE_CHANTIER", label: "Visite chantier", colorKey: "chantier" },
   { id: "RDV_CLIENT", label: "Rendez-vous client", colorKey: "reunion" },
   { id: "RDV_FOURNISSEUR", label: "Rendez-vous fournisseur", colorKey: "livraison" },

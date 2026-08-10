@@ -26,15 +26,31 @@ export async function POST(request: Request, ctx: Ctx) {
     where: {
       id,
       status: { not: "ANNULE" },
-      OR: [
-        { attendees: { some: { userId: session.user.id } } },
-        { responsibleId: session.user.id },
-      ],
+      attendees: { some: { userId: session.user.id } },
     },
-    select: { id: true },
+    select: {
+      id: true,
+      createdById: true,
+      responsibleId: true,
+      attendees: {
+        where: { userId: session.user.id },
+        select: { status: true },
+      },
+    },
   });
   if (!event) {
     return NextResponse.json({ error: "Événement introuvable ou non invité" }, { status: 404 });
+  }
+
+  // Organisateur / responsable : jamais RSVP sur sa propre réunion
+  if (
+    event.createdById === session.user.id ||
+    event.responsibleId === session.user.id
+  ) {
+    return NextResponse.json(
+      { error: "Le responsable ou l’organisateur n’a pas à accepter sa propre réunion." },
+      { status: 403 },
+    );
   }
 
   await prisma.agendaEventAttendee.upsert({

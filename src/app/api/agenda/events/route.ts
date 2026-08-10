@@ -250,6 +250,7 @@ export async function GET(request: Request) {
         const { urgency, urgencyLabel } = buildAgendaUrgency({
           startAt: startDate,
           status: e.status,
+          type: e.type,
           followUpSheet: sheet,
         });
         let sourceMessageHref: string | null = null;

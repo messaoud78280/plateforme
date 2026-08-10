@@ -5,12 +5,9 @@ import {
   EXTENDED_HOUR_END,
   EXTENDED_HOUR_START,
   PX_PER_HOUR,
-  WORK_HOUR_END,
-  WORK_HOUR_START,
   addDays,
   formatTime,
   hoursList,
-  isOutsideWorkHours,
   isSameDay,
   isoWeekLabel,
   minutesSinceMidnight,
@@ -87,12 +84,9 @@ export function AgendaDayWeekView({
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const hourPxRef = useRef(pxPerHour);
-  /** Clé mode+date+plage — scroll initial une seule fois par contexte. */
+  /** Clé mode+date — scroll initial une seule fois par contexte. */
   const initialScrollKeyRef = useRef<string | null>(null);
   const [now, setNow] = useState(() => new Date());
-  /** Plage métier 06–22 par défaut ; repli 07–19 optionnel. */
-  const [extended, setExtended] = useState(true);
-  const autoExtendedRef = useRef(false);
   const [slotMenu, setSlotMenu] = useState<{
     dayIndex: number;
     draft: AgendaQuickCreateDraft;
@@ -115,8 +109,8 @@ export function AgendaDayWeekView({
   confirmLinkedRef.current = onConfirmLinkedReschedule;
   const ignoreClickRef = useRef(false);
 
-  const hourStart = extended ? EXTENDED_HOUR_START : WORK_HOUR_START;
-  const hourEnd = extended ? EXTENDED_HOUR_END : WORK_HOUR_END;
+  const hourStart = EXTENDED_HOUR_START;
+  const hourEnd = EXTENDED_HOUR_END;
   const gridTopMin = hourStart * 60;
   const gridBottomMin = (hourEnd + 1) * 60;
   const totalHours = hourEnd - hourStart + 1;
@@ -155,26 +149,13 @@ export function AgendaDayWeekView({
     return () => mq.removeEventListener("change", apply);
   }, []);
 
-  // Auto-étendre une fois si un événement hors plage travail
-  useEffect(() => {
-    if (autoExtendedRef.current) return;
-    const outside = events.some((ev) => {
-      if (ev.allDay) return false;
-      return isOutsideWorkHours(new Date(ev.startAt)) || isOutsideWorkHours(new Date(ev.endAt));
-    });
-    if (outside) {
-      autoExtendedRef.current = true;
-      setExtended(true);
-    }
-  }, [events]);
-
   // Scroll initial vers l’heure actuelle ; conserver la zone visible au zoom.
   // Pas de re-scroll sur clic événement / filtre / re-render.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     const prevPx = hourPxRef.current;
-    const contextKey = `${mode}:${startOfDay(cursor).toISOString()}:${extended ? "ext" : "work"}`;
+    const contextKey = `${mode}:${startOfDay(cursor).toISOString()}`;
 
     if (prevPx !== pxPerHour && prevPx > 0 && initialScrollKeyRef.current !== null) {
       const midY = el.scrollTop + el.clientHeight / 2;
@@ -194,7 +175,7 @@ export function AgendaDayWeekView({
     // Fenêtre ~2 h avant l’heure actuelle (ex. 16:00 → ~14:00 en haut)
     const windowStart = Math.max(gridTopMin, focus - 120);
     el.scrollTop = Math.max(0, minutesToY(windowStart));
-  }, [mode, cursor, extended, pxPerHour, minutesToY, gridTopMin, gridBottomMin]);
+  }, [mode, cursor, pxPerHour, minutesToY, gridTopMin, gridBottomMin]);
 
   const allDayEvents = useMemo(
     () =>
@@ -293,8 +274,8 @@ export function AgendaDayWeekView({
       // Y dans le référentiel grille (rect déjà scrollé) — ne pas re-ajouter scrollTop.
       const y = e.clientY - rect.top;
       const deltaY = y - d.originY;
-      const topMin = (extended ? EXTENDED_HOUR_START : WORK_HOUR_START) * 60;
-      const bottomMin = ((extended ? EXTENDED_HOUR_END : WORK_HOUR_END) + 1) * 60;
+      const topMin = EXTENDED_HOUR_START * 60;
+      const bottomMin = (EXTENDED_HOUR_END + 1) * 60;
 
       // Auto-scroll près des bords du TimeGrid
       const sc = scrollRef.current;
@@ -366,7 +347,7 @@ export function AgendaDayWeekView({
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
     };
-  }, [mode, extended]);
+  }, [mode]);
 
   function startMove(e: React.PointerEvent, ev: AgendaEventDTO, dayIndex: number) {
     e.stopPropagation();
@@ -680,28 +661,8 @@ export function AgendaDayWeekView({
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center justify-center border-b border-slate-100 bg-slate-50/50 py-0.5">
-        {extended ? (
-          <button
-            type="button"
-            onClick={() => setExtended(false)}
-            className="text-[10px] font-semibold text-slate-400 hover:text-slate-600"
-          >
-            Revenir à 07:00 – 19:00
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setExtended(true)}
-            className="text-[10px] font-semibold text-slate-400 hover:text-slate-600"
-          >
-            Afficher 06:00 – 22:00
-          </button>
-        )}
-      </div>
-
       {/*
-        AGENDA-V2A.2 — TimeGrid scrollable 06→22.
+        AGENDA-V2A.2 — TimeGrid scrollable 06→22 (plage unique, sans toggle).
         Parent flex min-h-0 + overflow-y-auto : la journée défile, le cadre reste.
       */}
       <div

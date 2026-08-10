@@ -19,6 +19,7 @@ import {
   type MessageReplyMeta,
 } from "@/lib/messagerie/message-reply";
 import { presentMessagesForViewer } from "@/lib/messagerie/filter-hidden-messages";
+import { resolveMessageNotificationHref } from "@/lib/messagerie/resolve-conversation";
 
 function canUseDirectMessages(role?: string | null): boolean {
   return isManagerRole(role) || isStaffAgent(role) || role === "CLIENT";
@@ -169,12 +170,20 @@ export async function POST(request: Request) {
       include: messageInclude,
     });
 
+    const href = resolveMessageNotificationHref({
+      sourceType: "DIRECT",
+      senderId: session.user.id,
+      receiverId: receiver.id,
+      notifyUserId: receiver.id,
+      messageId: message.id,
+    });
+
     await createNotification({
       userId: receiver.id,
       type: "MESSAGE_RECEIVED",
       title: "Nouveau message",
       message: `${session.user?.name ?? "Quelqu'un"} vous a envoyé un message direct.`,
-      actionUrl: "/dashboard/messagerie?tab=messages-directs",
+      actionUrl: href,
     });
 
     ttlInvalidatePrefix(`msg-unread:${receiver.id}`);
@@ -188,7 +197,7 @@ export async function POST(request: Request) {
         message.content,
         message.attachmentsJson as MsgAttachment[] | null,
       ),
-      href: `/dashboard/messagerie?tab=messages-directs&with=${session.user.id}`,
+      href,
       at: message.createdAt.toISOString(),
       kind: "DIRECT",
       conversationKey: `DIRECT:${session.user.id}`,

@@ -1146,8 +1146,9 @@ export function MessagerieMissionsView({
 
     if (task) {
       setFilter("inbox");
-      if (selectedTaskIdRef.current !== task) setSelectedTaskId(task);
       setSelectedDirectContactId("");
+      setSelectedChannelId("");
+      if (selectedTaskIdRef.current !== task) setSelectedTaskId(task);
       setMobileShowThread(true);
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("bework:messagerie-thread-open"));
@@ -1155,17 +1156,29 @@ export function MessagerieMissionsView({
       return;
     }
 
-    if (tab === "messages-directs" || withUser) {
+    if (withUser) {
       setFilter("inbox");
-      if (withUser) {
-        setSelectedTaskId("");
-        if (selectedDirectContactIdRef.current !== withUser) {
-          setSelectedDirectContactId(withUser);
-        }
-        setMobileShowThread(true);
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new Event("bework:messagerie-thread-open"));
-        }
+      setSelectedTaskId("");
+      setSelectedChannelId("");
+      if (selectedDirectContactIdRef.current !== withUser) {
+        setSelectedDirectContactId(withUser);
+      }
+      setMobileShowThread(true);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("bework:messagerie-thread-open"));
+      }
+      return;
+    }
+
+    // Ancien deep-link générique (notif legacy) — liste, jamais conserver un task stale
+    if (tab === "messages-directs") {
+      setFilter("inbox");
+      setSelectedTaskId("");
+      setSelectedChannelId("");
+      setSelectedDirectContactId("");
+      setMobileShowThread(false);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("bework:messagerie-thread-close"));
       }
       return;
     }
@@ -1178,18 +1191,20 @@ export function MessagerieMissionsView({
     ) {
       setSelectedTaskId("");
       setSelectedDirectContactId("");
+      setSelectedChannelId("");
       setMobileShowThread(false);
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("bework:messagerie-thread-close"));
       }
     }
 
-    if (messageId && !task && tab !== "messages-directs") {
+    if (messageId && !task) {
       void fetch(`/api/messages/locate?kind=TASK&id=${encodeURIComponent(messageId)}`)
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
           if (d?.taskId) {
             setSelectedTaskId(d.taskId);
+            setSelectedDirectContactId("");
             setMobileShowThread(true);
             replaceMessagerieQuery({ task: d.taskId });
           }

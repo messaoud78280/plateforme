@@ -75,11 +75,18 @@ export function HeaderDropdown({
       if (triggerRef.current?.contains(target) || panelRef.current?.contains(target)) return;
       setOpen(false);
     }
+    function onPanelClick(e: MouseEvent) {
+      const el = e.target as HTMLElement | null;
+      if (el?.closest?.("a[href]")) setOpen(false);
+    }
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onMouse);
+    const panel = panelRef.current;
+    panel?.addEventListener("click", onPanelClick);
     return () => {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("mousedown", onMouse);
+      panel?.removeEventListener("click", onPanelClick);
     };
   }, [open]);
 

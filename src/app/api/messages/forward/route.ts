@@ -24,6 +24,7 @@ import {
   defaultMessageChannelForPerson,
   type MessageChannel,
 } from "@/lib/equipe-acces/nav-by-persona";
+import { resolveMessageNotificationHref } from "@/lib/messagerie/resolve-conversation";
 type Kind = "DIRECT" | "TASK" | "PROJECT";
 
 type SourcePayload = {
@@ -192,12 +193,20 @@ export async function POST(request: Request) {
         },
       });
 
+      const href = resolveMessageNotificationHref({
+        sourceType: "DIRECT",
+        senderId: session.user.id,
+        receiverId: destId,
+        notifyUserId: destId,
+        messageId: message.id,
+      });
+
       await createNotification({
         userId: destId,
         type: "MESSAGE_RECEIVED",
         title: "Message transféré",
         message: `${session.user.name ?? "Quelqu’un"} vous a transféré un message.`,
-        actionUrl: `/dashboard/messagerie?tab=messages-directs&with=${session.user.id}`,
+        actionUrl: href,
       });
       ttlInvalidatePrefix(`msg-unread:${destId}`);
       void broadcastMessagerieToUser({
@@ -206,7 +215,7 @@ export async function POST(request: Request) {
         senderName: session.user.name ?? "Quelqu’un",
         title: session.user.name ?? "Message",
         preview: formatMediaPreview(message.content, atts),
-        href: `/dashboard/messagerie?tab=messages-directs&with=${session.user.id}`,
+        href,
         at: message.createdAt.toISOString(),
         kind: "DIRECT",
         conversationKey: `DIRECT:${session.user.id}`,
@@ -303,12 +312,18 @@ export async function POST(request: Request) {
         },
       });
 
+      const href = resolveMessageNotificationHref({
+        sourceType: "TASK",
+        taskId: task.id,
+        messageId: message.id,
+      });
+
       await createNotification({
         userId: receiverId,
         type: "MESSAGE_RECEIVED",
         title: "Message transféré",
         message: `Message transféré sur « ${task.title} ».`,
-        actionUrl: `/dashboard/messagerie?task=${task.id}&messageId=${message.id}`,
+        actionUrl: href,
       });
       ttlInvalidatePrefix(`msg-unread:${receiverId}`);
       void broadcastMessagerieToUser({
@@ -317,7 +332,7 @@ export async function POST(request: Request) {
         senderName: session.user.name ?? "Quelqu’un",
         title: task.title,
         preview: formatMediaPreview(message.content, atts),
-        href: `/dashboard/messagerie?task=${task.id}&messageId=${message.id}`,
+        href,
         at: message.createdAt.toISOString(),
         kind: "TASK",
         conversationKey: `TASK:${task.id}`,

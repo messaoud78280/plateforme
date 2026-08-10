@@ -19,6 +19,7 @@ import {
   type MessageReplyMeta,
 } from "@/lib/messagerie/message-reply";
 import { presentMessagesForViewer } from "@/lib/messagerie/filter-hidden-messages";
+import { resolveMessageNotificationHref } from "@/lib/messagerie/resolve-conversation";
 
 /** GET /api/tasks/[id]/messages — Messages de la tâche (filtrés par participant).
  * Query : take (défaut 50, max 100) · before=<ISO> (charger plus ancien) · after=<ISO|id> (poll incrémental)
@@ -295,6 +296,12 @@ export async function POST(
       },
     });
 
+    const href = resolveMessageNotificationHref({
+      sourceType: "TASK",
+      taskId,
+      messageId: message.id,
+    });
+
     await createNotification({
       userId: receiverIdFinal,
       type: "MESSAGE_RECEIVED",
@@ -302,7 +309,7 @@ export async function POST(
       message: internal
         ? `Message interne sur la mission « ${task.title} ».`
         : `${session.user?.name ?? "Quelqu'un"} vous a envoyé un message sur la mission « ${task.title} ».`,
-      actionUrl: `/dashboard/messagerie?task=${taskId}&messageId=${message.id}`,
+      actionUrl: href,
     });
 
     ttlInvalidatePrefix(`msg-unread:${receiverIdFinal}`);
@@ -316,7 +323,7 @@ export async function POST(
         message.content,
         message.attachmentsJson as MsgAttachment[] | null,
       ),
-      href: `/dashboard/messagerie?task=${taskId}&messageId=${message.id}`,
+      href,
       at: message.createdAt.toISOString(),
       kind: "TASK",
       conversationKey: `TASK:${taskId}`,

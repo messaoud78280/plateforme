@@ -28,6 +28,7 @@ import {
   typeFromLegacyChannel,
   type ProjectChannelType,
 } from "@/lib/messagerie/project-channels";
+import { resolveMessageNotificationHref } from "@/lib/messagerie/resolve-conversation";
 import {
   ChannelSendMembershipError,
   createChannelMessageWithSenderMembership,
@@ -355,7 +356,11 @@ export async function POST(request: Request) {
     }
 
     const preview = formatMediaPreview(text, attachments).slice(0, 80);
-    const href = `/dashboard/messagerie?view=chantiers&project=${projectId}&channelId=${resolvedChannelId}`;
+    const href = resolveMessageNotificationHref({
+      sourceType: "PROJECT_CHANNEL",
+      projectId,
+      channelId: resolvedChannelId,
+    });
 
     for (const uid of notifyIds) {
       ttlInvalidatePrefix(`msg-unread:${uid}`);

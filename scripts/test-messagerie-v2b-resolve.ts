@@ -59,7 +59,7 @@ const task = resolveConversationHref({ kind: "task", taskId: "t1", messageId: "m
 assert(task.includes("task=t1") && task.includes("messageId=m1"), "mission + messageId");
 
 const direct = resolveConversationHref({ kind: "direct", userId: "u2" });
-assert(direct.includes("tab=messages-directs") && direct.includes("with=u2"), "direct");
+assert(direct.includes("with=u2") && !direct.includes("tab="), "direct → ?with= (sans tab générique)");
 
 if (failed > 0) {
   console.error(`\n${failed} test(s) échoué(s)`);

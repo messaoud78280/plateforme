@@ -39,11 +39,12 @@ export function MessagerieHub(props: Props) {
   const channelParam = searchParams.get("channel");
   const channelIdParam = searchParams.get("channelId");
   const externalOrgParam = searchParams.get("externalOrganizationId");
-  /** Conversation ouverte — masquer le chrome Hub sur mobile. */
-  const threadOpen = Boolean(
-    searchParams.get("task") ||
-      searchParams.get("with") ||
-      searchParams.get("channelId"),
+  /** Deep-link Discussions prioritaire sur Par chantier. */
+  const forceMissions = Boolean(searchParams.get("task") || searchParams.get("with"));
+  const forceChantiers = Boolean(
+    !forceMissions &&
+      (searchParams.get("channelId") ||
+        (searchParams.get("view") === "chantiers" && searchParams.get("project"))),
   );
 
   const initialView = useMemo(() => {
@@ -52,10 +53,20 @@ export function MessagerieHub(props: Props) {
   }, [viewParam, props.preferChantiers]);
 
   const [userView, setUserView] = useState<"missions" | "chantiers" | null>(null);
-  const view: "missions" | "chantiers" =
-    viewParam === "chantiers" || viewParam === "missions"
-      ? viewParam
-      : (userView ?? initialView);
+  const view: "missions" | "chantiers" = forceMissions
+    ? "missions"
+    : forceChantiers
+      ? "chantiers"
+      : viewParam === "chantiers" || viewParam === "missions"
+        ? viewParam
+        : (userView ?? initialView);
+
+  /** Conversation ouverte — masquer le chrome Hub sur mobile. */
+  const threadOpen = Boolean(
+    searchParams.get("task") ||
+      searchParams.get("with") ||
+      searchParams.get("channelId"),
+  );
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">

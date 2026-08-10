@@ -7,7 +7,11 @@
   "buildAptPackages": ["libreoffice-nogui", "fontconfig", "fonts-liberation"],
   "steps": {
     "build": {
-      "commands": ["npm run build"]
+      "commands": ["npm run build"],
+      "variables": {
+        "NODE_OPTIONS": "--max-old-space-size=8192",
+        "BEWORK_BUILD_HEAP_MB": "8192"
+      }
     }
   },
   "deploy": {

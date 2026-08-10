@@ -3,7 +3,12 @@ import { redirect, notFound } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { BackLink } from "@/components/ui/BackLink";
+import { ContextBackButton } from "@/components/ui/ContextBackButton";
+import {
+  contextBackLabelForHref,
+  sanitizeInternalReturnTo,
+} from "@/lib/navigation/safe-return-to";
+import { resolveChantierHeaderParties } from "@/lib/chantier/party-labels";
 import { MessageForm } from "@/components/MessageForm";
 import { ProjectAssignAgent } from "@/components/projects/ProjectAssignAgent";
 import { ProjectPpspsSection } from "@/components/projects/ProjectPpspsSection";
@@ -47,11 +52,14 @@ import { isActionOpen, isVisaPending, isOverdue } from "@/lib/pilotage/calculati
 
 export default async function ProjetDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ returnTo?: string }>;
 }) {
   const session = await getServerSession(authOptions);
   const { id } = await params;
+  const { returnTo: returnToRaw } = await searchParams;
 
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard");
@@ -82,7 +90,19 @@ export default async function ProjetDetailPage({
       where: { id },
       include: {
         client: true,
-        assignedTo: { select: { id: true, name: true, email: true } },
+        assignedTo: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            personType: true,
+            role: true,
+            permissionProfile: true,
+            accessStatus: true,
+            jobTitle: true,
+          },
+        },
+        organization: { select: { name: true } },
         messages: {
           where: {
             ...projectMessageVisibilityWhere(session.user.id),
@@ -123,6 +143,45 @@ export default async function ProjetDetailPage({
 
   const access = await canAccessChantierProject(session.user, id);
   if (!access.ok) notFound();
+
+  const [clientExtAccess, followUpClient] = await Promise.all([
+    prisma.projectAccess.findMany({
+      where: {
+        projectId: id,
+        user: { personType: "CLIENT_EXT", accessStatus: "ACTIVE" },
+      },
+      select: { user: { select: { name: true, company: true } } },
+      take: 5,
+    }),
+    prisma.followUpSheet.findFirst({
+      where: { projectId: id, NOT: { status: "AVENANT" } },
+      select: { clientName: true },
+      orderBy: { createdAt: "asc" },
+    }),
+  ]);
+
+  const headerParties = resolveChantierHeaderParties({
+    client: project.client
+      ? {
+          id: project.client.id,
+          name: project.client.name,
+          company: project.client.company,
+          personType: project.client.personType,
+          role: project.client.role,
+          accessStatus: project.client.accessStatus,
+        }
+      : null,
+    assignedTo: project.assignedTo,
+    internalManager: project.internalManager,
+    organizationName: project.organization?.name ?? null,
+    clientExtLabels: clientExtAccess.map(
+      (a) => a.user.company?.trim() || a.user.name?.trim() || "",
+    ),
+    followUpClientName: followUpClient?.clientName ?? null,
+  });
+
+  const safeReturnTo = sanitizeInternalReturnTo(returnToRaw, "/dashboard/projets");
+  const backLabel = contextBackLabelForHref(safeReturnTo, "Retour aux chantiers");
 
   await ensureChantierFolders(id);
 
@@ -329,10 +388,7 @@ export default async function ProjetDetailPage({
       : []),
   ].slice(0, 8);
 
-  const responsibleLabel =
-    project.assignedTo?.name ||
-    project.internalManager ||
-    null;
+  const responsibleLabel = headerParties.responsibleLabel;
 
   const contextCard = (
     <div className="rounded-xl border border-slate-200/90 bg-white p-4 sm:p-5">
@@ -557,7 +613,11 @@ export default async function ProjetDetailPage({
 
   return (
     <div className="space-y-5">
-      <BackLink href="/dashboard/projets">Retour aux chantiers</BackLink>
+      <ContextBackButton
+        label={backLabel}
+        fallbackHref="/dashboard/projets"
+        returnTo={returnToRaw}
+      />
 
       <header className="rounded-xl border border-slate-200/90 bg-white px-4 py-4 sm:px-5 sm:py-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -569,8 +629,10 @@ export default async function ProjetDetailPage({
               {project.title}
             </h1>
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
-              <span className="font-medium text-slate-800">{project.client.name}</span>
-              <span className="text-slate-300">·</span>
+              {headerParties.clientLabel ? (
+                <span className="font-medium text-slate-800">{headerParties.clientLabel}</span>
+              ) : null}
+              {headerParties.clientLabel ? <span className="text-slate-300">·</span> : null}
               {isStaff ? (
                 <ChantierStatusSelect projectId={project.id} value={project.chantierStatus} canEdit />
               ) : (
@@ -582,7 +644,8 @@ export default async function ProjetDetailPage({
                 <>
                   <span className="text-slate-300">·</span>
                   <span>
-                    Responsable : <strong className="font-semibold text-slate-900">{responsibleLabel}</strong>
+                    Responsable :{" "}
+                    <strong className="font-semibold text-slate-900">{responsibleLabel}</strong>
                   </span>
                 </>
               ) : null}

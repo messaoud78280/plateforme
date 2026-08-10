@@ -27,9 +27,12 @@ type ContextBackButtonProps = {
 };
 
 /**
- * NAVIGATION-RETOUR-V1 — Retour contextuel discret.
- * 1) onBack (état local) 2) historique navigateur fiable 3) returnTo / fallbackHref.
- * Ne remplace pas l’historique navigateur natif Back/Forward.
+ * NAVIGATION-RETOUR-V1.1 — Retour contextuel discret.
+ * 1) onBack (état local)
+ * 2) returnTo interne explicite → push (conserve deep-link conversation)
+ * 3) historique navigateur fiable
+ * 4) fallbackHref
+ * Ne remplace pas Back/Forward natifs (pas de replace()).
  */
 export function ContextBackButton({
   label,
@@ -44,6 +47,8 @@ export function ContextBackButton({
 
   const safeFallback = sanitizeInternalReturnTo(fallbackHref, "/dashboard");
   const targetHref = sanitizeInternalReturnTo(returnTo, safeFallback);
+  const hasExplicitReturnTo =
+    Boolean(returnTo?.trim()) && targetHref !== safeFallback;
   const displayLabel = label ?? contextBackLabelForHref(targetHref);
 
   function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
@@ -55,8 +60,12 @@ export function ContextBackButton({
       return;
     }
 
-    // Historique fiable uniquement si referrer dashboard interne
-    // (conserve filtres / scroll via history API du navigateur).
+    // returnTo explicite (ex. Messagerie → conversation) : push deep-link
+    if (hasExplicitReturnTo) {
+      router.push(targetHref);
+      return;
+    }
+
     if (canSafelyUseBrowserHistory()) {
       router.back();
       return;

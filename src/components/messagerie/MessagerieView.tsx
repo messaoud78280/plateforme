@@ -40,6 +40,10 @@ import {
   MessageForwardDialog,
   type ForwardDestOption,
 } from "@/components/messagerie/MessageForwardDialog";
+import {
+  messagerieReturnTo,
+  withReturnTo,
+} from "@/lib/navigation/safe-return-to";
 import { ContextBackButton } from "@/components/ui/ContextBackButton";
 import { resolveActiveChannelPresentation } from "@/lib/messagerie/resolve-active-channel-presentation";
 import {
@@ -1578,7 +1582,13 @@ export function MessagerieView({
 
               <div className="space-y-2 border-t border-slate-200 pt-4">
                 <Link
-                  href={`/dashboard/projets/${selectedProject.id}`}
+                  href={withReturnTo(
+                    `/dashboard/projets/${selectedProject.id}`,
+                    messagerieReturnTo({
+                      projectId: selectedProject.id,
+                      channelId: selectedChannelId || null,
+                    }),
+                  )}
                   className="block w-full rounded-lg border border-slate-300 bg-white py-2.5 text-center text-sm font-medium text-slate-700 hover:bg-slate-50"
                 >
                   Voir le chantier

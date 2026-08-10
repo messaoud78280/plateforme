@@ -61,6 +61,10 @@ import {
   maybeRedactReplyExcerpt,
   type MessageDeleteMode,
 } from "@/lib/messagerie/message-delete";
+import {
+  messagerieReturnTo,
+  withReturnTo,
+} from "@/lib/navigation/safe-return-to";
 import { ContextBackButton } from "@/components/ui/ContextBackButton";
 import { DEMO_PERSONAS } from "@/lib/demo-environment/personas";
 
@@ -3075,21 +3079,34 @@ export function MessagerieMissionsView({
                     </button>
                     {selectedMission.projectId ? (
                       <Link
-                        href={`/dashboard/projets/${selectedMission.projectId}`}
+                        href={withReturnTo(
+                          `/dashboard/projets/${selectedMission.projectId}`,
+                          messagerieReturnTo({ taskId: selectedTaskId }),
+                        )}
                         className="block px-3 py-2 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
                         onClick={() => setHeaderMenuOpen(false)}
                       >
                         Voir le chantier
                       </Link>
                     ) : null}
-                    <div className="border-t border-[#f0f2f5] px-2 py-1">
+                    <div className="border-t border-[#f0f2f5] px-1 py-1">
                       <ConversationDossierPanel
                         taskId={selectedTaskId}
                         projectId={selectedMission.projectId}
+                        returnTo={messagerieReturnTo({ taskId: selectedTaskId })}
                       />
                     </div>
-                    <div className="border-t border-[#f0f2f5] px-2 py-1">
-                      <DeleteTaskButton taskId={selectedTaskId} />
+                    <div className="border-t border-[#f0f2f5] px-1 py-1">
+                      <DeleteTaskButton
+                        taskId={selectedTaskId}
+                        variant="menu"
+                        confirmText="Supprimer cette mission ? Cette opération est irréversible."
+                        onDeleted={() => {
+                          setHeaderMenuOpen(false);
+                          setSelectedTaskId("");
+                          setMissions((prev) => prev.filter((m) => m.id !== selectedTaskId));
+                        }}
+                      />
                     </div>
                   </div>
                 ) : null}

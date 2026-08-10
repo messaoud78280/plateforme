@@ -7,6 +7,8 @@ type Props = {
   taskId: string;
   className?: string;
   size?: "sm" | "md";
+  /** menu = libellé destructif explicite (Messagerie •••). */
+  variant?: "icon" | "menu";
   confirmText?: string;
   onDeleted?: () => void;
 };
@@ -15,6 +17,7 @@ export function DeleteTaskButton({
   taskId,
   className = "",
   size = "sm",
+  variant = "icon",
   confirmText = "Supprimer cette mission ? Cette opération est irréversible.",
   onDeleted,
 }: Props) {
@@ -39,6 +42,19 @@ export function DeleteTaskButton({
     }
   }
 
+  if (variant === "menu") {
+    return (
+      <button
+        type="button"
+        onClick={handleDelete}
+        disabled={loading}
+        className={`block w-full px-3 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 ${className}`}
+      >
+        {loading ? "Suppression…" : "Supprimer la mission"}
+      </button>
+    );
+  }
+
   const pad = size === "md" ? "px-3 py-2" : "px-2.5 py-2";
   const icon = size === "md" ? "h-4 w-4" : "h-4 w-4";
 
@@ -48,8 +64,8 @@ export function DeleteTaskButton({
       onClick={handleDelete}
       disabled={loading}
       className={`inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white ${pad} text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-800 disabled:opacity-50 ${className}`}
-      title="Supprimer"
-      aria-label="Supprimer"
+      title="Supprimer la mission"
+      aria-label="Supprimer la mission"
     >
       <svg className={icon} viewBox="0 0 24 24" fill="none" aria-hidden>
         <path

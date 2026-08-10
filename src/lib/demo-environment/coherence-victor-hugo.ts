@@ -72,6 +72,23 @@ export async function ensureVictorHugoCoherence(opts: {
         internalManager: karim.name ?? "Karim Benali",
       },
     });
+  } else {
+    // Si assignedTo pointe encore vers un CLIENT_EXT → retirer
+    const current = await prisma.project.findUnique({
+      where: { id: project.id },
+      select: {
+        assignedTo: { select: { id: true, personType: true, name: true } },
+      },
+    });
+    if (current?.assignedTo?.personType === "CLIENT_EXT") {
+      await prisma.project.update({
+        where: { id: project.id },
+        data: {
+          assignedToId: null,
+          internalManager: karim?.name ?? "Karim Benali",
+        },
+      });
+    }
   }
 
   const assigneeId = karim?.id ?? opts.rootUserId;

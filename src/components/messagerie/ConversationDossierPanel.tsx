@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { withReturnTo } from "@/lib/navigation/safe-return-to";
 
 type Ctx = {
   project: { id: string; title: string } | null;
@@ -47,9 +48,11 @@ function fmt(iso: string | null) {
 export function ConversationDossierPanel({
   taskId,
   projectId,
+  returnTo,
 }: {
   taskId: string;
   projectId?: string | null;
+  returnTo?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const [ctx, setCtx] = useState<Ctx | null>(null);
@@ -68,38 +71,37 @@ export function ConversationDossierPanel({
   const eventCount = ctx?.events.length ?? 0;
   const pendingCount = ctx?.pending.length ?? 0;
   const total = todoCount + pendingCount;
+  const chantierId = projectId || ctx?.project?.id;
+  const chantierHref = chantierId
+    ? withReturnTo(`/dashboard/projets/${chantierId}`, returnTo)
+    : null;
 
   return (
     <div className="relative">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-        title="Dossier conversation"
+        className="w-full rounded-lg px-3 py-2 text-left text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+        title="Actions et suivis liés à cette conversation"
       >
-        Dossier
-        {total > 0 ? (
-          <span className="ml-1.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
-            {total}
-          </span>
-        ) : null}
+        {total > 0 ? `Suivi lié (${total})` : "Suivi lié"}
       </button>
 
       {open ? (
         <div className="absolute right-0 z-40 mt-2 w-80 max-h-[70vh] overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
-              Dossier chantier
+              Suivi chantier
             </p>
             <button type="button" onClick={() => setOpen(false)} className="text-xs text-slate-400">
               Fermer
             </button>
           </div>
 
-          {projectId || ctx?.project ? (
+          {chantierHref ? (
             <div className="mb-3 flex flex-wrap gap-1.5">
               <Link
-                href={`/dashboard/projets/${projectId || ctx?.project?.id}`}
+                href={chantierHref}
                 className="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-700 hover:bg-slate-200"
               >
                 Chantier

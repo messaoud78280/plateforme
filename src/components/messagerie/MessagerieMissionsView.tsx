@@ -401,6 +401,7 @@ export function MessagerieMissionsView({
   const [directContent, setDirectContent] = useState("");
   const [sendingDirect, setSendingDirect] = useState(false);
   const [directAttemptedSend, setDirectAttemptedSend] = useState(false);
+  const [directSendError, setDirectSendError] = useState<string | null>(null);
   const [directMessages, setDirectMessages] = useState<DirectMessageItem[]>([]);
   const [directThreadMessages, setDirectThreadMessages] = useState<DirectMessageItem[]>([]);
   const [loadingDirectMessages, setLoadingDirectMessages] = useState(false);
@@ -1181,13 +1182,13 @@ export function MessagerieMissionsView({
         setDirectThreadMessages((prev) => prev.filter((m) => m.id !== tempId));
         setReplyDirectContent(content);
         setReplyAttachments(attachments);
-        alert(data?.error ?? "Échec de l’envoi — réessayez");
+        setDirectSendError(data?.error ?? "Échec de l’envoi — réessayez");
       }
     } catch {
       setDirectThreadMessages((prev) => prev.filter((m) => m.id !== tempId));
       setReplyDirectContent(content);
       setReplyAttachments(attachments);
-      alert("Erreur réseau — réessayez");
+      setDirectSendError("Erreur réseau — réessayez");
     } finally {
       setSendingReply(false);
       sendLockRef.current = false;
@@ -1201,6 +1202,8 @@ export function MessagerieMissionsView({
     const hasAttachments = directAttachments.length > 0;
     if ((!hasContent && !hasAttachments) || !directRecipientId || sendingDirect) return;
 
+    setDirectAttemptedSend(true);
+    setDirectSendError(null);
     setSendingDirect(true);
     try {
       const res = await fetch("/api/messages/direct", {
@@ -1218,14 +1221,21 @@ export function MessagerieMissionsView({
         setDirectContent("");
         setDirectRecipientId("");
         setDirectAttachments([]);
+        setDirectSendError(null);
         setFilter("messages-directs");
         setSelectedDirectContactId(recipientId);
         const list = await refreshDirectIndex();
         setDirectMessages(list);
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err?.error ?? "Erreur lors de l'envoi");
+        setDirectSendError(
+          typeof err?.error === "string" && err.error.trim()
+            ? err.error
+            : "Impossible d’envoyer ce message. Ce destinataire n’est plus disponible.",
+        );
       }
+    } catch {
+      setDirectSendError("Erreur réseau — réessayez.");
     } finally {
       setSendingDirect(false);
     }
@@ -1664,6 +1674,7 @@ export function MessagerieMissionsView({
                           onClick={() => {
                             setDirectRecipientId(r.id);
                             setDirectAttemptedSend(false);
+                            setDirectSendError(null);
                             // Conversation existante → ouvrir le fil directement
                             const existing = directConversations.find((c) => c.user.id === r.id);
                             if (existing?.lastMessage) {
@@ -1701,6 +1712,14 @@ export function MessagerieMissionsView({
               </ul>
               {directAttemptedSend && !directRecipientId ? (
                 <p className="mt-2 text-xs text-red-600">Choisissez un destinataire pour envoyer.</p>
+              ) : null}
+              {directSendError ? (
+                <p
+                  role="alert"
+                  className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-800"
+                >
+                  {directSendError}
+                </p>
               ) : null}
             </div>
             {directRecipientId ? (
@@ -1775,6 +1794,14 @@ export function MessagerieMissionsView({
               >
                 {sendingDirect ? "Envoi…" : "Envoyer"}
               </button>
+              {directSendError ? (
+                <p
+                  role="alert"
+                  className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-800"
+                >
+                  {directSendError}
+                </p>
+              ) : null}
             </div>
             ) : null}
           </form>

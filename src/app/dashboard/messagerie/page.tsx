@@ -10,6 +10,11 @@ import {
   DEMO_STAFF_CONTACTS,
   isDemoStaffHiddenFromMessaging,
 } from "@/lib/demo-environment/demo-staff-names";
+import {
+  evaluateDirectMessageAcl,
+  isMessagingAccessActive,
+  type DirectAclUser,
+} from "@/lib/messaging/direct-acl";
 
 export type MessagerieRecipient = {
   id: string;
@@ -31,7 +36,14 @@ function toRecipient(u: {
   personType: string | null;
   permissionProfile: string | null;
   company: string | null;
-  externalOrganization?: { type: string; name: string; tradeName: string | null } | null;
+  accessStatus?: string | null;
+  organizationMemberships?: { organizationId: string }[];
+  externalOrganization?: {
+    type: string;
+    name: string;
+    tradeName: string | null;
+    hostOrganizationId?: string | null;
+  } | null;
 }): MessagerieRecipient {
   const party = resolveMessagingPartyType({
     personType: u.personType,
@@ -63,6 +75,28 @@ function toRecipient(u: {
   };
 }
 
+function toAclUser(u: {
+  id: string;
+  role: string;
+  personType: string | null;
+  permissionProfile: string | null;
+  accessStatus?: string | null;
+  email?: string | null;
+  organizationMemberships?: { organizationId: string }[];
+  externalOrganization?: { hostOrganizationId?: string | null } | null;
+}): DirectAclUser {
+  return {
+    id: u.id,
+    role: u.role,
+    personType: u.personType,
+    permissionProfile: u.permissionProfile,
+    accessStatus: u.accessStatus ?? null,
+    email: u.email ?? null,
+    organizationIds: (u.organizationMemberships ?? []).map((m) => m.organizationId),
+    externalHostOrganizationId: u.externalOrganization?.hostOrganizationId ?? null,
+  };
+}
+
 const USER_SELECT = {
   id: true,
   name: true,
@@ -71,8 +105,22 @@ const USER_SELECT = {
   personType: true,
   permissionProfile: true,
   company: true,
-  externalOrganization: { select: { type: true, name: true, tradeName: true } },
+  accessStatus: true,
+  organizationMemberships: { select: { organizationId: true } },
+  externalOrganization: {
+    select: { type: true, name: true, tradeName: true, hostOrganizationId: true },
+  },
 } as const;
+
+function keepIfMessageable(
+  sender: DirectAclUser,
+  raw: Parameters<typeof toRecipient>[0],
+): MessagerieRecipient | null {
+  if (!isMessagingAccessActive(raw.accessStatus)) return null;
+  const acl = evaluateDirectMessageAcl(sender, toAclUser(raw), { taskLinked: false });
+  if (!acl.ok) return null;
+  return toRecipient(raw);
+}
 
 export default async function MessageriePage() {
   const session = await getCachedServerSession();
@@ -94,10 +142,14 @@ export default async function MessageriePage() {
     const me = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: {
+        id: true,
+        role: true,
         personType: true,
         permissionProfile: true,
+        accessStatus: true,
         email: true,
-        organizationMemberships: { select: { organizationId: true }, take: 1 },
+        organizationMemberships: { select: { organizationId: true } },
+        externalOrganization: { select: { hostOrganizationId: true } },
       },
     });
     personType = me?.personType ?? session.user.personType ?? null;
@@ -109,10 +161,16 @@ export default async function MessageriePage() {
       ["DIRECTION", "CONDUCTEUR", "ADMINISTRATIF", "CHEF_CHANTIER"].includes(
         me?.permissionProfile ?? "",
       );
+    const senderAcl: DirectAclUser | null = me
+      ? toAclUser({
+          ...me,
+          role: me.role ?? session.user.role ?? "CLIENT",
+        })
+      : null;
 
     if (isManager || isAgent || (isClient && meInternal)) {
       // Pair internes + externes liés à l’organisation (personas démo incluses).
-      if (orgId) {
+      if (orgId && senderAcl) {
         const members = await prisma.organizationMember.findMany({
           where: { organizationId: orgId },
           select: { user: { select: USER_SELECT } },
@@ -120,12 +178,12 @@ export default async function MessageriePage() {
         const byId = new Map<string, MessagerieRecipient>();
         for (const m of members) {
           if (!m.user || m.user.id === session.user.id) continue;
-          // Laura Bernard (legacy) masquée — Lefèvre / Adjaili OK si présents.
           if (isDemoSession && isDemoStaffHiddenFromMessaging(m.user.email)) continue;
-          byId.set(m.user.id, toRecipient(m.user));
+          const rec = keepIfMessageable(senderAcl, m.user);
+          if (rec) byId.set(rec.id, rec);
         }
 
-        // Externes Point.P / ABC Promotion via ProjectAccess sur chantiers de l’org
+        // Externes Point.P / syndic via ProjectAccess / ExternalOrganization host
         const externals = await prisma.user.findMany({
           where: {
             personType: { in: ["CLIENT_EXT", "SUPPLIER", "SUBCONTRACTOR"] },
@@ -143,10 +201,11 @@ export default async function MessageriePage() {
         });
         for (const u of externals) {
           if (u.id === session.user.id) continue;
-          byId.set(u.id, toRecipient(u));
+          const rec = keepIfMessageable(senderAcl, u);
+          if (rec) byId.set(rec.id, rec);
         }
 
-        // Staff démo visibles (Sophie Lefèvre, Karim Adjaili) — hors org, pour Contacts.
+        // Staff démo visibles (Sophie Lefèvre, Karim Adjaili) — hors org, filtrés par ACL.
         if (isDemoSession) {
           const visibleStaffEmails = DEMO_STAFF_CONTACTS.filter((c) => c.showInDemoMessaging).map(
             (c) => c.email,
@@ -158,7 +217,9 @@ export default async function MessageriePage() {
             });
             for (const u of staffUsers) {
               if (u.id === session.user.id) continue;
-              byId.set(u.id, toRecipient(u));
+              if (isDemoStaffHiddenFromMessaging(u.email)) continue;
+              const rec = keepIfMessageable(senderAcl, u);
+              if (rec) byId.set(rec.id, rec);
             }
           }
         }

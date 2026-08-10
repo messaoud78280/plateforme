@@ -9,6 +9,7 @@ import {
   isManagerRole,
   isStaffAgent,
 } from "@/lib/messaging/access";
+import { canDirectMessageUser } from "@/lib/messaging/direct-acl";
 import { broadcastMessagerieToUser } from "@/lib/messagerie/broadcast";
 import { ttlInvalidatePrefix } from "@/lib/perf/ttl-cache";
 import { formatMediaPreview, type MsgAttachment } from "@/lib/messagerie/media-preview";
@@ -133,6 +134,7 @@ export async function POST(request: Request) {
         id: receiverId,
         role: { in: ["AGENCE", "AGENT", "MANAGER", "CLIENT"] },
       },
+      select: { id: true, name: true },
     });
 
     if (!receiver || receiver.id === session.user.id) {
@@ -142,25 +144,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Client : uniquement vers agent / gérant lié à ses missions
-    if (session.user.role === "CLIENT") {
-      if (!["AGENCE", "AGENT", "MANAGER"].includes(receiver.role)) {
-        return NextResponse.json({ error: "Destinataire non autorisé." }, { status: 403 });
-      }
-      const linked = await prisma.task.findFirst({
-        where: {
-          clientId: session.user.id,
-          OR: [{ assignedToId: receiver.id }, { createdById: receiver.id }],
-        },
-        select: { id: true },
-      });
-      const isManager = receiver.role === "MANAGER";
-      if (!linked && !isManager) {
-        return NextResponse.json(
-          { error: "Ce contact n’est pas lié à vos missions." },
-          { status: 403 },
-        );
-      }
+    const acl = await canDirectMessageUser(session.user.id, receiver.id);
+    if (!acl.ok) {
+      return NextResponse.json({ error: acl.error }, { status: acl.status });
     }
 
     let payloadJson: Record<string, unknown> | undefined;

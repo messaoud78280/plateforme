@@ -82,7 +82,6 @@ export function resolveConversationHref(ctx: ConversationContext): string {
     }
     case "direct": {
       const q = new URLSearchParams({
-        tab: "messages-directs",
         with: ctx.userId,
       });
       if (ctx.messageId) q.set("messageId", ctx.messageId);

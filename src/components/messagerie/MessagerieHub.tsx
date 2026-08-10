@@ -64,7 +64,7 @@ export function MessagerieHub(props: Props) {
               : "bg-slate-100 text-slate-600 hover:bg-slate-200"
           }`}
         >
-          Conversations
+          Discussions
         </button>
         <button
           type="button"
@@ -74,7 +74,7 @@ export function MessagerieHub(props: Props) {
               ? "bg-[#1e3a5f] text-white"
               : "bg-slate-100 text-slate-600 hover:bg-slate-200"
           }`}
-          title="Filtrer les fils par chantier (Interne · Client · Fournisseur)"
+          title="Canaux par chantier"
         >
           Par chantier
         </button>

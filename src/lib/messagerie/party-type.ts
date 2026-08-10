@@ -113,26 +113,14 @@ function fromChannel(channel: string | null | undefined): MessagingPartyType | n
   return null;
 }
 
-function fromTaskCategory(category: string | null | undefined): MessagingPartyType | null {
-  if (!category) return null;
-  const c = category.toLowerCase();
-  if (c.includes("bon de commande") || c.includes("fournisseur") || c.includes("livraison")) {
-    return "SUPPLIER";
-  }
+function fromTaskCategory(_category: string | null | undefined): MessagingPartyType | null {
+  // V2C.7 — le sujet / catégorie d’une tâche NE définit PAS le périmètre de lecture.
+  // Ex. « Relancer Point.P » entre salariés = INTERNE si aucun fournisseur participant.
   return null;
 }
 
-function fromTitleHint(title: string | null | undefined): MessagingPartyType | null {
-  if (!title) return null;
-  const t = title.toLowerCase();
-  if (
-    t.includes("point.p") ||
-    t.includes("pointp") ||
-    t.includes("fournisseur") ||
-    /\bbc-?\d/i.test(title)
-  ) {
-    return "SUPPLIER";
-  }
+function fromTitleHint(_title: string | null | undefined): MessagingPartyType | null {
+  // V2C.7 — idem : le titre ne transforme pas une conversation en « Fournisseur · Externe ».
   return null;
 }
 
@@ -151,8 +139,8 @@ function fromLegacyRole(role: string | null | undefined): MessagingPartyType | n
 
 /**
  * Résout le type d’interlocuteur / conversation pour l’UI Messagerie.
- * Priorité : channel → personType → externalOrg → taskCategory → title → legacyRole.
- * Sans signal fiable → INTERNAL uniquement si permissionProfile interne connu, sinon PARTNER (externe neutre).
+ * Priorité : channel → personType → externalOrg → legacyRole / profil.
+ * V2C.7 : taskCategory / titleHint ne définissent plus le périmètre (qui peut lire).
  */
 export function resolveMessagingPartyType(
   input: ResolveMessagingPartyInput,
@@ -166,11 +154,7 @@ export function resolveMessagingPartyType(
   const byOrg = fromExternalOrgType(input.externalOrgType);
   if (byOrg) return LABELS[byOrg];
 
-  const byCat = fromTaskCategory(input.taskCategory);
-  if (byCat) return LABELS[byCat];
-
-  const byTitle = fromTitleHint(input.titleHint);
-  if (byTitle) return LABELS[byTitle];
+  // category / title volontairement ignorés (périmètre ≠ sujet)
 
   const profile = (input.permissionProfile ?? "").toUpperCase();
   if (

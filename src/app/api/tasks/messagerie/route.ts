@@ -37,8 +37,9 @@ export async function GET(request: NextRequest) {
     const tasks = await prisma.task.findMany({
       where: taskWhere,
       include: {
-        client: { select: { id: true, name: true } },
+        client: { select: { id: true, name: true, personType: true } },
         assignedTo: { select: { id: true, name: true } },
+        project: { select: { id: true, title: true } },
         taskMessages: {
           where: taskMessageVisibilityRelationWhere(session.user),
           orderBy: { createdAt: "desc" },
@@ -70,6 +71,7 @@ export async function GET(request: NextRequest) {
       category: (t as { category?: string | null }).category ?? null,
       priority: (t as { priority?: string | null }).priority ?? null,
       projectId: t.projectId ?? null,
+      projectName: t.project?.title ?? null,
       client: t.client,
       assignedTo: t.assignedTo,
       lastMessage: t.taskMessages[0]
@@ -77,6 +79,7 @@ export async function GET(request: NextRequest) {
             id: t.taskMessages[0].id,
             content: t.taskMessages[0].content,
             createdAt: t.taskMessages[0].createdAt,
+            isInternal: Boolean(t.taskMessages[0].isInternal),
             sender: t.taskMessages[0].sender,
           }
         : null,

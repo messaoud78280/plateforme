@@ -2,7 +2,15 @@
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
     "buildCommand": "npm run build",
-    "watchPatterns": ["src/**", "prisma/**", "package.json", "package-lock.json"]
+    "watchPatterns": [
+      "src/**",
+      "prisma/**",
+      "package.json",
+      "package-lock.json",
+      "next.config.ts",
+      "railpack.json",
+      "scripts/build-production.sh"
+    ]
   },
   "deploy": {
     "healthcheckPath": "/api/health",

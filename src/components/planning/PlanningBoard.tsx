@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * PLANNING-V2B — vue ressources.
+ * Board = collaborateurs planifiables × période, enrichi par AgendaEvent (source unique).
+ * Amélioration CORE volontaire (correcte pour toute plateforme) — pas de wording SETRIM.
+ */
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { AgendaEventDTO } from "@/components/agenda/agenda-types";
@@ -22,7 +27,6 @@ import {
   isDragBlocked,
   isResourceFreeOnDay,
   listEventConflicts,
-  nextAssignmentAfter,
   planningBlockLabel,
   planningPeriodLabel,
   planningRoleLabel,
@@ -106,15 +110,17 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
   );
 
   const resources: PlanningResource[] = useMemo(() => {
-    return teamUsers.map((u) => ({
-      id: u.id,
-      name: u.name || u.email,
-      email: u.email,
-      jobTitle: u.jobTitle,
-      permissionProfile: u.permissionProfile,
-      personType: u.personType,
-      kind: "person" as const,
-    }));
+    return teamUsers
+      .map((u) => ({
+        id: u.id,
+        name: u.name || u.email,
+        email: u.email,
+        jobTitle: u.jobTitle,
+        permissionProfile: u.permissionProfile,
+        personType: u.personType,
+        kind: "person" as const,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" }));
   }, [teamUsers]);
 
   const load = useCallback(async () => {
@@ -224,11 +230,6 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
     () => planningSummary(filteredEvents, resources, from, to),
     [filteredEvents, resources, from, to],
   );
-
-  const nextEvt = useMemo(() => {
-    if (filteredEvents.length > 0) return null;
-    return nextAssignmentAfter(events, to);
-  }, [filteredEvents.length, events, to]);
 
   const selected = events.find((e) => e.id === selectedId) ?? null;
   const conflictEvt = events.find((e) => e.id === conflictFocusId) ?? null;
@@ -373,11 +374,16 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
               </h1>
               <span className="rounded-md bg-[#1e3a5f]/10 px-2 py-0.5 text-xs font-bold text-[#1e3a5f]">
                 {isoWeekLabel(weekStart)}
+                {" · "}
+                {summary.collaborators} collaborateur
+                {summary.collaborators > 1 ? "s" : ""}
               </span>
             </div>
-            <p className="mt-0.5 text-sm text-slate-600">{period.rangeLabel}</p>
+            {period.rangeLabel ? (
+              <p className="mt-0.5 text-sm text-slate-600">{period.rangeLabel}</p>
+            ) : null}
             <p className="mt-1 text-xs font-medium text-slate-500">
-              Qui est où · Qui est disponible
+              Qui est affecté · Ce qui reste à organiser
             </p>
           </div>
 
@@ -458,22 +464,30 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
               </button>
             </div>
 
-            <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
-              {([5, 6, 7] as const).map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  title={n === 5 ? "Lun–Ven" : n === 6 ? "Lun–Sam" : "Lun–Dim"}
-                  onClick={() => applyWorkDays(n)}
-                  className={cn(
-                    "rounded-md px-2 py-1.5 text-[11px] font-bold",
-                    workDays === n ? "bg-white text-[#1e3a5f] shadow-sm" : "text-slate-500",
-                  )}
-                >
-                  {n}j
-                </button>
-              ))}
-            </div>
+            {view !== "day" ? (
+              <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+                {(
+                  [
+                    [5, "5 jours · lun–ven"],
+                    [6, "6 jours · lun–sam"],
+                    [7, "7 jours · lun–dim"],
+                  ] as const
+                ).map(([n, tip]) => (
+                  <button
+                    key={n}
+                    type="button"
+                    title={tip}
+                    onClick={() => applyWorkDays(n)}
+                    className={cn(
+                      "rounded-md px-2 py-1.5 text-[11px] font-bold",
+                      workDays === n ? "bg-white text-[#1e3a5f] shadow-sm" : "text-slate-500",
+                    )}
+                  >
+                    {n}j
+                  </button>
+                ))}
+              </div>
+            ) : null}
 
             <button
               type="button"
@@ -486,6 +500,19 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
               )}
             >
               Filtres
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                setCreateDraft({
+                  day: startOfDay(cursor),
+                  resourceId: resources[0]?.id ?? "__unassigned",
+                })
+              }
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50"
+            >
+              + Planifier une intervention
             </button>
 
             <Link
@@ -529,7 +556,7 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
                 checked={filterAvailableOnly}
                 onChange={(e) => setFilterAvailableOnly(e.target.checked)}
               />
-              Disponibles
+              Sans affectation
             </label>
             <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">
               <input
@@ -544,18 +571,23 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
 
         <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
           <SummaryChip label="Collaborateurs" value={summary.collaborators} />
-          <SummaryChip label="Chantiers" value={summary.sites} />
+          <SummaryChip
+            label={summary.sites === 1 ? "chantier planifié" : "chantiers planifiés"}
+            value={summary.sites}
+          />
           <SummaryChip label="Affectations" value={summary.assignments} />
           <SummaryChip
             label="Conflits"
             value={summary.conflicts}
             accent={summary.conflicts > 0 ? "danger" : undefined}
           />
-          <SummaryChip
-            label="À affecter"
-            value={summary.unassigned}
-            accent={summary.unassigned > 0 ? "warn" : undefined}
-          />
+          {summary.unassigned > 0 ? (
+            <SummaryChip
+              label="Sans responsable"
+              value={summary.unassigned}
+              accent="warn"
+            />
+          ) : null}
         </div>
       </header>
 
@@ -581,7 +613,7 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
         <section className="rounded-2xl border border-amber-200/80 bg-amber-50/60 px-4 py-3">
           <div className="mb-2 flex items-center justify-between gap-2">
             <h2 className="text-xs font-extrabold uppercase tracking-wide text-amber-950">
-              À affecter
+              Sans responsable
             </h2>
             <span className="rounded-full bg-amber-200/80 px-2 py-0.5 text-[11px] font-bold text-amber-950">
               {unassigned.length}
@@ -614,10 +646,10 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
         </section>
       ) : null}
 
-      {/* Mobile */}
+      {/* Mobile — liste collaborateurs toujours visible */}
       <div className="lg:hidden">
         <MobileDayPeople
-          day={view === "day" ? startOfDay(cursor) : startOfDay(new Date())}
+          day={startOfDay(cursor)}
           resources={visibleResources}
           events={filteredEvents}
           allEvents={events}
@@ -628,22 +660,17 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
         />
       </div>
 
-      {/* Desktop */}
+      {emptyPeriod && !loading ? (
+        <p className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-center text-xs font-medium text-slate-600">
+          Aucune affectation planifiée{" "}
+          {view === "day" ? "ce jour" : "cette période"}.
+        </p>
+      ) : null}
+
+      {/* Desktop — board = collaborateurs × période, enrichi par AgendaEvent */}
       <div className="hidden min-h-0 flex-1 overflow-auto rounded-2xl border border-slate-200/90 bg-white shadow-sm lg:block">
         {loading ? (
           <p className="p-10 text-center text-sm text-slate-500">Chargement du planning…</p>
-        ) : emptyPeriod ? (
-          <EmptyPlanningState
-            collaborators={resources.length}
-            nextEvt={nextEvt}
-            onNextWeek={() => shift(1)}
-            onCreate={() =>
-              setCreateDraft({
-                day: startOfDay(new Date()),
-                resourceId: resources[0]?.id ?? "__unassigned",
-              })
-            }
-          />
         ) : view === "day" ? (
             <DayHourGrid
               day={startOfDay(cursor)}
@@ -718,13 +745,13 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
                             <button
                               type="button"
                               onClick={() => setCreateDraft({ day: d, resourceId: r.id })}
-                              className="flex h-full min-h-[3.5rem] flex-col items-start justify-center rounded-lg border border-dashed border-slate-200/90 bg-emerald-50/30 px-2 py-1.5 text-left transition hover:border-[#1e3a5f]/40 hover:bg-emerald-50/60"
-                              title="Disponible — cliquer pour affecter"
+                              className="flex h-full min-h-[3.5rem] flex-col items-start justify-center rounded-lg border border-dashed border-slate-200/90 bg-slate-50/50 px-2 py-1.5 text-left transition hover:border-[#1e3a5f]/40 hover:bg-slate-50"
+                              title="Aucune affectation planifiée — cliquer pour affecter"
                             >
-                              <span className="text-[10px] font-bold uppercase tracking-wide text-emerald-800/70">
-                                Disponible
+                              <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                                Sans affectation
                               </span>
-                              <span className="text-[10px] font-semibold text-slate-400">
+                              <span className="text-[10px] font-semibold text-[#1e3a5f]">
                                 + Affecter
                               </span>
                             </button>
@@ -980,9 +1007,12 @@ function DayHourGrid({
                 <button
                   type="button"
                   onClick={() => onCreate(r.id)}
-                  className="absolute inset-1 flex items-center justify-center rounded-lg border border-dashed border-emerald-200/80 bg-emerald-50/40 text-[10px] font-bold uppercase text-emerald-800/70"
+                  className="absolute inset-x-1 top-1 z-10 flex flex-col items-start gap-0.5 rounded-lg border border-dashed border-slate-200 bg-white/95 px-2 py-2 text-left shadow-sm hover:border-[#1e3a5f]/40"
                 >
-                  Disponible
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                    Aucune affectation planifiée
+                  </span>
+                  <span className="text-[11px] font-bold text-[#1e3a5f]">+ Affecter</span>
                 </button>
               ) : (
                 cell.map((e) => {
@@ -1083,9 +1113,12 @@ function MobileDayPeople({
                   <button
                     type="button"
                     onClick={() => onCreate(r.id, day)}
-                    className="w-full rounded-lg border border-dashed border-emerald-200 bg-emerald-50/50 px-2 py-2 text-left text-xs font-bold text-emerald-800"
+                    className="w-full rounded-lg border border-dashed border-slate-200 bg-slate-50/80 px-2 py-2 text-left text-xs font-medium text-slate-600"
                   >
-                    Disponible · + Affecter
+                    <span className="block font-semibold text-slate-500">
+                      Aucune affectation planifiée
+                    </span>
+                    <span className="font-bold text-[#1e3a5f]">+ Affecter</span>
                   </button>
                 ) : (
                   cell.map((e) => {
@@ -1125,64 +1158,6 @@ function MobileDayPeople({
           );
         })}
       </ul>
-    </div>
-  );
-}
-
-function EmptyPlanningState({
-  collaborators,
-  nextEvt,
-  onNextWeek,
-  onCreate,
-}: {
-  collaborators: number;
-  nextEvt: AgendaEventDTO | null;
-  onNextWeek: () => void;
-  onCreate: () => void;
-}) {
-  const nextLabel = nextEvt ? planningBlockLabel(nextEvt) : null;
-  return (
-    <div className="flex flex-col items-center px-6 py-14 text-center">
-      <p className="text-base font-extrabold text-slate-900">Aucune affectation cette période</p>
-      <p className="mt-1 text-sm text-slate-600">
-        {collaborators} collaborateur{collaborators > 1 ? "s" : ""} disponible
-        {collaborators > 1 ? "s" : ""}
-      </p>
-      <div className="mt-5 flex flex-wrap justify-center gap-2">
-        <button
-          type="button"
-          onClick={onCreate}
-          className="rounded-lg bg-[#1e3a5f] px-4 py-2 text-xs font-bold text-white"
-        >
-          + Planifier une intervention
-        </button>
-        <button
-          type="button"
-          onClick={onNextWeek}
-          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700"
-        >
-          Voir la période suivante
-        </button>
-      </div>
-      {nextEvt && nextLabel ? (
-        <p className="mt-6 text-xs text-slate-500">
-          Prochaine affectation :{" "}
-          <span className="font-bold text-slate-800">
-            {nextEvt.responsible?.name?.split(" ")[0]} · {nextLabel.site} ·{" "}
-            {new Date(nextEvt.startAt).toLocaleDateString("fr-FR", {
-              weekday: "long",
-              day: "numeric",
-              month: "short",
-            })}
-          </span>{" "}
-          <Link
-            href={eventHref(nextEvt)}
-            className="font-bold text-[#1e3a5f] underline"
-          >
-            Voir
-          </Link>
-        </p>
-      ) : null}
     </div>
   );
 }

@@ -75,9 +75,11 @@ export function planningRoleLabel(u: {
     case "DIRECTION":
       return "Direction";
     case "CONDUCTEUR":
-      return "Conducteur";
+      return "Conducteur de travaux";
     case "ADMINISTRATIF":
-      return "Administratif";
+      return "Responsable administratif";
+    case "CHEF_CHANTIER":
+      return "Chef de chantier";
     default:
       break;
   }
@@ -204,12 +206,14 @@ export function planningPeriodLabel(
   const weekStart = startOfWeek(cursor);
   const weekLabel = `Semaine ${isoWeekNumber(weekStart)}`;
   if (mode === "day") {
-    const title = cursor.toLocaleDateString("fr-FR", {
+    const raw = cursor.toLocaleDateString("fr-FR", {
       weekday: "long",
       day: "numeric",
       month: "long",
     });
-    return { weekLabel, rangeLabel: title, title };
+    const title = raw.charAt(0).toUpperCase() + raw.slice(1);
+    // rangeLabel vide en jour → évite le doublon title / sous-titre (PLANNING-V2B)
+    return { weekLabel, rangeLabel: "", title };
   }
   const first = days[0] ?? weekStart;
   const last = days[days.length - 1] ?? first;
@@ -224,7 +228,10 @@ export function planningPeriodLabel(
   return { weekLabel, rangeLabel, title };
 }
 
-/** Ressource libre toute la journée (aucun créneau). */
+/**
+ * Aucune affectation planifiée ce jour (≠ disponibilité réelle).
+ * Pas de congés / absences / horaires — voir dette Planning Availability V2.
+ */
 export function isResourceFreeOnDay(
   events: AgendaEventDTO[],
   resourceId: string,
@@ -233,6 +240,9 @@ export function isResourceFreeOnDay(
   if (resourceId === "__unassigned") return false;
   return eventsForResourceOnDay(events, resourceId, day).length === 0;
 }
+
+/** Alias explicite — wording UI : « Sans affectation », jamais « Disponible ». */
+export const resourceHasNoAssignmentOnDay = isResourceFreeOnDay;
 
 export function unassignedEventsInRange(
   events: AgendaEventDTO[],

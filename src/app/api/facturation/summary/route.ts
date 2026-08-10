@@ -33,5 +33,6 @@ export async function GET() {
     attention: snap.totals.attention,
     aFacturer: snap.totals.aFacturer,
     enRetard: snap.totals.enRetard,
+    aSurveiller: snap.totals.aSurveiller,
   });
 }

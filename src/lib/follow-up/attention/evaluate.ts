@@ -142,6 +142,24 @@ function ruleStepStale(
   };
 }
 
+/**
+ * Policy facturation V1A.2 — progressive, CRITIQUE rare.
+ * Plancher : même si WorkflowStep est trop agressif (ex. escalate = 2×delay),
+ * on n’escalade pas avant ces seuils.
+ *
+ * < delay     → pas encore BILLING_PENDING (juste « à facturer » dans le suivi)
+ * delay→orange → A_SURVEILLER
+ * orange→red   → IMPORTANT
+ * red→escalate → URGENT (= en retard métier)
+ * ≥ escalate   → CRITIQUE
+ */
+const BILLING_LEVEL_FLOOR = {
+  delayHours: 48,
+  alertOrangeHours: 120, // J5
+  alertRedHours: 168, // J7
+  escalateHours: 336, // J14
+} as const;
+
 function ruleBilling(
   sheet: AttentionSheetInput,
   step: AttentionWorkflowStep | null | undefined,
@@ -153,7 +171,10 @@ function ruleBilling(
   const entered = toDate(sheet.statusEnteredAt);
   if (!entered) return null;
 
-  const delayHours = step?.delayHours && step.delayHours > 0 ? step.delayHours : 48;
+  const delayHours =
+    step?.delayHours && step.delayHours > 0
+      ? step.delayHours
+      : BILLING_LEVEL_FLOOR.delayHours;
   const hoursInStep = hoursBetween(entered, now);
   if (hoursInStep < delayHours) return null;
 
@@ -162,9 +183,18 @@ function ruleBilling(
     statusKey: String(sheet.status),
     label: step?.label ?? "À facturer",
     delayHours,
-    alertOrangeHours: step?.alertOrangeHours ?? delayHours,
-    alertRedHours: step?.alertRedHours ?? Math.round(delayHours * 1.5),
-    escalateHours: step?.escalateHours ?? delayHours * 2,
+    alertOrangeHours: Math.max(
+      step?.alertOrangeHours ?? 0,
+      BILLING_LEVEL_FLOOR.alertOrangeHours,
+    ),
+    alertRedHours: Math.max(
+      step?.alertRedHours ?? 0,
+      BILLING_LEVEL_FLOOR.alertRedHours,
+    ),
+    escalateHours: Math.max(
+      step?.escalateHours ?? 0,
+      BILLING_LEVEL_FLOOR.escalateHours,
+    ),
   };
 
   return {
@@ -172,6 +202,7 @@ function ruleBilling(
     level: levelFromStepOverrun(hoursInStep, stepForLevel),
     reason: `Travaux terminés depuis ${formatDaysFr(days)} — facturation à préparer`,
     overdueByHours: hoursInStep,
+    actionLabel: "Préparer la facturation",
   };
 }
 

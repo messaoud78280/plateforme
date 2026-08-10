@@ -8,7 +8,6 @@ import type { BillingFilter } from "@/lib/facturation/types";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BackLink } from "@/components/ui/BackLink";
 import { cn } from "@/lib/cn";
-import { URGENCY_STYLES, type UrgencyLevel } from "@/lib/follow-up/types";
 import { withReturnTo } from "@/lib/navigation/safe-return-to";
 
 export const dynamic = "force-dynamic";
@@ -16,10 +15,25 @@ export const dynamic = "force-dynamic";
 const FILTERS: { id: BillingFilter; label: string }[] = [
   { id: "all", label: "Tous" },
   { id: "a_facturer", label: "À facturer" },
-  { id: "en_attente", label: "En attente" },
-  { id: "en_retard", label: "Oublis" },
+  { id: "en_attente", label: "Suite client" },
+  { id: "en_retard", label: "En retard" },
   { id: "soldes", label: "Clôturés" },
 ];
+
+function urgencyBadgeClass(level: string): string {
+  switch (level) {
+    case "A_SURVEILLER":
+      return "bg-amber-50 text-amber-900 ring-1 ring-amber-200/80";
+    case "IMPORTANT":
+      return "bg-orange-50 text-orange-900 ring-1 ring-orange-200/80";
+    case "URGENT":
+      return "bg-red-50 text-red-800 ring-1 ring-red-200/80";
+    case "CRITIQUE":
+      return "bg-red-900 text-white";
+    default:
+      return "bg-slate-100 text-slate-700";
+  }
+}
 
 export default async function FacturationPage({
   searchParams,
@@ -73,7 +87,7 @@ export default async function FacturationPage({
       <PageHeader
         eyebrow="Pilotage"
         title="Facturation"
-        description="Anti-oubli : dossiers arrivés à l’étape facturation, actions attendues, oublis internes."
+        description="Anti-oubli : dossiers à l’étape facturation — sans crier au loup."
         actions={
           <Link
             href={withReturnTo("/dashboard/a-traiter", "/dashboard/facturation")}
@@ -104,7 +118,7 @@ export default async function FacturationPage({
                     filter === k.key
                       ? "border-[#1e3a5f] ring-1 ring-[#1e3a5f]/20"
                       : "border-slate-200/90",
-                    k.key === "en_retard" ? "border-red-200/80" : null,
+                    k.key === "en_retard" ? "border-red-200/70" : null,
                   )}
                 >
                   <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
@@ -117,6 +131,15 @@ export default async function FacturationPage({
                 </Link>
               ))}
             </section>
+          ) : null}
+
+          {snap.watchSummary ? (
+            <p className="text-sm text-amber-900/90" data-testid="facturation-watch-summary">
+              {snap.watchSummary}
+              {snap.totals.enRetard === 0
+                ? " — pas encore hors délai."
+                : "."}
+            </p>
           ) : null}
 
           <section className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5">
@@ -133,47 +156,51 @@ export default async function FacturationPage({
                 href="/dashboard/a-traiter?category=FACTURATION"
                 className="text-xs font-semibold text-[#1d4ed8] hover:underline"
               >
-                Board complet →
+                Voir tout dans À traiter →
               </Link>
             </div>
             {snap.attention.length === 0 ? (
               <p className="mt-4 text-sm text-slate-500">
-                Aucun oubli de facturation détecté pour le moment.
+                Aucun dossier à relancer pour le moment.
               </p>
             ) : (
               <ul className="mt-3 divide-y divide-slate-100">
-                {snap.attention.map((a) => {
-                  const style =
-                    URGENCY_STYLES[(a.urgency as UrgencyLevel) ?? "IMPORTANT"] ??
-                    URGENCY_STYLES.IMPORTANT;
-                  return (
-                    <li key={a.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
-                      <div className="min-w-0">
-                        <p className="text-[15px] font-semibold text-slate-900">{a.title}</p>
-                        <p className="mt-0.5 text-[13px] text-slate-600">{a.reason}</p>
-                        <p className="mt-1 text-[12px] text-slate-500">
-                          {[a.projectTitle, a.assigneeName].filter(Boolean).join(" · ")}
+                {snap.attention.map((a) => (
+                  <li key={a.id} className="py-3">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#1e3a5f]">
+                            {a.headline}
+                          </p>
+                          <span
+                            className={cn(
+                              "rounded-md px-2 py-0.5 text-[10px] font-semibold",
+                              urgencyBadgeClass(a.urgency),
+                            )}
+                          >
+                            {a.urgencyLabel}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-[15px] font-semibold text-slate-900">
+                          {a.title}
+                        </p>
+                        {a.clientName ? (
+                          <p className="mt-0.5 text-[13px] text-slate-600">{a.clientName}</p>
+                        ) : null}
+                        <p className="mt-1 text-[13px] text-slate-600">
+                          {[a.sinceLabel, a.assigneeName].filter(Boolean).join(" · ")}
                         </p>
                       </div>
-                      <div className="flex shrink-0 items-center gap-2">
-                        <span
-                          className={cn(
-                            "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase",
-                            style.badge,
-                          )}
-                        >
-                          {a.urgency}
-                        </span>
-                        <Link
-                          href={a.href}
-                          className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-semibold text-white hover:bg-[#152a45]"
-                        >
-                          Ouvrir
-                        </Link>
-                      </div>
-                    </li>
-                  );
-                })}
+                      <Link
+                        href={a.href}
+                        className="shrink-0 rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-semibold text-white hover:bg-[#152a45]"
+                      >
+                        {a.actionLabel} →
+                      </Link>
+                    </div>
+                  </li>
+                ))}
               </ul>
             )}
           </section>
@@ -184,24 +211,39 @@ export default async function FacturationPage({
                 Suivi
               </h2>
               <div className="flex flex-wrap gap-1.5">
-                {FILTERS.map((f) => (
-                  <Link
-                    key={f.id}
-                    href={
-                      f.id === "all"
-                        ? "/dashboard/facturation"
-                        : `/dashboard/facturation?filtre=${f.id}`
-                    }
-                    className={cn(
-                      "rounded-full px-3 py-1 text-xs font-semibold",
-                      filter === f.id
-                        ? "bg-[#1e3a5f] text-white"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200",
-                    )}
-                  >
-                    {f.label}
-                  </Link>
-                ))}
+                {FILTERS.map((f) => {
+                  const available = snap.filterAvailability[f.id];
+                  const active = filter === f.id;
+                  if (!available && !active && f.id !== "all") {
+                    return (
+                      <span
+                        key={f.id}
+                        className="cursor-not-allowed rounded-full px-3 py-1 text-xs font-semibold text-slate-300"
+                        title="Aucun dossier dans cette catégorie"
+                      >
+                        {f.label}
+                      </span>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={f.id}
+                      href={
+                        f.id === "all"
+                          ? "/dashboard/facturation"
+                          : `/dashboard/facturation?filtre=${f.id}`
+                      }
+                      className={cn(
+                        "rounded-full px-3 py-1 text-xs font-semibold",
+                        active
+                          ? "bg-[#1e3a5f] text-white"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                      )}
+                    >
+                      {f.label}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
 
@@ -209,78 +251,87 @@ export default async function FacturationPage({
               <p className="mt-4 text-sm text-slate-500">Aucun dossier pour ce filtre.</p>
             ) : (
               <>
-                {/* Desktop table */}
-                <div className="mt-4 hidden overflow-x-auto md:block">
-                  <table className="w-full min-w-[640px] text-left text-sm">
+                <div className="mt-4 hidden md:block">
+                  <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-slate-200 text-[11px] uppercase tracking-wide text-slate-500">
-                        <th className="pb-2 pr-3 font-semibold">Chantier</th>
-                        <th className="pb-2 pr-3 font-semibold">Client</th>
+                        <th className="pb-2 pr-3 font-semibold">Chantier / client</th>
                         <th className="pb-2 pr-3 font-semibold">Étape</th>
                         <th className="pb-2 pr-3 font-semibold">Responsable</th>
                         <th className="pb-2 pr-3 font-semibold">Depuis</th>
-                        <th className="pb-2 pr-3 font-semibold">Prochaine action</th>
-                        <th className="pb-2 font-semibold"> </th>
+                        <th className="pb-2 font-semibold">Prochaine action</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {snap.items.map((row) => (
-                        <tr
-                          key={row.id}
-                          className="border-b border-slate-100 hover:bg-slate-50/80"
-                        >
-                          <td className="py-3 pr-3 font-semibold text-slate-900">
-                            {row.projectTitle || row.title}
-                          </td>
-                          <td className="py-3 pr-3 text-slate-600">
-                            {row.clientName ?? "—"}
-                          </td>
-                          <td className="py-3 pr-3 text-slate-700">{row.statusLabel}</td>
-                          <td className="py-3 pr-3 text-slate-600">
-                            {row.assigneeName ?? "—"}
-                          </td>
-                          <td className="py-3 pr-3 text-slate-600">
-                            {row.sinceLabel ?? "—"}
-                          </td>
-                          <td className="py-3 pr-3 text-slate-800">
-                            {row.nextAction || row.primaryAction}
-                          </td>
-                          <td className="py-3 text-right">
-                            <Link
-                              href={row.href}
-                              className="text-xs font-semibold text-[#1d4ed8] hover:underline"
-                            >
-                              Ouvrir
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
+                      {snap.items.map((row) => {
+                        const action = row.nextAction || row.primaryAction;
+                        return (
+                          <tr key={row.id} className="border-b border-slate-100">
+                            <td className="p-0" colSpan={5}>
+                              <Link
+                                href={row.href}
+                                className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,1.4fr)] items-center gap-0 py-3 hover:bg-slate-50/80"
+                              >
+                                <span className="min-w-0 pr-3">
+                                  <span className="block font-semibold text-slate-900">
+                                    {row.projectTitle || row.title}
+                                  </span>
+                                  <span className="mt-0.5 block text-[13px] text-slate-600">
+                                    {row.clientName ?? "—"}
+                                  </span>
+                                </span>
+                                <span className="pr-3 text-slate-700">{row.statusLabel}</span>
+                                <span className="pr-3 text-slate-600">
+                                  {row.assigneeName ?? "—"}
+                                </span>
+                                <span className="pr-3 text-slate-600">
+                                  {row.sinceLabel ? `Depuis ${row.sinceLabel}` : "—"}
+                                </span>
+                                <span className="font-medium text-[#1e3a5f]">
+                                  {action} →
+                                </span>
+                              </Link>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
 
-                {/* Mobile cards */}
                 <ul className="mt-3 space-y-2 md:hidden">
-                  {snap.items.map((row) => (
-                    <li key={row.id}>
-                      <Link
-                        href={row.href}
-                        className="block min-h-[52px] rounded-xl border border-slate-200 bg-slate-50/40 px-3 py-3"
-                      >
-                        <p className="text-[15px] font-semibold text-slate-900">
-                          {row.projectTitle || row.title}
-                        </p>
-                        <p className="mt-0.5 text-[13px] text-slate-600">
-                          {[row.clientName, row.statusLabel, row.sinceLabel]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </p>
-                        <p className="mt-1 text-[12px] font-medium text-[#1e3a5f]">
-                          {row.nextAction || row.primaryAction}
-                        </p>
-                      </Link>
-                    </li>
-                  ))}
+                  {snap.items.map((row) => {
+                    const action = row.nextAction || row.primaryAction;
+                    return (
+                      <li key={row.id}>
+                        <Link
+                          href={row.href}
+                          className="block min-h-[52px] rounded-xl border border-slate-200 bg-slate-50/40 px-3 py-3"
+                        >
+                          <p className="text-[15px] font-semibold text-slate-900">
+                            {row.projectTitle || row.title}
+                          </p>
+                          {row.clientName ? (
+                            <p className="mt-0.5 text-[13px] text-slate-600">
+                              {row.clientName}
+                            </p>
+                          ) : null}
+                          <p className="mt-1 text-[13px] text-slate-700">
+                            Facturation à préparer
+                            {row.sinceLabel ? ` · Depuis ${row.sinceLabel}` : ""}
+                          </p>
+                          {row.assigneeName ? (
+                            <p className="mt-0.5 text-[12px] text-slate-500">
+                              {row.assigneeName}
+                            </p>
+                          ) : null}
+                          <p className="mt-2 text-[12px] font-semibold text-[#1e3a5f]">
+                            {action.startsWith("Préparer") ? "Préparer →" : `${action} →`}
+                          </p>
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </>
             )}

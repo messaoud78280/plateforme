@@ -9,8 +9,10 @@ export const BILLING_PIPELINE_STATUSES = [
   "A_FACTURER",
 ] as const;
 
+/** Statut fiche = suite admin après émission (pas un paiement V1B). */
 export const BILLING_WAITING_STATUSES = ["ATTENTE_REGLEMENT"] as const;
 
+/** Dossiers sortis du pipeline facturation (pas « payé / soldé » financier). */
 export const BILLING_DONE_STATUSES = ["FACTURE", "TERMINE"] as const;
 
 export type BillingPipelineStatus = (typeof BILLING_PIPELINE_STATUSES)[number];
@@ -43,32 +45,47 @@ export type BillingListItem = {
   primaryAction: string;
   href: string;
   urgency: string | null;
+  /** Niveau du diagnostic BILLING_PENDING seul (pas DUE). */
+  billingLevel: string | null;
   attentionReason: string | null;
+  /** URGENT / CRITIQUE sur BILLING_PENDING uniquement. */
   isOverdueAttention: boolean;
+  /** A_SURVEILLER / IMPORTANT sur BILLING_PENDING. */
+  isWatchAttention: boolean;
   bucket: "a_facturer" | "en_attente" | "en_retard" | "soldes" | "suivi";
 };
 
 export type BillingAttentionPreview = {
   id: string;
   title: string;
+  /** Ex. « Facturation à préparer » */
+  headline: string;
   reason: string;
+  sinceLabel: string | null;
   urgency: string;
+  urgencyLabel: string;
   href: string;
+  actionLabel: string;
   assigneeName: string | null;
   projectTitle: string | null;
+  clientName: string | null;
 };
 
 export type BillingSnapshot = {
   kpis: BillingKpi[];
+  /** Texte secondaire : « N dossier(s) à surveiller » — pas une grosse card. */
+  watchSummary: string | null;
   attention: BillingAttentionPreview[];
   items: BillingListItem[];
   totals: {
     aFacturer: number;
     enAttente: number;
     enRetard: number;
+    aSurveiller: number;
     soldes: number;
     attention: number;
   };
+  filterAvailability: Record<BillingFilter, boolean>;
   /** Invoice / WorkSituation présents (info, pas de KPI €). */
   hasInvoiceRows: boolean;
   hasSituationRows: boolean;
@@ -86,6 +103,16 @@ export function isBillingWaitingStatus(status: string): boolean {
 
 export function isBillingDoneStatus(status: string): boolean {
   return (BILLING_DONE_STATUSES as readonly string[]).includes(status);
+}
+
+/** Retard métier = délai de préparation réellement dépassé. */
+export function isBillingOverdueLevel(level: string | null | undefined): boolean {
+  return level === "URGENT" || level === "CRITIQUE";
+}
+
+/** Traîne, mais pas encore « en retard ». */
+export function isBillingWatchLevel(level: string | null | undefined): boolean {
+  return level === "A_SURVEILLER" || level === "IMPORTANT";
 }
 
 export function resolveBillingPrimaryAction(status: string): string {
@@ -122,4 +149,19 @@ export function formatSinceDays(days: number | null): string | null {
   if (days === 0) return "aujourd’hui";
   if (days === 1) return "1 jour";
   return `${days} jours`;
+}
+
+export function billingUrgencyLabel(level: string | null | undefined): string {
+  switch (level) {
+    case "A_SURVEILLER":
+      return "À surveiller";
+    case "IMPORTANT":
+      return "Important";
+    case "URGENT":
+      return "En retard";
+    case "CRITIQUE":
+      return "Critique";
+    default:
+      return "À facturer";
+  }
 }

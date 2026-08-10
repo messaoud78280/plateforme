@@ -6,9 +6,11 @@ import { useEffect, useState } from "react";
 type SnapshotLite = {
   attention: number;
   aFacturer: number;
+  enRetard?: number;
+  aSurveiller?: number;
 };
 
-/** Bandeau Accueil — uniquement si anomalies facturation. */
+/** Bandeau Accueil — uniquement si action facturation réelle. */
 export function FacturationHomeBanner() {
   const [data, setData] = useState<SnapshotLite | null>(null);
 
@@ -33,6 +35,20 @@ export function FacturationHomeBanner() {
   const total = Math.max(data.attention, data.aFacturer);
   if (total <= 0) return null;
 
+  const enRetard = data.enRetard ?? 0;
+  const aSurveiller = data.aSurveiller ?? 0;
+
+  let detail: string;
+  if (enRetard > 0) {
+    detail = `${enRetard} préparation${enRetard > 1 ? "s" : ""} hors délai.`;
+  } else if (aSurveiller > 0) {
+    detail = `${aSurveiller} dossier${aSurveiller > 1 ? "s" : ""} à surveiller.`;
+  } else if (data.aFacturer > 0) {
+    detail = `${data.aFacturer} dossier${data.aFacturer > 1 ? "s" : ""} en étape facturation.`;
+  } else {
+    detail = `${data.attention} action${data.attention > 1 ? "s" : ""} de facturation.`;
+  }
+
   return (
     <section
       className="rounded-2xl border border-[#1e3a5f]/15 bg-white p-4 shadow-sm sm:p-5"
@@ -42,7 +58,9 @@ export function FacturationHomeBanner() {
         <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]">
           Facturation
           <span className="ml-2.5 tabular-nums text-slate-900">
-            {total} élément{total > 1 ? "s" : ""} à traiter
+            {data.aFacturer > 0
+              ? `${data.aFacturer} à facturer`
+              : `${total} à traiter`}
           </span>
         </h2>
         <Link
@@ -52,16 +70,7 @@ export function FacturationHomeBanner() {
           Voir →
         </Link>
       </div>
-      {data.attention > 0 ? (
-        <p className="mt-2 text-sm text-slate-600">
-          {data.attention} oubli{data.attention > 1 ? "s" : ""} de facturation détecté
-          {data.attention > 1 ? "s" : ""}.
-        </p>
-      ) : (
-        <p className="mt-2 text-sm text-slate-600">
-          {data.aFacturer} dossier{data.aFacturer > 1 ? "s" : ""} en étape facturation.
-        </p>
-      )}
+      <p className="mt-2 text-sm text-slate-600">{detail}</p>
     </section>
   );
 }

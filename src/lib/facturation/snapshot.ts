@@ -12,10 +12,13 @@ import {
   type BillingKpi,
   type BillingListItem,
   type BillingSnapshot,
+  billingUrgencyLabel,
   formatSinceDays,
   isBillingDoneStatus,
+  isBillingOverdueLevel,
   isBillingPipelineStatus,
   isBillingWaitingStatus,
+  isBillingWatchLevel,
   resolveBillingBucket,
   resolveBillingPrimaryAction,
   BILLING_DONE_STATUSES,
@@ -67,12 +70,16 @@ export async function getBillingSnapshot(opts: {
       urgencyOverride: true,
       assigneeId: true,
       projectId: true,
+      organizationId: true,
       assignee: { select: { id: true, name: true } },
       project: { select: { id: true, title: true } },
     },
     orderBy: [{ updatedAt: "desc" }],
     take: 200,
   });
+
+  const organizationId =
+    sheets.find((s) => s.organizationId)?.organizationId ?? null;
 
   const attentionBatch = await loadAttentionForSheets({
     sheets: sheets.map((s) => ({
@@ -83,6 +90,7 @@ export async function getBillingSnapshot(opts: {
       nextActionDone: s.nextActionDone,
       urgencyOverride: s.urgencyOverride,
     })),
+    organizationId,
     now,
   });
 
@@ -94,15 +102,17 @@ export async function getBillingSnapshot(opts: {
     const enteredIso = attentionBatch.statusEnteredAt.get(s.id);
     const enteredAt = enteredIso ? new Date(enteredIso) : null;
     const sinceDays = enteredAt ? daysBetween(enteredAt, now) : null;
+    const sinceLabel = formatSinceDays(sinceDays);
 
     const billingItems =
       att?.attentionItems.filter((i) => i.code === "BILLING_PENDING") ?? [];
     const primaryBilling = billingItems[0] ?? null;
+    const billingLevel = primaryBilling?.level ?? null;
     const isOverdueAttention = Boolean(
-      primaryBilling &&
-        (att?.effectiveUrgency === "URGENT" ||
-          att?.effectiveUrgency === "CRITIQUE" ||
-          att?.effectiveUrgency === "IMPORTANT"),
+      primaryBilling && isBillingOverdueLevel(billingLevel),
+    );
+    const isWatchAttention = Boolean(
+      primaryBilling && isBillingWatchLevel(billingLevel),
     );
 
     const href = withReturnTo(
@@ -110,19 +120,14 @@ export async function getBillingSnapshot(opts: {
       FACTURATION_HREF,
     );
 
+    const primaryAction = resolveBillingPrimaryAction(s.status);
+    const actionLabel =
+      (!s.nextActionDone && s.nextAction?.trim()) || primaryAction;
+
     const bucket = resolveBillingBucket({
       status: s.status,
-      isOverdueAttention: Boolean(primaryBilling),
+      isOverdueAttention,
     });
-
-    // "en_retard" = diagnostic BILLING_PENDING réellement levé
-    const effectiveBucket =
-      primaryBilling &&
-      (att?.effectiveUrgency === "URGENT" || att?.effectiveUrgency === "CRITIQUE")
-        ? "en_retard"
-        : bucket === "en_retard"
-          ? "a_facturer"
-          : bucket;
 
     items.push({
       id: s.id,
@@ -132,34 +137,53 @@ export async function getBillingSnapshot(opts: {
       projectTitle: s.project?.title ?? null,
       status: s.status,
       statusLabel:
-        STATUS_LABELS[s.status as keyof typeof STATUS_LABELS] ?? s.status,
+        s.status === "ATTENTE_REGLEMENT"
+          ? "Suite client"
+          : s.status === "FACTURE" || s.status === "TERMINE"
+            ? "Clôturé"
+            : (STATUS_LABELS[s.status as keyof typeof STATUS_LABELS] ?? s.status),
       assigneeName: s.assignee?.name ?? null,
       assigneeId: s.assigneeId,
       nextAction: s.nextActionDone ? null : s.nextAction,
-      sinceLabel: formatSinceDays(sinceDays),
+      sinceLabel,
       sinceDays,
-      primaryAction: resolveBillingPrimaryAction(s.status),
+      primaryAction,
       href,
       urgency: att?.effectiveUrgency ?? null,
-      attentionReason: primaryBilling?.reason ?? att?.primaryReason ?? null,
-      isOverdueAttention: Boolean(primaryBilling),
-      bucket: effectiveBucket,
+      billingLevel,
+      attentionReason: primaryBilling?.reason ?? null,
+      isOverdueAttention,
+      isWatchAttention,
+      bucket,
     });
 
-    if (primaryBilling && att && att.effectiveUrgency !== "NORMAL") {
+    if (primaryBilling && billingLevel && billingLevel !== "NORMAL") {
+      const sinceFromReason =
+        sinceLabel != null
+          ? sinceLabel === "aujourd’hui"
+            ? "depuis aujourd’hui"
+            : `depuis ${sinceLabel}`
+          : null;
       attentionPreview.push({
         id: s.id,
-        title: s.title,
+        title: s.project?.title || s.title,
+        headline: "Facturation à préparer",
         reason: primaryBilling.reason,
-        urgency: att.effectiveUrgency,
+        sinceLabel: sinceFromReason,
+        urgency: billingLevel,
+        urgencyLabel: billingUrgencyLabel(billingLevel),
         href,
+        actionLabel:
+          primaryBilling.actionLabel ??
+          actionLabel ??
+          "Préparer la facturation",
         assigneeName: s.assignee?.name ?? null,
         projectTitle: s.project?.title ?? null,
+        clientName: s.clientName,
       });
     }
   }
 
-  // Tri : retards → à facturer → en attente → soldés
   const rank: Record<BillingListItem["bucket"], number> = {
     en_retard: 0,
     a_facturer: 1,
@@ -187,42 +211,43 @@ export async function getBillingSnapshot(opts: {
   const pipelineCount = aFacturer;
   const enAttente = items.filter((i) => isBillingWaitingStatus(i.status)).length;
   const enRetard = items.filter((i) => i.isOverdueAttention).length;
+  const aSurveiller = items.filter((i) => i.isWatchAttention).length;
   const soldes = items.filter((i) => isBillingDoneStatus(i.status)).length;
 
   const kpis: BillingKpi[] = [];
-  if (pipelineCount > 0 || enRetard > 0) {
+  if (pipelineCount > 0) {
     kpis.push({
       key: "a_facturer",
       label: "À facturer",
       count: pipelineCount,
       hint:
         pipelineCount === 1
-          ? "1 dossier à préparer"
-          : `${pipelineCount} dossiers à préparer`,
+          ? "1 dossier à l’étape facturation"
+          : `${pipelineCount} dossiers à l’étape facturation`,
       href: `${FACTURATION_HREF}?filtre=a_facturer`,
     });
   }
   if (enAttente > 0) {
     kpis.push({
       key: "en_attente",
-      label: "En attente",
+      label: "Suite client",
       count: enAttente,
       hint:
         enAttente === 1
-          ? "1 suite côté client"
-          : `${enAttente} suites côté client`,
+          ? "1 dossier en attente de suite"
+          : `${enAttente} dossiers en attente de suite`,
       href: `${FACTURATION_HREF}?filtre=en_attente`,
     });
   }
   if (enRetard > 0) {
     kpis.push({
       key: "en_retard",
-      label: "Oublis",
+      label: "En retard",
       count: enRetard,
       hint:
         enRetard === 1
-          ? "1 action interne de facturation en retard"
-          : `${enRetard} actions internes de facturation en retard`,
+          ? "1 préparation hors délai"
+          : `${enRetard} préparations hors délai`,
       href: `${FACTURATION_HREF}?filtre=en_retard`,
     });
   }
@@ -236,6 +261,13 @@ export async function getBillingSnapshot(opts: {
       href: `${FACTURATION_HREF}?filtre=soldes`,
     });
   }
+
+  const watchSummary =
+    aSurveiller > 0
+      ? aSurveiller === 1
+        ? "1 dossier à surveiller"
+        : `${aSurveiller} dossiers à surveiller`
+      : null;
 
   const filter = opts.filter ?? "all";
   const filteredItems =
@@ -251,7 +283,6 @@ export async function getBillingSnapshot(opts: {
               ? items.filter((i) => isBillingDoneStatus(i.status))
               : items;
 
-  // Données € optionnelles (présence seule — jamais affichées en V1A-lite)
   const [invoiceCount, situationCount] = await Promise.all([
     prisma.invoice.count(),
     prisma.workSituation.count({ where: { archivedAt: null } }),
@@ -259,14 +290,23 @@ export async function getBillingSnapshot(opts: {
 
   return {
     kpis,
+    watchSummary,
     attention: attentionPreview.slice(0, 5),
     items: filteredItems,
     totals: {
       aFacturer: pipelineCount,
       enAttente,
       enRetard,
+      aSurveiller,
       soldes,
       attention: attentionPreview.length,
+    },
+    filterAvailability: {
+      all: true,
+      a_facturer: pipelineCount > 0,
+      en_attente: enAttente > 0,
+      en_retard: enRetard > 0,
+      soldes: soldes > 0,
     },
     hasInvoiceRows: invoiceCount > 0,
     hasSituationRows: situationCount > 0,
@@ -296,9 +336,11 @@ export async function getProjectBillingHint(opts: {
   return {
     show: true,
     label:
-      snap.attention.length > 0
-        ? "Facturation à préparer"
-        : "À facturer",
+      snap.totals.enRetard > 0
+        ? "Facturation en retard"
+        : snap.attention.length > 0
+          ? "Facturation à préparer"
+          : "À facturer",
     count: n,
     href: withReturnTo(
       `${FACTURATION_HREF}?filtre=a_facturer`,

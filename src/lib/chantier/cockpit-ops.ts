@@ -26,6 +26,7 @@ import {
 } from "@/lib/messagerie/resolve-conversation";
 import { CHANTIER_STATUS_LABELS } from "@/lib/chantier-dossier/constants";
 import { isSharedVisibility } from "@/lib/equipe-acces/project-access";
+import { purchaseOrderAttentionSelect } from "@/lib/purchase-orders/attention/select";
 import {
   withPerfLog,
   timedBranch,
@@ -348,63 +349,7 @@ export async function loadChantierCockpitOps(opts: {
       where: { projectId, status: { in: PO_ACTIVE } },
       take: 20,
       orderBy: { updatedAt: "desc" },
-      select: {
-        id: true,
-        number: true,
-        subject: true,
-        status: true,
-        sharedWithSupplier: true,
-        requestedDeliveryAt: true,
-        confirmedDeliveryAt: true,
-        proposedDeliveryAt: true,
-        proposedDeliveryStatus: true,
-        supplierRefuseReason: true,
-        responsibleId: true,
-        requestedById: true,
-        responsible: { select: { id: true, name: true } },
-        requestedBy: { select: { id: true, name: true } },
-        externalOrganization: { select: { name: true, tradeName: true } },
-        lines: {
-          orderBy: { sortOrder: "asc" },
-          take: 3,
-          select: {
-            id: true,
-            designation: true,
-            unit: true,
-            quantity: true,
-            receivedQty: true,
-          },
-        },
-        receipts: {
-          select: {
-            id: true,
-            receivedAt: true,
-            cancelledAt: true,
-            status: true,
-            deliveryNoteNumber: true,
-            documents: { where: { kind: "BL" }, select: { id: true }, take: 1 },
-            lines: {
-              select: {
-                orderLineId: true,
-                receivedQty: true,
-                damagedQty: true,
-                refusedQty: true,
-              },
-            },
-          },
-        },
-        events: {
-          where: { kind: { in: ["shared", "supplier_propose", "supplier_refuse"] } },
-          orderBy: { createdAt: "desc" },
-          take: 10,
-          select: { id: true, kind: true, createdAt: true },
-        },
-        agendaEvents: {
-          where: { type: "LIVRAISON", status: { not: "ANNULE" } },
-          take: 1,
-          select: { id: true },
-        },
-      },
+      select: purchaseOrderAttentionSelect,
     }),
     ),
     timedBranch(

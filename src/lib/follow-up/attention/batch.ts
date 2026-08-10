@@ -6,7 +6,10 @@
  * - si `organizationId` est fourni → workflow de cette org pour tout le batch ;
  * - sinon → 1 requête batch pour résoudre l’org par fiche, puis workflow par org ;
  * - jamais de fallback silencieux si une org est connue.
+ *
+ * PERF-V2B : timeline/agenda/workflow en parallèle ; timeline = dernier statut / fiche.
  */
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   evaluateFollowUpAttention,
@@ -17,6 +20,7 @@ import type { AttentionWorkflowStep } from "@/lib/follow-up/attention/types";
 import { episodeKeyFromStatusTransition } from "@/lib/follow-up/attention/escalation-policy";
 import type { UrgencyThresholds } from "@/lib/follow-up/types";
 import { URGENCY_LABELS } from "@/lib/follow-up/types";
+import { isPerfLogEnabled, timedBranch, withPerfLog } from "@/lib/perf/server-timing";
 
 export type AttentionBatchResult = {
   byId: Map<string, SerializedAttention>;
@@ -47,6 +51,24 @@ function warnFallbackMissingOrg(sheetCount: number) {
   );
 }
 
+type LatestStatusRow = {
+  id: string;
+  sheetId: string;
+  occurredAt: Date;
+};
+
+/** Dernier événement kind=statut par fiche (pas toute la timeline). */
+async function loadLatestStatusEvents(sheetIds: string[]): Promise<LatestStatusRow[]> {
+  if (sheetIds.length === 0) return [];
+  return prisma.$queryRaw<LatestStatusRow[]>`
+    SELECT DISTINCT ON ("sheetId") id, "sheetId", "occurredAt"
+    FROM "FollowUpTimelineEvent"
+    WHERE kind = 'statut'
+      AND "sheetId" IN (${Prisma.join(sheetIds)})
+    ORDER BY "sheetId", "occurredAt" DESC
+  `;
+}
+
 export async function loadAttentionForSheets(opts: {
   sheets: {
     id: string;
@@ -64,26 +86,71 @@ export async function loadAttentionForSheets(opts: {
   thresholds?: UrgencyThresholds;
   now?: Date;
 }): Promise<AttentionBatchResult> {
-  const out = new Map<string, SerializedAttention>();
-  const sheetIds = opts.sheets.map((s) => s.id);
-  if (sheetIds.length === 0) {
-    return { byId: out, statusEnteredAt: new Map(), statusEpisodeKey: new Map() };
-  }
+  return withPerfLog(`attention.batch n=${opts.sheets.length}`, async () => {
+    const out = new Map<string, SerializedAttention>();
+    const sheetIds = opts.sheets.map((s) => s.id);
+    if (sheetIds.length === 0) {
+      return { byId: out, statusEnteredAt: new Map(), statusEpisodeKey: new Map() };
+    }
 
-  const statusEnteredAt = new Map<string, string>();
-  const statusEpisodeKey = new Map<string, string>();
-  for (const s of opts.sheets) {
-    if (s.statusEnteredAt) statusEnteredAt.set(s.id, s.statusEnteredAt);
-    if (s.statusEpisodeKey) statusEpisodeKey.set(s.id, s.statusEpisodeKey);
-  }
+    const statusEnteredAt = new Map<string, string>();
+    const statusEpisodeKey = new Map<string, string>();
+    for (const s of opts.sheets) {
+      if (s.statusEnteredAt) statusEnteredAt.set(s.id, s.statusEnteredAt);
+      if (s.statusEpisodeKey) statusEpisodeKey.set(s.id, s.statusEpisodeKey);
+    }
 
-  const needTimeline = opts.sheets.some((s) => !s.statusEnteredAt || !s.statusEpisodeKey);
-  if (needTimeline) {
-    const statusEvents = await prisma.followUpTimelineEvent.findMany({
-      where: { sheetId: { in: sheetIds }, kind: "statut" },
-      select: { id: true, sheetId: true, occurredAt: true },
-      orderBy: { occurredAt: "desc" },
-    });
+    const needTimeline = opts.sheets.some(
+      (s) => !s.statusEnteredAt || !s.statusEpisodeKey,
+    );
+    const providedSteps = opts.workflowSteps ?? [];
+    const knownOrgId = opts.organizationId ?? null;
+
+    // Timeline + agenda + (workflow si org connue) — indépendants → parallèle (RTT).
+    const timelinePromise = needTimeline
+      ? timedBranch("attention.timeline", loadLatestStatusEvents(sheetIds))
+      : Promise.resolve([] as LatestStatusRow[]);
+
+    const agendaPromise = timedBranch(
+      "attention.agenda",
+      prisma.agendaEvent.findMany({
+        where: {
+          followUpSheetId: { in: sheetIds },
+          status: { not: "ANNULE" },
+          type: { in: ["LIVRAISON", "INTERVENTION"] },
+        },
+        select: {
+          id: true,
+          followUpSheetId: true,
+          type: true,
+          status: true,
+          title: true,
+          startAt: true,
+          purchaseOrderId: true,
+        },
+      }),
+    );
+
+    const workflowEarlyPromise =
+      providedSteps.length === 0 && knownOrgId
+        ? timedBranch(
+            "attention.workflow",
+            loadWorkflowStepsForOrg(knownOrgId).catch((e) => {
+              console.error(
+                `[attention] workflow load failed organizationId=${knownOrgId}`,
+                e instanceof Error ? e.message : e,
+              );
+              return [] as AttentionWorkflowStep[];
+            }),
+          )
+        : Promise.resolve(null as AttentionWorkflowStep[] | null);
+
+    const [statusEvents, agendaRows, workflowEarly] = await Promise.all([
+      timelinePromise,
+      agendaPromise,
+      workflowEarlyPromise,
+    ]);
+
     for (const e of statusEvents) {
       if (!statusEnteredAt.has(e.sheetId)) {
         statusEnteredAt.set(e.sheetId, e.occurredAt.toISOString());
@@ -98,143 +165,143 @@ export async function loadAttentionForSheets(opts: {
         );
       }
     }
-  }
 
-  for (const s of opts.sheets) {
-    if (!statusEpisodeKey.has(s.id)) {
-      statusEpisodeKey.set(
-        s.id,
-        episodeKeyFromStatusTransition({
-          occurredAt: statusEnteredAt.get(s.id) ?? null,
+    for (const s of opts.sheets) {
+      if (!statusEpisodeKey.has(s.id)) {
+        statusEpisodeKey.set(
+          s.id,
+          episodeKeyFromStatusTransition({
+            occurredAt: statusEnteredAt.get(s.id) ?? null,
+          }),
+        );
+      }
+    }
+
+    const agendaBySheet = new Map<string, typeof agendaRows>();
+    for (const ev of agendaRows) {
+      if (!ev.followUpSheetId) continue;
+      const list = agendaBySheet.get(ev.followUpSheetId) ?? [];
+      list.push(ev);
+      agendaBySheet.set(ev.followUpSheetId, list);
+    }
+
+    /** orgId par fiche — jamais de mélange silencieux multi-tenant. */
+    const orgBySheetId = new Map<string, string | null>();
+    if (knownOrgId) {
+      for (const s of opts.sheets) {
+        orgBySheetId.set(s.id, knownOrgId);
+      }
+    } else {
+      const orgRows = await timedBranch(
+        "attention.orgBySheet",
+        prisma.followUpSheet.findMany({
+          where: { id: { in: sheetIds } },
+          select: { id: true, organizationId: true },
+        }),
+      );
+      for (const row of orgRows) {
+        orgBySheetId.set(row.id, row.organizationId);
+      }
+      for (const s of opts.sheets) {
+        if (!orgBySheetId.has(s.id)) orgBySheetId.set(s.id, null);
+      }
+    }
+
+    const stepsByOrgId = new Map<string, AttentionWorkflowStep[]>();
+
+    if (providedSteps.length > 0) {
+      const orgIds = [
+        ...new Set(
+          [...orgBySheetId.values()].filter((id): id is string => Boolean(id)),
+        ),
+      ];
+      if (orgIds.length === 0) {
+        stepsByOrgId.set("__provided__", providedSteps);
+      } else {
+        for (const orgId of orgIds) {
+          stepsByOrgId.set(orgId, providedSteps);
+        }
+      }
+    } else if (workflowEarly && knownOrgId) {
+      stepsByOrgId.set(knownOrgId, workflowEarly);
+    } else {
+      const orgIds = [
+        ...new Set(
+          [...orgBySheetId.values()].filter((id): id is string => Boolean(id)),
+        ),
+      ];
+      await Promise.all(
+        orgIds.map(async (orgId) => {
+          try {
+            stepsByOrgId.set(
+              orgId,
+              await timedBranch(
+                `attention.workflow.${orgId.slice(0, 8)}`,
+                loadWorkflowStepsForOrg(orgId),
+              ),
+            );
+          } catch (e) {
+            console.error(
+              `[attention] workflow load failed organizationId=${orgId}`,
+              e instanceof Error ? e.message : e,
+            );
+            stepsByOrgId.set(orgId, []);
+          }
         }),
       );
     }
-  }
 
-  const agendaRows = await prisma.agendaEvent.findMany({
-    where: {
-      followUpSheetId: { in: sheetIds },
-      status: { not: "ANNULE" },
-      type: { in: ["LIVRAISON", "INTERVENTION"] },
-    },
-    select: {
-      id: true,
-      followUpSheetId: true,
-      type: true,
-      status: true,
-      title: true,
-      startAt: true,
-      purchaseOrderId: true,
-    },
+    const missingOrgCount = opts.sheets.filter((s) => !orgBySheetId.get(s.id)).length;
+    if (missingOrgCount > 0 && providedSteps.length === 0) {
+      warnFallbackMissingOrg(missingOrgCount);
+    }
+
+    const now = opts.now ?? new Date();
+    const tEval0 = isPerfLogEnabled() ? Date.now() : 0;
+
+    for (const sheet of opts.sheets) {
+      const orgId = orgBySheetId.get(sheet.id) ?? null;
+      const steps =
+        (orgId ? stepsByOrgId.get(orgId) : null) ??
+        stepsByOrgId.get("__provided__") ??
+        providedSteps;
+      const stepByKey = new Map(steps.map((s) => [s.statusKey, s]));
+
+      const result = evaluateFollowUpAttention(
+        {
+          id: sheet.id,
+          status: sheet.status,
+          title: sheet.title,
+          nextActionAt: sheet.nextActionAt,
+          nextActionDone: sheet.nextActionDone,
+          urgencyOverride: sheet.urgencyOverride as never,
+          statusEnteredAt: statusEnteredAt.get(sheet.id) ?? null,
+        },
+        {
+          now,
+          workflowStep: stepByKey.get(sheet.status) ?? null,
+          agendaEvents: (agendaBySheet.get(sheet.id) ?? []).map((e) => ({
+            id: e.id,
+            type: e.type,
+            status: e.status,
+            title: e.title,
+            startAt: e.startAt,
+            purchaseOrderId: e.purchaseOrderId,
+          })),
+          thresholds: opts.thresholds,
+        },
+      );
+      out.set(sheet.id, serializeAttentionResult(result));
+    }
+
+    if (isPerfLogEnabled()) {
+      console.info(
+        `[perf] attention.evaluateJs n=${opts.sheets.length} ${Date.now() - tEval0}ms`,
+      );
+    }
+
+    return { byId: out, statusEnteredAt, statusEpisodeKey };
   });
-
-  const agendaBySheet = new Map<string, typeof agendaRows>();
-  for (const ev of agendaRows) {
-    if (!ev.followUpSheetId) continue;
-    const list = agendaBySheet.get(ev.followUpSheetId) ?? [];
-    list.push(ev);
-    agendaBySheet.set(ev.followUpSheetId, list);
-  }
-
-  /** orgId par fiche — jamais de mélange silencieux multi-tenant. */
-  const orgBySheetId = new Map<string, string | null>();
-  if (opts.organizationId) {
-    for (const s of opts.sheets) {
-      orgBySheetId.set(s.id, opts.organizationId);
-    }
-  } else {
-    const orgRows = await prisma.followUpSheet.findMany({
-      where: { id: { in: sheetIds } },
-      select: { id: true, organizationId: true },
-    });
-    for (const row of orgRows) {
-      orgBySheetId.set(row.id, row.organizationId);
-    }
-    for (const s of opts.sheets) {
-      if (!orgBySheetId.has(s.id)) orgBySheetId.set(s.id, null);
-    }
-  }
-
-  const providedSteps = opts.workflowSteps ?? [];
-  const stepsByOrgId = new Map<string, AttentionWorkflowStep[]>();
-
-  if (providedSteps.length > 0) {
-    const orgIds = [
-      ...new Set(
-        [...orgBySheetId.values()].filter((id): id is string => Boolean(id)),
-      ),
-    ];
-    if (orgIds.length === 0) {
-      stepsByOrgId.set("__provided__", providedSteps);
-    } else {
-      for (const orgId of orgIds) {
-        stepsByOrgId.set(orgId, providedSteps);
-      }
-    }
-  } else {
-    const orgIds = [
-      ...new Set(
-        [...orgBySheetId.values()].filter((id): id is string => Boolean(id)),
-      ),
-    ];
-    await Promise.all(
-      orgIds.map(async (orgId) => {
-        try {
-          stepsByOrgId.set(orgId, await loadWorkflowStepsForOrg(orgId));
-        } catch (e) {
-          console.error(
-            `[attention] workflow load failed organizationId=${orgId}`,
-            e instanceof Error ? e.message : e,
-          );
-          stepsByOrgId.set(orgId, []);
-        }
-      }),
-    );
-  }
-
-  const missingOrgCount = opts.sheets.filter((s) => !orgBySheetId.get(s.id)).length;
-  if (missingOrgCount > 0 && providedSteps.length === 0) {
-    warnFallbackMissingOrg(missingOrgCount);
-  }
-
-  const now = opts.now ?? new Date();
-
-  for (const sheet of opts.sheets) {
-    const orgId = orgBySheetId.get(sheet.id) ?? null;
-    const steps =
-      (orgId ? stepsByOrgId.get(orgId) : null) ??
-      stepsByOrgId.get("__provided__") ??
-      providedSteps;
-    const stepByKey = new Map(steps.map((s) => [s.statusKey, s]));
-
-    const result = evaluateFollowUpAttention(
-      {
-        id: sheet.id,
-        status: sheet.status,
-        title: sheet.title,
-        nextActionAt: sheet.nextActionAt,
-        nextActionDone: sheet.nextActionDone,
-        urgencyOverride: sheet.urgencyOverride as never,
-        statusEnteredAt: statusEnteredAt.get(sheet.id) ?? null,
-      },
-      {
-        now,
-        workflowStep: stepByKey.get(sheet.status) ?? null,
-        agendaEvents: (agendaBySheet.get(sheet.id) ?? []).map((e) => ({
-          id: e.id,
-          type: e.type,
-          status: e.status,
-          title: e.title,
-          startAt: e.startAt,
-          purchaseOrderId: e.purchaseOrderId,
-        })),
-        thresholds: opts.thresholds,
-      },
-    );
-    out.set(sheet.id, serializeAttentionResult(result));
-  }
-
-  return { byId: out, statusEnteredAt, statusEpisodeKey };
 }
 
 export function urgencyLabelFor(level: string): string {

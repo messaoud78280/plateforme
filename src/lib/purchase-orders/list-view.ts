@@ -13,6 +13,7 @@ import {
 } from "@/lib/purchase-orders/attention/evaluate";
 import type { PurchaseOrderAttentionInput } from "@/lib/purchase-orders/attention/types";
 import { PURCHASE_ORDER_STATUS_LABELS } from "@/lib/purchase-orders/status";
+import { purchaseOrderAttentionSelect } from "@/lib/purchase-orders/attention/select";
 import {
   withPerfLog,
   runWithPerfContext,
@@ -143,56 +144,11 @@ export async function loadPurchaseOrdersListView(opts: {
         : {}),
     },
     select: {
-      id: true,
-      number: true,
-      subject: true,
-      status: true,
-      sharedWithSupplier: true,
-      requestedDeliveryAt: true,
-      confirmedDeliveryAt: true,
-      proposedDeliveryAt: true,
-      proposedDeliveryStatus: true,
-      supplierRefuseReason: true,
+      ...purchaseOrderAttentionSelect,
       updatedAt: true,
-      responsibleId: true,
-      requestedById: true,
       externalOrganizationId: true,
-      externalOrganization: { select: { id: true, name: true, tradeName: true } },
-      project: { select: { id: true, title: true } },
-      responsible: { select: { name: true } },
-      requestedBy: { select: { name: true } },
-      lines: {
-        orderBy: { sortOrder: "asc" },
-        select: { id: true, designation: true, unit: true, quantity: true },
-      },
-      receipts: {
-        select: {
-          id: true,
-          receivedAt: true,
-          cancelledAt: true,
-          status: true,
-          deliveryNoteNumber: true,
-          documents: { where: { kind: "BL" }, select: { id: true }, take: 1 },
-          lines: {
-            select: {
-              orderLineId: true,
-              receivedQty: true,
-              damagedQty: true,
-              refusedQty: true,
-            },
-          },
-        },
-      },
-      events: {
-        where: { kind: { in: ["shared", "supplier_propose", "supplier_refuse"] } },
-        orderBy: { createdAt: "desc" },
-        take: 10,
-        select: { id: true, kind: true, createdAt: true },
-      },
-      agendaEvents: {
-        where: { type: "LIVRAISON", status: { not: "ANNULE" } },
-        take: 1,
-        select: { id: true },
+      externalOrganization: {
+        select: { id: true, name: true, tradeName: true },
       },
     },
     orderBy: { updatedAt: "desc" },

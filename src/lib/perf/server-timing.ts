@@ -2,8 +2,17 @@
  * PERF-V2A.1 — mesures serveur.
  * Activé si NODE_ENV=development OU BEWORK_PERF_LOG=1 OU PERF_DEBUG=true.
  * Jamais de données métier/sensibles dans les logs.
+ *
+ * Pas d’import `node:async_hooks` : ce module est tiré via prisma dans des
+ * chemins client (ex. credits-lifecycle → ActionsWidget) et casserait le build webpack.
  */
-import { AsyncLocalStorage } from "node:async_hooks";
+type PerfStore = {
+  queryCount: number;
+  queries: { model: string; action: string; ms: number }[];
+};
+
+/** Contexte empilé (suffisant pour scripts + PERF_DEBUG ; off en prod). */
+let activeStore: PerfStore | null = null;
 
 export function isPerfLogEnabled() {
   return (
@@ -14,23 +23,18 @@ export function isPerfLogEnabled() {
   );
 }
 
-type PerfStore = {
-  queryCount: number;
-  queries: { model: string; action: string; ms: number }[];
-};
-
-const perfAls = new AsyncLocalStorage<PerfStore>();
-
 export function getPerfStore(): PerfStore | undefined {
-  return perfAls.getStore();
+  return activeStore ?? undefined;
 }
 
 /** Enveloppe une requête HTTP / un profil script avec compteur de queries. */
 export function runWithPerfContext<T>(fn: () => Promise<T>): Promise<T> {
-  const existing = perfAls.getStore();
-  if (existing) return fn();
+  if (activeStore) return fn();
   const store: PerfStore = { queryCount: 0, queries: [] };
-  return perfAls.run(store, fn);
+  activeStore = store;
+  return fn().finally(() => {
+    if (activeStore === store) activeStore = null;
+  });
 }
 
 export function recordPerfQuery(opts: {
@@ -38,7 +42,7 @@ export function recordPerfQuery(opts: {
   action: string;
   ms: number;
 }) {
-  const store = perfAls.getStore();
+  const store = activeStore;
   if (!store) return;
   store.queryCount += 1;
   if (opts.ms >= 0) {
@@ -82,7 +86,7 @@ export function summarizePerfQueries(top = 5): {
   count: number;
   top: { model: string; action: string; ms: number }[];
 } {
-  const store = perfAls.getStore();
+  const store = activeStore;
   if (!store) return { count: 0, top: [] };
   const sorted = [...store.queries].sort((a, b) => b.ms - a.ms).slice(0, top);
   return { count: store.queryCount, top: sorted };

@@ -33,9 +33,14 @@ assert.doesNotMatch(missions, /}, 7000\)/);
 assert.doesNotMatch(missions, /}, 10000\)/);
 
 const layout = read("src/app/dashboard/layout.tsx");
-assert.match(layout, /dynamic\(/);
-assert.match(layout, /DemoCommercialTour/);
-assert.match(layout, /ssr:\s*false/);
+assert.match(layout, /DemoCommercialTourLazy/);
+assert.doesNotMatch(layout, /ssr:\s*false/);
+
+const tourLazy = read("src/components/demo-environment/DemoCommercialTourLazy.tsx");
+assert.match(tourLazy, /"use client"/);
+assert.match(tourLazy, /dynamic\(/);
+assert.match(tourLazy, /ssr:\s*false/);
+assert.match(tourLazy, /DemoCommercialTour/);
 
 const main = read("src/components/dashboard/DashboardMain.tsx");
 assert.match(main, /pendingNav/);

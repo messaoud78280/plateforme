@@ -780,6 +780,11 @@ export async function transitionQuoteStatus(
   });
   if (!quote) throw new Error("Devis introuvable");
 
+  /** Double clic ACCEPTED : idempotent, pas de second acceptedAt. */
+  if (toStatus === "ACCEPTED" && quote.status === "ACCEPTED") {
+    return quote;
+  }
+
   const allowed = ALLOWED_TRANSITIONS[quote.status] ?? [];
   if (!allowed.includes(toStatus)) {
     throw new Error(`Transition ${quote.status} → ${toStatus} non autorisée`);

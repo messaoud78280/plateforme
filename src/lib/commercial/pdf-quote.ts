@@ -99,9 +99,18 @@ function snapshotLines(s: QuotePdfSnapshot | null): string[] {
   return lines.length ? lines : ["—"];
 }
 
-/** PDF devis client — sans logo BeWork. */
+/** PDF devis client — sans logo BeWork. Moteur unique (preview + snapshot). */
 export function generateQuotePdfBuffer(input: QuotePdfInput): Buffer {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+  // Date de création PDF déterministe (issueDate) — évite un hash qui change à chaque génération.
+  if (typeof doc.setCreationDate === "function") {
+    doc.setCreationDate(input.issueDate);
+  }
+  doc.setProperties({
+    title: `Devis ${input.number}`,
+    subject: input.subject,
+    creator: "BeWork Gestion commerciale",
+  });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   let y = MARGIN;
@@ -313,5 +322,22 @@ export function generateQuotePdfBuffer(input: QuotePdfInput): Buffer {
   }
 
   const ab = doc.output("arraybuffer");
-  return Buffer.from(ab);
+  return stabilizePdfDocumentIds(Buffer.from(ab));
+}
+
+/**
+ * jsPDF injecte un /ID aléatoire à chaque génération.
+ * Pour un hash stable du même contenu contractuel, on normalise l’ID.
+ */
+function stabilizePdfDocumentIds(pdf: Buffer): Buffer {
+  const latin = pdf.toString("latin1");
+  const fixed =
+    "/ID[<00000000000000000000000000000000><00000000000000000000000000000000>]";
+  const next = latin.replace(/\/ID\s*\[[^\]]*\]/g, fixed);
+  return Buffer.from(next, "latin1");
+}
+
+/** Alias unique demandé V1C-A — même moteur que generateQuotePdfBuffer. */
+export function generateCommercialQuotePdf(input: QuotePdfInput): Buffer {
+  return generateQuotePdfBuffer(input);
 }

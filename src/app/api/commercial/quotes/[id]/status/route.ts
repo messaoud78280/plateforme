@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { CommercialQuoteStatus } from "@prisma/client";
 import { requireCommercialApiSession } from "@/lib/commercial/access";
 import { transitionQuoteStatus } from "@/lib/commercial/quotes";
+import { acceptQuoteWithPdfArchive } from "@/lib/commercial/accepted-snapshot";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -18,6 +19,19 @@ export async function POST(req: Request, ctx: Ctx) {
   }
 
   try {
+    if (toStatus === "ACCEPTED") {
+      const result = await acceptQuoteWithPdfArchive({
+        orgId: auth.orgId,
+        quoteId: id,
+        actorUserId: auth.session.user.id,
+      });
+      return NextResponse.json({
+        quote: result.quote,
+        pdfArchived: result.pdfArchived,
+        pdfArchiveError: result.pdfArchiveError,
+      });
+    }
+
     const quote = await transitionQuoteStatus(
       auth.orgId,
       id,

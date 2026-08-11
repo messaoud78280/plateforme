@@ -60,15 +60,18 @@ type QuoteDetail = {
 export function QuoteEditor({
   initial,
   canEdit,
+  acceptedPdfAvailable = false,
 }: {
   initial: QuoteDetail;
   canEdit: boolean;
+  acceptedPdfAvailable?: boolean;
 }) {
   const router = useRouter();
   const [quote, setQuote] = useState(initial);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [busyStatus, setBusyStatus] = useState(false);
+  const [accepting, setAccepting] = useState(false);
 
   const version = quote.currentVersion;
   const lines = version?.lines ?? [];
@@ -169,7 +172,9 @@ export function QuoteEditor({
   }
 
   async function setStatus(toStatus: string) {
+    if (busyStatus) return;
     setBusyStatus(true);
+    if (toStatus === "ACCEPTED") setAccepting(true);
     setError(null);
     try {
       const res = await fetch(`/api/commercial/quotes/${quote.id}/status`, {
@@ -179,6 +184,9 @@ export function QuoteEditor({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur");
+      if (data.pdfArchiveError) {
+        setError(`Devis accepté — archivage PDF à finaliser : ${data.pdfArchiveError}`);
+      }
       const detail = await fetch(`/api/commercial/quotes/${quote.id}`).then((r) => r.json());
       if (detail.quote) setQuote(detail.quote);
       router.refresh();
@@ -186,6 +194,7 @@ export function QuoteEditor({
       setError(e instanceof Error ? e.message : "Erreur");
     } finally {
       setBusyStatus(false);
+      setAccepting(false);
     }
   }
 
@@ -249,12 +258,16 @@ export function QuoteEditor({
             <p className="text-xs text-slate-500">{saveLabel}</p>
             <div className="flex flex-wrap justify-end gap-2">
               <a
-                href={`/api/commercial/quotes/${quote.id}/pdf`}
+                href={
+                  acceptedPdfAvailable
+                    ? `/api/commercial/quotes/${quote.id}/accepted-pdf`
+                    : `/api/commercial/quotes/${quote.id}/pdf`
+                }
                 target="_blank"
                 rel="noreferrer"
                 className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-[#1e3a5f]"
               >
-                PDF
+                {acceptedPdfAvailable ? "PDF figé à l’acceptation" : "Aperçu PDF"}
               </a>
               {!canEdit &&
               ["SENT", "VIEWED", "ACCEPTED", "VALIDATED"].includes(quote.status) ? (
@@ -282,9 +295,9 @@ export function QuoteEditor({
                   type="button"
                   disabled={busyStatus}
                   onClick={() => void setStatus("ACCEPTED")}
-                  className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white"
+                  className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
                 >
-                  Accepté
+                  {accepting ? "Acceptation…" : "Accepté"}
                 </button>
               ) : null}
             </div>

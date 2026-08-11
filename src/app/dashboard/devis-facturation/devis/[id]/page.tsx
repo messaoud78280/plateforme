@@ -7,8 +7,10 @@ import { getQuoteDetail } from "@/lib/commercial/quotes";
 import { loadDealFinancialSummary } from "@/lib/commercial/deal-summary";
 import { QuoteEditor } from "@/components/commercial/QuoteEditor";
 import { QuoteCommercialFlow } from "@/components/commercial/QuoteCommercialFlow";
+import { QuoteAcceptedArchiveCard } from "@/components/commercial/QuoteAcceptedArchiveCard";
 import { roundMoney } from "@/lib/commercial/money";
 import { prisma } from "@/lib/prisma";
+import { loadAcceptedArchiveUi } from "@/lib/commercial/accepted-snapshot";
 
 export const dynamic = "force-dynamic";
 
@@ -29,8 +31,10 @@ export default async function DevisDetailPage({
     ["DRAFT", "TO_VALIDATE", "VALIDATED"].includes(quote.status) &&
     quote.currentVersion?.lockState === "DRAFT";
 
-  const [summary, invoiceStats] = await Promise.all([
-    quote.status === "ACCEPTED" ? loadDealFinancialSummary(orgId, id) : null,
+  const [summary, invoiceStats, archive] = await Promise.all([
+    quote.status === "ACCEPTED" || quote.acceptedAt
+      ? loadDealFinancialSummary(orgId, id)
+      : null,
     prisma.commercialInvoice.findMany({
       where: {
         organizationId: orgId,
@@ -39,6 +43,9 @@ export default async function DevisDetailPage({
       },
       select: { amountPaid: true },
     }),
+    quote.acceptedVersionId || quote.status === "ACCEPTED"
+      ? loadAcceptedArchiveUi(orgId, id)
+      : null,
   ]);
 
   const hasInvoice = invoiceStats.length > 0;
@@ -61,7 +68,20 @@ export default async function DevisDetailPage({
           Validité dépassée — le statut stocké n’est pas modifié automatiquement.
         </p>
       ) : null}
-      <QuoteEditor initial={quote as never} canEdit={canEdit} />
+      <QuoteEditor
+        initial={quote as never}
+        canEdit={canEdit}
+        acceptedPdfAvailable={Boolean(archive?.snapshot)}
+      />
+      {archive?.hasAcceptedVersion ? (
+        <QuoteAcceptedArchiveCard
+          quoteId={id}
+          versionNumber={archive.versionNumber}
+          acceptedAt={archive.acceptedAt}
+          snapshot={archive.snapshot}
+          historicalMissing={archive.historicalMissing}
+        />
+      ) : null}
       {summary ? (
         <section className="rounded-xl border border-slate-200 bg-white p-4">
           <h2 className="text-sm font-bold text-slate-900">Synthèse financière</h2>

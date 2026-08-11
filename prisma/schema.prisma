@@ -618,6 +618,7 @@ model Organization {
   commercialLaborResources  CommercialLaborResource[]
   commercialEquipmentResources CommercialEquipmentResource[]
   commercialStatusEvents    CommercialStatusEvent[]
+  commercialQuoteSnapshots  CommercialQuoteSnapshot[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -3805,6 +3806,7 @@ model CommercialQuote {
   versions          CommercialQuoteVersion[] @relation("CommercialQuoteVersions")
   amendments        CommercialAmendment[]
   invoices          CommercialInvoice[]
+  snapshots         CommercialQuoteSnapshot[]
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
@@ -3839,10 +3841,37 @@ model CommercialQuoteVersion {
   quote          CommercialQuote  @relation("CommercialQuoteVersions", fields: [quoteId], references: [id], onDelete: Cascade)
   sections       CommercialQuoteSection[]
   lines          CommercialQuoteLine[]
+  snapshots      CommercialQuoteSnapshot[]
 
   @@unique([quoteId, versionNumber])
   @@index([organizationId])
   @@index([quoteId])
+}
+
+/// PDF figé à l’acceptation — métadonnées uniquement (bytes en storage privé).
+/// Pas une signature électronique ni une preuve juridique certifiée.
+model CommercialQuoteSnapshot {
+  id             String   @id @default(cuid())
+  organizationId String
+  quoteId        String
+  quoteVersionId String
+  /// V1C-A : ACCEPTED_PDF uniquement.
+  kind           String   @default("ACCEPTED_PDF")
+  storageKey     String
+  sha256         String
+  mimeType       String   @default("application/pdf")
+  fileSize       Int
+  generatedAt    DateTime
+  createdAt      DateTime @default(now())
+
+  organization Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  quote        CommercialQuote        @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  quoteVersion CommercialQuoteVersion @relation(fields: [quoteVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([quoteVersionId, kind])
+  @@index([organizationId, quoteId])
+  @@index([quoteId])
+  @@index([sha256])
 }
 
 model CommercialQuoteSection {

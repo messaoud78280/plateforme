@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { PlanningBoard } from "@/components/planning/PlanningBoard";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import { isPlanifiableUser } from "@/lib/planning/board";
+import type { PlanningProjectHint } from "@/lib/planning/suggestions";
 import { projectWhereForClientUser } from "@/lib/organization/access";
 import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 
@@ -104,17 +105,38 @@ export default async function PlanningPage() {
 
   const projectWhere = staff ? {} : await projectWhereForClientUser(session.user.id);
 
-  const projects = await prisma.project.findMany({
+  const projectRows = await prisma.project.findMany({
     where: projectWhere,
-    select: { id: true, title: true },
+    select: {
+      id: true,
+      title: true,
+      assignedToId: true,
+      projectAccesses: { select: { userId: true } },
+      worksitePilotages: {
+        where: { archivedAt: null },
+        select: { conducteurId: true },
+        orderBy: { updatedAt: "desc" },
+        take: 1,
+      },
+    },
     orderBy: { title: "asc" },
     take: 80,
   });
+
+  const projects = projectRows.map((p) => ({ id: p.id, title: p.title }));
+  const projectHints: PlanningProjectHint[] = projectRows.map((p) => ({
+    id: p.id,
+    title: p.title,
+    assignedToId: p.assignedToId,
+    accessUserIds: p.projectAccesses.map((a) => a.userId),
+    conducteurId: p.worksitePilotages[0]?.conducteurId ?? null,
+  }));
 
   return (
     <PlanningBoard
       teamUsers={teamUsers}
       projects={projects}
+      projectHints={projectHints}
       currentUserId={session.user.id}
     />
   );

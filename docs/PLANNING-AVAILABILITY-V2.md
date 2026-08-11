@@ -2,11 +2,13 @@
 
 > **Statut :** non implémenté.  
 > **PLANNING-V2B :** wording « Sans affectation » uniquement — **pas** de fausse disponibilité.  
-> **PLANNING-V2B.1 :** filtre UI « Équipe terrain » (`CONDUCTEUR` | `CHEF_CHANTIER`) vs « Toute l'équipe » — Direction / Administratif restent planifiables, masqués par défaut si un profil terrain existe.
+> **PLANNING-V2B.1 :** filtre UI « Équipe terrain » (`CONDUCTEUR` | `CHEF_CHANTIER`) vs « Toute l'équipe » — Direction / Administratif restent planifiables, masqués par défaut si un profil terrain existe.  
+> **PLANNING-V2C :** zone « À organiser » (AgendaEvent sans `responsibleId`), suggestions déterministes (`evaluatePlanningAssigneeSuggestions`), charge planifiée (nb + durée, jamais % capacité), optimistic UI sans `router.refresh`.
 
 ## Problème
 
 Sans données d’absences / horaires, déduire :
+
 
 ```
 aucune AgendaEvent → disponible

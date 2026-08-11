@@ -20,9 +20,18 @@ import {
   planningRoleLabel,
   planningSummary,
   shiftEventToDay,
+  unassignedEventsInRange,
   visibleDaysForRange,
   type PlanningResource,
 } from "../src/lib/planning/board";
+import {
+  evaluatePlanningAssigneeSuggestions,
+  PLANNING_SUGGESTION_WEIGHTS,
+} from "../src/lib/planning/suggestions";
+import {
+  computeResourceWorkload,
+  formatPlanningDuration,
+} from "../src/lib/planning/workload";
 import { startOfWeek } from "../src/lib/agenda/dates";
 
 let failed = 0;
@@ -208,11 +217,79 @@ assert(boardSrc.includes("Toute l'équipe") || boardSrc.includes("Toute l&apos;�
 assert(boardSrc.includes("max-h-[min(70vh,52rem)]"), "V2B.1: scroll vertical board");
 assert(!boardSrc.includes("isoWeekLabel"), "V2B.1: badge S33 doublon retiré");
 
+// —— V2C ——
+const unassignedEvt = ev({
+  id: "ua",
+  responsibleId: null,
+  responsible: null,
+  startAt: "2026-08-11T07:00:00.000Z",
+  endAt: "2026-08-11T11:00:00.000Z",
+});
+const rangeFrom = new Date("2026-08-10T00:00:00.000Z");
+const rangeTo = new Date("2026-08-16T23:59:59.000Z");
+assert(
+  unassignedEventsInRange([unassignedEvt, a], rangeFrom, rangeTo).some((e) => e.id === "ua"),
+  "V2C: À organiser contient event sans responsable",
+);
+
+const suggestions = evaluatePlanningAssigneeSuggestions({
+  event: unassignedEvt,
+  candidates: [
+    { id: "u1", name: "Karim Benali", email: "k@x.fr", permissionProfile: "CONDUCTEUR" },
+    { id: "u2", name: "Julie Martin", email: "j@x.fr", permissionProfile: "ADMINISTRATIF" },
+  ],
+  allEvents: [a],
+  projectHint: {
+    id: "p1",
+    title: "Victor Hugo",
+    assignedToId: "u1",
+    accessUserIds: ["u1"],
+    conducteurId: "u1",
+  },
+});
+assert(suggestions[0]?.userId === "u1", "V2C scénario 1: Karim suggéré en tête");
+assert(suggestions[0]?.suggested === true, "V2C: flag Suggéré sur meilleur sans conflit");
+assert(
+  suggestions[0]!.reasons.includes("conducteur_pilotage") ||
+    suggestions[0]!.reasons.includes("assigne_projet"),
+  "V2C: raison factuelle chantier",
+);
+assert(suggestions[0]!.reasons.includes("aucun_conflit"), "V2C: aucun conflit Karim mardi");
+assert(
+  suggestions.find((s) => s.userId === "u2")!.reasons.includes("role_moins_adapte"),
+  "V2C: Julie rôle moins adapté",
+);
+assert(PLANNING_SUGGESTION_WEIGHTS.conducteur_pilotage === 40, "V2C: poids centralisés");
+
+const wl = computeResourceWorkload([a], "u1", [day]);
+assert(wl.assignments === 1, "V2C: 1 affectation charge");
+assert(wl.minutes === 240, "V2C: 4h = 240 min");
+assert(formatPlanningDuration(450) === "7 h 30", "V2C: format 7 h 30");
+assert(formatPlanningDuration(null) === null, "V2C: pas de durée fictive");
+
+assert(boardSrc.includes("À organiser"), "V2C: zone À organiser");
+assert(boardSrc.includes("Affecter →") || boardSrc.includes("Affecter"), "V2C: action Affecter");
+assert(boardSrc.includes("evaluatePlanningAssigneeSuggestions"), "V2C: moteur suggestions");
+assert(boardSrc.includes("patchEventOptimistic"), "V2C: optimistic UI");
+assert(boardSrc.includes("Affecter quand même"), "V2C: conflit confirmé");
+assert(boardSrc.includes("CollaboratorPanel"), "V2C: panneau collaborateur");
+assert(boardSrc.includes("computeResourceWorkload"), "V2C: charge planifiée");
+assert(
+  !boardSrc.includes("router.refresh(") && !boardSrc.includes("router.refresh()"),
+  "V2C: pas d'appel router.refresh",
+);
+assert(!/openai|anthropic|gemini|OpenAI/i.test(boardSrc), "V2C: aucune IA externe dans board");
+const sugSrc = readFileSync(join(process.cwd(), "src/lib/planning/suggestions.ts"), "utf8");
+assert(!/openai|anthropic|gemini|OpenAI|@ai-sdk/i.test(sugSrc), "V2C: suggestions sans SDK IA");
+assert(sugSrc.includes("PLANNING_SUGGESTION_WEIGHTS"), "V2C: poids explicables");
+assert(sugSrc.includes("déterministes") || sugSrc.includes("determinist"), "V2C: moteur déterministe");
+
 const pageSrc = readFileSync(join(process.cwd(), "src/app/dashboard/planning/page.tsx"), "utf8");
 assert(pageSrc.includes("isExternalPortalUser"), "V2B H: externes redirigés");
 assert(pageSrc.includes("isPlanifiableUser"), "V2B H: filtre planifiables");
+assert(pageSrc.includes("projectHints"), "V2C: projectHints pour suggestions");
 
 if (failed) {
   process.exit(1);
 }
-console.log("\nPlanning board helpers OK (V2A+V2B+V2B.1)");
+console.log("\nPlanning board helpers OK (V2A+V2B+V2B.1+V2C)");

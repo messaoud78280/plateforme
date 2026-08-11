@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * PLANNING-V2B — vue ressources.
- * Board = collaborateurs planifiables × période, enrichi par AgendaEvent (source unique).
- * Amélioration CORE volontaire (correcte pour toute plateforme) — pas de wording SETRIM.
+ * PLANNING-V2C — vue ressources actionnable.
+ * Board = collaborateurs × période, enrichi par AgendaEvent (source unique).
+ * Suggestions déterministes — pas d'IA / LLM.
  */
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -26,7 +26,6 @@ import {
   hasTerrainPlanifiableUsers,
   initialsFromName,
   isDragBlocked,
-  isResourceFreeOnDay,
   listEventConflicts,
   planningBlockLabel,
   planningPeriodLabel,
@@ -40,6 +39,15 @@ import {
   type PlanningTeamUser,
   type PlanningWorkDays,
 } from "@/lib/planning/board";
+import {
+  evaluatePlanningAssigneeSuggestions,
+  type PlanningProjectHint,
+} from "@/lib/planning/suggestions";
+import {
+  computeResourceWorkload,
+  formatPlanningDuration,
+  nextAssignmentForResource,
+} from "@/lib/planning/workload";
 import {
   nextPlanningZoom,
   planningBlockTextPx,
@@ -58,12 +66,18 @@ type ViewMode = "day" | "week" | "fortnight";
 type Props = {
   teamUsers: PlanningTeamUser[];
   projects: { id: string; title: string }[];
+  projectHints?: PlanningProjectHint[];
   currentUserId: string;
 };
 
 const DAY_HOURS = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
 
-export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
+export function PlanningBoard({
+  teamUsers,
+  projects,
+  projectHints = [],
+  currentUserId,
+}: Props) {
   const [view, setView] = useState<ViewMode>("week");
   const [cursor, setCursor] = useState(() => new Date());
   const [events, setEvents] = useState<AgendaEventDTO[]>([]);
@@ -76,8 +90,8 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
   const [workDays, setWorkDays] = useState<PlanningWorkDays>(5);
   const [q, setQ] = useState("");
   const [filterProjectId, setFilterProjectId] = useState("");
-  const [filterAvailableOnly, setFilterAvailableOnly] = useState(false);
-  const [filterConflictsOnly, setFilterConflictsOnly] = useState(false);
+  /** all | conflicts | unassigned — filtres naturels V2C */
+  const [filterState, setFilterState] = useState<"all" | "conflicts" | "unassigned">("all");
   const [showFilters, setShowFilters] = useState(false);
   const canUseTerrainScope = useMemo(() => hasTerrainPlanifiableUsers(teamUsers), [teamUsers]);
   const [resourceScope, setResourceScope] = useState<PlanningResourceScope>("terrain");
@@ -85,6 +99,14 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
     day: Date;
     resourceId: string;
   } | null>(null);
+  const [assignEvent, setAssignEvent] = useState<AgendaEventDTO | null>(null);
+  const [conflictConfirm, setConflictConfirm] = useState<{
+    event: AgendaEventDTO;
+    userId: string;
+    userName: string;
+    warning: string;
+  } | null>(null);
+  const [personPanelId, setPersonPanelId] = useState<string | null>(null);
   const [createBusy, setCreateBusy] = useState(false);
   const [dragEventId, setDragEventId] = useState<string | null>(null);
 
@@ -134,8 +156,8 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
     );
   }, [teamUsers, resourceScope, canUseTerrainScope]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setLoading(true);
     setError("");
     try {
       const qs = new URLSearchParams({
@@ -145,22 +167,28 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
       });
       const res = await fetch(`/api/agenda/events?${qs}`, { cache: "no-store" });
       if (!res.ok) {
-        setError("Impossible de charger le planning.");
+        if (!opts?.silent) setError("Impossible de charger le planning.");
         return;
       }
       const data = await res.json();
       const list = Array.isArray(data.events) ? (data.events as AgendaEventDTO[]) : [];
       setEvents(filterPlanningEvents(list));
     } catch {
-      setError("Erreur réseau.");
+      if (!opts?.silent) setError("Erreur réseau.");
     } finally {
-      setLoading(false);
+      if (!opts?.silent) setLoading(false);
     }
   }, [from, to]);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  const projectHintById = useMemo(() => {
+    const map = new Map<string, PlanningProjectHint>();
+    for (const h of projectHints) map.set(h.id, h);
+    return map;
+  }, [projectHints]);
 
   const filteredEvents = useMemo(() => {
     let list = events;
@@ -174,11 +202,14 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
         return blob.includes(qq);
       });
     }
-    if (filterConflictsOnly) {
+    if (filterState === "conflicts") {
       list = list.filter((e) => listEventConflicts(e, events).length > 0);
     }
+    if (filterState === "unassigned") {
+      list = list.filter((e) => !e.responsibleId);
+    }
     return list;
-  }, [events, filterProjectId, q, filterConflictsOnly]);
+  }, [events, filterProjectId, q, filterState]);
 
   const visibleResources = useMemo(() => {
     let list = resources;
@@ -205,11 +236,7 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
         ),
       );
     }
-    if (filterAvailableOnly) {
-      const focusDay = view === "day" ? startOfDay(cursor) : startOfDay(new Date());
-      list = list.filter((r) => isResourceFreeOnDay(filteredEvents, r.id, focusDay));
-    }
-    if (filterConflictsOnly) {
+    if (filterState === "conflicts") {
       list = list.filter((r) =>
         days.some((d) =>
           eventsForResourceOnDay(filteredEvents, r.id, d).some(
@@ -218,23 +245,17 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
         ),
       );
     }
+    // « Sans responsable » : on garde toute l'équipe visible (affectation depuis À organiser)
     return list;
-  }, [
-    resources,
-    q,
-    filterProjectId,
-    filterAvailableOnly,
-    filterConflictsOnly,
-    filteredEvents,
-    days,
-    view,
-    cursor,
-    events,
-  ]);
+  }, [resources, q, filterProjectId, filterState, filteredEvents, days, events]);
 
   const unassigned = useMemo(
-    () => unassignedEventsInRange(filteredEvents, from, to),
-    [filteredEvents, from, to],
+    () => unassignedEventsInRange(
+      filterState === "unassigned" ? events.filter((e) => !e.responsibleId) : filteredEvents,
+      from,
+      to,
+    ),
+    [filteredEvents, events, filterState, from, to],
   );
 
   const summary = useMemo(
@@ -292,6 +313,26 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
     return { ok: true };
   }
 
+  /** Optimistic UI — pas de router.refresh ; rollback si API échoue. */
+  async function patchEventOptimistic(
+    id: string,
+    body: Record<string, unknown>,
+    applyLocal: (prev: AgendaEventDTO[]) => AgendaEventDTO[],
+    successMsg: string,
+  ): Promise<boolean> {
+    const snapshot = events;
+    setEvents(applyLocal(events));
+    const result = await patchEvent(id, body);
+    if (!result.ok) {
+      setEvents(snapshot);
+      setToast(result.message || "Échec");
+      return false;
+    }
+    setToast(successMsg);
+    void load({ silent: true });
+    return true;
+  }
+
   async function onDropCell(resourceId: string, day: Date) {
     if (!dragEventId) return;
     const ev = events.find((e) => e.id === dragEventId);
@@ -307,16 +348,87 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
       startAt: times.startAt,
       endAt: times.endAt,
     };
+    const person =
+      resourceId !== "__unassigned"
+        ? resources.find((r) => r.id === resourceId)
+        : null;
     if (resourceId !== "__unassigned" && resourceId !== ev.responsibleId) {
       body.responsibleId = resourceId;
     }
-    const result = await patchEvent(ev.id, body);
-    if (!result.ok) {
-      setToast(result.message || "Échec");
+    const dayLabel = day.toLocaleDateString("fr-FR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+    const msg = person
+      ? `Affecté à ${person.name.split(" ")[0]} · ${dayLabel}`
+      : `Déplacé au ${dayLabel}`;
+    await patchEventOptimistic(
+      ev.id,
+      body,
+      (prev) =>
+        prev.map((e) =>
+          e.id === ev.id
+            ? {
+                ...e,
+                startAt: times.startAt,
+                endAt: times.endAt,
+                responsibleId:
+                  typeof body.responsibleId === "string"
+                    ? body.responsibleId
+                    : e.responsibleId,
+                responsible:
+                  person
+                    ? { id: person.id, name: person.name, email: person.email }
+                    : e.responsible,
+              }
+            : e,
+        ),
+      msg,
+    );
+  }
+
+  async function assignToUser(event: AgendaEventDTO, userId: string, force = false) {
+    const user = teamUsers.find((u) => u.id === userId);
+    if (!user) return;
+    const probeConflicts = listEventConflicts(
+      { ...event, responsibleId: userId },
+      events,
+    );
+    if (probeConflicts.length > 0 && !force) {
+      const peer = probeConflicts[0]!;
+      const when = peer.otherStartAt
+        ? new Date(peer.otherStartAt).toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "";
+      setConflictConfirm({
+        event,
+        userId,
+        userName: user.name,
+        warning: `${user.name.split(" ")[0]} a déjà « ${peer.otherTitle} »${when ? ` (${when})` : ""}.`,
+      });
       return;
     }
-    setToast("Affectation mise à jour");
-    await load();
+    setConflictConfirm(null);
+    setAssignEvent(null);
+    const ok = await patchEventOptimistic(
+      event.id,
+      { responsibleId: userId },
+      (prev) =>
+        prev.map((e) =>
+          e.id === event.id
+            ? {
+                ...e,
+                responsibleId: userId,
+                responsible: { id: user.id, name: user.name, email: user.email },
+              }
+            : e,
+        ),
+      `Affecté à ${user.name.split(" ")[0]}`,
+    );
+    if (!ok) setAssignEvent(event);
   }
 
   async function submitCreate(form: FormData) {
@@ -354,13 +466,16 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
       }
       setCreateDraft(null);
       setToast("Affectation créée");
-      await load();
+      await load({ silent: true });
     } finally {
       setCreateBusy(false);
     }
   }
 
   const emptyPeriod = !loading && filteredEvents.length === 0;
+  const personPanel = personPanelId
+    ? resources.find((r) => r.id === personPanelId) ?? null
+    : null;
 
   return (
     <div
@@ -582,21 +697,19 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
                 ))}
               </select>
             </label>
-            <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">
-              <input
-                type="checkbox"
-                checked={filterAvailableOnly}
-                onChange={(e) => setFilterAvailableOnly(e.target.checked)}
-              />
-              Sans affectation
-            </label>
-            <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">
-              <input
-                type="checkbox"
-                checked={filterConflictsOnly}
-                onChange={(e) => setFilterConflictsOnly(e.target.checked)}
-              />
-              Conflits
+            <label className="flex min-w-[10rem] flex-col gap-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+              État
+              <select
+                value={filterState}
+                onChange={(e) =>
+                  setFilterState(e.target.value as "all" | "conflicts" | "unassigned")
+                }
+                className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-800"
+              >
+                <option value="all">Tous</option>
+                <option value="conflicts">Conflits</option>
+                <option value="unassigned">Sans responsable</option>
+              </select>
             </label>
           </div>
         ) : null}
@@ -640,43 +753,68 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
       ) : null}
 
       {unassigned.length > 0 ? (
-        <section className="rounded-2xl border border-amber-200/80 bg-amber-50/60 px-4 py-3">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <h2 className="text-xs font-extrabold uppercase tracking-wide text-amber-950">
-              Sans responsable
+        <section className="rounded-xl border border-slate-200/90 bg-white px-3 py-2.5 shadow-sm">
+          <div className="mb-2 flex items-center gap-2">
+            <h2 className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-500">
+              À organiser
             </h2>
-            <span className="rounded-full bg-amber-200/80 px-2 py-0.5 text-[11px] font-bold text-amber-950">
+            <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
               {unassigned.length}
             </span>
           </div>
-          <ul className="flex flex-wrap gap-2">
-            {unassigned.slice(0, 8).map((e) => {
+          <ul className="space-y-1.5">
+            {unassigned.slice(0, 6).map((e) => {
               const label = planningBlockLabel(e);
+              const day = new Date(e.startAt);
               return (
-                <li key={e.id}>
+                <li
+                  key={e.id}
+                  draggable={!isDragBlocked(e).blocked}
+                  onDragStart={() => setDragEventId(e.id)}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50/60 px-2.5 py-2"
+                >
                   <button
                     type="button"
                     onClick={() => setSelectedId(e.id)}
-                    className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-left shadow-sm hover:border-amber-300"
+                    className="min-w-0 flex-1 text-left"
                   >
-                    <p className="text-[11px] font-bold uppercase text-slate-800">{label.site}</p>
-                    <p className="text-[10px] text-slate-600">
-                      {label.type} ·{" "}
-                      {new Date(e.startAt).toLocaleDateString("fr-FR", {
+                    <p className="truncate text-xs font-extrabold uppercase text-slate-900">
+                      {label.site}
+                    </p>
+                    <p className="text-[11px] font-medium text-slate-600">
+                      {label.type}
+                      {" · "}
+                      {day.toLocaleDateString("fr-FR", {
                         weekday: "short",
                         day: "numeric",
                         month: "short",
                       })}
+                      {!e.allDay ? ` · ${formatTime(day)}` : ""}
+                      {" · Sans responsable"}
                     </p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAssignEvent(e)}
+                    className="shrink-0 rounded-md bg-[#1e3a5f] px-2.5 py-1 text-[11px] font-bold text-white hover:bg-[#16304f]"
+                  >
+                    Affecter →
                   </button>
                 </li>
               );
             })}
           </ul>
+          {unassigned.length > 6 ? (
+            <p className="mt-1.5 text-[10px] font-medium text-slate-500">
+              +{unassigned.length - 6} autre{unassigned.length - 6 > 1 ? "s" : ""}
+            </p>
+          ) : null}
         </section>
+      ) : !loading ? (
+        <p className="px-1 text-[11px] font-medium text-slate-400">Tout est organisé.</p>
       ) : null}
 
-      {/* Mobile — liste collaborateurs toujours visible */}
+      {/* Mobile — liste collaborateurs + à organiser */}
       <div className="lg:hidden">
         <MobileDayPeople
           day={startOfDay(cursor)}
@@ -687,6 +825,7 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
           onSelect={setSelectedId}
           onConflict={setConflictFocusId}
           onCreate={(resourceId, day) => setCreateDraft({ resourceId, day })}
+          onOpenPerson={setPersonPanelId}
         />
       </div>
 
@@ -716,6 +855,7 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
               }
               setDragEventId={setDragEventId}
               onDropCell={onDropCell}
+              onOpenPerson={setPersonPanelId}
             />
         ) : (
           <table className="w-full min-w-[860px] border-collapse text-left">
@@ -751,7 +891,12 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
                   className={cn("align-top", idx % 2 === 0 ? "bg-white" : "bg-slate-50/40")}
                 >
                   <td className="sticky left-0 z-10 border-b border-r border-slate-200 bg-inherit px-3 py-2.5">
-                    <ResourceCell resource={r} currentUserId={currentUserId} />
+                    <ResourceCell
+                      resource={r}
+                      currentUserId={currentUserId}
+                      workload={computeResourceWorkload(filteredEvents, r.id, days)}
+                      onOpen={() => setPersonPanelId(r.id)}
+                    />
                   </td>
                   {days.map((d) => {
                     const cell = eventsForResourceOnDay(filteredEvents, r.id, d);
@@ -805,6 +950,14 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
           allEvents={events}
           onClose={() => setSelectedId(null)}
           onConflict={() => setConflictFocusId(selected.id)}
+          onAssign={
+            !selected.responsibleId
+              ? () => {
+                  setAssignEvent(selected);
+                  setSelectedId(null);
+                }
+              : undefined
+          }
         />
       ) : null}
 
@@ -828,6 +981,63 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
           busy={createBusy}
           onClose={() => setCreateDraft(null)}
           onSubmit={(fd) => void submitCreate(fd)}
+        />
+      ) : null}
+
+      {assignEvent ? (
+        <AssignExistingModal
+          event={assignEvent}
+          candidates={teamUsers}
+          allEvents={events}
+          projectHint={
+            assignEvent.projectId
+              ? projectHintById.get(assignEvent.projectId) ?? null
+              : null
+          }
+          onClose={() => setAssignEvent(null)}
+          onPick={(userId) => void assignToUser(assignEvent, userId)}
+        />
+      ) : null}
+
+      {conflictConfirm ? (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-900/40 p-4 sm:items-center">
+          <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl">
+            <p className="text-sm font-extrabold text-slate-900">⚠ Chevauchement</p>
+            <p className="mt-2 text-sm text-slate-600">{conflictConfirm.warning}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700"
+                onClick={() => setConflictConfirm(null)}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
+                onClick={() =>
+                  void assignToUser(conflictConfirm.event, conflictConfirm.userId, true)
+                }
+              >
+                Affecter quand même
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {personPanel ? (
+        <CollaboratorPanel
+          resource={personPanel}
+          currentUserId={currentUserId}
+          workload={computeResourceWorkload(filteredEvents, personPanel.id, days)}
+          next={nextAssignmentForResource(filteredEvents, personPanel.id, from)}
+          onClose={() => setPersonPanelId(null)}
+          onFilterOnly={() => {
+            setQ(personPanel.name.split(" ")[0] || personPanel.name);
+            setShowFilters(true);
+            setPersonPanelId(null);
+          }}
         />
       ) : null}
     </div>
@@ -904,26 +1114,57 @@ function SummaryChip({
 function ResourceCell({
   resource,
   currentUserId,
+  workload,
+  onOpen,
 }: {
   resource: PlanningResource;
   currentUserId: string;
+  workload?: { assignments: number; minutes: number | null };
+  onOpen?: () => void;
 }) {
   const initials = initialsFromName(resource.name);
   const role = planningRoleLabel({
     ...resource,
     currentUserId,
   });
-  return (
-    <div className="flex items-center gap-2.5">
+  const duration = formatPlanningDuration(workload?.minutes ?? null);
+  const loadLine =
+    workload == null
+      ? null
+      : workload.assignments === 0
+        ? "Sans affectation"
+        : duration
+          ? `${workload.assignments} affectation${workload.assignments > 1 ? "s" : ""} · ${duration}`
+          : `${workload.assignments} affectation${workload.assignments > 1 ? "s" : ""}`;
+
+  const inner = (
+    <>
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1e3a5f] text-[11px] font-extrabold text-white">
         {initials}
       </span>
       <div className="min-w-0">
         <p className="truncate text-sm font-extrabold text-slate-900">{resource.name}</p>
         <p className="truncate text-[11px] font-medium text-slate-500">{role}</p>
+        {loadLine ? (
+          <p className="truncate text-[10px] font-semibold text-slate-400">{loadLine}</p>
+        ) : null}
       </div>
-    </div>
+    </>
   );
+
+  if (onOpen) {
+    return (
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex w-full items-center gap-2.5 rounded-lg text-left hover:bg-slate-50/80"
+      >
+        {inner}
+      </button>
+    );
+  }
+
+  return <div className="flex items-center gap-2.5">{inner}</div>;
 }
 
 function AssignmentBlock({
@@ -983,7 +1224,7 @@ function AssignmentBlock({
           }}
           className="mt-0.5 text-[10px] font-extrabold text-red-700 hover:underline"
         >
-          ⚠ Conflit
+          ⚠ Chevauchement
         </button>
       ) : null}
     </div>
@@ -1002,6 +1243,7 @@ function DayHourGrid({
   onCreate,
   setDragEventId,
   onDropCell,
+  onOpenPerson,
 }: {
   day: Date;
   resources: PlanningResource[];
@@ -1014,6 +1256,7 @@ function DayHourGrid({
   onCreate: (resourceId: string) => void;
   setDragEventId: (id: string | null) => void;
   onDropCell: (resourceId: string, day: Date) => void | Promise<void>;
+  onOpenPerson?: (id: string) => void;
 }) {
   const hourH = Math.max(36, Math.round(cellMin / 2.2));
   return (
@@ -1027,7 +1270,12 @@ function DayHourGrid({
         </div>
         {resources.map((r) => (
           <div key={r.id} className="border-r border-slate-200 px-2 py-2">
-            <ResourceCell resource={r} currentUserId={currentUserId} />
+            <ResourceCell
+              resource={r}
+              currentUserId={currentUserId}
+              workload={computeResourceWorkload(events, r.id, [day])}
+              onOpen={onOpenPerson ? () => onOpenPerson(r.id) : undefined}
+            />
           </div>
         ))}
       </div>
@@ -1139,6 +1387,7 @@ function MobileDayPeople({
   onSelect,
   onConflict,
   onCreate,
+  onOpenPerson,
 }: {
   day: Date;
   resources: PlanningResource[];
@@ -1148,6 +1397,7 @@ function MobileDayPeople({
   onSelect: (id: string) => void;
   onConflict: (id: string) => void;
   onCreate: (resourceId: string, day: Date) => void;
+  onOpenPerson?: (id: string) => void;
 }) {
   return (
     <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
@@ -1161,9 +1411,15 @@ function MobileDayPeople({
       <ul className="space-y-2">
         {resources.map((r) => {
           const cell = eventsForResourceOnDay(events, r.id, day);
+          const wl = computeResourceWorkload(events, r.id, [day]);
           return (
             <li key={r.id} className="rounded-xl border border-slate-200 p-2.5">
-              <ResourceCell resource={r} currentUserId={currentUserId} />
+              <ResourceCell
+                resource={r}
+                currentUserId={currentUserId}
+                workload={wl}
+                onOpen={onOpenPerson ? () => onOpenPerson(r.id) : undefined}
+              />
               <div className="mt-2 space-y-1.5">
                 {cell.length === 0 ? (
                   <EmptyAssignCell mobile onClick={() => onCreate(r.id, day)} />
@@ -1193,7 +1449,7 @@ function MobileDayPeople({
                               onConflict(e.id);
                             }}
                           >
-                            ⚠ Conflit
+                            ⚠ Chevauchement
                           </button>
                         ) : null}
                       </button>
@@ -1214,11 +1470,13 @@ function DetailPanel({
   allEvents,
   onClose,
   onConflict,
+  onAssign,
 }: {
   event: AgendaEventDTO;
   allEvents: AgendaEventDTO[];
   onClose: () => void;
   onConflict: () => void;
+  onAssign?: () => void;
 }) {
   const conflict = listEventConflicts(event, allEvents).length > 0;
   return (
@@ -1248,14 +1506,23 @@ function DetailPanel({
               onClick={onConflict}
               className="mt-2 text-xs font-bold text-red-700 underline"
             >
-              ⚠ Voir le conflit
+              ⚠ Voir le chevauchement
             </button>
           ) : null}
         </div>
         <div className="flex gap-2">
+          {!event.responsibleId && onAssign ? (
+            <button
+              type="button"
+              onClick={onAssign}
+              className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white"
+            >
+              Affecter
+            </button>
+          ) : null}
           <Link
             href={eventHref(event)}
-            className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white"
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700"
           >
             Ouvrir
           </Link>
@@ -1450,6 +1717,189 @@ function CreateAssignModal({
           </button>
         </div>
       </form>
+    </div>
+  );
+}
+
+function AssignExistingModal({
+  event,
+  candidates,
+  allEvents,
+  projectHint,
+  onClose,
+  onPick,
+}: {
+  event: AgendaEventDTO;
+  candidates: PlanningTeamUser[];
+  allEvents: AgendaEventDTO[];
+  projectHint: PlanningProjectHint | null;
+  onClose: () => void;
+  onPick: (userId: string) => void;
+}) {
+  const label = planningBlockLabel(event);
+  const suggestions = useMemo(
+    () =>
+      evaluatePlanningAssigneeSuggestions({
+        event,
+        candidates,
+        allEvents,
+        projectHint,
+      }),
+    [event, candidates, allEvents, projectHint],
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center">
+      <div className="max-h-[85vh] w-full max-w-md overflow-auto rounded-2xl bg-white p-4 shadow-xl">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+              Affecter
+            </p>
+            <h2 className="truncate text-base font-extrabold text-slate-900">{label.site}</h2>
+            <p className="text-xs font-medium text-slate-600">
+              {label.type}
+              {" · "}
+              {new Date(event.startAt).toLocaleDateString("fr-FR", {
+                weekday: "short",
+                day: "numeric",
+                month: "short",
+              })}
+              {!event.allDay
+                ? ` · ${formatTime(new Date(event.startAt))}–${formatTime(new Date(event.endAt))}`
+                : ""}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="shrink-0 text-xs font-semibold text-slate-500"
+          >
+            Fermer
+          </button>
+        </div>
+
+        <ul className="mt-3 space-y-1.5">
+          {suggestions.slice(0, 8).map((s) => (
+            <li key={s.userId}>
+              <button
+                type="button"
+                onClick={() => onPick(s.userId)}
+                className={cn(
+                  "flex w-full flex-col rounded-xl border px-3 py-2.5 text-left transition hover:border-[#1e3a5f]/40",
+                  s.suggested
+                    ? "border-[#1e3a5f]/35 bg-[#1e3a5f]/[0.04]"
+                    : "border-slate-200 bg-white",
+                )}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-extrabold text-slate-900">{s.name}</p>
+                  {s.suggested ? (
+                    <span className="rounded-full bg-[#1e3a5f] px-2 py-0.5 text-[10px] font-bold text-white">
+                      Suggéré
+                    </span>
+                  ) : null}
+                </div>
+                <p className="text-[11px] font-medium text-slate-500">{s.roleLabel}</p>
+                <p className="mt-1 text-[11px] font-medium text-slate-600">
+                  {s.reasonLabels
+                    .filter((r) => !r.startsWith("Rôle moins"))
+                    .slice(0, 3)
+                    .map((r) => (r === "Conflit horaire" ? `⚠ ${r}` : `✓ ${r}`))
+                    .join(" · ")}
+                  {s.reasons.includes("role_moins_adapte") ? " · Rôle moins adapté" : ""}
+                </p>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-[10px] font-medium text-slate-400">
+          Suggestion déterministe — vous validez l’affectation.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function CollaboratorPanel({
+  resource,
+  currentUserId,
+  workload,
+  next,
+  onClose,
+  onFilterOnly,
+}: {
+  resource: PlanningResource;
+  currentUserId: string;
+  workload: { assignments: number; minutes: number | null; projectIds: string[] };
+  next: AgendaEventDTO | null;
+  onClose: () => void;
+  onFilterOnly: () => void;
+}) {
+  const role = planningRoleLabel({ ...resource, currentUserId });
+  const duration = formatPlanningDuration(workload.minutes);
+  const nextLabel = next ? planningBlockLabel(next) : null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center">
+      <aside className="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <h2 className="text-base font-extrabold text-slate-900">{resource.name}</h2>
+            <p className="text-xs font-medium text-slate-500">{role}</p>
+          </div>
+          <button type="button" onClick={onClose} className="text-xs font-semibold text-slate-500">
+            Fermer
+          </button>
+        </div>
+
+        <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2.5">
+          <p className="text-[10px] font-extrabold uppercase tracking-wide text-slate-500">
+            Cette période
+          </p>
+          <p className="mt-1 text-sm font-bold text-slate-800">
+            {workload.assignments} affectation{workload.assignments > 1 ? "s" : ""}
+            {duration ? ` · ${duration} planifiées` : ""}
+          </p>
+          <p className="text-xs font-medium text-slate-600">
+            {workload.projectIds.length} chantier{workload.projectIds.length > 1 ? "s" : ""}
+          </p>
+        </div>
+
+        {next && nextLabel ? (
+          <div className="mt-3">
+            <p className="text-[10px] font-extrabold uppercase tracking-wide text-slate-500">
+              Prochain
+            </p>
+            <p className="mt-1 text-sm font-extrabold uppercase text-slate-900">{nextLabel.site}</p>
+            <p className="text-xs font-medium text-slate-600">
+              {new Date(next.startAt).toLocaleDateString("fr-FR", {
+                weekday: "long",
+                day: "numeric",
+                month: "short",
+              })}
+              {" · "}
+              {nextLabel.time}
+            </p>
+          </div>
+        ) : null}
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onFilterOnly}
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700"
+          >
+            Voir uniquement
+          </button>
+          <Link
+            href={`/dashboard/agenda?q=${encodeURIComponent(resource.name)}`}
+            className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white"
+          >
+            Agenda
+          </Link>
+        </div>
+      </aside>
     </div>
   );
 }

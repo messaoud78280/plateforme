@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { marginPercentFromCostSell, roundMoney } from "@/lib/commercial/money";
@@ -45,14 +46,50 @@ function RowActionsMenu({
   const [confirm, setConfirm] = useState<"delete" | "archive" | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  function updateMenuPos() {
+    const btn = btnRef.current;
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    const menuWidth = 176;
+    const left = Math.min(
+      Math.max(8, r.right - menuWidth),
+      window.innerWidth - menuWidth - 8,
+    );
+    const below = r.bottom + 6;
+    const estimatedHeight = 160;
+    const top =
+      below + estimatedHeight > window.innerHeight - 8
+        ? Math.max(8, r.top - estimatedHeight - 6)
+        : below;
+    setMenuPos({ top, left });
+  }
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setMenuPos(null);
+      return;
+    }
+    updateMenuPos();
+    const onScroll = () => updateMenuPos();
+    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open && !confirm) return;
     const onDoc = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      const t = e.target as Node;
+      if (btnRef.current?.contains(t)) return;
+      if (menuRef.current?.contains(t)) return;
+      setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -60,10 +97,11 @@ function RowActionsMenu({
         setConfirm(null);
       }
     };
-    document.addEventListener("mousedown", onDoc);
+    // click (pas mousedown) : évite de fermer dans le même geste d’ouverture
+    document.addEventListener("click", onDoc);
     window.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("click", onDoc);
       window.removeEventListener("keydown", onKey);
     };
   }, [open, confirm]);
@@ -155,136 +193,155 @@ function RowActionsMenu({
     }
   }
 
-  const used = item.quoteLineCount > 0;
+  const used = (item.quoteLineCount ?? 0) > 0;
+
+  const menu =
+    open && menuPos && typeof document !== "undefined"
+      ? createPortal(
+          <div
+            ref={menuRef}
+            role="menu"
+            style={{ top: menuPos.top, left: menuPos.left }}
+            className="fixed z-[100] min-w-[11rem] rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {view === "active" ? (
+              <>
+                <Link
+                  role="menuitem"
+                  href={`/dashboard/devis-facturation/bibliotheque/${item.id}`}
+                  className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
+                  onClick={() => setOpen(false)}
+                >
+                  Modifier
+                </Link>
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled={busy}
+                  className="block w-full px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+                  onClick={() => void duplicate()}
+                >
+                  Dupliquer
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled={busy}
+                  className="block w-full px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
+                  onClick={() => {
+                    setOpen(false);
+                    setConfirm(used ? "archive" : "delete");
+                  }}
+                >
+                  {used ? "Archiver" : "Supprimer"}
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled={busy}
+                  className="block w-full px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+                  onClick={() => void restore()}
+                >
+                  Restaurer
+                </button>
+                <Link
+                  role="menuitem"
+                  href={`/dashboard/devis-facturation/bibliotheque/${item.id}`}
+                  className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
+                  onClick={() => setOpen(false)}
+                >
+                  Consulter
+                </Link>
+              </>
+            )}
+            {error ? (
+              <p className="border-t border-slate-100 px-3 py-2 text-xs text-red-700">{error}</p>
+            ) : null}
+          </div>,
+          document.body,
+        )
+      : null;
+
+  const dialog =
+    confirm && typeof document !== "undefined"
+      ? createPortal(
+          <div
+            className="fixed inset-0 z-[110] flex items-end justify-center bg-slate-900/40 p-4 sm:items-center"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`confirm-${item.id}`}
+            onClick={() => !busy && setConfirm(null)}
+          >
+            <div
+              className="w-full max-w-sm rounded-2xl bg-white p-4 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 id={`confirm-${item.id}`} className="text-base font-bold text-slate-900">
+                {confirm === "archive" ? "Archiver cet ouvrage ?" : "Supprimer cet ouvrage ?"}
+              </h3>
+              <p className="mt-1 font-semibold text-[#1e3a5f]">« {item.name} »</p>
+              <p className="mt-2 text-sm text-slate-600">
+                {confirm === "archive"
+                  ? "Il ne sera plus proposé dans les nouveaux devis. Les devis existants resteront inchangés."
+                  : "Cet ouvrage sera supprimé de la bibliothèque."}
+              </p>
+              {error ? <p className="mt-2 text-xs text-red-700">{error}</p> : null}
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setConfirm(null)}
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void (confirm === "archive" ? archive() : hardDelete())}
+                  className={
+                    confirm === "archive"
+                      ? "rounded-lg bg-[#1e3a5f] px-3 py-2 text-sm font-bold text-white disabled:opacity-60"
+                      : "rounded-lg bg-red-700 px-3 py-2 text-sm font-bold text-white disabled:opacity-60"
+                  }
+                >
+                  {busy ? "…" : confirm === "archive" ? "Archiver" : "Supprimer"}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )
+      : null;
 
   return (
-    <div ref={rootRef} className="relative shrink-0">
+    <div className="relative shrink-0">
       <button
+        ref={btnRef}
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`Actions pour ${item.name}`}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           setOpen((v) => !v);
           setError(null);
         }}
-        className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm font-bold text-slate-600 hover:bg-slate-50"
+        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm font-bold leading-none text-slate-600 hover:bg-slate-50"
       >
         •••
       </button>
-
-      {open ? (
-        <div
-          role="menu"
-          className="absolute right-0 z-30 mt-1 min-w-[11rem] rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {view === "active" ? (
-            <>
-              <Link
-                role="menuitem"
-                href={`/dashboard/devis-facturation/bibliotheque/${item.id}`}
-                className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
-                onClick={() => setOpen(false)}
-              >
-                Modifier
-              </Link>
-              <button
-                type="button"
-                role="menuitem"
-                disabled={busy}
-                className="block w-full px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-50 disabled:opacity-50"
-                onClick={() => void duplicate()}
-              >
-                Dupliquer
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                disabled={busy}
-                className="block w-full px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
-                onClick={() => {
-                  setOpen(false);
-                  setConfirm(used ? "archive" : "delete");
-                }}
-              >
-                {used ? "Archiver" : "Supprimer"}
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                role="menuitem"
-                disabled={busy}
-                className="block w-full px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-50 disabled:opacity-50"
-                onClick={() => void restore()}
-              >
-                Restaurer
-              </button>
-              <Link
-                role="menuitem"
-                href={`/dashboard/devis-facturation/bibliotheque/${item.id}`}
-                className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
-                onClick={() => setOpen(false)}
-              >
-                Consulter
-              </Link>
-            </>
-          )}
-          {error ? <p className="border-t border-slate-100 px-3 py-2 text-xs text-red-700">{error}</p> : null}
-        </div>
-      ) : null}
-
-      {confirm ? (
-        <div
-          className="fixed inset-0 z-[90] flex items-end justify-center bg-slate-900/40 p-4 sm:items-center"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={`confirm-${item.id}`}
-          onClick={() => !busy && setConfirm(null)}
-        >
-          <div
-            className="w-full max-w-sm rounded-2xl bg-white p-4 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 id={`confirm-${item.id}`} className="text-base font-bold text-slate-900">
-              {confirm === "archive" ? "Archiver cet ouvrage ?" : "Supprimer cet ouvrage ?"}
-            </h3>
-            <p className="mt-1 font-semibold text-[#1e3a5f]">« {item.name} »</p>
-            <p className="mt-2 text-sm text-slate-600">
-              {confirm === "archive"
-                ? "Il ne sera plus proposé dans les nouveaux devis. Les devis existants resteront inchangés."
-                : "Cet ouvrage sera supprimé de la bibliothèque."}
-            </p>
-            {error ? <p className="mt-2 text-xs text-red-700">{error}</p> : null}
-            <div className="mt-4 flex justify-end gap-2">
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => setConfirm(null)}
-                className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700"
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void (confirm === "archive" ? archive() : hardDelete())}
-                className={
-                  confirm === "archive"
-                    ? "rounded-lg bg-[#1e3a5f] px-3 py-2 text-sm font-bold text-white disabled:opacity-60"
-                    : "rounded-lg bg-red-700 px-3 py-2 text-sm font-bold text-white disabled:opacity-60"
-                }
-              >
-                {busy ? "…" : confirm === "archive" ? "Archiver" : "Supprimer"}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {menu}
+      {dialog}
     </div>
   );
 }
@@ -298,6 +355,7 @@ export function WorkItemsLibraryClient({
   view: "active" | "archived";
   query?: string;
 }) {
+  const router = useRouter();
   const [items, setItems] = useState(initialItems);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -356,7 +414,7 @@ export function WorkItemsLibraryClient({
         </p>
       ) : null}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="rounded-xl border border-slate-200 bg-white">
         {items.length === 0 ? (
           <p className="p-6 text-sm text-slate-500">
             {query
@@ -409,93 +467,80 @@ export function WorkItemsLibraryClient({
               })}
             </ul>
 
-            <div className="hidden overflow-x-auto md:block">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 text-[10px] font-bold uppercase text-slate-500">
-                  <tr>
-                    <th className="px-4 py-2">Ouvrage</th>
-                    <th className="px-4 py-2">Réf.</th>
-                    <th className="px-4 py-2">Unité</th>
-                    <th className="px-4 py-2">Coût</th>
-                    <th className="px-4 py-2">Vente</th>
-                    <th className="px-4 py-2">Taux de marque</th>
-                    <th className="px-4 py-2">Type</th>
-                    <th className="px-4 py-2 text-right">
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {items.map((w) => {
-                    const marque = marqueOf(w);
-                    const href = `/dashboard/devis-facturation/bibliotheque/${w.id}`;
-                    return (
-                      <tr
-                        key={w.id}
-                        className="group cursor-pointer hover:bg-slate-50/80"
-                        onClick={() => {
-                          window.location.href = href;
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            window.location.href = href;
-                          }
-                        }}
-                        tabIndex={0}
-                        role="link"
-                        aria-label={`Ouvrir ${w.name}`}
-                      >
-                        <td className="px-4 py-2.5">
-                          <span className="font-semibold text-[#1e3a5f] group-hover:underline">
-                            {w.name}
-                          </span>
-                          {w.needsPriceRecalc ? (
-                            <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
-                              À recalculer
+            <div className="hidden md:block">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-50 text-[10px] font-bold uppercase text-slate-500">
+                    <tr>
+                      <th className="px-4 py-2">Ouvrage</th>
+                      <th className="px-4 py-2">Réf.</th>
+                      <th className="px-4 py-2">Unité</th>
+                      <th className="px-4 py-2">Coût</th>
+                      <th className="px-4 py-2">Vente</th>
+                      <th className="px-4 py-2">Taux de marque</th>
+                      <th className="px-4 py-2">Type</th>
+                      <th className="px-4 py-2 text-right">
+                        <span className="sr-only">Actions</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {items.map((w) => {
+                      const marque = marqueOf(w);
+                      const href = `/dashboard/devis-facturation/bibliotheque/${w.id}`;
+                      return (
+                        <tr key={w.id} className="group hover:bg-slate-50/80">
+                          <td className="px-4 py-2.5">
+                            <button
+                              type="button"
+                              className="text-left font-semibold text-[#1e3a5f] hover:underline"
+                              onClick={() => router.push(href)}
+                            >
+                              {w.name}
+                            </button>
+                            {w.needsPriceRecalc ? (
+                              <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
+                                À recalculer
+                              </span>
+                            ) : null}
+                          </td>
+                          <td className="px-4 py-2.5 text-slate-600">{w.reference || "—"}</td>
+                          <td className="px-4 py-2.5 text-slate-600">{w.saleUnit}</td>
+                          <td className="px-4 py-2.5 tabular-nums">{fmtMoney(w.unitCostHt)} €</td>
+                          <td className="px-4 py-2.5 tabular-nums font-semibold">
+                            {fmtMoney(w.unitSellHt)} €
+                          </td>
+                          <td className="px-4 py-2.5 tabular-nums text-slate-600">
+                            {roundMoney(marque, 1).toLocaleString("fr-FR")} %
+                          </td>
+                          <td className="px-4 py-2.5">
+                            <span
+                              className={
+                                w.kind === "COMPOSITE"
+                                  ? "rounded-full bg-[#1e3a5f]/10 px-2 py-0.5 text-[10px] font-bold text-[#1e3a5f]"
+                                  : "rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600"
+                              }
+                            >
+                              {w.kind === "COMPOSITE" ? "Composé" : "Simple"}
                             </span>
-                          ) : null}
-                        </td>
-                        <td className="px-4 py-2.5 text-slate-600">{w.reference || "—"}</td>
-                        <td className="px-4 py-2.5 text-slate-600">{w.saleUnit}</td>
-                        <td className="px-4 py-2.5 tabular-nums">{fmtMoney(w.unitCostHt)} €</td>
-                        <td className="px-4 py-2.5 tabular-nums font-semibold">
-                          {fmtMoney(w.unitSellHt)} €
-                        </td>
-                        <td className="px-4 py-2.5 tabular-nums text-slate-600">
-                          {roundMoney(marque, 1).toLocaleString("fr-FR")} %
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <span
-                            className={
-                              w.kind === "COMPOSITE"
-                                ? "rounded-full bg-[#1e3a5f]/10 px-2 py-0.5 text-[10px] font-bold text-[#1e3a5f]"
-                                : "rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600"
-                            }
-                          >
-                            {w.kind === "COMPOSITE" ? "Composé" : "Simple"}
-                          </span>
-                        </td>
-                        <td
-                          className="px-4 py-2.5 text-right"
-                          onClick={(e) => e.stopPropagation()}
-                          onKeyDown={(e) => e.stopPropagation()}
-                        >
-                          <div className="inline-flex justify-end">
-                            <RowActionsMenu
-                              item={w}
-                              view={view}
-                              onToast={setToast}
-                              onRemoved={removeLocal}
-                              onRestored={removeLocal}
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          </td>
+                          <td className="px-4 py-2.5 text-right">
+                            <div className="inline-flex justify-end">
+                              <RowActionsMenu
+                                item={w}
+                                view={view}
+                                onToast={setToast}
+                                onRemoved={removeLocal}
+                                onRestored={removeLocal}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </>
         )}

@@ -7,6 +7,7 @@ import {
   resolveCommercialOrgId,
 } from "@/lib/commercial/access";
 import { loadAmendmentDetail } from "@/lib/commercial/amendment-billing";
+import { loadDealFinancialSummary } from "@/lib/commercial/deal-summary";
 import {
   COMMERCIAL_AMENDMENT_STATUS_LABELS,
   COMMERCIAL_INVOICE_STATUS_LABELS,
@@ -29,6 +30,8 @@ export default async function AvenantDetailPage({
   const amendment = await loadAmendmentDetail(orgId, id);
   if (!amendment) notFound();
 
+  const deal = await loadDealFinancialSummary(orgId, amendment.quote.id);
+
   const project = amendment.quote.project;
   const client =
     amendment.quote.clientExternalOrg?.tradeName ||
@@ -45,6 +48,23 @@ export default async function AvenantDetailPage({
         title={amendment.number}
         description={amendment.subject}
       />
+
+      <div className="flex flex-wrap gap-2">
+        <a
+          href={`/api/commercial/amendments/${amendment.id}/pdf`}
+          target="_blank"
+          rel="noreferrer"
+          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#1e3a5f]"
+        >
+          {amendment.status === "ACCEPTED" ? "PDF avenant" : "Aperçu PDF (projection)"}
+        </a>
+      </div>
+
+      {amendment.status !== "ACCEPTED" ? (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+          Projection — non contractuel tant que non accepté.
+        </p>
+      ) : null}
 
       <section className="rounded-xl border border-slate-200 bg-white p-4 space-y-2 text-sm">
         <p>
@@ -98,6 +118,39 @@ export default async function AvenantDetailPage({
           </p>
         ) : null}
       </section>
+
+      {deal ? (
+        <section className="rounded-xl border border-slate-200 bg-white p-4">
+          <h2 className="text-sm font-bold text-slate-900">Synthèse affaire</h2>
+          <dl className="mt-2 grid gap-2 sm:grid-cols-3 text-sm">
+            <div>
+              <dt className="text-xs text-slate-500">Marché initial HT</dt>
+              <dd className="font-semibold tabular-nums">
+                {roundMoney(deal.initialMarketHt, 2).toLocaleString("fr-FR")} €
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-500">Avenants acceptés HT</dt>
+              <dd className="font-semibold tabular-nums">
+                {roundMoney(deal.acceptedAmendmentsHt, 2).toLocaleString("fr-FR")} €
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-500">Marché actualisé HT</dt>
+              <dd className="font-bold tabular-nums text-[#1e3a5f]">
+                {roundMoney(deal.updatedMarketHt, 2).toLocaleString("fr-FR")} €
+              </dd>
+            </div>
+          </dl>
+          {deal.pendingAmendmentsHt > 0 ? (
+            <p className="mt-2 text-xs text-amber-800">
+              Projections en cours (non acceptées) ·{" "}
+              {roundMoney(deal.pendingAmendmentsHt, 2).toLocaleString("fr-FR")} € HT — non
+              inclus dans le marché actualisé.
+            </p>
+          ) : null}
+        </section>
+      ) : null}
 
       <AmendmentActions amendmentId={amendment.id} status={amendment.status} />
 

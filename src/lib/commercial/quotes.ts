@@ -1,6 +1,7 @@
-import type { CommercialLineKind, CommercialQuoteStatus, Prisma } from "@prisma/client";
+import type { CommercialLineKind, CommercialQuoteStatus } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { calculateDocumentTotals, calculateLine } from "@/lib/commercial/money";
+import { calculateDocumentTotals, calculateLine, roundMoney } from "@/lib/commercial/money";
 import { d } from "@/lib/commercial/decimal";
 import { ensureCommercialOrgSettings, nextQuoteNumber } from "@/lib/commercial/settings";
 
@@ -538,6 +539,7 @@ export async function upsertLine(
     discountPercent?: number;
     vatRate?: number;
     commercialWorkItemId?: string | null;
+    compositionSnapshotJson?: Prisma.InputJsonValue | null;
     sortOrder?: number;
     isOptional?: boolean;
   },
@@ -564,7 +566,7 @@ export async function upsertLine(
     isOptional,
   });
 
-  const calcFields = {
+  const baseFields = {
     kind,
     reference: input.reference ?? null,
     designation,
@@ -581,11 +583,6 @@ export async function upsertLine(
     lineTtc: calc.lineTtc,
     marginAmount: calc.marginAmount,
     isOptional,
-    ...(input.sectionId !== undefined ? { sectionId: input.sectionId } : {}),
-    ...(input.commercialWorkItemId !== undefined
-      ? { commercialWorkItemId: input.commercialWorkItemId }
-      : {}),
-    ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {}),
   };
 
   let lineId = input.lineId;
@@ -595,7 +592,25 @@ export async function upsertLine(
       select: { id: true },
     });
     if (!existing) throw new Error("Ligne introuvable");
-    await prisma.commercialQuoteLine.update({ where: { id: lineId }, data: calcFields });
+    await prisma.commercialQuoteLine.update({
+      where: { id: lineId },
+      data: {
+        ...baseFields,
+        ...(input.sectionId !== undefined ? { sectionId: input.sectionId } : {}),
+        ...(input.commercialWorkItemId !== undefined
+          ? { commercialWorkItemId: input.commercialWorkItemId }
+          : {}),
+        ...(input.compositionSnapshotJson !== undefined
+          ? {
+              compositionSnapshotJson:
+                input.compositionSnapshotJson === null
+                  ? Prisma.JsonNull
+                  : input.compositionSnapshotJson,
+            }
+          : {}),
+        ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {}),
+      },
+    });
   } else {
     const max = await prisma.commercialQuoteLine.aggregate({
       where: { versionId },
@@ -608,13 +623,208 @@ export async function upsertLine(
         sectionId: input.sectionId ?? null,
         commercialWorkItemId: input.commercialWorkItemId ?? null,
         sortOrder: input.sortOrder ?? (max._max.sortOrder ?? -1) + 1,
-        ...calcFields,
+        ...baseFields,
+        ...(input.compositionSnapshotJson != null
+          ? { compositionSnapshotJson: input.compositionSnapshotJson }
+          : {}),
       },
     });
     lineId = created.id;
   }
 
   await recomputeAndSaveVersionTotals(orgId, versionId);
+  return prisma.commercialQuoteLine.findUniqueOrThrow({ where: { id: lineId } });
+}
+
+/** Ajoute une ligne depuis la bibliothèque avec snapshot figé. */
+export async function addLineFromWorkItem(
+  orgId: string,
+  quoteId: string,
+  input: {
+    workItemId: string;
+    quantity: number;
+    sectionId?: string | null;
+  },
+) {
+  const { buildCompositionSnapshot, getWorkItem } = await import(
+    "@/lib/commercial/library"
+  );
+  const wi = await getWorkItem(orgId, input.workItemId);
+  if (!wi) throw new Error("Ouvrage introuvable dans cette organisation");
+  const snapshot = buildCompositionSnapshot({
+    id: wi.id,
+    name: wi.name,
+    reference: wi.reference,
+    saleUnit: wi.saleUnit,
+    kind: wi.kind,
+    feesPercent: wi.feesPercent,
+    feesAmountHt: wi.feesAmountHt,
+    sellMode: wi.sellMode,
+    marginPercent: wi.marginPercent,
+    unitCostHt: wi.unitCostHt,
+    unitSellHt: wi.unitSellHt,
+    components: wi.components.map((c) => ({
+      name: c.name,
+      type: c.type,
+      quantityPerUnit: c.quantityPerUnit,
+      unit: c.unit,
+      unitCostHt: c.unitCostHt,
+      lineCostHt: c.lineCostHt,
+      lossPercent: c.lossPercent,
+      comment: c.comment,
+      materialId: c.materialId,
+      laborId: c.laborId,
+      equipmentId: c.equipmentId,
+    })),
+  });
+  return upsertLine(orgId, quoteId, {
+    designation: wi.name,
+    description: wi.description,
+    reference: wi.reference,
+    quantity: input.quantity > 0 ? input.quantity : 1,
+    unit: wi.saleUnit,
+    unitCostHt: snapshot.unitCostHt,
+    unitSellHt: snapshot.unitSellHt,
+    commercialWorkItemId: wi.id,
+    sectionId: input.sectionId,
+    compositionSnapshotJson: snapshot as unknown as Prisma.InputJsonValue,
+  });
+}
+
+/**
+ * Met à jour le sous-détail d’UNE ligne de devis (snapshot local).
+ * N’altère pas l’ouvrage bibliothèque sauf si pushToLibrary=true.
+ */
+export async function updateLineCompositionSnapshot(
+  orgId: string,
+  quoteId: string,
+  lineId: string,
+  snapshot: {
+    components: Array<{
+      name: string;
+      type: string;
+      quantityPerUnit: number;
+      unit: string;
+      unitCostHt: number;
+      lossPercent?: number;
+      comment?: string | null;
+    }>;
+    feesPercent?: number;
+    feesAmountHt?: number;
+    sellMode?: "MARGIN" | "FIXED_SELL";
+    marginPercent?: number;
+    unitSellHt?: number;
+  },
+  opts?: { pushToLibrary?: boolean },
+) {
+  const { calculateWorkItemCosting } = await import("@/lib/commercial/money");
+  const quote = await assertEditableVersion(orgId, quoteId);
+  const versionId = quote.currentVersion!.id;
+  const line = await prisma.commercialQuoteLine.findFirst({
+    where: { id: lineId, organizationId: orgId, versionId },
+  });
+  if (!line) throw new Error("Ligne introuvable");
+
+  const costing = calculateWorkItemCosting({
+    components: snapshot.components.map((c) => ({
+      type: c.type,
+      quantityPerUnit: c.quantityPerUnit,
+      unitCostHt: c.unitCostHt,
+      lossPercent: c.lossPercent ?? 0,
+    })),
+    feesPercent: snapshot.feesPercent ?? 0,
+    feesAmountHt: snapshot.feesAmountHt ?? 0,
+    sellMode: snapshot.sellMode ?? "MARGIN",
+    marginPercent: snapshot.marginPercent,
+    unitSellHt: snapshot.unitSellHt,
+  });
+
+  const compositionSnapshotJson = {
+    ...(typeof line.compositionSnapshotJson === "object" &&
+    line.compositionSnapshotJson !== null
+      ? (line.compositionSnapshotJson as Record<string, unknown>)
+      : {}),
+    feesPercent: snapshot.feesPercent ?? 0,
+    feesAmountHt: snapshot.feesAmountHt ?? 0,
+    sellMode: snapshot.sellMode ?? "MARGIN",
+    marginPercent: costing.marquePercent,
+    unitCostHt: costing.costPriceHt,
+    unitSellHt: costing.unitSellHt,
+    snappedAt: new Date().toISOString(),
+    components: snapshot.components.map((c) => ({
+      ...c,
+      lossPercent: c.lossPercent ?? 0,
+      lineCostHt: roundMoney(
+        (c.quantityPerUnit || 0) *
+          (1 + (c.lossPercent ?? 0) / 100) *
+          (c.unitCostHt || 0),
+        4,
+      ),
+    })),
+    breakdown: {
+      materialsHt: costing.materialsHt,
+      laborHt: costing.laborHt,
+      equipmentHt: costing.equipmentHt,
+      subcontractHt: costing.subcontractHt,
+      otherHt: costing.otherHt,
+      dryCostHt: costing.dryCostHt,
+      feesHt: costing.feesHt,
+      costPriceHt: costing.costPriceHt,
+      marquePercent: costing.marquePercent,
+      markupPercent: costing.markupPercent,
+    },
+  };
+
+  await upsertLine(orgId, quoteId, {
+    lineId,
+    designation: line.designation,
+    description: line.description,
+    reference: line.reference,
+    quantity: d(line.quantity),
+    unit: line.unit,
+    unitCostHt: costing.costPriceHt,
+    unitSellHt: costing.unitSellHt,
+    discountPercent: d(line.discountPercent),
+    vatRate: d(line.vatRate),
+    commercialWorkItemId: line.commercialWorkItemId,
+    compositionSnapshotJson: compositionSnapshotJson as Prisma.InputJsonValue,
+    sectionId: line.sectionId,
+    kind: line.kind,
+    isOptional: line.isOptional,
+  });
+
+  if (opts?.pushToLibrary && line.commercialWorkItemId) {
+    const { upsertWorkItemComponent, deleteWorkItemComponent, updateWorkItem, getWorkItem } =
+      await import("@/lib/commercial/library");
+    const wi = await getWorkItem(orgId, line.commercialWorkItemId);
+    if (wi) {
+      for (const c of wi.components) {
+        const componentId = (c as { id: string }).id;
+        await deleteWorkItemComponent(orgId, wi.id, componentId);
+      }
+      for (const [i, c] of snapshot.components.entries()) {
+        await upsertWorkItemComponent(orgId, wi.id, {
+          name: c.name,
+          type: c.type as "MATERIAL" | "LABOR" | "EQUIPMENT" | "SUBCONTRACT" | "OTHER",
+          quantityPerUnit: c.quantityPerUnit,
+          unit: c.unit,
+          unitCostHt: c.unitCostHt,
+          lossPercent: c.lossPercent ?? 0,
+          comment: c.comment ?? null,
+          sortOrder: i,
+        });
+      }
+      await updateWorkItem(orgId, wi.id, {
+        feesPercent: snapshot.feesPercent ?? 0,
+        feesAmountHt: snapshot.feesAmountHt ?? 0,
+        sellMode: snapshot.sellMode ?? "MARGIN",
+        marginPercent: costing.marquePercent,
+        unitSellHt: costing.unitSellHt,
+        kind: "COMPOSITE",
+      });
+    }
+  }
+
   return prisma.commercialQuoteLine.findUniqueOrThrow({ where: { id: lineId } });
 }
 

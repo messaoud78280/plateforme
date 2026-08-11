@@ -38,7 +38,7 @@ export async function loadDealFinancialSummary(orgId: string, quoteId: string) {
         where: {
           organizationId: orgId,
           quoteId,
-          status: { in: ["DRAFT", "SENT"] },
+          status: { in: ["DRAFT", "TO_VALIDATE", "SENT"] },
         },
         select: {
           id: true,

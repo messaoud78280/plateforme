@@ -127,6 +127,7 @@ model User {
   commercialQuotesResponsible  CommercialQuote[] @relation("CommercialQuoteResponsible")
   commercialInvoicesCreated    CommercialInvoice[] @relation("CommercialInvoiceCreatedBy")
   commercialPaymentsRecorded   CommercialPayment[] @relation("CommercialPaymentRecordedBy")
+  commercialWorkItemsCreated   CommercialWorkItem[] @relation("CommercialWorkItemCreatedBy")
   commercialStatusEvents       CommercialStatusEvent[] @relation("CommercialStatusEventActor")
 
   // Pilotage administratif des travaux
@@ -248,6 +249,7 @@ model ExternalOrganization {
   projectChannels  ProjectChannel[]
   commercialQuotesAsClient CommercialQuote[] @relation("CommercialQuoteClient")
   commercialInvoicesAsClient CommercialInvoice[] @relation("CommercialInvoiceClient")
+  commercialComponentsAsSubcontractor CommercialWorkItemComponent[] @relation("CommercialComponentSubcontractor")
 
   @@index([hostOrganizationId])
   @@index([hostOrganizationId, type])
@@ -3695,6 +3697,7 @@ enum CommercialQuoteStatus {
 
 enum CommercialAmendmentStatus {
   DRAFT
+  TO_VALIDATE
   SENT
   ACCEPTED
   REFUSED
@@ -3739,19 +3742,32 @@ model CommercialOrgSettings {
   organizationId       String   @unique
   defaultVatRate       Decimal  @default(20) @db.Decimal(6, 4)
   defaultCurrency      String   @default("EUR")
+  /// Marge cible (taux de marque : marge / PV)
   targetMarginPercent  Decimal? @db.Decimal(8, 4)
+  /// Seuil d’alerte indicative (taux de marque) — n’empêche pas la validation
+  minMarginPercent     Decimal? @db.Decimal(8, 4)
   defaultPaymentTerms  String?
+  defaultValidityDays  Int?
+  defaultDepositPercent Decimal? @db.Decimal(6, 4)
+  /// Journée de travail pour estimation journées-personne (rendements)
+  workDayHours         Decimal  @default(8) @db.Decimal(6, 2)
   bankIban             String?
   bankBic              String?
   bankName             String?
   insuranceMentions    String?  @db.Text
   legalMentions        String?  @db.Text
+  quoteMentions        String?  @db.Text
+  invoiceMentions      String?  @db.Text
+  /// Couleur d’accent PDF (#hex) — template unique V1.1
+  accentColor          String?
   quotePrefix          String   @default("DEV")
   invoicePrefix        String   @default("FAC")
   amendmentPrefix      String   @default("AV")
+  creditPrefix         String   @default("AVO")
   nextQuoteSeq         Int      @default(1)
   nextInvoiceSeq       Int      @default(1)
   nextAmendmentSeq     Int      @default(1)
+  nextCreditSeq        Int      @default(1)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
@@ -3911,6 +3927,8 @@ model CommercialQuoteLine {
   lineTtc              Decimal            @default(0) @db.Decimal(14, 4)
   marginAmount         Decimal            @default(0) @db.Decimal(14, 4)
   commercialWorkItemId String?
+  /// Snapshot composition / coûts au moment de l’ajout (devis figé si biblio change)
+  compositionSnapshotJson Json?
   sortOrder            Int                @default(0)
   isOptional           Boolean            @default(false)
   createdAt            DateTime           @default(now())
@@ -4073,23 +4091,39 @@ model CommercialWorkItem {
   description      String?  @db.Text
   family           String?
   subFamily        String?
+  /// Tags libres séparés par virgule (recherche)
+  tags             String?
   saleUnit         String   @default("U")
+  /// SIMPLE | COMPOSITE
+  kind             String   @default("SIMPLE")
   unitCostHt       Decimal  @default(0) @db.Decimal(14, 4)
   unitSellHt       Decimal  @default(0) @db.Decimal(14, 4)
+  /// Taux de marque (marge / PV) — méthode principale V1.1
   marginPercent    Decimal  @default(0) @db.Decimal(8, 4)
+  /// Frais complémentaires : % du déboursé sec et/ou montant fixe HT / unité
+  feesPercent      Decimal  @default(0) @db.Decimal(8, 4)
+  feesAmountHt     Decimal  @default(0) @db.Decimal(14, 4)
+  /// MARGIN = PV depuis marge cible · FIXED_SELL = marge depuis PV saisi
+  sellMode         String   @default("MARGIN")
   /// Lien optionnel vers biblio BeWork (lecture seule, pas de couplage fort)
   sourceWorkItemId String?
+  /// Prix matière/MO changés — à recalculer en biblio (devis non touchés)
+  needsPriceRecalc Boolean  @default(false)
   isActive         Boolean  @default(true)
+  createdById      String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User?        @relation("CommercialWorkItemCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   components   CommercialWorkItemComponent[]
   quoteLines   CommercialQuoteLine[]
 
   @@index([organizationId, name])
   @@index([organizationId, family])
+  @@index([organizationId, reference])
   @@index([sourceWorkItemId])
+  @@index([createdById])
 }
 
 model CommercialWorkItemComponent {
@@ -4102,9 +4136,14 @@ model CommercialWorkItemComponent {
   unit           String                  @default("U")
   unitCostHt     Decimal                 @default(0) @db.Decimal(14, 4)
   lineCostHt     Decimal                 @default(0) @db.Decimal(14, 4)
+  /// Pertes % (ex. 5 → qty effective = qty × 1,05). Jamais appliqué sans config.
+  lossPercent    Decimal                 @default(0) @db.Decimal(8, 4)
+  comment        String?                 @db.Text
   materialId     String?
   laborId        String?
   equipmentId    String?
+  /// Sous-traitant (ExternalOrganization) si type SUBCONTRACT
+  subcontractorExternalOrgId String?
   sortOrder      Int                     @default(0)
   createdAt      DateTime                @default(now())
   updatedAt      DateTime                @updatedAt
@@ -4113,9 +4152,13 @@ model CommercialWorkItemComponent {
   material  CommercialMaterial?      @relation(fields: [materialId], references: [id], onDelete: SetNull)
   labor     CommercialLaborResource? @relation(fields: [laborId], references: [id], onDelete: SetNull)
   equipment CommercialEquipmentResource? @relation(fields: [equipmentId], references: [id], onDelete: SetNull)
+  subcontractor ExternalOrganization? @relation("CommercialComponentSubcontractor", fields: [subcontractorExternalOrgId], references: [id], onDelete: SetNull)
 
   @@index([workItemId, sortOrder])
   @@index([organizationId])
+  @@index([materialId])
+  @@index([laborId])
+  @@index([equipmentId])
 }
 
 model CommercialMaterial {
@@ -4126,6 +4169,9 @@ model CommercialMaterial {
   family         String?
   unit           String   @default("U")
   supplierName   String?
+  manufacturer   String?
+  /// Source libre du prix courant (catalogue, devis fournisseur, etc.)
+  priceSource    String?
   currentPriceHt Decimal  @default(0) @db.Decimal(14, 4)
   notes          String?  @db.Text
   isActive       Boolean  @default(true)
@@ -4137,6 +4183,8 @@ model CommercialMaterial {
   components   CommercialWorkItemComponent[]
 
   @@index([organizationId, name])
+  @@index([organizationId, reference])
+  @@index([organizationId, family])
 }
 
 model CommercialMaterialPrice {
@@ -4145,6 +4193,7 @@ model CommercialMaterialPrice {
   materialId     String
   priceHt        Decimal  @db.Decimal(14, 4)
   source         String?
+  supplierName   String?
   notedAt        DateTime @default(now())
   comment        String?
   createdAt      DateTime @default(now())
@@ -4159,7 +4208,12 @@ model CommercialLaborResource {
   id             String   @id @default(cuid())
   organizationId String
   name           String
+  /// Métier (ex. Maçon)
+  trade          String?
+  qualification  String?
+  /// Coût horaire utilisé en chiffrage V1.1 = coût chargé si renseigné, sinon coût interne
   hourlyCostHt   Decimal  @default(0) @db.Decimal(14, 4)
+  /// Coût chargé optionnel (charges sociales incluses) — documenté en UI
   loadedCostHt   Decimal? @db.Decimal(14, 4)
   notes          String?  @db.Text
   validFrom      DateTime? @db.Date
@@ -4178,8 +4232,9 @@ model CommercialEquipmentResource {
   id             String   @id @default(cuid())
   organizationId String
   name           String
-  /// OWNED | RENTAL | SMALL_TOOLS
+  /// OWNED | RENTAL | SMALL_TOOLS — catégorie affichée
   kind           String   @default("OWNED")
+  category       String?
   hourlyCostHt   Decimal? @db.Decimal(14, 4)
   dailyCostHt    Decimal? @db.Decimal(14, 4)
   unit           String   @default("h")

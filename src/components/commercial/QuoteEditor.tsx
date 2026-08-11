@@ -1,12 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   COMMERCIAL_QUOTE_STATUS_LABELS,
   roundMoney,
 } from "@/lib/commercial/money";
 import { QuoteAcceptedNextSteps } from "@/components/commercial/QuoteAcceptedNextSteps";
+import { LibraryPickerModal } from "@/components/commercial/LibraryPickerModal";
+import { LineCompositionDrawer } from "@/components/commercial/LineCompositionDrawer";
+
 function fmtMoney(n: number) {
   return roundMoney(n, 2).toLocaleString("fr-FR", {
     minimumFractionDigits: 2,
@@ -20,6 +23,7 @@ type Line = {
   kind: string;
   reference: string | null;
   designation: string;
+  description?: string | null;
   quantity: number;
   unit: string;
   unitCostHt: number;
@@ -30,6 +34,8 @@ type Line = {
   lineCostHt: number;
   sortOrder: number;
   isOptional: boolean;
+  commercialWorkItemId?: string | null;
+  compositionSnapshotJson?: unknown;
 };
 
 type Section = { id: string; title: string; sortOrder: number };
@@ -61,10 +67,13 @@ export function QuoteEditor({
   initial,
   canEdit,
   acceptedPdfAvailable = false,
+  minMarginPercent = 15,
 }: {
   initial: QuoteDetail;
   canEdit: boolean;
   acceptedPdfAvailable?: boolean;
+  /** Seuil d’alerte marge (taux de marque). Défaut 15 % si réglages non passés. */
+  minMarginPercent?: number;
 }) {
   const router = useRouter();
   const [quote, setQuote] = useState(initial);
@@ -72,6 +81,10 @@ export function QuoteEditor({
   const [error, setError] = useState<string | null>(null);
   const [busyStatus, setBusyStatus] = useState(false);
   const [accepting, setAccepting] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [librarySectionId, setLibrarySectionId] = useState<string | null>(null);
+  const [compositionLine, setCompositionLine] = useState<Line | null>(null);
+  const mutationSeq = useRef(0);
 
   const version = quote.currentVersion;
   const lines = version?.lines ?? [];
@@ -80,9 +93,19 @@ export function QuoteEditor({
     [version?.sections],
   );
 
+  const refreshQuote = useCallback(
+    async (seq?: number) => {
+      const detail = await fetch(`/api/commercial/quotes/${quote.id}`).then((r) => r.json());
+      if (seq != null && seq !== mutationSeq.current) return;
+      if (detail.quote) setQuote(detail.quote);
+    },
+    [quote.id],
+  );
+
   const patchLine = useCallback(
     async (lineId: string, patch: Record<string, unknown>) => {
       if (!canEdit) return;
+      const seq = ++mutationSeq.current;
       setSaveState("saving");
       setError(null);
       try {
@@ -93,15 +116,16 @@ export function QuoteEditor({
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Erreur");
-        const detail = await fetch(`/api/commercial/quotes/${quote.id}`).then((r) => r.json());
-        if (detail.quote) setQuote(detail.quote);
-        setSaveState("saved");
+        await refreshQuote(seq);
+        if (seq === mutationSeq.current) setSaveState("saved");
       } catch (e) {
-        setSaveState("error");
-        setError(e instanceof Error ? e.message : "Erreur");
+        if (seq === mutationSeq.current) {
+          setSaveState("error");
+          setError(e instanceof Error ? e.message : "Erreur");
+        }
       }
     },
-    [canEdit, quote.id],
+    [canEdit, quote.id, refreshQuote],
   );
 
   useEffect(() => {
@@ -149,8 +173,41 @@ export function QuoteEditor({
       setError(data.error || "Erreur");
       return;
     }
-    const detail = await fetch(`/api/commercial/quotes/${quote.id}`).then((r) => r.json());
-    if (detail.quote) setQuote(detail.quote);
+    await refreshQuote();
+    setSaveState("saved");
+  }
+
+  async function duplicateLine(line: Line) {
+    if (!canEdit) return;
+    setSaveState("saving");
+    setError(null);
+    const res = await fetch(`/api/commercial/quotes/${quote.id}/lines`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sectionId: line.sectionId,
+        kind: line.kind,
+        reference: line.reference,
+        designation: line.designation,
+        description: line.description ?? null,
+        quantity: line.quantity,
+        unit: line.unit,
+        unitCostHt: line.unitCostHt,
+        unitSellHt: line.unitSellHt,
+        discountPercent: line.discountPercent,
+        vatRate: line.vatRate,
+        commercialWorkItemId: line.commercialWorkItemId ?? null,
+        compositionSnapshotJson: line.compositionSnapshotJson ?? undefined,
+        isOptional: line.isOptional,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setSaveState("error");
+      setError(data.error || "Erreur");
+      return;
+    }
+    await refreshQuote();
     setSaveState("saved");
   }
 
@@ -166,8 +223,7 @@ export function QuoteEditor({
       setError(data.error || "Erreur");
       return;
     }
-    const detail = await fetch(`/api/commercial/quotes/${quote.id}`).then((r) => r.json());
-    if (detail.quote) setQuote(detail.quote);
+    await refreshQuote();
     setSaveState("saved");
   }
 
@@ -307,7 +363,7 @@ export function QuoteEditor({
         {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
         {canEdit ? (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => void addSection()}
@@ -321,6 +377,16 @@ export function QuoteEditor({
               className="text-xs font-semibold text-[#1d4ed8]"
             >
               + Ligne
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setLibrarySectionId(sections[0]?.id ?? null);
+                setLibraryOpen(true);
+              }}
+              className="text-xs font-semibold text-[#1d4ed8]"
+            >
+              + Depuis la bibliothèque
             </button>
           </div>
         ) : (
@@ -350,16 +416,28 @@ export function QuoteEditor({
                 .sort((a, b) => a.sortOrder - b.sortOrder);
               return (
                 <div key={sec.id} className="border-b border-slate-100">
-                  <div className="flex items-center justify-between bg-slate-50/80 px-3 py-2">
+                  <div className="flex items-center justify-between gap-2 bg-slate-50/80 px-3 py-2">
                     <h3 className="text-sm font-bold text-slate-900">{sec.title}</h3>
                     {canEdit ? (
-                      <button
-                        type="button"
-                        onClick={() => void addLine(sec.id)}
-                        className="text-[11px] font-semibold text-[#1d4ed8]"
-                      >
-                        + Ligne
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void addLine(sec.id)}
+                          className="text-[11px] font-semibold text-[#1d4ed8]"
+                        >
+                          + Ligne
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLibrarySectionId(sec.id);
+                            setLibraryOpen(true);
+                          }}
+                          className="text-[11px] font-semibold text-[#1d4ed8]"
+                        >
+                          + Bibliothèque
+                        </button>
+                      </div>
                     ) : null}
                   </div>
                   {secLines.map((line) => (
@@ -369,6 +447,8 @@ export function QuoteEditor({
                       canEdit={canEdit}
                       onPatch={(p) => void patchLine(line.id, p)}
                       onDelete={() => void deleteLine(line.id)}
+                      onDuplicate={() => void duplicateLine(line)}
+                      onOpenComposition={() => setCompositionLine(line)}
                     />
                   ))}
                 </div>
@@ -389,6 +469,8 @@ export function QuoteEditor({
                     canEdit={canEdit}
                     onPatch={(p) => void patchLine(line.id, p)}
                     onDelete={() => void deleteLine(line.id)}
+                    onDuplicate={() => void duplicateLine(line)}
+                    onOpenComposition={() => setCompositionLine(line)}
                   />
                 ))}
             </div>
@@ -415,10 +497,42 @@ export function QuoteEditor({
           label="Marge"
           value={`${fmtMoney(quote.marginAmount)} € (${fmtMoney(quote.marginPercent)} %)`}
         />
+        {quote.marginPercent < minMarginPercent ? (
+          <p className="rounded-md bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900">
+            Marge inférieure à votre objectif
+          </p>
+        ) : null}
         <Row label="Total HT" value={`${fmtMoney(quote.totalSellHt)} €`} bold />
         <Row label="TVA" value={`${fmtMoney(quote.totalVat)} €`} />
         <Row label="Total TTC" value={`${fmtMoney(quote.totalTtc)} €`} bold />
       </aside>
+
+      <LibraryPickerModal
+        quoteId={quote.id}
+        sectionId={librarySectionId ?? undefined}
+        open={libraryOpen}
+        onClose={() => setLibraryOpen(false)}
+        onAdded={() => {
+          void refreshQuote().then(() => setSaveState("saved"));
+        }}
+      />
+      {compositionLine ? (
+        <LineCompositionDrawer
+          quoteId={quote.id}
+          line={{
+            id: compositionLine.id,
+            designation: compositionLine.designation,
+            compositionSnapshotJson: compositionLine.compositionSnapshotJson,
+            unitSellHt: compositionLine.unitSellHt,
+            unitCostHt: compositionLine.unitCostHt,
+          }}
+          canEdit={canEdit}
+          onClose={() => setCompositionLine(null)}
+          onSaved={() => {
+            void refreshQuote();
+          }}
+        />
+      ) : null}
     </div>
   );
 }
@@ -439,17 +553,24 @@ function LineRow({
   canEdit,
   onPatch,
   onDelete,
+  onDuplicate,
+  onOpenComposition,
 }: {
   line: Line;
   canEdit: boolean;
   onPatch: (p: Record<string, unknown>) => void;
   onDelete: () => void;
+  onDuplicate: () => void;
+  onOpenComposition: () => void;
 }) {
   const [des, setDes] = useState(line.designation);
   const [qty, setQty] = useState(String(line.quantity));
   const [unit, setUnit] = useState(line.unit);
   const [pu, setPu] = useState(String(line.unitSellHt));
   const [rem, setRem] = useState(String(line.discountPercent));
+  const hasComposition = Boolean(
+    line.compositionSnapshotJson || line.commercialWorkItemId,
+  );
 
   useEffect(() => {
     setDes(line.designation);
@@ -471,13 +592,24 @@ function LineRow({
 
   return (
     <div className="grid grid-cols-1 gap-2 border-t border-slate-50 px-3 py-2 md:grid-cols-12 md:items-center">
-      <input
-        disabled={!canEdit}
-        value={des}
-        onChange={(e) => setDes(e.target.value)}
-        onBlur={commit}
-        className="rounded border border-slate-200 px-2 py-1.5 text-sm md:col-span-4"
-      />
+      <div className="md:col-span-4 space-y-1">
+        <input
+          disabled={!canEdit}
+          value={des}
+          onChange={(e) => setDes(e.target.value)}
+          onBlur={commit}
+          className="w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
+        />
+        {hasComposition ? (
+          <button
+            type="button"
+            onClick={onOpenComposition}
+            className="text-[11px] font-semibold text-[#1d4ed8]"
+          >
+            Sous-détail
+          </button>
+        ) : null}
+      </div>
       <input
         disabled={!canEdit}
         value={qty}
@@ -509,17 +641,23 @@ function LineRow({
       <div className="tabular-nums text-sm font-semibold text-slate-800 md:col-span-2">
         {fmtMoney(line.lineSellHt)} €
       </div>
-      {canEdit ? (
-        <button
-          type="button"
-          onClick={onDelete}
-          className="text-xs text-red-600 md:col-span-1"
-        >
-          ✕
-        </button>
-      ) : (
-        <span className="md:col-span-1" />
-      )}
+      <div className="flex flex-wrap items-center gap-2 md:col-span-1 md:justify-end">
+        {canEdit ? (
+          <>
+            <button
+              type="button"
+              onClick={onDuplicate}
+              title="Dupliquer"
+              className="text-[11px] font-semibold text-slate-600"
+            >
+              Dupliquer
+            </button>
+            <button type="button" onClick={onDelete} className="text-xs text-red-600">
+              ✕
+            </button>
+          </>
+        ) : null}
+      </div>
     </div>
   );
 }

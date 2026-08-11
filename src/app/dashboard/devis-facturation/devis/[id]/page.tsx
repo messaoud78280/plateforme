@@ -12,6 +12,8 @@ import { QuoteAmendmentsPanel } from "@/components/commercial/QuoteAmendmentsPan
 import { roundMoney } from "@/lib/commercial/money";
 import { prisma } from "@/lib/prisma";
 import { loadAcceptedArchiveUi } from "@/lib/commercial/accepted-snapshot";
+import { ensureCommercialOrgSettings } from "@/lib/commercial/settings";
+import { d } from "@/lib/commercial/decimal";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +34,7 @@ export default async function DevisDetailPage({
     ["DRAFT", "TO_VALIDATE", "VALIDATED"].includes(quote.status) &&
     quote.currentVersion?.lockState === "DRAFT";
 
-  const [summary, invoiceStats, archive] = await Promise.all([
+  const [summary, invoiceStats, archive, settings] = await Promise.all([
     quote.status === "ACCEPTED" || quote.acceptedAt
       ? loadDealFinancialSummary(orgId, id)
       : null,
@@ -47,6 +49,7 @@ export default async function DevisDetailPage({
     quote.acceptedVersionId || quote.status === "ACCEPTED"
       ? loadAcceptedArchiveUi(orgId, id)
       : null,
+    ensureCommercialOrgSettings(orgId),
   ]);
 
   const hasInvoice = invoiceStats.length > 0;
@@ -55,6 +58,9 @@ export default async function DevisDetailPage({
     quote.validityDate &&
     ["SENT", "VIEWED"].includes(quote.status) &&
     new Date(quote.validityDate).getTime() < Date.now();
+
+  const minMarginPercent =
+    settings.minMarginPercent != null ? d(settings.minMarginPercent) : 15;
 
   return (
     <div className="space-y-4">
@@ -73,6 +79,7 @@ export default async function DevisDetailPage({
         initial={quote as never}
         canEdit={canEdit}
         acceptedPdfAvailable={Boolean(archive?.snapshot)}
+        minMarginPercent={minMarginPercent}
       />
       {archive?.hasAcceptedVersion ? (
         <QuoteAcceptedArchiveCard

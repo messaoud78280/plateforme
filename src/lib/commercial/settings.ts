@@ -69,15 +69,23 @@ export async function updateCommercialOrgSettings(
     defaultVatRate?: number;
     defaultCurrency?: string;
     targetMarginPercent?: number | null;
+    minMarginPercent?: number | null;
     defaultPaymentTerms?: string | null;
+    defaultValidityDays?: number | null;
+    defaultDepositPercent?: number | null;
+    workDayHours?: number;
     bankIban?: string | null;
     bankBic?: string | null;
     bankName?: string | null;
     insuranceMentions?: string | null;
     legalMentions?: string | null;
+    quoteMentions?: string | null;
+    invoiceMentions?: string | null;
+    accentColor?: string | null;
     quotePrefix?: string;
     invoicePrefix?: string;
     amendmentPrefix?: string;
+    creditPrefix?: string;
   },
 ) {
   await ensureCommercialOrgSettings(orgId);
@@ -89,9 +97,19 @@ export async function updateCommercialOrgSettings(
       ...(data.targetMarginPercent !== undefined
         ? { targetMarginPercent: data.targetMarginPercent }
         : {}),
+      ...(data.minMarginPercent !== undefined
+        ? { minMarginPercent: data.minMarginPercent }
+        : {}),
       ...(data.defaultPaymentTerms !== undefined
         ? { defaultPaymentTerms: data.defaultPaymentTerms }
         : {}),
+      ...(data.defaultValidityDays !== undefined
+        ? { defaultValidityDays: data.defaultValidityDays }
+        : {}),
+      ...(data.defaultDepositPercent !== undefined
+        ? { defaultDepositPercent: data.defaultDepositPercent }
+        : {}),
+      ...(data.workDayHours !== undefined ? { workDayHours: data.workDayHours } : {}),
       ...(data.bankIban !== undefined ? { bankIban: data.bankIban } : {}),
       ...(data.bankBic !== undefined ? { bankBic: data.bankBic } : {}),
       ...(data.bankName !== undefined ? { bankName: data.bankName } : {}),
@@ -99,9 +117,15 @@ export async function updateCommercialOrgSettings(
         ? { insuranceMentions: data.insuranceMentions }
         : {}),
       ...(data.legalMentions !== undefined ? { legalMentions: data.legalMentions } : {}),
+      ...(data.quoteMentions !== undefined ? { quoteMentions: data.quoteMentions } : {}),
+      ...(data.invoiceMentions !== undefined
+        ? { invoiceMentions: data.invoiceMentions }
+        : {}),
+      ...(data.accentColor !== undefined ? { accentColor: data.accentColor } : {}),
       ...(data.quotePrefix !== undefined ? { quotePrefix: data.quotePrefix } : {}),
       ...(data.invoicePrefix !== undefined ? { invoicePrefix: data.invoicePrefix } : {}),
       ...(data.amendmentPrefix !== undefined ? { amendmentPrefix: data.amendmentPrefix } : {}),
+      ...(data.creditPrefix !== undefined ? { creditPrefix: data.creditPrefix } : {}),
     },
   });
 }

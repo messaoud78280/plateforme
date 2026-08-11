@@ -32,6 +32,10 @@ export async function POST(req: Request, ctx: Ctx) {
       commercialWorkItemId: body.commercialWorkItemId
         ? String(body.commercialWorkItemId)
         : null,
+      compositionSnapshotJson:
+        body.compositionSnapshotJson !== undefined
+          ? (body.compositionSnapshotJson as never)
+          : undefined,
       isOptional: Boolean(body.isOptional),
       sortOrder: body.sortOrder != null ? Number(body.sortOrder) : undefined,
     });

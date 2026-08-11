@@ -7,7 +7,9 @@ import {
   createAmendment,
   listAmendments,
   refuseAmendment,
+  reopenAmendmentDraft,
   sendAmendment,
+  submitAmendmentForValidation,
   updateAmendmentMeta,
 } from "@/lib/commercial/amendments";
 
@@ -56,6 +58,22 @@ export async function POST(req: Request) {
     }
     if (action === "send") {
       const amendment = await sendAmendment(
+        auth.orgId,
+        String(body.amendmentId ?? ""),
+        auth.session.user.id,
+      );
+      return NextResponse.json({ amendment });
+    }
+    if (action === "toValidate") {
+      const amendment = await submitAmendmentForValidation(
+        auth.orgId,
+        String(body.amendmentId ?? ""),
+        auth.session.user.id,
+      );
+      return NextResponse.json({ amendment });
+    }
+    if (action === "reopenDraft") {
+      const amendment = await reopenAmendmentDraft(
         auth.orgId,
         String(body.amendmentId ?? ""),
         auth.session.user.id,

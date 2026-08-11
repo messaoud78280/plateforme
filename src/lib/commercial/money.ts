@@ -136,16 +136,176 @@ export type WorkItemComponentInput = {
   type: string;
   quantityPerUnit: number;
   unitCostHt: number;
+  lossPercent?: number;
 };
 
 export function calculateWorkItemUnitCost(components: WorkItemComponentInput[]): number {
   let cents = 0;
   for (const c of components) {
     const q = Number(c.quantityPerUnit) || 0;
+    const loss = Math.max(0, Number(c.lossPercent) || 0);
+    const effectiveQty = q * (1 + loss / 100);
     const u = Number(c.unitCostHt) || 0;
-    cents += toCents(roundMoney(q * u, 4));
+    cents += toCents(roundMoney(effectiveQty * u, 4));
   }
   return fromCents(cents);
+}
+
+/** Quantité effective avec pertes (ex. 10,5 × 7 % → 11,235). */
+export function effectiveQuantityWithLoss(quantity: number, lossPercent = 0): number {
+  const q = Number(quantity) || 0;
+  const loss = Math.max(0, Number(lossPercent) || 0);
+  return roundMoney(q * (1 + loss / 100), 6);
+}
+
+export function calculateComponentLineCost(input: {
+  quantityPerUnit: number;
+  unitCostHt: number;
+  lossPercent?: number;
+}): number {
+  const qty = effectiveQuantityWithLoss(input.quantityPerUnit, input.lossPercent ?? 0);
+  return roundMoney(qty * (Number(input.unitCostHt) || 0), 4);
+}
+
+/**
+ * Taux de marque = marge / prix de vente (méthode principale V1.1).
+ * Alias sémantique de marginPercentFromCostSell.
+ */
+export function marquePercentFromCostSell(costHt: number, sellHt: number): number {
+  return marginPercentFromCostSell(costHt, sellHt);
+}
+
+/** Taux de marge = marge / coût (≠ marque). */
+export function markupPercentFromCostSell(costHt: number, sellHt: number): number {
+  if (costHt <= 0) return 0;
+  return roundMoney(((sellHt - costHt) / costHt) * 100, 2);
+}
+
+/** Coefficient de vente = PV / coût. */
+export function sellCoefficientFromCostSell(costHt: number, sellHt: number): number {
+  if (costHt <= 0) return 0;
+  return roundMoney(sellHt / costHt, 4);
+}
+
+export type CostBreakdownByType = {
+  materialsHt: number;
+  laborHt: number;
+  equipmentHt: number;
+  subcontractHt: number;
+  otherHt: number;
+  dryCostHt: number;
+  feesHt: number;
+  costPriceHt: number;
+};
+
+export type WorkItemCostingInput = {
+  components: Array<{
+    type: string;
+    quantityPerUnit: number;
+    unitCostHt: number;
+    lossPercent?: number;
+  }>;
+  feesPercent?: number;
+  feesAmountHt?: number;
+  /** MARGIN = PV depuis taux de marque · FIXED_SELL = marge depuis PV */
+  sellMode?: "MARGIN" | "FIXED_SELL";
+  marginPercent?: number;
+  unitSellHt?: number;
+};
+
+export type WorkItemCostingResult = CostBreakdownByType & {
+  unitSellHt: number;
+  /** Taux de marque % */
+  marquePercent: number;
+  /** Taux de marge % */
+  markupPercent: number;
+  sellCoefficient: number;
+  marginAmountHt: number;
+};
+
+export function calculateWorkItemCosting(input: WorkItemCostingInput): WorkItemCostingResult {
+  const buckets = {
+    MATERIAL: 0,
+    LABOR: 0,
+    EQUIPMENT: 0,
+    SUBCONTRACT: 0,
+    OTHER: 0,
+  };
+  for (const c of input.components) {
+    const line = calculateComponentLineCost(c);
+    const key = (c.type in buckets ? c.type : "OTHER") as keyof typeof buckets;
+    buckets[key] = roundMoney(buckets[key] + line, 4);
+  }
+  const dryCostHt = fromCents(
+    toCents(buckets.MATERIAL) +
+      toCents(buckets.LABOR) +
+      toCents(buckets.EQUIPMENT) +
+      toCents(buckets.SUBCONTRACT) +
+      toCents(buckets.OTHER),
+  );
+  const feesFromPercent = roundMoney(dryCostHt * ((Number(input.feesPercent) || 0) / 100), 4);
+  const feesHt = roundMoney(feesFromPercent + (Number(input.feesAmountHt) || 0), 4);
+  const costPriceHt = roundMoney(dryCostHt + feesHt, 2);
+
+  const sellMode = input.sellMode ?? "MARGIN";
+  let unitSellHt: number;
+  let marquePercent: number;
+  if (sellMode === "FIXED_SELL") {
+    unitSellHt = roundMoney(Number(input.unitSellHt) || 0, 2);
+    marquePercent = marquePercentFromCostSell(costPriceHt, unitSellHt);
+  } else {
+    marquePercent = Number(input.marginPercent) || 0;
+    unitSellHt =
+      marquePercent > 0
+        ? sellFromCostAndMarginPercent(costPriceHt, marquePercent)
+        : roundMoney(Number(input.unitSellHt) || costPriceHt, 2);
+    marquePercent = marquePercentFromCostSell(costPriceHt, unitSellHt);
+  }
+
+  const marginAmountHt = roundMoney(unitSellHt - costPriceHt, 2);
+  return {
+    materialsHt: fromCents(toCents(buckets.MATERIAL)),
+    laborHt: fromCents(toCents(buckets.LABOR)),
+    equipmentHt: fromCents(toCents(buckets.EQUIPMENT)),
+    subcontractHt: fromCents(toCents(buckets.SUBCONTRACT)),
+    otherHt: fromCents(toCents(buckets.OTHER)),
+    dryCostHt,
+    feesHt,
+    costPriceHt,
+    unitSellHt,
+    marquePercent,
+    markupPercent: markupPercentFromCostSell(costPriceHt, unitSellHt),
+    sellCoefficient: sellCoefficientFromCostSell(costPriceHt, unitSellHt),
+    marginAmountHt,
+  };
+}
+
+/** Heures totales pour une quantité d’ouvrage (MODE A : h / unité). */
+export function laborHoursForQuantity(hoursPerUnit: number, quantity: number): number {
+  return roundMoney((Number(hoursPerUnit) || 0) * (Number(quantity) || 0), 4);
+}
+
+/** Estimation journées-personne (prépare futur lien Planning). */
+export function personDaysFromHours(hours: number, workDayHours = 8): number {
+  const day = Number(workDayHours) || 8;
+  if (day <= 0) return 0;
+  return roundMoney((Number(hours) || 0) / day, 2);
+}
+
+/**
+ * MODE B (V1.2 préparé) : équipe + production/jour → h / unité.
+ * Ex. 2 pers × 8 h / 30 m²/j = 0,533 h/m²
+ */
+export function hoursPerUnitFromTeamProduction(input: {
+  teamSize: number;
+  productionPerDay: number;
+  workDayHours?: number;
+}): number {
+  const prod = Number(input.productionPerDay) || 0;
+  if (prod <= 0) return 0;
+  const hours =
+    (Number(input.teamSize) || 0) * (Number(input.workDayHours) || 8);
+  return roundMoney(hours / prod, 6);
 }
 
 /** Acompte : montant HT depuis % du marché. */
@@ -244,6 +404,7 @@ export function calculateAmendmentBillingProgress(input: {
 
 export const COMMERCIAL_AMENDMENT_STATUS_LABELS: Record<string, string> = {
   DRAFT: "Brouillon",
+  TO_VALIDATE: "À valider",
   SENT: "Envoyé",
   ACCEPTED: "Accepté",
   REFUSED: "Refusé",

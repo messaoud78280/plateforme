@@ -8,7 +8,8 @@ const ALLOWED_TRANSITIONS: Record<
   CommercialAmendmentStatus,
   CommercialAmendmentStatus[]
 > = {
-  DRAFT: ["SENT", "ACCEPTED", "CANCELLED"],
+  DRAFT: ["TO_VALIDATE", "SENT", "ACCEPTED", "CANCELLED"],
+  TO_VALIDATE: ["DRAFT", "SENT", "ACCEPTED", "REFUSED", "CANCELLED"],
   SENT: ["ACCEPTED", "REFUSED", "CANCELLED"],
   ACCEPTED: ["CANCELLED"],
   REFUSED: [],
@@ -295,6 +296,34 @@ export async function sendAmendment(
   actorUserId: string,
 ) {
   return transitionAmendment(orgId, amendmentId, "SENT", actorUserId, "Avenant envoyé");
+}
+
+export async function submitAmendmentForValidation(
+  orgId: string,
+  amendmentId: string,
+  actorUserId: string,
+) {
+  return transitionAmendment(
+    orgId,
+    amendmentId,
+    "TO_VALIDATE",
+    actorUserId,
+    "Avenant soumis à validation",
+  );
+}
+
+export async function reopenAmendmentDraft(
+  orgId: string,
+  amendmentId: string,
+  actorUserId: string,
+) {
+  return transitionAmendment(
+    orgId,
+    amendmentId,
+    "DRAFT",
+    actorUserId,
+    "Retour brouillon",
+  );
 }
 
 export async function acceptAmendment(

@@ -39,6 +39,7 @@
     "test:chantier-cockpit-ops": "npx tsx scripts/test-chantier-cockpit-ops.ts",
     "test:accueil-ops": "npx tsx scripts/test-accueil-ops.ts",
     "test:commercial-accepted-snapshot": "npx tsx scripts/test-commercial-accepted-snapshot.ts",
+    "test:commercial-v11-costing": "npx tsx scripts/test-commercial-v11-costing.ts",
     "test:gestion-commerciale-v1c-b": "npx tsx scripts/test-gestion-commerciale-v1c-b.ts",
     "test:attention-notifications": "npx tsx scripts/test-attention-notifications.ts",
     "test:attention-escalation": "npx tsx scripts/test-attention-escalation.ts",

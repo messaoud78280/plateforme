@@ -77,6 +77,14 @@ export function AmendmentActions({
           <button
             type="button"
             disabled={busy}
+            onClick={() => void run("toValidate")}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold"
+          >
+            Soumettre à validation
+          </button>
+          <button
+            type="button"
+            disabled={busy}
             onClick={() => void run("send")}
             className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold"
           >
@@ -89,6 +97,42 @@ export function AmendmentActions({
             className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white"
           >
             Accepter
+          </button>
+        </>
+      ) : null}
+      {status === "TO_VALIDATE" ? (
+        <>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void run("reopenDraft")}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold"
+          >
+            Retour brouillon
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void run("send")}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold"
+          >
+            Marquer envoyé
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void run("accept")}
+            className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white"
+          >
+            Accepter
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void run("refuse")}
+            className="rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-800"
+          >
+            Refuser
           </button>
         </>
       ) : null}

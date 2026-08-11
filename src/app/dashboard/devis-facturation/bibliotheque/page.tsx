@@ -1,21 +1,29 @@
+import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import {
   requireCommercialSession,
   resolveCommercialOrgId,
 } from "@/lib/commercial/access";
 import { listWorkItems } from "@/lib/commercial/library";
-import { roundMoney } from "@/lib/commercial/money";
+import { marginPercentFromCostSell, roundMoney } from "@/lib/commercial/money";
 import { CreateWorkItemButton } from "@/components/commercial/CreateWorkItemButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function BibliothequePage() {
+export default async function BibliothequePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const session = await requireCommercialSession(
     "/dashboard/devis-facturation/bibliotheque",
   );
   const orgId = await resolveCommercialOrgId(session.user);
   if (!orgId) return null;
-  const items = await listWorkItems(orgId);
+
+  const { q } = await searchParams;
+  const query = q?.trim() || undefined;
+  const items = await listWorkItems(orgId, { q: query, take: 200 });
 
   return (
     <div className="space-y-6">
@@ -23,31 +31,111 @@ export default async function BibliothequePage() {
         <PageHeader
           eyebrow="Devis & Facturation · Référentiel"
           title="Bibliothèque"
-          description="Ouvrages commerciaux — accélèrent le devis, jamais obligatoires."
+          description="Ouvrages prêts à chiffrer — accélèrent le devis, jamais obligatoires."
         />
-        <CreateWorkItemButton />
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href="/api/commercial/library/work-items?format=csv"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Export CSV
+          </a>
+          <CreateWorkItemButton />
+        </div>
       </div>
+
+      <form method="get" className="flex flex-wrap gap-2">
+        <input
+          name="q"
+          defaultValue={query ?? ""}
+          placeholder="Rechercher (nom, réf., famille…)"
+          className="min-w-[14rem] flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+        />
+        <button
+          type="submit"
+          className="rounded-xl bg-[#1e3a5f] px-4 py-2 text-sm font-bold text-white"
+        >
+          Rechercher
+        </button>
+        {query ? (
+          <Link
+            href="/dashboard/devis-facturation/bibliotheque"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600"
+          >
+            Effacer
+          </Link>
+        ) : null}
+      </form>
+
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {items.length === 0 ? (
           <p className="p-6 text-sm text-slate-500">
-            Aucun ouvrage. Vous pouvez créer un devis sans bibliothèque.
+            {query
+              ? "Aucun ouvrage pour cette recherche."
+              : "Aucun ouvrage. Vous pouvez créer un devis sans bibliothèque."}
           </p>
         ) : (
-          <ul className="divide-y divide-slate-100">
-            {items.map((w) => (
-              <li key={w.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
-                <div>
-                  <p className="font-semibold text-slate-900">{w.name}</p>
-                  <p className="text-xs text-slate-500">
-                    {[w.family, w.subFamily].filter(Boolean).join(" · ") || "—"}
-                  </p>
-                </div>
-                <p className="tabular-nums font-semibold">
-                  {roundMoney(w.unitSellHt, 2).toLocaleString("fr-FR")} € HT
-                </p>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 text-[10px] font-bold uppercase text-slate-500">
+                <tr>
+                  <th className="px-4 py-2">Ouvrage</th>
+                  <th className="px-4 py-2">Réf.</th>
+                  <th className="px-4 py-2">Unité</th>
+                  <th className="px-4 py-2">Coût</th>
+                  <th className="px-4 py-2">Vente</th>
+                  <th className="px-4 py-2">Marque</th>
+                  <th className="px-4 py-2">Type</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {items.map((w) => {
+                  const marque =
+                    w.marginPercent ||
+                    marginPercentFromCostSell(w.unitCostHt, w.unitSellHt);
+                  return (
+                    <tr key={w.id} className="hover:bg-slate-50/80">
+                      <td className="px-4 py-2.5">
+                        <Link
+                          href={`/dashboard/devis-facturation/bibliotheque/${w.id}`}
+                          className="font-semibold text-[#1e3a5f] hover:underline"
+                        >
+                          {w.name}
+                        </Link>
+                        {w.needsPriceRecalc ? (
+                          <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
+                            À recalculer
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-2.5 text-slate-600">{w.reference || "—"}</td>
+                      <td className="px-4 py-2.5 text-slate-600">{w.saleUnit}</td>
+                      <td className="px-4 py-2.5 tabular-nums">
+                        {roundMoney(w.unitCostHt, 2).toLocaleString("fr-FR")} €
+                      </td>
+                      <td className="px-4 py-2.5 tabular-nums font-semibold">
+                        {roundMoney(w.unitSellHt, 2).toLocaleString("fr-FR")} €
+                      </td>
+                      <td className="px-4 py-2.5 tabular-nums text-slate-600">
+                        {roundMoney(marque, 1).toLocaleString("fr-FR")} %
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <span
+                          className={
+                            w.kind === "COMPOSITE"
+                              ? "rounded-full bg-[#1e3a5f]/10 px-2 py-0.5 text-[10px] font-bold text-[#1e3a5f]"
+                              : "rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600"
+                          }
+                        >
+                          {w.kind === "COMPOSITE" ? "COMPOSITE" : "SIMPLE"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

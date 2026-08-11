@@ -14,7 +14,6 @@ import {
   formatDayShort,
   formatTime,
   isSameDay,
-  isoWeekLabel,
   startOfDay,
   startOfWeek,
 } from "@/lib/agenda/dates";
@@ -23,6 +22,8 @@ import {
   eventHref,
   eventsForResourceOnDay,
   filterPlanningEvents,
+  filterResourcesByScope,
+  hasTerrainPlanifiableUsers,
   initialsFromName,
   isDragBlocked,
   isResourceFreeOnDay,
@@ -35,6 +36,7 @@ import {
   unassignedEventsInRange,
   visibleDaysForRange,
   type PlanningResource,
+  type PlanningResourceScope,
   type PlanningTeamUser,
   type PlanningWorkDays,
 } from "@/lib/planning/board";
@@ -77,6 +79,8 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
   const [filterAvailableOnly, setFilterAvailableOnly] = useState(false);
   const [filterConflictsOnly, setFilterConflictsOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const canUseTerrainScope = useMemo(() => hasTerrainPlanifiableUsers(teamUsers), [teamUsers]);
+  const [resourceScope, setResourceScope] = useState<PlanningResourceScope>("terrain");
   const [createDraft, setCreateDraft] = useState<{
     day: Date;
     resourceId: string;
@@ -88,6 +92,12 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
     setZoom(readPlanningZoom());
     setWorkDays(readPlanningWorkDays());
   }, []);
+
+  useEffect(() => {
+    if (!canUseTerrainScope && resourceScope === "terrain") {
+      setResourceScope("all");
+    }
+  }, [canUseTerrainScope, resourceScope]);
 
   const weekStart = useMemo(() => startOfWeek(cursor), [cursor]);
   const days = useMemo(
@@ -110,18 +120,19 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
   );
 
   const resources: PlanningResource[] = useMemo(() => {
-    return teamUsers
-      .map((u) => ({
-        id: u.id,
-        name: u.name || u.email,
-        email: u.email,
-        jobTitle: u.jobTitle,
-        permissionProfile: u.permissionProfile,
-        personType: u.personType,
-        kind: "person" as const,
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" }));
-  }, [teamUsers]);
+    const mapped = teamUsers.map((u) => ({
+      id: u.id,
+      name: u.name || u.email,
+      email: u.email,
+      jobTitle: u.jobTitle,
+      permissionProfile: u.permissionProfile,
+      personType: u.personType,
+      kind: "person" as const,
+    }));
+    return filterResourcesByScope(mapped, canUseTerrainScope ? resourceScope : "all").sort((a, b) =>
+      a.name.localeCompare(b.name, "fr", { sensitivity: "base" }),
+    );
+  }, [teamUsers, resourceScope, canUseTerrainScope]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -227,8 +238,8 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
   );
 
   const summary = useMemo(
-    () => planningSummary(filteredEvents, resources, from, to),
-    [filteredEvents, resources, from, to],
+    () => planningSummary(filteredEvents, visibleResources, from, to),
+    [filteredEvents, visibleResources, from, to],
   );
 
   const selected = events.find((e) => e.id === selectedId) ?? null;
@@ -368,26 +379,47 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1e3a5f]/90">
               Planning équipe
             </p>
-            <div className="mt-0.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-              <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
-                {period.title}
-              </h1>
-              <span className="rounded-md bg-[#1e3a5f]/10 px-2 py-0.5 text-xs font-bold text-[#1e3a5f]">
-                {isoWeekLabel(weekStart)}
-                {" · "}
-                {summary.collaborators} collaborateur
-                {summary.collaborators > 1 ? "s" : ""}
-              </span>
-            </div>
+            <h1 className="mt-0.5 text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
+              {period.title}
+            </h1>
             {period.rangeLabel ? (
               <p className="mt-0.5 text-sm text-slate-600">{period.rangeLabel}</p>
             ) : null}
             <p className="mt-1 text-xs font-medium text-slate-500">
-              Qui est affecté · Ce qui reste à organiser
+              {summary.collaborators} collaborateur{summary.collaborators > 1 ? "s" : ""}
+              {" · "}
+              {summary.assignments} affectation{summary.assignments > 1 ? "s" : ""}
+              {" · "}
+              {summary.conflicts} conflit{summary.conflicts > 1 ? "s" : ""}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {canUseTerrainScope ? (
+              <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+                {(
+                  [
+                    ["terrain", "Équipe terrain"],
+                    ["all", "Toute l'équipe"],
+                  ] as const
+                ).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setResourceScope(id)}
+                    className={cn(
+                      "rounded-md px-2.5 py-1.5 text-[11px] font-bold",
+                      resourceScope === id
+                        ? "bg-[#1e3a5f] text-white"
+                        : "text-slate-600 hover:bg-white",
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
             <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
               {(
                 [
@@ -570,12 +602,10 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
         ) : null}
 
         <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
-          <SummaryChip label="Collaborateurs" value={summary.collaborators} />
           <SummaryChip
             label={summary.sites === 1 ? "chantier planifié" : "chantiers planifiés"}
             value={summary.sites}
           />
-          <SummaryChip label="Affectations" value={summary.assignments} />
           <SummaryChip
             label="Conflits"
             value={summary.conflicts}
@@ -668,7 +698,7 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
       ) : null}
 
       {/* Desktop — board = collaborateurs × période, enrichi par AgendaEvent */}
-      <div className="hidden min-h-0 flex-1 overflow-auto rounded-2xl border border-slate-200/90 bg-white shadow-sm lg:block">
+      <div className="hidden max-h-[min(70vh,52rem)] min-h-0 flex-1 overflow-auto rounded-2xl border border-slate-200/90 bg-white shadow-sm lg:block">
         {loading ? (
           <p className="p-10 text-center text-sm text-slate-500">Chargement du planning…</p>
         ) : view === "day" ? (
@@ -742,19 +772,9 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
                           style={{ minHeight: "var(--pl-cell-min)" }}
                         >
                           {free ? (
-                            <button
-                              type="button"
+                            <EmptyAssignCell
                               onClick={() => setCreateDraft({ day: d, resourceId: r.id })}
-                              className="flex h-full min-h-[3.5rem] flex-col items-start justify-center rounded-lg border border-dashed border-slate-200/90 bg-slate-50/50 px-2 py-1.5 text-left transition hover:border-[#1e3a5f]/40 hover:bg-slate-50"
-                              title="Aucune affectation planifiée — cliquer pour affecter"
-                            >
-                              <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                                Sans affectation
-                              </span>
-                              <span className="text-[10px] font-semibold text-[#1e3a5f]">
-                                + Affecter
-                              </span>
-                            </button>
+                            />
                           ) : (
                             cell.map((e) => (
                               <AssignmentBlock
@@ -811,6 +831,47 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
         />
       ) : null}
     </div>
+  );
+}
+
+function EmptyAssignCell({
+  onClick,
+  className,
+  dense,
+  mobile,
+}: {
+  onClick: () => void;
+  className?: string;
+  dense?: boolean;
+  mobile?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title="Aucune affectation planifiée — cliquer pour affecter"
+      className={cn(
+        "group flex w-full flex-col items-start justify-center rounded-md bg-slate-50/50 px-2 text-left transition",
+        "hover:bg-slate-100/90",
+        dense ? "min-h-[2.5rem] py-1.5" : "min-h-[2.75rem] py-1.5",
+        mobile && "border border-transparent py-2",
+        className,
+      )}
+    >
+      <span className="text-[9px] font-medium uppercase tracking-wide text-slate-400">
+        Sans affectation
+      </span>
+      <span
+        className={cn(
+          "text-[10px] font-semibold text-[#1e3a5f]",
+          mobile
+            ? "opacity-100"
+            : "opacity-55 group-hover:opacity-100 group-focus-visible:opacity-100",
+        )}
+      >
+        + Affecter
+      </span>
+    </button>
   );
 }
 
@@ -1004,16 +1065,11 @@ function DayHourGrid({
                 />
               ))}
               {free ? (
-                <button
-                  type="button"
+                <EmptyAssignCell
+                  className="absolute inset-x-1 top-1 z-10"
+                  dense
                   onClick={() => onCreate(r.id)}
-                  className="absolute inset-x-1 top-1 z-10 flex flex-col items-start gap-0.5 rounded-lg border border-dashed border-slate-200 bg-white/95 px-2 py-2 text-left shadow-sm hover:border-[#1e3a5f]/40"
-                >
-                  <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                    Aucune affectation planifiée
-                  </span>
-                  <span className="text-[11px] font-bold text-[#1e3a5f]">+ Affecter</span>
-                </button>
+                />
               ) : (
                 cell.map((e) => {
                   const start = new Date(e.startAt);
@@ -1110,16 +1166,7 @@ function MobileDayPeople({
               <ResourceCell resource={r} currentUserId={currentUserId} />
               <div className="mt-2 space-y-1.5">
                 {cell.length === 0 ? (
-                  <button
-                    type="button"
-                    onClick={() => onCreate(r.id, day)}
-                    className="w-full rounded-lg border border-dashed border-slate-200 bg-slate-50/80 px-2 py-2 text-left text-xs font-medium text-slate-600"
-                  >
-                    <span className="block font-semibold text-slate-500">
-                      Aucune affectation planifiée
-                    </span>
-                    <span className="font-bold text-[#1e3a5f]">+ Affecter</span>
-                  </button>
+                  <EmptyAssignCell mobile onClick={() => onCreate(r.id, day)} />
                 ) : (
                   cell.map((e) => {
                     const label = planningBlockLabel(e);

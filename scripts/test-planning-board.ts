@@ -1,5 +1,5 @@
 /**
- * Tests Planning V2A + V2B (ressources visibles sans affectation).
+ * Tests Planning V2A + V2B + V2B.1 (filtre terrain, conflits horaires).
  * Run: npx tsx scripts/test-planning-board.ts
  */
 import { readFileSync } from "node:fs";
@@ -9,9 +9,12 @@ import {
   eventHasConflict,
   eventsForResourceOnDay,
   filterPlanningEvents,
+  filterResourcesByScope,
+  hasTerrainPlanifiableUsers,
   isDragBlocked,
   isPlanifiableUser,
   isResourceFreeOnDay,
+  isTerrainPlanifiableProfile,
   planningBlockLabel,
   planningPeriodLabel,
   planningRoleLabel,
@@ -77,11 +80,31 @@ assert(eventHasConflict(a, [a, b]), "conflit responsable détecté");
 assert(planningBlockLabel(a).site.toUpperCase().includes("VICTOR"), "libellé chantier");
 
 assert(isPlanifiableUser({ personType: "INTERNAL" }), "internal planifiable");
+assert(isPlanifiableUser({ personType: "INTERNAL", permissionProfile: "DIRECTION" }), "Direction planifiable (toute l'équipe)");
+assert(isPlanifiableUser({ personType: "INTERNAL", permissionProfile: "ADMINISTRATIF" }), "Administratif planifiable");
 assert(!isPlanifiableUser({ personType: "SUPPLIER" }), "Thomas/supplier exclu");
 assert(!isPlanifiableUser({ personType: "CLIENT_EXT" }), "Sophie/client exclu");
 assert(!isPlanifiableUser({ permissionProfile: "FOURNISSEUR" }), "profil fournisseur exclu");
 assert(!isPlanifiableUser({ accessStatus: "DISABLED" }), "DISABLED exclu");
 assert(!isPlanifiableUser({ accessStatus: "SUSPENDED" }), "SUSPENDED exclu");
+
+assert(isTerrainPlanifiableProfile("CONDUCTEUR"), "terrain: conducteur");
+assert(isTerrainPlanifiableProfile("CHEF_CHANTIER"), "terrain: chef chantier");
+assert(!isTerrainPlanifiableProfile("DIRECTION"), "terrain: pas Direction");
+assert(!isTerrainPlanifiableProfile("ADMINISTRATIF"), "terrain: pas Administratif");
+
+const teamMix = [
+  { id: "d", permissionProfile: "DIRECTION" },
+  { id: "j", permissionProfile: "ADMINISTRATIF" },
+  { id: "k", permissionProfile: "CONDUCTEUR" },
+];
+assert(hasTerrainPlanifiableUsers(teamMix), "équipe mixte a du terrain");
+assert(filterResourcesByScope(teamMix, "terrain").length === 1, "filtre terrain → 1 conducteur");
+assert(filterResourcesByScope(teamMix, "all").length === 3, "filtre all → 3");
+assert(
+  filterResourcesByScope([{ permissionProfile: "DIRECTION" }], "terrain").length === 1,
+  "fallback terrain vide → conserve la liste",
+);
 
 assert(isDragBlocked(ev({ id: "l", type: "LIVRAISON", purchaseOrderId: "po1" })).blocked, "BL drag bloqué");
 assert(!isDragBlocked(a).blocked, "intervention drag OK");
@@ -128,6 +151,49 @@ assert(
   "rôle conducteur métier",
 );
 
+// —— V2B.1 conflits horaires ——
+const overlapA = ev({
+  id: "oa",
+  startAt: "2026-08-10T09:00:00.000Z",
+  endAt: "2026-08-10T12:00:00.000Z",
+  projectId: "p1",
+});
+const overlapB = ev({
+  id: "ob",
+  startAt: "2026-08-10T11:00:00.000Z",
+  endAt: "2026-08-10T13:00:00.000Z",
+  projectId: "p2",
+  project: { id: "p2", title: "République", siteCity: null, siteAddress: null },
+});
+assert(eventHasConflict(overlapA, [overlapA, overlapB]), "V2B.1: conflit 09–12 vs 11–13");
+const summaryConflict = planningSummary([overlapA, overlapB], resources, day, day);
+assert(summaryConflict.conflicts > 0, "V2B.1: KPI conflits > 0");
+
+const freeA = ev({
+  id: "fa",
+  startAt: "2026-08-10T09:45:00.000Z",
+  endAt: "2026-08-10T10:45:00.000Z",
+});
+const freeB = ev({
+  id: "fb",
+  startAt: "2026-08-10T12:00:00.000Z",
+  endAt: "2026-08-10T13:15:00.000Z",
+  projectId: "p2",
+  project: { id: "p2", title: "République", siteCity: null, siteAddress: null },
+});
+assert(!eventHasConflict(freeA, [freeA, freeB]), "V2B.1: non-conflit 09:45–10:45 vs 12:00–13:15");
+assert(planningSummary([freeA, freeB], resources, day, day).conflicts === 0, "V2B.1: KPI conflits = 0");
+
+const many = Array.from({ length: 25 }, (_, i) => ({
+  id: `u${i}`,
+  name: `User ${i}`,
+  email: `u${i}@x.fr`,
+  kind: "person" as const,
+  permissionProfile: i % 5 === 0 ? "DIRECTION" : "CONDUCTEUR",
+}));
+assert(filterResourcesByScope(many, "terrain").length === 20, "V2B.1: 25 users → 20 terrain");
+assert(filterResourcesByScope(many, "all").length === 25, "V2B.1: 25 users → all");
+
 const boardSrc = readFileSync(join(process.cwd(), "src/components/planning/PlanningBoard.tsx"), "utf8");
 assert(!/Disponible/.test(boardSrc), "V2B D: aucun wording Disponible");
 assert(!/disponible/.test(boardSrc), "V2B D: aucun wording disponible");
@@ -136,6 +202,11 @@ assert(boardSrc.includes("chantiers planifiés") || boardSrc.includes("chantier 
 assert(boardSrc.includes('view !== "day"'), "V2B E: 5j/6j/7j masqués en vue Jour");
 assert(!boardSrc.includes("EmptyPlanningState"), "V2B: gros empty state retiré");
 assert(boardSrc.includes("MobileDayPeople"), "V2B G: mobile liste collaborateurs");
+assert(boardSrc.includes("EmptyAssignCell"), "V2B.1: cellule vide allégée");
+assert(boardSrc.includes("Équipe terrain"), "V2B.1: filtre équipe terrain");
+assert(boardSrc.includes("Toute l'équipe") || boardSrc.includes("Toute l&apos;équipe"), "V2B.1: toute l'équipe");
+assert(boardSrc.includes("max-h-[min(70vh,52rem)]"), "V2B.1: scroll vertical board");
+assert(!boardSrc.includes("isoWeekLabel"), "V2B.1: badge S33 doublon retiré");
 
 const pageSrc = readFileSync(join(process.cwd(), "src/app/dashboard/planning/page.tsx"), "utf8");
 assert(pageSrc.includes("isExternalPortalUser"), "V2B H: externes redirigés");
@@ -144,4 +215,4 @@ assert(pageSrc.includes("isPlanifiableUser"), "V2B H: filtre planifiables");
 if (failed) {
   process.exit(1);
 }
-console.log("\nPlanning board helpers OK (V2A+V2B)");
+console.log("\nPlanning board helpers OK (V2A+V2B+V2B.1)");

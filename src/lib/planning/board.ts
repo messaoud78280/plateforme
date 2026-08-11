@@ -64,6 +64,36 @@ export function isPlanifiableUser(u: {
   return true;
 }
 
+/**
+ * Profils « terrain » planifiables — basés uniquement sur PermissionProfile existants.
+ * Pas de TECHNICIEN / OUVRIER dans le modèle actuel.
+ * Direction & Administratif restent planifiables via « Toute l'équipe ».
+ */
+export const PLANNING_TERRAIN_PROFILES = ["CONDUCTEUR", "CHEF_CHANTIER"] as const;
+
+export type PlanningResourceScope = "terrain" | "all";
+
+export function isTerrainPlanifiableProfile(permissionProfile?: string | null): boolean {
+  return (PLANNING_TERRAIN_PROFILES as readonly string[]).includes(permissionProfile ?? "");
+}
+
+/** Filtre UI ressources — ne touche pas isPlanifiableUser (ACL / chargement). */
+export function filterResourcesByScope<T extends { permissionProfile?: string | null }>(
+  list: T[],
+  scope: PlanningResourceScope,
+): T[] {
+  if (scope !== "terrain") return list;
+  const terrain = list.filter((u) => isTerrainPlanifiableProfile(u.permissionProfile));
+  // Fallback : si aucun profil terrain, conserver toute l'équipe (évite board vide)
+  return terrain.length > 0 ? terrain : list;
+}
+
+export function hasTerrainPlanifiableUsers(
+  list: { permissionProfile?: string | null }[],
+): boolean {
+  return list.some((u) => isTerrainPlanifiableProfile(u.permissionProfile));
+}
+
 export function planningRoleLabel(u: {
   jobTitle?: string | null;
   permissionProfile?: string | null;

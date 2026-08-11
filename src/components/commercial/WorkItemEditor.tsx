@@ -73,6 +73,7 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [savedMsg, setSavedMsg] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     reference: "",
@@ -129,6 +130,7 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
   async function saveMeta() {
     setBusy(true);
     setError(null);
+    setSavedMsg(null);
     try {
       const res = await fetch(`/api/commercial/library/work-items/${workItemId}`, {
         method: "PATCH",
@@ -149,6 +151,7 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur");
       await load();
+      setSavedMsg("Ouvrage mis à jour.");
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
@@ -263,6 +266,11 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
 
       {error ? (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>
+      ) : null}
+      {savedMsg ? (
+        <p role="status" className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-900">
+          {savedMsg}
+        </p>
       ) : null}
 
       <div className="rounded-xl border border-slate-200 bg-white p-4">

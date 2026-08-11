@@ -153,12 +153,19 @@ export function buildCompositionSnapshot(workItem: {
 
 export async function listWorkItems(
   orgId: string,
-  opts?: { q?: string; take?: number; skip?: number },
+  opts?: {
+    q?: string;
+    take?: number;
+    skip?: number;
+    /** Défaut : actifs seulement (picker + biblio). */
+    active?: boolean;
+  },
 ) {
   const q = opts?.q?.trim();
+  const active = opts?.active ?? true;
   const where: Prisma.CommercialWorkItemWhereInput = {
     organizationId: orgId,
-    isActive: true,
+    isActive: active,
     ...(q
       ? {
           OR: [
@@ -178,7 +185,7 @@ export async function listWorkItems(
     skip: opts?.skip ?? 0,
     include: {
       components: { orderBy: { sortOrder: "asc" } },
-      _count: { select: { components: true } },
+      _count: { select: { components: true, quoteLines: true } },
     },
   });
   return rows.map((w) => ({
@@ -188,9 +195,23 @@ export async function listWorkItems(
     marginPercent: d(w.marginPercent),
     feesPercent: d(w.feesPercent),
     feesAmountHt: d(w.feesAmountHt),
+    quoteLineCount: w._count.quoteLines,
     components: w.components.map(mapComponent),
   }));
 }
+
+/** Décision UI/API : supprimer physiquement ou archiver. */
+export function workItemRemovalMode(quoteLineCount: number): "delete" | "archive" {
+  return quoteLineCount > 0 ? "archive" : "delete";
+}
+
+/** Nombre de lignes de devis liées (snapshot historique indépendant). */
+export async function countWorkItemQuoteUsages(orgId: string, workItemId: string) {
+  return prisma.commercialQuoteLine.count({
+    where: { organizationId: orgId, commercialWorkItemId: workItemId },
+  });
+}
+
 
 export async function getWorkItem(orgId: string, id: string) {
   const w = await prisma.commercialWorkItem.findFirst({
@@ -381,16 +402,60 @@ export async function updateWorkItem(
   return getWorkItem(orgId, id);
 }
 
+/** Archive : reste en historique, retiré des nouveaux devis. Ne touche aucun devis. */
+export async function archiveWorkItem(orgId: string, id: string) {
+  const existing = await prisma.commercialWorkItem.findFirst({
+    where: { id, organizationId: orgId },
+    select: { id: true, isActive: true },
+  });
+  if (!existing) throw new Error("Ouvrage introuvable");
+  if (!existing.isActive) return getWorkItem(orgId, id);
+  await prisma.commercialWorkItem.update({
+    where: { id },
+    data: { isActive: false },
+  });
+  return getWorkItem(orgId, id);
+}
+
+/** Restaure un ouvrage archivé (de nouveau sélectionnable). */
+export async function restoreWorkItem(orgId: string, id: string) {
+  const existing = await prisma.commercialWorkItem.findFirst({
+    where: { id, organizationId: orgId },
+    select: { id: true },
+  });
+  if (!existing) throw new Error("Ouvrage introuvable");
+  await prisma.commercialWorkItem.update({
+    where: { id },
+    data: { isActive: true },
+  });
+  return getWorkItem(orgId, id);
+}
+
+/**
+ * Suppression physique uniquement si l’ouvrage n’est lié à aucune ligne de devis.
+ * Sinon → archiver (isActive=false). Ne modifie jamais les snapshots de devis.
+ */
 export async function deleteWorkItem(orgId: string, id: string) {
   const existing = await prisma.commercialWorkItem.findFirst({
     where: { id, organizationId: orgId },
     select: { id: true },
   });
   if (!existing) throw new Error("Ouvrage introuvable");
-  return prisma.commercialWorkItem.update({
+
+  const usage = await countWorkItemQuoteUsages(orgId, id);
+  if (usage > 0) {
+    const err = new Error(
+      "Cet ouvrage a déjà été utilisé dans un devis. Archivez-le pour le retirer des nouveaux devis.",
+    ) as Error & { code?: string; usageCount?: number };
+    err.code = "WORK_ITEM_IN_USE";
+    err.usageCount = usage;
+    throw err;
+  }
+
+  await prisma.commercialWorkItem.delete({
     where: { id },
-    data: { isActive: false },
   });
+  return { deleted: true as const };
 }
 
 export async function duplicateWorkItem(orgId: string, id: string, createdById?: string) {

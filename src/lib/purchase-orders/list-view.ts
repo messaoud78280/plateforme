@@ -1,6 +1,6 @@
 /**
- * COMMANDES-V2C — Projection liste commandes (batch, sans N+1).
- * Réutilise evaluatePurchaseOrderAttention + computeReceivingSnapshot.
+ * COMMANDES-V2C / V2D — Projection liste commandes (batch, sans N+1).
+ * Réutilise evaluatePurchaseOrderAttention + computeReceivingSnapshot + nextAction.
  */
 import type { PurchaseOrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -14,6 +14,11 @@ import {
 import type { PurchaseOrderAttentionInput } from "@/lib/purchase-orders/attention/types";
 import { PURCHASE_ORDER_STATUS_LABELS } from "@/lib/purchase-orders/status";
 import { purchaseOrderAttentionSelect } from "@/lib/purchase-orders/attention/select";
+import {
+  evaluatePurchaseOrderNextAction,
+  formatPurchaseOrderAttentionWhy,
+  type PurchaseOrderNextActionCode,
+} from "@/lib/purchase-orders/next-action";
 import {
   withPerfLog,
   runWithPerfContext,
@@ -44,6 +49,12 @@ export type PurchaseOrderListRow = {
   attentionUrgency: UrgencyLevel | null;
   attentionShort: string | null;
   attentionReason: string | null;
+  /** Raison courte explicable (liste) */
+  attentionWhy: string | null;
+  nextActionCode: PurchaseOrderNextActionCode;
+  nextActionLabel: string;
+  nextActionNeedsUser: boolean;
+  nextActionHref: string | null;
   agendaEventId: string | null;
   sharedWithSupplier: boolean;
   updatedAt: string;
@@ -53,9 +64,13 @@ export type PurchaseOrderListRow = {
 
 export type PurchaseOrderListSummary = {
   total: number;
-  toConfirm: number;
+  toTreat: number;
+  deliveriesToday: number;
+  overdue: number;
   deliveriesThisWeek: number;
+  /** @deprecated alias toTreat */
   needingAttention: number;
+  toConfirm: number;
 };
 
 function stripProjectFromSubject(subject: string, projectTitle: string | null): string {
@@ -162,6 +177,13 @@ export async function loadPurchaseOrdersListView(opts: {
   let toConfirm = 0;
   let deliveriesThisWeek = 0;
   let needingAttention = 0;
+  let toTreat = 0;
+  let deliveriesToday = 0;
+  let overdue = 0;
+  const dayStart = new Date(now);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(now);
+  dayEnd.setHours(23, 59, 59, 999);
 
   for (const o of orders) {
     const receiptLines = o.receipts.flatMap((r) =>
@@ -233,12 +255,62 @@ export async function loadPurchaseOrdersListView(opts: {
     if (del.at && del.at >= weekStart && del.at < weekEnd) deliveriesThisWeek += 1;
     if (active) needingAttention += 1;
 
+    const hasReceiptIssue = receiptLines.some(
+      (l) => Number(l.damagedQty) > 0 || Number(l.refusedQty) > 0,
+    );
+    const next = evaluatePurchaseOrderNextAction(
+      {
+        status: o.status,
+        sharedWithSupplier: o.sharedWithSupplier,
+        proposedDeliveryStatus: o.proposedDeliveryStatus,
+        requestedDeliveryAt: o.requestedDeliveryAt,
+        confirmedDeliveryAt: o.confirmedDeliveryAt,
+        proposedDeliveryAt: o.proposedDeliveryAt,
+        supplierName: input.supplierName,
+        orderedQty: snap.totalOrdered,
+        receivedQty: snap.totalReceivedConforming,
+        fullyReceived: snap.fullyReceived,
+        hasReceiptIssue,
+      },
+      { now },
+    );
+    if (next.needsUserAction) toTreat += 1;
+    if (del.at && del.at >= dayStart && del.at <= dayEnd && !snap.fullyReceived) {
+      deliveriesToday += 1;
+    }
+    if (
+      next.code === "RELANCER_LIVRAISON_EN_RETARD" ||
+      (del.at && del.at < dayStart && !snap.fullyReceived && del.kind === "confirmed")
+    ) {
+      overdue += 1;
+    }
+
+    const attentionWhy = formatPurchaseOrderAttentionWhy(
+      {
+        attentionReason: reason,
+        deliveryAt: del.at ? del.at.toISOString() : null,
+        deliveryKind: del.kind,
+        orderedQty: snap.totalOrdered,
+        receivedQty: snap.totalReceivedConforming,
+        fullyReceived: snap.fullyReceived,
+        nextActionCode: next.code,
+      },
+      { now },
+    );
+
     const canReceive = [
       "CONFIRMEE",
       "LIVRAISON_PROGRAMMEE",
       "PARTIELLEMENT_RECUE",
       "A_CONFIRMER",
     ].includes(o.status);
+
+    const nextHref =
+      next.hrefKind === "reception"
+        ? `/dashboard/commandes/${o.id}/reception`
+        : next.hrefKind === "detail"
+          ? `/dashboard/commandes/${o.id}`
+          : null;
 
     rows.push({
       id: o.id,
@@ -258,10 +330,15 @@ export async function loadPurchaseOrdersListView(opts: {
       orderedQty: snap.totalOrdered,
       receivedQty: snap.totalReceivedConforming,
       fullyReceived: snap.fullyReceived,
-      attentionActive: active,
+      attentionActive: active || next.needsUserAction,
       attentionUrgency: urgency,
       attentionShort: attentionShortLabel(urgency, reason),
       attentionReason: reason,
+      attentionWhy,
+      nextActionCode: next.code,
+      nextActionLabel: next.label,
+      nextActionNeedsUser: next.needsUserAction,
+      nextActionHref: nextHref,
       agendaEventId: input.agendaEventId ?? null,
       sharedWithSupplier: o.sharedWithSupplier,
       updatedAt: o.updatedAt.toISOString(),
@@ -270,8 +347,11 @@ export async function loadPurchaseOrdersListView(opts: {
     });
   }
 
-  // Tri défaut : attention → livraison proche → récentes
+  // Tri défaut : action requise → attention → livraison proche → récentes
   rows.sort((a, b) => {
+    if (a.nextActionNeedsUser !== b.nextActionNeedsUser) {
+      return a.nextActionNeedsUser ? -1 : 1;
+    }
     const ua = a.attentionUrgency ? urgencyRank(a.attentionUrgency) : -1;
     const ub = b.attentionUrgency ? urgencyRank(b.attentionUrgency) : -1;
     if (ub !== ua) return ub - ua;
@@ -285,9 +365,12 @@ export async function loadPurchaseOrdersListView(opts: {
     rows,
     summary: {
       total: rows.length,
-      toConfirm,
+      toTreat,
+      deliveriesToday,
+      overdue,
       deliveriesThisWeek,
-      needingAttention,
+      needingAttention: toTreat,
+      toConfirm,
     },
   };
     }).finally(() => {

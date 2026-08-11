@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   actionsForPurchaseOrderStatus,
   PURCHASE_ORDER_STATUS_LABELS,
@@ -10,6 +10,8 @@ import {
   REFUSE_REASONS,
   supplierActionsForStatus,
 } from "@/lib/purchase-orders/supplier-ui";
+import { evaluatePurchaseOrderNextAction } from "@/lib/purchase-orders/next-action";
+import { evaluatePurchaseOrderWorksiteRisk } from "@/lib/purchase-orders/worksite-risk";
 import type { PurchaseOrderStatus } from "@prisma/client";
 import { PurchaseOrderMessagerieLink } from "@/components/messagerie/MessagerieContextLinks";
 import { ContextBackButton } from "@/components/ui/ContextBackButton";
@@ -260,6 +262,58 @@ export function PurchaseOrderDetailClient({
   const supplierLabel =
     order.externalOrganization.tradeName || order.externalOrganization.name;
 
+  const orderedQty = useMemo(
+    () => order.lines.reduce((s, l) => s + Number(l.quantity || 0), 0),
+    [order.lines],
+  );
+  const receivedQty = useMemo(
+    () => order.lines.reduce((s, l) => s + Number(l.receivedQty || 0), 0),
+    [order.lines],
+  );
+  const nextAction = useMemo(
+    () =>
+      evaluatePurchaseOrderNextAction({
+        status: order.status,
+        sharedWithSupplier: order.sharedWithSupplier,
+        proposedDeliveryStatus: order.proposedDeliveryStatus || "NONE",
+        requestedDeliveryAt: order.requestedDeliveryAt,
+        confirmedDeliveryAt: order.confirmedDeliveryAt,
+        proposedDeliveryAt: order.proposedDeliveryAt,
+        supplierName: supplierLabel,
+        orderedQty,
+        receivedQty,
+        fullyReceived: orderedQty > 0 && receivedQty >= orderedQty,
+      }),
+    [
+      order.status,
+      order.sharedWithSupplier,
+      order.proposedDeliveryStatus,
+      order.requestedDeliveryAt,
+      order.confirmedDeliveryAt,
+      order.proposedDeliveryAt,
+      supplierLabel,
+      orderedQty,
+      receivedQty,
+    ],
+  );
+  const worksiteRisk = useMemo(
+    () =>
+      evaluatePurchaseOrderWorksiteRisk({
+        deliveryAt: order.confirmedDeliveryAt || order.requestedDeliveryAt,
+        remainingQty: Math.max(0, orderedQty - receivedQty),
+        fullyReceived: orderedQty > 0 && receivedQty >= orderedQty,
+        projectId: order.project?.id ?? null,
+        // Pas de FK intervention — risque dur uniquement si date passée + chantier
+      }),
+    [
+      order.confirmedDeliveryAt,
+      order.requestedDeliveryAt,
+      orderedQty,
+      receivedQty,
+      order.project?.id,
+    ],
+  );
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -313,6 +367,29 @@ export function PurchaseOrderDetailClient({
               : PURCHASE_ORDER_STATUS_LABELS[order.status]}
           </span>
         </div>
+
+        {!isSupplierView && nextAction.code !== "AUCUNE" ? (
+          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+            <p className="text-[10px] font-extrabold uppercase tracking-wide text-slate-500">
+              Prochaine action
+            </p>
+            <p className="mt-0.5 text-sm font-extrabold text-slate-900">{nextAction.label}</p>
+            {worksiteRisk.label ? (
+              <p className="mt-1 text-xs font-semibold text-amber-900">
+                {worksiteRisk.label}
+                {worksiteRisk.reason ? ` — ${worksiteRisk.reason}` : ""}
+              </p>
+            ) : null}
+            {canAct && nextAction.hrefKind === "reception" ? (
+              <Link
+                href={`/dashboard/commandes/${order.id}/reception`}
+                className="mt-2 inline-flex rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white"
+              >
+                Réceptionner
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
 
         {!isSupplierView && order.project?.id ? (
           <div className="mt-3">

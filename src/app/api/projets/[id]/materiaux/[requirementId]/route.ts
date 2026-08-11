@@ -12,7 +12,7 @@ import {
 } from "@/lib/materiaux/service";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 
-type Ctx = { params: Promise<{ projectId: string; id: string }> };
+type Ctx = { params: Promise<{ id: string; requirementId: string }> };
 
 export async function PATCH(req: Request, ctx: Ctx) {
   const session = await getServerSession(authOptions);
@@ -25,9 +25,9 @@ export async function PATCH(req: Request, ctx: Ctx) {
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) return NextResponse.json({ error: "Organisation introuvable" }, { status: 403 });
 
-  const { projectId, id } = await ctx.params;
+  const { id: projectId, requirementId } = await ctx.params;
   const existing = await prisma.materialRequirement.findFirst({
-    where: { id, projectId, organizationId: orgId },
+    where: { id: requirementId, projectId, organizationId: orgId },
     select: { id: true },
   });
   if (!existing) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
@@ -37,12 +37,15 @@ export async function PATCH(req: Request, ctx: Ctx) {
 
   try {
     if (body.cancel) {
-      const requirement = await cancelMaterialRequirement({ organizationId: orgId, id });
+      const requirement = await cancelMaterialRequirement({
+        organizationId: orgId,
+        id: requirementId,
+      });
       return NextResponse.json({ ok: true, requirement });
     }
     const requirement = await updateMaterialRequirement({
       organizationId: orgId,
-      id,
+      id: requirementId,
       label: body.label != null ? String(body.label) : undefined,
       quantityRequired:
         body.quantityRequired != null ? Number(body.quantityRequired) : undefined,

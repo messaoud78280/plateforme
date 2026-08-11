@@ -13,7 +13,7 @@ import {
 } from "@/lib/materiaux/service";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 
-type Ctx = { params: Promise<{ projectId: string }> };
+type Ctx = { params: Promise<{ id: string }> };
 
 async function assertProjectAccess(opts: {
   userId: string;
@@ -44,7 +44,7 @@ export async function GET(_req: Request, ctx: Ctx) {
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) return NextResponse.json({ error: "Organisation introuvable" }, { status: 403 });
 
-  const { projectId } = await ctx.params;
+  const { id: projectId } = await ctx.params;
   const project = await assertProjectAccess({
     userId: session.user.id,
     orgId,
@@ -75,7 +75,7 @@ export async function POST(req: Request, ctx: Ctx) {
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) return NextResponse.json({ error: "Organisation introuvable" }, { status: 403 });
 
-  const { projectId } = await ctx.params;
+  const { id: projectId } = await ctx.params;
   const project = await assertProjectAccess({
     userId: session.user.id,
     orgId,

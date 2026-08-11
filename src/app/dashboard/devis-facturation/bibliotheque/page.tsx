@@ -21,7 +21,7 @@ export default async function BibliothequePage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <PageHeader
-          eyebrow="Gestion commerciale · Référentiel"
+          eyebrow="Devis & Facturation · Référentiel"
           title="Bibliothèque"
           description="Ouvrages commerciaux — accélèrent le devis, jamais obligatoires."
         />

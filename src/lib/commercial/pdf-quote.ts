@@ -109,7 +109,7 @@ export function generateQuotePdfBuffer(input: QuotePdfInput): Buffer {
   doc.setProperties({
     title: `Devis ${input.number}`,
     subject: input.subject,
-    creator: "BeWork Gestion commerciale",
+    creator: "BeWork Devis & Facturation",
   });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();

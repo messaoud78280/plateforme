@@ -20,7 +20,7 @@ export default async function EncaissementsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Gestion commerciale"
+        eyebrow="Devis & Facturation"
         title="Encaissements"
         description="Paiements reçus sur les factures commerciales — pas de confusion avec « à facturer »."
       />

@@ -29,7 +29,7 @@ export default async function FactureDetailPage({
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <PageHeader
-        eyebrow="Gestion commerciale"
+        eyebrow="Devis & Facturation"
         title={inv.number}
         description={inv.subject ?? undefined}
       />

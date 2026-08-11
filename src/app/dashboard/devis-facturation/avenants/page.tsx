@@ -24,7 +24,7 @@ export default async function AvenantsIndexPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Gestion commerciale"
+        eyebrow="Devis & Facturation"
         title="Avenants"
         description="Consultation — création depuis le détail d’un devis accepté."
       />

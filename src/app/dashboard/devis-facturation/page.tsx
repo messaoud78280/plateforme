@@ -50,8 +50,8 @@ export default async function DevisFacturationDashboardPage() {
     return (
       <div className="space-y-6">
         <PageHeader
-          eyebrow="Gestion commerciale"
-          title="Gestion commerciale"
+          eyebrow="Devis & Facturation"
+          title="Devis & Facturation"
           description="Devis, contrat, factures et encaissements — une seule chaîne."
         />
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-14 text-center">
@@ -89,7 +89,7 @@ export default async function DevisFacturationDashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <PageHeader
-          eyebrow="Gestion commerciale"
+          eyebrow="Devis & Facturation"
           title="Vue d’ensemble"
           description="Ce qui bouge, ce qui est contractualisé, ce qui reste à facturer et à encaisser."
         />

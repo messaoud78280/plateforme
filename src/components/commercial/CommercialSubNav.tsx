@@ -28,7 +28,7 @@ export function CommercialSubNav() {
   return (
     <nav
       className="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm"
-      aria-label="Gestion commerciale"
+      aria-label="Devis & Facturation"
     >
       {primary.map((l) => {
         const active = l.exact

@@ -87,7 +87,7 @@ export default async function FacturationPage({
       <PageHeader
         eyebrow="Pilotage chantier"
         title="À facturer"
-        description="Dossiers / chantiers qui nécessitent une action de facturation — pas la facture financière elle-même (Gestion commerciale)."
+        description="Dossiers / chantiers qui nécessitent une action de facturation — pas la facture financière elle-même (Devis & Facturation)."
         actions={
           <Link
             href={withReturnTo("/dashboard/a-traiter", "/dashboard/facturation")}

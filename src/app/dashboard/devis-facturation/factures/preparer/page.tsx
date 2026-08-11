@@ -35,7 +35,7 @@ export default async function PreparerFacturePage({
           Retour avenant
         </BackLink>
         <PageHeader
-          eyebrow="Gestion commerciale"
+          eyebrow="Devis & Facturation"
           title="Préparer la facture"
           description={`Avenant ${amendment.number} — validation humaine obligatoire.`}
         />
@@ -95,7 +95,7 @@ export default async function PreparerFacturePage({
     <div className="mx-auto max-w-xl space-y-6">
       <BackLink href="/dashboard/facturation">À facturer</BackLink>
       <PageHeader
-        eyebrow="Gestion commerciale"
+        eyebrow="Devis & Facturation"
         title="Préparer la facture"
         description={`Chantier · ${project.title} — validation humaine obligatoire.`}
       />

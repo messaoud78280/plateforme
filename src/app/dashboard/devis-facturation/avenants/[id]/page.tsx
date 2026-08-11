@@ -41,7 +41,7 @@ export default async function AvenantDetailPage({
         Retour devis {amendment.quote.number}
       </BackLink>
       <PageHeader
-        eyebrow="Gestion commerciale · Avenant"
+        eyebrow="Devis & Facturation · Avenant"
         title={amendment.number}
         description={amendment.subject}
       />

@@ -21,7 +21,7 @@ export default async function FacturesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Gestion commerciale" title="Factures" description="Factures clients BTP — source CommercialInvoice." />
+      <PageHeader eyebrow="Devis & Facturation" title="Factures" description="Factures clients BTP — hors abonnement SaaS." />
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {invoices.length === 0 ? (
           <p className="p-6 text-sm text-slate-500">Aucune facture.</p>

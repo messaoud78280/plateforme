@@ -20,7 +20,7 @@ export default async function DevisListPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <PageHeader
-          eyebrow="Gestion commerciale"
+          eyebrow="Devis & Facturation"
           title="Devis"
           description="Devis commerciaux — source de vérité financière."
         />

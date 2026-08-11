@@ -4,26 +4,34 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ContextBackButton } from "@/components/ui/ContextBackButton";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { CreatePurchaseOrderForm } from "@/components/purchase-orders/CreatePurchaseOrderForm";
+import {
+  CreatePurchaseOrderForm,
+  type PrefillPurchaseOrderLine,
+} from "@/components/purchase-orders/CreatePurchaseOrderForm";
 import {
   isInternalPurchaseOrderActor,
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
 import { projectWhereForClientUser } from "@/lib/organization/access";
 import { sanitizeInternalReturnTo } from "@/lib/navigation/safe-return-to";
+import { loadMaterialRequirementsForProject } from "@/lib/materiaux/load-for-project";
 
 export const dynamic = "force-dynamic";
 
 export default async function NouvelleCommandePage({
   searchParams,
 }: {
-  searchParams: Promise<{ projectId?: string; returnTo?: string }>;
+  searchParams: Promise<{ projectId?: string; returnTo?: string; req?: string }>;
 }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/commandes/nouvelle");
   if (!isInternalPurchaseOrderActor(session.user)) redirect("/dashboard/commandes");
 
-  const { projectId: projectIdParam, returnTo: returnToRaw } = await searchParams;
+  const {
+    projectId: projectIdParam,
+    returnTo: returnToRaw,
+    req: reqRaw,
+  } = await searchParams;
   const returnTo = sanitizeInternalReturnTo(returnToRaw, "/dashboard/commandes");
 
   const orgId = await resolvePurchaseOrderOrgId(session.user);
@@ -53,6 +61,42 @@ export default async function NouvelleCommandePage({
     .filter((u) => !u.personType || u.personType === "INTERNAL")
     .map((u) => ({ id: u.id, name: u.name }));
 
+  let prefillLines: PrefillPurchaseOrderLine[] | null = null;
+  let earliestNeededAt: string | null = null;
+
+  const reqIds = (reqRaw ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (reqIds.length > 0 && projectIdParam) {
+    const rows = await loadMaterialRequirementsForProject({
+      organizationId: orgId,
+      projectId: projectIdParam,
+    });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    const lines: PrefillPurchaseOrderLine[] = [];
+    for (const id of reqIds) {
+      const r = byId.get(id);
+      if (!r || r.status === "CANCELLED") continue;
+      const qty = r.progress.remainingToOrder;
+      if (qty <= 0) continue;
+      lines.push({
+        designation: r.label,
+        quantity: qty,
+        unit: r.unit,
+        materialRequirementId: r.id,
+        neededAt: r.neededAt,
+      });
+      if (r.neededAt) {
+        if (!earliestNeededAt || r.neededAt < earliestNeededAt) {
+          earliestNeededAt = r.neededAt;
+        }
+      }
+    }
+    if (lines.length > 0) prefillLines = lines;
+  }
+
   return (
     <div className="space-y-6">
       <ContextBackButton
@@ -63,12 +107,18 @@ export default async function NouvelleCommandePage({
       <PageHeader
         eyebrow="Commandes"
         title="Nouvelle commande"
-        description="Préparez une demande fournisseur en quelques champs — le reste peut attendre."
+        description={
+          prefillLines
+            ? "Lignes préremplies depuis les besoins matériaux du chantier."
+            : "Préparez une demande fournisseur en quelques champs — le reste peut attendre."
+        }
       />
       <CreatePurchaseOrderForm
         projects={projects}
         team={team}
         defaultProjectId={projectIdParam ?? null}
+        prefillLines={prefillLines}
+        earliestNeededAt={earliestNeededAt}
       />
     </div>
   );

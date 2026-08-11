@@ -13,18 +13,44 @@ type SupplierOpt = {
   primaryContact: { id: string; name: string; jobTitle: string | null } | null;
 };
 
-type Line = { designation: string; quantity: string; unit: string; unitPriceHt: string };
+type Line = {
+  designation: string;
+  quantity: string;
+  unit: string;
+  unitPriceHt: string;
+  materialRequirementId?: string | null;
+  neededAtHint?: string | null;
+};
 
-const emptyLine = (): Line => ({ designation: "", quantity: "1", unit: "U", unitPriceHt: "" });
+export type PrefillPurchaseOrderLine = {
+  designation: string;
+  quantity: number;
+  unit: string;
+  materialRequirementId: string;
+  neededAt?: string | null;
+};
+
+const emptyLine = (): Line => ({
+  designation: "",
+  quantity: "1",
+  unit: "U",
+  unitPriceHt: "",
+  materialRequirementId: null,
+});
 
 export function CreatePurchaseOrderForm({
   projects,
   team,
   defaultProjectId,
+  prefillLines,
+  earliestNeededAt,
 }: {
   projects: ProjectOpt[];
   team: TeamOpt[];
   defaultProjectId?: string | null;
+  /** MATERIAUX-V1B — lignes préremplies depuis besoins sélectionnés */
+  prefillLines?: PrefillPurchaseOrderLine[] | null;
+  earliestNeededAt?: string | null;
 }) {
   const router = useRouter();
   const initialProject =
@@ -38,9 +64,29 @@ export function CreatePurchaseOrderForm({
   const [contactId, setContactId] = useState<string | null>(null);
   const [supplierQ, setSupplierQ] = useState("");
   const [suppliers, setSuppliers] = useState<SupplierOpt[]>([]);
-  const [subject, setSubject] = useState("");
-  const [lines, setLines] = useState<Line[]>([emptyLine()]);
-  const [deliveryDate, setDeliveryDate] = useState("");
+  const [subject, setSubject] = useState(
+    prefillLines && prefillLines.length > 0
+      ? prefillLines.map((l) => l.designation).slice(0, 3).join(" · ")
+      : "",
+  );
+  const [lines, setLines] = useState<Line[]>(() =>
+    prefillLines && prefillLines.length > 0
+      ? prefillLines.map((l) => ({
+          designation: l.designation,
+          quantity: String(l.quantity),
+          unit: l.unit,
+          unitPriceHt: "",
+          materialRequirementId: l.materialRequirementId,
+          neededAtHint: l.neededAt ?? null,
+        }))
+      : [emptyLine()],
+  );
+  const [deliveryDate, setDeliveryDate] = useState(() => {
+    if (!earliestNeededAt) return "";
+    const d = new Date(earliestNeededAt);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toISOString().slice(0, 10);
+  });
   const [deliveryTime, setDeliveryTime] = useState("07:30");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [responsibleId, setResponsibleId] = useState(team[0]?.id ?? "");
@@ -53,6 +99,7 @@ export function CreatePurchaseOrderForm({
   const [newSupplierName, setNewSupplierName] = useState("");
 
   const selectedProject = projects.find((p) => p.id === projectId);
+  const fromMateriaux = Boolean(prefillLines && prefillLines.length > 0);
 
   useEffect(() => {
     if (!selectedProject) return;
@@ -131,6 +178,10 @@ export function CreatePurchaseOrderForm({
             quantity: Number(l.quantity),
             unit: l.unit,
             unitPriceHt: l.unitPriceHt === "" ? null : Number(l.unitPriceHt),
+            materialRequirementId: l.materialRequirementId || null,
+            quantityAllocated: l.materialRequirementId
+              ? Number(l.quantity)
+              : null,
           })),
         }),
       });
@@ -239,48 +290,64 @@ export function CreatePurchaseOrderForm({
 
       <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
         <h2 className="text-sm font-bold text-slate-900">Lignes de commande</h2>
+        {fromMateriaux ? (
+          <p className="text-xs text-slate-500">
+            Prérempli depuis les besoins matériaux — fournisseur et livraison à confirmer.
+          </p>
+        ) : null}
         {lines.map((line, idx) => (
-          <div key={idx} className="grid gap-2 sm:grid-cols-12">
-            <input
-              value={line.designation}
-              onChange={(e) => {
-                const next = [...lines];
-                next[idx] = { ...line, designation: e.target.value };
-                setLines(next);
-              }}
-              placeholder="Désignation"
-              className="rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-5"
-            />
-            <input
-              value={line.quantity}
-              onChange={(e) => {
-                const next = [...lines];
-                next[idx] = { ...line, quantity: e.target.value };
-                setLines(next);
-              }}
-              placeholder="Qté"
-              className="rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-2"
-            />
-            <input
-              value={line.unit}
-              onChange={(e) => {
-                const next = [...lines];
-                next[idx] = { ...line, unit: e.target.value };
-                setLines(next);
-              }}
-              placeholder="Unité"
-              className="rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-2"
-            />
-            <input
-              value={line.unitPriceHt}
-              onChange={(e) => {
-                const next = [...lines];
-                next[idx] = { ...line, unitPriceHt: e.target.value };
-                setLines(next);
-              }}
-              placeholder="Prix HT"
-              className="rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-3"
-            />
+          <div key={idx} className="space-y-1">
+            <div className="grid gap-2 sm:grid-cols-12">
+              <input
+                value={line.designation}
+                onChange={(e) => {
+                  const next = [...lines];
+                  next[idx] = { ...line, designation: e.target.value };
+                  setLines(next);
+                }}
+                placeholder="Désignation"
+                className="rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-5"
+              />
+              <input
+                value={line.quantity}
+                onChange={(e) => {
+                  const next = [...lines];
+                  next[idx] = { ...line, quantity: e.target.value };
+                  setLines(next);
+                }}
+                placeholder="Qté"
+                className="rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-2"
+              />
+              <input
+                value={line.unit}
+                onChange={(e) => {
+                  const next = [...lines];
+                  next[idx] = { ...line, unit: e.target.value };
+                  setLines(next);
+                }}
+                placeholder="Unité"
+                className="rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-2"
+              />
+              <input
+                value={line.unitPriceHt}
+                onChange={(e) => {
+                  const next = [...lines];
+                  next[idx] = { ...line, unitPriceHt: e.target.value };
+                  setLines(next);
+                }}
+                placeholder="Prix HT"
+                className="rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-3"
+              />
+            </div>
+            {line.neededAtHint ? (
+              <p className="text-[11px] text-amber-800">
+                Besoin chantier avant le{" "}
+                {new Date(line.neededAtHint).toLocaleDateString("fr-FR", {
+                  day: "numeric",
+                  month: "short",
+                })}
+              </p>
+            ) : null}
           </div>
         ))}
         <button

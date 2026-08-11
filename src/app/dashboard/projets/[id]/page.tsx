@@ -50,6 +50,9 @@ import { chantierStatusBadgeTone } from "@/lib/chantier-lifecycle";
 import { ChantierContractuelPanel } from "@/components/chantier/ChantierContractuelPanel";
 import { canEditPilotageOperational } from "@/lib/pilotage/access";
 import { isActionOpen, isVisaPending, isOverdue } from "@/lib/pilotage/calculations";
+import { ProjectMateriauxSection } from "@/components/projects/ProjectMateriauxSection";
+import { loadMaterialRequirementsForProject } from "@/lib/materiaux/load-for-project";
+import { isInternalPurchaseOrderActor } from "@/lib/purchase-orders/access";
 
 export default async function ProjetDetailPage({
   params,
@@ -235,76 +238,89 @@ export default async function ProjetDetailPage({
     actorProfile?.personType !== "CLIENT_EXT" &&
     actorProfile?.personType !== "SUPPLIER";
 
-  const [chantierFolders, missingCount, ops, contractuelRaw, billingHint] = await Promise.all([
-    canSeeDocuments
-      ? prisma.chantierFolder.findMany({
-          where: { projectId: id },
-          orderBy: { sortOrder: "asc" },
-          include: {
-            files: {
-              orderBy: { createdAt: "desc" },
-              take: 40,
-              include: { addedBy: { select: { name: true } } },
-            },
-          },
-        })
-      : Promise.resolve([]),
-    prisma.chantierFile.count({
-      where: { projectId: id, status: { in: CHANTIER_MISSING_STATUSES } },
-    }),
-    loadChantierCockpitOps({
-      projectId: id,
-      projectTitle: project.title,
-      externalViewer: isExternalViewer,
-    }).catch((e) => {
-      console.error("[ProjetDetail] cockpit ops:", e);
-      return null;
-    }),
-    // Summary légère — pas le détail contractuel complet
-    canSeeContractuel
-      ? prisma.worksitePilotage.findUnique({
-          where: { projectId: id },
-          select: {
-            id: true,
-            archivedAt: true,
-            blockers: {
-              where: { archivedAt: null, status: { in: ["Ouvert", "En cours"] } },
-              select: { severity: true },
-            },
-            obligations: {
-              where: { archivedAt: null, status: { notIn: ["Validée", "Non applicable"] } },
-              select: { id: true },
-            },
-            plans: {
-              where: { archivedAt: null },
-              select: { status: true, visaDueDate: true },
-            },
-            doeItems: {
-              where: { archivedAt: null },
-              select: { status: true },
-            },
-            actions: {
-              where: { archivedAt: null },
-              select: { status: true, dueDate: true },
-            },
-          },
-        })
-      : Promise.resolve(null),
-    !isExternalViewer
-      ? import("@/lib/facturation/snapshot")
-          .then(({ getProjectBillingHint }) =>
-            getProjectBillingHint({
-              user: {
-                id: session.user.id,
-                role: session.user.role,
-                personType: session.user.personType ?? null,
+  const canSeeMateriaux =
+    !isExternalViewer && isInternalPurchaseOrderActor(session.user);
+
+  const [chantierFolders, missingCount, ops, contractuelRaw, billingHint, materiauxRows] =
+    await Promise.all([
+      canSeeDocuments
+        ? prisma.chantierFolder.findMany({
+            where: { projectId: id },
+            orderBy: { sortOrder: "asc" },
+            include: {
+              files: {
+                orderBy: { createdAt: "desc" },
+                take: 40,
+                include: { addedBy: { select: { name: true } } },
               },
-              projectId: id,
-            }),
-          )
-          .catch(() => null)
-      : Promise.resolve(null),
-  ]);
+            },
+          })
+        : Promise.resolve([]),
+      prisma.chantierFile.count({
+        where: { projectId: id, status: { in: CHANTIER_MISSING_STATUSES } },
+      }),
+      loadChantierCockpitOps({
+        projectId: id,
+        projectTitle: project.title,
+        externalViewer: isExternalViewer,
+      }).catch((e) => {
+        console.error("[ProjetDetail] cockpit ops:", e);
+        return null;
+      }),
+      // Summary légère — pas le détail contractuel complet
+      canSeeContractuel
+        ? prisma.worksitePilotage.findUnique({
+            where: { projectId: id },
+            select: {
+              id: true,
+              archivedAt: true,
+              blockers: {
+                where: { archivedAt: null, status: { in: ["Ouvert", "En cours"] } },
+                select: { severity: true },
+              },
+              obligations: {
+                where: { archivedAt: null, status: { notIn: ["Validée", "Non applicable"] } },
+                select: { id: true },
+              },
+              plans: {
+                where: { archivedAt: null },
+                select: { status: true, visaDueDate: true },
+              },
+              doeItems: {
+                where: { archivedAt: null },
+                select: { status: true },
+              },
+              actions: {
+                where: { archivedAt: null },
+                select: { status: true, dueDate: true },
+              },
+            },
+          })
+        : Promise.resolve(null),
+      !isExternalViewer
+        ? import("@/lib/facturation/snapshot")
+            .then(({ getProjectBillingHint }) =>
+              getProjectBillingHint({
+                user: {
+                  id: session.user.id,
+                  role: session.user.role,
+                  personType: session.user.personType ?? null,
+                },
+                projectId: id,
+              }),
+            )
+            .catch(() => null)
+        : Promise.resolve(null),
+      canSeeMateriaux && project.organizationId
+        ? loadMaterialRequirementsForProject({
+            organizationId: project.organizationId,
+            projectId: id,
+          }).catch((e) => {
+            console.error("[ProjetDetail] materiaux:", e);
+            return [];
+          })
+        : Promise.resolve([]),
+    ]);
 
   const dossierFolders = chantierFolders.map((folder) => ({
     id: folder.id,
@@ -591,6 +607,16 @@ export default async function ProjetDetailPage({
 
   const partagePanel = canManageShare ? <ChantierSharePanel projectId={id} /> : null;
 
+  const materiauxReadOnly = project.chantierStatus === "TERMINE";
+  const materiauxPanel = canSeeMateriaux ? (
+    <ProjectMateriauxSection
+      projectId={id}
+      projectTitle={project.title}
+      initialRows={materiauxRows}
+      canWrite={isStaff && !materiauxReadOnly}
+    />
+  ) : null;
+
   const organisationPanel = (
     <div className="space-y-4">
       <ProjectAssignAgent
@@ -790,6 +816,7 @@ export default async function ProjetDetailPage({
         panels={{
           overview: contextCard,
           taches: tachesPanel,
+          materiaux: materiauxPanel,
           documents: documentsPanel,
           messages: messagesPanel,
           partage: partagePanel,

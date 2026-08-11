@@ -124,6 +124,15 @@ export async function POST(req: Request) {
           l.tvaRate === null || l.tvaRate === undefined || l.tvaRate === ""
             ? null
             : Number(l.tvaRate),
+        materialRequirementId: l.materialRequirementId
+          ? String(l.materialRequirementId)
+          : null,
+        quantityAllocated:
+          l.quantityAllocated === null ||
+          l.quantityAllocated === undefined ||
+          l.quantityAllocated === ""
+            ? null
+            : Number(l.quantityAllocated),
       })),
       details: body.details
         ? {

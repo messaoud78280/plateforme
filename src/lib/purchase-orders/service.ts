@@ -16,6 +16,9 @@ export type CreatePurchaseOrderLineInput = {
   unit?: string;
   unitPriceHt?: number | null;
   tvaRate?: number | null;
+  /** MATERIAUX-V1B — allouer cette ligne à un besoin (même unité) */
+  materialRequirementId?: string | null;
+  quantityAllocated?: number | null;
 };
 
 export type CreatePurchaseOrderInput = {
@@ -78,6 +81,11 @@ export async function createPurchaseOrder(input: CreatePurchaseOrderInput) {
       unit: (l.unit ?? "U").trim() || "U",
       unitPriceHt: l.unitPriceHt ?? null,
       tvaRate: l.tvaRate ?? null,
+      materialRequirementId: l.materialRequirementId?.trim() || null,
+      quantityAllocated:
+        l.quantityAllocated != null && Number.isFinite(Number(l.quantityAllocated))
+          ? Number(l.quantityAllocated)
+          : null,
     }))
     .filter((l) => l.designation && l.quantity > 0);
 
@@ -94,53 +102,103 @@ export async function createPurchaseOrder(input: CreatePurchaseOrderInput) {
   const number = await generatePurchaseOrderNumber(input.organizationId);
   const status = input.status ?? "A_CONFIRMER";
 
-  const order = await prisma.purchaseOrder.create({
-    data: {
-      organizationId: input.organizationId,
-      number,
-      status,
-      subject: input.subject.trim(),
-      projectId: input.projectId,
-      followUpSheetId: input.followUpSheetId ?? undefined,
-      externalOrganizationId: input.externalOrganizationId,
-      contactId: input.contactId ?? undefined,
-      requestedById: input.requestedById,
-      responsibleId: input.responsibleId ?? undefined,
-      validatorId: input.details?.validatorId ?? undefined,
-      requestedDeliveryAt: input.requestedDeliveryAt ?? undefined,
-      deliveryPlaceType: input.deliveryPlaceType ?? "CHANTIER",
-      deliveryAddress: input.deliveryAddress ?? undefined,
-      amountHt: amountHt ?? undefined,
-      tvaRate: input.details?.tvaRate ?? undefined,
-      discountHt: input.details?.discountHt ?? undefined,
-      deliveryFeesHt: input.details?.deliveryFeesHt ?? undefined,
-      supplierRef: input.details?.supplierRef ?? undefined,
-      quoteRef: input.details?.quoteRef ?? undefined,
-      quoteDate: input.details?.quoteDate ?? undefined,
-      paymentTerms: input.details?.paymentTerms ?? undefined,
-      deliveryInstructions: input.deliveryInstructions ?? undefined,
-      siteContactName: input.details?.siteContactName ?? undefined,
-      siteContactPhone: input.details?.siteContactPhone ?? undefined,
-      partialDeliveryAllowed: input.details?.partialDeliveryAllowed ?? true,
-      internalNotes: input.internalNotes ?? undefined,
-      supplierNotes: input.details?.supplierNotes ?? undefined,
-      urgency: input.urgency ?? undefined,
-      lines: {
-        create: lines.map((l, i) => ({
-          designation: l.designation,
-          quantity: l.quantity,
-          unit: l.unit,
-          unitPriceHt: l.unitPriceHt ?? undefined,
-          tvaRate: l.tvaRate ?? undefined,
-          sortOrder: i,
-        })),
+  const reqIds = [
+    ...new Set(lines.map((l) => l.materialRequirementId).filter(Boolean) as string[]),
+  ];
+  if (reqIds.length > 0) {
+    const reqs = await prisma.materialRequirement.findMany({
+      where: {
+        id: { in: reqIds },
+        organizationId: input.organizationId,
+        projectId: input.projectId,
+        status: { not: "CANCELLED" },
       },
-    },
-    include: {
-      lines: true,
-      externalOrganization: { select: { id: true, name: true, tradeName: true } },
-      project: { select: { id: true, title: true } },
-    },
+      select: { id: true, unit: true },
+    });
+    if (reqs.length !== reqIds.length) {
+      throw new Error("Besoin matériau introuvable ou hors chantier");
+    }
+    const byId = new Map(reqs.map((r) => [r.id, r]));
+    for (const l of lines) {
+      if (!l.materialRequirementId) continue;
+      const req = byId.get(l.materialRequirementId)!;
+      if (!materiauxUnitsCompatible(req.unit, l.unit)) {
+        throw new Error(
+          `Unité incompatible pour « ${l.designation} » (besoin ${req.unit} ≠ ligne ${l.unit})`,
+        );
+      }
+    }
+  }
+
+  const order = await prisma.$transaction(async (tx) => {
+    const created = await tx.purchaseOrder.create({
+      data: {
+        organizationId: input.organizationId,
+        number,
+        status,
+        subject: input.subject.trim(),
+        projectId: input.projectId,
+        followUpSheetId: input.followUpSheetId ?? undefined,
+        externalOrganizationId: input.externalOrganizationId,
+        contactId: input.contactId ?? undefined,
+        requestedById: input.requestedById,
+        responsibleId: input.responsibleId ?? undefined,
+        validatorId: input.details?.validatorId ?? undefined,
+        requestedDeliveryAt: input.requestedDeliveryAt ?? undefined,
+        deliveryPlaceType: input.deliveryPlaceType ?? "CHANTIER",
+        deliveryAddress: input.deliveryAddress ?? undefined,
+        amountHt: amountHt ?? undefined,
+        tvaRate: input.details?.tvaRate ?? undefined,
+        discountHt: input.details?.discountHt ?? undefined,
+        deliveryFeesHt: input.details?.deliveryFeesHt ?? undefined,
+        supplierRef: input.details?.supplierRef ?? undefined,
+        quoteRef: input.details?.quoteRef ?? undefined,
+        quoteDate: input.details?.quoteDate ?? undefined,
+        paymentTerms: input.details?.paymentTerms ?? undefined,
+        deliveryInstructions: input.deliveryInstructions ?? undefined,
+        siteContactName: input.details?.siteContactName ?? undefined,
+        siteContactPhone: input.details?.siteContactPhone ?? undefined,
+        partialDeliveryAllowed: input.details?.partialDeliveryAllowed ?? true,
+        internalNotes: input.internalNotes ?? undefined,
+        supplierNotes: input.details?.supplierNotes ?? undefined,
+        urgency: input.urgency ?? undefined,
+        lines: {
+          create: lines.map((l, i) => ({
+            designation: l.designation,
+            quantity: l.quantity,
+            unit: l.unit,
+            unitPriceHt: l.unitPriceHt ?? undefined,
+            tvaRate: l.tvaRate ?? undefined,
+            sortOrder: i,
+          })),
+        },
+      },
+      include: {
+        lines: true,
+        externalOrganization: { select: { id: true, name: true, tradeName: true } },
+        project: { select: { id: true, title: true } },
+      },
+    });
+
+    for (let i = 0; i < lines.length; i++) {
+      const src = lines[i]!;
+      const createdLine = created.lines.find((ln) => ln.sortOrder === i) ?? created.lines[i];
+      if (!src.materialRequirementId || !createdLine) continue;
+      const allocated =
+        src.quantityAllocated != null && src.quantityAllocated > 0
+          ? src.quantityAllocated
+          : src.quantity;
+      await tx.materialRequirementOrderLink.create({
+        data: {
+          organizationId: input.organizationId,
+          materialRequirementId: src.materialRequirementId,
+          purchaseOrderLineId: createdLine.id,
+          quantityAllocated: allocated,
+        },
+      });
+    }
+
+    return created;
   });
 
   await appendEvent({
@@ -159,6 +217,16 @@ export async function createPurchaseOrder(input: CreatePurchaseOrderInput) {
   }
 
   return order;
+}
+
+function materiauxUnitsCompatible(a: string, b: string): boolean {
+  const na = a.trim().toLowerCase().replace(/\s+/g, " ");
+  const nb = b.trim().toLowerCase().replace(/\s+/g, " ");
+  const trivial = (u: string) =>
+    ["u", "unité", "unites", "unités", "unit", "units", "pce", "pcs", "pc"].includes(u)
+      ? "u"
+      : u;
+  return trivial(na) === trivial(nb);
 }
 
 export async function transitionPurchaseOrder(opts: {

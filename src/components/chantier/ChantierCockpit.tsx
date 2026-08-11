@@ -7,6 +7,7 @@ import { cn } from "@/lib/cn";
 export type ChantierCockpitTabId =
   | "overview"
   | "taches"
+  | "materiaux"
   | "documents"
   | "messages"
   | "partage"
@@ -16,6 +17,7 @@ export type ChantierCockpitTabId =
 const TABS: { id: ChantierCockpitTabId; label: string }[] = [
   { id: "overview", label: "Vue d’ensemble" },
   { id: "taches", label: "Tâches" },
+  { id: "materiaux", label: "Matériaux" },
   { id: "documents", label: "Documents" },
   { id: "messages", label: "Échanges" },
   { id: "partage", label: "Partage" },
@@ -42,6 +44,7 @@ function tabFromHash(): ChantierCockpitTabId | null {
   if (typeof window === "undefined") return null;
   const h = window.location.hash.replace(/^#/, "");
   if (h === "tab-taches" || h.startsWith("tab-taches")) return "taches";
+  if (h === "tab-materiaux" || h === "materiaux") return "materiaux";
   if (h === "dossier-chantier" || h === "tab-documents") return "documents";
   if (h === "tab-messages") return "messages";
   if (h === "tab-partage") return "partage";

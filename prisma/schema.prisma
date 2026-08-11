@@ -121,6 +121,8 @@ model User {
   chantierFilesAdded    ChantierFile[] @relation("ChantierFileAddedBy")
   chantierFileComments  ChantierFileComment[] @relation("ChantierFileCommentAuthor")
   chantierFileFavorites ChantierFileFavorite[]
+  materialRequirementsCreated  MaterialRequirement[] @relation("MaterialRequirementCreatedBy")
+  materialRequirementsValidated MaterialRequirement[] @relation("MaterialRequirementValidatedBy")
 
   // Pilotage administratif des travaux
   worksitePilotagesCreated   WorksitePilotage[] @relation("PilotageCreatedBy")
@@ -381,8 +383,79 @@ model PurchaseOrderLine {
 
   order        PurchaseOrder             @relation(fields: [orderId], references: [id], onDelete: Cascade)
   receiptLines PurchaseOrderReceiptLine[]
+  materialRequirementLinks MaterialRequirementOrderLink[]
 
   @@index([orderId])
+}
+
+enum MaterialRequirementStatus {
+  PROPOSED
+  VALIDATED
+  CANCELLED
+}
+
+enum MaterialRequirementSourceType {
+  MANUAL
+  QUOTE_LINE
+  DOCUMENT
+  DPGF
+  AI_PROPOSAL
+}
+
+/// Besoin matériau chantier (MATERIAUX-V1B) — pas un stock, pas une ligne devis.
+model MaterialRequirement {
+  id               String                        @id @default(cuid())
+  organizationId   String
+  projectId        String
+  label            String
+  siteResourceId   String?
+  quantityRequired Decimal                       @db.Decimal(14, 3)
+  unit             String
+  /// null = aucune marge ; jamais inventer 5 % / 10 %
+  lossFactor       Decimal?                      @db.Decimal(5, 4)
+  neededAt         DateTime?
+  status           MaterialRequirementStatus     @default(VALIDATED)
+  sourceType       MaterialRequirementSourceType @default(MANUAL)
+  sourceId         String?
+  sourceLabel      String?
+  chantierFileId   String?
+  validatedById    String?
+  validatedAt      DateTime?
+  createdById      String
+  createdAt        DateTime                      @default(now())
+  updatedAt        DateTime                      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  siteResource SiteResource? @relation(fields: [siteResourceId], references: [id], onDelete: SetNull)
+  chantierFile ChantierFile? @relation(fields: [chantierFileId], references: [id], onDelete: SetNull)
+  validatedBy  User?        @relation("MaterialRequirementValidatedBy", fields: [validatedById], references: [id], onDelete: SetNull)
+  createdBy    User         @relation("MaterialRequirementCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  orderLinks   MaterialRequirementOrderLink[]
+
+  @@index([organizationId, projectId])
+  @@index([organizationId, projectId, status])
+  @@index([siteResourceId])
+  @@index([chantierFileId])
+}
+
+/// Allocation besoin → ligne BC (N–N, multi-fournisseurs). quantityAllocated = unité du besoin.
+model MaterialRequirementOrderLink {
+  id                     String   @id @default(cuid())
+  organizationId         String
+  materialRequirementId  String
+  purchaseOrderLineId    String
+  quantityAllocated      Decimal  @db.Decimal(14, 3)
+  createdAt              DateTime @default(now())
+
+  organization         Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  materialRequirement  MaterialRequirement @relation(fields: [materialRequirementId], references: [id], onDelete: Cascade)
+  purchaseOrderLine    PurchaseOrderLine   @relation(fields: [purchaseOrderLineId], references: [id], onDelete: Cascade)
+
+  @@unique([materialRequirementId, purchaseOrderLineId])
+  @@index([materialRequirementId])
+  @@index([purchaseOrderLineId])
+  @@index([organizationId])
 }
 
 /// Réception chantier (plusieurs réceptions possibles par commande).
@@ -525,6 +598,8 @@ model Organization {
   workflows             WorkflowDefinition[]
   purchaseOrders        PurchaseOrder[]
   purchaseOrderReceipts PurchaseOrderReceipt[]
+  materialRequirements  MaterialRequirement[]
+  materialRequirementOrderLinks MaterialRequirementOrderLink[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -693,6 +768,7 @@ model Project {
   agendaEvents AgendaEvent[]
   followUpSheets FollowUpSheet[]
   purchaseOrders PurchaseOrder[]
+  materialRequirements MaterialRequirement[]
   reports Report[]
   skillPpspsSessions SkillPpspsSession[]
   chantierFolders ChantierFolder[]
@@ -781,6 +857,7 @@ model ChantierFile {
   comments ChantierFileComment[]
   favorites ChantierFileFavorite[]
   marketDocuments PilotageMarketDocument[]
+  materialRequirements MaterialRequirement[]
 
   @@index([projectId, folderId])
   @@index([clientId])
@@ -2198,6 +2275,7 @@ model SiteResource {
   workItemLinks      WorkItemSiteResource[]
   groupingProposals SiteResourceGroupingProposal[] @relation("ProposalTargetResource")
   groupingProposalsAsSource SiteResourceGroupingProposal[] @relation("ProposalCreatedResource")
+  materialRequirements MaterialRequirement[]
 
   @@index([resourceType, family, subFamily])
   @@index([status])

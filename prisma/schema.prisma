@@ -123,6 +123,11 @@ model User {
   chantierFileFavorites ChantierFileFavorite[]
   materialRequirementsCreated  MaterialRequirement[] @relation("MaterialRequirementCreatedBy")
   materialRequirementsValidated MaterialRequirement[] @relation("MaterialRequirementValidatedBy")
+  commercialQuotesCreated      CommercialQuote[] @relation("CommercialQuoteCreatedBy")
+  commercialQuotesResponsible  CommercialQuote[] @relation("CommercialQuoteResponsible")
+  commercialInvoicesCreated    CommercialInvoice[] @relation("CommercialInvoiceCreatedBy")
+  commercialPaymentsRecorded   CommercialPayment[] @relation("CommercialPaymentRecordedBy")
+  commercialStatusEvents       CommercialStatusEvent[] @relation("CommercialStatusEventActor")
 
   // Pilotage administratif des travaux
   worksitePilotagesCreated   WorksitePilotage[] @relation("PilotageCreatedBy")
@@ -241,6 +246,8 @@ model ExternalOrganization {
   contacts         ExternalOrgContact[]
   purchaseOrders   PurchaseOrder[]
   projectChannels  ProjectChannel[]
+  commercialQuotesAsClient CommercialQuote[] @relation("CommercialQuoteClient")
+  commercialInvoicesAsClient CommercialInvoice[] @relation("CommercialInvoiceClient")
 
   @@index([hostOrganizationId])
   @@index([hostOrganizationId, type])
@@ -600,6 +607,17 @@ model Organization {
   purchaseOrderReceipts PurchaseOrderReceipt[]
   materialRequirements  MaterialRequirement[]
   materialRequirementOrderLinks MaterialRequirementOrderLink[]
+  /// Domaine Devis & Facturation (Commercial*) — isolé des Quote* / Invoice / Payment SaaS
+  commercialOrgSettings     CommercialOrgSettings?
+  commercialQuotes          CommercialQuote[]
+  commercialAmendments      CommercialAmendment[]
+  commercialInvoices        CommercialInvoice[]
+  commercialPayments        CommercialPayment[]
+  commercialWorkItems       CommercialWorkItem[]
+  commercialMaterials       CommercialMaterial[]
+  commercialLaborResources  CommercialLaborResource[]
+  commercialEquipmentResources CommercialEquipmentResource[]
+  commercialStatusEvents    CommercialStatusEvent[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -776,6 +794,8 @@ model Project {
   worksitePilotages WorksitePilotage[]
   projectAccesses ProjectAccess[]
   projectChannels ProjectChannel[]
+  commercialQuotes CommercialQuote[]
+  commercialInvoices CommercialInvoice[]
 
   @@index([organizationId])
 }
@@ -3653,4 +3673,509 @@ model DemoEnvironment {
   @@index([createdById])
   @@index([companyName])
   @@index([templateKey])
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Devis & Facturation — domaine Commercial* (isolé de Quote* / Invoice / Payment SaaS)
+// UI : /dashboard/devis-facturation — préfixe technique uniquement
+// ═══════════════════════════════════════════════════════════════════════════
+
+enum CommercialQuoteStatus {
+  DRAFT
+  TO_VALIDATE
+  VALIDATED
+  SENT
+  VIEWED
+  ACCEPTED
+  REFUSED
+  EXPIRED
+  CANCELLED
+}
+
+enum CommercialAmendmentStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REFUSED
+  CANCELLED
+}
+
+enum CommercialInvoiceType {
+  STANDARD
+  DEPOSIT
+  PROGRESS
+  FINAL
+  CREDIT
+}
+
+enum CommercialInvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum CommercialComponentType {
+  MATERIAL
+  LABOR
+  EQUIPMENT
+  SUBCONTRACT
+  OTHER
+}
+
+enum CommercialLineKind {
+  WORK
+  COMMENT
+  OPTION
+  SUBTOTAL
+}
+
+/// Paramètres entreprise pour le module Devis & Facturation
+model CommercialOrgSettings {
+  id                   String   @id @default(cuid())
+  organizationId       String   @unique
+  defaultVatRate       Decimal  @default(20) @db.Decimal(6, 4)
+  defaultCurrency      String   @default("EUR")
+  targetMarginPercent  Decimal? @db.Decimal(8, 4)
+  defaultPaymentTerms  String?
+  bankIban             String?
+  bankBic              String?
+  bankName             String?
+  insuranceMentions    String?  @db.Text
+  legalMentions        String?  @db.Text
+  quotePrefix          String   @default("DEV")
+  invoicePrefix        String   @default("FAC")
+  amendmentPrefix      String   @default("AV")
+  nextQuoteSeq         Int      @default(1)
+  nextInvoiceSeq       Int      @default(1)
+  nextAmendmentSeq     Int      @default(1)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+/// Devis commercial (affaire) — projectId optionnel (prospect)
+model CommercialQuote {
+  id                     String                @id @default(cuid())
+  organizationId         String
+  number                 String
+  subject                String
+  status                 CommercialQuoteStatus @default(DRAFT)
+  currency               String                @default("EUR")
+  projectId              String?
+  clientExternalOrgId    String?
+  /// Snapshot client (conservé même si ExternalOrganization change)
+  clientSnapshotJson     Json?
+  /// Snapshot émetteur
+  issuerSnapshotJson     Json?
+  siteAddressSnapshot    String?
+  issueDate              DateTime              @db.Date
+  validityDate           DateTime?             @db.Date
+  responsibleId          String?
+  createdById            String
+  internalNotes          String?               @db.Text
+  clientNotes            String?               @db.Text
+  paymentTerms           String?
+  depositPercent         Decimal?              @db.Decimal(6, 4)
+  depositAmountHt        Decimal?              @db.Decimal(14, 4)
+  defaultVatRate         Decimal               @default(20) @db.Decimal(6, 4)
+  currentVersionId       String?               @unique
+  acceptedAt             DateTime?
+  acceptedVersionId      String?
+  sentAt                 DateTime?
+  /// Totaux cache (version courante) pour listes
+  totalCostHt            Decimal               @default(0) @db.Decimal(14, 4)
+  totalSellHt            Decimal               @default(0) @db.Decimal(14, 4)
+  totalVat               Decimal               @default(0) @db.Decimal(14, 4)
+  totalTtc               Decimal               @default(0) @db.Decimal(14, 4)
+  marginAmount           Decimal               @default(0) @db.Decimal(14, 4)
+  marginPercent          Decimal               @default(0) @db.Decimal(8, 4)
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+
+  organization      Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project           Project?              @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  clientExternalOrg ExternalOrganization? @relation("CommercialQuoteClient", fields: [clientExternalOrgId], references: [id], onDelete: SetNull)
+  responsible       User?                 @relation("CommercialQuoteResponsible", fields: [responsibleId], references: [id], onDelete: SetNull)
+  createdBy         User                  @relation("CommercialQuoteCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  currentVersion    CommercialQuoteVersion? @relation("CommercialQuoteCurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+  versions          CommercialQuoteVersion[] @relation("CommercialQuoteVersions")
+  amendments        CommercialAmendment[]
+  invoices          CommercialInvoice[]
+
+  @@unique([organizationId, number])
+  @@index([organizationId, status])
+  @@index([organizationId, updatedAt])
+  @@index([projectId])
+  @@index([clientExternalOrgId])
+}
+
+model CommercialQuoteVersion {
+  id               String   @id @default(cuid())
+  organizationId   String
+  quoteId          String
+  versionNumber    Int
+  label            String?
+  /// DRAFT | ISSUED | ACCEPTED_SNAPSHOT
+  lockState        String   @default("DRAFT")
+  issuedAt         DateTime?
+  clientSnapshotJson Json?
+  issuerSnapshotJson Json?
+  paymentTerms     String?
+  clientNotes      String?  @db.Text
+  totalCostHt      Decimal  @default(0) @db.Decimal(14, 4)
+  totalSellHt      Decimal  @default(0) @db.Decimal(14, 4)
+  totalVat         Decimal  @default(0) @db.Decimal(14, 4)
+  totalTtc         Decimal  @default(0) @db.Decimal(14, 4)
+  marginAmount     Decimal  @default(0) @db.Decimal(14, 4)
+  marginPercent    Decimal  @default(0) @db.Decimal(8, 4)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  quoteAsCurrent CommercialQuote? @relation("CommercialQuoteCurrentVersion")
+  quote          CommercialQuote  @relation("CommercialQuoteVersions", fields: [quoteId], references: [id], onDelete: Cascade)
+  sections       CommercialQuoteSection[]
+  lines          CommercialQuoteLine[]
+
+  @@unique([quoteId, versionNumber])
+  @@index([organizationId])
+  @@index([quoteId])
+}
+
+model CommercialQuoteSection {
+  id             String   @id @default(cuid())
+  organizationId String
+  versionId      String
+  title          String
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  version CommercialQuoteVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  lines   CommercialQuoteLine[]
+
+  @@index([versionId, sortOrder])
+  @@index([organizationId])
+}
+
+model CommercialQuoteLine {
+  id                   String             @id @default(cuid())
+  organizationId       String
+  versionId            String
+  sectionId            String?
+  kind                 CommercialLineKind @default(WORK)
+  reference            String?
+  designation          String
+  description          String?            @db.Text
+  quantity             Decimal            @default(1) @db.Decimal(14, 4)
+  unit                 String             @default("U")
+  unitCostHt           Decimal            @default(0) @db.Decimal(14, 4)
+  unitSellHt           Decimal            @default(0) @db.Decimal(14, 4)
+  discountPercent      Decimal            @default(0) @db.Decimal(6, 4)
+  vatRate              Decimal            @default(20) @db.Decimal(6, 4)
+  lineCostHt           Decimal            @default(0) @db.Decimal(14, 4)
+  lineSellHt           Decimal            @default(0) @db.Decimal(14, 4)
+  lineVat              Decimal            @default(0) @db.Decimal(14, 4)
+  lineTtc              Decimal            @default(0) @db.Decimal(14, 4)
+  marginAmount         Decimal            @default(0) @db.Decimal(14, 4)
+  commercialWorkItemId String?
+  sortOrder            Int                @default(0)
+  isOptional           Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  version   CommercialQuoteVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  section   CommercialQuoteSection? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  workItem  CommercialWorkItem?    @relation(fields: [commercialWorkItemId], references: [id], onDelete: SetNull)
+
+  @@index([versionId, sortOrder])
+  @@index([sectionId])
+  @@index([organizationId])
+  @@index([commercialWorkItemId])
+}
+
+model CommercialAmendment {
+  id                  String                     @id @default(cuid())
+  organizationId      String
+  quoteId             String
+  number              String
+  subject             String
+  status              CommercialAmendmentStatus  @default(DRAFT)
+  issueDate           DateTime                   @db.Date
+  totalSellHt         Decimal                    @default(0) @db.Decimal(14, 4)
+  totalVat            Decimal                    @default(0) @db.Decimal(14, 4)
+  totalTtc            Decimal                    @default(0) @db.Decimal(14, 4)
+  clientNotes         String?                    @db.Text
+  internalNotes       String?                    @db.Text
+  acceptedAt          DateTime?
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  quote        CommercialQuote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  lines        CommercialAmendmentLine[]
+
+  @@unique([organizationId, number])
+  @@index([organizationId, status])
+  @@index([quoteId])
+}
+
+model CommercialAmendmentLine {
+  id             String   @id @default(cuid())
+  organizationId String
+  amendmentId    String
+  designation    String
+  quantity       Decimal  @default(1) @db.Decimal(14, 4)
+  unit           String   @default("U")
+  unitSellHt     Decimal  @default(0) @db.Decimal(14, 4)
+  vatRate        Decimal  @default(20) @db.Decimal(6, 4)
+  lineSellHt     Decimal  @default(0) @db.Decimal(14, 4)
+  lineVat        Decimal  @default(0) @db.Decimal(14, 4)
+  lineTtc        Decimal  @default(0) @db.Decimal(14, 4)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  amendment CommercialAmendment @relation(fields: [amendmentId], references: [id], onDelete: Cascade)
+
+  @@index([amendmentId, sortOrder])
+  @@index([organizationId])
+}
+
+model CommercialInvoice {
+  id                   String                  @id @default(cuid())
+  organizationId       String
+  number               String
+  type                 CommercialInvoiceType   @default(STANDARD)
+  status               CommercialInvoiceStatus @default(DRAFT)
+  quoteId              String?
+  amendmentId          String?
+  projectId            String?
+  clientExternalOrgId  String?
+  clientSnapshotJson   Json?
+  issuerSnapshotJson   Json?
+  issueDate            DateTime                @db.Date
+  dueDate              DateTime?               @db.Date
+  currency             String                  @default("EUR")
+  subject              String?
+  totalSellHt          Decimal                 @default(0) @db.Decimal(14, 4)
+  totalVat             Decimal                 @default(0) @db.Decimal(14, 4)
+  totalTtc             Decimal                 @default(0) @db.Decimal(14, 4)
+  amountPaid           Decimal                 @default(0) @db.Decimal(14, 4)
+  amountDue            Decimal                 @default(0) @db.Decimal(14, 4)
+  /// Pour acomptes : % du marché
+  depositPercent       Decimal?                @db.Decimal(6, 4)
+  issuedAt             DateTime?
+  createdById          String
+  internalNotes        String?                 @db.Text
+  clientNotes          String?                 @db.Text
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+
+  organization      Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  quote             CommercialQuote?      @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  project           Project?              @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  clientExternalOrg ExternalOrganization? @relation("CommercialInvoiceClient", fields: [clientExternalOrgId], references: [id], onDelete: SetNull)
+  createdBy         User                  @relation("CommercialInvoiceCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  lines             CommercialInvoiceLine[]
+  payments          CommercialPayment[]
+
+  @@unique([organizationId, number])
+  @@index([organizationId, status])
+  @@index([quoteId])
+  @@index([projectId])
+  @@index([clientExternalOrgId])
+}
+
+model CommercialInvoiceLine {
+  id             String   @id @default(cuid())
+  organizationId String
+  invoiceId      String
+  designation    String
+  description    String?  @db.Text
+  quantity       Decimal  @default(1) @db.Decimal(14, 4)
+  unit           String   @default("U")
+  unitSellHt     Decimal  @default(0) @db.Decimal(14, 4)
+  vatRate        Decimal  @default(20) @db.Decimal(6, 4)
+  lineSellHt     Decimal  @default(0) @db.Decimal(14, 4)
+  lineVat        Decimal  @default(0) @db.Decimal(14, 4)
+  lineTtc        Decimal  @default(0) @db.Decimal(14, 4)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  invoice CommercialInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId, sortOrder])
+  @@index([organizationId])
+}
+
+/// Règlements clients BTP — AUCUNE relation avec Payment SaaS/Stripe
+model CommercialPayment {
+  id             String   @id @default(cuid())
+  organizationId String
+  invoiceId      String
+  amount         Decimal  @db.Decimal(14, 4)
+  paidAt         DateTime @db.Date
+  method         String   @default("VIREMENT")
+  reference      String?
+  comment        String?  @db.Text
+  recordedById   String
+  createdAt      DateTime @default(now())
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoice      CommercialInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  recordedBy   User              @relation("CommercialPaymentRecordedBy", fields: [recordedById], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([invoiceId])
+}
+
+model CommercialWorkItem {
+  id               String   @id @default(cuid())
+  organizationId   String
+  reference        String?
+  name             String
+  description      String?  @db.Text
+  family           String?
+  subFamily        String?
+  saleUnit         String   @default("U")
+  unitCostHt       Decimal  @default(0) @db.Decimal(14, 4)
+  unitSellHt       Decimal  @default(0) @db.Decimal(14, 4)
+  marginPercent    Decimal  @default(0) @db.Decimal(8, 4)
+  /// Lien optionnel vers biblio BeWork (lecture seule, pas de couplage fort)
+  sourceWorkItemId String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  components   CommercialWorkItemComponent[]
+  quoteLines   CommercialQuoteLine[]
+
+  @@index([organizationId, name])
+  @@index([organizationId, family])
+  @@index([sourceWorkItemId])
+}
+
+model CommercialWorkItemComponent {
+  id             String                  @id @default(cuid())
+  organizationId String
+  workItemId     String
+  name           String
+  type           CommercialComponentType @default(MATERIAL)
+  quantityPerUnit Decimal                @default(1) @db.Decimal(14, 4)
+  unit           String                  @default("U")
+  unitCostHt     Decimal                 @default(0) @db.Decimal(14, 4)
+  lineCostHt     Decimal                 @default(0) @db.Decimal(14, 4)
+  materialId     String?
+  laborId        String?
+  equipmentId    String?
+  sortOrder      Int                     @default(0)
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  workItem  CommercialWorkItem       @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  material  CommercialMaterial?      @relation(fields: [materialId], references: [id], onDelete: SetNull)
+  labor     CommercialLaborResource? @relation(fields: [laborId], references: [id], onDelete: SetNull)
+  equipment CommercialEquipmentResource? @relation(fields: [equipmentId], references: [id], onDelete: SetNull)
+
+  @@index([workItemId, sortOrder])
+  @@index([organizationId])
+}
+
+model CommercialMaterial {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  reference      String?
+  family         String?
+  unit           String   @default("U")
+  supplierName   String?
+  currentPriceHt Decimal  @default(0) @db.Decimal(14, 4)
+  notes          String?  @db.Text
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  prices       CommercialMaterialPrice[]
+  components   CommercialWorkItemComponent[]
+
+  @@index([organizationId, name])
+}
+
+model CommercialMaterialPrice {
+  id             String   @id @default(cuid())
+  organizationId String
+  materialId     String
+  priceHt        Decimal  @db.Decimal(14, 4)
+  source         String?
+  notedAt        DateTime @default(now())
+  comment        String?
+  createdAt      DateTime @default(now())
+
+  material CommercialMaterial @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@index([materialId, notedAt])
+  @@index([organizationId])
+}
+
+model CommercialLaborResource {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  hourlyCostHt   Decimal  @default(0) @db.Decimal(14, 4)
+  loadedCostHt   Decimal? @db.Decimal(14, 4)
+  notes          String?  @db.Text
+  validFrom      DateTime? @db.Date
+  validTo        DateTime? @db.Date
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  components   CommercialWorkItemComponent[]
+
+  @@index([organizationId, name])
+}
+
+model CommercialEquipmentResource {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  /// OWNED | RENTAL | SMALL_TOOLS
+  kind           String   @default("OWNED")
+  hourlyCostHt   Decimal? @db.Decimal(14, 4)
+  dailyCostHt    Decimal? @db.Decimal(14, 4)
+  unit           String   @default("h")
+  notes          String?  @db.Text
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  components   CommercialWorkItemComponent[]
+
+  @@index([organizationId, name])
+}
+
+model CommercialStatusEvent {
+  id             String   @id @default(cuid())
+  organizationId String
+  entityType     String
+  entityId       String
+  fromStatus     String?
+  toStatus       String
+  label          String
+  detail         String?  @db.Text
+  actorUserId    String?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?        @relation("CommercialStatusEventActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, entityType, entityId])
+  @@index([createdAt])
 }

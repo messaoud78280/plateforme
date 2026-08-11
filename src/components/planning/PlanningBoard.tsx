@@ -1,9 +1,8 @@
 "use client";
 
 /**
- * PLANNING-V2C — vue ressources actionnable.
- * Board = collaborateurs × période, enrichi par AgendaEvent (source unique).
- * Suggestions déterministes — pas d'IA / LLM.
+ * PLANNING-V2C.1 — vue ressources simple (personnes × jours).
+ * Intelligence V2C derrière l’UI — pas de timeline horaire type Agenda.
  */
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -69,8 +68,6 @@ type Props = {
   projectHints?: PlanningProjectHint[];
   currentUserId: string;
 };
-
-const DAY_HOURS = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
 
 export function PlanningBoard({
   teamUsers,
@@ -476,6 +473,15 @@ export function PlanningBoard({
   const personPanel = personPanelId
     ? resources.find((r) => r.id === personPanelId) ?? null
     : null;
+  const activeFilterCount =
+    (q.trim() ? 1 : 0) + (filterProjectId ? 1 : 0) + (filterState !== "all" ? 1 : 0);
+  const searchQuery = q.trim();
+
+  function resetFilters() {
+    setQ("");
+    setFilterProjectId("");
+    setFilterState("all");
+  }
 
   return (
     <div
@@ -506,6 +512,9 @@ export function PlanningBoard({
               {summary.assignments} affectation{summary.assignments > 1 ? "s" : ""}
               {" · "}
               {summary.conflicts} conflit{summary.conflicts > 1 ? "s" : ""}
+              {summary.sites > 0
+                ? ` · ${summary.sites} chantier${summary.sites > 1 ? "s" : ""}`
+                : ""}
             </p>
           </div>
 
@@ -583,71 +592,120 @@ export function PlanningBoard({
               </button>
             </div>
 
-            <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-white px-1 py-0.5">
+            <div className="relative">
               <button
                 type="button"
-                disabled={!prevPlanningZoom(zoom)}
-                onClick={() => {
-                  const p = prevPlanningZoom(zoom);
-                  if (p) applyZoom(p);
-                }}
-                className="rounded-md px-2 py-1 text-xs font-bold text-slate-600 disabled:opacity-40"
+                onClick={() => setShowFilters((v) => !v)}
+                className={cn(
+                  "rounded-lg border px-3 py-1.5 text-xs font-bold",
+                  showFilters || activeFilterCount > 0
+                    ? "border-[#1e3a5f] bg-[#1e3a5f]/5 text-[#1e3a5f]"
+                    : "border-slate-200 bg-white text-slate-700",
+                )}
               >
-                −
+                {activeFilterCount > 0 ? `Filtres · ${activeFilterCount}` : "Filtres"}
               </button>
-              <span className="min-w-[3rem] text-center text-[11px] font-bold text-slate-700">
-                {zoom} %
-              </span>
-              <button
-                type="button"
-                disabled={!nextPlanningZoom(zoom)}
-                onClick={() => {
-                  const n = nextPlanningZoom(zoom);
-                  if (n) applyZoom(n);
-                }}
-                className="rounded-md px-2 py-1 text-xs font-bold text-slate-600 disabled:opacity-40"
-              >
-                +
-              </button>
+              {showFilters ? (
+                <div className="absolute right-0 z-40 mt-1.5 w-[min(20rem,calc(100vw-2rem))] rounded-xl border border-slate-200 bg-white p-3 shadow-lg">
+                  <label className="block text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                    Recherche
+                    <input
+                      value={q}
+                      onChange={(e) => setQ(e.target.value)}
+                      placeholder="Karim, Les Lilas…"
+                      className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-800"
+                    />
+                  </label>
+                  <label className="mt-2 block text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                    Chantier
+                    <select
+                      value={filterProjectId}
+                      onChange={(e) => setFilterProjectId(e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-800"
+                    >
+                      <option value="">Tous</option>
+                      {projects.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.title}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="mt-2 block text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                    État
+                    <select
+                      value={filterState}
+                      onChange={(e) =>
+                        setFilterState(e.target.value as "all" | "conflicts" | "unassigned")
+                      }
+                      className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-800"
+                    >
+                      <option value="all">Tous</option>
+                      <option value="conflicts">Conflits</option>
+                      <option value="unassigned">Sans responsable</option>
+                    </select>
+                  </label>
+                  {view !== "day" ? (
+                    <div className="mt-3 border-t border-slate-100 pt-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                        Affichage
+                      </p>
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {([5, 6, 7] as const).map((n) => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() => applyWorkDays(n)}
+                            className={cn(
+                              "rounded-md px-2 py-1 text-[11px] font-bold",
+                              workDays === n
+                                ? "bg-[#1e3a5f] text-white"
+                                : "bg-slate-50 text-slate-600",
+                            )}
+                          >
+                            {n}j
+                          </button>
+                        ))}
+                      </div>
+                      <div className="mt-2 flex items-center gap-1">
+                        <button
+                          type="button"
+                          disabled={!prevPlanningZoom(zoom)}
+                          onClick={() => {
+                            const p = prevPlanningZoom(zoom);
+                            if (p) applyZoom(p);
+                          }}
+                          className="rounded-md border border-slate-200 px-2 py-1 text-xs font-bold text-slate-600 disabled:opacity-40"
+                        >
+                          −
+                        </button>
+                        <span className="text-[11px] font-bold text-slate-600">{zoom} %</span>
+                        <button
+                          type="button"
+                          disabled={!nextPlanningZoom(zoom)}
+                          onClick={() => {
+                            const n = nextPlanningZoom(zoom);
+                            if (n) applyZoom(n);
+                          }}
+                          className="rounded-md border border-slate-200 px-2 py-1 text-xs font-bold text-slate-600 disabled:opacity-40"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                  {activeFilterCount > 0 ? (
+                    <button
+                      type="button"
+                      onClick={resetFilters}
+                      className="mt-3 text-[11px] font-bold text-[#1e3a5f] hover:underline"
+                    >
+                      Réinitialiser
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
-
-            {view !== "day" ? (
-              <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
-                {(
-                  [
-                    [5, "5 jours · lun–ven"],
-                    [6, "6 jours · lun–sam"],
-                    [7, "7 jours · lun–dim"],
-                  ] as const
-                ).map(([n, tip]) => (
-                  <button
-                    key={n}
-                    type="button"
-                    title={tip}
-                    onClick={() => applyWorkDays(n)}
-                    className={cn(
-                      "rounded-md px-2 py-1.5 text-[11px] font-bold",
-                      workDays === n ? "bg-white text-[#1e3a5f] shadow-sm" : "text-slate-500",
-                    )}
-                  >
-                    {n}j
-                  </button>
-                ))}
-              </div>
-            ) : null}
-
-            <button
-              type="button"
-              onClick={() => setShowFilters((v) => !v)}
-              className={cn(
-                "rounded-lg border px-3 py-1.5 text-xs font-bold",
-                showFilters
-                  ? "border-[#1e3a5f] bg-[#1e3a5f]/5 text-[#1e3a5f]"
-                  : "border-slate-200 bg-white text-slate-700",
-              )}
-            >
-              Filtres
-            </button>
 
             <button
               type="button"
@@ -659,7 +717,7 @@ export function PlanningBoard({
               }
               className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50"
             >
-              + Planifier une intervention
+              + Planifier
             </button>
 
             <Link
@@ -671,67 +729,21 @@ export function PlanningBoard({
           </div>
         </div>
 
-        {showFilters ? (
-          <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-slate-100 pt-3">
-            <label className="flex min-w-[10rem] flex-1 flex-col gap-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-              Recherche
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Karim, Les Lilas…"
-                className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-800"
-              />
-            </label>
-            <label className="flex min-w-[10rem] flex-col gap-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-              Chantier
-              <select
-                value={filterProjectId}
-                onChange={(e) => setFilterProjectId(e.target.value)}
-                className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-800"
-              >
-                <option value="">Tous</option>
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex min-w-[10rem] flex-col gap-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-              État
-              <select
-                value={filterState}
-                onChange={(e) =>
-                  setFilterState(e.target.value as "all" | "conflicts" | "unassigned")
-                }
-                className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-800"
-              >
-                <option value="all">Tous</option>
-                <option value="conflicts">Conflits</option>
-                <option value="unassigned">Sans responsable</option>
-              </select>
-            </label>
-          </div>
+        {searchQuery ? (
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-600">
+            <span>
+              {visibleResources.length} résultat{visibleResources.length > 1 ? "s" : ""} pour «{" "}
+              {searchQuery} »
+            </span>
+            <button
+              type="button"
+              onClick={() => setQ("")}
+              className="rounded-md border border-slate-200 px-2 py-0.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
+            >
+              × Effacer
+            </button>
+          </p>
         ) : null}
-
-        <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
-          <SummaryChip
-            label={summary.sites === 1 ? "chantier planifié" : "chantiers planifiés"}
-            value={summary.sites}
-          />
-          <SummaryChip
-            label="Conflits"
-            value={summary.conflicts}
-            accent={summary.conflicts > 0 ? "danger" : undefined}
-          />
-          {summary.unassigned > 0 ? (
-            <SummaryChip
-              label="Sans responsable"
-              value={summary.unassigned}
-              accent="warn"
-            />
-          ) : null}
-        </div>
       </header>
 
       {error ? (
@@ -810,13 +822,11 @@ export function PlanningBoard({
             </p>
           ) : null}
         </section>
-      ) : !loading ? (
-        <p className="px-1 text-[11px] font-medium text-slate-400">Tout est organisé.</p>
       ) : null}
 
       {/* Mobile — liste collaborateurs + à organiser */}
       <div className="lg:hidden">
-        <MobileDayPeople
+        <DayPeopleList
           day={startOfDay(cursor)}
           resources={visibleResources}
           events={filteredEvents}
@@ -841,22 +851,19 @@ export function PlanningBoard({
         {loading ? (
           <p className="p-10 text-center text-sm text-slate-500">Chargement du planning…</p>
         ) : view === "day" ? (
-            <DayHourGrid
+          <div className="p-3">
+            <DayPeopleList
               day={startOfDay(cursor)}
               resources={visibleResources}
               events={filteredEvents}
               allEvents={events}
               currentUserId={currentUserId}
-              cellMin={cellMin}
               onSelect={setSelectedId}
               onConflict={setConflictFocusId}
-              onCreate={(resourceId) =>
-                setCreateDraft({ resourceId, day: startOfDay(cursor) })
-              }
-              setDragEventId={setDragEventId}
-              onDropCell={onDropCell}
+              onCreate={(resourceId, day) => setCreateDraft({ resourceId, day })}
               onOpenPerson={setPersonPanelId}
             />
+          </div>
         ) : (
           <table className="w-full min-w-[860px] border-collapse text-left">
             <thead className="sticky top-0 z-20">
@@ -1002,7 +1009,7 @@ export function PlanningBoard({
       {conflictConfirm ? (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-900/40 p-4 sm:items-center">
           <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl">
-            <p className="text-sm font-extrabold text-slate-900">⚠ Chevauchement</p>
+            <p className="text-sm font-extrabold text-slate-900">⚠ Conflit</p>
             <p className="mt-2 text-sm text-slate-600">{conflictConfirm.warning}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <button
@@ -1082,32 +1089,6 @@ function EmptyAssignCell({
         + Affecter
       </span>
     </button>
-  );
-}
-
-function SummaryChip({
-  label,
-  value,
-  accent,
-}: {
-  label: string;
-  value: number;
-  accent?: "danger" | "warn";
-}) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1",
-        accent === "danger"
-          ? "border-red-200 bg-red-50 text-red-800"
-          : accent === "warn"
-            ? "border-amber-200 bg-amber-50 text-amber-900"
-            : "border-slate-200 bg-slate-50 text-slate-700",
-      )}
-    >
-      <span className="font-extrabold tabular-nums">{value}</span>
-      <span className="font-medium opacity-80">{label}</span>
-    </span>
   );
 }
 
@@ -1224,161 +1205,14 @@ function AssignmentBlock({
           }}
           className="mt-0.5 text-[10px] font-extrabold text-red-700 hover:underline"
         >
-          ⚠ Chevauchement
+          ⚠ Conflit
         </button>
       ) : null}
     </div>
   );
 }
 
-function DayHourGrid({
-  day,
-  resources,
-  events,
-  allEvents,
-  currentUserId,
-  cellMin,
-  onSelect,
-  onConflict,
-  onCreate,
-  setDragEventId,
-  onDropCell,
-  onOpenPerson,
-}: {
-  day: Date;
-  resources: PlanningResource[];
-  events: AgendaEventDTO[];
-  allEvents: AgendaEventDTO[];
-  currentUserId: string;
-  cellMin: number;
-  onSelect: (id: string) => void;
-  onConflict: (id: string) => void;
-  onCreate: (resourceId: string) => void;
-  setDragEventId: (id: string | null) => void;
-  onDropCell: (resourceId: string, day: Date) => void | Promise<void>;
-  onOpenPerson?: (id: string) => void;
-}) {
-  const hourH = Math.max(36, Math.round(cellMin / 2.2));
-  return (
-    <div className="min-w-[720px]">
-      <div
-        className="sticky top-0 z-20 grid border-b border-slate-200 bg-[#eef2f7]"
-        style={{ gridTemplateColumns: `3.5rem repeat(${resources.length}, minmax(9rem, 1fr))` }}
-      >
-        <div className="border-r border-slate-200 px-1 py-2 text-[10px] font-bold uppercase text-slate-500">
-          Heure
-        </div>
-        {resources.map((r) => (
-          <div key={r.id} className="border-r border-slate-200 px-2 py-2">
-            <ResourceCell
-              resource={r}
-              currentUserId={currentUserId}
-              workload={computeResourceWorkload(events, r.id, [day])}
-              onOpen={onOpenPerson ? () => onOpenPerson(r.id) : undefined}
-            />
-          </div>
-        ))}
-      </div>
-      <div
-        className="relative grid"
-        style={{ gridTemplateColumns: `3.5rem repeat(${resources.length}, minmax(9rem, 1fr))` }}
-      >
-        <div>
-          {DAY_HOURS.map((h) => (
-            <div
-              key={h}
-              className="border-b border-r border-slate-100 px-1 text-[10px] font-bold text-slate-500"
-              style={{ height: hourH }}
-            >
-              {String(h).padStart(2, "0")}:00
-            </div>
-          ))}
-        </div>
-        {resources.map((r) => {
-          const cell = eventsForResourceOnDay(events, r.id, day);
-          const free = cell.length === 0;
-          return (
-            <div
-              key={r.id}
-              className="relative border-r border-slate-100"
-              style={{ height: hourH * DAY_HOURS.length }}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={() => void onDropCell(r.id, day)}
-            >
-              {DAY_HOURS.map((h) => (
-                <div
-                  key={h}
-                  className="absolute left-0 right-0 border-b border-slate-50"
-                  style={{ top: (h - DAY_HOURS[0]!) * hourH, height: hourH }}
-                />
-              ))}
-              {free ? (
-                <EmptyAssignCell
-                  className="absolute inset-x-1 top-1 z-10"
-                  dense
-                  onClick={() => onCreate(r.id)}
-                />
-              ) : (
-                cell.map((e) => {
-                  const start = new Date(e.startAt);
-                  const end = new Date(e.endAt);
-                  const startMin = Math.max(
-                    0,
-                    (start.getHours() - DAY_HOURS[0]!) * 60 + start.getMinutes(),
-                  );
-                  const endMin = Math.min(
-                    DAY_HOURS.length * 60,
-                    (end.getHours() - DAY_HOURS[0]!) * 60 + end.getMinutes(),
-                  );
-                  const top = (startMin / 60) * hourH;
-                  const height = Math.max(28, ((endMin - startMin) / 60) * hourH);
-                  const meta = agendaTypeMeta(e.type);
-                  const label = planningBlockLabel(e);
-                  const conflict = listEventConflicts(e, allEvents).length > 0;
-                  return (
-                    <button
-                      key={e.id}
-                      type="button"
-                      draggable={!isDragBlocked(e).blocked}
-                      onDragStart={() => setDragEventId(e.id)}
-                      onClick={() => onSelect(e.id)}
-                      className="absolute left-1 right-1 z-[1] overflow-hidden rounded-lg border px-1.5 py-1 text-left shadow-sm"
-                      style={{
-                        top,
-                        height,
-                        background: meta.colors.bg,
-                        borderColor: conflict ? "#ef4444" : meta.colors.border,
-                        color: meta.colors.text,
-                      }}
-                    >
-                      <p className="truncate text-[10px] font-extrabold uppercase">{label.site}</p>
-                      <p className="truncate text-[9px] font-semibold">{label.time}</p>
-                      {conflict ? (
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          onClick={(ev) => {
-                            ev.stopPropagation();
-                            onConflict(e.id);
-                          }}
-                          className="text-[9px] font-extrabold text-red-700"
-                        >
-                          ⚠
-                        </span>
-                      ) : null}
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function MobileDayPeople({
+function DayPeopleList({
   day,
   resources,
   events,
@@ -1400,12 +1234,12 @@ function MobileDayPeople({
   onOpenPerson?: (id: string) => void;
 }) {
   return (
-    <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+    <div className="space-y-2">
+      <p className="px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
         {day.toLocaleDateString("fr-FR", {
           weekday: "long",
           day: "numeric",
-          month: "short",
+          month: "long",
         })}
       </p>
       <ul className="space-y-2">
@@ -1413,7 +1247,7 @@ function MobileDayPeople({
           const cell = eventsForResourceOnDay(events, r.id, day);
           const wl = computeResourceWorkload(events, r.id, [day]);
           return (
-            <li key={r.id} className="rounded-xl border border-slate-200 p-2.5">
+            <li key={r.id} className="rounded-xl border border-slate-200/80 bg-white px-3 py-2.5">
               <ResourceCell
                 resource={r}
                 currentUserId={currentUserId}
@@ -1432,25 +1266,31 @@ function MobileDayPeople({
                         key={e.id}
                         type="button"
                         onClick={() => onSelect(e.id)}
-                        className="flex w-full flex-col rounded-lg bg-slate-50 px-2.5 py-2 text-left"
+                        className="flex w-full flex-col rounded-lg bg-slate-50 px-2.5 py-2 text-left hover:bg-slate-100/80"
                       >
+                        <span className="text-[11px] font-bold text-slate-500">{label.time}</span>
                         <span className="text-xs font-extrabold uppercase text-slate-900">
                           {label.site}
                         </span>
-                        <span className="text-[11px] font-semibold text-slate-600">
-                          {label.time} · {label.type}
-                        </span>
+                        <span className="text-[11px] font-medium text-slate-600">{label.type}</span>
                         {conflict ? (
-                          <button
-                            type="button"
+                          <span
+                            role="button"
+                            tabIndex={0}
                             className="mt-0.5 self-start text-[11px] font-bold text-red-700"
                             onClick={(ev) => {
                               ev.stopPropagation();
                               onConflict(e.id);
                             }}
+                            onKeyDown={(ev) => {
+                              if (ev.key === "Enter") {
+                                ev.stopPropagation();
+                                onConflict(e.id);
+                              }
+                            }}
                           >
-                            ⚠ Chevauchement
-                          </button>
+                            ⚠ Conflit
+                          </span>
                         ) : null}
                       </button>
                     );
@@ -1464,6 +1304,7 @@ function MobileDayPeople({
     </div>
   );
 }
+
 
 function DetailPanel({
   event,
@@ -1796,25 +1637,25 @@ function AssignExistingModal({
                   <p className="text-sm font-extrabold text-slate-900">{s.name}</p>
                   {s.suggested ? (
                     <span className="rounded-full bg-[#1e3a5f] px-2 py-0.5 text-[10px] font-bold text-white">
-                      Suggéré
+                      Recommandé
                     </span>
                   ) : null}
                 </div>
                 <p className="text-[11px] font-medium text-slate-500">{s.roleLabel}</p>
                 <p className="mt-1 text-[11px] font-medium text-slate-600">
-                  {s.reasonLabels
-                    .filter((r) => !r.startsWith("Rôle moins"))
-                    .slice(0, 3)
-                    .map((r) => (r === "Conflit horaire" ? `⚠ ${r}` : `✓ ${r}`))
-                    .join(" · ")}
-                  {s.reasons.includes("role_moins_adapte") ? " · Rôle moins adapté" : ""}
+                  {s.hasConflict
+                    ? "⚠ Conflit horaire"
+                    : s.reasonLabels
+                        .filter((r) => r !== "Rôle moins adapté" && r !== "Conflit horaire")
+                        .slice(0, 2)
+                        .join(" · ") || (s.reasons.includes("role_moins_adapte") ? "Rôle moins adapté" : "")}
                 </p>
               </button>
             </li>
           ))}
         </ul>
         <p className="mt-3 text-[10px] font-medium text-slate-400">
-          Suggestion déterministe — vous validez l’affectation.
+          BeWork propose — vous validez.
         </p>
       </div>
     </div>

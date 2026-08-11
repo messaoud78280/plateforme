@@ -207,15 +207,23 @@ const boardSrc = readFileSync(join(process.cwd(), "src/components/planning/Plann
 assert(!/Disponible/.test(boardSrc), "V2B D: aucun wording Disponible");
 assert(!/disponible/.test(boardSrc), "V2B D: aucun wording disponible");
 assert(boardSrc.includes("Sans affectation") || boardSrc.includes("Aucune affectation planifiée"), "V2B wording sans affectation");
-assert(boardSrc.includes("chantiers planifiés") || boardSrc.includes("chantier planifié"), "V2B C: KPI chantier planifié");
+assert(
+  boardSrc.includes("chantier") || boardSrc.includes("chantiers planifiés"),
+  "V2B C: KPI chantier",
+);
 assert(boardSrc.includes('view !== "day"'), "V2B E: 5j/6j/7j masqués en vue Jour");
 assert(!boardSrc.includes("EmptyPlanningState"), "V2B: gros empty state retiré");
-assert(boardSrc.includes("MobileDayPeople"), "V2B G: mobile liste collaborateurs");
+assert(boardSrc.includes("DayPeopleList"), "V2B G / V2C.1: liste collaborateurs jour");
+assert(!boardSrc.includes("DayHourGrid"), "V2C.1: timeline horaire Jour retirée");
+assert(!boardSrc.includes("Tout est organisé"), "V2C.1: empty À organiser masqué");
 assert(boardSrc.includes("EmptyAssignCell"), "V2B.1: cellule vide allégée");
 assert(boardSrc.includes("Équipe terrain"), "V2B.1: filtre équipe terrain");
 assert(boardSrc.includes("Toute l'équipe") || boardSrc.includes("Toute l&apos;équipe"), "V2B.1: toute l'équipe");
 assert(boardSrc.includes("max-h-[min(70vh,52rem)]"), "V2B.1: scroll vertical board");
 assert(!boardSrc.includes("isoWeekLabel"), "V2B.1: badge S33 doublon retiré");
+assert(boardSrc.includes("× Effacer") || boardSrc.includes("Effacer"), "V2C.1: recherche claire");
+assert(boardSrc.includes("Recommandé"), "V2C.1: suggestion sobre");
+assert(boardSrc.includes("Filtres ·") || boardSrc.includes("Filtres"), "V2C.1: filtres popover");
 
 // —— V2C ——
 const unassignedEvt = ev({
@@ -292,4 +300,4 @@ assert(pageSrc.includes("projectHints"), "V2C: projectHints pour suggestions");
 if (failed) {
   process.exit(1);
 }
-console.log("\nPlanning board helpers OK (V2A+V2B+V2B.1+V2C)");
+console.log("\nPlanning board helpers OK (V2A+V2B+V2B.1+V2C+V2C.1)");

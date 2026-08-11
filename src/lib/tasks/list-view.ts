@@ -227,7 +227,11 @@ export async function loadTasksListView(opts: LoadTasksListViewOpts): Promise<{
       statusBucket: statusBucket(t.status),
       priority: prio,
       priorityLabel:
-        prio === "URGENT" ? "Urgente" : prio === "PRIORITAIRE" ? "Prioritaire" : "Normale",
+        prio === "URGENT"
+          ? "Priorité haute"
+          : prio === "PRIORITAIRE"
+            ? "Prioritaire"
+            : "Normale",
       projectId: t.project?.id ?? null,
       projectTitle: t.project?.title ?? null,
       projectTitleShort: shortProjectTitle(t.project?.title ?? null),

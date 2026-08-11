@@ -232,6 +232,7 @@ export function DocumentsHubClient({
         <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           {items.map((it) => {
             const vis = visibilityLabel(it.visibility);
+            const missing = Boolean(it.isExpectedMissing);
             return (
               <li key={it.id}>
                 <Link
@@ -249,7 +250,7 @@ export function DocumentsHubClient({
                       {it.title}
                     </span>
                     <span className="mt-0.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
-                      {typeBadge(it.typeLabel)}
+                      {missing ? "Document attendu" : typeBadge(it.typeLabel)}
                     </span>
                     <span className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-slate-600">
                       {it.projectTitle ? (
@@ -263,22 +264,30 @@ export function DocumentsHubClient({
                       {it.contextLabel ? <span>{it.contextLabel}</span> : null}
                     </span>
                     <span className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
-                      <span>{fmtDate(it.createdAt)}</span>
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-semibold",
-                          vis.lock
-                            ? "bg-slate-100 text-slate-700"
-                            : "bg-emerald-50 text-emerald-800",
-                        )}
-                      >
-                        {vis.lock ? <span aria-hidden>🔒</span> : null}
-                        {vis.text}
-                      </span>
+                      {missing ? (
+                        <span className="rounded-md bg-amber-50 px-1.5 py-0.5 font-semibold text-amber-800">
+                          Manquante
+                        </span>
+                      ) : (
+                        <span>{fmtDate(it.createdAt)}</span>
+                      )}
+                      {!missing ? (
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-semibold",
+                            vis.lock
+                              ? "bg-slate-100 text-slate-700"
+                              : "bg-emerald-50 text-emerald-800",
+                          )}
+                        >
+                          {vis.lock ? <span aria-hidden>🔒</span> : null}
+                          {vis.text}
+                        </span>
+                      ) : null}
                     </span>
                   </span>
                   <span className="shrink-0 self-center text-xs font-bold text-[#1d4ed8]">
-                    Ouvrir
+                    {missing ? "Ajouter" : "Ouvrir"}
                   </span>
                 </Link>
               </li>

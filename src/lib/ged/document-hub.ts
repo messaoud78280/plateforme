@@ -387,6 +387,7 @@ export async function loadDocumentHub(opts: {
           id: true,
           name: true,
           category: true,
+          status: true,
           createdAt: true,
           mimeType: true,
           projectId: true,
@@ -397,24 +398,30 @@ export async function loadDocumentHub(opts: {
 
       legacy = docs
         .filter((d) => !syncedSet.has(d.id))
-        .map((d) => ({
-          id: `doc:${d.id}`,
-          source: "legacy" as const,
-          title: d.name,
-          typeLabel: typeLabel({ category: d.category, name: d.name }),
-          group: "administratif" as HubGroup,
-          projectId: d.projectId,
-          projectTitle: d.project?.title ?? null,
-          contextLabel: "Pièce mission",
-          visibility: "Interne",
-          authorName: d.client.name,
-          createdAt: d.createdAt.toISOString(),
-          href: d.projectId
-            ? `/dashboard/projets/${d.projectId}#tab-documents`
-            : `/dashboard/documents?legacy=${d.id}`,
-          mimeHint: d.mimeType,
-          isCurrentVersion: true,
-        }));
+        .map((d) => {
+          const missingHint =
+            /\(manquante\)/i.test(d.name) || d.status === "EN_ATTENTE";
+          const cleanTitle = d.name.replace(/\s*\(manquante\)\s*/i, "").trim() || d.name;
+          return {
+            id: `doc:${d.id}`,
+            source: "legacy" as const,
+            title: missingHint ? cleanTitle : d.name,
+            typeLabel: typeLabel({ category: d.category, name: d.name }),
+            group: "administratif" as HubGroup,
+            projectId: d.projectId,
+            projectTitle: d.project?.title ?? null,
+            contextLabel: missingHint ? "Document attendu" : typeLabel({ category: d.category, name: d.name }),
+            visibility: "Interne",
+            authorName: d.client.name,
+            createdAt: d.createdAt.toISOString(),
+            href: d.projectId
+              ? `/dashboard/projets/${d.projectId}#tab-documents`
+              : `/dashboard/documents?legacy=${d.id}`,
+            mimeHint: missingHint ? null : d.mimeType,
+            isCurrentVersion: true,
+            isExpectedMissing: missingHint,
+          };
+        });
     }
 
     const merged = [...items, ...orphanPo, ...legacy].filter(

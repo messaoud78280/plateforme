@@ -31,11 +31,6 @@ function openGlobalSearch() {
   window.dispatchEvent(new CustomEvent("bework:open-global-search"));
 }
 
-function isAccueilPath(pathname: string | null): boolean {
-  if (!pathname) return false;
-  return pathname === "/dashboard" || pathname === "/dashboard/";
-}
-
 function applyHighlight(target: string | undefined) {
   document.querySelectorAll(".demo-tour-highlight").forEach((el) => {
     el.classList.remove("demo-tour-highlight");
@@ -287,9 +282,8 @@ export function DemoCommercialTour() {
     document.head.appendChild(style);
   }, []);
 
-  /** Launcher flottant : Accueil desktop uniquement — jamais Messagerie / zones denses / mobile. */
-  const showFloatingLauncher =
-    phase === "idle" && desktop && isAccueilPath(pathname);
+  /** Launcher flottant retiré : même action que « Présenter » dans le header démo. */
+  const showFloatingLauncher = false;
 
   return (
     <>

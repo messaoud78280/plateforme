@@ -28,6 +28,8 @@ export type HubDocumentItem = {
   href: string;
   mimeHint: string | null;
   isCurrentVersion: boolean;
+  /** Pièce attendue sans fichier réel — ne pas proposer « Ouvrir ». */
+  isExpectedMissing?: boolean;
 };
 
 const GROUP_DEFS: { id: HubGroup; label: string }[] = [

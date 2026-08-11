@@ -49,6 +49,7 @@ function formatWhenFr(d: Date): string {
     month: "long",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Europe/Paris",
   });
 }
 
@@ -76,17 +77,17 @@ export function purchaseOrderAttentionActionLabel(
     case "ORDER_NOT_SENT":
       return "Envoyer au fournisseur";
     case "DELIVERY_UNCONFIRMED":
-      return "Voir la commande";
+      return `Obtenir confirmation ${name}`;
     case "DELIVERY_OVERDUE":
       return "Réceptionner / Contacter fournisseur";
     case "PARTIAL_RECEIPT_PENDING":
-      return "Voir réception";
+      return "Compléter la réception";
     case "RECEIPT_ISSUE":
       return "Traiter l’anomalie";
     case "DELIVERY_NOTE_MISSING":
       return "Ajouter le BL";
     default:
-      return "Voir la commande";
+      return "Obtenir confirmation";
   }
 }
 

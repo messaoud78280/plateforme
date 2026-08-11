@@ -111,7 +111,11 @@ export function formatDayTitle(d: Date): { date: string; weekday: string } {
 }
 
 export function formatTime(d: Date): string {
-  return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/Paris",
+  });
 }
 
 export function formatDayShort(d: Date): string {

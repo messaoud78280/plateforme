@@ -10,7 +10,7 @@ export const TASK_PRIORITY_RANK: Record<string, number> = {
 };
 
 export const TASK_PRIORITY_LABELS: Record<string, string> = {
-  URGENT: "Urgent",
+  URGENT: "Priorité haute",
   PRIORITAIRE: "Prioritaire",
   STANDARD: "Normal",
 };
@@ -49,7 +49,7 @@ export function priorityLabel(priority: string | null | undefined): string {
 }
 
 export function taskPriorityLabel(priority: string | null | undefined): string {
-  if (priority === "URGENT") return "Urgent";
+  if (priority === "URGENT") return "Priorité haute";
   if (priority === "PRIORITAIRE") return "Prioritaire";
   return "Standard";
 }

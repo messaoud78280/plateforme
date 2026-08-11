@@ -485,7 +485,10 @@ export function PlanningBoard({
 
   return (
     <div
-      className="flex min-h-[75vh] flex-col gap-3"
+      className={cn(
+        "flex flex-col gap-3",
+        visibleResources.length <= 2 ? "min-h-0" : "min-h-[75vh]",
+      )}
       style={
         {
           ["--pl-cell-min" as string]: `${cellMin}px`,
@@ -847,7 +850,14 @@ export function PlanningBoard({
       ) : null}
 
       {/* Desktop — board = collaborateurs × période, enrichi par AgendaEvent */}
-      <div className="hidden max-h-[min(70vh,52rem)] min-h-0 flex-1 overflow-auto rounded-2xl border border-slate-200/90 bg-white shadow-sm lg:block">
+      <div
+        className={cn(
+          "hidden min-h-0 flex-1 overflow-auto rounded-2xl border border-slate-200/90 bg-white shadow-sm lg:block",
+          visibleResources.length <= 2
+            ? "max-h-[min(42vh,28rem)]"
+            : "max-h-[min(70vh,52rem)]",
+        )}
+      >
         {loading ? (
           <p className="p-10 text-center text-sm text-slate-500">Chargement du planning…</p>
         ) : view === "day" ? (

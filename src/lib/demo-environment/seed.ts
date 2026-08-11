@@ -1000,7 +1000,8 @@ export async function enrichDemoTaskThreads(opts: {
   ]);
   /** Jamais CLIENT_EXT Sophie Martin ; staff Lefèvre uniquement en fallback messagerie SETRIM. */
   const karimPersonaId = personaKarim?.id ?? karimId;
-  const juliePersonaId = personaJulie?.id ?? sophieId;
+  /** Jamais staff Sophie Lefèvre en fallback — persona Julie ou Karim. */
+  const juliePersonaId = personaJulie?.id ?? karimPersonaId;
 
   const tasks = await prisma.task.findMany({
     where: { clientId },

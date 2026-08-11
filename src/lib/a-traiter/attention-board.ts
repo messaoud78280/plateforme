@@ -222,9 +222,15 @@ export function buildPurchaseOrderAttentionCard(opts: {
     primary?.code === "PARTIAL_RECEIPT_PENDING" ||
     primary?.code === "RECEIPT_ISSUE";
 
+  // Prochaine action = métier (Relancer / Obtenir confirmation…), pas une navigation « Voir ».
   const actionLabel =
-    primary?.actionLabel ||
-    (canReceive ? "Réceptionner" : "Voir la commande");
+    primary?.actionLabel && !/^voir\b/i.test(primary.actionLabel.trim())
+      ? primary.actionLabel
+      : canReceive
+        ? "Réceptionner"
+        : order.supplierName
+          ? `Relancer ${order.supplierName.split(/\s+/)[0]}`
+          : "Obtenir confirmation";
 
   const supplierMessageUrl =
     order.sharedWithSupplier && order.projectId
@@ -263,7 +269,7 @@ export function buildPurchaseOrderAttentionCard(opts: {
     actionUrl: purchaseOrderAttentionActionUrl(order.id, primary?.code, {
       returnTo: "/dashboard/a-traiter",
     }),
-    actionLabel: primary?.actionLabel || "Voir la commande",
+    actionLabel,
     supplierMessageUrl,
     searchExtra: (order.lineDesignations ?? []).join(" "),
   };

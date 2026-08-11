@@ -9,6 +9,7 @@ function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString("fr-FR", {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Europe/Paris",
   });
 }
 
@@ -16,6 +17,7 @@ function fmtDay(iso: string) {
   return new Date(iso).toLocaleDateString("fr-FR", {
     day: "numeric",
     month: "short",
+    timeZone: "Europe/Paris",
   });
 }
 
@@ -25,6 +27,7 @@ function fmtDayTime(iso: string) {
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Europe/Paris",
   });
 }
 

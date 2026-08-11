@@ -9,6 +9,7 @@ import type {
 } from "@/lib/purchase-orders/list-view";
 import { urgencyRank } from "@/lib/follow-up/urgency";
 import { projectSupplierHref } from "@/lib/messagerie/resolve-conversation";
+import { formatPurchaseOrderDeliveryShort } from "@/lib/purchase-orders/delivery-display";
 import { cn } from "@/lib/cn";
 
 type SortId = "attention" | "delivery" | "recent" | "number";
@@ -29,12 +30,7 @@ type Props = {
 };
 
 function fmtDelivery(iso: string | null): { date: string; time: string } | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  return {
-    date: d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }),
-    time: d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
-  };
+  return formatPurchaseOrderDeliveryShort(iso);
 }
 
 function receiptLabel(r: PurchaseOrderListRow): string {

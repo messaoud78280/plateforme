@@ -151,6 +151,47 @@ assert(!isResourceFreeOnDay(oneEvt, "u1", day), "V2B B: Karim a une affectation"
 assert(isResourceFreeOnDay(oneEvt, "u2", day), "V2B B: Julie toujours sans affectation");
 assert(eventsForResourceOnDay(oneEvt, "u1", day).length === 1, "V2B B: 1 bloc Karim");
 
+// COHERENCE-PLATFORM-V1 — KPI = scope ressources visibles (équipe terrain = Karim)
+const denis = ev({
+  id: "denis",
+  responsibleId: "u-denis",
+  startAt: "2026-08-10T08:00:00.000Z",
+  endAt: "2026-08-10T10:00:00.000Z",
+  responsible: { id: "u-denis", name: "Denis Buret", email: "d@x.fr" },
+});
+const julieEvt = ev({
+  id: "julie",
+  responsibleId: "u2",
+  startAt: "2026-08-10T14:00:00.000Z",
+  endAt: "2026-08-10T16:00:00.000Z",
+  responsible: { id: "u2", name: "Julie Martin", email: "j@x.fr" },
+});
+const karim2 = ev({
+  id: "karim2",
+  responsibleId: "u1",
+  startAt: "2026-08-11T08:00:00.000Z",
+  endAt: "2026-08-11T12:00:00.000Z",
+});
+const allFour = [a, karim2, denis, julieEvt];
+const terrainOnly: PlanningResource[] = [
+  { id: "u1", name: "Karim Benali", email: "k@x.fr", kind: "person", permissionProfile: "CONDUCTEUR" },
+];
+const weekEnd = new Date("2026-08-16T23:59:59.000Z");
+const terrainKpi = planningSummary(allFour, terrainOnly, weekStart, weekEnd);
+assert(terrainKpi.collaborators === 1, "COHERENCE: terrain → 1 collaborateur");
+assert(terrainKpi.assignments === 2, "COHERENCE: terrain → 2 affectations Karim (pas 4)");
+const allTeamKpi = planningSummary(allFour, resources, weekStart, weekEnd);
+assert(allTeamKpi.collaborators === 3, "COHERENCE: toute équipe → 3 collaborateurs");
+assert(allTeamKpi.assignments === 3, "COHERENCE: toute équipe (3 ressources) → 3 affectations scoped");
+// Note: denis has responsibleId u-denis not in resources → excluded from assignments when resources=3 personas without denis
+const withDenis: PlanningResource[] = [
+  ...resources,
+  { id: "u-denis", name: "Denis Buret", email: "d@x.fr", kind: "person", permissionProfile: "DIRECTION" },
+];
+const fullKpi = planningSummary(allFour, withDenis, weekStart, weekEnd);
+assert(fullKpi.collaborators === 4, "COHERENCE: 4 ressources visibles");
+assert(fullKpi.assignments === 4, "COHERENCE: 4 affectations si 4 visibles");
+
 const dayLabel = planningPeriodLabel("day", day, [day]);
 assert(dayLabel.title.length > 0, "V2B date title");
 assert(dayLabel.rangeLabel === "", "V2B date: pas de doublon rangeLabel en vue jour");

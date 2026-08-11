@@ -271,6 +271,7 @@ export function formatPurchaseOrderAttentionWhy(
     const t = new Date(input.deliveryAt).toLocaleTimeString("fr-FR", {
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "Europe/Paris",
     });
     return `Livraison attendue aujourd'hui à ${t}`;
   }

@@ -353,14 +353,22 @@ function AttentionCard({
           </Link>
         ) : null}
         {card.subjectType === "PURCHASE_ORDER" &&
-        (card.category === "LIVRAISON" ||
-          card.category === "RECEPTION" ||
-          card.category === "BL") ? (
+        card.attentionItems.some((i) =>
+          ["DELIVERY_OVERDUE", "PARTIAL_RECEIPT_PENDING", "RECEIPT_ISSUE"].includes(i.code),
+        ) ? (
           <Link
             href={`/dashboard/commandes/${card.subjectId}/reception?returnTo=${encodeURIComponent("/dashboard/a-traiter")}`}
             className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
           >
             Réceptionner
+          </Link>
+        ) : null}
+        {card.subjectType === "PURCHASE_ORDER" ? (
+          <Link
+            href={`/dashboard/commandes/${card.subjectId}?returnTo=${encodeURIComponent("/dashboard/a-traiter")}`}
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
+          >
+            Voir la commande
           </Link>
         ) : null}
         {card.subjectType === "PURCHASE_ORDER" && card.supplierMessageUrl ? (

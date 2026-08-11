@@ -304,19 +304,23 @@ export function planningSummary(
   unassigned: number;
 } {
   const people = resources.filter((r) => r.kind === "person");
+  const visibleIds = new Set(people.map((r) => r.id));
   const inRange = events.filter((e) => {
     const s = new Date(e.startAt).getTime();
     const en = new Date(e.endAt).getTime();
     return s <= to.getTime() && en >= from.getTime();
   });
+  // KPI = même scope que la grille : affectations des collaborateurs visibles uniquement
+  const scoped = inRange.filter(
+    (e) => e.responsibleId != null && visibleIds.has(e.responsibleId),
+  );
   const sites = new Set(
-    inRange.map((e) => e.projectId || e.project?.title).filter(Boolean) as string[],
+    scoped.map((e) => e.projectId || e.project?.title).filter(Boolean) as string[],
   );
   let conflicts = 0;
   const seen = new Set<string>();
-  for (const e of inRange) {
-    if (!e.responsibleId) continue;
-    if (listEventConflicts(e, inRange).length > 0) {
+  for (const e of scoped) {
+    if (listEventConflicts(e, scoped).length > 0) {
       const key = e.id.includes("__") ? e.id.split("__")[0]! : e.id;
       if (!seen.has(key)) {
         seen.add(key);
@@ -327,7 +331,7 @@ export function planningSummary(
   return {
     collaborators: people.length,
     sites: sites.size,
-    assignments: inRange.filter((e) => e.responsibleId).length,
+    assignments: scoped.length,
     conflicts,
     unassigned: inRange.filter((e) => !e.responsibleId).length,
   };

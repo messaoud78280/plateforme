@@ -15,6 +15,11 @@ import {
   runWithPerfContext,
   summarizePerfQueries,
 } from "@/lib/perf/server-timing";
+import {
+  formatPurchaseOrderDeliveryTime,
+  getEffectivePurchaseOrderDeliveryAt,
+  PURCHASE_ORDER_DISPLAY_TZ,
+} from "@/lib/purchase-orders/delivery-display";
 
 const PO_WATCH: PurchaseOrderStatus[] = [
   "A_VALIDER",
@@ -150,8 +155,9 @@ function dueLabel(iso: string | null, now: Date): string {
 function mapAttention(cards: ATraiterAttentionCard[]): AccueilAttentionItem[] {
   return cards.map((c) => ({
     id: `${c.subjectType}:${c.subjectId}`,
+    // Accueil = action, pas copie verbatim de la raison W3 (board À traiter garde le détail).
     title: c.title,
-    reason: c.primaryReason ?? c.nextAction ?? "À traiter",
+    reason: c.nextAction ?? c.primaryReason ?? "À traiter",
     urgency: c.effectiveUrgency,
     projectTitle: c.projectTitle,
     href: c.actionUrl,
@@ -422,7 +428,7 @@ export async function loadAccueilOps(opts: {
     const nextDeliveryByProject = new Map<string, string>();
     for (const o of nextDeliveries) {
       if (!o.projectId || nextDeliveryByProject.has(o.projectId)) continue;
-      const when = o.confirmedDeliveryAt ?? o.requestedDeliveryAt;
+      const when = getEffectivePurchaseOrderDeliveryAt(o);
       if (!when) continue;
       const supplier = o.externalOrganization.tradeName || o.externalOrganization.name;
       const whenLabel = when.toLocaleDateString("fr-FR", {
@@ -430,16 +436,26 @@ export async function loadAccueilOps(opts: {
         month: "short",
         hour: "2-digit",
         minute: "2-digit",
+        timeZone: PURCHASE_ORDER_DISPLAY_TZ,
       });
       nextDeliveryByProject.set(o.projectId, `Livraison ${supplier} · ${whenLabel}`);
     }
+
+    const attentionPoIds = new Set(
+      attentionSnap.attentionCards
+        .filter((c) => c.subjectType === "PURCHASE_ORDER")
+        .map((c) => c.subjectId),
+    );
 
     const chantiersScored = projects
       .map((p) => {
         const att = attentionByProject.get(p.id) ?? { n: 0, crit: 0, urg: 0 };
         const overdue = overdueMap.get(p.id) ?? 0;
         const next = nextByProject.get(p.id);
-        const nextDeliveryLabel = nextDeliveryByProject.get(p.id) ?? null;
+        // Dédup Accueil : si le chantier a déjà des attentions, ne pas répéter la livraison
+        // comme alerte — seulement comme signal calendrier si pas d’attention.
+        const nextDeliveryLabel =
+          att.n > 0 ? null : (nextDeliveryByProject.get(p.id) ?? null);
         const score =
           att.crit * 10 +
           att.urg * 6 +
@@ -453,6 +469,7 @@ export async function loadAccueilOps(opts: {
               month: "short",
               hour: "2-digit",
               minute: "2-digit",
+              timeZone: PURCHASE_ORDER_DISPLAY_TZ,
             })} · ${next.title}`
           : null;
         return {
@@ -512,12 +529,9 @@ export async function loadAccueilOps(opts: {
       const diff = Math.round(
         (startOfDay(delivery).getTime() - day0.getTime()) / 86400000,
       );
-      const time = delivery.toLocaleTimeString("fr-FR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      if (diff === 0) return `Aujourd’hui ${time}`;
-      if (diff === 1) return `Demain ${time}`;
+      const time = formatPurchaseOrderDeliveryTime(delivery) ?? "";
+      if (diff === 0) return `Aujourd’hui ${time}`.trim();
+      if (diff === 1) return `Demain ${time}`.trim();
       if (diff < 0) return `En retard · ${fmtShort(delivery)}`;
       return fmtShort(delivery);
     }
@@ -528,11 +542,12 @@ export async function loadAccueilOps(opts: {
         month: "short",
         hour: "2-digit",
         minute: "2-digit",
+        timeZone: PURCHASE_ORDER_DISPLAY_TZ,
       });
     }
 
     const ordersScored = ordersRaw.map((o) => {
-      const delivery = o.confirmedDeliveryAt ?? o.requestedDeliveryAt;
+      const delivery = getEffectivePurchaseOrderDeliveryAt(o);
       let score = 0;
       if (issueStatuses.has(o.status)) score += 40;
       if (o.status === "PARTIELLEMENT_RECUE") score += 20;
@@ -588,6 +603,7 @@ export async function loadAccueilOps(opts: {
       chantiers: chantiersScored,
       orders: ordersScored.slice(0, 3).map(({ o, delivery }) => {
         const focusCode = focusCodeForOrder(o);
+        const inAttention = attentionPoIds.has(o.id);
         const statusExtra =
           o.proposedDeliveryStatus === "PENDING"
             ? "À confirmer"
@@ -599,9 +615,12 @@ export async function loadAccueilOps(opts: {
           projectTitle: o.project?.title ?? null,
           deliveryAt: delivery?.toISOString() ?? null,
           deliveryLabel: deliveryLabelFor(delivery),
-          statusLabel: statusExtra,
+          // Dédup : À traiter porte l’alerte ; ici résumé opérationnel (créneau / statut court).
+          statusLabel: inAttention ? (deliveryLabelFor(delivery) ? "Planifiée" : "À suivre") : statusExtra,
           receiptLabel: receiptLabelFor(o),
-          hasIssue: issueStatuses.has(o.status) || o.proposedDeliveryStatus === "PENDING",
+          hasIssue: inAttention
+            ? false
+            : issueStatuses.has(o.status) || o.proposedDeliveryStatus === "PENDING",
           href: purchaseOrderAttentionActionUrl(o.id, focusCode),
         };
       }),

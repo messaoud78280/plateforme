@@ -153,7 +153,7 @@ export function LineCompositionDrawer({
   function pushLibrary() {
     if (
       !window.confirm(
-        "Mettre à jour l’ouvrage dans la bibliothèque ? Cette ligne de devis sera aussi enregistrée. Les autres devis déjà créés resteront figés.",
+        "Modifier ce devis et la bibliothèque ?\n\nCette modification mettra à jour l’ouvrage de la bibliothèque et la ligne de ce devis.\n\nLes autres devis existants ne seront pas modifiés.",
       )
     ) {
       return;
@@ -167,7 +167,7 @@ export function LineCompositionDrawer({
       onClose={onClose}
       title={line.designation}
       description="Sous-détail figé sur cette ligne de devis"
-      widthClass="max-w-lg"
+      widthClass="w-full max-w-lg sm:max-w-lg"
       footer={
         canEdit ? (
           <div className="flex flex-col gap-2">
@@ -187,7 +187,7 @@ export function LineCompositionDrawer({
                 onClick={pushLibrary}
                 className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
               >
-                Mettre à jour l&apos;ouvrage dans la bibliothèque
+                Modifier ce devis et la bibliothèque
               </button>
             </div>
           </div>

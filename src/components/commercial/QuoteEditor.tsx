@@ -511,7 +511,7 @@ export function QuoteEditor({
         />
         {quote.marginPercent < minMarginPercent ? (
           <p className="rounded-md bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900">
-            Marge inférieure à votre objectif
+            Taux de marque inférieur à votre objectif ({minMarginPercent} %)
           </p>
         ) : null}
         <Row label="Total HT" value={`${fmtMoney(quote.totalSellHt)} €`} bold />

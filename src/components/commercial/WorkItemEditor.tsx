@@ -328,8 +328,8 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
               value={form.kind}
               onChange={(e) => setForm((f) => ({ ...f, kind: e.target.value }))}
             >
-              <option value="SIMPLE">SIMPLE</option>
-              <option value="COMPOSITE">COMPOSITE</option>
+              <option value="SIMPLE">Simple — prix direct</option>
+              <option value="COMPOSITE">Composé — sous-détail</option>
             </select>
           </div>
           <div>
@@ -365,59 +365,87 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
               disabled={form.sellMode === "MARGIN"}
             />
           </div>
-          <div>
-            <label className={labelClass}>Frais %</label>
-            <input
-              type="number"
-              step="0.01"
-              className={inputClass}
-              value={form.feesPercent}
-              onChange={(e) => setForm((f) => ({ ...f, feesPercent: e.target.value }))}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Frais montant HT</label>
-            <input
-              type="number"
-              step="0.01"
-              className={inputClass}
-              value={form.feesAmountHt}
-              onChange={(e) => setForm((f) => ({ ...f, feesAmountHt: e.target.value }))}
-            />
-          </div>
+          {form.kind === "COMPOSITE" ? (
+            <>
+              <div>
+                <label className={labelClass}>Frais %</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  className={inputClass}
+                  value={form.feesPercent}
+                  onChange={(e) => setForm((f) => ({ ...f, feesPercent: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Frais montant HT</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  className={inputClass}
+                  value={form.feesAmountHt}
+                  onChange={(e) => setForm((f) => ({ ...f, feesAmountHt: e.target.value }))}
+                />
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-bold text-[#1e3a5f]">Décomposition coût</h2>
-        <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3 lg:grid-cols-5">
-          {[
-            ["Matériaux", c.materialsHt],
-            ["Main-d'œuvre", c.laborHt],
-            ["Matériel", c.equipmentHt],
-            ["Sous-traitance", c.subcontractHt],
-            ["Autre", c.otherHt],
-            ["Déboursé sec", c.dryCostHt],
-            ["Frais", c.feesHt],
-            ["Prix de revient", c.costPriceHt],
-            ["Vente HT", c.unitSellHt],
-            ["Taux de marque", c.marquePercent],
-            ["Taux de marge", c.markupPercent],
-            ["Coefficient", c.sellCoefficient],
-          ].map(([label, val]) => (
-            <div key={String(label)} className="rounded-lg bg-slate-50 px-2.5 py-2">
-              <p className="text-[10px] font-semibold uppercase text-slate-500">{label}</p>
-              <p className="mt-0.5 tabular-nums font-semibold text-slate-900">
-                {typeof val === "number" &&
-                (String(label).includes("taux") || String(label).includes("Taux"))
-                  ? `${fmt(val)} %`
-                  : String(label) === "Coefficient"
-                    ? fmt(val as number, 4)
-                    : `${fmt(val as number)} €`}
-              </p>
-            </div>
-          ))}
-        </div>
+        <h2 className="mb-3 text-sm font-bold text-[#1e3a5f]">
+          {form.kind === "COMPOSITE" ? "Décomposition du coût" : "Prix"}
+        </h2>
+        {form.kind === "SIMPLE" ? (
+          <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+            {[
+              ["Coût HT", c.costPriceHt],
+              ["Vente HT", c.unitSellHt],
+              ["Taux de marque", c.marquePercent],
+              ["Coefficient", c.sellCoefficient],
+            ].map(([label, val]) => (
+              <div key={String(label)} className="rounded-lg bg-slate-50 px-2.5 py-2">
+                <p className="text-[10px] font-semibold uppercase text-slate-500">{label}</p>
+                <p className="mt-0.5 tabular-nums font-semibold text-slate-900">
+                  {String(label).includes("Taux")
+                    ? `${fmt(val as number)} %`
+                    : String(label) === "Coefficient"
+                      ? fmt(val as number, 4)
+                      : `${fmt(val as number)} €`}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3 lg:grid-cols-5">
+            {[
+              ["Matériaux", c.materialsHt],
+              ["Main-d'œuvre", c.laborHt],
+              ["Matériel", c.equipmentHt],
+              ["Sous-traitance", c.subcontractHt],
+              ["Autre", c.otherHt],
+              ["Déboursé sec", c.dryCostHt],
+              ["Frais", c.feesHt],
+              ["Prix de revient", c.costPriceHt],
+              ["Vente HT", c.unitSellHt],
+              ["Taux de marque", c.marquePercent],
+              ["Taux de marge", c.markupPercent],
+              ["Coefficient", c.sellCoefficient],
+            ].map(([label, val]) => (
+              <div key={String(label)} className="rounded-lg bg-slate-50 px-2.5 py-2">
+                <p className="text-[10px] font-semibold uppercase text-slate-500">{label}</p>
+                <p className="mt-0.5 tabular-nums font-semibold text-slate-900">
+                  {typeof val === "number" &&
+                  (String(label).includes("taux") || String(label).includes("Taux"))
+                    ? `${fmt(val)} %`
+                    : String(label) === "Coefficient"
+                      ? fmt(val as number, 4)
+                      : `${fmt(val as number)} €`}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {form.kind === "COMPOSITE" ? (

@@ -74,8 +74,8 @@ export function CreateWorkItemButton() {
         onChange={(e) => setKind(e.target.value as "SIMPLE" | "COMPOSITE")}
         className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
       >
-        <option value="SIMPLE">Simple</option>
-        <option value="COMPOSITE">Composite</option>
+        <option value="SIMPLE">Simple — prix direct</option>
+        <option value="COMPOSITE">Composé — sous-détail</option>
       </select>
       {kind === "SIMPLE" ? (
         <input

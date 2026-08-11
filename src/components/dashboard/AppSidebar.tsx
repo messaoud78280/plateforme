@@ -77,6 +77,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
         label: "Pilotage",
         items: [
           { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
+          { href: "/dashboard/devis-facturation", label: "Devis & Facturation", icon: Wallet },
           { href: "/dashboard/facturation", label: "Facturation", icon: Wallet },
           { href: "/dashboard/rapports", label: "Rapports", icon: Briefcase },
           { href: "/dashboard/assistant-ia", label: "Assistant IA", icon: Sparkles },

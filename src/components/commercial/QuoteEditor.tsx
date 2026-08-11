@@ -9,6 +9,8 @@ import {
 import { QuoteAcceptedNextSteps } from "@/components/commercial/QuoteAcceptedNextSteps";
 import { LibraryPickerModal } from "@/components/commercial/LibraryPickerModal";
 import { LineCompositionDrawer } from "@/components/commercial/LineCompositionDrawer";
+import { QuotePriceCheckPanel } from "@/components/commercial/QuotePriceCheckPanel";
+import { shouldOfferPriceCheck } from "@/lib/commercial/price-check-ui";
 
 function fmtMoney(n: number) {
   return roundMoney(n, 2).toLocaleString("fr-FR", {
@@ -84,6 +86,8 @@ export function QuoteEditor({
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [librarySectionId, setLibrarySectionId] = useState<string | null>(null);
   const [compositionLine, setCompositionLine] = useState<Line | null>(null);
+  const [priceCheckOpen, setPriceCheckOpen] = useState(false);
+  const [priceCheckSessionBadge, setPriceCheckSessionBadge] = useState<string | null>(null);
   const mutationSeq = useRef(0);
 
   const version = quote.currentVersion;
@@ -336,6 +340,20 @@ export function QuoteEditor({
               >
                 {acceptedPdfAvailable ? "PDF figé à l’acceptation" : "Aperçu PDF"}
               </a>
+              {shouldOfferPriceCheck(quote.status) ? (
+                <button
+                  type="button"
+                  onClick={() => setPriceCheckOpen(true)}
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-800"
+                >
+                  Vérifier les prix
+                  {priceCheckSessionBadge ? (
+                    <span className="ml-1 text-[10px] font-normal text-slate-500">
+                      · {priceCheckSessionBadge}
+                    </span>
+                  ) : null}
+                </button>
+              ) : null}
               {!canEdit &&
               ["SENT", "VIEWED", "ACCEPTED", "VALIDATED"].includes(quote.status) ? (
                 <button
@@ -548,6 +566,24 @@ export function QuoteEditor({
           }}
         />
       ) : null}
+
+      <QuotePriceCheckPanel
+        open={priceCheckOpen}
+        onClose={() => setPriceCheckOpen(false)}
+        quoteId={quote.id}
+        canEdit={canEdit}
+        quoteStatus={quote.status}
+        onSessionBadge={setPriceCheckSessionBadge}
+        onRequestNewVersion={() => {
+          setPriceCheckOpen(false);
+          void createNewVersion();
+        }}
+        onApplied={() => {
+          mutationSeq.current += 1;
+          void refreshQuote(mutationSeq.current);
+          router.refresh();
+        }}
+      />
     </div>
   );
 }

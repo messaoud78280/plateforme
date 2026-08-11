@@ -708,6 +708,9 @@ export async function updateLineCompositionSnapshot(
       unitCostHt: number;
       lossPercent?: number;
       comment?: string | null;
+      materialId?: string | null;
+      laborId?: string | null;
+      equipmentId?: string | null;
     }>;
     feesPercent?: number;
     feesAmountHt?: number;

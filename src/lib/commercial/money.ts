@@ -206,8 +206,8 @@ export const COMMERCIAL_QUOTE_STATUS_LABELS: Record<string, string> = {
 export const COMMERCIAL_INVOICE_STATUS_LABELS: Record<string, string> = {
   DRAFT: "Brouillon",
   ISSUED: "Émise",
-  PARTIALLY_PAID: "Partiellement payée",
-  PAID: "Payée",
+  PARTIALLY_PAID: "Partiellement encaissée",
+  PAID: "Encaissée",
   OVERDUE: "En retard",
   CANCELLED: "Annulée",
 };

@@ -56,6 +56,13 @@ export async function POST(req: Request) {
         : null,
       projectId: body.projectId ? String(body.projectId) : null,
       dueDate: body.dueDate ? new Date(String(body.dueDate)) : null,
+      type:
+        body.type === "PROGRESS" ||
+        body.type === "FINAL" ||
+        body.type === "CREDIT" ||
+        body.type === "STANDARD"
+          ? body.type
+          : "STANDARD",
       lines: lines.map((l: Record<string, unknown>) => ({
         designation: String(l.designation ?? ""),
         quantity: l.quantity != null ? Number(l.quantity) : 1,

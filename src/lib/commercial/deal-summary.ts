@@ -17,10 +17,18 @@ export async function loadDealFinancialSummary(orgId: string, quoteId: string) {
   });
   if (!quote) return null;
 
-  const [amendments, invoices] = await Promise.all([
+  const [acceptedAmendments, pendingAmendments, invoices] = await Promise.all([
     prisma.commercialAmendment.findMany({
       where: { organizationId: orgId, quoteId, status: "ACCEPTED" },
-      select: { totalSellHt: true },
+      select: { id: true, number: true, subject: true, totalSellHt: true, status: true },
+    }),
+    prisma.commercialAmendment.findMany({
+      where: {
+        organizationId: orgId,
+        quoteId,
+        status: { in: ["DRAFT", "SENT"] },
+      },
+      select: { id: true, number: true, subject: true, totalSellHt: true, status: true },
     }),
     prisma.commercialInvoice.findMany({
       where: {
@@ -28,14 +36,16 @@ export async function loadDealFinancialSummary(orgId: string, quoteId: string) {
         quoteId,
         status: { notIn: ["CANCELLED", "DRAFT"] },
       },
-      select: { totalSellHt: true, totalTtc: true, amountPaid: true },
+      select: { totalSellHt: true, totalTtc: true, amountPaid: true, amountDue: true },
     }),
   ]);
 
-  const acceptedAmendmentsHt = amendments.reduce((s, a) => s + d(a.totalSellHt), 0);
+  const acceptedAmendmentsHt = acceptedAmendments.reduce((s, a) => s + d(a.totalSellHt), 0);
+  const pendingAmendmentsHt = pendingAmendments.reduce((s, a) => s + d(a.totalSellHt), 0);
   const invoicedHt = invoices.reduce((s, i) => s + d(i.totalSellHt), 0);
   const invoicedTtc = invoices.reduce((s, i) => s + d(i.totalTtc), 0);
   const paidTtc = invoices.reduce((s, i) => s + d(i.amountPaid), 0);
+  const remainingToCollectTtcFromDue = invoices.reduce((s, i) => s + d(i.amountDue), 0);
 
   const summary = calculateDealFinancialSummary({
     initialMarketHt: d(quote.totalSellHt),
@@ -54,5 +64,22 @@ export async function loadDealFinancialSummary(orgId: string, quoteId: string) {
       acceptedAt: quote.acceptedAt,
     },
     ...summary,
+    /** Préférence amountDue factures si disponible (aligné encaissement réel). */
+    remainingToCollectTtc: remainingToCollectTtcFromDue || summary.remainingToCollectTtc,
+    pendingAmendmentsHt,
+    amendmentsAccepted: acceptedAmendments.map((a) => ({
+      id: a.id,
+      number: a.number,
+      subject: a.subject,
+      totalSellHt: d(a.totalSellHt),
+      status: a.status,
+    })),
+    amendmentsPending: pendingAmendments.map((a) => ({
+      id: a.id,
+      number: a.number,
+      subject: a.subject,
+      totalSellHt: d(a.totalSellHt),
+      status: a.status,
+    })),
   };
 }

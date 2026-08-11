@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireCommercialApiSession } from "@/lib/commercial/access";
+import { loadCommercialDashboardKpis } from "@/lib/commercial/dashboard-kpis";
+import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
 
 export async function GET() {
@@ -10,40 +11,8 @@ export async function GET() {
   }
   const orgId = auth.orgId;
 
-  const [
-    quotesDraft,
-    quotesSent,
-    quotesAccepted,
-    invoicesDraft,
-    invoicesIssued,
-    invoicesPartial,
-    invoicesPaid,
-    amendmentsOpen,
-    recentQuotes,
-    overdueInvoices,
-  ] = await Promise.all([
-    prisma.commercialQuote.count({ where: { organizationId: orgId, status: "DRAFT" } }),
-    prisma.commercialQuote.count({
-      where: { organizationId: orgId, status: { in: ["SENT", "VIEWED"] } },
-    }),
-    prisma.commercialQuote.count({
-      where: { organizationId: orgId, status: "ACCEPTED" },
-    }),
-    prisma.commercialInvoice.count({
-      where: { organizationId: orgId, status: "DRAFT" },
-    }),
-    prisma.commercialInvoice.count({
-      where: { organizationId: orgId, status: "ISSUED" },
-    }),
-    prisma.commercialInvoice.count({
-      where: { organizationId: orgId, status: "PARTIALLY_PAID" },
-    }),
-    prisma.commercialInvoice.count({
-      where: { organizationId: orgId, status: "PAID" },
-    }),
-    prisma.commercialAmendment.count({
-      where: { organizationId: orgId, status: { in: ["DRAFT", "SENT"] } },
-    }),
+  const [kpis, recentQuotes] = await Promise.all([
+    loadCommercialDashboardKpis(orgId),
     prisma.commercialQuote.findMany({
       where: { organizationId: orgId },
       orderBy: { updatedAt: "desc" },
@@ -57,30 +26,23 @@ export async function GET() {
         updatedAt: true,
       },
     }),
-    prisma.commercialInvoice.findMany({
-      where: {
-        organizationId: orgId,
-        status: { in: ["ISSUED", "PARTIALLY_PAID", "OVERDUE"] },
-        dueDate: { lt: new Date() },
-      },
-      select: { id: true, amountDue: true },
-    }),
   ]);
-
-  const amountDueOverdue = overdueInvoices.reduce((s, i) => s + d(i.amountDue), 0);
 
   return NextResponse.json({
     kpis: {
-      quotesDraft,
-      quotesSent,
-      quotesAccepted,
-      invoicesDraft,
-      invoicesIssued,
-      invoicesPartial,
-      invoicesPaid,
-      amendmentsOpen,
-      overdueCount: overdueInvoices.length,
-      amountDueOverdue,
+      quoteCount: kpis.quoteCount,
+      enPreparation: kpis.enPreparation,
+      envoyes: kpis.envoyes,
+      acceptes: kpis.acceptes,
+      refuses: kpis.refuses,
+      expires: kpis.expires,
+      pipelineDevisHt: kpis.pipelineDevisHt,
+      contratAccepteHt: kpis.contratAccepteHt,
+      aEncaisserTtc: kpis.aEncaisserTtc,
+      /** aliases legacy */
+      quotesDraft: kpis.enPreparation,
+      quotesSent: kpis.envoyes,
+      quotesAccepted: kpis.acceptes,
     },
     recentQuotes: recentQuotes.map((q) => ({
       ...q,

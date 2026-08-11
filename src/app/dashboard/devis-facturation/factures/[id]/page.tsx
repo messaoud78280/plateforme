@@ -29,11 +29,15 @@ export default async function FactureDetailPage({
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <PageHeader
-        eyebrow={COMMERCIAL_INVOICE_TYPE_LABELS[inv.type] ?? "Facture"}
+        eyebrow="Gestion commerciale"
         title={inv.number}
         description={inv.subject ?? undefined}
       />
       <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-2 text-sm">
+        <p>
+          <span className="text-slate-500">Type · </span>
+          {COMMERCIAL_INVOICE_TYPE_LABELS[inv.type] ?? inv.type}
+        </p>
         <p>
           <span className="text-slate-500">Statut · </span>
           {COMMERCIAL_INVOICE_STATUS_LABELS[inv.status] ?? inv.status}
@@ -43,11 +47,11 @@ export default async function FactureDetailPage({
           {roundMoney(inv.totalTtc, 2).toLocaleString("fr-FR")} €
         </p>
         <p>
-          <span className="text-slate-500">Payé · </span>
+          <span className="text-slate-500">Encaissé · </span>
           {roundMoney(inv.amountPaid, 2).toLocaleString("fr-FR")} €
         </p>
         <p className="font-bold">
-          Reste à payer · {roundMoney(inv.amountDue, 2).toLocaleString("fr-FR")} €
+          Reste · {roundMoney(inv.amountDue, 2).toLocaleString("fr-FR")} €
         </p>
       </div>
       <ul className="rounded-xl border border-slate-200 bg-white divide-y divide-slate-100">
@@ -70,7 +74,7 @@ export default async function FactureDetailPage({
       ) : null}
       {inv.payments.length > 0 ? (
         <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <h3 className="text-sm font-bold">Paiements</h3>
+          <h3 className="text-sm font-bold">Encaissements</h3>
           <ul className="mt-2 space-y-1 text-sm">
             {inv.payments.map((p) => (
               <li key={p.id}>

@@ -77,8 +77,8 @@ function buildSections(role: string | null | undefined): NavSection[] {
         label: "Pilotage",
         items: [
           { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
-          { href: "/dashboard/devis-facturation", label: "Devis & Facturation", icon: Wallet },
-          { href: "/dashboard/facturation", label: "Facturation", icon: Wallet },
+          { href: "/dashboard/devis-facturation", label: "Gestion commerciale", icon: Wallet },
+          { href: "/dashboard/facturation", label: "À facturer", icon: Wallet },
           { href: "/dashboard/rapports", label: "Rapports", icon: Briefcase },
           { href: "/dashboard/assistant-ia", label: "Assistant IA", icon: Sparkles },
         ],
@@ -116,7 +116,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
         items: [
           { href: "/dashboard/agents", label: "Agents", icon: Users },
           { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
-          { href: "/dashboard/facturation", label: "Facturation", icon: Wallet },
+          { href: "/dashboard/facturation", label: "À facturer", icon: Wallet },
           { href: "/dashboard/messages", label: "RDV", icon: CalendarDays },
           { href: "/dashboard/fiches-suivi", label: "Fiches suivi", icon: StickyNote },
         ],
@@ -126,7 +126,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
         label: "Outils",
         items: [
           { href: "/dashboard/devis", label: "Analyses", icon: FileText },
-          { href: "/dashboard/devis-facturation", label: "Devis & Facturation", icon: Wallet },
+          { href: "/dashboard/devis-facturation", label: "Gestion commerciale", icon: Wallet },
           { href: "/dashboard/assistant-ia", label: "Assistant IA", icon: Sparkles },
           { href: "/dashboard/demonstrations", label: "Démos", icon: PanelLeft },
           { href: "/dashboard/rapports", label: "Rapports", icon: Briefcase },
@@ -154,7 +154,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
           { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
           { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList },
           { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
-          { href: "/dashboard/facturation", label: "Facturation", icon: Wallet },
+          { href: "/dashboard/facturation", label: "À facturer", icon: Wallet },
         ],
       },
       {
@@ -166,7 +166,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
             : []),
           { href: "/dashboard/messages", label: "RDV", icon: CalendarDays },
           { href: "/dashboard/devis", label: "Analyses", icon: FileText },
-          { href: "/dashboard/devis-facturation", label: "Devis & Facturation", icon: Wallet },
+          { href: "/dashboard/devis-facturation", label: "Gestion commerciale", icon: Wallet },
           { href: "/dashboard/assistant-ia", label: "Assistant IA", icon: Sparkles },
           { href: "/dashboard/parametres", label: "Paramètres", icon: Settings },
         ],

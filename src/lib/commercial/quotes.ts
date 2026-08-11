@@ -20,6 +20,46 @@ const ALLOWED_TRANSITIONS: Record<CommercialQuoteStatus, CommercialQuoteStatus[]
 
 type Snapshot = Prisma.InputJsonValue;
 
+/** Champs contractuels (B) — bloqués si SENT / ACCEPTED / etc. */
+export const QUOTE_CONTRACTUAL_META_KEYS = [
+  "subject",
+  "clientExternalOrgId",
+  "siteAddressSnapshot",
+  "validityDate",
+  "paymentTerms",
+  "clientNotes",
+  "depositPercent",
+  "depositAmountHt",
+] as const;
+
+const META_LOCKED_STATUSES: CommercialQuoteStatus[] = [
+  "SENT",
+  "VIEWED",
+  "ACCEPTED",
+  "REFUSED",
+  "EXPIRED",
+  "CANCELLED",
+];
+
+export function assertQuoteMetaUpdateAllowed(
+  status: CommercialQuoteStatus | string,
+  data: Record<string, unknown>,
+): { ok: true } | { ok: false; error: string } {
+  const locked = META_LOCKED_STATUSES.includes(status as CommercialQuoteStatus);
+  if (!locked) return { ok: true };
+  const contractualTouched = QUOTE_CONTRACTUAL_META_KEYS.some(
+    (k) => data[k] !== undefined,
+  );
+  if (contractualTouched) {
+    return {
+      ok: false,
+      error:
+        "Document verrouillé — créez une nouvelle version pour modifier les données contractuelles",
+    };
+  }
+  return { ok: true };
+}
+
 async function buildIssuerSnapshot(orgId: string): Promise<Snapshot> {
   const org = await prisma.organization.findUnique({
     where: { id: orgId },
@@ -325,6 +365,17 @@ export async function updateQuoteMeta(
     select: { id: true, status: true, currentVersionId: true },
   });
   if (!quote) throw new Error("Devis introuvable");
+
+  const guard = assertQuoteMetaUpdateAllowed(quote.status, data);
+  if (!guard.ok) throw new Error(guard.error);
+
+  if (data.projectId) {
+    const project = await prisma.project.findFirst({
+      where: { id: data.projectId, organizationId: orgId },
+      select: { id: true },
+    });
+    if (!project) throw new Error("Chantier introuvable ou hors organisation");
+  }
 
   let clientSnapshotJson: Snapshot | null | undefined;
   if (data.clientExternalOrgId !== undefined) {

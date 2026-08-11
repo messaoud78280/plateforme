@@ -56,10 +56,10 @@ export function FacturationHomeBanner() {
     >
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]">
-          Facturation
+          À facturer
           <span className="ml-2.5 tabular-nums text-slate-900">
             {data.aFacturer > 0
-              ? `${data.aFacturer} à facturer`
+              ? `${data.aFacturer} dossier${data.aFacturer > 1 ? "s" : ""}`
               : `${total} à traiter`}
           </span>
         </h2>

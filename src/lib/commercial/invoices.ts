@@ -186,6 +186,7 @@ export async function createStandardInvoice(input: {
   clientExternalOrgId?: string | null;
   projectId?: string | null;
   dueDate?: Date | null;
+  type?: CommercialInvoiceType;
   lines: Array<{
     designation: string;
     quantity?: number;
@@ -254,7 +255,9 @@ export async function createStandardInvoice(input: {
       data: {
         organizationId: input.orgId,
         number,
-        type: "STANDARD" satisfies CommercialInvoiceType,
+        type: (input.type && input.type !== "DEPOSIT"
+          ? input.type
+          : "STANDARD") satisfies CommercialInvoiceType,
         status: "DRAFT",
         quoteId: input.quoteId ?? null,
         projectId: input.projectId ?? quoteSnapshots?.projectId ?? null,

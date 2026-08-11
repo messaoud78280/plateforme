@@ -12,6 +12,9 @@ export function RecordPaymentForm({
 }) {
   const router = useRouter();
   const [amount, setAmount] = useState(String(maxAmount));
+  const [paidAt, setPaidAt] = useState(new Date().toISOString().slice(0, 10));
+  const [method, setMethod] = useState("VIREMENT");
+  const [reference, setReference] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,8 +27,9 @@ export function RecordPaymentForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: Number(amount),
-          paidAt: new Date().toISOString().slice(0, 10),
-          method: "VIREMENT",
+          paidAt,
+          method,
+          reference: reference.trim() || undefined,
         }),
       });
       const data = await res.json();
@@ -40,12 +44,46 @@ export function RecordPaymentForm({
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3">
-      <h3 className="text-sm font-bold text-slate-900">Enregistrer un paiement</h3>
-      <input
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-      />
+      <h3 className="text-sm font-bold text-slate-900">Enregistrer un encaissement</h3>
+      <label className="block text-xs text-slate-500">
+        Montant
+        <input
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+        />
+      </label>
+      <label className="block text-xs text-slate-500">
+        Date
+        <input
+          type="date"
+          value={paidAt}
+          onChange={(e) => setPaidAt(e.target.value)}
+          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+        />
+      </label>
+      <label className="block text-xs text-slate-500">
+        Mode
+        <select
+          value={method}
+          onChange={(e) => setMethod(e.target.value)}
+          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+        >
+          <option value="VIREMENT">Virement</option>
+          <option value="CHEQUE">Chèque</option>
+          <option value="CB">Carte</option>
+          <option value="ESPECES">Espèces</option>
+          <option value="AUTRE">Autre</option>
+        </select>
+      </label>
+      <label className="block text-xs text-slate-500">
+        Référence (optionnel)
+        <input
+          value={reference}
+          onChange={(e) => setReference(e.target.value)}
+          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+        />
+      </label>
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       <button
         type="button"
@@ -53,7 +91,7 @@ export function RecordPaymentForm({
         onClick={() => void submit()}
         className="rounded-lg bg-[#1e3a5f] px-4 py-2 text-xs font-bold text-white"
       >
-        {busy ? "…" : "Enregistrer"}
+        {busy ? "…" : "Enregistrer l’encaissement"}
       </button>
     </div>
   );

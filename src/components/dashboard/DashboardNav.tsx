@@ -123,7 +123,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               Analyses
             </NavLink>
             <NavLink href="/dashboard/devis-facturation" pathname={pathname} activeClass={active}>
-              Devis & Facturation
+              Gestion commerciale
             </NavLink>
             <NavLink href="/dashboard/assistant-ia" pathname={pathname} activeClass={active}>
               Assistant IA
@@ -182,7 +182,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               Analyses
             </NavLink>
             <NavLink href="/dashboard/devis-facturation" pathname={pathname} activeClass={active}>
-              Devis & Facturation
+              Gestion commerciale
             </NavLink>
             <NavLink href="/dashboard/assistant-ia" pathname={pathname} activeClass={active}>
               Assistant IA

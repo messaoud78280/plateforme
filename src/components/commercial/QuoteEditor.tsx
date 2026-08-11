@@ -6,6 +6,7 @@ import {
   COMMERCIAL_QUOTE_STATUS_LABELS,
   roundMoney,
 } from "@/lib/commercial/money";
+import { QuoteAcceptedNextSteps } from "@/components/commercial/QuoteAcceptedNextSteps";
 function fmtMoney(n: number) {
   return roundMoney(n, 2).toLocaleString("fr-FR", {
     minimumFractionDigits: 2,
@@ -38,6 +39,7 @@ type QuoteDetail = {
   number: string;
   subject: string;
   status: string;
+  siteAddressSnapshot?: string | null;
   totalCostHt: number;
   totalSellHt: number;
   totalVat: number;
@@ -187,6 +189,34 @@ export function QuoteEditor({
     }
   }
 
+  async function createNewVersion() {
+    if (
+      !confirm(
+        "Créer une nouvelle version brouillon ? La version actuelle reste figée.",
+      )
+    ) {
+      return;
+    }
+    setBusyStatus(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/commercial/quotes/${quote.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "newVersion" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur");
+      const detail = await fetch(`/api/commercial/quotes/${quote.id}`).then((r) => r.json());
+      if (detail.quote) setQuote(detail.quote);
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusyStatus(false);
+    }
+  }
+
   const saveLabel =
     saveState === "saving"
       ? "Enregistrement…"
@@ -226,6 +256,17 @@ export function QuoteEditor({
               >
                 PDF
               </a>
+              {!canEdit &&
+              ["SENT", "VIEWED", "ACCEPTED", "VALIDATED"].includes(quote.status) ? (
+                <button
+                  type="button"
+                  disabled={busyStatus}
+                  onClick={() => void createNewVersion()}
+                  className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-950"
+                >
+                  Créer une nouvelle version
+                </button>
+              ) : null}
               {quote.status === "DRAFT" || quote.status === "VALIDATED" ? (
                 <button
                   type="button"
@@ -271,7 +312,8 @@ export function QuoteEditor({
           </div>
         ) : (
           <p className="text-xs text-amber-800">
-            Document verrouillé — créez une nouvelle version pour modifier (V1.1) ou un avenant.
+            Document verrouillé — utilisez « Créer une nouvelle version » ou un avenant. Ne
+            modifiez jamais silencieusement une version envoyée ou acceptée.
           </p>
         )}
 
@@ -341,7 +383,15 @@ export function QuoteEditor({
         </div>
 
         {quote.status === "ACCEPTED" ? (
-          <AcceptedActions quoteId={quote.id} />
+          <>
+            <QuoteAcceptedNextSteps
+              quoteId={quote.id}
+              subject={quote.subject}
+              siteAddressSnapshot={quote.siteAddressSnapshot}
+              project={quote.project}
+            />
+            <AcceptedActions quoteId={quote.id} />
+          </>
         ) : null}
       </div>
 

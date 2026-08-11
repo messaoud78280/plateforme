@@ -7,6 +7,10 @@ import {
 import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
 import { COMMERCIAL_QUOTE_STATUS_LABELS, roundMoney } from "@/lib/commercial/money";
+import {
+  loadCommercialDashboardKpis,
+  quoteNextActionLabel,
+} from "@/lib/commercial/dashboard-kpis";
 
 export const dynamic = "force-dynamic";
 
@@ -22,100 +26,92 @@ export default async function DevisFacturationDashboardPage() {
   const orgId = await resolveCommercialOrgId(session.user);
   if (!orgId) return null;
 
-  const quotes = await prisma.commercialQuote.findMany({
-    where: { organizationId: orgId },
-    orderBy: { updatedAt: "desc" },
-    take: 8,
-    include: {
-      clientExternalOrg: { select: { name: true, tradeName: true } },
-      project: { select: { title: true } },
-      responsible: { select: { name: true } },
-    },
-  });
+  const [kpis, quotes] = await Promise.all([
+    loadCommercialDashboardKpis(orgId),
+    prisma.commercialQuote.findMany({
+      where: { organizationId: orgId },
+      orderBy: { updatedAt: "desc" },
+      take: 8,
+      select: {
+        id: true,
+        number: true,
+        subject: true,
+        status: true,
+        totalSellHt: true,
+        projectId: true,
+        validityDate: true,
+        clientExternalOrg: { select: { name: true, tradeName: true } },
+        project: { select: { title: true } },
+      },
+    }),
+  ]);
 
-  const counts = {
-    draft: quotes.filter((q) => q.status === "DRAFT").length,
-    sent: 0,
-    accepted: 0,
-    refused: 0,
-    expired: 0,
-  };
-
-  const all = await prisma.commercialQuote.groupBy({
-    by: ["status"],
-    where: { organizationId: orgId },
-    _count: true,
-    _sum: { totalSellHt: true },
-  });
-
-  for (const row of all) {
-    if (row.status === "DRAFT" || row.status === "TO_VALIDATE" || row.status === "VALIDATED")
-      counts.draft = row._count;
-    if (row.status === "SENT" || row.status === "VIEWED") counts.sent += row._count;
-    if (row.status === "ACCEPTED") counts.accepted = row._count;
-    if (row.status === "REFUSED") counts.refused = row._count;
-    if (row.status === "EXPIRED") counts.expired = row._count;
+  if (kpis.quoteCount === 0) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow="Gestion commerciale"
+          title="Gestion commerciale"
+          description="Devis, contrat, factures et encaissements — une seule chaîne."
+        />
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-14 text-center">
+          <p className="text-lg font-extrabold text-slate-900">Créez votre premier devis</p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
+            Puis suivez-le jusqu’à l’encaissement, sans ressaisie.
+          </p>
+          <Link
+            href="/dashboard/devis-facturation/devis/nouveau"
+            className="mt-6 inline-flex rounded-xl bg-[#1e3a5f] px-5 py-3 text-sm font-bold text-white hover:bg-[#152a45]"
+          >
+            + Nouveau devis
+          </Link>
+          <p className="mt-4 text-xs text-slate-400">
+            La bibliothèque d’ouvrages reste accessible dans Référentiel — jamais obligatoire.
+          </p>
+        </div>
+      </div>
+    );
   }
 
-  const pendingHt = all
-    .filter((r) => ["SENT", "VIEWED", "DRAFT", "TO_VALIDATE", "VALIDATED"].includes(r.status))
-    .reduce((s, r) => s + d(r._sum.totalSellHt), 0);
-  const acceptedHt = all
-    .filter((r) => r.status === "ACCEPTED")
-    .reduce((s, r) => s + d(r._sum.totalSellHt), 0);
-
-  const invoices = await prisma.commercialInvoice.findMany({
-    where: {
-      organizationId: orgId,
-      status: { in: ["ISSUED", "PARTIALLY_PAID", "OVERDUE"] },
+  const cards = [
+    { label: "Devis en préparation", value: String(kpis.enPreparation) },
+    { label: "Devis acceptés", value: String(kpis.acceptes) },
+    { label: "Contrat accepté HT", value: `${money(kpis.contratAccepteHt)} €` },
+    {
+      label: "Pipeline devis HT",
+      value: `${money(kpis.pipelineDevisHt)} €`,
+      hint: "Brouillons + envoyés (non contractualisés)",
     },
-    select: { amountDue: true },
-  });
-  const dueTtc = invoices.reduce((s, i) => s + d(i.amountDue), 0);
-
-  const kpis = [
-    { label: "En préparation", value: counts.draft },
-    { label: "Envoyés", value: counts.sent },
-    { label: "Acceptés", value: counts.accepted },
-    { label: "Refusés", value: counts.refused },
-    { label: "Expirés", value: counts.expired },
-    { label: "En attente HT", value: `${money(pendingHt)} €` },
-    { label: "CA accepté HT", value: `${money(acceptedHt)} €` },
-    { label: "À encaisser", value: `${money(dueTtc)} €` },
+    { label: "À encaisser", value: `${money(kpis.aEncaisserTtc)} €` },
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <PageHeader
-          eyebrow="Devis & Facturation"
+          eyebrow="Gestion commerciale"
           title="Vue d’ensemble"
-          description="Chiffrer, faire accepter, facturer et suivre l’encaissement — sans complexité inutile."
+          description="Ce qui bouge, ce qui est contractualisé, ce qui reste à facturer et à encaisser."
         />
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/dashboard/devis-facturation/devis/nouveau"
-            className="rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#152a45]"
-          >
-            + Nouveau devis
-          </Link>
-          <Link
-            href="/dashboard/devis-facturation/bibliotheque"
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700"
-          >
-            + Nouvel ouvrage
-          </Link>
-        </div>
+        <Link
+          href="/dashboard/devis-facturation/devis/nouveau"
+          className="rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#152a45]"
+        >
+          + Nouveau devis
+        </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((k) => (
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {cards.map((k) => (
           <div
             key={k.label}
             className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_0_rgba(15,23,42,0.04)]"
           >
             <p className="text-2xl font-extrabold tabular-nums text-slate-900">{k.value}</p>
             <p className="mt-1 text-sm text-slate-600">{k.label}</p>
+            {"hint" in k && k.hint ? (
+              <p className="mt-0.5 text-[11px] text-slate-400">{k.hint}</p>
+            ) : null}
           </div>
         ))}
       </div>
@@ -130,51 +126,55 @@ export default async function DevisFacturationDashboardPage() {
             Tout voir
           </Link>
         </div>
-        {quotes.length === 0 ? (
-          <p className="p-6 text-sm text-slate-500">
-            Aucun devis. Commencez par créer votre premier devis.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-[10px] font-bold uppercase text-slate-500">
-                <tr>
-                  <th className="px-4 py-2">Numéro</th>
-                  <th className="px-4 py-2">Client</th>
-                  <th className="px-4 py-2">Objet</th>
-                  <th className="px-4 py-2">HT</th>
-                  <th className="px-4 py-2">Statut</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 text-[10px] font-bold uppercase text-slate-500">
+              <tr>
+                <th className="px-4 py-2">Réf.</th>
+                <th className="px-4 py-2">Client</th>
+                <th className="hidden px-4 py-2 sm:table-cell">Chantier</th>
+                <th className="px-4 py-2">HT</th>
+                <th className="px-4 py-2">Statut</th>
+                <th className="px-4 py-2">Prochaine action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {quotes.map((q) => (
+                <tr key={q.id} className="hover:bg-slate-50/80">
+                  <td className="px-4 py-2.5">
+                    <Link
+                      href={`/dashboard/devis-facturation/devis/${q.id}`}
+                      className="font-semibold text-[#1d4ed8]"
+                    >
+                      {q.number}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2.5 text-slate-700">
+                    {q.clientExternalOrg?.tradeName ||
+                      q.clientExternalOrg?.name ||
+                      "—"}
+                  </td>
+                  <td className="hidden px-4 py-2.5 text-slate-600 sm:table-cell">
+                    {q.project?.title ?? "—"}
+                  </td>
+                  <td className="px-4 py-2.5 tabular-nums">
+                    {money(d(q.totalSellHt))} €
+                  </td>
+                  <td className="px-4 py-2.5">
+                    {COMMERCIAL_QUOTE_STATUS_LABELS[q.status] ?? q.status}
+                  </td>
+                  <td className="px-4 py-2.5 text-xs font-medium text-slate-700">
+                    {quoteNextActionLabel({
+                      status: q.status,
+                      projectId: q.projectId,
+                      validityDate: q.validityDate,
+                    })}
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {quotes.map((q) => (
-                  <tr key={q.id} className="hover:bg-slate-50/80">
-                    <td className="px-4 py-2.5">
-                      <Link
-                        href={`/dashboard/devis-facturation/devis/${q.id}`}
-                        className="font-semibold text-[#1d4ed8]"
-                      >
-                        {q.number}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-2.5 text-slate-700">
-                      {q.clientExternalOrg?.tradeName ||
-                        q.clientExternalOrg?.name ||
-                        "—"}
-                    </td>
-                    <td className="px-4 py-2.5 text-slate-800">{q.subject}</td>
-                    <td className="px-4 py-2.5 tabular-nums">
-                      {money(d(q.totalSellHt))} €
-                    </td>
-                    <td className="px-4 py-2.5">
-                      {COMMERCIAL_QUOTE_STATUS_LABELS[q.status] ?? q.status}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   );

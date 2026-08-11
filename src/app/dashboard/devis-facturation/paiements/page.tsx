@@ -1,10 +1,5 @@
-import { SectionPlaceholder } from "@/components/commercial/SectionPlaceholder";
+import { redirect } from "next/navigation";
 
-export default function Page() {
-  return (
-    <SectionPlaceholder
-      title="Paiements"
-      description="Encaissements clients liés aux factures commerciales."
-    />
-  );
+export default function PaiementsRedirectPage() {
+  redirect("/dashboard/devis-facturation/encaissements");
 }

@@ -85,9 +85,9 @@ export default async function FacturationPage({
     <div className="space-y-6" data-testid="facturation-page">
       <BackLink href="/dashboard">Accueil</BackLink>
       <PageHeader
-        eyebrow="Pilotage"
-        title="Facturation"
-        description="Anti-oubli : dossiers à l’étape facturation — sans crier au loup."
+        eyebrow="Pilotage chantier"
+        title="À facturer"
+        description="Dossiers / chantiers qui nécessitent une action de facturation — pas la facture financière elle-même (Gestion commerciale)."
         actions={
           <Link
             href={withReturnTo("/dashboard/a-traiter", "/dashboard/facturation")}
@@ -265,32 +265,46 @@ export default async function FacturationPage({
                     <tbody>
                       {snap.items.map((row) => {
                         const action = row.nextAction || row.primaryAction;
+                        const prepareHref =
+                          row.projectId &&
+                          (row.status === "A_FACTURER" || row.bucket === "a_facturer")
+                            ? `/dashboard/devis-facturation/factures/preparer?projectId=${row.projectId}`
+                            : null;
                         return (
                           <tr key={row.id} className="border-b border-slate-100">
-                            <td className="p-0" colSpan={5}>
-                              <Link
-                                href={row.href}
-                                className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,1.4fr)] items-center gap-0 py-3 hover:bg-slate-50/80"
-                              >
-                                <span className="min-w-0 pr-3">
-                                  <span className="block font-semibold text-slate-900">
-                                    {row.projectTitle || row.title}
-                                  </span>
-                                  <span className="mt-0.5 block text-[13px] text-slate-600">
-                                    {row.clientName ?? "—"}
-                                  </span>
+                            <td className="py-3 pr-3">
+                              <Link href={row.href} className="block hover:opacity-90">
+                                <span className="block font-semibold text-slate-900">
+                                  {row.projectTitle || row.title}
                                 </span>
-                                <span className="pr-3 text-slate-700">{row.statusLabel}</span>
-                                <span className="pr-3 text-slate-600">
-                                  {row.assigneeName ?? "—"}
-                                </span>
-                                <span className="pr-3 text-slate-600">
-                                  {row.sinceLabel ? `Depuis ${row.sinceLabel}` : "—"}
-                                </span>
-                                <span className="font-medium text-[#1e3a5f]">
-                                  {action} →
+                                <span className="mt-0.5 block text-[13px] text-slate-600">
+                                  {row.clientName ?? "—"}
                                 </span>
                               </Link>
+                            </td>
+                            <td className="py-3 pr-3 text-slate-700">{row.statusLabel}</td>
+                            <td className="py-3 pr-3 text-slate-600">
+                              {row.assigneeName ?? "—"}
+                            </td>
+                            <td className="py-3 pr-3 text-slate-600">
+                              {row.sinceLabel ? `Depuis ${row.sinceLabel}` : "—"}
+                            </td>
+                            <td className="py-3">
+                              {prepareHref ? (
+                                <Link
+                                  href={prepareHref}
+                                  className="inline-flex rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white"
+                                >
+                                  Préparer la facture
+                                </Link>
+                              ) : (
+                                <Link
+                                  href={row.href}
+                                  className="font-medium text-[#1e3a5f]"
+                                >
+                                  {action} →
+                                </Link>
+                              )}
                             </td>
                           </tr>
                         );
@@ -302,12 +316,17 @@ export default async function FacturationPage({
                 <ul className="mt-3 space-y-2 md:hidden">
                   {snap.items.map((row) => {
                     const action = row.nextAction || row.primaryAction;
+                    const prepareHref =
+                      row.projectId &&
+                      (row.status === "A_FACTURER" || row.bucket === "a_facturer")
+                        ? `/dashboard/devis-facturation/factures/preparer?projectId=${row.projectId}`
+                        : null;
                     return (
-                      <li key={row.id}>
-                        <Link
-                          href={row.href}
-                          className="block min-h-[52px] rounded-xl border border-slate-200 bg-slate-50/40 px-3 py-3"
-                        >
+                      <li
+                        key={row.id}
+                        className="rounded-xl border border-slate-200 bg-slate-50/40 px-3 py-3"
+                      >
+                        <Link href={row.href} className="block min-h-[44px]">
                           <p className="text-[15px] font-semibold text-slate-900">
                             {row.projectTitle || row.title}
                           </p>
@@ -317,18 +336,22 @@ export default async function FacturationPage({
                             </p>
                           ) : null}
                           <p className="mt-1 text-[13px] text-slate-700">
-                            Facturation à préparer
+                            {row.statusLabel}
                             {row.sinceLabel ? ` · Depuis ${row.sinceLabel}` : ""}
                           </p>
-                          {row.assigneeName ? (
-                            <p className="mt-0.5 text-[12px] text-slate-500">
-                              {row.assigneeName}
-                            </p>
-                          ) : null}
-                          <p className="mt-2 text-[12px] font-semibold text-[#1e3a5f]">
-                            {action.startsWith("Préparer") ? "Préparer →" : `${action} →`}
-                          </p>
                         </Link>
+                        {prepareHref ? (
+                          <Link
+                            href={prepareHref}
+                            className="mt-2 inline-flex rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
+                          >
+                            Préparer la facture
+                          </Link>
+                        ) : (
+                          <p className="mt-2 text-[12px] font-semibold text-[#1e3a5f]">
+                            {action} →
+                          </p>
+                        )}
                       </li>
                     );
                   })}

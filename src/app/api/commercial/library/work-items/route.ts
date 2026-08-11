@@ -15,7 +15,10 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const q = url.searchParams.get("q") ?? undefined;
   const format = url.searchParams.get("format");
-  const items = await listWorkItems(auth.orgId, { q, take: 100 });
+  const items = await listWorkItems(auth.orgId, {
+    q,
+    take: format === "csv" ? 2000 : 100,
+  });
   if (format === "csv") {
     const csv = workItemsToCsv(items);
     return new NextResponse(csv, {

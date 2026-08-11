@@ -115,7 +115,7 @@ export function QuoteAmendmentsPanel({
                           : "text-amber-800"
                     }`}
                   >
-                    +{roundMoney(a.totalSellHt, 2).toLocaleString("fr-FR")} € HT
+                    {`${a.totalSellHt >= 0 ? "+" : ""}${roundMoney(a.totalSellHt, 2).toLocaleString("fr-FR")} € HT`}
                   </p>
                 </div>
               </Link>

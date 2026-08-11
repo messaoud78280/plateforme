@@ -118,7 +118,7 @@ export function calculateDocumentTotals(lines: LineCalcResult[]): DocumentTotals
   };
 }
 
-/** Prix de vente depuis déboursé + marge % (marge / PV = m). */
+/** Prix de vente depuis déboursé + taux de marque (marge / PV = m). */
 export function sellFromCostAndMarginPercent(costHt: number, marginPercent: number): number {
   const m = Number(marginPercent) || 0;
   if (m >= 100) return roundMoney(costHt, 2);
@@ -126,7 +126,7 @@ export function sellFromCostAndMarginPercent(costHt: number, marginPercent: numb
   return roundMoney(costHt / (1 - m / 100), 2);
 }
 
-/** Marge % depuis coût et PV. */
+/** Taux de marque % = (PV − coût) / PV. Stocké en DB dans marginPercent (héritage V1). */
 export function marginPercentFromCostSell(costHt: number, sellHt: number): number {
   if (sellHt <= 0) return 0;
   return roundMoney(((sellHt - costHt) / sellHt) * 100, 2);

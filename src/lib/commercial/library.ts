@@ -47,6 +47,7 @@ export type CompositionSnapshot = {
     costPriceHt: number;
     marquePercent: number;
     markupPercent: number;
+    sellCoefficient: number;
   };
 };
 
@@ -145,6 +146,7 @@ export function buildCompositionSnapshot(workItem: {
       costPriceHt: costing.costPriceHt,
       marquePercent: costing.marquePercent,
       markupPercent: costing.markupPercent,
+      sellCoefficient: costing.sellCoefficient,
     },
   };
 }
@@ -1030,5 +1032,5 @@ export function workItemsToCsv(
       .map((c) => `"${String(c).replace(/"/g, '""')}"`)
       .join(";"),
   );
-  return [header, ...lines].join("\n");
+  return `\uFEFF${[header, ...lines].join("\n")}`;
 }

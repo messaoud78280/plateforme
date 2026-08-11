@@ -152,7 +152,7 @@ export function LibraryPickerModal({
           ) : (
             <ul className="divide-y divide-slate-100">
               {items.map((w) => {
-                const marge =
+                const marque =
                   w.marginPercent ||
                   marginPercentFromCostSell(w.unitCostHt, w.unitSellHt);
                 return (
@@ -165,8 +165,8 @@ export function LibraryPickerModal({
                       <p className="text-[11px] text-slate-500">
                         {[w.reference, w.saleUnit].filter(Boolean).join(" · ") || "—"}
                         {" · "}
-                        vente {fmt(w.unitSellHt)} € · coût {fmt(w.unitCostHt)} € · marge{" "}
-                        {fmt(marge)} %
+                        vente {fmt(w.unitSellHt)} € · coût {fmt(w.unitCostHt)} € · marque{" "}
+                        {fmt(marque)} %
                       </p>
                     </div>
                     <div className="flex items-center gap-2">

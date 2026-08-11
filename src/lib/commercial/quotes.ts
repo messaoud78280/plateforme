@@ -772,6 +772,7 @@ export async function updateLineCompositionSnapshot(
       costPriceHt: costing.costPriceHt,
       marquePercent: costing.marquePercent,
       markupPercent: costing.markupPercent,
+      sellCoefficient: costing.sellCoefficient,
     },
   };
 

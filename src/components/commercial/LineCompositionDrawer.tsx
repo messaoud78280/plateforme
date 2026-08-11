@@ -40,6 +40,7 @@ type Snapshot = {
     costPriceHt: number;
     marquePercent: number;
     markupPercent: number;
+    sellCoefficient?: number;
   };
 };
 
@@ -152,7 +153,7 @@ export function LineCompositionDrawer({
   function pushLibrary() {
     if (
       !window.confirm(
-        "Mettre à jour l’ouvrage dans la bibliothèque avec ce sous-détail ? Les devis déjà créés ne seront pas modifiés.",
+        "Mettre à jour l’ouvrage dans la bibliothèque ? Cette ligne de devis sera aussi enregistrée. Les autres devis déjà créés resteront figés.",
       )
     ) {
       return;
@@ -178,7 +179,7 @@ export function LineCompositionDrawer({
                 onClick={() => void save(false)}
                 className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
               >
-                Enregistrer sur le devis
+                Modifier uniquement ce devis
               </button>
               <button
                 type="button"
@@ -220,15 +221,18 @@ export function LineCompositionDrawer({
                 ["Déboursé sec", breakdown.dryCostHt],
                 ["Frais", breakdown.feesHt],
                 ["Prix de revient", breakdown.costPriceHt],
-                ["Marque %", breakdown.marquePercent],
-                ["Markup %", breakdown.markupPercent],
+                ["Taux de marque", breakdown.marquePercent],
+                ["Taux de marge", breakdown.markupPercent],
+                ["Coefficient", breakdown.sellCoefficient ?? 0],
               ].map(([label, val]) => (
                 <div key={String(label)} className="flex justify-between rounded bg-slate-50 px-2 py-1">
                   <span className="text-slate-500">{label}</span>
                   <span className="tabular-nums font-semibold">
-                    {String(label).includes("%")
+                    {String(label).includes("Taux")
                       ? `${fmt(val as number)} %`
-                      : `${fmt(val as number)} €`}
+                      : String(label) === "Coefficient"
+                        ? fmt(val as number, 4)
+                        : `${fmt(val as number)} €`}
                   </span>
                 </div>
               ))}
@@ -271,13 +275,13 @@ export function LineCompositionDrawer({
                 value={sellMode}
                 onChange={(e) => setSellMode(e.target.value)}
               >
-                <option value="MARGIN">Marge</option>
+                <option value="MARGIN">Taux de marque</option>
                 <option value="FIXED_SELL">PV fixe</option>
               </select>
             </div>
             <div>
               <label className="mb-0.5 block text-[10px] font-bold uppercase text-slate-500">
-                {sellMode === "FIXED_SELL" ? "PV HT" : "Marque %"}
+                {sellMode === "FIXED_SELL" ? "PV HT" : "Taux de marque %"}
               </label>
               {sellMode === "FIXED_SELL" ? (
                 <input

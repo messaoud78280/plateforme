@@ -102,7 +102,10 @@ export function SettingsForm({ initial }: { initial: CommercialSettingsFormValue
               onChange={(e) => set("defaultCurrency", e.target.value)}
             />
           </Field>
-          <Field label="Marge cible (%)" hint="Taux de marque souhaité">
+          <Field
+            label="Taux de marque cible (%)"
+            hint="(PV − coût) / PV — méthode principale de chiffrage"
+          >
             <input
               type="number"
               step="0.01"
@@ -117,8 +120,8 @@ export function SettingsForm({ initial }: { initial: CommercialSettingsFormValue
             />
           </Field>
           <Field
-            label="Seuil d’alerte marge (%)"
-            hint="Alerte indicative — n’empêche pas la validation"
+            label="Seuil d’alerte (taux de marque %)"
+            hint="Alerte indicative — n’empêche pas la validation. N’altère pas les devis figés."
           >
             <input
               type="number"
@@ -160,7 +163,10 @@ export function SettingsForm({ initial }: { initial: CommercialSettingsFormValue
               }
             />
           </Field>
-          <Field label="Heures / journée" hint="Pour estimation journées-personne">
+          <Field
+            label="Heures / journée"
+            hint="Nouveaux calculs journées-personne uniquement — ne réécrit pas les snapshots de devis"
+          >
             <input
               type="number"
               step="0.25"

@@ -137,6 +137,7 @@ export function QuoteEditor({
   async function addSection() {
     const title = prompt("Titre du chapitre", "Nouveau chapitre");
     if (!title?.trim()) return;
+    const seq = ++mutationSeq.current;
     setSaveState("saving");
     const res = await fetch(`/api/commercial/quotes/${quote.id}/sections`, {
       method: "POST",
@@ -145,16 +146,18 @@ export function QuoteEditor({
     });
     const data = await res.json();
     if (!res.ok) {
-      setSaveState("error");
-      setError(data.error || "Erreur");
+      if (seq === mutationSeq.current) {
+        setSaveState("error");
+        setError(data.error || "Erreur");
+      }
       return;
     }
-    const detail = await fetch(`/api/commercial/quotes/${quote.id}`).then((r) => r.json());
-    if (detail.quote) setQuote(detail.quote);
-    setSaveState("saved");
+    await refreshQuote(seq);
+    if (seq === mutationSeq.current) setSaveState("saved");
   }
 
   async function addLine(sectionId: string | null) {
+    const seq = ++mutationSeq.current;
     setSaveState("saving");
     const res = await fetch(`/api/commercial/quotes/${quote.id}/lines`, {
       method: "POST",
@@ -169,16 +172,19 @@ export function QuoteEditor({
     });
     const data = await res.json();
     if (!res.ok) {
-      setSaveState("error");
-      setError(data.error || "Erreur");
+      if (seq === mutationSeq.current) {
+        setSaveState("error");
+        setError(data.error || "Erreur");
+      }
       return;
     }
-    await refreshQuote();
-    setSaveState("saved");
+    await refreshQuote(seq);
+    if (seq === mutationSeq.current) setSaveState("saved");
   }
 
   async function duplicateLine(line: Line) {
     if (!canEdit) return;
+    const seq = ++mutationSeq.current;
     setSaveState("saving");
     setError(null);
     const res = await fetch(`/api/commercial/quotes/${quote.id}/lines`, {
@@ -203,28 +209,33 @@ export function QuoteEditor({
     });
     const data = await res.json();
     if (!res.ok) {
-      setSaveState("error");
-      setError(data.error || "Erreur");
+      if (seq === mutationSeq.current) {
+        setSaveState("error");
+        setError(data.error || "Erreur");
+      }
       return;
     }
-    await refreshQuote();
-    setSaveState("saved");
+    await refreshQuote(seq);
+    if (seq === mutationSeq.current) setSaveState("saved");
   }
 
   async function deleteLine(lineId: string) {
     if (!confirm("Supprimer cette ligne ?")) return;
+    const seq = ++mutationSeq.current;
     setSaveState("saving");
     const res = await fetch(`/api/commercial/quotes/${quote.id}/lines/${lineId}`, {
       method: "DELETE",
     });
     if (!res.ok) {
       const data = await res.json();
-      setSaveState("error");
-      setError(data.error || "Erreur");
+      if (seq === mutationSeq.current) {
+        setSaveState("error");
+        setError(data.error || "Erreur");
+      }
       return;
     }
-    await refreshQuote();
-    setSaveState("saved");
+    await refreshQuote(seq);
+    if (seq === mutationSeq.current) setSaveState("saved");
   }
 
   async function setStatus(toStatus: string) {
@@ -493,9 +504,10 @@ export function QuoteEditor({
       <aside className="h-fit space-y-3 rounded-xl border border-slate-200 bg-white p-4 lg:sticky lg:top-4">
         <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Synthèse</p>
         <Row label="Déboursé" value={`${fmtMoney(quote.totalCostHt)} €`} />
+        <Row label="Marge" value={`${fmtMoney(quote.marginAmount)} €`} />
         <Row
-          label="Marge"
-          value={`${fmtMoney(quote.marginAmount)} € (${fmtMoney(quote.marginPercent)} %)`}
+          label="Taux de marque"
+          value={`${fmtMoney(quote.marginPercent)} %`}
         />
         {quote.marginPercent < minMarginPercent ? (
           <p className="rounded-md bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900">
@@ -513,7 +525,10 @@ export function QuoteEditor({
         open={libraryOpen}
         onClose={() => setLibraryOpen(false)}
         onAdded={() => {
-          void refreshQuote().then(() => setSaveState("saved"));
+          const seq = ++mutationSeq.current;
+          void refreshQuote(seq).then(() => {
+            if (seq === mutationSeq.current) setSaveState("saved");
+          });
         }}
       />
       {compositionLine ? (

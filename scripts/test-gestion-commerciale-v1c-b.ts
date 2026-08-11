@@ -143,5 +143,23 @@ function assert(cond: boolean, msg: string) {
   assert(p.isBillable === false, "SENT pending — pas facturable comme accepté");
 }
 
+{
+  const p = calculateAmendmentBillingProgress({
+    amendmentStatus: "TO_VALIDATE",
+    acceptedAmountHt: 1450,
+    invoices: [],
+  });
+  assert(p.isBillable === false, "TO_VALIDATE — pas facturable");
+  assert(p.remainingToInvoiceHt === 0, "TO_VALIDATE — reste 0");
+  const s = calculateDealFinancialSummary({
+    initialMarketHt: 48500,
+    acceptedAmendmentsHt: 3200,
+    invoicedHt: 0,
+    paidTtc: 0,
+    invoicedTtc: 0,
+  });
+  assert(s.updatedMarketHt === 51700, "TO_VALIDATE n’entre pas dans contrat (51 700)");
+}
+
 console.log(failed === 0 ? "\nALL PASSED" : `\n${failed} FAILED`);
 process.exit(failed === 0 ? 0 : 1);

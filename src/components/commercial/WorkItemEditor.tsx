@@ -34,6 +34,7 @@ type Costing = {
   unitSellHt: number;
   marquePercent: number;
   markupPercent: number;
+  sellCoefficient: number;
 };
 
 type WorkItem = {
@@ -338,12 +339,12 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
               value={form.sellMode}
               onChange={(e) => setForm((f) => ({ ...f, sellMode: e.target.value }))}
             >
-              <option value="MARGIN">Marge cible</option>
+              <option value="MARGIN">Taux de marque cible</option>
               <option value="FIXED_SELL">Prix de vente fixe</option>
             </select>
           </div>
           <div>
-            <label className={labelClass}>Marque %</label>
+            <label className={labelClass}>Taux de marque %</label>
             <input
               type="number"
               step="0.01"
@@ -400,15 +401,19 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
             ["Frais", c.feesHt],
             ["Prix de revient", c.costPriceHt],
             ["Vente HT", c.unitSellHt],
-            ["Marque %", c.marquePercent],
-            ["Markup %", c.markupPercent],
+            ["Taux de marque", c.marquePercent],
+            ["Taux de marge", c.markupPercent],
+            ["Coefficient", c.sellCoefficient],
           ].map(([label, val]) => (
             <div key={String(label)} className="rounded-lg bg-slate-50 px-2.5 py-2">
               <p className="text-[10px] font-semibold uppercase text-slate-500">{label}</p>
               <p className="mt-0.5 tabular-nums font-semibold text-slate-900">
-                {typeof val === "number" && String(label).includes("%")
+                {typeof val === "number" &&
+                (String(label).includes("taux") || String(label).includes("Taux"))
                   ? `${fmt(val)} %`
-                  : `${fmt(val as number)} €`}
+                  : String(label) === "Coefficient"
+                    ? fmt(val as number, 4)
+                    : `${fmt(val as number)} €`}
               </p>
             </div>
           ))}

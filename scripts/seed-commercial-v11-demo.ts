@@ -32,6 +32,15 @@ async function main() {
 
   console.log(`Seed FICTIF V1.1 pour ${org.name} (${org.id})`);
 
+  const already = await prisma.commercialWorkItem.findFirst({
+    where: { organizationId: orgId, reference: "OUV-MUR-20" },
+    select: { id: true },
+  });
+  if (already) {
+    console.log("Déjà présent (OUV-MUR-20) — seed idempotent, aucune duplication.");
+    return;
+  }
+
   const bloc = await createMaterial(orgId, {
     name: "Bloc béton creux 20×20×50",
     reference: "MAT-BLOC-20",

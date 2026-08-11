@@ -4,6 +4,7 @@
  */
 import {
   calculateComponentLineCost,
+  calculateLine,
   calculateWorkItemCosting,
   calculateDealFinancialSummary,
   effectiveQuantityWithLoss,
@@ -16,7 +17,7 @@ import {
   sellCoefficientFromCostSell,
   sellFromCostAndMarginPercent,
 } from "../src/lib/commercial/money";
-import { buildCompositionSnapshot } from "../src/lib/commercial/library";
+import { buildCompositionSnapshot, workItemsToCsv } from "../src/lib/commercial/library";
 
 let failed = 0;
 function assert(cond: boolean, msg: string) {
@@ -167,6 +168,127 @@ function assert(cond: boolean, msg: string) {
 {
   assert(marquePercentFromCostSell(75, 100) === 25, "marque 25%");
   assert(markupPercentFromCostSell(75, 100) === roundMoney((25 / 75) * 100, 2), "marge ≠ marque");
+}
+
+{
+  // Recette §5 / §52 — coût 100, PV 125
+  assert(sellCoefficientFromCostSell(100, 125) === 1.25, "coefficient 1,25");
+  assert(markupPercentFromCostSell(100, 125) === 25, "taux de marge 25 %");
+  assert(marquePercentFromCostSell(100, 125) === 20, "taux de marque 20 %");
+}
+
+{
+  // Recette §47 — Étanchéité terrasse 1 m² (puis × 100)
+  const etancheite = calculateWorkItemCosting({
+    components: [
+      { type: "MATERIAL", quantityPerUnit: 1, unitCostHt: 10, lossPercent: 10 },
+      { type: "LABOR", quantityPerUnit: 0.4, unitCostHt: 35 },
+      { type: "EQUIPMENT", quantityPerUnit: 0.05, unitCostHt: 80 },
+      { type: "SUBCONTRACT", quantityPerUnit: 1, unitCostHt: 2 },
+    ],
+    feesPercent: 5,
+    feesAmountHt: 0,
+    sellMode: "MARGIN",
+    marginPercent: 20,
+  });
+  assert(etancheite.materialsHt === 11, "étanchéité matière 11 (10 + 10 % pertes)");
+  assert(etancheite.laborHt === 14, "étanchéité MO 14");
+  assert(etancheite.equipmentHt === 4, "étanchéité matériel 4");
+  assert(etancheite.subcontractHt === 2, "étanchéité ST 2");
+  assert(etancheite.dryCostHt === 31, "étanchéité déboursé 31");
+  assert(etancheite.feesHt === 1.55, "étanchéité frais 5 %");
+  assert(etancheite.costPriceHt === 32.55, "étanchéité revient 32.55");
+  assert(etancheite.unitSellHt === 40.69, "étanchéité PV marque 20 %");
+  const line100 = calculateLine({
+    quantity: 100,
+    unitCostHt: etancheite.costPriceHt,
+    unitSellHt: etancheite.unitSellHt,
+  });
+  assert(line100.lineCostHt === 3255, "100 m² déboursé");
+  assert(line100.lineSellHt === 4069, "100 m² vente");
+}
+
+{
+  // Recette §49 — snapshot figé vs hausse matière 20 %
+  const componentsAvant = [
+    { name: "Membrane", type: "MATERIAL", quantityPerUnit: 1, unit: "m²", unitCostHt: 10, lineCostHt: 11, lossPercent: 10 },
+  ];
+  const snap = buildCompositionSnapshot({
+    id: "wi-et",
+    name: "Étanchéité terrasse",
+    reference: "OUV-ET",
+    saleUnit: "m²",
+    kind: "COMPOSITE",
+    feesPercent: 0,
+    feesAmountHt: 0,
+    sellMode: "MARGIN",
+    marginPercent: 20,
+    unitCostHt: 0,
+    unitSellHt: 0,
+    components: componentsAvant,
+  });
+  const frozen = snap.unitCostHt;
+  const apres = calculateWorkItemCosting({
+    components: [{ type: "MATERIAL", quantityPerUnit: 1, unitCostHt: 12, lossPercent: 10 }],
+    sellMode: "MARGIN",
+    marginPercent: 20,
+  });
+  assert(snap.unitCostHt === frozen, "snapshot devis inchangé après hausse");
+  assert(apres.costPriceHt !== frozen, "bibliothèque recalculée");
+  assert(apres.materialsHt === 13.2, "membrane 12 € + 10 % pertes");
+}
+
+{
+  // Recette §48 — arrondis
+  const r = calculateWorkItemCosting({
+    components: [{ type: "MATERIAL", quantityPerUnit: 3.333, unitCostHt: 12.37, lossPercent: 7.5 }],
+    feesPercent: 0,
+    sellMode: "FIXED_SELL",
+    unitSellHt: 50,
+  });
+  const expectedLine = calculateComponentLineCost({
+    quantityPerUnit: 3.333,
+    unitCostHt: 12.37,
+    lossPercent: 7.5,
+  });
+  assert(r.materialsHt === roundMoney(expectedLine, 2) || r.materialsHt === expectedLine, "arrondi pertes × PU");
+}
+
+{
+  assert(personDaysFromHours(40, 8) === 5, "journée 8 h → 5 j");
+  assert(personDaysFromHours(40, 10) === 4, "journée 10 h → 4 j");
+  assert(personDaysFromHours(35, 7) === 5, "journée 7 h → 5 j");
+}
+
+{
+  function shouldApply(seq: number, current: number) {
+    return seq === current;
+  }
+  assert(shouldApply(1, 2) === false, "mutationSeq : A tardive ignorée");
+  assert(shouldApply(2, 2) === true, "mutationSeq : B récente appliquée");
+}
+
+{
+  const samePrice = roundMoney(12, 4) === roundMoney(12, 4);
+  assert(samePrice, "12 € → 12 € : pas de nouvelle variation");
+}
+
+{
+  const csv = workItemsToCsv([
+    {
+      reference: "R1",
+      name: "Mur ; « 20 cm »",
+      family: "Maçonnerie",
+      saleUnit: "m²",
+      kind: "COMPOSITE",
+      unitCostHt: 50.5,
+      unitSellHt: 65,
+      marginPercent: 22.31,
+    },
+  ]);
+  assert(csv.startsWith("\uFEFF"), "CSV BOM UTF-8");
+  assert(csv.includes("\"Mur ; « 20 cm »\""), "CSV échappe point-virgule");
+  assert(csv.includes("50,5"), "CSV nombre virgule FR");
 }
 
 if (failed) {

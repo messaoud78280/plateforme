@@ -567,8 +567,7 @@ function AcceptedActions({ quoteId }: { quoteId: string }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur");
-      setMsg(`Avenant ${data.amendment.number} créé`);
-      router.refresh();
+      router.push(`/dashboard/devis-facturation/avenants/${data.amendment.id}`);
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Erreur");
     } finally {

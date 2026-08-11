@@ -2,6 +2,18 @@ import { prisma } from "@/lib/prisma";
 import { calculateLine, calculateDocumentTotals } from "@/lib/commercial/money";
 import { d } from "@/lib/commercial/decimal";
 import { nextAmendmentNumber } from "@/lib/commercial/settings";
+import type { CommercialAmendmentStatus } from "@prisma/client";
+
+const ALLOWED_TRANSITIONS: Record<
+  CommercialAmendmentStatus,
+  CommercialAmendmentStatus[]
+> = {
+  DRAFT: ["SENT", "ACCEPTED", "CANCELLED"],
+  SENT: ["ACCEPTED", "REFUSED", "CANCELLED"],
+  ACCEPTED: ["CANCELLED"],
+  REFUSED: [],
+  CANCELLED: [],
+};
 
 export async function listAmendments(orgId: string) {
   const rows = await prisma.commercialAmendment.findMany({
@@ -9,8 +21,29 @@ export async function listAmendments(orgId: string) {
     orderBy: { updatedAt: "desc" },
     take: 80,
     include: {
-      quote: { select: { id: true, number: true, subject: true } },
+      quote: {
+        select: {
+          id: true,
+          number: true,
+          subject: true,
+          project: { select: { id: true, title: true } },
+        },
+      },
     },
+  });
+  return rows.map((a) => ({
+    ...a,
+    totalSellHt: d(a.totalSellHt),
+    totalVat: d(a.totalVat),
+    totalTtc: d(a.totalTtc),
+  }));
+}
+
+export async function listAmendmentsForQuote(orgId: string, quoteId: string) {
+  const rows = await prisma.commercialAmendment.findMany({
+    where: { organizationId: orgId, quoteId },
+    orderBy: { number: "asc" },
+    include: { lines: { orderBy: { sortOrder: "asc" } } },
   });
   return rows.map((a) => ({
     ...a,
@@ -67,6 +100,47 @@ export async function createAmendment(input: {
   });
 }
 
+export async function updateAmendmentMeta(
+  orgId: string,
+  amendmentId: string,
+  data: {
+    subject?: string;
+    clientNotes?: string | null;
+    internalNotes?: string | null;
+  },
+) {
+  const amendment = await prisma.commercialAmendment.findFirst({
+    where: { id: amendmentId, organizationId: orgId },
+    select: { id: true, status: true },
+  });
+  if (!amendment) throw new Error("Avenant introuvable");
+
+  const lockedContractual = ["ACCEPTED", "REFUSED", "CANCELLED", "SENT"].includes(
+    amendment.status,
+  );
+  const contractualTouched =
+    data.subject !== undefined || data.clientNotes !== undefined;
+
+  if (lockedContractual && contractualTouched) {
+    throw new Error(
+      "Avenant verrouillé — les données contractuelles ne sont plus modifiables",
+    );
+  }
+
+  return prisma.commercialAmendment.update({
+    where: { id: amendmentId },
+    data: {
+      ...(data.subject !== undefined && amendment.status === "DRAFT"
+        ? { subject: data.subject.trim() }
+        : {}),
+      ...(data.clientNotes !== undefined && amendment.status === "DRAFT"
+        ? { clientNotes: data.clientNotes }
+        : {}),
+      ...(data.internalNotes !== undefined ? { internalNotes: data.internalNotes } : {}),
+    },
+  });
+}
+
 export async function addAmendmentLine(
   orgId: string,
   amendmentId: string,
@@ -83,7 +157,9 @@ export async function addAmendmentLine(
     include: { quote: { select: { defaultVatRate: true } } },
   });
   if (!amendment) throw new Error("Avenant introuvable");
-  if (amendment.status !== "DRAFT") throw new Error("Avenant non modifiable");
+  if (amendment.status !== "DRAFT") {
+    throw new Error("Avenant non modifiable — seules les lignes brouillon sont éditables");
+  }
 
   const designation = input.designation.trim();
   if (!designation) throw new Error("Désignation requise");
@@ -128,6 +204,9 @@ export async function recomputeAmendmentTotals(orgId: string, amendmentId: strin
     include: { lines: true },
   });
   if (!amendment) throw new Error("Avenant introuvable");
+  if (amendment.status !== "DRAFT") {
+    throw new Error("Totaux figés — avenant non brouillon");
+  }
 
   const lineResults = amendment.lines.map((l) =>
     calculateLine({
@@ -161,24 +240,39 @@ export async function recomputeAmendmentTotals(orgId: string, amendmentId: strin
   });
 }
 
-export async function acceptAmendment(
+async function transitionAmendment(
   orgId: string,
   amendmentId: string,
+  toStatus: CommercialAmendmentStatus,
   actorUserId: string,
+  label: string,
 ) {
   const amendment = await prisma.commercialAmendment.findFirst({
     where: { id: amendmentId, organizationId: orgId },
-    select: { id: true, status: true },
+    select: { id: true, status: true, totalSellHt: true },
   });
   if (!amendment) throw new Error("Avenant introuvable");
-  if (amendment.status !== "DRAFT" && amendment.status !== "SENT") {
-    throw new Error("Avenant déjà traité");
+
+  if (amendment.status === toStatus) return amendment;
+
+  const allowed = ALLOWED_TRANSITIONS[amendment.status] ?? [];
+  if (!allowed.includes(toStatus)) {
+    throw new Error(`Transition ${amendment.status} → ${toStatus} non autorisée`);
+  }
+
+  if (toStatus === "ACCEPTED" || toStatus === "SENT") {
+    if (d(amendment.totalSellHt) === 0) {
+      throw new Error("Ajoutez au moins une ligne avant d’envoyer ou d’accepter");
+    }
   }
 
   return prisma.$transaction(async (tx) => {
     const updated = await tx.commercialAmendment.update({
       where: { id: amendmentId },
-      data: { status: "ACCEPTED", acceptedAt: new Date() },
+      data: {
+        status: toStatus,
+        ...(toStatus === "ACCEPTED" ? { acceptedAt: new Date() } : {}),
+      },
     });
     await tx.commercialStatusEvent.create({
       data: {
@@ -186,11 +280,61 @@ export async function acceptAmendment(
         entityType: "AMENDMENT",
         entityId: amendmentId,
         fromStatus: amendment.status,
-        toStatus: "ACCEPTED",
-        label: "Avenant accepté",
+        toStatus,
+        label,
         actorUserId,
       },
     });
     return updated;
   });
+}
+
+export async function sendAmendment(
+  orgId: string,
+  amendmentId: string,
+  actorUserId: string,
+) {
+  return transitionAmendment(orgId, amendmentId, "SENT", actorUserId, "Avenant envoyé");
+}
+
+export async function acceptAmendment(
+  orgId: string,
+  amendmentId: string,
+  actorUserId: string,
+) {
+  return transitionAmendment(
+    orgId,
+    amendmentId,
+    "ACCEPTED",
+    actorUserId,
+    "Avenant accepté",
+  );
+}
+
+export async function refuseAmendment(
+  orgId: string,
+  amendmentId: string,
+  actorUserId: string,
+) {
+  return transitionAmendment(
+    orgId,
+    amendmentId,
+    "REFUSED",
+    actorUserId,
+    "Avenant refusé",
+  );
+}
+
+export async function cancelAmendment(
+  orgId: string,
+  amendmentId: string,
+  actorUserId: string,
+) {
+  return transitionAmendment(
+    orgId,
+    amendmentId,
+    "CANCELLED",
+    actorUserId,
+    "Avenant annulé",
+  );
 }

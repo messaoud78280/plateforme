@@ -3,8 +3,12 @@ import { requireCommercialApiSession } from "@/lib/commercial/access";
 import {
   acceptAmendment,
   addAmendmentLine,
+  cancelAmendment,
   createAmendment,
   listAmendments,
+  refuseAmendment,
+  sendAmendment,
+  updateAmendmentMeta,
 } from "@/lib/commercial/amendments";
 
 export async function GET() {
@@ -27,7 +31,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    if (body.action === "addLine") {
+    const action = String(body.action ?? "");
+    if (action === "addLine") {
       const amendment = await addAmendmentLine(
         auth.orgId,
         String(body.amendmentId ?? ""),
@@ -41,11 +46,57 @@ export async function POST(req: Request) {
       );
       return NextResponse.json({ amendment });
     }
-    if (body.action === "accept") {
+    if (action === "accept") {
       const amendment = await acceptAmendment(
         auth.orgId,
         String(body.amendmentId ?? ""),
         auth.session.user.id,
+      );
+      return NextResponse.json({ amendment });
+    }
+    if (action === "send") {
+      const amendment = await sendAmendment(
+        auth.orgId,
+        String(body.amendmentId ?? ""),
+        auth.session.user.id,
+      );
+      return NextResponse.json({ amendment });
+    }
+    if (action === "refuse") {
+      const amendment = await refuseAmendment(
+        auth.orgId,
+        String(body.amendmentId ?? ""),
+        auth.session.user.id,
+      );
+      return NextResponse.json({ amendment });
+    }
+    if (action === "cancel") {
+      const amendment = await cancelAmendment(
+        auth.orgId,
+        String(body.amendmentId ?? ""),
+        auth.session.user.id,
+      );
+      return NextResponse.json({ amendment });
+    }
+    if (action === "updateMeta") {
+      const amendment = await updateAmendmentMeta(
+        auth.orgId,
+        String(body.amendmentId ?? ""),
+        {
+          subject: body.subject !== undefined ? String(body.subject) : undefined,
+          clientNotes:
+            body.clientNotes !== undefined
+              ? body.clientNotes
+                ? String(body.clientNotes)
+                : null
+              : undefined,
+          internalNotes:
+            body.internalNotes !== undefined
+              ? body.internalNotes
+                ? String(body.internalNotes)
+                : null
+              : undefined,
+        },
       );
       return NextResponse.json({ amendment });
     }

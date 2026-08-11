@@ -191,6 +191,65 @@ export function calculateDealFinancialSummary(
   };
 }
 
+/**
+ * Progression facturation d’un avenant (allocation via invoice.amendmentId).
+ * CREDIT réduit le facturé (avoir), CANCELLED/DRAFT exclus.
+ */
+export type AmendmentBillingInvoiceInput = {
+  type: string;
+  status: string;
+  totalSellHt: number;
+};
+
+export type AmendmentBillingProgress = {
+  acceptedAmountHt: number;
+  invoicedAmountHt: number;
+  remainingToInvoiceHt: number;
+  isFullyInvoiced: boolean;
+  isBillable: boolean;
+};
+
+/** Contribution nette HT d’une facture à un avenant (CREDIT = négatif). */
+export function invoiceContributionHtToAmendment(
+  inv: AmendmentBillingInvoiceInput,
+): number {
+  if (inv.status === "CANCELLED" || inv.status === "DRAFT") return 0;
+  const ht = roundMoney(Math.abs(Number(inv.totalSellHt) || 0), 2);
+  if (inv.type === "CREDIT") return -ht;
+  return ht;
+}
+
+export function calculateAmendmentBillingProgress(input: {
+  amendmentStatus: string;
+  acceptedAmountHt: number;
+  invoices: AmendmentBillingInvoiceInput[];
+}): AmendmentBillingProgress {
+  const accepted = roundMoney(Number(input.acceptedAmountHt) || 0, 2);
+  const isAccepted = input.amendmentStatus === "ACCEPTED";
+  const invoiced = roundMoney(
+    input.invoices.reduce((s, i) => s + invoiceContributionHtToAmendment(i), 0),
+    2,
+  );
+  const remaining = isAccepted
+    ? roundMoney(Math.max(0, accepted - invoiced), 2)
+    : 0;
+  return {
+    acceptedAmountHt: accepted,
+    invoicedAmountHt: invoiced,
+    remainingToInvoiceHt: remaining,
+    isFullyInvoiced: isAccepted && remaining <= 0.009,
+    isBillable: isAccepted && remaining > 0.009,
+  };
+}
+
+export const COMMERCIAL_AMENDMENT_STATUS_LABELS: Record<string, string> = {
+  DRAFT: "Brouillon",
+  SENT: "Envoyé",
+  ACCEPTED: "Accepté",
+  REFUSED: "Refusé",
+  CANCELLED: "Annulé",
+};
+
 export const COMMERCIAL_QUOTE_STATUS_LABELS: Record<string, string> = {
   DRAFT: "Brouillon",
   TO_VALIDATE: "À valider",

@@ -3946,6 +3946,8 @@ model CommercialAmendment {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   quote        CommercialQuote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
   lines        CommercialAmendmentLine[]
+  /// Factures allouées à CET avenant (N factures → 1 avenant ; multi-avenants/facture = P2).
+  invoices     CommercialInvoice[]
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
@@ -4005,6 +4007,7 @@ model CommercialInvoice {
 
   organization      Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   quote             CommercialQuote?      @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  amendment         CommercialAmendment?  @relation(fields: [amendmentId], references: [id], onDelete: SetNull)
   project           Project?              @relation(fields: [projectId], references: [id], onDelete: SetNull)
   clientExternalOrg ExternalOrganization? @relation("CommercialInvoiceClient", fields: [clientExternalOrgId], references: [id], onDelete: SetNull)
   createdBy         User                  @relation("CommercialInvoiceCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
@@ -4014,6 +4017,7 @@ model CommercialInvoice {
   @@unique([organizationId, number])
   @@index([organizationId, status])
   @@index([quoteId])
+  @@index([amendmentId])
   @@index([projectId])
   @@index([clientExternalOrgId])
 }

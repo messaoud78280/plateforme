@@ -8,6 +8,7 @@ import { loadDealFinancialSummary } from "@/lib/commercial/deal-summary";
 import { QuoteEditor } from "@/components/commercial/QuoteEditor";
 import { QuoteCommercialFlow } from "@/components/commercial/QuoteCommercialFlow";
 import { QuoteAcceptedArchiveCard } from "@/components/commercial/QuoteAcceptedArchiveCard";
+import { QuoteAmendmentsPanel } from "@/components/commercial/QuoteAmendmentsPanel";
 import { roundMoney } from "@/lib/commercial/money";
 import { prisma } from "@/lib/prisma";
 import { loadAcceptedArchiveUi } from "@/lib/commercial/accepted-snapshot";
@@ -82,88 +83,97 @@ export default async function DevisDetailPage({
           historicalMissing={archive.historicalMissing}
         />
       ) : null}
+
       {summary ? (
-        <section className="rounded-xl border border-slate-200 bg-white p-4">
-          <h2 className="text-sm font-bold text-slate-900">Synthèse financière</h2>
-          <dl className="mt-3 grid gap-2 sm:grid-cols-3 text-sm">
-            <div>
-              <dt className="text-xs text-slate-500">Devis initial HT</dt>
-              <dd className="font-semibold">
-                {roundMoney(summary.initialMarketHt, 2).toLocaleString("fr-FR")} €
-              </dd>
+        <>
+          <section className="rounded-xl border border-slate-200 bg-white p-4">
+            <h2 className="text-sm font-bold text-slate-900">
+              {summary.quote.number}
+              {summary.quote.projectTitle ? ` · ${summary.quote.projectTitle}` : ""}
+            </h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                  Contrat
+                </p>
+                <dl className="mt-2 space-y-1 text-sm">
+                  <div className="flex justify-between gap-2">
+                    <dt className="text-slate-500">Devis initial</dt>
+                    <dd className="tabular-nums font-semibold">
+                      {roundMoney(summary.initialMarketHt, 2).toLocaleString("fr-FR")} €
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <dt className="text-slate-500">Avenants acceptés</dt>
+                    <dd className="tabular-nums font-semibold">
+                      {roundMoney(summary.acceptedAmendmentsHt, 2).toLocaleString("fr-FR")} €
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-2 border-t border-slate-100 pt-1">
+                    <dt className="font-semibold text-slate-800">Contrat accepté</dt>
+                    <dd className="tabular-nums font-bold text-[#1e3a5f]">
+                      {roundMoney(summary.updatedMarketHt, 2).toLocaleString("fr-FR")} €
+                    </dd>
+                  </div>
+                  {summary.pendingAmendmentsHt > 0 ? (
+                    <div className="flex justify-between gap-2 text-amber-800">
+                      <dt>En attente</dt>
+                      <dd className="tabular-nums font-semibold">
+                        {roundMoney(summary.pendingAmendmentsHt, 2).toLocaleString("fr-FR")} €
+                      </dd>
+                    </div>
+                  ) : null}
+                </dl>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                  Facturation
+                </p>
+                <dl className="mt-2 space-y-1 text-sm">
+                  <div className="flex justify-between gap-2">
+                    <dt className="text-slate-500">Facturé</dt>
+                    <dd className="tabular-nums font-semibold">
+                      {roundMoney(summary.invoicedHt, 2).toLocaleString("fr-FR")} €
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <dt className="text-slate-500">Reste à facturer</dt>
+                    <dd className="tabular-nums font-bold">
+                      {roundMoney(summary.remainingToInvoiceHt, 2).toLocaleString("fr-FR")} €
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                  Encaissements
+                </p>
+                <dl className="mt-2 space-y-1 text-sm">
+                  <div className="flex justify-between gap-2">
+                    <dt className="text-slate-500">Encaissé</dt>
+                    <dd className="tabular-nums font-semibold">
+                      {roundMoney(summary.paidTtc, 2).toLocaleString("fr-FR")} €
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <dt className="text-slate-500">Reste à encaisser</dt>
+                    <dd className="tabular-nums font-bold">
+                      {roundMoney(summary.remainingToCollectTtc, 2).toLocaleString("fr-FR")} €
+                    </dd>
+                  </div>
+                </dl>
+              </div>
             </div>
-            <div>
-              <dt className="text-xs text-slate-500">Avenants acceptés HT</dt>
-              <dd className="font-semibold">
-                {roundMoney(summary.acceptedAmendmentsHt, 2).toLocaleString("fr-FR")} €
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs text-slate-500">Avenants en attente HT</dt>
-              <dd className="font-semibold text-amber-800">
-                {roundMoney(summary.pendingAmendmentsHt, 2).toLocaleString("fr-FR")} €
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs text-slate-500">Contrat accepté HT</dt>
-              <dd className="font-bold text-[#1e3a5f]">
-                {roundMoney(summary.updatedMarketHt, 2).toLocaleString("fr-FR")} €
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs text-slate-500">Facturé HT</dt>
-              <dd className="font-semibold">
-                {roundMoney(summary.invoicedHt, 2).toLocaleString("fr-FR")} €
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs text-slate-500">Encaissé TTC</dt>
-              <dd className="font-semibold">
-                {roundMoney(summary.paidTtc, 2).toLocaleString("fr-FR")} €
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs text-slate-500">Reste à facturer HT</dt>
-              <dd className="font-semibold">
-                {roundMoney(summary.remainingToInvoiceHt, 2).toLocaleString("fr-FR")} €
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs text-slate-500">Reste à encaisser TTC</dt>
-              <dd className="font-semibold">
-                {roundMoney(summary.remainingToCollectTtc, 2).toLocaleString("fr-FR")} €
-              </dd>
-            </div>
-          </dl>
-          {summary.amendmentsAccepted.length + summary.amendmentsPending.length > 0 ? (
-            <div className="mt-4 border-t border-slate-100 pt-3">
-              <p className="text-xs font-bold uppercase text-slate-500">Avenants</p>
-              <ul className="mt-2 space-y-1 text-sm">
-                {summary.amendmentsAccepted.map((a) => (
-                  <li key={a.id} className="flex justify-between gap-2">
-                    <span>
-                      {a.number} · {a.subject}{" "}
-                      <span className="text-emerald-700">(accepté)</span>
-                    </span>
-                    <span className="tabular-nums">
-                      +{roundMoney(a.totalSellHt, 2).toLocaleString("fr-FR")} €
-                    </span>
-                  </li>
-                ))}
-                {summary.amendmentsPending.map((a) => (
-                  <li key={a.id} className="flex justify-between gap-2 text-amber-900">
-                    <span>
-                      {a.number} · {a.subject} (en attente)
-                    </span>
-                    <span className="tabular-nums">
-                      +{roundMoney(a.totalSellHt, 2).toLocaleString("fr-FR")} €
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </section>
+          </section>
+
+          <QuoteAmendmentsPanel
+            quoteId={id}
+            quoteAccepted={quote.status === "ACCEPTED"}
+            accepted={summary.amendmentsAccepted}
+            pending={summary.amendmentsPending}
+            closed={summary.amendmentsClosed}
+          />
+        </>
       ) : null}
     </div>
   );

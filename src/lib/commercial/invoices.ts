@@ -182,6 +182,7 @@ export async function createStandardInvoice(input: {
   orgId: string;
   userId: string;
   quoteId?: string | null;
+  amendmentId?: string | null;
   subject: string;
   clientExternalOrgId?: string | null;
   projectId?: string | null;
@@ -207,7 +208,44 @@ export async function createStandardInvoice(input: {
     projectId: string | null;
   } | null = null;
 
-  if (input.quoteId) {
+  let resolvedQuoteId = input.quoteId ?? null;
+  let resolvedAmendmentId = input.amendmentId ?? null;
+
+  if (resolvedAmendmentId) {
+    const amendment = await prisma.commercialAmendment.findFirst({
+      where: { id: resolvedAmendmentId, organizationId: input.orgId },
+      select: {
+        id: true,
+        status: true,
+        quoteId: true,
+        number: true,
+        totalSellHt: true,
+        quote: {
+          select: {
+            projectId: true,
+            clientExternalOrgId: true,
+            clientSnapshotJson: true,
+            issuerSnapshotJson: true,
+            organizationId: true,
+          },
+        },
+      },
+    });
+    if (!amendment) throw new Error("Avenant introuvable ou hors organisation");
+    if (amendment.status !== "ACCEPTED") {
+      throw new Error("Seuls les avenants acceptés peuvent être facturés");
+    }
+    if (resolvedQuoteId && resolvedQuoteId !== amendment.quoteId) {
+      throw new Error("L’avenant n’appartient pas à ce devis");
+    }
+    resolvedQuoteId = amendment.quoteId;
+    quoteSnapshots = {
+      clientSnapshotJson: amendment.quote.clientSnapshotJson,
+      issuerSnapshotJson: amendment.quote.issuerSnapshotJson,
+      clientExternalOrgId: amendment.quote.clientExternalOrgId,
+      projectId: amendment.quote.projectId,
+    };
+  } else if (input.quoteId) {
     const quote = await prisma.commercialQuote.findFirst({
       where: { id: input.quoteId, organizationId: input.orgId },
       select: {
@@ -219,6 +257,14 @@ export async function createStandardInvoice(input: {
     });
     if (!quote) throw new Error("Devis introuvable");
     quoteSnapshots = quote;
+  }
+
+  if (input.projectId) {
+    const project = await prisma.project.findFirst({
+      where: { id: input.projectId, organizationId: input.orgId },
+      select: { id: true },
+    });
+    if (!project) throw new Error("Chantier introuvable ou hors organisation");
   }
 
   const prepared = input.lines.map((l, i) => {
@@ -249,6 +295,24 @@ export async function createStandardInvoice(input: {
     prepared.map((p) => ({ ...p.calc, includedInTotals: true })),
   );
 
+  if (resolvedAmendmentId) {
+    const { loadAmendmentBillingProgressBatch } = await import(
+      "@/lib/commercial/amendment-billing"
+    );
+    const map = await loadAmendmentBillingProgressBatch(input.orgId, [
+      resolvedAmendmentId,
+    ]);
+    const progress = map.get(resolvedAmendmentId);
+    if (!progress?.isBillable) {
+      throw new Error("Cet avenant n’a plus de reste à facturer");
+    }
+    if (totals.totalSellHt > progress.remainingToInvoiceHt + 0.01) {
+      throw new Error(
+        `Montant supérieur au reste à facturer de l’avenant (${progress.remainingToInvoiceHt.toFixed(2)} € HT)`,
+      );
+    }
+  }
+
   return prisma.$transaction(async (tx) => {
     const number = await nextInvoiceNumber(input.orgId, tx);
     const invoice = await tx.commercialInvoice.create({
@@ -259,7 +323,8 @@ export async function createStandardInvoice(input: {
           ? input.type
           : "STANDARD") satisfies CommercialInvoiceType,
         status: "DRAFT",
-        quoteId: input.quoteId ?? null,
+        quoteId: resolvedQuoteId,
+        amendmentId: resolvedAmendmentId,
         projectId: input.projectId ?? quoteSnapshots?.projectId ?? null,
         clientExternalOrgId:
           input.clientExternalOrgId ?? quoteSnapshots?.clientExternalOrgId ?? null,

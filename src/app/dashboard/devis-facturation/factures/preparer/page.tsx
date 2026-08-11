@@ -7,22 +7,53 @@ import {
 } from "@/lib/commercial/access";
 import { prisma } from "@/lib/prisma";
 import { loadDealFinancialSummary } from "@/lib/commercial/deal-summary";
+import { loadAmendmentDetail } from "@/lib/commercial/amendment-billing";
 import { PrepareInvoiceForm } from "@/components/commercial/PrepareInvoiceForm";
+import { PrepareAmendmentInvoiceForm } from "@/components/commercial/PrepareAmendmentInvoiceForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function PreparerFacturePage({
   searchParams,
 }: {
-  searchParams: Promise<{ projectId?: string }>;
+  searchParams: Promise<{ projectId?: string; amendmentId?: string }>;
 }) {
   const session = await requireCommercialSession(
     "/dashboard/devis-facturation/factures/preparer",
   );
   const orgId = await resolveCommercialOrgId(session.user);
   const sp = await searchParams;
+  if (!orgId) notFound();
+
+  const amendmentId = sp.amendmentId?.trim();
+  if (amendmentId) {
+    const amendment = await loadAmendmentDetail(orgId, amendmentId);
+    if (!amendment) notFound();
+    return (
+      <div className="mx-auto max-w-xl space-y-6">
+        <BackLink href={`/dashboard/devis-facturation/avenants/${amendment.id}`}>
+          Retour avenant
+        </BackLink>
+        <PageHeader
+          eyebrow="Gestion commerciale"
+          title="Préparer la facture"
+          description={`Avenant ${amendment.number} — validation humaine obligatoire.`}
+        />
+        <PrepareAmendmentInvoiceForm
+          amendmentId={amendment.id}
+          amendmentNumber={amendment.number}
+          subject={amendment.subject}
+          quoteId={amendment.quote.id}
+          projectId={amendment.quote.projectId}
+          clientExternalOrgId={amendment.quote.clientExternalOrgId}
+          remainingToInvoiceHt={amendment.billing.remainingToInvoiceHt}
+        />
+      </div>
+    );
+  }
+
   const projectId = sp.projectId?.trim();
-  if (!orgId || !projectId) notFound();
+  if (!projectId) notFound();
 
   const project = await prisma.project.findFirst({
     where: { id: projectId, organizationId: orgId },

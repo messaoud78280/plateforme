@@ -50,6 +50,7 @@ export async function POST(req: Request) {
       orgId: auth.orgId,
       userId: auth.session.user.id,
       quoteId: body.quoteId ? String(body.quoteId) : null,
+      amendmentId: body.amendmentId ? String(body.amendmentId) : null,
       subject: String(body.subject ?? ""),
       clientExternalOrgId: body.clientExternalOrgId
         ? String(body.clientExternalOrgId)

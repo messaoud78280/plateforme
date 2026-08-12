@@ -270,3 +270,14 @@ export function paymentScheduleTypeLabel(type: PaymentScheduleLineType): string 
       return "Personnalisé";
   }
 }
+
+/** Première ligne d’un type donné (ordre sortOrder) — pour DF-3 facturation. */
+export function firstScheduleLineOfType(
+  raw: unknown,
+  type: PaymentScheduleLineType,
+): PaymentScheduleLine | null {
+  const schedule = parsePaymentSchedule(raw);
+  if (!schedule?.lines.length) return null;
+  const sorted = [...schedule.lines].sort((a, b) => a.sortOrder - b.sortOrder);
+  return sorted.find((l) => l.type === type) ?? null;
+}

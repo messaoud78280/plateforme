@@ -13,17 +13,42 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function FacturesPage() {
+export default async function FacturesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ quoteId?: string }>;
+}) {
   const session = await requireCommercialSession("/dashboard/devis-facturation/factures");
   const orgId = await resolveCommercialOrgId(session.user);
   if (!orgId) return null;
+  const sp = await searchParams;
+  const quoteFilter = sp.quoteId?.trim() || null;
   const invoices = await listInvoices(orgId);
+  const filtered = quoteFilter
+    ? invoices.filter((inv) => inv.quote?.id === quoteFilter)
+    : invoices;
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Devis & Facturation" title="Factures" description="Factures clients BTP — hors abonnement SaaS." />
+      <PageHeader
+        eyebrow="Devis & Facturation"
+        title="Factures"
+        description={
+          quoteFilter
+            ? "Factures liées au devis sélectionné."
+            : "Factures clients BTP — hors abonnement SaaS."
+        }
+      />
+      {quoteFilter ? (
+        <p className="text-xs text-slate-500">
+          Filtre devis actif ·{" "}
+          <Link href="/dashboard/devis-facturation/factures" className="font-semibold text-[#1d4ed8]">
+            Voir toutes
+          </Link>
+        </p>
+      ) : null}
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-        {invoices.length === 0 ? (
+        {filtered.length === 0 ? (
           <p className="p-6 text-sm text-slate-500">Aucune facture.</p>
         ) : (
           <table className="w-full text-left text-sm">
@@ -38,7 +63,7 @@ export default async function FacturesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {invoices.map((inv) => (
+              {filtered.map((inv) => (
                 <tr key={inv.id}>
                   <td className="px-4 py-2.5">
                     <Link

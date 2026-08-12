@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireCommercialApiSession } from "@/lib/commercial/access";
 import {
   createDepositInvoice,
+  createQuoteProgressInvoice,
   createStandardInvoice,
   issueInvoice,
   listInvoices,
@@ -38,9 +39,28 @@ export async function POST(req: Request) {
       });
       if (body.issue) {
         await issueInvoice(auth.orgId, invoice.id, auth.session.user.id);
-        const issued = await listInvoices(auth.orgId);
-        const fresh = issued.find((i) => i.id === invoice.id) ?? invoice;
-        return NextResponse.json({ invoice: fresh }, { status: 201 });
+      }
+      return NextResponse.json({ invoice }, { status: 201 });
+    }
+
+    /** Parcours devis accepté : situation / solde (montant marché, pas DF-5). */
+    if (
+      body.fromQuote === true &&
+      body.quoteId &&
+      (body.type === "PROGRESS" || body.type === "FINAL" || body.type === "STANDARD")
+    ) {
+      const invoice = await createQuoteProgressInvoice({
+        orgId: auth.orgId,
+        userId: auth.session.user.id,
+        quoteId: String(body.quoteId),
+        type: body.type,
+        amountHt: body.amountHt != null ? Number(body.amountHt) : undefined,
+        useRemaining: body.useRemaining === true || body.type === "FINAL",
+        useSchedule: body.useSchedule === true,
+        dueDate: body.dueDate ? new Date(String(body.dueDate)) : null,
+      });
+      if (body.issue) {
+        await issueInvoice(auth.orgId, invoice.id, auth.session.user.id);
       }
       return NextResponse.json({ invoice }, { status: 201 });
     }
@@ -73,6 +93,9 @@ export async function POST(req: Request) {
         description: l.description ? String(l.description) : null,
       })),
     });
+    if (body.issue) {
+      await issueInvoice(auth.orgId, invoice.id, auth.session.user.id);
+    }
     return NextResponse.json({ invoice }, { status: 201 });
   } catch (e) {
     return NextResponse.json(

@@ -1732,21 +1732,18 @@ function AcceptedActions({ quoteId }: { quoteId: string }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
-  async function createDeposit() {
-    const pct = prompt("Pourcentage d’acompte", "30");
-    if (!pct) return;
+  async function createInvoice(
+    body: Record<string, unknown>,
+    confirmLabel: string,
+  ) {
+    if (!confirm(confirmLabel)) return;
     setBusy(true);
     setMsg(null);
     try {
       const res = await fetch("/api/commercial/invoices", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "DEPOSIT",
-          quoteId,
-          percent: Number(pct),
-          issue: true,
-        }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur");
@@ -1758,10 +1755,44 @@ function AcceptedActions({ quoteId }: { quoteId: string }) {
     }
   }
 
+  async function createDeposit() {
+    await createInvoice(
+      { type: "DEPOSIT", quoteId, issue: false },
+      "Créer un brouillon de facture d’acompte depuis l’échéancier du devis (ou % historique) ?",
+    );
+  }
+
+  async function createProgress() {
+    await createInvoice(
+      {
+        type: "PROGRESS",
+        quoteId,
+        fromQuote: true,
+        useSchedule: true,
+        issue: false,
+      },
+      "Créer un brouillon de situation depuis l’échéance PROGRESS de l’échéancier ?",
+    );
+  }
+
+  async function createFinal() {
+    await createInvoice(
+      {
+        type: "FINAL",
+        quoteId,
+        fromQuote: true,
+        useRemaining: true,
+        issue: false,
+      },
+      "Créer un brouillon de solde pour le reste à facturer ?",
+    );
+  }
+
   async function createAmendment() {
     const subject = prompt("Objet de l’avenant", "Travaux supplémentaires");
     if (!subject) return;
     setBusy(true);
+    setMsg(null);
     try {
       const res = await fetch("/api/commercial/amendments", {
         method: "POST",
@@ -1780,21 +1811,41 @@ function AcceptedActions({ quoteId }: { quoteId: string }) {
 
   return (
     <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4">
-      <p className="text-sm font-bold text-emerald-950">Créer à partir de ce devis</p>
+      <p className="text-sm font-bold text-emerald-950">Facturer ce devis</p>
+      <p className="mt-1 text-xs text-slate-600">
+        Brouillon créé → contrôlez → émettez depuis la facture. Acompte pris sur
+        l’échéancier structuré (ligne DEPOSIT) si présent.
+      </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <button
           type="button"
           disabled={busy}
           onClick={() => void createDeposit()}
-          className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
+          className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
         >
-          Facture d’acompte
+          Facturer l’acompte
+        </button>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void createProgress()}
+          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold disabled:opacity-50"
+        >
+          Facturer une situation
+        </button>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void createFinal()}
+          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold disabled:opacity-50"
+        >
+          Facturer le solde
         </button>
         <button
           type="button"
           disabled={busy}
           onClick={() => void createAmendment()}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold"
+          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold disabled:opacity-50"
         >
           Avenant
         </button>
@@ -1805,7 +1856,7 @@ function AcceptedActions({ quoteId }: { quoteId: string }) {
           Factures liées
         </a>
       </div>
-      {msg ? <p className="mt-2 text-xs text-slate-700">{msg}</p> : null}
+      {msg ? <p className="mt-2 text-xs text-red-700">{msg}</p> : null}
     </div>
   );
 }

@@ -7,7 +7,17 @@ import {
   roundMoney,
 } from "@/lib/commercial/money";
 import { d } from "@/lib/commercial/decimal";
-import { nextInvoiceNumber } from "@/lib/commercial/settings";
+import { nextInvoiceNumber, ensureCommercialOrgSettings } from "@/lib/commercial/settings";
+import {
+  firstScheduleLineOfType,
+  type PaymentScheduleLineType,
+} from "@/lib/commercial/payment-schedule";
+import { loadDealFinancialSummary } from "@/lib/commercial/deal-summary";
+import {
+  generateCommercialInvoicePdf,
+  type InvoicePdfInput,
+} from "@/lib/commercial/pdf-invoice";
+import type { QuotePdfSnapshot } from "@/lib/commercial/pdf-quote";
 
 function invoicePaymentStatus(totalTtc: number, amountPaid: number): CommercialInvoiceStatus {
   const paid = roundMoney(amountPaid, 2);
@@ -44,7 +54,15 @@ export async function getInvoiceDetail(orgId: string, id: string) {
     include: {
       lines: { orderBy: { sortOrder: "asc" } },
       payments: { orderBy: { paidAt: "desc" } },
-      quote: { select: { id: true, number: true, subject: true } },
+      quote: {
+        select: {
+          id: true,
+          number: true,
+          subject: true,
+          siteAddressSnapshot: true,
+        },
+      },
+      project: { select: { id: true, title: true } },
       clientExternalOrg: { select: { id: true, name: true, tradeName: true } },
       createdBy: { select: { id: true, name: true } },
     },
@@ -74,6 +92,34 @@ export async function getInvoiceDetail(orgId: string, id: string) {
   };
 }
 
+function asSnapshot(raw: unknown): QuotePdfSnapshot | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  return raw as QuotePdfSnapshot;
+}
+
+/** Résout % + libellé acompte : échéancier DEPOSIT → depositPercent → 30. */
+export function resolveDepositTerms(quote: {
+  paymentScheduleJson?: unknown;
+  depositPercent?: number | null;
+}): { percent: number; label: string; source: "schedule" | "depositPercent" | "default" } {
+  const depositLine = firstScheduleLineOfType(quote.paymentScheduleJson, "DEPOSIT");
+  if (depositLine) {
+    return {
+      percent: depositLine.percent,
+      label: depositLine.label,
+      source: "schedule",
+    };
+  }
+  if (quote.depositPercent != null && Number(quote.depositPercent) > 0) {
+    return {
+      percent: roundMoney(Number(quote.depositPercent), 4),
+      label: `Acompte de ${roundMoney(Number(quote.depositPercent), 2)} %`,
+      source: "depositPercent",
+    };
+  }
+  return { percent: 30, label: "Acompte à la commande", source: "default" };
+}
+
 export async function createDepositInvoice(input: {
   orgId: string;
   userId: string;
@@ -96,6 +142,7 @@ export async function createDepositInvoice(input: {
       clientSnapshotJson: true,
       issuerSnapshotJson: true,
       depositPercent: true,
+      paymentScheduleJson: true,
     },
   });
   if (!quote) throw new Error("Devis introuvable");
@@ -103,15 +150,26 @@ export async function createDepositInvoice(input: {
     throw new Error("Acompte réservé aux devis acceptés");
   }
 
+  const summary = await loadDealFinancialSummary(input.orgId, quote.id);
+  const remaining = summary?.remainingToInvoiceHt ?? d(quote.totalSellHt);
+  if (remaining <= 0.01) {
+    throw new Error("Rien à facturer — marché déjà facturé");
+  }
+
+  const terms = resolveDepositTerms({
+    paymentScheduleJson: quote.paymentScheduleJson,
+    depositPercent:
+      quote.depositPercent != null ? d(quote.depositPercent) : null,
+  });
+  const percent = input.percent ?? terms.percent;
   const marketHt = d(quote.totalSellHt);
-  const percent =
-    input.percent ??
-    (quote.depositPercent != null ? d(quote.depositPercent) : undefined) ??
-    30;
-  const amountHt =
+  let amountHt =
     input.amountHt != null
       ? roundMoney(input.amountHt, 2)
       : depositAmountFromPercent(marketHt, percent);
+  amountHt = roundMoney(Math.min(amountHt, remaining), 2);
+  if (amountHt <= 0) throw new Error("Montant d’acompte invalide");
+
   const vatRate = d(quote.defaultVatRate);
   const calc = calculateLine({
     kind: "WORK",
@@ -119,6 +177,10 @@ export async function createDepositInvoice(input: {
     unitSellHt: amountHt,
     vatRate,
   });
+  const designation =
+    terms.source === "schedule"
+      ? `${terms.label} (${percent} %) — devis ${quote.number}`
+      : `Acompte de ${percent} % sur devis ${quote.number} — ${quote.subject}`;
 
   return prisma.$transaction(async (tx) => {
     const number = await nextInvoiceNumber(input.orgId, tx);
@@ -150,7 +212,7 @@ export async function createDepositInvoice(input: {
       data: {
         organizationId: input.orgId,
         invoiceId: invoice.id,
-        designation: `Acompte de ${percent} % sur devis ${quote.number} — ${quote.subject}`,
+        designation,
         quantity: 1,
         unit: "U",
         unitSellHt: amountHt,
@@ -176,6 +238,167 @@ export async function createDepositInvoice(input: {
 
     return invoice;
   });
+}
+
+/**
+ * Situation ou solde depuis un devis accepté (montant HT marché, pas ligne à ligne).
+ * - FINAL / useRemaining → reste à facturer
+ * - PROGRESS + échéancier → % PROGRESS du marché, plafonné au reste
+ */
+export async function createQuoteProgressInvoice(input: {
+  orgId: string;
+  userId: string;
+  quoteId: string;
+  type: "PROGRESS" | "FINAL" | "STANDARD";
+  amountHt?: number;
+  useRemaining?: boolean;
+  useSchedule?: boolean;
+  dueDate?: Date | null;
+}) {
+  const quote = await prisma.commercialQuote.findFirst({
+    where: { id: input.quoteId, organizationId: input.orgId },
+    select: {
+      id: true,
+      status: true,
+      number: true,
+      subject: true,
+      totalSellHt: true,
+      defaultVatRate: true,
+      projectId: true,
+      clientExternalOrgId: true,
+      clientSnapshotJson: true,
+      issuerSnapshotJson: true,
+      paymentScheduleJson: true,
+    },
+  });
+  if (!quote) throw new Error("Devis introuvable");
+  if (quote.status !== "ACCEPTED") {
+    throw new Error("Facturation réservée aux devis acceptés");
+  }
+
+  const summary = await loadDealFinancialSummary(input.orgId, quote.id);
+  const remaining = summary?.remainingToInvoiceHt ?? 0;
+  if (remaining <= 0.01) {
+    throw new Error("Rien à facturer — marché déjà facturé");
+  }
+
+  const marketHt = d(quote.totalSellHt);
+  const vatRate = d(quote.defaultVatRate);
+  let amountHt: number;
+  let designation: string;
+  let subject: string;
+
+  if (input.type === "FINAL" || input.useRemaining) {
+    amountHt = roundMoney(remaining, 2);
+    designation = `Solde — devis ${quote.number} — ${quote.subject}`;
+    subject = `Solde — ${quote.number}`;
+  } else if (input.useSchedule) {
+    const scheduleType: PaymentScheduleLineType =
+      input.type === "PROGRESS" ? "PROGRESS" : "FINAL";
+    const line = firstScheduleLineOfType(quote.paymentScheduleJson, scheduleType);
+    if (!line) {
+      throw new Error(
+        `Aucune échéance ${scheduleType} dans l’échéancier — indiquez un montant`,
+      );
+    }
+    amountHt = roundMoney(
+      Math.min(depositAmountFromPercent(marketHt, line.percent), remaining),
+      2,
+    );
+    designation = `${line.label} (${line.percent} %) — devis ${quote.number}`;
+    subject = `${line.label} — ${quote.number}`;
+  } else if (input.amountHt != null) {
+    amountHt = roundMoney(input.amountHt, 2);
+    if (amountHt > remaining + 0.01) {
+      throw new Error(
+        `Montant supérieur au reste à facturer (${remaining.toFixed(2)} € HT)`,
+      );
+    }
+    designation =
+      input.type === "PROGRESS"
+        ? `Situation — devis ${quote.number} — ${quote.subject}`
+        : `Facture — devis ${quote.number} — ${quote.subject}`;
+    subject =
+      input.type === "PROGRESS"
+        ? `Situation — ${quote.number}`
+        : `Facture — ${quote.number}`;
+  } else {
+    throw new Error("Montant HT requis");
+  }
+
+  if (amountHt <= 0) throw new Error("Montant invalide");
+
+  return createStandardInvoice({
+    orgId: input.orgId,
+    userId: input.userId,
+    quoteId: quote.id,
+    subject,
+    clientExternalOrgId: quote.clientExternalOrgId,
+    projectId: quote.projectId,
+    dueDate: input.dueDate ?? null,
+    type: input.type === "FINAL" || input.useRemaining ? "FINAL" : input.type,
+    lines: [
+      {
+        designation,
+        quantity: 1,
+        unit: "U",
+        unitSellHt: amountHt,
+        vatRate,
+      },
+    ],
+  });
+}
+
+export async function generateInvoicePdfPreview(
+  orgId: string,
+  invoiceId: string,
+): Promise<{ buffer: Buffer; filename: string } | null> {
+  const inv = await getInvoiceDetail(orgId, invoiceId);
+  if (!inv) return null;
+  const settings = await ensureCommercialOrgSettings(orgId);
+
+  const pdfInput: InvoicePdfInput = {
+    number: inv.number,
+    subject: inv.subject ?? inv.number,
+    status: inv.status,
+    type: inv.type,
+    issueDate: inv.issueDate,
+    dueDate: inv.dueDate,
+    issuedAt: inv.issuedAt,
+    clientNotes: inv.clientNotes,
+    projectTitle: inv.project?.title ?? null,
+    siteAddressSnapshot: inv.quote?.siteAddressSnapshot ?? null,
+    quoteNumber: inv.quote?.number ?? null,
+    issuer: asSnapshot(inv.issuerSnapshotJson),
+    client: asSnapshot(inv.clientSnapshotJson),
+    currency: inv.currency,
+    invoiceMentions: settings.invoiceMentions,
+    legalMentions: settings.legalMentions,
+    bankIban: settings.bankIban,
+    bankBic: settings.bankBic,
+    bankName: settings.bankName,
+    depositPercent: inv.depositPercent,
+    totals: {
+      totalSellHt: inv.totalSellHt,
+      totalVat: inv.totalVat,
+      totalTtc: inv.totalTtc,
+      amountPaid: inv.amountPaid,
+      amountDue: inv.amountDue,
+    },
+    lines: inv.lines.map((l) => ({
+      designation: l.designation,
+      description: l.description,
+      quantity: l.quantity,
+      unit: l.unit,
+      unitSellHt: l.unitSellHt,
+      vatRate: l.vatRate,
+      lineSellHt: l.lineSellHt,
+    })),
+  };
+
+  const buffer = generateCommercialInvoicePdf(pdfInput);
+  const safe = inv.number.replace(/[^\w.-]+/g, "_");
+  return { buffer, filename: `facture-${safe}.pdf` };
 }
 
 export async function createStandardInvoice(input: {

@@ -111,7 +111,7 @@ export function HeaderDropdown({
               top: position.top,
               left: position.left,
               width,
-              zIndex: 9999,
+              zIndex,
             }}
           >
             {children}

@@ -32,6 +32,8 @@ export type InvoicePdfInput = {
   retentionAmountHt?: number | null;
   retentionRate?: number | null;
   depositDeductedHt?: number | null;
+  prorataAmountHt?: number | null;
+  prorataRate?: number | null;
   totals: {
     totalSellHt: number;
     totalVat: number;
@@ -333,12 +335,14 @@ export function generateInvoicePdfBuffer(input: InvoicePdfInput): Buffer {
   const boxW = 72;
   const boxX = pageW - MARGIN - boxW;
   const hasRetention = (input.retentionAmountHt ?? 0) > 0.004;
+  const hasProrata = (input.prorataAmountHt ?? 0) > 0.004;
   const hasDeposit = (input.depositDeductedHt ?? 0) > 0.004;
-  const hasBreakdown = hasRetention || hasDeposit;
+  const hasBreakdown = hasRetention || hasProrata || hasDeposit;
   let boxH = 26;
   if (hasBreakdown) {
     boxH = 32;
     if (hasRetention) boxH += 5.5;
+    if (hasProrata) boxH += 5.5;
     if (hasDeposit) boxH += 5.5;
     if (input.totals.amountPaid > 0) boxH += 12;
   } else if (input.totals.amountPaid > 0) {
@@ -358,6 +362,13 @@ export function generateInvoicePdfBuffer(input: InvoicePdfInput): Buffer {
     if (hasRetention) {
       doc.text(`RG ${input.retentionRate ?? ""} %`, boxX + 3, ty);
       doc.text(`- ${fmtEur(input.retentionAmountHt ?? 0)}`, boxX + boxW - 3, ty, {
+        align: "right",
+      });
+      ty += 5.5;
+    }
+    if (hasProrata) {
+      doc.text(`Compte prorata ${input.prorataRate ?? ""} %`, boxX + 3, ty);
+      doc.text(`- ${fmtEur(input.prorataAmountHt ?? 0)}`, boxX + boxW - 3, ty, {
         align: "right",
       });
       ty += 5.5;

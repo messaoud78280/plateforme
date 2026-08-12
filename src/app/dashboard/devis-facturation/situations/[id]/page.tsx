@@ -94,6 +94,29 @@ export default async function SituationPage({
         netPeriodTtc: Number(
           (s as { netPeriodTtc?: number }).netPeriodTtc ?? s.periodTtc,
         ),
+        prorataEnabledSnapshot: Boolean(
+          (s as { prorataEnabledSnapshot?: boolean }).prorataEnabledSnapshot,
+        ),
+        prorataRateSnapshot: Number(
+          (s as { prorataRateSnapshot?: number }).prorataRateSnapshot ?? 0,
+        ),
+        prorataPreviousHt: Number(
+          (s as { prorataPreviousHt?: number }).prorataPreviousHt ?? 0,
+        ),
+        prorataPeriodHt: Number(
+          (s as { prorataPeriodHt?: number }).prorataPeriodHt ?? 0,
+        ),
+        prorataCumulativeHt: Number(
+          (s as { prorataCumulativeHt?: number }).prorataCumulativeHt ?? 0,
+        ),
+        prorataLabelSnapshot:
+          (s as { prorataLabelSnapshot?: string | null }).prorataLabelSnapshot ??
+          null,
+        postProrataPeriodSellHt: Number(
+          (s as { postProrataPeriodSellHt?: number }).postProrataPeriodSellHt ??
+            (s as { netPeriodSellHt?: number }).netPeriodSellHt ??
+            s.periodSellHt,
+        ),
         depositDeductedHt: Number(
           (s as { depositDeductedHt?: number }).depositDeductedHt ?? 0,
         ),

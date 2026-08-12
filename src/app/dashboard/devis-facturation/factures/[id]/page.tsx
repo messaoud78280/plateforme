@@ -42,6 +42,8 @@ export default async function FactureDetailPage({
         retentionAmountHt: inv.retentionAmountHt,
         retentionRate: inv.retentionRate,
         depositDeductedHt: inv.depositDeductedHt,
+        prorataAmountHt: inv.prorataAmountHt,
+        prorataRate: inv.prorataRate,
         clientNotes: inv.clientNotes,
         issuerSnapshotJson: (inv.issuerSnapshotJson as Record<string, string | null> | null) ?? null,
         clientSnapshotJson: (inv.clientSnapshotJson as Record<string, string | null> | null) ?? null,

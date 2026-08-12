@@ -62,6 +62,13 @@ type Statement = {
   netPeriodSellHt: number;
   netPeriodVat: number;
   netPeriodTtc: number;
+  prorataEnabledSnapshot: boolean;
+  prorataRateSnapshot: number;
+  prorataPreviousHt: number;
+  prorataPeriodHt: number;
+  prorataCumulativeHt: number;
+  prorataLabelSnapshot: string | null;
+  postProrataPeriodSellHt: number;
   depositDeductedHt: number;
   payablePeriodSellHt: number;
   payablePeriodVat: number;
@@ -392,6 +399,43 @@ export function ProgressStatementEditor({
               <p className="text-slate-500">Net après RG</p>
               <p className="font-bold tabular-nums text-[#1e3a5f]">
                 {fmt(statement.netPeriodSellHt)} € HT · {fmt(statement.netPeriodTtc)} € TTC
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {statement.prorataEnabledSnapshot && statement.prorataPeriodHt > 0.004 ? (
+        <div className="rounded-xl border border-violet-200 bg-violet-50/50 p-4">
+          <p className="text-sm font-bold text-violet-950">
+            {statement.prorataLabelSnapshot?.trim() || "Compte prorata"}
+          </p>
+          <p className="mt-0.5 text-[11px] text-violet-800/80">
+            Provision / retenue — marché {fmt(statement.prorataRateSnapshot)} %
+          </p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 text-xs">
+            <div>
+              <p className="text-slate-500">Précédent</p>
+              <p className="font-bold tabular-nums">
+                {fmt(statement.prorataPreviousHt)} €
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-500">Période</p>
+              <p className="font-bold tabular-nums">
+                − {fmt(statement.prorataPeriodHt)} € HT
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-500">Cumul</p>
+              <p className="font-bold tabular-nums">
+                {fmt(statement.prorataCumulativeHt)} €
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-500">Net après prorata</p>
+              <p className="font-bold tabular-nums text-[#1e3a5f]">
+                {fmt(statement.postProrataPeriodSellHt)} € HT
               </p>
             </div>
           </div>

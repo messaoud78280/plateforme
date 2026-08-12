@@ -3741,6 +3741,11 @@ enum CommercialRetentionStatus {
   SETTLED
 }
 
+/// DF-6C — base de calcul de la provision compte prorata (extensible)
+enum CommercialProrataBaseMode {
+  PERIOD_WORK_HT
+}
+
 enum CommercialComponentType {
   MATERIAL
   LABOR
@@ -3826,6 +3831,11 @@ model CommercialQuote {
   retentionGuaranteePercent Decimal            @default(0) @db.Decimal(6, 4)
   /// Date prévue de libération de la RG (marché) — facultative
   retentionReleaseDueDate   DateTime?          @db.Date
+  /// DF-6C — provision / retenue compte prorata (pas une remise commerciale)
+  prorataEnabled            Boolean            @default(false)
+  prorataPercent            Decimal            @default(0) @db.Decimal(6, 4)
+  prorataBaseMode           CommercialProrataBaseMode @default(PERIOD_WORK_HT)
+  prorataLabel              String?
   currentVersionId       String?               @unique
   acceptedAt             DateTime?
   acceptedVersionId      String?
@@ -4051,7 +4061,10 @@ model CommercialInvoice {
   retentionRate        Decimal?                @db.Decimal(6, 4)
   /// DF-6B — acompte déduit sur cette facture de situation
   depositDeductedHt    Decimal                 @default(0) @db.Decimal(14, 4)
-  /// Totaux = net exigible (après RG et déduction acompte si applicable)
+  /// DF-6C — provision compte prorata déduite (HT)
+  prorataAmountHt      Decimal                 @default(0) @db.Decimal(14, 4)
+  prorataRate          Decimal?                @db.Decimal(6, 4)
+  /// Totaux = net exigible (après RG, prorata et acompte si applicable)
   totalSellHt          Decimal                 @default(0) @db.Decimal(14, 4)
   totalVat             Decimal                 @default(0) @db.Decimal(14, 4)
   totalTtc             Decimal                 @default(0) @db.Decimal(14, 4)
@@ -4125,7 +4138,20 @@ model CommercialProgressStatement {
   netPeriodSellHt         Decimal                        @default(0) @db.Decimal(14, 4)
   netPeriodVat            Decimal                        @default(0) @db.Decimal(14, 4)
   netPeriodTtc            Decimal                        @default(0) @db.Decimal(14, 4)
-  /// DF-6B — déduction d’acompte sur la période (après RG)
+  /// DF-6C — provision compte prorata (snapshot + montants)
+  prorataEnabledSnapshot  Boolean                        @default(false)
+  prorataRateSnapshot     Decimal                        @default(0) @db.Decimal(6, 4)
+  prorataBaseModeSnapshot CommercialProrataBaseMode      @default(PERIOD_WORK_HT)
+  prorataBaseAmountHt     Decimal                        @default(0) @db.Decimal(14, 4)
+  prorataLabelSnapshot    String?
+  prorataPreviousHt       Decimal                        @default(0) @db.Decimal(14, 4)
+  prorataPeriodHt         Decimal                        @default(0) @db.Decimal(14, 4)
+  prorataCumulativeHt     Decimal                        @default(0) @db.Decimal(14, 4)
+  /// Net après RG et prorata (avant acompte)
+  postProrataPeriodSellHt Decimal                        @default(0) @db.Decimal(14, 4)
+  postProrataPeriodVat    Decimal                        @default(0) @db.Decimal(14, 4)
+  postProrataPeriodTtc    Decimal                        @default(0) @db.Decimal(14, 4)
+  /// DF-6B — déduction d’acompte sur la période (après RG + prorata)
   depositDeductedHt       Decimal                        @default(0) @db.Decimal(14, 4)
   payablePeriodSellHt     Decimal                        @default(0) @db.Decimal(14, 4)
   payablePeriodVat        Decimal                        @default(0) @db.Decimal(14, 4)

@@ -44,6 +44,8 @@ type InvoiceDoc = {
   retentionAmountHt?: number | null;
   retentionRate?: number | null;
   depositDeductedHt?: number | null;
+  prorataAmountHt?: number | null;
+  prorataRate?: number | null;
   clientNotes: string | null;
   issuerSnapshotJson: Snapshot | null;
   clientSnapshotJson: Snapshot | null;
@@ -296,6 +298,8 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
             {invoice.worksSellHt != null &&
             ((invoice.retentionAmountHt != null &&
               invoice.retentionAmountHt > 0.004) ||
+              (invoice.prorataAmountHt != null &&
+                invoice.prorataAmountHt > 0.004) ||
               (invoice.depositDeductedHt != null &&
                 invoice.depositDeductedHt > 0.004)) ? (
               <>
@@ -311,6 +315,15 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
                     <dt>RG {invoice.retentionRate ?? ""} %</dt>
                     <dd className="tabular-nums font-medium">
                       − {fmt(invoice.retentionAmountHt)} €
+                    </dd>
+                  </div>
+                ) : null}
+                {invoice.prorataAmountHt != null &&
+                invoice.prorataAmountHt > 0.004 ? (
+                  <div className="flex justify-between text-violet-800">
+                    <dt>Compte prorata {invoice.prorataRate ?? ""} %</dt>
+                    <dd className="tabular-nums font-medium">
+                      − {fmt(invoice.prorataAmountHt)} €
                     </dd>
                   </div>
                 ) : null}
@@ -345,6 +358,7 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
             <div className="flex justify-between border-t border-slate-100 pt-2 text-base font-bold text-[#1e3a5f]">
               <dt>
                 {(invoice.retentionAmountHt && invoice.retentionAmountHt > 0) ||
+                (invoice.prorataAmountHt && invoice.prorataAmountHt > 0) ||
                 (invoice.depositDeductedHt && invoice.depositDeductedHt > 0)
                   ? "Net TTC exigible"
                   : "Total TTC"}

@@ -82,6 +82,8 @@ export async function getInvoiceDetail(orgId: string, id: string) {
     retentionAmountHt: d(inv.retentionAmountHt ?? 0),
     retentionRate: inv.retentionRate != null ? d(inv.retentionRate) : null,
     depositDeductedHt: d(inv.depositDeductedHt ?? 0),
+    prorataAmountHt: d(inv.prorataAmountHt ?? 0),
+    prorataRate: inv.prorataRate != null ? d(inv.prorataRate) : null,
     lines: inv.lines.map((l) => ({
       ...l,
       quantity: d(l.quantity),
@@ -390,6 +392,8 @@ export async function generateInvoicePdfPreview(
     retentionAmountHt: inv.retentionAmountHt,
     retentionRate: inv.retentionRate,
     depositDeductedHt: inv.depositDeductedHt,
+    prorataAmountHt: inv.prorataAmountHt,
+    prorataRate: inv.prorataRate,
     totals: {
       totalSellHt: inv.totalSellHt,
       totalVat: inv.totalVat,

@@ -12,6 +12,7 @@ import {
   PROGRESS_STATEMENT_STATUS_LABELS,
 } from "@/lib/commercial/progress-calc";
 import { computeRetentionForPeriod } from "@/lib/commercial/retention-calc";
+import { computeProrataProvision } from "@/lib/commercial/prorata-calc";
 import { computeDepositDeduction } from "@/lib/commercial/deposit-calc";
 import { getQuoteDepositBalance } from "@/lib/commercial/deposit";
 
@@ -97,6 +98,14 @@ function mapStatement<T extends Record<string, unknown>>(s: T) {
     "netPeriodSellHt",
     "netPeriodVat",
     "netPeriodTtc",
+    "prorataRateSnapshot",
+    "prorataBaseAmountHt",
+    "prorataPreviousHt",
+    "prorataPeriodHt",
+    "prorataCumulativeHt",
+    "postProrataPeriodSellHt",
+    "postProrataPeriodVat",
+    "postProrataPeriodTtc",
     "depositDeductedHt",
     "payablePeriodSellHt",
     "payablePeriodVat",
@@ -125,6 +134,10 @@ async function loadAcceptedBillableLines(orgId: string, quoteId: string) {
       currentVersionId: true,
       retentionGuaranteePercent: true,
       retentionReleaseDueDate: true,
+      prorataEnabled: true,
+      prorataPercent: true,
+      prorataBaseMode: true,
+      prorataLabel: true,
       defaultVatRate: true,
     },
   });
@@ -340,11 +353,29 @@ export async function createProgressStatement(input: {
     previousRetentionHt,
   });
 
+  const previousProrataHt = lastClosed
+    ? d(
+        (lastClosed as { prorataCumulativeHt?: unknown }).prorataCumulativeHt ??
+          0,
+      )
+    : 0;
+  const prorataEnabled = Boolean(quote.prorataEnabled) && d(quote.prorataPercent) > 0;
+  const prorata = computeProrataProvision({
+    enabled: prorataEnabled,
+    ratePercent: d(quote.prorataPercent),
+    baseMode: quote.prorataBaseMode ?? "PERIOD_WORK_HT",
+    periodSellHt: totals.periodSellHt,
+    previousProrataHt,
+    netAfterRetentionSellHt: retention.netPeriodSellHt,
+    netAfterRetentionVat: retention.netPeriodVat,
+    netAfterRetentionTtc: retention.netPeriodTtc,
+  });
+
   const depositBal = await getQuoteDepositBalance(input.orgId, quote.id);
   const deposit = computeDepositDeduction({
-    netPeriodSellHt: retention.netPeriodSellHt,
-    netPeriodVat: retention.netPeriodVat,
-    netPeriodTtc: retention.netPeriodTtc,
+    netPeriodSellHt: prorata.postProrataPeriodSellHt,
+    netPeriodVat: prorata.postProrataPeriodVat,
+    netPeriodTtc: prorata.postProrataPeriodTtc,
     remainingDepositHt: depositBal.remainingToDeductHt,
   });
 
@@ -383,6 +414,17 @@ export async function createProgressStatement(input: {
           netPeriodSellHt: retention.netPeriodSellHt,
           netPeriodVat: retention.netPeriodVat,
           netPeriodTtc: retention.netPeriodTtc,
+          prorataEnabledSnapshot: prorata.enabled,
+          prorataRateSnapshot: prorata.ratePercent,
+          prorataBaseModeSnapshot: prorata.baseMode as "PERIOD_WORK_HT",
+          prorataBaseAmountHt: prorata.prorataBaseAmountHt,
+          prorataLabelSnapshot: quote.prorataLabel,
+          prorataPreviousHt: prorata.prorataPreviousHt,
+          prorataPeriodHt: prorata.prorataPeriodHt,
+          prorataCumulativeHt: prorata.prorataCumulativeHt,
+          postProrataPeriodSellHt: prorata.postProrataPeriodSellHt,
+          postProrataPeriodVat: prorata.postProrataPeriodVat,
+          postProrataPeriodTtc: prorata.postProrataPeriodTtc,
           depositDeductedHt: deposit.depositDeductedHt,
           payablePeriodSellHt: deposit.payablePeriodSellHt,
           payablePeriodVat: deposit.payablePeriodVat,
@@ -532,11 +574,22 @@ export async function updateProgressStatementLines(input: {
     previousRetentionHt: d(statement.retentionPreviousHt),
   });
 
+  const prorata = computeProrataProvision({
+    enabled: Boolean(statement.prorataEnabledSnapshot),
+    ratePercent: d(statement.prorataRateSnapshot),
+    baseMode: statement.prorataBaseModeSnapshot ?? "PERIOD_WORK_HT",
+    periodSellHt: totals.periodSellHt,
+    previousProrataHt: d(statement.prorataPreviousHt),
+    netAfterRetentionSellHt: retention.netPeriodSellHt,
+    netAfterRetentionVat: retention.netPeriodVat,
+    netAfterRetentionTtc: retention.netPeriodTtc,
+  });
+
   const depositBal = await getQuoteDepositBalance(input.orgId, statement.quoteId);
   const deposit = computeDepositDeduction({
-    netPeriodSellHt: retention.netPeriodSellHt,
-    netPeriodVat: retention.netPeriodVat,
-    netPeriodTtc: retention.netPeriodTtc,
+    netPeriodSellHt: prorata.postProrataPeriodSellHt,
+    netPeriodVat: prorata.postProrataPeriodVat,
+    netPeriodTtc: prorata.postProrataPeriodTtc,
     remainingDepositHt: depositBal.remainingToDeductHt,
   });
 
@@ -583,6 +636,12 @@ export async function updateProgressStatementLines(input: {
         netPeriodSellHt: retention.netPeriodSellHt,
         netPeriodVat: retention.netPeriodVat,
         netPeriodTtc: retention.netPeriodTtc,
+        prorataBaseAmountHt: prorata.prorataBaseAmountHt,
+        prorataPeriodHt: prorata.prorataPeriodHt,
+        prorataCumulativeHt: prorata.prorataCumulativeHt,
+        postProrataPeriodSellHt: prorata.postProrataPeriodSellHt,
+        postProrataPeriodVat: prorata.postProrataPeriodVat,
+        postProrataPeriodTtc: prorata.postProrataPeriodTtc,
         depositDeductedHt: deposit.depositDeductedHt,
         payablePeriodSellHt: deposit.payablePeriodSellHt,
         payablePeriodVat: deposit.payablePeriodVat,
@@ -795,15 +854,26 @@ export async function generateInvoiceFromProgressStatement(input: {
     const netVat = d(statement.netPeriodVat);
     const netTtc = d(statement.netPeriodTtc);
 
+    const prorata = computeProrataProvision({
+      enabled: Boolean(statement.prorataEnabledSnapshot),
+      ratePercent: d(statement.prorataRateSnapshot),
+      baseMode: statement.prorataBaseModeSnapshot ?? "PERIOD_WORK_HT",
+      periodSellHt: worksHt,
+      previousProrataHt: d(statement.prorataPreviousHt),
+      netAfterRetentionSellHt: netHt,
+      netAfterRetentionVat: netVat,
+      netAfterRetentionTtc: netTtc,
+    });
+
     const depositBal = await getQuoteDepositBalance(
       input.orgId,
       statement.quoteId,
       { excludeStatementId: statement.id },
     );
     const deposit = computeDepositDeduction({
-      netPeriodSellHt: netHt,
-      netPeriodVat: netVat,
-      netPeriodTtc: netTtc,
+      netPeriodSellHt: prorata.postProrataPeriodSellHt,
+      netPeriodVat: prorata.postProrataPeriodVat,
+      netPeriodTtc: prorata.postProrataPeriodTtc,
       remainingDepositHt: depositBal.remainingToDeductHt,
     });
 
@@ -826,8 +896,30 @@ export async function generateInvoiceFromProgressStatement(input: {
       });
     }
 
+    if (prorata.prorataPeriodHt > 0.004) {
+      const avgRate =
+        netHt > 0 ? roundMoney((netVat / netHt) * 100, 4) : 20;
+      const label =
+        statement.prorataLabelSnapshot?.trim() || "Compte prorata";
+      prepared.push({
+        designation: `${label} ${prorata.ratePercent} %`,
+        description: `${statement.label} — provision / retenue (pas une remise) — base ${prorata.prorataBaseAmountHt.toFixed(2)} € HT`,
+        quantity: 1,
+        unit: "U",
+        unitSellHt: -prorata.prorataPeriodHt,
+        vatRate: avgRate,
+        lineSellHt: -prorata.prorataPeriodHt,
+        lineVat: -prorata.prorataPeriodVat,
+        lineTtc: -prorata.prorataPeriodTtc,
+        sortOrder: prepared.length,
+      });
+    }
+
     if (deposit.depositDeductedHt > 0.004) {
-      const avgRate = netHt > 0 ? roundMoney((netVat / netHt) * 100, 4) : 20;
+      const baseHt = prorata.postProrataPeriodSellHt;
+      const baseVat = prorata.postProrataPeriodVat;
+      const avgRate =
+        baseHt > 0 ? roundMoney((baseVat / baseHt) * 100, 4) : 20;
       prepared.push({
         designation: "Déduction d’acompte",
         description: `Imputation sur acomptes déjà facturés — marché ${statement.quote.number}`,
@@ -881,6 +973,9 @@ export async function generateInvoiceFromProgressStatement(input: {
           retentionHt > 0
             ? `Travaux ${worksHt.toFixed(2)} € HT — RG ${retentionRate} % : −${retentionHt.toFixed(2)} € HT`
             : `Travaux ${worksHt.toFixed(2)} € HT`,
+          prorata.prorataPeriodHt > 0
+            ? `Compte prorata ${prorata.ratePercent} % : −${prorata.prorataPeriodHt.toFixed(2)} € HT (cumul ${prorata.prorataCumulativeHt.toFixed(2)} €)`
+            : null,
           deposit.depositDeductedHt > 0
             ? `Déduction acompte : −${deposit.depositDeductedHt.toFixed(2)} € HT`
             : null,
@@ -893,6 +988,8 @@ export async function generateInvoiceFromProgressStatement(input: {
         worksTtc,
         retentionAmountHt: retentionHt,
         retentionRate: retentionHt > 0 ? retentionRate : null,
+        prorataAmountHt: prorata.prorataPeriodHt,
+        prorataRate: prorata.prorataPeriodHt > 0 ? prorata.ratePercent : null,
         depositDeductedHt: deposit.depositDeductedHt,
         totalSellHt: payableHt,
         totalVat: payableVat,
@@ -944,6 +1041,12 @@ export async function generateInvoiceFromProgressStatement(input: {
       where: { id: statement.id },
       data: {
         status: "INVOICED",
+        prorataBaseAmountHt: prorata.prorataBaseAmountHt,
+        prorataPeriodHt: prorata.prorataPeriodHt,
+        prorataCumulativeHt: prorata.prorataCumulativeHt,
+        postProrataPeriodSellHt: prorata.postProrataPeriodSellHt,
+        postProrataPeriodVat: prorata.postProrataPeriodVat,
+        postProrataPeriodTtc: prorata.postProrataPeriodTtc,
         depositDeductedHt: deposit.depositDeductedHt,
         payablePeriodSellHt: payableHt,
         payablePeriodVat: payableVat,

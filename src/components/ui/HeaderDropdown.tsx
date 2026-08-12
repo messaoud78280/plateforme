@@ -23,6 +23,8 @@ type HeaderDropdownProps = {
   align?: "left" | "right";
   width?: number;
   panelId?: string;
+  /** Défaut 9999 (header). Préférer ~50 pour menus de page (sous modales z-80). */
+  zIndex?: number;
 };
 
 export function HeaderDropdown({
@@ -32,6 +34,7 @@ export function HeaderDropdown({
   align = "right",
   width = 288,
   panelId,
+  zIndex = 9999,
 }: HeaderDropdownProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);

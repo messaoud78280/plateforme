@@ -26,6 +26,11 @@ export type InvoicePdfInput = {
   bankBic?: string | null;
   bankName?: string | null;
   depositPercent?: number | null;
+  worksSellHt?: number | null;
+  worksVat?: number | null;
+  worksTtc?: number | null;
+  retentionAmountHt?: number | null;
+  retentionRate?: number | null;
   totals: {
     totalSellHt: number;
     totalVat: number;
@@ -322,37 +327,79 @@ export function generateInvoicePdfBuffer(input: InvoicePdfInput): Buffer {
 
   inTable = false;
 
-  ensureSpace(36);
+  ensureSpace(48);
   y += 4;
-  const boxW = 70;
+  const boxW = 72;
   const boxX = pageW - MARGIN - boxW;
-  const boxH = input.totals.amountPaid > 0 ? 34 : 26;
+  const hasRetention = (input.retentionAmountHt ?? 0) > 0.004;
+  const boxH = hasRetention
+    ? input.totals.amountPaid > 0
+      ? 46
+      : 38
+    : input.totals.amountPaid > 0
+      ? 34
+      : 26;
   doc.setDrawColor(...NAVY);
   doc.setLineWidth(0.3);
   doc.roundedRect(boxX, y, boxW, boxH, 2, 2, "S");
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(...SLATE);
   doc.setFont("helvetica", "normal");
-  doc.text("Total HT", boxX + 3, y + 7);
-  doc.text(fmtEur(input.totals.totalSellHt), boxX + boxW - 3, y + 7, {
-    align: "right",
-  });
-  doc.text("TVA", boxX + 3, y + 14);
-  doc.text(fmtEur(input.totals.totalVat), boxX + boxW - 3, y + 14, {
-    align: "right",
-  });
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...NAVY);
-  doc.text("Total TTC", boxX + 3, y + 22);
-  doc.text(fmtEur(input.totals.totalTtc), boxX + boxW - 3, y + 22, {
-    align: "right",
-  });
-  if (input.totals.amountPaid > 0) {
+  let ty = y + 6;
+  if (hasRetention && input.worksSellHt != null) {
+    doc.text("Travaux HT", boxX + 3, ty);
+    doc.text(fmtEur(input.worksSellHt), boxX + boxW - 3, ty, { align: "right" });
+    ty += 5.5;
+    doc.text(`RG ${input.retentionRate ?? ""} %`, boxX + 3, ty);
+    doc.text(`- ${fmtEur(input.retentionAmountHt ?? 0)}`, boxX + boxW - 3, ty, {
+      align: "right",
+    });
+    ty += 5.5;
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...NAVY);
+    doc.text("Net HT", boxX + 3, ty);
+    doc.text(fmtEur(input.totals.totalSellHt), boxX + boxW - 3, ty, {
+      align: "right",
+    });
+    ty += 5.5;
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...SLATE);
-    doc.setFontSize(7.5);
-    doc.text("Reste dû", boxX + 3, y + 30);
-    doc.text(fmtEur(input.totals.amountDue), boxX + boxW - 3, y + 30, {
+    doc.text("TVA", boxX + 3, ty);
+    doc.text(fmtEur(input.totals.totalVat), boxX + boxW - 3, ty, {
+      align: "right",
+    });
+    ty += 5.5;
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...NAVY);
+    doc.text("Net TTC exigible", boxX + 3, ty);
+    doc.text(fmtEur(input.totals.totalTtc), boxX + boxW - 3, ty, {
+      align: "right",
+    });
+  } else {
+    doc.text("Total HT", boxX + 3, ty);
+    doc.text(fmtEur(input.totals.totalSellHt), boxX + boxW - 3, ty, {
+      align: "right",
+    });
+    ty += 7;
+    doc.text("TVA", boxX + 3, ty);
+    doc.text(fmtEur(input.totals.totalVat), boxX + boxW - 3, ty, {
+      align: "right",
+    });
+    ty += 8;
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...NAVY);
+    doc.text("Total TTC", boxX + 3, ty);
+    doc.text(fmtEur(input.totals.totalTtc), boxX + boxW - 3, ty, {
+      align: "right",
+    });
+  }
+  if (input.totals.amountPaid > 0) {
+    ty += 6;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...SLATE);
+    doc.setFontSize(7);
+    doc.text("Reste dû", boxX + 3, ty);
+    doc.text(fmtEur(input.totals.amountDue), boxX + boxW - 3, ty, {
       align: "right",
     });
   }

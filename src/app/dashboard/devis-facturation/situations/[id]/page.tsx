@@ -72,6 +72,28 @@ export default async function SituationPage({
         remainingSellHt: Number(s.remainingSellHt),
         remainingVat: Number(s.remainingVat),
         remainingTtc: Number(s.remainingTtc),
+        retentionRateSnapshot: Number(
+          (s as { retentionRateSnapshot?: number }).retentionRateSnapshot ?? 0,
+        ),
+        retentionCapHt: Number((s as { retentionCapHt?: number }).retentionCapHt ?? 0),
+        retentionPreviousHt: Number(
+          (s as { retentionPreviousHt?: number }).retentionPreviousHt ?? 0,
+        ),
+        retentionPeriodHt: Number(
+          (s as { retentionPeriodHt?: number }).retentionPeriodHt ?? 0,
+        ),
+        retentionCumulativeHt: Number(
+          (s as { retentionCumulativeHt?: number }).retentionCumulativeHt ?? 0,
+        ),
+        netPeriodSellHt: Number(
+          (s as { netPeriodSellHt?: number }).netPeriodSellHt ?? s.periodSellHt,
+        ),
+        netPeriodVat: Number(
+          (s as { netPeriodVat?: number }).netPeriodVat ?? s.periodVat,
+        ),
+        netPeriodTtc: Number(
+          (s as { netPeriodTtc?: number }).netPeriodTtc ?? s.periodTtc,
+        ),
         quote: s.quote,
         project: s.project,
         invoice: s.invoice,

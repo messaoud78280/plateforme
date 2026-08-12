@@ -54,6 +54,14 @@ type Statement = {
   remainingSellHt: number;
   remainingVat: number;
   remainingTtc: number;
+  retentionRateSnapshot: number;
+  retentionCapHt: number;
+  retentionPreviousHt: number;
+  retentionPeriodHt: number;
+  retentionCumulativeHt: number;
+  netPeriodSellHt: number;
+  netPeriodVat: number;
+  netPeriodTtc: number;
   quote: { id: string; number: string; subject: string };
   project: { id: string; title: string } | null;
   invoice: { id: string; number: string } | null;
@@ -330,7 +338,7 @@ export function ProgressStatementEditor({
           ttc={statement.previousTtc}
         />
         <TotalsBlock
-          title="Cette situation"
+          title="Cette situation (brut)"
           ht={canEdit ? previewTotals.period : statement.periodSellHt}
           vat={statement.periodVat}
           ttc={statement.periodTtc}
@@ -349,6 +357,42 @@ export function ProgressStatementEditor({
           ttc={statement.remainingTtc}
         />
       </div>
+
+      {statement.retentionRateSnapshot > 0 || statement.retentionPeriodHt > 0 ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+          <p className="text-sm font-bold text-amber-950">Retenue de garantie</p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-5 text-xs">
+            <div>
+              <p className="text-slate-500">Taux</p>
+              <p className="font-bold">{fmt(statement.retentionRateSnapshot)} %</p>
+            </div>
+            <div>
+              <p className="text-slate-500">Précédent</p>
+              <p className="font-bold tabular-nums">
+                {fmt(statement.retentionPreviousHt)} €
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-500">Cette période</p>
+              <p className="font-bold tabular-nums">
+                {fmt(statement.retentionPeriodHt)} €
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-500">Cumul RG</p>
+              <p className="font-bold tabular-nums">
+                {fmt(statement.retentionCumulativeHt)} € / {fmt(statement.retentionCapHt)} €
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-500">Net période après RG</p>
+              <p className="font-bold tabular-nums text-[#1e3a5f]">
+                {fmt(statement.netPeriodSellHt)} € HT · {fmt(statement.netPeriodTtc)} € TTC
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {canEdit ? (
         <div className="flex flex-wrap gap-3 rounded-xl border border-slate-200 bg-white p-3">

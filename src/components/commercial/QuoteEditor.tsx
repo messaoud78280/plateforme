@@ -15,6 +15,7 @@ import {
 } from "@/lib/commercial/money";
 import { QuoteAcceptedNextSteps } from "@/components/commercial/QuoteAcceptedNextSteps";
 import { ProgressStatementsPanel } from "@/components/commercial/ProgressStatementsPanel";
+import { QuoteRetentionPanel } from "@/components/commercial/QuoteRetentionPanel";
 import { LibraryPickerModal } from "@/components/commercial/LibraryPickerModal";
 import { LineCompositionDrawer } from "@/components/commercial/LineCompositionDrawer";
 import { QuotePriceCheckPanel } from "@/components/commercial/QuotePriceCheckPanel";
@@ -1198,6 +1199,7 @@ export function QuoteEditor({
                 project={quote.project}
               />
             </div>
+            <QuoteRetentionPanel quoteId={quote.id} />
             <ProgressStatementsPanel quoteId={quote.id} />
             <AcceptedActions quoteId={quote.id} />
           </div>

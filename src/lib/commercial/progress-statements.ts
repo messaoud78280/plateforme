@@ -11,6 +11,7 @@ import {
   computeProgressTotals,
   PROGRESS_STATEMENT_STATUS_LABELS,
 } from "@/lib/commercial/progress-calc";
+import { computeRetentionForPeriod } from "@/lib/commercial/retention-calc";
 
 export { PROGRESS_STATEMENT_STATUS_LABELS };
 
@@ -86,6 +87,14 @@ function mapStatement<T extends Record<string, unknown>>(s: T) {
     "remainingSellHt",
     "remainingVat",
     "remainingTtc",
+    "retentionRateSnapshot",
+    "retentionCapHt",
+    "retentionPreviousHt",
+    "retentionPeriodHt",
+    "retentionCumulativeHt",
+    "netPeriodSellHt",
+    "netPeriodVat",
+    "netPeriodTtc",
   ] as const;
   const out: Record<string, unknown> = { ...s };
   for (const k of moneyKeys) {
@@ -108,6 +117,9 @@ async function loadAcceptedBillableLines(orgId: string, quoteId: string) {
       issuerSnapshotJson: true,
       acceptedVersionId: true,
       currentVersionId: true,
+      retentionGuaranteePercent: true,
+      retentionReleaseDueDate: true,
+      defaultVatRate: true,
     },
   });
   if (!quote) throw new Error("Devis introuvable");
@@ -309,6 +321,19 @@ export async function createProgressStatement(input: {
     })),
   );
 
+  const previousRetentionHt = lastClosed
+    ? d(lastClosed.retentionCumulativeHt)
+    : 0;
+  const rateSnapshot = d(quote.retentionGuaranteePercent);
+  const retention = computeRetentionForPeriod({
+    periodSellHt: totals.periodSellHt,
+    periodVat: totals.periodVat,
+    periodTtc: totals.periodTtc,
+    ratePercent: rateSnapshot,
+    marketSellHt: totals.marketSellHt,
+    previousRetentionHt,
+  });
+
   try {
     return await prisma.$transaction(async (tx) => {
       const statement = await tx.commercialProgressStatement.create({
@@ -336,6 +361,14 @@ export async function createProgressStatement(input: {
           remainingSellHt: totals.remainingSellHt,
           remainingVat: totals.remainingVat,
           remainingTtc: totals.remainingTtc,
+          retentionRateSnapshot: retention.ratePercent,
+          retentionCapHt: retention.retentionCapHt,
+          retentionPreviousHt: retention.retentionPreviousHt,
+          retentionPeriodHt: retention.retentionPeriodHt,
+          retentionCumulativeHt: retention.retentionCumulativeHt,
+          netPeriodSellHt: retention.netPeriodSellHt,
+          netPeriodVat: retention.netPeriodVat,
+          netPeriodTtc: retention.netPeriodTtc,
           createdById: input.userId,
         },
       });
@@ -472,6 +505,15 @@ export async function updateProgressStatementLines(input: {
     }),
   );
 
+  const retention = computeRetentionForPeriod({
+    periodSellHt: totals.periodSellHt,
+    periodVat: totals.periodVat,
+    periodTtc: totals.periodTtc,
+    ratePercent: d(statement.retentionRateSnapshot),
+    marketSellHt: totals.marketSellHt,
+    previousRetentionHt: d(statement.retentionPreviousHt),
+  });
+
   await prisma.$transaction(async (tx) => {
     for (const u of updates) {
       await tx.commercialProgressStatementLine.update({
@@ -509,6 +551,12 @@ export async function updateProgressStatementLines(input: {
         marketSellHt: totals.marketSellHt,
         marketVat: totals.marketVat,
         marketTtc: totals.marketTtc,
+        retentionCapHt: retention.retentionCapHt,
+        retentionPeriodHt: retention.retentionPeriodHt,
+        retentionCumulativeHt: retention.retentionCumulativeHt,
+        netPeriodSellHt: retention.netPeriodSellHt,
+        netPeriodVat: retention.netPeriodVat,
+        netPeriodTtc: retention.netPeriodTtc,
       },
     });
   });
@@ -628,6 +676,8 @@ export async function generateInvoiceFromProgressStatement(input: {
             clientExternalOrgId: true,
             clientSnapshotJson: true,
             issuerSnapshotJson: true,
+            retentionReleaseDueDate: true,
+            defaultVatRate: true,
           },
         },
       },
@@ -663,9 +713,9 @@ export async function generateInvoiceFromProgressStatement(input: {
       throw new Error("Aucun montant de période à facturer");
     }
 
-    let totalHt = 0;
-    let totalVat = 0;
-    let totalTtc = 0;
+    let worksHt = 0;
+    let worksVat = 0;
+    let worksTtc = 0;
     const prepared = periodLines.map((l, i) => {
       const ht = d(l.periodSellHt);
       const vatRate = d(l.vatRate);
@@ -675,9 +725,9 @@ export async function generateInvoiceFromProgressStatement(input: {
         unitSellHt: ht,
         vatRate,
       });
-      totalHt += calc.lineSellHt;
-      totalVat += calc.lineVat;
-      totalTtc += calc.lineTtc;
+      worksHt += calc.lineSellHt;
+      worksVat += calc.lineVat;
+      worksTtc += calc.lineTtc;
       return {
         designation: `${l.designation} — ${statement.label}`,
         description: [
@@ -698,16 +748,40 @@ export async function generateInvoiceFromProgressStatement(input: {
       };
     });
 
-    totalHt = roundMoney(totalHt, 2);
-    totalVat = roundMoney(totalVat, 2);
-    totalTtc = roundMoney(totalTtc, 2);
+    worksHt = roundMoney(worksHt, 2);
+    worksVat = roundMoney(worksVat, 2);
+    worksTtc = roundMoney(worksTtc, 2);
 
-    // Garde-fou : facture = période, pas cumul
     const expectedPeriod = d(statement.periodSellHt);
-    if (Math.abs(totalHt - expectedPeriod) > 0.05) {
+    if (Math.abs(worksHt - expectedPeriod) > 0.05) {
       throw new Error(
-        `Incohérence totaux période (lignes ${totalHt} € vs situation ${expectedPeriod} €)`,
+        `Incohérence totaux période (lignes ${worksHt} € vs situation ${expectedPeriod} €)`,
       );
+    }
+
+    const retentionHt = d(statement.retentionPeriodHt);
+    const retentionRate = d(statement.retentionRateSnapshot);
+    const netHt = d(statement.netPeriodSellHt);
+    const netVat = d(statement.netPeriodVat);
+    const netTtc = d(statement.netPeriodTtc);
+
+    // Ligne RG négative pour lisibilité facture (si RG > 0)
+    if (retentionHt > 0.004) {
+      const avgRate =
+        worksHt > 0 ? roundMoney((worksVat / worksHt) * 100, 4) : 20;
+      const retVat = roundMoney(worksVat - netVat, 2);
+      prepared.push({
+        designation: `Retenue de garantie ${retentionRate} %`,
+        description: `${statement.label} — créance différée (non exigible immédiatement)`,
+        quantity: 1,
+        unit: "U",
+        unitSellHt: -retentionHt,
+        vatRate: avgRate,
+        lineSellHt: -retentionHt,
+        lineVat: -retVat,
+        lineTtc: -roundMoney(retentionHt + retVat, 2),
+        sortOrder: prepared.length,
+      });
     }
 
     const number = await nextInvoiceNumber(input.orgId, tx);
@@ -742,14 +816,22 @@ export async function generateInvoiceFromProgressStatement(input: {
           statement.label,
           `Référence devis / marché : ${statement.quote.number}`,
           periodLabel ? `Période : ${periodLabel}` : null,
+          retentionHt > 0
+            ? `Travaux ${worksHt.toFixed(2)} € HT — RG ${retentionRate} % : −${retentionHt.toFixed(2)} € HT — Net exigible ${netHt.toFixed(2)} € HT`
+            : null,
         ]
           .filter(Boolean)
           .join("\n"),
-        totalSellHt: totalHt,
-        totalVat,
-        totalTtc,
+        worksSellHt: worksHt,
+        worksVat,
+        worksTtc,
+        retentionAmountHt: retentionHt,
+        retentionRate: retentionHt > 0 ? retentionRate : null,
+        totalSellHt: netHt,
+        totalVat: netVat,
+        totalTtc: netTtc,
         amountPaid: 0,
-        amountDue: totalTtc,
+        amountDue: netTtc,
         createdById: input.userId,
       },
     });
@@ -769,6 +851,24 @@ export async function generateInvoiceFromProgressStatement(input: {
           lineVat: line.lineVat,
           lineTtc: line.lineTtc,
           sortOrder: line.sortOrder,
+        },
+      });
+    }
+
+    if (retentionHt > 0.004) {
+      const retVat = roundMoney(worksVat - netVat, 2);
+      await tx.commercialRetentionGuarantee.create({
+        data: {
+          organizationId: input.orgId,
+          quoteId: statement.quoteId,
+          progressStatementId: statement.id,
+          situationInvoiceId: invoice.id,
+          amountHt: retentionHt,
+          amountVat: retVat,
+          amountTtc: roundMoney(retentionHt + retVat, 2),
+          ratePercent: retentionRate,
+          status: "HELD",
+          plannedReleaseDate: statement.quote.retentionReleaseDueDate ?? null,
         },
       });
     }

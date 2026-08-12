@@ -76,6 +76,11 @@ export async function getInvoiceDetail(orgId: string, id: string) {
     amountPaid: d(inv.amountPaid),
     amountDue: d(inv.amountDue),
     depositPercent: inv.depositPercent != null ? d(inv.depositPercent) : null,
+    worksSellHt: inv.worksSellHt != null ? d(inv.worksSellHt) : null,
+    worksVat: inv.worksVat != null ? d(inv.worksVat) : null,
+    worksTtc: inv.worksTtc != null ? d(inv.worksTtc) : null,
+    retentionAmountHt: d(inv.retentionAmountHt ?? 0),
+    retentionRate: inv.retentionRate != null ? d(inv.retentionRate) : null,
     lines: inv.lines.map((l) => ({
       ...l,
       quantity: d(l.quantity),
@@ -378,6 +383,11 @@ export async function generateInvoicePdfPreview(
     bankBic: settings.bankBic,
     bankName: settings.bankName,
     depositPercent: inv.depositPercent,
+    worksSellHt: inv.worksSellHt,
+    worksVat: inv.worksVat,
+    worksTtc: inv.worksTtc,
+    retentionAmountHt: inv.retentionAmountHt,
+    retentionRate: inv.retentionRate,
     totals: {
       totalSellHt: inv.totalSellHt,
       totalVat: inv.totalVat,
@@ -699,6 +709,18 @@ export async function recordPayment(input: {
       },
     });
 
+    return payment;
+  }).then(async (payment) => {
+    if (status === "PAID") {
+      const { settleRetentionIfInvoicePaid } = await import(
+        "@/lib/commercial/retention"
+      );
+      await settleRetentionIfInvoicePaid(
+        input.orgId,
+        input.invoiceId,
+        input.userId,
+      );
+    }
     return payment;
   });
 }

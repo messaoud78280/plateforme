@@ -131,6 +131,7 @@ model User {
   commercialStatusEvents       CommercialStatusEvent[] @relation("CommercialStatusEventActor")
   commercialProgressStatementsCreated CommercialProgressStatement[] @relation("CommercialProgressStatementCreatedBy")
   commercialProgressStatementsValidated CommercialProgressStatement[] @relation("CommercialProgressStatementValidatedBy")
+  commercialRetentionsReleased CommercialRetentionGuarantee[] @relation("CommercialRetentionReleasedBy")
 
   // Pilotage administratif des travaux
   worksitePilotagesCreated   WorksitePilotage[] @relation("PilotageCreatedBy")
@@ -624,6 +625,7 @@ model Organization {
   commercialStatusEvents    CommercialStatusEvent[]
   commercialQuoteSnapshots  CommercialQuoteSnapshot[]
   commercialProgressStatements CommercialProgressStatement[]
+  commercialRetentionGuarantees CommercialRetentionGuarantee[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -3731,6 +3733,14 @@ enum CommercialProgressStatementStatus {
   INVOICED
 }
 
+/// DF-6A — cycle de vie d’une retenue de garantie (créance différée)
+enum CommercialRetentionStatus {
+  HELD
+  DUE
+  RELEASED
+  SETTLED
+}
+
 enum CommercialComponentType {
   MATERIAL
   LABOR
@@ -3812,6 +3822,10 @@ model CommercialQuote {
   depositPercent         Decimal?              @db.Decimal(6, 4)
   depositAmountHt        Decimal?              @db.Decimal(14, 4)
   defaultVatRate         Decimal               @default(20) @db.Decimal(6, 4)
+  /// DF-6A — retenue de garantie (% du HT travaux). 0 = pas de RG.
+  retentionGuaranteePercent Decimal            @default(0) @db.Decimal(6, 4)
+  /// Date prévue de libération de la RG (marché) — facultative
+  retentionReleaseDueDate   DateTime?          @db.Date
   currentVersionId       String?               @unique
   acceptedAt             DateTime?
   acceptedVersionId      String?
@@ -3837,6 +3851,7 @@ model CommercialQuote {
   invoices             CommercialInvoice[]
   snapshots            CommercialQuoteSnapshot[]
   progressStatements   CommercialProgressStatement[]
+  retentionGuarantees  CommercialRetentionGuarantee[]
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
@@ -4027,6 +4042,14 @@ model CommercialInvoice {
   dueDate              DateTime?               @db.Date
   currency             String                  @default("EUR")
   subject              String?
+  /// Travaux bruts (avant RG) — null si facture classique sans RG
+  worksSellHt          Decimal?                @db.Decimal(14, 4)
+  worksVat             Decimal?                @db.Decimal(14, 4)
+  worksTtc             Decimal?                @db.Decimal(14, 4)
+  /// Montant HT retenu (RG) — 0 si aucune
+  retentionAmountHt    Decimal                 @default(0) @db.Decimal(14, 4)
+  retentionRate        Decimal?                @db.Decimal(6, 4)
+  /// Totaux = net exigible (après RG si applicable)
   totalSellHt          Decimal                 @default(0) @db.Decimal(14, 4)
   totalVat             Decimal                 @default(0) @db.Decimal(14, 4)
   totalTtc             Decimal                 @default(0) @db.Decimal(14, 4)
@@ -4050,6 +4073,8 @@ model CommercialInvoice {
   createdBy          User                           @relation("CommercialInvoiceCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
   lines              CommercialInvoiceLine[]
   payments           CommercialPayment[]
+  withholdRetentions CommercialRetentionGuarantee[] @relation("RetentionSituationInvoice")
+  settlementRetention CommercialRetentionGuarantee? @relation("RetentionSettlementInvoice")
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
@@ -4089,6 +4114,15 @@ model CommercialProgressStatement {
   remainingSellHt     Decimal                            @default(0) @db.Decimal(14, 4)
   remainingVat        Decimal                            @default(0) @db.Decimal(14, 4)
   remainingTtc        Decimal                            @default(0) @db.Decimal(14, 4)
+  /// DF-6A — RG figée sur la situation
+  retentionRateSnapshot   Decimal                        @default(0) @db.Decimal(6, 4)
+  retentionCapHt          Decimal                        @default(0) @db.Decimal(14, 4)
+  retentionPreviousHt     Decimal                        @default(0) @db.Decimal(14, 4)
+  retentionPeriodHt       Decimal                        @default(0) @db.Decimal(14, 4)
+  retentionCumulativeHt   Decimal                        @default(0) @db.Decimal(14, 4)
+  netPeriodSellHt         Decimal                        @default(0) @db.Decimal(14, 4)
+  netPeriodVat            Decimal                        @default(0) @db.Decimal(14, 4)
+  netPeriodTtc            Decimal                        @default(0) @db.Decimal(14, 4)
   validatedAt         DateTime?
   validatedById       String?
   createdById         String
@@ -4102,11 +4136,46 @@ model CommercialProgressStatement {
   validatedBy       User?                           @relation("CommercialProgressStatementValidatedBy", fields: [validatedById], references: [id], onDelete: SetNull)
   lines             CommercialProgressStatementLine[]
   invoice           CommercialInvoice?
+  retentionGuarantee CommercialRetentionGuarantee?
 
   @@unique([quoteId, number])
   @@index([organizationId, status])
   @@index([organizationId, quoteId])
   @@index([projectId])
+}
+
+/// DF-6A — Créance de retenue de garantie (par situation / période)
+model CommercialRetentionGuarantee {
+  id                   String                    @id @default(cuid())
+  organizationId       String
+  quoteId              String
+  progressStatementId  String                    @unique
+  /// Facture de situation qui a retenu la RG
+  situationInvoiceId   String?
+  /// Facture de libération pour encaisser la RG
+  settlementInvoiceId  String?                   @unique
+  amountHt             Decimal                   @db.Decimal(14, 4)
+  amountVat            Decimal                   @default(0) @db.Decimal(14, 4)
+  amountTtc            Decimal                   @db.Decimal(14, 4)
+  ratePercent          Decimal                   @db.Decimal(6, 4)
+  status               CommercialRetentionStatus @default(HELD)
+  plannedReleaseDate   DateTime?                 @db.Date
+  releasedAt           DateTime?
+  releasedById         String?
+  settledAt            DateTime?
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+
+  organization       Organization                 @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  quote              CommercialQuote              @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  progressStatement  CommercialProgressStatement  @relation(fields: [progressStatementId], references: [id], onDelete: Cascade)
+  situationInvoice   CommercialInvoice?           @relation("RetentionSituationInvoice", fields: [situationInvoiceId], references: [id], onDelete: SetNull)
+  settlementInvoice  CommercialInvoice?           @relation("RetentionSettlementInvoice", fields: [settlementInvoiceId], references: [id], onDelete: SetNull)
+  releasedBy         User?                        @relation("CommercialRetentionReleasedBy", fields: [releasedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status])
+  @@index([quoteId])
+  @@index([plannedReleaseDate])
 }
 
 model CommercialProgressStatementLine {

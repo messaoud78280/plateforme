@@ -38,6 +38,11 @@ type InvoiceDoc = {
   amountPaid: number;
   amountDue: number;
   depositPercent: number | null;
+  worksSellHt?: number | null;
+  worksVat?: number | null;
+  worksTtc?: number | null;
+  retentionAmountHt?: number | null;
+  retentionRate?: number | null;
   clientNotes: string | null;
   issuerSnapshotJson: Snapshot | null;
   clientSnapshotJson: Snapshot | null;
@@ -287,16 +292,47 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
 
         <div className="mt-6 flex justify-end">
           <dl className="w-full max-w-xs space-y-1.5 rounded-xl border border-slate-200 p-4 text-sm">
-            <div className="flex justify-between text-slate-600">
-              <dt>Total HT</dt>
-              <dd className="tabular-nums font-medium">{fmt(invoice.totalSellHt)} €</dd>
-            </div>
+            {invoice.retentionAmountHt != null &&
+            invoice.retentionAmountHt > 0.004 &&
+            invoice.worksSellHt != null ? (
+              <>
+                <div className="flex justify-between text-slate-600">
+                  <dt>Travaux HT</dt>
+                  <dd className="tabular-nums font-medium">
+                    {fmt(invoice.worksSellHt)} €
+                  </dd>
+                </div>
+                <div className="flex justify-between text-amber-800">
+                  <dt>RG {invoice.retentionRate ?? ""} %</dt>
+                  <dd className="tabular-nums font-medium">
+                    − {fmt(invoice.retentionAmountHt)} €
+                  </dd>
+                </div>
+                <div className="flex justify-between text-slate-600">
+                  <dt>Net HT</dt>
+                  <dd className="tabular-nums font-medium">
+                    {fmt(invoice.totalSellHt)} €
+                  </dd>
+                </div>
+              </>
+            ) : (
+              <div className="flex justify-between text-slate-600">
+                <dt>Total HT</dt>
+                <dd className="tabular-nums font-medium">
+                  {fmt(invoice.totalSellHt)} €
+                </dd>
+              </div>
+            )}
             <div className="flex justify-between text-slate-600">
               <dt>TVA</dt>
               <dd className="tabular-nums font-medium">{fmt(invoice.totalVat)} €</dd>
             </div>
             <div className="flex justify-between border-t border-slate-100 pt-2 text-base font-bold text-[#1e3a5f]">
-              <dt>Total TTC</dt>
+              <dt>
+                {invoice.retentionAmountHt && invoice.retentionAmountHt > 0
+                  ? "Net TTC exigible"
+                  : "Total TTC"}
+              </dt>
               <dd className="tabular-nums">{fmt(invoice.totalTtc)} €</dd>
             </div>
             {invoice.amountPaid > 0 || invoice.status !== "DRAFT" ? (

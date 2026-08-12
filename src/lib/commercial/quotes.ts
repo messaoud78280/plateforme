@@ -326,45 +326,7 @@ export async function listQuotes(
 }
 
 export async function getQuoteDetail(orgId: string, id: string) {
-  let quote = await prisma.commercialQuote.findFirst({
-    where: { id, organizationId: orgId },
-    include: {
-      clientExternalOrg: {
-        select: {
-          id: true,
-          name: true,
-          tradeName: true,
-          email: true,
-          phone: true,
-          address: true,
-          city: true,
-          zipCode: true,
-          siret: true,
-        },
-      },
-      project: { select: { id: true, title: true } },
-      responsible: { select: { id: true, name: true } },
-      createdBy: { select: { id: true, name: true } },
-      currentVersion: {
-        include: {
-          sections: { orderBy: { sortOrder: "asc" } },
-          lines: { orderBy: { sortOrder: "asc" } },
-        },
-      },
-      versions: {
-        orderBy: { versionNumber: "desc" },
-        select: {
-          id: true,
-          versionNumber: true,
-          label: true,
-          lockState: true,
-          issuedAt: true,
-          totalSellHt: true,
-          totalTtc: true,
-        },
-      },
-    },
-  });
+  let quote = await reloadQuoteDetail(orgId, id);
   if (!quote) return null;
 
   /** DF-1B — brouillon sans version courante : réparer (smoke / données incomplètes). */
@@ -373,45 +335,28 @@ export async function getQuoteDetail(orgId: string, id: string) {
     EDITABLE_STATUSES.includes(quote.status)
   ) {
     await ensureDraftHasCurrentVersion(orgId, quote.id);
-    quote = await prisma.commercialQuote.findFirst({
-      where: { id, organizationId: orgId },
-      include: {
-        clientExternalOrg: {
-          select: {
-            id: true,
-            name: true,
-            tradeName: true,
-            email: true,
-            phone: true,
-            address: true,
-            city: true,
-            zipCode: true,
-            siret: true,
-          },
-        },
-        project: { select: { id: true, title: true } },
-        responsible: { select: { id: true, name: true } },
-        createdBy: { select: { id: true, name: true } },
-        currentVersion: {
-          include: {
-            sections: { orderBy: { sortOrder: "asc" } },
-            lines: { orderBy: { sortOrder: "asc" } },
-          },
-        },
-        versions: {
-          orderBy: { versionNumber: "desc" },
-          select: {
-            id: true,
-            versionNumber: true,
-            label: true,
-            lockState: true,
-            issuedAt: true,
-            totalSellHt: true,
-            totalTtc: true,
-          },
-        },
-      },
+    quote = await reloadQuoteDetail(orgId, id);
+    if (!quote) return null;
+  }
+
+  /** Émetteur manquant sur devis éditable → renseigner depuis l’organisation (logo démo inclus). */
+  if (
+    EDITABLE_STATUSES.includes(quote.status) &&
+    quote.currentVersion?.lockState === "DRAFT" &&
+    !hasIssuerName(quote.issuerSnapshotJson)
+  ) {
+    const issuerSnapshotJson = await buildIssuerSnapshot(orgId);
+    await prisma.commercialQuote.update({
+      where: { id: quote.id },
+      data: { issuerSnapshotJson },
     });
+    if (quote.currentVersionId) {
+      await prisma.commercialQuoteVersion.update({
+        where: { id: quote.currentVersionId },
+        data: { issuerSnapshotJson },
+      });
+    }
+    quote = await reloadQuoteDetail(orgId, id);
     if (!quote) return null;
   }
 
@@ -459,6 +404,57 @@ export async function getQuoteDetail(orgId: string, id: string) {
       totalTtc: d(v.totalTtc),
     })),
   };
+}
+
+const quoteDetailInclude = {
+  clientExternalOrg: {
+    select: {
+      id: true,
+      name: true,
+      tradeName: true,
+      email: true,
+      phone: true,
+      address: true,
+      city: true,
+      zipCode: true,
+      siret: true,
+    },
+  },
+  project: { select: { id: true, title: true } },
+  responsible: { select: { id: true, name: true } },
+  createdBy: { select: { id: true, name: true } },
+  currentVersion: {
+    include: {
+      sections: { orderBy: { sortOrder: "asc" as const } },
+      lines: { orderBy: { sortOrder: "asc" as const } },
+    },
+  },
+  versions: {
+    orderBy: { versionNumber: "desc" as const },
+    select: {
+      id: true,
+      versionNumber: true,
+      label: true,
+      lockState: true,
+      issuedAt: true,
+      totalSellHt: true,
+      totalTtc: true,
+    },
+  },
+} as const;
+
+async function reloadQuoteDetail(orgId: string, id: string) {
+  return prisma.commercialQuote.findFirst({
+    where: { id, organizationId: orgId },
+    include: quoteDetailInclude,
+  });
+}
+
+function hasIssuerName(raw: unknown): boolean {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return false;
+  const o = raw as Record<string, unknown>;
+  const name = String(o.name ?? o.tradeName ?? "").trim();
+  return name.length > 0;
 }
 
 /** Crée une V1 DRAFT vide si le devis éditable n’a pas de version courante. */

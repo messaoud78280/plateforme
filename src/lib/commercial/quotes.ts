@@ -239,11 +239,47 @@ export async function createQuote(input: {
   });
 }
 
-export async function listQuotes(orgId: string) {
+export async function listQuotes(
+  orgId: string,
+  opts?: {
+    q?: string;
+    status?: string;
+    clientId?: string;
+    projectId?: string;
+    take?: number;
+  },
+) {
+  const q = opts?.q?.trim();
+  const status = opts?.status?.trim();
+  const clientId = opts?.clientId?.trim();
+  const projectId = opts?.projectId?.trim();
+
   const rows = await prisma.commercialQuote.findMany({
-    where: { organizationId: orgId },
+    where: {
+      organizationId: orgId,
+      ...(status ? { status: status as never } : {}),
+      ...(clientId ? { clientExternalOrgId: clientId } : {}),
+      ...(projectId ? { projectId } : {}),
+      ...(q
+        ? {
+            OR: [
+              { number: { contains: q, mode: "insensitive" } },
+              { subject: { contains: q, mode: "insensitive" } },
+              {
+                clientExternalOrg: {
+                  OR: [
+                    { name: { contains: q, mode: "insensitive" } },
+                    { tradeName: { contains: q, mode: "insensitive" } },
+                  ],
+                },
+              },
+              { project: { title: { contains: q, mode: "insensitive" } } },
+            ],
+          }
+        : {}),
+    },
     orderBy: { updatedAt: "desc" },
-    take: 100,
+    take: opts?.take ?? 100,
     select: {
       id: true,
       number: true,
@@ -255,6 +291,7 @@ export async function listQuotes(orgId: string) {
       totalTtc: true,
       marginPercent: true,
       updatedAt: true,
+      currentVersion: { select: { versionNumber: true, label: true } },
       clientExternalOrg: { select: { id: true, name: true, tradeName: true } },
       project: { select: { id: true, title: true } },
       responsible: { select: { id: true, name: true } },

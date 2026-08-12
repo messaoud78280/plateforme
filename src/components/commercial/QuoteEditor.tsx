@@ -10,6 +10,8 @@ import { QuoteAcceptedNextSteps } from "@/components/commercial/QuoteAcceptedNex
 import { LibraryPickerModal } from "@/components/commercial/LibraryPickerModal";
 import { LineCompositionDrawer } from "@/components/commercial/LineCompositionDrawer";
 import { QuotePriceCheckPanel } from "@/components/commercial/QuotePriceCheckPanel";
+import { QuoteStatusActions } from "@/components/commercial/QuoteStatusActions";
+import type { QuoteActionDef } from "@/lib/commercial/quote-actions";
 import { shouldOfferPriceCheck } from "@/lib/commercial/price-check-ui";
 
 function fmtMoney(n: number) {
@@ -61,6 +63,12 @@ type QuoteDetail = {
     sections: Section[];
     lines: Line[];
   } | null;
+  versions?: Array<{
+    id: string;
+    versionNumber: number;
+    label: string | null;
+    lockState: string;
+  }>;
   clientExternalOrg: { name: string; tradeName: string | null } | null;
   project: { id: string; title: string } | null;
 };
@@ -160,18 +168,32 @@ export function QuoteEditor({
     if (seq === mutationSeq.current) setSaveState("saved");
   }
 
-  async function addLine(sectionId: string | null) {
+  async function addLine(
+    sectionId: string | null,
+    opts?: { kind?: string; designation?: string; isOptional?: boolean },
+  ) {
     const seq = ++mutationSeq.current;
     setSaveState("saving");
+    const kind = opts?.kind ?? "WORK";
     const res = await fetch(`/api/commercial/quotes/${quote.id}/lines`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         sectionId,
-        designation: "Nouvelle ligne",
-        quantity: 1,
+        kind,
+        designation:
+          opts?.designation ??
+          (kind === "COMMENT"
+            ? "Commentaire"
+            : kind === "OPTION"
+              ? "Option"
+              : kind === "SUBTOTAL"
+                ? "Sous-total"
+                : "Nouvelle ligne"),
+        quantity: kind === "COMMENT" || kind === "SUBTOTAL" ? 0 : 1,
         unit: "U",
         unitSellHt: 0,
+        isOptional: opts?.isOptional ?? kind === "OPTION",
       }),
     });
     const data = await res.json();
@@ -184,6 +206,56 @@ export function QuoteEditor({
     }
     await refreshQuote(seq);
     if (seq === mutationSeq.current) setSaveState("saved");
+  }
+
+  async function handleStatusAction(action: QuoteActionDef) {
+    if (action.id === "preview_pdf") {
+      window.open(`/api/commercial/quotes/${quote.id}/pdf`, "_blank", "noreferrer");
+      return;
+    }
+    if (action.id === "accepted_pdf") {
+      window.open(
+        `/api/commercial/quotes/${quote.id}/accepted-pdf`,
+        "_blank",
+        "noreferrer",
+      );
+      return;
+    }
+    if (action.id === "price_check") {
+      if (shouldOfferPriceCheck(quote.status)) setPriceCheckOpen(true);
+      return;
+    }
+    if (action.id === "new_version") {
+      void createNewVersion();
+      return;
+    }
+    if (action.id === "prepare_invoice") {
+      router.push(`/dashboard/devis-facturation/factures/preparer?quoteId=${quote.id}`);
+      return;
+    }
+    if (action.id === "link_project") {
+      document
+        .getElementById("quote-accepted-next-steps")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    if (action.toStatus) {
+      if (action.destructive) {
+        const ok = window.confirm(
+          action.id === "refuse"
+            ? "Marquer ce devis comme refusé ?"
+            : "Annuler ce devis ? Il ne sera plus modifiable comme un brouillon actif.",
+        );
+        if (!ok) return;
+      }
+      if (action.id === "accept") {
+        const ok = window.confirm(
+          "Accepter ce devis ? Le PDF de la version courante sera figé. Cette action est irréversible sur le document accepté.",
+        );
+        if (!ok) return;
+      }
+      void setStatus(action.toStatus);
+    }
   }
 
   async function duplicateLine(line: Line) {
@@ -312,7 +384,10 @@ export function QuoteEditor({
         <header className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-              {quote.number} · V{version?.versionNumber ?? 1}
+              Devis commercial · {quote.number} · Version {version?.versionNumber ?? 1}
+              {version?.lockState && version.lockState !== "DRAFT"
+                ? ` · ${version.lockState === "ACCEPTED_SNAPSHOT" ? "figée" : "verrouillée"}`
+                : ""}
             </p>
             <h1 className="text-xl font-extrabold text-slate-950">{quote.subject}</h1>
             <p className="mt-1 text-sm text-slate-600">
@@ -327,65 +402,14 @@ export function QuoteEditor({
           </div>
           <div className="flex flex-col items-end gap-2">
             <p className="text-xs text-slate-500">{saveLabel}</p>
-            <div className="flex flex-wrap justify-end gap-2">
-              <a
-                href={
-                  acceptedPdfAvailable
-                    ? `/api/commercial/quotes/${quote.id}/accepted-pdf`
-                    : `/api/commercial/quotes/${quote.id}/pdf`
-                }
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-[#1e3a5f]"
-              >
-                {acceptedPdfAvailable ? "PDF figé à l’acceptation" : "Aperçu PDF"}
-              </a>
-              {shouldOfferPriceCheck(quote.status) ? (
-                <button
-                  type="button"
-                  onClick={() => setPriceCheckOpen(true)}
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-800"
-                >
-                  Vérifier les prix
-                  {priceCheckSessionBadge ? (
-                    <span className="ml-1 text-[10px] font-normal text-slate-500">
-                      · {priceCheckSessionBadge}
-                    </span>
-                  ) : null}
-                </button>
-              ) : null}
-              {!canEdit &&
-              ["SENT", "VIEWED", "ACCEPTED", "VALIDATED"].includes(quote.status) ? (
-                <button
-                  type="button"
-                  disabled={busyStatus}
-                  onClick={() => void createNewVersion()}
-                  className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-950"
-                >
-                  Créer une nouvelle version
-                </button>
-              ) : null}
-              {quote.status === "DRAFT" || quote.status === "VALIDATED" ? (
-                <button
-                  type="button"
-                  disabled={busyStatus}
-                  onClick={() => void setStatus("SENT")}
-                  className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
-                >
-                  Marquer envoyé
-                </button>
-              ) : null}
-              {quote.status === "SENT" || quote.status === "VIEWED" ? (
-                <button
-                  type="button"
-                  disabled={busyStatus}
-                  onClick={() => void setStatus("ACCEPTED")}
-                  className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
-                >
-                  {accepting ? "Acceptation…" : "Accepté"}
-                </button>
-              ) : null}
-            </div>
+            <QuoteStatusActions
+              status={quote.status}
+              canEdit={canEdit}
+              hasAcceptedPdf={acceptedPdfAvailable}
+              hasProject={Boolean(quote.project)}
+              busy={busyStatus || accepting}
+              onAction={(a) => void handleStatusAction(a)}
+            />
           </div>
         </header>
 
@@ -409,6 +433,27 @@ export function QuoteEditor({
             </button>
             <button
               type="button"
+              onClick={() =>
+                void addLine(sections[0]?.id ?? null, { kind: "COMMENT" })
+              }
+              className="text-xs font-semibold text-[#1d4ed8]"
+            >
+              + Commentaire
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                void addLine(sections[0]?.id ?? null, {
+                  kind: "OPTION",
+                  isOptional: true,
+                })
+              }
+              className="text-xs font-semibold text-[#1d4ed8]"
+            >
+              + Option
+            </button>
+            <button
+              type="button"
               onClick={() => {
                 setLibrarySectionId(sections[0]?.id ?? null);
                 setLibraryOpen(true);
@@ -417,10 +462,15 @@ export function QuoteEditor({
             >
               + Depuis la bibliothèque
             </button>
+            {priceCheckSessionBadge ? (
+              <span className="text-[10px] font-medium text-slate-500">
+                Prix · {priceCheckSessionBadge}
+              </span>
+            ) : null}
           </div>
         ) : (
           <p className="text-xs text-amber-800">
-            Document verrouillé — utilisez « Créer une nouvelle version » ou un avenant. Ne
+            Document verrouillé — utilisez « Nouvelle version » (menu •••) ou un avenant. Ne
             modifiez jamais silencieusement une version envoyée ou acceptée.
           </p>
         )}
@@ -508,12 +558,14 @@ export function QuoteEditor({
 
         {quote.status === "ACCEPTED" ? (
           <>
-            <QuoteAcceptedNextSteps
-              quoteId={quote.id}
-              subject={quote.subject}
-              siteAddressSnapshot={quote.siteAddressSnapshot}
-              project={quote.project}
-            />
+            <div id="quote-accepted-next-steps">
+              <QuoteAcceptedNextSteps
+                quoteId={quote.id}
+                subject={quote.subject}
+                siteAddressSnapshot={quote.siteAddressSnapshot}
+                project={quote.project}
+              />
+            </div>
             <AcceptedActions quoteId={quote.id} />
           </>
         ) : null}
@@ -521,6 +573,26 @@ export function QuoteEditor({
 
       <aside className="h-fit space-y-3 rounded-xl border border-slate-200 bg-white p-4 lg:sticky lg:top-4">
         <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Synthèse</p>
+        <p className="text-xs text-slate-600">
+          Version courante{" "}
+          <span className="font-bold text-[#1e3a5f]">
+            V{version?.versionNumber ?? 1}
+          </span>
+          {version?.lockState === "DRAFT" ? " · modifiable" : " · verrouillée"}
+        </p>
+        {(quote.versions?.length ?? 0) > 1 ? (
+          <ul className="space-y-1 border-b border-slate-100 pb-3 text-xs text-slate-600">
+            {quote.versions!.map((v) => (
+              <li key={v.id} className="flex justify-between gap-2">
+                <span>
+                  V{v.versionNumber}
+                  {v.id === version?.id ? " · courante" : ""}
+                </span>
+                <span className="text-slate-400">{v.lockState}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
         <Row label="Déboursé" value={`${fmtMoney(quote.totalCostHt)} €`} />
         <Row label="Marge" value={`${fmtMoney(quote.marginAmount)} €`} />
         <Row
@@ -535,6 +607,9 @@ export function QuoteEditor({
         <Row label="Total HT" value={`${fmtMoney(quote.totalSellHt)} €`} bold />
         <Row label="TVA" value={`${fmtMoney(quote.totalVat)} €`} />
         <Row label="Total TTC" value={`${fmtMoney(quote.totalTtc)} €`} bold />
+        <p className="pt-2 text-[10px] leading-relaxed text-slate-400">
+          Module Devis & Facturation — pas la bibliothèque Analyses.
+        </p>
       </aside>
 
       <LibraryPickerModal

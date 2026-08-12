@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import {
   requireCommercialSession,
@@ -6,6 +7,8 @@ import {
 } from "@/lib/commercial/access";
 import { prisma } from "@/lib/prisma";
 import { CreateQuoteForm } from "@/components/commercial/CreateQuoteForm";
+import { ensureCommercialOrgSettings } from "@/lib/commercial/settings";
+import { d } from "@/lib/commercial/decimal";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +19,7 @@ export default async function NouveauDevisPage() {
   const orgId = await resolveCommercialOrgId(session.user);
   if (!orgId) redirect("/dashboard/devis-facturation");
 
-  const [clients, projects] = await Promise.all([
+  const [clients, projects, settings, quotesWithProjects] = await Promise.all([
     prisma.externalOrganization.findMany({
       where: {
         hostOrganizationId: orgId,
@@ -31,11 +34,20 @@ export default async function NouveauDevisPage() {
       where: { organizationId: orgId },
       select: { id: true, title: true, siteAddress: true, siteCity: true },
       orderBy: { updatedAt: "desc" },
-      take: 40,
+      take: 80,
+    }),
+    ensureCommercialOrgSettings(orgId),
+    prisma.commercialQuote.findMany({
+      where: {
+        organizationId: orgId,
+        projectId: { not: null },
+        clientExternalOrgId: { not: null },
+      },
+      select: { projectId: true, clientExternalOrgId: true },
+      take: 500,
     }),
   ]);
 
-  // Fallback: aussi les orgs externes sans filtre type strict si vide
   const clientsFinal =
     clients.length > 0
       ? clients
@@ -46,14 +58,40 @@ export default async function NouveauDevisPage() {
           take: 100,
         });
 
+  const linkedByProject = new Map<string, Set<string>>();
+  for (const q of quotesWithProjects) {
+    if (!q.projectId || !q.clientExternalOrgId) continue;
+    const set = linkedByProject.get(q.projectId) ?? new Set();
+    set.add(q.clientExternalOrgId);
+    linkedByProject.set(q.projectId, set);
+  }
+
+  const projectsWithLinks = projects.map((p) => ({
+    ...p,
+    linkedClientIds: [...(linkedByProject.get(p.id) ?? [])],
+  }));
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Devis"
-        title="Nouveau devis"
-        description="Client et chantier optionnels — vous pourrez rattacher plus tard."
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <PageHeader
+          eyebrow="Devis & Facturation · Devis commerciaux"
+          title="Nouveau devis"
+          description="Client et chantier optionnels — rattachement possible après acceptation."
+        />
+        <Link
+          href="/dashboard/devis-facturation/devis"
+          className="text-sm font-semibold text-slate-600 underline"
+        >
+          ← Liste des devis
+        </Link>
+      </div>
+      <CreateQuoteForm
+        clients={clientsFinal}
+        projects={projectsWithLinks}
+        defaultValidityDays={settings.defaultValidityDays}
+        defaultVatRate={d(settings.defaultVatRate)}
       />
-      <CreateQuoteForm clients={clientsFinal} projects={projects} />
     </div>
   );
 }

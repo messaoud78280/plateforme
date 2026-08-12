@@ -52,7 +52,7 @@ export default async function DevisFacturationDashboardPage() {
         <PageHeader
           eyebrow="Devis & Facturation"
           title="Devis & Facturation"
-          description="Devis, contrat, factures et encaissements — une seule chaîne."
+          description="Devis clients, acceptation, factures et encaissements — une seule chaîne commerciale."
         />
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-14 text-center">
           <p className="text-lg font-extrabold text-slate-900">Créez votre premier devis</p>
@@ -66,7 +66,8 @@ export default async function DevisFacturationDashboardPage() {
             + Nouveau devis
           </Link>
           <p className="mt-4 text-xs text-slate-400">
-            La bibliothèque d’ouvrages reste accessible dans Référentiel — jamais obligatoire.
+            Distinct de « Analyses devis » (bibliothèque interne). Référentiel commercial dans
+            l’onglet Référentiel.
           </p>
         </div>
       </div>

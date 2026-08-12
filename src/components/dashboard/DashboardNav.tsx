@@ -120,7 +120,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               Agents
             </NavLink>
             <NavLink href="/dashboard/devis" pathname={pathname} activeClass={active}>
-              Analyses
+              Analyses devis
             </NavLink>
             <NavLink href="/dashboard/devis-facturation" pathname={pathname} activeClass={active}>
               Devis & Facturation
@@ -179,7 +179,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               Historique
             </NavLink>
             <NavLink href="/dashboard/devis" pathname={pathname} activeClass={active}>
-              Analyses
+              Analyses devis
             </NavLink>
             <NavLink href="/dashboard/devis-facturation" pathname={pathname} activeClass={active}>
               Devis & Facturation

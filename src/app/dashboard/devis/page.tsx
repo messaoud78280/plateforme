@@ -6,12 +6,12 @@ export default async function BeWorkDevisHomePage() {
 
   const cards = [
     {
-      title: "Créer un devis",
+      title: "Document estimatif (Analyses)",
       description:
-        "Constituer un document estimatif ou de consultation à partir des ouvrages BeWork et exporter un PDF client.",
+        "Constituer un document d’analyse / chiffrage interne à partir des ouvrages BeWork. Pour un devis client facturable, utilisez Devis & Facturation.",
       href: "/dashboard/devis/creer",
       cta: "Démarrer",
-      badge: "Chiffrage",
+      badge: "Analyses",
     },
     {
       title: "Projets clients",
@@ -69,14 +69,32 @@ export default async function BeWorkDevisHomePage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2 px-1">
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1e3a5f]/80">Bibliothèque interne</p>
-        <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">BeWork Devis</h1>
-        <p className="max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-          Bibliothèque privée d&apos;ouvrages, prix et désignations BTP.
+        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1e3a5f]/80">
+          Bibliothèque & analyses
         </p>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          Analyses devis
+        </h1>
+        <p className="max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
+          Bibliothèque privée d&apos;ouvrages, prix et désignations BTP — pour chiffrer et
+          analyser, pas pour facturer un client.
+        </p>
+        <div className="max-w-2xl rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-950">
+          <p className="font-semibold">Ce n’est pas Devis & Facturation.</p>
+          <p className="mt-1 text-amber-900/90">
+            Pour créer un devis client, le versionner, l’accepter et facturer :{" "}
+            <Link
+              href="/dashboard/devis-facturation"
+              className="font-bold text-[#1e3a5f] underline"
+            >
+              ouvrir Devis & Facturation
+            </Link>
+            .
+          </p>
+        </div>
         <p className="max-w-2xl pt-2 text-sm text-slate-500">
-          Construisez progressivement la base interne pour vos assistants travaux — sans import automatique dans
-          cette version.
+          Construisez progressivement la base interne pour vos assistants travaux — sans import
+          automatique dans cette version.
         </p>
       </header>
 

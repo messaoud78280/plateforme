@@ -129,6 +129,8 @@ model User {
   commercialPaymentsRecorded   CommercialPayment[] @relation("CommercialPaymentRecordedBy")
   commercialWorkItemsCreated   CommercialWorkItem[] @relation("CommercialWorkItemCreatedBy")
   commercialStatusEvents       CommercialStatusEvent[] @relation("CommercialStatusEventActor")
+  commercialProgressStatementsCreated CommercialProgressStatement[] @relation("CommercialProgressStatementCreatedBy")
+  commercialProgressStatementsValidated CommercialProgressStatement[] @relation("CommercialProgressStatementValidatedBy")
 
   // Pilotage administratif des travaux
   worksitePilotagesCreated   WorksitePilotage[] @relation("PilotageCreatedBy")
@@ -621,6 +623,7 @@ model Organization {
   commercialEquipmentResources CommercialEquipmentResource[]
   commercialStatusEvents    CommercialStatusEvent[]
   commercialQuoteSnapshots  CommercialQuoteSnapshot[]
+  commercialProgressStatements CommercialProgressStatement[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -799,6 +802,7 @@ model Project {
   projectChannels ProjectChannel[]
   commercialQuotes CommercialQuote[]
   commercialInvoices CommercialInvoice[]
+  commercialProgressStatements CommercialProgressStatement[]
 
   @@index([organizationId])
 }
@@ -3721,6 +3725,12 @@ enum CommercialInvoiceStatus {
   CANCELLED
 }
 
+enum CommercialProgressStatementStatus {
+  DRAFT
+  VALIDATED
+  INVOICED
+}
+
 enum CommercialComponentType {
   MATERIAL
   LABOR
@@ -3823,9 +3833,10 @@ model CommercialQuote {
   createdBy         User                  @relation("CommercialQuoteCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
   currentVersion    CommercialQuoteVersion? @relation("CommercialQuoteCurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
   versions          CommercialQuoteVersion[] @relation("CommercialQuoteVersions")
-  amendments        CommercialAmendment[]
-  invoices          CommercialInvoice[]
-  snapshots         CommercialQuoteSnapshot[]
+  amendments           CommercialAmendment[]
+  invoices             CommercialInvoice[]
+  snapshots            CommercialQuoteSnapshot[]
+  progressStatements   CommercialProgressStatement[]
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
@@ -4006,6 +4017,8 @@ model CommercialInvoice {
   status               CommercialInvoiceStatus @default(DRAFT)
   quoteId              String?
   amendmentId          String?
+  /// DF-5 — facture générée depuis une situation (montant période uniquement)
+  progressStatementId  String?                 @unique
   projectId            String?
   clientExternalOrgId  String?
   clientSnapshotJson   Json?
@@ -4028,14 +4041,15 @@ model CommercialInvoice {
   createdAt            DateTime                @default(now())
   updatedAt            DateTime                @updatedAt
 
-  organization      Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  quote             CommercialQuote?      @relation(fields: [quoteId], references: [id], onDelete: SetNull)
-  amendment         CommercialAmendment?  @relation(fields: [amendmentId], references: [id], onDelete: SetNull)
-  project           Project?              @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  clientExternalOrg ExternalOrganization? @relation("CommercialInvoiceClient", fields: [clientExternalOrgId], references: [id], onDelete: SetNull)
-  createdBy         User                  @relation("CommercialInvoiceCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
-  lines             CommercialInvoiceLine[]
-  payments          CommercialPayment[]
+  organization       Organization                   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  quote              CommercialQuote?               @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  amendment          CommercialAmendment?           @relation(fields: [amendmentId], references: [id], onDelete: SetNull)
+  progressStatement  CommercialProgressStatement?   @relation(fields: [progressStatementId], references: [id], onDelete: SetNull)
+  project            Project?                       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  clientExternalOrg  ExternalOrganization?          @relation("CommercialInvoiceClient", fields: [clientExternalOrgId], references: [id], onDelete: SetNull)
+  createdBy          User                           @relation("CommercialInvoiceCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  lines              CommercialInvoiceLine[]
+  payments           CommercialPayment[]
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
@@ -4043,6 +4057,89 @@ model CommercialInvoice {
   @@index([amendmentId])
   @@index([projectId])
   @@index([clientExternalOrgId])
+}
+
+/// DF-5 — Situation de travaux (avancement ligne à ligne)
+model CommercialProgressStatement {
+  id                  String                             @id @default(cuid())
+  organizationId      String
+  quoteId             String
+  projectId           String?
+  clientExternalOrgId String?
+  /// Numéro déterministe 1, 2, 3… unique par devis
+  number              Int
+  label               String
+  status              CommercialProgressStatementStatus  @default(DRAFT)
+  periodStart         DateTime?                          @db.Date
+  periodEnd           DateTime?                          @db.Date
+  /// Snapshot contractuel figé (lignes WORK du marché accepté)
+  contractSnapshotJson Json
+  marketSellHt        Decimal                            @default(0) @db.Decimal(14, 4)
+  marketVat           Decimal                            @default(0) @db.Decimal(14, 4)
+  marketTtc           Decimal                            @default(0) @db.Decimal(14, 4)
+  previousSellHt      Decimal                            @default(0) @db.Decimal(14, 4)
+  previousVat         Decimal                            @default(0) @db.Decimal(14, 4)
+  previousTtc         Decimal                            @default(0) @db.Decimal(14, 4)
+  periodSellHt        Decimal                            @default(0) @db.Decimal(14, 4)
+  periodVat           Decimal                            @default(0) @db.Decimal(14, 4)
+  periodTtc           Decimal                            @default(0) @db.Decimal(14, 4)
+  cumulativeSellHt    Decimal                            @default(0) @db.Decimal(14, 4)
+  cumulativeVat       Decimal                            @default(0) @db.Decimal(14, 4)
+  cumulativeTtc       Decimal                            @default(0) @db.Decimal(14, 4)
+  remainingSellHt     Decimal                            @default(0) @db.Decimal(14, 4)
+  remainingVat        Decimal                            @default(0) @db.Decimal(14, 4)
+  remainingTtc        Decimal                            @default(0) @db.Decimal(14, 4)
+  validatedAt         DateTime?
+  validatedById       String?
+  createdById         String
+  createdAt           DateTime                           @default(now())
+  updatedAt           DateTime                           @updatedAt
+
+  organization      Organization                    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  quote             CommercialQuote                 @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  project           Project?                        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdBy         User                            @relation("CommercialProgressStatementCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  validatedBy       User?                           @relation("CommercialProgressStatementValidatedBy", fields: [validatedById], references: [id], onDelete: SetNull)
+  lines             CommercialProgressStatementLine[]
+  invoice           CommercialInvoice?
+
+  @@unique([quoteId, number])
+  @@index([organizationId, status])
+  @@index([organizationId, quoteId])
+  @@index([projectId])
+}
+
+model CommercialProgressStatementLine {
+  id                 String   @id @default(cuid())
+  organizationId     String
+  statementId        String
+  sourceQuoteLineId  String?
+  sortOrder          Int      @default(0)
+  reference          String?
+  designation        String
+  description        String?  @db.Text
+  unit               String   @default("U")
+  contractQuantity   Decimal  @db.Decimal(14, 4)
+  unitSellHt         Decimal  @db.Decimal(14, 4)
+  vatRate            Decimal  @default(20) @db.Decimal(6, 4)
+  contractSellHt     Decimal  @db.Decimal(14, 4)
+  previousPercent    Decimal  @default(0) @db.Decimal(8, 4)
+  previousQuantity   Decimal  @default(0) @db.Decimal(14, 4)
+  previousSellHt     Decimal  @default(0) @db.Decimal(14, 4)
+  periodPercent      Decimal  @default(0) @db.Decimal(8, 4)
+  periodQuantity     Decimal  @default(0) @db.Decimal(14, 4)
+  periodSellHt       Decimal  @default(0) @db.Decimal(14, 4)
+  cumulativePercent  Decimal  @default(0) @db.Decimal(8, 4)
+  cumulativeQuantity Decimal  @default(0) @db.Decimal(14, 4)
+  cumulativeSellHt   Decimal  @default(0) @db.Decimal(14, 4)
+  remainingSellHt    Decimal  @default(0) @db.Decimal(14, 4)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  statement CommercialProgressStatement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+
+  @@index([statementId, sortOrder])
+  @@index([organizationId])
 }
 
 model CommercialInvoiceLine {

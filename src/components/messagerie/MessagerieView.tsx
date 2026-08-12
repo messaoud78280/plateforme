@@ -52,6 +52,7 @@ import {
   maybeRedactReplyExcerpt,
   type MessageDeleteMode,
 } from "@/lib/messagerie/message-delete";
+import { buildMessagerieChantierUrl } from "@/lib/messagerie/messaging-url";
 
 type MessageChannel = "INTERNE" | "CLIENT" | "FOURNISSEUR" | "SOUS_TRAITANT";
 
@@ -357,19 +358,15 @@ export function MessagerieView({
     channelId?: string | null;
     channel?: string | null;
   }) {
-    const params = new URLSearchParams(
-      typeof window !== "undefined" ? window.location.search : searchParams.toString(),
-    );
-    params.set("view", "chantiers");
-    if (next.project) params.set("project", next.project);
-    else params.delete("project");
-    if (next.channelId) params.set("channelId", next.channelId);
-    else params.delete("channelId");
-    if (next.channel) params.set("channel", next.channel);
-    else if (!next.channelId) params.delete("channel");
-    const qs = params.toString();
     syncingUrlRef.current = true;
-    router.replace(`/dashboard/messagerie?${qs}`, { scroll: false });
+    router.replace(
+      buildMessagerieChantierUrl({
+        project: next.project ?? null,
+        channelId: next.channelId ?? null,
+        channel: next.channel ?? null,
+      }),
+      { scroll: false },
+    );
     window.setTimeout(() => {
       syncingUrlRef.current = false;
     }, 0);
@@ -457,18 +454,29 @@ export function MessagerieView({
           // URL / props = source de vérité — pas d’auto-sélection list[0]
           const pid = selectedProjectId || initialProjectId || "";
           if (pid) {
-            if (!selectedProjectId) setSelectedProjectId(pid);
-            setExpandedProjectId(pid);
-            const channels = await loadProjectChannels(pid);
-            const chId = selectedChannelId || initialChannelId || "";
-            if (chId && channels.some((c) => c.id === chId)) {
-              setSelectedChannelId(chId);
-              await loadMessagesForChannel(chId);
-            } else if (chId && !channels.some((c) => c.id === chId)) {
-              // channelId invalide / hors ACL → rester au niveau chantier
+            const projectExists = list.some((p: ProjectItem) => p.id === pid);
+            if (!projectExists) {
+              setSelectedProjectId("");
+              setExpandedProjectId("");
               setSelectedChannelId("");
+              setMobileLevel("projects");
               setMobileShowThread(false);
-              setMobileLevel("channels");
+              replaceChantierQuery({ project: null, channelId: null });
+            } else {
+              if (!selectedProjectId) setSelectedProjectId(pid);
+              setExpandedProjectId(pid);
+              const channels = await loadProjectChannels(pid);
+              const chId = selectedChannelId || initialChannelId || "";
+              if (chId && channels.some((c) => c.id === chId)) {
+                setSelectedChannelId(chId);
+                await loadMessagesForChannel(chId);
+              } else if (chId && !channels.some((c) => c.id === chId)) {
+                // channelId invalide / hors ACL → rester au niveau chantier
+                setSelectedChannelId("");
+                setMobileShowThread(false);
+                setMobileLevel("channels");
+                replaceChantierQuery({ project: pid, channelId: null });
+              }
             }
           }
         }

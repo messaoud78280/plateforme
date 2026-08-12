@@ -9,6 +9,10 @@ import { documentDownloadHref } from "@/lib/documents/download-url";
 import { badgeIcon } from "@/lib/messagerie/message-links";
 import { WA_CHAT_BG, waBubbleTime, waListTime } from "@/components/messagerie/wa-theme";
 import { getMessagerieUnread, subscribeMessagerieEvents } from "@/lib/perf/messagerie-unread-bus";
+import {
+  buildMessagerieChantierUrl,
+  buildMessagerieMissionsUrl,
+} from "@/lib/messagerie/messaging-url";
 import { compressImageForMessagerie } from "@/lib/messagerie/compress-image";
 import {
   formatMediaPreview,
@@ -805,26 +809,14 @@ export function MessagerieMissionsView({
 
   /** URL = source de vérité conversation (mobile + partage de lien). */
   function replaceMessagerieQuery(next: { task?: string | null; with?: string | null }) {
-    const params = new URLSearchParams(
-      typeof window !== "undefined" ? window.location.search : searchParams.toString(),
-    );
-    if (next.task) {
-      params.set("task", next.task);
-      params.delete("with");
-    } else if (next.with) {
-      params.set("with", next.with);
-      params.delete("task");
-    } else {
-      params.delete("task");
-      params.delete("with");
-    }
-    params.delete("messageId");
-    params.delete("tab");
-    const qs = params.toString();
     syncingUrlRef.current = true;
-    router.replace(qs ? `/dashboard/messagerie?${qs}` : "/dashboard/messagerie", {
-      scroll: false,
-    });
+    router.replace(
+      buildMessagerieMissionsUrl({
+        task: next.task ?? null,
+        with: next.with ?? null,
+      }),
+      { scroll: false },
+    );
     window.setTimeout(() => {
       syncingUrlRef.current = false;
     }, 0);
@@ -2698,7 +2690,7 @@ export function MessagerieMissionsView({
                   <button
                     type="button"
                     onClick={() => {
-                      router.push("/dashboard/messagerie?view=chantiers");
+                      router.push(buildMessagerieChantierUrl());
                       setMoreOpen(false);
                     }}
                     className="block w-full border-t border-[#f0f2f5] px-3 py-2 text-left text-sm text-[#111b21] hover:bg-[#f5f6f6]"

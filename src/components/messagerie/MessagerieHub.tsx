@@ -1,10 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MessagerieMissionsView } from "@/components/messagerie/MessagerieMissionsView";
 import { MessagerieView } from "@/components/messagerie/MessagerieView";
 import type { MessagingPartyType } from "@/lib/messagerie/party-type";
+import {
+  buildMessagerieChantierUrl,
+  buildMessagerieMissionsUrl,
+  resolveMessagerieView,
+} from "@/lib/messagerie/messaging-url";
 import { cn } from "@/lib/cn";
 
 export type HubRecipient = {
@@ -33,33 +37,14 @@ type Props = {
 };
 
 export function MessagerieHub(props: Props) {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const viewParam = searchParams.get("view");
   const projectParam = searchParams.get("project");
   const channelParam = searchParams.get("channel");
   const channelIdParam = searchParams.get("channelId");
   const externalOrgParam = searchParams.get("externalOrganizationId");
-  /** Deep-link Discussions prioritaire sur Par chantier. */
-  const forceMissions = Boolean(searchParams.get("task") || searchParams.get("with"));
-  const forceChantiers = Boolean(
-    !forceMissions &&
-      (searchParams.get("channelId") ||
-        (searchParams.get("view") === "chantiers" && searchParams.get("project"))),
-  );
 
-  const initialView = useMemo(() => {
-    if (viewParam === "chantiers" || viewParam === "missions") return viewParam;
-    return props.preferChantiers ? "chantiers" : "missions";
-  }, [viewParam, props.preferChantiers]);
-
-  const [userView, setUserView] = useState<"missions" | "chantiers" | null>(null);
-  const view: "missions" | "chantiers" = forceMissions
-    ? "missions"
-    : forceChantiers
-      ? "chantiers"
-      : viewParam === "chantiers" || viewParam === "missions"
-        ? viewParam
-        : (userView ?? initialView);
+  const view = resolveMessagerieView(searchParams, props.preferChantiers);
 
   /** Conversation ouverte — masquer le chrome Hub sur mobile. */
   const threadOpen = Boolean(
@@ -67,6 +52,14 @@ export function MessagerieHub(props: Props) {
       searchParams.get("with") ||
       searchParams.get("channelId"),
   );
+
+  function switchView(next: "missions" | "chantiers") {
+    if (next === view) return;
+    router.push(
+      next === "missions" ? buildMessagerieMissionsUrl() : buildMessagerieChantierUrl(),
+      { scroll: false },
+    );
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
@@ -82,7 +75,7 @@ export function MessagerieHub(props: Props) {
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={() => setUserView("missions")}
+            onClick={() => switchView("missions")}
             className={`min-h-9 rounded-full px-3.5 py-1.5 text-xs font-semibold ${
               view === "missions"
                 ? "bg-[#1e3a5f] text-white"
@@ -94,7 +87,7 @@ export function MessagerieHub(props: Props) {
           </button>
           <button
             type="button"
-            onClick={() => setUserView("chantiers")}
+            onClick={() => switchView("chantiers")}
             className={`min-h-9 rounded-full px-3.5 py-1.5 text-xs font-semibold ${
               view === "chantiers"
                 ? "bg-[#1e3a5f] text-white"

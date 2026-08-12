@@ -122,6 +122,78 @@ export function defaultDueDateFromIssue(issueDate: Date = new Date()): Date {
   return d;
 }
 
+/**
+ * Calcule une échéance explicite depuis des conditions de règlement.
+ * Toujours stocker le résultat en `dueDate` (vérité opérationnelle).
+ */
+export function computeDueDateFromTerms(
+  issueDate: Date,
+  terms:
+    | "COMPTANT"
+    | "J15"
+    | "J30"
+    | "J45"
+    | "J30_FDM"
+    | "J45_FDM"
+    | "CUSTOM",
+  customDate?: Date | null,
+): Date {
+  if (terms === "CUSTOM" && customDate) {
+    return new Date(customDate);
+  }
+  const base = new Date(issueDate);
+  base.setHours(12, 0, 0, 0);
+
+  if (terms === "COMPTANT") {
+    return base;
+  }
+
+  const addDays = (n: number) => {
+    const d = new Date(base);
+    d.setDate(d.getDate() + n);
+    return d;
+  };
+
+  const endOfMonthPlus = (days: number) => {
+    const d = new Date(base.getFullYear(), base.getMonth() + 1, 0);
+    d.setHours(12, 0, 0, 0);
+    d.setDate(d.getDate() + days);
+    return d;
+  };
+
+  switch (terms) {
+    case "J15":
+      return addDays(15);
+    case "J30":
+      return addDays(30);
+    case "J45":
+      return addDays(45);
+    case "J30_FDM":
+      return endOfMonthPlus(30);
+    case "J45_FDM":
+      return endOfMonthPlus(45);
+    default:
+      return addDays(30);
+  }
+}
+
+/** Bloque le surpaiement — primitive testable. */
+export function assertPaymentWithinRemaining(
+  remainingDue: number,
+  paymentAmount: number,
+): void {
+  const remaining = roundMoney(Math.max(0, remainingDue), 2);
+  const amount = roundMoney(paymentAmount, 2);
+  if (amount <= 0) {
+    throw new Error("Montant invalide");
+  }
+  if (amount > remaining + 1e-9) {
+    throw new Error(
+      `Surpaiement refusé : reste dû ${remaining.toFixed(2)} € (saisie ${amount.toFixed(2)} €).`,
+    );
+  }
+}
+
 export function isCollectibleInvoiceType(type: string | null | undefined): boolean {
   return type !== "CREDIT";
 }

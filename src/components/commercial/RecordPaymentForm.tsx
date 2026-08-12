@@ -15,10 +15,12 @@ export function RecordPaymentForm({
   const [paidAt, setPaidAt] = useState(new Date().toISOString().slice(0, 10));
   const [method, setMethod] = useState("VIREMENT");
   const [reference, setReference] = useState("");
+  const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function submit() {
+    if (busy) return;
     setBusy(true);
     setError(null);
     try {
@@ -30,6 +32,7 @@ export function RecordPaymentForm({
           paidAt,
           method,
           reference: reference.trim() || undefined,
+          comment: comment.trim() || undefined,
         }),
       });
       const data = await res.json();
@@ -44,9 +47,10 @@ export function RecordPaymentForm({
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3">
-      <h3 className="text-sm font-bold text-slate-900">Enregistrer un encaissement</h3>
+      <h3 className="text-sm font-bold text-slate-900">Enregistrer un paiement</h3>
       <label className="block text-xs text-slate-500">
-        Montant
+        Montant (max{" "}
+        {maxAmount.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €)
         <input
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
@@ -85,14 +89,23 @@ export function RecordPaymentForm({
           className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
         />
       </label>
+      <label className="block text-xs text-slate-500">
+        Commentaire (optionnel)
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          rows={2}
+        />
+      </label>
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       <button
         type="button"
         disabled={busy}
         onClick={() => void submit()}
-        className="rounded-lg bg-[#1e3a5f] px-4 py-2 text-xs font-bold text-white"
+        className="rounded-lg bg-[#1e3a5f] px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
       >
-        {busy ? "…" : "Enregistrer l’encaissement"}
+        {busy ? "…" : "Enregistrer le paiement"}
       </button>
     </div>
   );

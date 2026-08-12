@@ -1,13 +1,16 @@
 /**
  * DF-4 — Échéances, OVERDUE, paiements
- * Run: node --import tsx scripts/test-commercial-df4-collections.ts
+ * Run: npx tsx scripts/test-commercial-df4-collections.ts
  */
 import assert from "node:assert/strict";
 import {
   agingBucket,
+  assertPaymentWithinRemaining,
+  computeDueDateFromTerms,
   daysOverdue,
   defaultDueDateFromIssue,
   evaluateCommercialInvoiceStatus,
+  isCollectibleInvoiceType,
   isDueDatePast,
 } from "../src/lib/commercial/invoice-status";
 
@@ -94,11 +97,13 @@ function testF_draftNeverOverdue() {
   console.log("✓ F DRAFT jamais OVERDUE");
 }
 
-function testG_surpaiementLogic() {
-  const remaining = 6_000;
-  const attempt = 6_500;
-  assert.ok(attempt > remaining);
-  console.log("✓ G surpaiement à bloquer côté recordPayment");
+function testG_surpaiement() {
+  assert.throws(
+    () => assertPaymentWithinRemaining(6_000, 6_500),
+    /Surpaiement refusé/,
+  );
+  assert.doesNotThrow(() => assertPaymentWithinRemaining(6_000, 6_000));
+  console.log("✓ G surpaiement bloqué");
 }
 
 function testH_temporal() {
@@ -110,6 +115,8 @@ function testH_temporal() {
   assert.equal(isDueDatePast(tomorrow), false);
   const due = defaultDueDateFromIssue(new Date("2026-08-12"));
   assert.equal(due.toISOString().slice(0, 10), "2026-09-11");
+  const j30 = computeDueDateFromTerms(new Date("2026-08-12"), "J30");
+  assert.equal(j30.toISOString().slice(0, 10), "2026-09-11");
   console.log("✓ H temporel overdue + J+30 = 11/09/2026");
 }
 
@@ -123,13 +130,36 @@ function testI_aging() {
   console.log("✓ I aging buckets");
 }
 
+function testJ_creditExcluded() {
+  assert.equal(isCollectibleInvoiceType("CREDIT"), false);
+  assert.equal(isCollectibleInvoiceType("PROGRESS"), true);
+  console.log("✓ J CREDIT hors KPI encaissement");
+}
+
+function testK_cancelRecalc() {
+  // Après annulation d’un paiement sur facture soldée → recalcul statut
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 5);
+  const s = evaluateCommercialInvoiceStatus({
+    status: "ISSUED", // après cancel on réévalue depuis ISSUED-like
+    totalTtc: 10_000,
+    amountPaid: 4_000,
+    amountDue: 6_000,
+    dueDate: yesterday,
+  });
+  assert.equal(s, "OVERDUE");
+  console.log("✓ K annulation → recalcul OVERDUE si échéance passée");
+}
+
 testA_futureIssued();
 testB_partial();
 testC_paid();
 testD_overdue();
 testE_overduePartial();
 testF_draftNeverOverdue();
-testG_surpaiementLogic();
+testG_surpaiement();
 testH_temporal();
 testI_aging();
+testJ_creditExcluded();
+testK_cancelRecalc();
 console.log("\nDF-4 OK");

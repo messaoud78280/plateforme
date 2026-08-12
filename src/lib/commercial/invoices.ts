@@ -19,6 +19,7 @@ import {
 } from "@/lib/commercial/pdf-invoice";
 import type { QuotePdfSnapshot } from "@/lib/commercial/pdf-quote";
 import {
+  assertPaymentWithinRemaining,
   defaultDueDateFromIssue,
   evaluateCommercialInvoiceStatus,
 } from "@/lib/commercial/invoice-status";
@@ -696,11 +697,7 @@ export async function recordPayment(input: {
   const previousPaid = d(invoice.amountPaid);
   const totalTtc = d(invoice.totalTtc);
   const remaining = roundMoney(Math.max(0, totalTtc - previousPaid), 2);
-  if (amount > remaining + 1e-9) {
-    throw new Error(
-      `Surpaiement refusé : reste dû ${remaining.toFixed(2)} € (saisie ${amount.toFixed(2)} €).`,
-    );
-  }
+  assertPaymentWithinRemaining(remaining, amount);
   const newPaid = roundMoney(previousPaid + amount, 2);
   const amountDue = roundMoney(Math.max(0, totalTtc - newPaid), 2);
   const status = evaluateCommercialInvoiceStatus({

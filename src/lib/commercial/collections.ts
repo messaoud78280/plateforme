@@ -12,7 +12,7 @@ import {
   isDueDatePast,
   type AgingBucket,
 } from "@/lib/commercial/invoice-status";
-import { createNotification, notifyManagers } from "@/lib/notifications";
+import { createNotification } from "@/lib/notifications";
 
 export type CollectionsFilter =
   | "all"
@@ -292,7 +292,6 @@ export async function refreshCommercialOverdueStatuses(opts?: {
 
     if (opts?.notify !== false) {
       const level = daysOverdue(inv.dueDate, now) >= 15 ? "URGENT" : "IMPORTANT";
-      const dedupeKey = `COMMERCIAL_OVERDUE:${inv.organizationId}:${inv.id}:${level}`;
       const title =
         level === "URGENT"
           ? `Facture en retard — ${inv.number}`
@@ -300,18 +299,21 @@ export async function refreshCommercialOverdueStatuses(opts?: {
       const message = `Reste dû ${d(inv.amountDue).toFixed(2)} € — échéance dépassée.`;
       const actionUrl = `/dashboard/devis-facturation/factures/${inv.id}`;
 
-      if (inv.createdById) {
-        await createNotification({
-          userId: inv.createdById,
-          type: "COMMERCIAL_INVOICE_OVERDUE",
-          title,
-          message,
-          actionUrl,
-          dedupeKey,
+      const recipientIds = new Set<string>();
+      if (inv.createdById) recipientIds.add(inv.createdById);
+      else {
+        const members = await prisma.organizationMember.findMany({
+          where: { organizationId: inv.organizationId },
+          select: { userId: true },
+          take: 30,
         });
-        notified += 1;
-      } else {
-        await notifyManagers({
+        for (const m of members) recipientIds.add(m.userId);
+      }
+
+      for (const userId of recipientIds) {
+        const dedupeKey = `COMMERCIAL_OVERDUE:${userId}:${inv.id}:${level}`;
+        await createNotification({
+          userId,
           type: "COMMERCIAL_INVOICE_OVERDUE",
           title,
           message,

@@ -9,6 +9,7 @@ import {
   roundMoney,
 } from "@/lib/commercial/money";
 import { RecordPaymentForm } from "@/components/commercial/RecordPaymentForm";
+import { InvoiceDueDateEditor } from "@/components/commercial/InvoiceDueDateEditor";
 
 type Snapshot = {
   name?: string | null;
@@ -259,11 +260,22 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
             <p className="text-2xl font-bold tracking-tight text-[#1e3a5f]">FACTURE</p>
             <p className="mt-1 text-sm font-semibold text-slate-800">{invoice.number}</p>
             <p className="text-xs text-slate-500">Date · {fmtDate(invoice.issueDate)}</p>
-            {invoice.dueDate ? (
+            {invoice.dueDate && invoice.status !== "DRAFT" ? (
               <p className="text-xs text-slate-500">Échéance · {fmtDate(invoice.dueDate)}</p>
             ) : null}
           </div>
         </div>
+
+        {invoice.status === "DRAFT" ||
+        (invoice.status !== "PAID" &&
+          invoice.status !== "CANCELLED" &&
+          invoice.amountDue > 0) ? (
+          <InvoiceDueDateEditor
+            invoiceId={invoice.id}
+            issueDate={invoice.issueDate}
+            dueDate={invoice.dueDate}
+          />
+        ) : null}
 
         <div className="mt-6 grid gap-4 rounded-xl bg-slate-50 p-4 sm:grid-cols-2">
           <div>

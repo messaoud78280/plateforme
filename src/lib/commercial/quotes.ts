@@ -326,7 +326,7 @@ export async function listQuotes(
 }
 
 export async function getQuoteDetail(orgId: string, id: string) {
-  const quote = await prisma.commercialQuote.findFirst({
+  let quote = await prisma.commercialQuote.findFirst({
     where: { id, organizationId: orgId },
     include: {
       clientExternalOrg: {
@@ -366,6 +366,54 @@ export async function getQuoteDetail(orgId: string, id: string) {
     },
   });
   if (!quote) return null;
+
+  /** DF-1B — brouillon sans version courante : réparer (smoke / données incomplètes). */
+  if (
+    !quote.currentVersionId &&
+    EDITABLE_STATUSES.includes(quote.status)
+  ) {
+    await ensureDraftHasCurrentVersion(orgId, quote.id);
+    quote = await prisma.commercialQuote.findFirst({
+      where: { id, organizationId: orgId },
+      include: {
+        clientExternalOrg: {
+          select: {
+            id: true,
+            name: true,
+            tradeName: true,
+            email: true,
+            phone: true,
+            address: true,
+            city: true,
+            zipCode: true,
+            siret: true,
+          },
+        },
+        project: { select: { id: true, title: true } },
+        responsible: { select: { id: true, name: true } },
+        createdBy: { select: { id: true, name: true } },
+        currentVersion: {
+          include: {
+            sections: { orderBy: { sortOrder: "asc" } },
+            lines: { orderBy: { sortOrder: "asc" } },
+          },
+        },
+        versions: {
+          orderBy: { versionNumber: "desc" },
+          select: {
+            id: true,
+            versionNumber: true,
+            label: true,
+            lockState: true,
+            issuedAt: true,
+            totalSellHt: true,
+            totalTtc: true,
+          },
+        },
+      },
+    });
+    if (!quote) return null;
+  }
 
   const version = quote.currentVersion;
   return {
@@ -411,6 +459,64 @@ export async function getQuoteDetail(orgId: string, id: string) {
       totalTtc: d(v.totalTtc),
     })),
   };
+}
+
+/** Crée une V1 DRAFT vide si le devis éditable n’a pas de version courante. */
+async function ensureDraftHasCurrentVersion(orgId: string, quoteId: string) {
+  const quote = await prisma.commercialQuote.findFirst({
+    where: { id: quoteId, organizationId: orgId },
+    select: {
+      id: true,
+      status: true,
+      currentVersionId: true,
+      paymentTerms: true,
+      paymentScheduleJson: true,
+      clientNotes: true,
+      clientSnapshotJson: true,
+      issuerSnapshotJson: true,
+    },
+  });
+  if (!quote || quote.currentVersionId) return;
+  if (!EDITABLE_STATUSES.includes(quote.status)) return;
+
+  const existing = await prisma.commercialQuoteVersion.findFirst({
+    where: { quoteId, organizationId: orgId },
+    orderBy: { versionNumber: "desc" },
+  });
+  if (existing) {
+    await prisma.commercialQuote.update({
+      where: { id: quoteId },
+      data: { currentVersionId: existing.id },
+    });
+    return;
+  }
+
+  const version = await prisma.commercialQuoteVersion.create({
+    data: {
+      organizationId: orgId,
+      quoteId,
+      versionNumber: 1,
+      label: "V1",
+      lockState: "DRAFT",
+      paymentTerms: quote.paymentTerms,
+      paymentScheduleJson: quote.paymentScheduleJson ?? undefined,
+      clientNotes: quote.clientNotes,
+      clientSnapshotJson: quote.clientSnapshotJson ?? undefined,
+      issuerSnapshotJson: quote.issuerSnapshotJson ?? undefined,
+    },
+  });
+  await prisma.commercialQuoteSection.create({
+    data: {
+      organizationId: orgId,
+      versionId: version.id,
+      title: "Ouvrages",
+      sortOrder: 0,
+    },
+  });
+  await prisma.commercialQuote.update({
+    where: { id: quoteId },
+    data: { currentVersionId: version.id },
+  });
 }
 
 export async function updateQuoteMeta(

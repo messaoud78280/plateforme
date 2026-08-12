@@ -809,9 +809,10 @@ export function QuoteEditor({
       ) : null}
 
       {!canEdit ? (
-        <p className="mx-auto mb-3 max-w-4xl text-xs text-amber-800">
-          Document verrouillé — utilisez « Nouvelle version » (menu •••) ou un avenant. Ne
-          modifiez jamais silencieusement une version envoyée ou acceptée.
+        <p className="mx-auto mb-3 max-w-4xl rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+          {version?.lockState && version.lockState !== "DRAFT"
+            ? "Version figée — utilisez « Nouvelle version » (menu •••) ou un avenant. Ne modifiez jamais silencieusement une version envoyée ou acceptée."
+            : "Document non modifiable dans cet état — créez une nouvelle version ou un avenant si besoin."}
         </p>
       ) : null}
 

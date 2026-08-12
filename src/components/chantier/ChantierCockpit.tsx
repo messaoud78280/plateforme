@@ -12,6 +12,7 @@ export type ChantierCockpitTabId =
   | "messages"
   | "partage"
   | "contractuel"
+  | "rentabilite"
   | "pilotage";
 
 const TABS: { id: ChantierCockpitTabId; label: string }[] = [
@@ -22,6 +23,7 @@ const TABS: { id: ChantierCockpitTabId; label: string }[] = [
   { id: "messages", label: "Échanges" },
   { id: "partage", label: "Partage" },
   { id: "contractuel", label: "Suivi contractuel" },
+  { id: "rentabilite", label: "Rentabilité" },
   { id: "pilotage", label: "Organisation" },
 ];
 
@@ -49,6 +51,7 @@ function tabFromHash(): ChantierCockpitTabId | null {
   if (h === "tab-messages") return "messages";
   if (h === "tab-partage") return "partage";
   if (h === "tab-contractuel" || h === "suivi-contractuel") return "contractuel";
+  if (h === "tab-rentabilite" || h === "rentabilite") return "rentabilite";
   if (h === "tab-pilotage") return "pilotage";
   return null;
 }

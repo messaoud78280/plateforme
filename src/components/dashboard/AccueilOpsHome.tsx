@@ -251,6 +251,24 @@ export function AccueilOpsHome({
           {/* 1c — FACTURATION anti-oubli (masqué si rien) */}
           <FacturationHomeBanner />
 
+          {/* 1d — Rentabilité chantiers (PILOTAGE-1) */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]">
+                Rentabilité chantiers
+              </h2>
+              <Link
+                href="/dashboard/rentabilite"
+                className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+              >
+                Voir la rentabilité →
+              </Link>
+            </div>
+            <p className="mt-2 text-sm text-slate-500">
+              Marge prévue vs estimée, engagé, facturé et encaissé — sans IA.
+            </p>
+          </section>
+
           {/* 2 — AUJOURD’HUI */}
           <section data-demo-target="accueil-aujourdhui">
             <div className="flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">

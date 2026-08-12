@@ -48,11 +48,14 @@ import {
 } from "@/lib/chantier-dossier/constants";
 import { chantierStatusBadgeTone } from "@/lib/chantier-lifecycle";
 import { ChantierContractuelPanel } from "@/components/chantier/ChantierContractuelPanel";
+import { ProjectProfitabilityPanel } from "@/components/chantier/ProjectProfitabilityPanel";
+import { loadProjectProfitability } from "@/lib/chantier/project-profitability";
 import { canEditPilotageOperational } from "@/lib/pilotage/access";
 import { isActionOpen, isVisaPending, isOverdue } from "@/lib/pilotage/calculations";
 import { ProjectMateriauxSection } from "@/components/projects/ProjectMateriauxSection";
 import { loadMaterialRequirementsForProject } from "@/lib/materiaux/load-for-project";
 import { isInternalPurchaseOrderActor } from "@/lib/purchase-orders/access";
+import { canAccessCommercialModule } from "@/lib/commercial/access";
 
 export default async function ProjetDetailPage({
   params,
@@ -238,10 +241,13 @@ export default async function ProjetDetailPage({
     actorProfile?.personType !== "CLIENT_EXT" &&
     actorProfile?.personType !== "SUPPLIER";
 
+  const canSeeRentabilite =
+    canSeeContractuel && canAccessCommercialModule(session.user);
+
   const canSeeMateriaux =
     !isExternalViewer && isInternalPurchaseOrderActor(session.user);
 
-  const [chantierFolders, missingCount, ops, contractuelRaw, billingHint, materiauxRows] =
+  const [chantierFolders, missingCount, ops, contractuelRaw, billingHint, materiauxRows, profitability] =
     await Promise.all([
       canSeeDocuments
         ? prisma.chantierFolder.findMany({
@@ -320,6 +326,12 @@ export default async function ProjetDetailPage({
             return [];
           })
         : Promise.resolve([]),
+      canSeeRentabilite && project.organizationId
+        ? loadProjectProfitability(project.organizationId, id).catch((e) => {
+            console.error("[ProjetDetail] profitability:", e);
+            return null;
+          })
+        : Promise.resolve(null),
     ]);
 
   const dossierFolders = chantierFolders.map((folder) => ({
@@ -664,6 +676,11 @@ export default async function ProjetDetailPage({
     />
   ) : null;
 
+  const rentabilitePanel =
+    canSeeRentabilite && profitability ? (
+      <ProjectProfitabilityPanel initial={profitability} />
+    ) : null;
+
   return (
     <div className="space-y-5">
       <ContextBackButton
@@ -821,6 +838,7 @@ export default async function ProjetDetailPage({
           messages: messagesPanel,
           partage: partagePanel,
           contractuel: contractuelPanel,
+          rentabilite: rentabilitePanel,
           pilotage: organisationPanel,
         }}
       />

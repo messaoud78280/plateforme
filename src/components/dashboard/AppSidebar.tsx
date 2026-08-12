@@ -27,6 +27,7 @@ import {
   StickyNote,
   Users,
   Wallet,
+  CircleDollarSign,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -77,6 +78,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
         label: "Pilotage",
         items: [
           { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
+          { href: "/dashboard/rentabilite", label: "Rentabilité", icon: CircleDollarSign },
           { href: "/dashboard/devis-facturation", label: "Devis & Facturation", icon: Wallet },
           { href: "/dashboard/facturation", label: "À facturer", icon: Wallet },
           { href: "/dashboard/rapports", label: "Rapports", icon: Briefcase },
@@ -116,6 +118,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
         items: [
           { href: "/dashboard/agents", label: "Agents", icon: Users },
           { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
+          { href: "/dashboard/rentabilite", label: "Rentabilité", icon: CircleDollarSign },
           { href: "/dashboard/facturation", label: "À facturer", icon: Wallet },
           { href: "/dashboard/messages", label: "RDV", icon: CalendarDays },
           { href: "/dashboard/fiches-suivi", label: "Fiches suivi", icon: StickyNote },
@@ -154,6 +157,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
           { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
           { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList },
           { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
+          { href: "/dashboard/rentabilite", label: "Rentabilité", icon: CircleDollarSign },
           { href: "/dashboard/facturation", label: "À facturer", icon: Wallet },
         ],
       },

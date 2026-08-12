@@ -133,6 +133,7 @@ model User {
   commercialProgressStatementsCreated CommercialProgressStatement[] @relation("CommercialProgressStatementCreatedBy")
   commercialProgressStatementsValidated CommercialProgressStatement[] @relation("CommercialProgressStatementValidatedBy")
   commercialRetentionsReleased CommercialRetentionGuarantee[] @relation("CommercialRetentionReleasedBy")
+  projectBudgetsCreated        ProjectBudget[] @relation("ProjectBudgetCreatedBy")
 
   // Pilotage administratif des travaux
   worksitePilotagesCreated   WorksitePilotage[] @relation("PilotageCreatedBy")
@@ -631,6 +632,7 @@ model Organization {
   commercialQuoteSnapshots  CommercialQuoteSnapshot[]
   commercialProgressStatements CommercialProgressStatement[]
   commercialRetentionGuarantees CommercialRetentionGuarantee[]
+  projectBudgets                ProjectBudget[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -810,6 +812,7 @@ model Project {
   commercialQuotes CommercialQuote[]
   commercialInvoices CommercialInvoice[]
   commercialProgressStatements CommercialProgressStatement[]
+  projectBudget ProjectBudget?
 
   @@index([organizationId])
 }
@@ -821,6 +824,42 @@ enum ChantierStatus {
   EN_ATTENTE
   RECEPTION
   TERMINE
+}
+
+/// PILOTAGE-1 — Budget initial chantier figé (snapshot devis accepté).
+/// Ne jamais recalculer depuis la bibliothèque après création.
+model ProjectBudget {
+  id                 String   @id @default(cuid())
+  organizationId     String
+  projectId          String   @unique
+  sourceQuoteId      String
+  sourceQuoteNumber  String?
+  snappedAt          DateTime @default(now())
+  createdById        String?
+  /// CA marché HT figé
+  marketSellHt       Decimal  @db.Decimal(14, 4)
+  materialsHt        Decimal  @default(0) @db.Decimal(14, 4)
+  laborHt            Decimal  @default(0) @db.Decimal(14, 4)
+  equipmentHt        Decimal  @default(0) @db.Decimal(14, 4)
+  subcontractHt      Decimal  @default(0) @db.Decimal(14, 4)
+  otherHt            Decimal  @default(0) @db.Decimal(14, 4)
+  feesHt             Decimal  @default(0) @db.Decimal(14, 4)
+  totalCostHt        Decimal  @default(0) @db.Decimal(14, 4)
+  plannedMarginHt    Decimal  @default(0) @db.Decimal(14, 4)
+  plannedMarginPercent Decimal @default(0) @db.Decimal(8, 4)
+  /// Heures MO prévues si extractibles des snapshots
+  laborHours         Decimal? @db.Decimal(14, 4)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sourceQuote  CommercialQuote @relation(fields: [sourceQuoteId], references: [id], onDelete: Restrict)
+  createdBy    User?          @relation("ProjectBudgetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([sourceQuoteId])
+  @@index([createdById])
 }
 
 // Rubrique du classeur chantier (01 Devis, 02 Contrats, …)
@@ -3867,6 +3906,7 @@ model CommercialQuote {
   snapshots            CommercialQuoteSnapshot[]
   progressStatements   CommercialProgressStatement[]
   retentionGuarantees  CommercialRetentionGuarantee[]
+  projectBudgets       ProjectBudget[]
 
   @@unique([organizationId, number])
   @@index([organizationId, status])

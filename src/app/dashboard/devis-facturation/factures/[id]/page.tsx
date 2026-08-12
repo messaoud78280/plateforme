@@ -65,6 +65,7 @@ export default async function FactureDetailPage({
           paidAt: p.paidAt,
           method: p.method,
           reference: p.reference,
+          cancelledAt: (p as { cancelledAt?: Date | null }).cancelledAt ?? null,
         })),
       }}
     />

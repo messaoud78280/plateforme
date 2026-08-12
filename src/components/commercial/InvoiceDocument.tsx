@@ -67,6 +67,7 @@ type InvoiceDoc = {
     paidAt: string | Date;
     method: string;
     reference: string | null;
+    cancelledAt?: string | Date | null;
   }>;
 };
 
@@ -107,6 +108,12 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
     invoice.amountDue > 0 &&
     invoice.status !== "DRAFT" &&
     invoice.status !== "CANCELLED";
+  const canRemind =
+    canPay &&
+    (invoice.status === "OVERDUE" ||
+      (invoice.dueDate &&
+        new Date(invoice.dueDate).getTime() <
+          new Date().setHours(0, 0, 0, 0)));
 
   async function issue() {
     if (!confirm("Émettre cette facture ? Elle ne pourra plus être modifiée comme brouillon.")) {
@@ -120,6 +127,45 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "issue" }),
       });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur");
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remind() {
+    if (!confirm("Marquer comme relancée ?")) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/commercial/invoices/${invoice.id}/remind`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ channel: "MANUEL" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur");
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function cancelPay(paymentId: string) {
+    if (!confirm("Annuler ce règlement ? L’historique est conservé.")) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/commercial/invoices/${invoice.id}/payments/${paymentId}/cancel`,
+        { method: "POST" },
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur");
       router.refresh();
@@ -164,6 +210,16 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
               className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
             >
               {busy ? "…" : "Émettre la facture"}
+            </button>
+          ) : null}
+          {canRemind ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void remind()}
+              className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900 disabled:opacity-50"
+            >
+              Relancer
             </button>
           ) : null}
         </div>
@@ -399,11 +455,29 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
       {invoice.payments.length > 0 ? (
         <div className="rounded-xl border border-slate-200 bg-white p-4">
           <h3 className="text-sm font-bold text-slate-900">Encaissements</h3>
-          <ul className="mt-2 space-y-1 text-sm text-slate-700">
+          <ul className="mt-2 space-y-2 text-sm text-slate-700">
             {invoice.payments.map((p) => (
-              <li key={p.id}>
-                {fmtDate(p.paidAt)} · {fmt(p.amount)} € · {p.method}
-                {p.reference ? ` · ${p.reference}` : ""}
+              <li
+                key={p.id}
+                className={`flex flex-wrap items-center justify-between gap-2 ${
+                  p.cancelledAt ? "text-slate-400 line-through" : ""
+                }`}
+              >
+                <span>
+                  {fmtDate(p.paidAt)} · {fmt(p.amount)} € · {p.method}
+                  {p.reference ? ` · ${p.reference}` : ""}
+                  {p.cancelledAt ? " (annulé)" : ""}
+                </span>
+                {!p.cancelledAt && invoice.status !== "CANCELLED" ? (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void cancelPay(p.id)}
+                    className="text-xs font-semibold text-red-700 disabled:opacity-50"
+                  >
+                    Annuler
+                  </button>
+                ) : null}
               </li>
             ))}
           </ul>

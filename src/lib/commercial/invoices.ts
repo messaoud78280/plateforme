@@ -1,4 +1,4 @@
-import type { CommercialInvoiceStatus, CommercialInvoiceType } from "@prisma/client";
+import type { CommercialInvoiceType, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   calculateLine,
@@ -18,13 +18,25 @@ import {
   type InvoicePdfInput,
 } from "@/lib/commercial/pdf-invoice";
 import type { QuotePdfSnapshot } from "@/lib/commercial/pdf-quote";
+import {
+  defaultDueDateFromIssue,
+  evaluateCommercialInvoiceStatus,
+} from "@/lib/commercial/invoice-status";
 
-function invoicePaymentStatus(totalTtc: number, amountPaid: number): CommercialInvoiceStatus {
-  const paid = roundMoney(amountPaid, 2);
-  const total = roundMoney(totalTtc, 2);
-  if (paid <= 0) return "ISSUED";
-  if (paid >= total) return "PAID";
-  return "PARTIALLY_PAID";
+async function sumValidPayments(
+  tx: Prisma.TransactionClient,
+  orgId: string,
+  invoiceId: string,
+): Promise<number> {
+  const agg = await tx.commercialPayment.aggregate({
+    where: {
+      organizationId: orgId,
+      invoiceId,
+      cancelledAt: null,
+    },
+    _sum: { amount: true },
+  });
+  return roundMoney(d(agg._sum.amount), 2);
 }
 
 export async function listInvoices(orgId: string) {
@@ -619,15 +631,21 @@ export async function createStandardInvoice(input: {
 export async function issueInvoice(orgId: string, invoiceId: string, actorUserId: string) {
   const invoice = await prisma.commercialInvoice.findFirst({
     where: { id: invoiceId, organizationId: orgId },
-    select: { id: true, status: true },
+    select: { id: true, status: true, dueDate: true, issueDate: true },
   });
   if (!invoice) throw new Error("Facture introuvable");
   if (invoice.status !== "DRAFT") throw new Error("Facture déjà émise ou annulée");
 
+  const dueDate = invoice.dueDate ?? defaultDueDateFromIssue(invoice.issueDate ?? new Date());
+
   return prisma.$transaction(async (tx) => {
     const updated = await tx.commercialInvoice.update({
       where: { id: invoiceId },
-      data: { status: "ISSUED", issuedAt: new Date() },
+      data: {
+        status: "ISSUED",
+        issuedAt: new Date(),
+        dueDate,
+      },
     });
     await tx.commercialStatusEvent.create({
       data: {
@@ -636,7 +654,7 @@ export async function issueInvoice(orgId: string, invoiceId: string, actorUserId
         entityId: invoiceId,
         fromStatus: "DRAFT",
         toStatus: "ISSUED",
-        label: "Facture émise",
+        label: `Facture émise — échéance ${dueDate.toLocaleDateString("fr-FR")}`,
         actorUserId,
       },
     });
@@ -663,8 +681,11 @@ export async function recordPayment(input: {
     select: {
       id: true,
       status: true,
+      type: true,
       totalTtc: true,
       amountPaid: true,
+      amountDue: true,
+      dueDate: true,
     },
   });
   if (!invoice) throw new Error("Facture introuvable");
@@ -677,12 +698,19 @@ export async function recordPayment(input: {
   const remaining = roundMoney(Math.max(0, totalTtc - previousPaid), 2);
   if (amount > remaining + 1e-9) {
     throw new Error(
-      `Montant supérieur au reste dû (${remaining.toFixed(2)} €). Réduisez le règlement.`,
+      `Surpaiement refusé : reste dû ${remaining.toFixed(2)} € (saisie ${amount.toFixed(2)} €).`,
     );
   }
   const newPaid = roundMoney(previousPaid + amount, 2);
   const amountDue = roundMoney(Math.max(0, totalTtc - newPaid), 2);
-  const status = invoicePaymentStatus(totalTtc, newPaid);
+  const status = evaluateCommercialInvoiceStatus({
+    status: invoice.status,
+    type: invoice.type,
+    totalTtc,
+    amountPaid: newPaid,
+    amountDue,
+    dueDate: invoice.dueDate,
+  });
 
   return prisma.$transaction(async (tx) => {
     const payment = await tx.commercialPayment.create({
@@ -731,9 +759,199 @@ export async function recordPayment(input: {
   });
 }
 
-export async function listPayments(orgId: string) {
+/** Annulation traçable d’un paiement + recalcul facture. */
+export async function cancelPayment(input: {
+  orgId: string;
+  paymentId: string;
+  userId: string;
+}) {
+  const payment = await prisma.commercialPayment.findFirst({
+    where: { id: input.paymentId, organizationId: input.orgId },
+    select: {
+      id: true,
+      invoiceId: true,
+      amount: true,
+      cancelledAt: true,
+      invoice: {
+        select: {
+          id: true,
+          status: true,
+          type: true,
+          totalTtc: true,
+          dueDate: true,
+        },
+      },
+    },
+  });
+  if (!payment) throw new Error("Paiement introuvable");
+  if (payment.cancelledAt) throw new Error("Paiement déjà annulé");
+  if (
+    payment.invoice.status === "DRAFT" ||
+    payment.invoice.status === "CANCELLED"
+  ) {
+    throw new Error("Facture non éligible");
+  }
+
+  return prisma.$transaction(async (tx) => {
+    await tx.commercialPayment.update({
+      where: { id: payment.id },
+      data: {
+        cancelledAt: new Date(),
+        cancelledById: input.userId,
+      },
+    });
+
+    const newPaid = await sumValidPayments(tx, input.orgId, payment.invoiceId);
+    const totalTtc = d(payment.invoice.totalTtc);
+    const amountDue = roundMoney(Math.max(0, totalTtc - newPaid), 2);
+    const fromStatus = payment.invoice.status;
+    const status = evaluateCommercialInvoiceStatus({
+      status: fromStatus === "PAID" ? "ISSUED" : fromStatus,
+      type: payment.invoice.type,
+      totalTtc,
+      amountPaid: newPaid,
+      amountDue,
+      dueDate: payment.invoice.dueDate,
+    });
+
+    await tx.commercialInvoice.update({
+      where: { id: payment.invoiceId },
+      data: { amountPaid: newPaid, amountDue, status },
+    });
+
+    await tx.commercialStatusEvent.create({
+      data: {
+        organizationId: input.orgId,
+        entityType: "INVOICE",
+        entityId: payment.invoiceId,
+        fromStatus,
+        toStatus: status,
+        label: `Annulation règlement ${d(payment.amount).toFixed(2)} €`,
+        actorUserId: input.userId,
+      },
+    });
+
+    return { invoiceId: payment.invoiceId, status, amountPaid: newPaid, amountDue };
+  });
+}
+
+export async function updateInvoiceDueDate(input: {
+  orgId: string;
+  invoiceId: string;
+  userId: string;
+  dueDate: Date | null;
+}) {
+  const invoice = await prisma.commercialInvoice.findFirst({
+    where: { id: input.invoiceId, organizationId: input.orgId },
+    select: {
+      id: true,
+      status: true,
+      type: true,
+      totalTtc: true,
+      amountPaid: true,
+      amountDue: true,
+      dueDate: true,
+    },
+  });
+  if (!invoice) throw new Error("Facture introuvable");
+  if (invoice.status === "CANCELLED") {
+    throw new Error("Facture annulée");
+  }
+
+  const status =
+    invoice.status === "DRAFT"
+      ? "DRAFT"
+      : evaluateCommercialInvoiceStatus({
+          status: invoice.status,
+          type: invoice.type,
+          totalTtc: d(invoice.totalTtc),
+          amountPaid: d(invoice.amountPaid),
+          amountDue: d(invoice.amountDue),
+          dueDate: input.dueDate,
+        });
+
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.commercialInvoice.update({
+      where: { id: invoice.id },
+      data: {
+        dueDate: input.dueDate,
+        ...(invoice.status !== "DRAFT" ? { status } : {}),
+      },
+    });
+    await tx.commercialStatusEvent.create({
+      data: {
+        organizationId: input.orgId,
+        entityType: "INVOICE",
+        entityId: invoice.id,
+        fromStatus: invoice.status,
+        toStatus: status,
+        label: input.dueDate
+          ? `Échéance fixée au ${input.dueDate.toLocaleDateString("fr-FR")}`
+          : "Échéance effacée",
+        actorUserId: input.userId,
+      },
+    });
+    return updated;
+  });
+}
+
+export async function markInvoiceReminded(input: {
+  orgId: string;
+  invoiceId: string;
+  userId: string;
+  comment?: string | null;
+  channel?: string | null;
+}) {
+  const invoice = await prisma.commercialInvoice.findFirst({
+    where: { id: input.invoiceId, organizationId: input.orgId },
+    select: { id: true, status: true, amountDue: true, reminderCount: true },
+  });
+  if (!invoice) throw new Error("Facture introuvable");
+  if (invoice.status === "DRAFT" || invoice.status === "CANCELLED") {
+    throw new Error("Facture non éligible à la relance");
+  }
+  if (d(invoice.amountDue) <= 0.004) {
+    throw new Error("Facture déjà soldée");
+  }
+
+  const channel = input.channel?.trim() || "MANUEL";
+  const detail = [
+    channel !== "MANUEL" ? `Canal : ${channel}` : null,
+    input.comment?.trim() || null,
+  ]
+    .filter(Boolean)
+    .join(" — ");
+
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.commercialInvoice.update({
+      where: { id: invoice.id },
+      data: {
+        lastReminderAt: new Date(),
+        reminderCount: (invoice.reminderCount ?? 0) + 1,
+      },
+    });
+    await tx.commercialStatusEvent.create({
+      data: {
+        organizationId: input.orgId,
+        entityType: "INVOICE",
+        entityId: invoice.id,
+        fromStatus: invoice.status,
+        toStatus: invoice.status,
+        label: "Relance client",
+        detail: detail || null,
+        actorUserId: input.userId,
+      },
+    });
+    return updated;
+  });
+}
+
+export async function listPayments(orgId: string, opts?: { includeCancelled?: boolean }) {
   const rows = await prisma.commercialPayment.findMany({
-    where: { organizationId: orgId },
+    where: {
+      organizationId: orgId,
+      ...(opts?.includeCancelled ? {} : { cancelledAt: null }),
+    },
     orderBy: { paidAt: "desc" },
     take: 100,
     include: {

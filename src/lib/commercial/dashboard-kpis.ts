@@ -32,8 +32,12 @@ export type CommercialDashboardKpis = {
   avenantsAcceptesHt: number;
   /** Contrat = devis acceptés + avenants acceptés. */
   contratAccepteHt: number;
-  /** Reste dû factures émises (TTC). */
+  /** Reste dû factures émises non échues (TTC). */
   aEncaisserTtc: number;
+  /** Reste dû factures en retard (TTC). */
+  enRetardTtc: number;
+  /** Paiements valides du mois calendaire. */
+  encaisseMoisTtc: number;
 };
 
 export function aggregateQuoteStatusCounts(
@@ -89,7 +93,8 @@ export function aggregateQuoteStatusCounts(
 export async function loadCommercialDashboardKpis(
   orgId: string,
 ): Promise<CommercialDashboardKpis> {
-  const [quoteCount, grouped, avenantsSum, invoices] = await Promise.all([
+  const { loadCollectionsKpis } = await import("@/lib/commercial/collections");
+  const [quoteCount, grouped, avenantsSum, collections] = await Promise.all([
     prisma.commercialQuote.count({ where: { organizationId: orgId } }),
     prisma.commercialQuote.groupBy({
       by: ["status"],
@@ -101,29 +106,21 @@ export async function loadCommercialDashboardKpis(
       where: { organizationId: orgId, status: "ACCEPTED" },
       _sum: { totalSellHt: true },
     }),
-    prisma.commercialInvoice.findMany({
-      where: {
-        organizationId: orgId,
-        status: { in: ["ISSUED", "PARTIALLY_PAID", "OVERDUE"] },
-      },
-      select: { amountDue: true },
-    }),
+    loadCollectionsKpis(orgId),
   ]);
 
   const counts = aggregateQuoteStatusCounts(grouped);
   const avenantsAcceptesHt = roundMoney(d(avenantsSum._sum.totalSellHt), 2);
   const contratAccepteHt = roundMoney(counts.devisAcceptesHt + avenantsAcceptesHt, 2);
-  const aEncaisserTtc = roundMoney(
-    invoices.reduce((s, i) => s + d(i.amountDue), 0),
-    2,
-  );
 
   return {
     quoteCount,
     ...counts,
     avenantsAcceptesHt,
     contratAccepteHt,
-    aEncaisserTtc,
+    aEncaisserTtc: collections.aEncaisserTtc,
+    enRetardTtc: collections.enRetardTtc,
+    encaisseMoisTtc: collections.encaisseMoisTtc,
   };
 }
 

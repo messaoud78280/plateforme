@@ -27,7 +27,8 @@ type NotificationType =
   | "PURCHASE_ORDER_URGENT"
   | "PURCHASE_ORDER_CRITICAL"
   | "PURCHASE_ORDER_ATTENTION"
-  | "MESSAGE_ACTION_ASSIGNED";
+  | "MESSAGE_ACTION_ASSIGNED"
+  | "COMMERCIAL_INVOICE_OVERDUE";
 
 export async function createNotification(params: {
   userId: string;

@@ -73,6 +73,7 @@ export function RecordPaymentForm({
           <option value="CHEQUE">Chèque</option>
           <option value="CB">Carte</option>
           <option value="ESPECES">Espèces</option>
+          <option value="PRELEVEMENT">Prélèvement</option>
           <option value="AUTRE">Autre</option>
         </select>
       </label>

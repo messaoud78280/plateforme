@@ -202,6 +202,21 @@ export async function POST(request: NextRequest) {
     errors.push(`fiches suivi alertes: ${e instanceof Error ? e.message : String(e)}`);
   }
 
+  let commercialOverdueUpdated = 0;
+  let commercialOverdueNotified = 0;
+  try {
+    const { refreshCommercialOverdueStatuses } = await import(
+      "@/lib/commercial/collections"
+    );
+    const r = await refreshCommercialOverdueStatuses({ notify: true, now });
+    commercialOverdueUpdated = r.updated;
+    commercialOverdueNotified = r.notified;
+  } catch (e) {
+    errors.push(
+      `factures commercial overdue: ${e instanceof Error ? e.message : String(e)}`,
+    );
+  }
+
   return NextResponse.json({
     ok: errors.length === 0,
     missingPieceNotified,
@@ -210,6 +225,8 @@ export async function POST(request: NextRequest) {
     agendaUnclosed,
     deliveryAlerts,
     followUpAlerts,
+    commercialOverdueUpdated,
+    commercialOverdueNotified,
     errors,
     ranAt: now.toISOString(),
   });

@@ -127,6 +127,7 @@ model User {
   commercialQuotesResponsible  CommercialQuote[] @relation("CommercialQuoteResponsible")
   commercialInvoicesCreated    CommercialInvoice[] @relation("CommercialInvoiceCreatedBy")
   commercialPaymentsRecorded   CommercialPayment[] @relation("CommercialPaymentRecordedBy")
+  commercialPaymentsCancelled  CommercialPayment[] @relation("CommercialPaymentCancelledBy")
   commercialWorkItemsCreated   CommercialWorkItem[] @relation("CommercialWorkItemCreatedBy")
   commercialStatusEvents       CommercialStatusEvent[] @relation("CommercialStatusEventActor")
   commercialProgressStatementsCreated CommercialProgressStatement[] @relation("CommercialProgressStatementCreatedBy")
@@ -4070,6 +4071,9 @@ model CommercialInvoice {
   totalTtc             Decimal                 @default(0) @db.Decimal(14, 4)
   amountPaid           Decimal                 @default(0) @db.Decimal(14, 4)
   amountDue            Decimal                 @default(0) @db.Decimal(14, 4)
+  /// DF-4 — dernière relance manuelle
+  lastReminderAt       DateTime?
+  reminderCount        Int                     @default(0)
   /// Pour acomptes : % du marché
   depositPercent       Decimal?                @db.Decimal(6, 4)
   issuedAt             DateTime?
@@ -4268,23 +4272,28 @@ model CommercialInvoiceLine {
 
 /// Règlements clients BTP — AUCUNE relation avec Payment SaaS/Stripe
 model CommercialPayment {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   organizationId String
   invoiceId      String
-  amount         Decimal  @db.Decimal(14, 4)
-  paidAt         DateTime @db.Date
-  method         String   @default("VIREMENT")
+  amount         Decimal   @db.Decimal(14, 4)
+  paidAt         DateTime  @db.Date
+  method         String    @default("VIREMENT")
   reference      String?
-  comment        String?  @db.Text
+  comment        String?   @db.Text
   recordedById   String
-  createdAt      DateTime @default(now())
+  /// DF-4 — annulation traçable (pas de suppression)
+  cancelledAt    DateTime?
+  cancelledById  String?
+  createdAt      DateTime  @default(now())
 
   organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   invoice      CommercialInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   recordedBy   User              @relation("CommercialPaymentRecordedBy", fields: [recordedById], references: [id], onDelete: Cascade)
+  cancelledBy  User?             @relation("CommercialPaymentCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
 
   @@index([organizationId])
   @@index([invoiceId])
+  @@index([organizationId, cancelledAt])
 }
 
 model CommercialWorkItem {

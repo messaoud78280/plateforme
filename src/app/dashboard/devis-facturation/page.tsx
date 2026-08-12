@@ -78,12 +78,9 @@ export default async function DevisFacturationDashboardPage() {
     { label: "Devis en préparation", value: String(kpis.enPreparation) },
     { label: "Devis acceptés", value: String(kpis.acceptes) },
     { label: "Contrat accepté HT", value: `${money(kpis.contratAccepteHt)} €` },
-    {
-      label: "Pipeline devis HT",
-      value: `${money(kpis.pipelineDevisHt)} €`,
-      hint: "Brouillons + envoyés (non contractualisés)",
-    },
     { label: "À encaisser", value: `${money(kpis.aEncaisserTtc)} €` },
+    { label: "En retard", value: `${money(kpis.enRetardTtc)} €` },
+    { label: "Encaissé ce mois", value: `${money(kpis.encaisseMoisTtc)} €` },
   ];
 
   return (
@@ -102,7 +99,7 @@ export default async function DevisFacturationDashboardPage() {
         </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((k) => (
           <div
             key={k.label}
@@ -110,9 +107,6 @@ export default async function DevisFacturationDashboardPage() {
           >
             <p className="text-2xl font-extrabold tabular-nums text-slate-900">{k.value}</p>
             <p className="mt-1 text-sm text-slate-600">{k.label}</p>
-            {"hint" in k && k.hint ? (
-              <p className="mt-0.5 text-[11px] text-slate-400">{k.hint}</p>
-            ) : null}
           </div>
         ))}
       </div>

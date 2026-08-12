@@ -16,10 +16,19 @@ export async function GET(req: Request) {
   const q = url.searchParams.get("q") ?? undefined;
   const format = url.searchParams.get("format");
   const view = url.searchParams.get("view"); // archived | (default active)
+  const kindParam = url.searchParams.get("kind");
+  const kind =
+    kindParam === "SIMPLE" || kindParam === "COMPOSITE" ? kindParam : undefined;
+  const favorite = url.searchParams.get("favorite") === "1";
+  const needsPriceRecalc = url.searchParams.get("needsPriceRecalc") === "1";
   const items = await listWorkItems(auth.orgId, {
     q,
-    take: format === "csv" ? 2000 : 100,
+    take: format === "csv" ? 2000 : 150,
     active: view === "archived" ? false : true,
+    kind,
+    favorite: favorite || undefined,
+    needsPriceRecalc: needsPriceRecalc || undefined,
+    includeComponents: format === "csv",
   });
   if (format === "csv") {
     const csv = workItemsToCsv(items);

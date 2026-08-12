@@ -159,6 +159,11 @@ export async function listWorkItems(
     skip?: number;
     /** Défaut : actifs seulement (picker + biblio). */
     active?: boolean;
+    kind?: "SIMPLE" | "COMPOSITE";
+    favorite?: boolean;
+    needsPriceRecalc?: boolean;
+    /** Inclure composants (coûteux) — défaut false pour listes. */
+    includeComponents?: boolean;
   },
 ) {
   const q = opts?.q?.trim();
@@ -166,38 +171,100 @@ export async function listWorkItems(
   const where: Prisma.CommercialWorkItemWhereInput = {
     organizationId: orgId,
     isActive: active,
+    ...(opts?.kind ? { kind: opts.kind } : {}),
+    ...(opts?.favorite ? { isFavorite: true } : {}),
+    ...(opts?.needsPriceRecalc ? { needsPriceRecalc: true } : {}),
     ...(q
       ? {
           OR: [
             { name: { contains: q, mode: "insensitive" } },
             { reference: { contains: q, mode: "insensitive" } },
             { family: { contains: q, mode: "insensitive" } },
+            { subFamily: { contains: q, mode: "insensitive" } },
             { description: { contains: q, mode: "insensitive" } },
             { tags: { contains: q, mode: "insensitive" } },
           ],
         }
       : {}),
   };
+  const includeComponents = opts?.includeComponents === true;
   const rows = await prisma.commercialWorkItem.findMany({
     where,
-    orderBy: { name: "asc" },
+    orderBy: [{ isFavorite: "desc" }, { updatedAt: "desc" }, { name: "asc" }],
     take: opts?.take ?? 100,
     skip: opts?.skip ?? 0,
     include: {
-      components: { orderBy: { sortOrder: "asc" } },
+      ...(includeComponents
+        ? { components: { orderBy: { sortOrder: "asc" as const } } }
+        : {}),
       _count: { select: { components: true, quoteLines: true } },
     },
   });
-  return rows.map((w) => ({
-    ...w,
-    unitCostHt: d(w.unitCostHt),
-    unitSellHt: d(w.unitSellHt),
-    marginPercent: d(w.marginPercent),
-    feesPercent: d(w.feesPercent),
-    feesAmountHt: d(w.feesAmountHt),
-    quoteLineCount: w._count.quoteLines,
-    components: w.components.map(mapComponent),
-  }));
+  return rows.map((w) => {
+    const withComp = w as typeof w & {
+      components?: Parameters<typeof mapComponent>[0][];
+    };
+    return {
+      ...w,
+      unitCostHt: d(w.unitCostHt),
+      unitSellHt: d(w.unitSellHt),
+      marginPercent: d(w.marginPercent),
+      feesPercent: d(w.feesPercent),
+      feesAmountHt: d(w.feesAmountHt),
+      quoteLineCount: w._count.quoteLines,
+      componentCount: w._count.components,
+      components: includeComponents
+        ? (withComp.components ?? []).map(mapComponent)
+        : [],
+    };
+  });
+}
+
+export async function getLibraryHubStats(orgId: string) {
+  const [ouvrages, materiaux, labor, needsRecalc, favorites] = await Promise.all([
+    prisma.commercialWorkItem.count({
+      where: { organizationId: orgId, isActive: true },
+    }),
+    prisma.commercialMaterial.count({
+      where: { organizationId: orgId, isActive: true },
+    }),
+    prisma.commercialLaborResource.count({
+      where: { organizationId: orgId, isActive: true },
+    }),
+    prisma.commercialWorkItem.count({
+      where: {
+        organizationId: orgId,
+        isActive: true,
+        needsPriceRecalc: true,
+      },
+    }),
+    prisma.commercialWorkItem.count({
+      where: { organizationId: orgId, isActive: true, isFavorite: true },
+    }),
+  ]);
+  return {
+    ouvrages,
+    materiaux,
+    mainOeuvre: labor,
+    needsRecalc,
+    favorites,
+  };
+}
+
+export async function setWorkItemFavorite(
+  orgId: string,
+  id: string,
+  isFavorite: boolean,
+) {
+  const existing = await prisma.commercialWorkItem.findFirst({
+    where: { id, organizationId: orgId },
+    select: { id: true },
+  });
+  if (!existing) throw new Error("Ouvrage introuvable");
+  return prisma.commercialWorkItem.update({
+    where: { id },
+    data: { isFavorite },
+  });
 }
 
 /** Décision UI/API : supprimer physiquement ou archiver. */

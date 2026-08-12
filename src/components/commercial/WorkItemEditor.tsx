@@ -42,6 +42,8 @@ type WorkItem = {
   name: string;
   reference: string | null;
   family: string | null;
+  subFamily: string | null;
+  description: string | null;
   saleUnit: string;
   kind: string;
   sellMode: string;
@@ -67,7 +69,15 @@ const inputClass =
   "w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm focus:border-[#1e3a5f] focus:outline-none focus:ring-1 focus:ring-[#1e3a5f]";
 const labelClass = "mb-0.5 block text-[10px] font-bold uppercase tracking-wide text-slate-500";
 
-export function WorkItemEditor({ workItemId }: { workItemId: string }) {
+export function WorkItemEditor({
+  workItemId,
+  embedded,
+  onDone,
+}: {
+  workItemId: string;
+  embedded?: boolean;
+  onDone?: () => void;
+}) {
   const router = useRouter();
   const [item, setItem] = useState<WorkItem | null>(null);
   const [loading, setLoading] = useState(true);
@@ -78,6 +88,8 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
     name: "",
     reference: "",
     family: "",
+    subFamily: "",
+    description: "",
     saleUnit: "U",
     kind: "SIMPLE",
     sellMode: "MARGIN",
@@ -108,6 +120,8 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
         name: w.name,
         reference: w.reference ?? "",
         family: w.family ?? "",
+        subFamily: w.subFamily ?? "",
+        description: w.description ?? "",
         saleUnit: w.saleUnit,
         kind: w.kind,
         sellMode: w.sellMode,
@@ -139,6 +153,8 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
           name: form.name.trim(),
           reference: form.reference.trim() || null,
           family: form.family.trim() || null,
+          subFamily: form.subFamily.trim() || null,
+          description: form.description.trim() || null,
           saleUnit: form.saleUnit.trim() || "U",
           kind: form.kind,
           sellMode: form.sellMode,
@@ -228,7 +244,12 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur");
-      router.push(`/dashboard/devis-facturation/bibliotheque/${data.workItem.id}`);
+      if (embedded) {
+        onDone?.();
+        router.refresh();
+      } else {
+        router.push(`/dashboard/devis-facturation/bibliotheque/${data.workItem.id}`);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
       setBusy(false);
@@ -322,6 +343,14 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
             />
           </div>
           <div>
+            <label className={labelClass}>Sous-famille</label>
+            <input
+              className={inputClass}
+              value={form.subFamily}
+              onChange={(e) => setForm((f) => ({ ...f, subFamily: e.target.value }))}
+            />
+          </div>
+          <div>
             <label className={labelClass}>Unité</label>
             <input
               className={inputClass}
@@ -397,6 +426,16 @@ export function WorkItemEditor({ workItemId }: { workItemId: string }) {
               </div>
             </>
           ) : null}
+        </div>
+
+        <div className="mt-3">
+          <label className={labelClass}>Notes / conditions de chiffrage</label>
+          <textarea
+            className={`${inputClass} min-h-[72px]`}
+            value={form.description}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            placeholder="Ex. Prix pour hauteur ≤ 3 m. Hors échafaudage."
+          />
         </div>
       </div>
 

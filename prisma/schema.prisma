@@ -4322,6 +4322,8 @@ model CommercialWorkItem {
   sourceWorkItemId String?
   /// Prix matière/MO changés — à recalculer en biblio (devis non touchés)
   needsPriceRecalc Boolean  @default(false)
+  /// DF Bibliothèque V2 — favori org
+  isFavorite       Boolean  @default(false)
   isActive         Boolean  @default(true)
   createdById      String?
   createdAt        DateTime @default(now())
@@ -4335,6 +4337,7 @@ model CommercialWorkItem {
   @@index([organizationId, name])
   @@index([organizationId, family])
   @@index([organizationId, reference])
+  @@index([organizationId, isFavorite])
   @@index([sourceWorkItemId])
   @@index([createdById])
 }

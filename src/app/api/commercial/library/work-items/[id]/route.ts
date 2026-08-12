@@ -49,6 +49,15 @@ export async function PATCH(req: Request, ctx: Ctx) {
       const workItem = await restoreWorkItem(auth.orgId, id);
       return NextResponse.json({ workItem, message: "Ouvrage restauré." });
     }
+    if (body.action === "favorite") {
+      const { setWorkItemFavorite } = await import("@/lib/commercial/library");
+      const workItem = await setWorkItemFavorite(
+        auth.orgId,
+        id,
+        body.isFavorite !== false,
+      );
+      return NextResponse.json({ workItem });
+    }
     const workItem = await updateWorkItem(auth.orgId, id, {
       name: body.name !== undefined ? String(body.name) : undefined,
       reference: body.reference !== undefined ? (body.reference ? String(body.reference) : null) : undefined,

@@ -94,6 +94,24 @@ export default async function SituationPage({
         netPeriodTtc: Number(
           (s as { netPeriodTtc?: number }).netPeriodTtc ?? s.periodTtc,
         ),
+        depositDeductedHt: Number(
+          (s as { depositDeductedHt?: number }).depositDeductedHt ?? 0,
+        ),
+        payablePeriodSellHt: Number(
+          (s as { payablePeriodSellHt?: number }).payablePeriodSellHt ??
+            (s as { netPeriodSellHt?: number }).netPeriodSellHt ??
+            s.periodSellHt,
+        ),
+        payablePeriodVat: Number(
+          (s as { payablePeriodVat?: number }).payablePeriodVat ??
+            (s as { netPeriodVat?: number }).netPeriodVat ??
+            s.periodVat,
+        ),
+        payablePeriodTtc: Number(
+          (s as { payablePeriodTtc?: number }).payablePeriodTtc ??
+            (s as { netPeriodTtc?: number }).netPeriodTtc ??
+            s.periodTtc,
+        ),
         quote: s.quote,
         project: s.project,
         invoice: s.invoice,

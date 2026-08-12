@@ -4049,7 +4049,9 @@ model CommercialInvoice {
   /// Montant HT retenu (RG) — 0 si aucune
   retentionAmountHt    Decimal                 @default(0) @db.Decimal(14, 4)
   retentionRate        Decimal?                @db.Decimal(6, 4)
-  /// Totaux = net exigible (après RG si applicable)
+  /// DF-6B — acompte déduit sur cette facture de situation
+  depositDeductedHt    Decimal                 @default(0) @db.Decimal(14, 4)
+  /// Totaux = net exigible (après RG et déduction acompte si applicable)
   totalSellHt          Decimal                 @default(0) @db.Decimal(14, 4)
   totalVat             Decimal                 @default(0) @db.Decimal(14, 4)
   totalTtc             Decimal                 @default(0) @db.Decimal(14, 4)
@@ -4123,6 +4125,11 @@ model CommercialProgressStatement {
   netPeriodSellHt         Decimal                        @default(0) @db.Decimal(14, 4)
   netPeriodVat            Decimal                        @default(0) @db.Decimal(14, 4)
   netPeriodTtc            Decimal                        @default(0) @db.Decimal(14, 4)
+  /// DF-6B — déduction d’acompte sur la période (après RG)
+  depositDeductedHt       Decimal                        @default(0) @db.Decimal(14, 4)
+  payablePeriodSellHt     Decimal                        @default(0) @db.Decimal(14, 4)
+  payablePeriodVat        Decimal                        @default(0) @db.Decimal(14, 4)
+  payablePeriodTtc        Decimal                        @default(0) @db.Decimal(14, 4)
   validatedAt         DateTime?
   validatedById       String?
   createdById         String

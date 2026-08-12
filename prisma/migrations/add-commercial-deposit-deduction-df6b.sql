@@ -1,0 +1,10 @@
+-- DF-6B — Déduction d’acomptes sur situations
+
+ALTER TABLE "CommercialProgressStatement"
+  ADD COLUMN IF NOT EXISTS "depositDeductedHt" DECIMAL(14,4) NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS "payablePeriodSellHt" DECIMAL(14,4) NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS "payablePeriodVat" DECIMAL(14,4) NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS "payablePeriodTtc" DECIMAL(14,4) NOT NULL DEFAULT 0;
+
+ALTER TABLE "CommercialInvoice"
+  ADD COLUMN IF NOT EXISTS "depositDeductedHt" DECIMAL(14,4) NOT NULL DEFAULT 0;

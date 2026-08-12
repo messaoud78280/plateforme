@@ -62,6 +62,10 @@ type Statement = {
   netPeriodSellHt: number;
   netPeriodVat: number;
   netPeriodTtc: number;
+  depositDeductedHt: number;
+  payablePeriodSellHt: number;
+  payablePeriodVat: number;
+  payablePeriodTtc: number;
   quote: { id: string; number: string; subject: string };
   project: { id: string; title: string } | null;
   invoice: { id: string; number: string } | null;
@@ -385,9 +389,35 @@ export function ProgressStatementEditor({
               </p>
             </div>
             <div>
-              <p className="text-slate-500">Net période après RG</p>
+              <p className="text-slate-500">Net après RG</p>
               <p className="font-bold tabular-nums text-[#1e3a5f]">
                 {fmt(statement.netPeriodSellHt)} € HT · {fmt(statement.netPeriodTtc)} € TTC
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {statement.depositDeductedHt > 0.004 ? (
+        <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-4">
+          <p className="text-sm font-bold text-sky-950">Déduction d’acompte</p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-3 text-xs">
+            <div>
+              <p className="text-slate-500">Acompte déduit</p>
+              <p className="font-bold tabular-nums">
+                − {fmt(statement.depositDeductedHt)} € HT
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-500">Net exigible période</p>
+              <p className="font-bold tabular-nums text-[#1e3a5f]">
+                {fmt(statement.payablePeriodSellHt)} € HT
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-500">TTC exigible</p>
+              <p className="font-bold tabular-nums">
+                {fmt(statement.payablePeriodTtc)} €
               </p>
             </div>
           </div>

@@ -43,6 +43,7 @@ type InvoiceDoc = {
   worksTtc?: number | null;
   retentionAmountHt?: number | null;
   retentionRate?: number | null;
+  depositDeductedHt?: number | null;
   clientNotes: string | null;
   issuerSnapshotJson: Snapshot | null;
   clientSnapshotJson: Snapshot | null;
@@ -292,9 +293,11 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
 
         <div className="mt-6 flex justify-end">
           <dl className="w-full max-w-xs space-y-1.5 rounded-xl border border-slate-200 p-4 text-sm">
-            {invoice.retentionAmountHt != null &&
-            invoice.retentionAmountHt > 0.004 &&
-            invoice.worksSellHt != null ? (
+            {invoice.worksSellHt != null &&
+            ((invoice.retentionAmountHt != null &&
+              invoice.retentionAmountHt > 0.004) ||
+              (invoice.depositDeductedHt != null &&
+                invoice.depositDeductedHt > 0.004)) ? (
               <>
                 <div className="flex justify-between text-slate-600">
                   <dt>Travaux HT</dt>
@@ -302,12 +305,24 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
                     {fmt(invoice.worksSellHt)} €
                   </dd>
                 </div>
-                <div className="flex justify-between text-amber-800">
-                  <dt>RG {invoice.retentionRate ?? ""} %</dt>
-                  <dd className="tabular-nums font-medium">
-                    − {fmt(invoice.retentionAmountHt)} €
-                  </dd>
-                </div>
+                {invoice.retentionAmountHt != null &&
+                invoice.retentionAmountHt > 0.004 ? (
+                  <div className="flex justify-between text-amber-800">
+                    <dt>RG {invoice.retentionRate ?? ""} %</dt>
+                    <dd className="tabular-nums font-medium">
+                      − {fmt(invoice.retentionAmountHt)} €
+                    </dd>
+                  </div>
+                ) : null}
+                {invoice.depositDeductedHt != null &&
+                invoice.depositDeductedHt > 0.004 ? (
+                  <div className="flex justify-between text-sky-800">
+                    <dt>Déduction acompte</dt>
+                    <dd className="tabular-nums font-medium">
+                      − {fmt(invoice.depositDeductedHt)} €
+                    </dd>
+                  </div>
+                ) : null}
                 <div className="flex justify-between text-slate-600">
                   <dt>Net HT</dt>
                   <dd className="tabular-nums font-medium">
@@ -329,7 +344,8 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
             </div>
             <div className="flex justify-between border-t border-slate-100 pt-2 text-base font-bold text-[#1e3a5f]">
               <dt>
-                {invoice.retentionAmountHt && invoice.retentionAmountHt > 0
+                {(invoice.retentionAmountHt && invoice.retentionAmountHt > 0) ||
+                (invoice.depositDeductedHt && invoice.depositDeductedHt > 0)
                   ? "Net TTC exigible"
                   : "Total TTC"}
               </dt>

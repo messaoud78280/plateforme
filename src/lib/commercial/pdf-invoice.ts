@@ -31,6 +31,7 @@ export type InvoicePdfInput = {
   worksTtc?: number | null;
   retentionAmountHt?: number | null;
   retentionRate?: number | null;
+  depositDeductedHt?: number | null;
   totals: {
     totalSellHt: number;
     totalVat: number;
@@ -332,13 +333,17 @@ export function generateInvoicePdfBuffer(input: InvoicePdfInput): Buffer {
   const boxW = 72;
   const boxX = pageW - MARGIN - boxW;
   const hasRetention = (input.retentionAmountHt ?? 0) > 0.004;
-  const boxH = hasRetention
-    ? input.totals.amountPaid > 0
-      ? 46
-      : 38
-    : input.totals.amountPaid > 0
-      ? 34
-      : 26;
+  const hasDeposit = (input.depositDeductedHt ?? 0) > 0.004;
+  const hasBreakdown = hasRetention || hasDeposit;
+  let boxH = 26;
+  if (hasBreakdown) {
+    boxH = 32;
+    if (hasRetention) boxH += 5.5;
+    if (hasDeposit) boxH += 5.5;
+    if (input.totals.amountPaid > 0) boxH += 12;
+  } else if (input.totals.amountPaid > 0) {
+    boxH = 34;
+  }
   doc.setDrawColor(...NAVY);
   doc.setLineWidth(0.3);
   doc.roundedRect(boxX, y, boxW, boxH, 2, 2, "S");
@@ -346,15 +351,27 @@ export function generateInvoicePdfBuffer(input: InvoicePdfInput): Buffer {
   doc.setTextColor(...SLATE);
   doc.setFont("helvetica", "normal");
   let ty = y + 6;
-  if (hasRetention && input.worksSellHt != null) {
+  if (hasBreakdown && input.worksSellHt != null) {
     doc.text("Travaux HT", boxX + 3, ty);
     doc.text(fmtEur(input.worksSellHt), boxX + boxW - 3, ty, { align: "right" });
     ty += 5.5;
-    doc.text(`RG ${input.retentionRate ?? ""} %`, boxX + 3, ty);
-    doc.text(`- ${fmtEur(input.retentionAmountHt ?? 0)}`, boxX + boxW - 3, ty, {
-      align: "right",
-    });
-    ty += 5.5;
+    if (hasRetention) {
+      doc.text(`RG ${input.retentionRate ?? ""} %`, boxX + 3, ty);
+      doc.text(`- ${fmtEur(input.retentionAmountHt ?? 0)}`, boxX + boxW - 3, ty, {
+        align: "right",
+      });
+      ty += 5.5;
+    }
+    if (hasDeposit) {
+      doc.text("Déduction acompte", boxX + 3, ty);
+      doc.text(
+        `- ${fmtEur(input.depositDeductedHt ?? 0)}`,
+        boxX + boxW - 3,
+        ty,
+        { align: "right" },
+      );
+      ty += 5.5;
+    }
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...NAVY);
     doc.text("Net HT", boxX + 3, ty);

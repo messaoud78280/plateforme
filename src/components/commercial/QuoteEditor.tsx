@@ -16,6 +16,7 @@ import {
 import { QuoteAcceptedNextSteps } from "@/components/commercial/QuoteAcceptedNextSteps";
 import { ProgressStatementsPanel } from "@/components/commercial/ProgressStatementsPanel";
 import { QuoteRetentionPanel } from "@/components/commercial/QuoteRetentionPanel";
+import { QuoteDepositPanel } from "@/components/commercial/QuoteDepositPanel";
 import { LibraryPickerModal } from "@/components/commercial/LibraryPickerModal";
 import { LineCompositionDrawer } from "@/components/commercial/LineCompositionDrawer";
 import { QuotePriceCheckPanel } from "@/components/commercial/QuotePriceCheckPanel";
@@ -1200,6 +1201,7 @@ export function QuoteEditor({
               />
             </div>
             <QuoteRetentionPanel quoteId={quote.id} />
+            <QuoteDepositPanel quoteId={quote.id} />
             <ProgressStatementsPanel quoteId={quote.id} />
             <AcceptedActions quoteId={quote.id} />
           </div>

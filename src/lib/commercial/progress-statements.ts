@@ -12,6 +12,8 @@ import {
   PROGRESS_STATEMENT_STATUS_LABELS,
 } from "@/lib/commercial/progress-calc";
 import { computeRetentionForPeriod } from "@/lib/commercial/retention-calc";
+import { computeDepositDeduction } from "@/lib/commercial/deposit-calc";
+import { getQuoteDepositBalance } from "@/lib/commercial/deposit";
 
 export { PROGRESS_STATEMENT_STATUS_LABELS };
 
@@ -95,6 +97,10 @@ function mapStatement<T extends Record<string, unknown>>(s: T) {
     "netPeriodSellHt",
     "netPeriodVat",
     "netPeriodTtc",
+    "depositDeductedHt",
+    "payablePeriodSellHt",
+    "payablePeriodVat",
+    "payablePeriodTtc",
   ] as const;
   const out: Record<string, unknown> = { ...s };
   for (const k of moneyKeys) {
@@ -334,6 +340,14 @@ export async function createProgressStatement(input: {
     previousRetentionHt,
   });
 
+  const depositBal = await getQuoteDepositBalance(input.orgId, quote.id);
+  const deposit = computeDepositDeduction({
+    netPeriodSellHt: retention.netPeriodSellHt,
+    netPeriodVat: retention.netPeriodVat,
+    netPeriodTtc: retention.netPeriodTtc,
+    remainingDepositHt: depositBal.remainingToDeductHt,
+  });
+
   try {
     return await prisma.$transaction(async (tx) => {
       const statement = await tx.commercialProgressStatement.create({
@@ -369,6 +383,10 @@ export async function createProgressStatement(input: {
           netPeriodSellHt: retention.netPeriodSellHt,
           netPeriodVat: retention.netPeriodVat,
           netPeriodTtc: retention.netPeriodTtc,
+          depositDeductedHt: deposit.depositDeductedHt,
+          payablePeriodSellHt: deposit.payablePeriodSellHt,
+          payablePeriodVat: deposit.payablePeriodVat,
+          payablePeriodTtc: deposit.payablePeriodTtc,
           createdById: input.userId,
         },
       });
@@ -514,6 +532,14 @@ export async function updateProgressStatementLines(input: {
     previousRetentionHt: d(statement.retentionPreviousHt),
   });
 
+  const depositBal = await getQuoteDepositBalance(input.orgId, statement.quoteId);
+  const deposit = computeDepositDeduction({
+    netPeriodSellHt: retention.netPeriodSellHt,
+    netPeriodVat: retention.netPeriodVat,
+    netPeriodTtc: retention.netPeriodTtc,
+    remainingDepositHt: depositBal.remainingToDeductHt,
+  });
+
   await prisma.$transaction(async (tx) => {
     for (const u of updates) {
       await tx.commercialProgressStatementLine.update({
@@ -557,6 +583,10 @@ export async function updateProgressStatementLines(input: {
         netPeriodSellHt: retention.netPeriodSellHt,
         netPeriodVat: retention.netPeriodVat,
         netPeriodTtc: retention.netPeriodTtc,
+        depositDeductedHt: deposit.depositDeductedHt,
+        payablePeriodSellHt: deposit.payablePeriodSellHt,
+        payablePeriodVat: deposit.payablePeriodVat,
+        payablePeriodTtc: deposit.payablePeriodTtc,
       },
     });
   });
@@ -765,6 +795,18 @@ export async function generateInvoiceFromProgressStatement(input: {
     const netVat = d(statement.netPeriodVat);
     const netTtc = d(statement.netPeriodTtc);
 
+    const depositBal = await getQuoteDepositBalance(
+      input.orgId,
+      statement.quoteId,
+      { excludeStatementId: statement.id },
+    );
+    const deposit = computeDepositDeduction({
+      netPeriodSellHt: netHt,
+      netPeriodVat: netVat,
+      netPeriodTtc: netTtc,
+      remainingDepositHt: depositBal.remainingToDeductHt,
+    });
+
     // Ligne RG négative pour lisibilité facture (si RG > 0)
     if (retentionHt > 0.004) {
       const avgRate =
@@ -783,6 +825,26 @@ export async function generateInvoiceFromProgressStatement(input: {
         sortOrder: prepared.length,
       });
     }
+
+    if (deposit.depositDeductedHt > 0.004) {
+      const avgRate = netHt > 0 ? roundMoney((netVat / netHt) * 100, 4) : 20;
+      prepared.push({
+        designation: "Déduction d’acompte",
+        description: `Imputation sur acomptes déjà facturés — marché ${statement.quote.number}`,
+        quantity: 1,
+        unit: "U",
+        unitSellHt: -deposit.depositDeductedHt,
+        vatRate: avgRate,
+        lineSellHt: -deposit.depositDeductedHt,
+        lineVat: -deposit.depositDeductedVat,
+        lineTtc: -deposit.depositDeductedTtc,
+        sortOrder: prepared.length,
+      });
+    }
+
+    const payableHt = deposit.payablePeriodSellHt;
+    const payableVat = deposit.payablePeriodVat;
+    const payableTtc = deposit.payablePeriodTtc;
 
     const number = await nextInvoiceNumber(input.orgId, tx);
     const periodLabel =
@@ -817,8 +879,12 @@ export async function generateInvoiceFromProgressStatement(input: {
           `Référence devis / marché : ${statement.quote.number}`,
           periodLabel ? `Période : ${periodLabel}` : null,
           retentionHt > 0
-            ? `Travaux ${worksHt.toFixed(2)} € HT — RG ${retentionRate} % : −${retentionHt.toFixed(2)} € HT — Net exigible ${netHt.toFixed(2)} € HT`
+            ? `Travaux ${worksHt.toFixed(2)} € HT — RG ${retentionRate} % : −${retentionHt.toFixed(2)} € HT`
+            : `Travaux ${worksHt.toFixed(2)} € HT`,
+          deposit.depositDeductedHt > 0
+            ? `Déduction acompte : −${deposit.depositDeductedHt.toFixed(2)} € HT`
             : null,
+          `Net exigible : ${payableHt.toFixed(2)} € HT / ${payableTtc.toFixed(2)} € TTC`,
         ]
           .filter(Boolean)
           .join("\n"),
@@ -827,11 +893,12 @@ export async function generateInvoiceFromProgressStatement(input: {
         worksTtc,
         retentionAmountHt: retentionHt,
         retentionRate: retentionHt > 0 ? retentionRate : null,
-        totalSellHt: netHt,
-        totalVat: netVat,
-        totalTtc: netTtc,
+        depositDeductedHt: deposit.depositDeductedHt,
+        totalSellHt: payableHt,
+        totalVat: payableVat,
+        totalTtc: payableTtc,
         amountPaid: 0,
-        amountDue: netTtc,
+        amountDue: payableTtc,
         createdById: input.userId,
       },
     });
@@ -875,7 +942,13 @@ export async function generateInvoiceFromProgressStatement(input: {
 
     await tx.commercialProgressStatement.update({
       where: { id: statement.id },
-      data: { status: "INVOICED" },
+      data: {
+        status: "INVOICED",
+        depositDeductedHt: deposit.depositDeductedHt,
+        payablePeriodSellHt: payableHt,
+        payablePeriodVat: payableVat,
+        payablePeriodTtc: payableTtc,
+      },
     });
 
     await tx.commercialStatusEvent.create({

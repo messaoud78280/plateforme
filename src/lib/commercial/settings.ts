@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 type Tx = Prisma.TransactionClient;
 
@@ -82,6 +82,7 @@ export async function updateCommercialOrgSettings(
     quoteMentions?: string | null;
     invoiceMentions?: string | null;
     accentColor?: string | null;
+    quoteDocumentSettingsJson?: unknown;
     quotePrefix?: string;
     invoicePrefix?: string;
     amendmentPrefix?: string;
@@ -122,6 +123,14 @@ export async function updateCommercialOrgSettings(
         ? { invoiceMentions: data.invoiceMentions }
         : {}),
       ...(data.accentColor !== undefined ? { accentColor: data.accentColor } : {}),
+      ...(data.quoteDocumentSettingsJson !== undefined
+        ? {
+            quoteDocumentSettingsJson:
+              data.quoteDocumentSettingsJson === null
+                ? Prisma.DbNull
+                : (data.quoteDocumentSettingsJson as Prisma.InputJsonValue),
+          }
+        : {}),
       ...(data.quotePrefix !== undefined ? { quotePrefix: data.quotePrefix } : {}),
       ...(data.invoicePrefix !== undefined ? { invoicePrefix: data.invoicePrefix } : {}),
       ...(data.amendmentPrefix !== undefined ? { amendmentPrefix: data.amendmentPrefix } : {}),

@@ -3,8 +3,17 @@
  * Snapshots contractuels de la version en priorité.
  */
 import { d } from "@/lib/commercial/decimal";
-import type { QuotePdfInput, QuotePdfSnapshot } from "@/lib/commercial/pdf-quote";
+import { roundMoney } from "@/lib/commercial/money";
+import type {
+  QuotePdfInput,
+  QuotePdfSnapshot,
+  QuotePdfVatSlice,
+} from "@/lib/commercial/pdf-quote";
 import { parsePaymentSchedule } from "@/lib/commercial/payment-schedule";
+import {
+  parseQuoteDocumentSettings,
+  type QuoteDocumentSettings,
+} from "@/lib/commercial/pdf/document-settings";
 
 export type QuotePdfVersionSource = {
   id: string;
@@ -29,6 +38,7 @@ export type QuotePdfVersionSource = {
     unitSellHt: unknown;
     vatRate: unknown;
     lineSellHt: unknown;
+    lineVat?: unknown;
     isOptional: boolean;
     sortOrder: number;
   }>;
@@ -48,6 +58,7 @@ export type QuotePdfHeaderSource = {
   issuerSnapshotJson?: unknown;
   currency: string;
   projectTitle?: string | null;
+  acceptedAt?: Date | null;
 };
 
 function asSnapshot(raw: unknown): QuotePdfSnapshot | null {
@@ -70,12 +81,53 @@ function mapLine(l: QuotePdfVersionSource["lines"][number]) {
   };
 }
 
+/** Ventilation TVA depuis lignes incluses (WORK non optionnelles). */
+export function buildVatBreakdownFromLines(
+  lines: Array<{
+    kind: string;
+    isOptional: boolean;
+    vatRate: number;
+    lineSellHt: number;
+    lineVat?: number;
+  }>,
+): QuotePdfVatSlice[] {
+  const map = new Map<number, { baseHt: number; vat: number }>();
+  for (const l of lines) {
+    if (l.kind !== "WORK" || l.isOptional) continue;
+    const rate = roundMoney(l.vatRate, 4);
+    const base = l.lineSellHt;
+    const vat =
+      l.lineVat != null
+        ? l.lineVat
+        : roundMoney((base * rate) / 100, 2);
+    const cur = map.get(rate) ?? { baseHt: 0, vat: 0 };
+    cur.baseHt += base;
+    cur.vat += vat;
+    map.set(rate, cur);
+  }
+  return [...map.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([rate, v]) => ({
+      rate,
+      baseHt: roundMoney(v.baseHt, 2),
+      vat: roundMoney(v.vat, 2),
+    }));
+}
+
 export function buildQuotePdfInputFromVersion(opts: {
   quote: QuotePdfHeaderSource;
   version: QuotePdfVersionSource;
   statusForPdf?: string;
   quoteMentions?: string | null;
   legalMentions?: string | null;
+  insuranceMentions?: string | null;
+  accentColor?: string | null;
+  documentSettings?: QuoteDocumentSettings | null;
+  bank?: QuotePdfInput["bank"];
+  particularConditions?: string | null;
+  executionDurationNote?: string | null;
+  executionStartNote?: string | null;
+  consumerContractContext?: string | null;
 }): QuotePdfInput {
   const { quote, version } = opts;
   const sections = [...version.sections]
@@ -102,6 +154,14 @@ export function buildQuotePdfInputFromVersion(opts: {
     parsePaymentSchedule(version.paymentScheduleJson) ??
     parsePaymentSchedule(quote.paymentScheduleJson);
 
+  const allMapped = version.lines.map((l) => ({
+    kind: l.kind,
+    isOptional: l.isOptional || l.kind === "OPTION",
+    vatRate: d(l.vatRate),
+    lineSellHt: d(l.lineSellHt),
+    lineVat: l.lineVat != null ? d(l.lineVat) : undefined,
+  }));
+
   return {
     number: quote.number,
     subject: quote.subject,
@@ -119,6 +179,18 @@ export function buildQuotePdfInputFromVersion(opts: {
     currency: quote.currency,
     quoteMentions: opts.quoteMentions ?? null,
     legalMentions: opts.legalMentions ?? null,
+    insuranceMentions: opts.insuranceMentions ?? null,
+    accentColor: opts.accentColor ?? null,
+    documentSettings: opts.documentSettings
+      ? parseQuoteDocumentSettings(opts.documentSettings)
+      : null,
+    bank: opts.bank ?? null,
+    acceptedAt: quote.acceptedAt ?? null,
+    particularConditions: opts.particularConditions ?? null,
+    executionDurationNote: opts.executionDurationNote ?? null,
+    executionStartNote: opts.executionStartNote ?? null,
+    consumerContractContext: opts.consumerContractContext ?? null,
+    vatBreakdown: buildVatBreakdownFromLines(allMapped),
     totals: {
       totalSellHt: d(version.totalSellHt),
       totalVat: d(version.totalVat),

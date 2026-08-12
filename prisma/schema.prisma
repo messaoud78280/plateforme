@@ -3829,6 +3829,8 @@ model CommercialOrgSettings {
   invoiceMentions      String?  @db.Text
   /// Couleur d’accent PDF (#hex) — template unique V1.1
   accentColor          String?
+  /// DEVIS PDF V2 — paramètres documents (CGV, déchets, banque, conformité…)
+  quoteDocumentSettingsJson Json?
   quotePrefix          String   @default("DEV")
   invoicePrefix        String   @default("FAC")
   amendmentPrefix      String   @default("AV")

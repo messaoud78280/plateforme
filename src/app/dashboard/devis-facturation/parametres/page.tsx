@@ -5,7 +5,7 @@ import {
 } from "@/lib/commercial/access";
 import { ensureCommercialOrgSettings } from "@/lib/commercial/settings";
 import { d } from "@/lib/commercial/decimal";
-import { SettingsForm } from "@/components/commercial/SettingsForm";
+import { SettingsForm, type CommercialSettingsFormValues } from "@/components/commercial/SettingsForm";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +45,9 @@ export default async function ParametresCommerciauxPage() {
           quoteMentions: s.quoteMentions,
           invoiceMentions: s.invoiceMentions,
           accentColor: s.accentColor,
+          quoteDocumentSettingsJson:
+            (s.quoteDocumentSettingsJson as CommercialSettingsFormValues["quoteDocumentSettingsJson"]) ??
+            {},
           quotePrefix: s.quotePrefix,
           invoicePrefix: s.invoicePrefix,
           amendmentPrefix: s.amendmentPrefix,

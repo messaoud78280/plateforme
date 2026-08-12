@@ -27,6 +27,7 @@ function serializeSettings(s: Awaited<ReturnType<typeof ensureCommercialOrgSetti
     quoteMentions: s.quoteMentions,
     invoiceMentions: s.invoiceMentions,
     accentColor: s.accentColor,
+    quoteDocumentSettingsJson: s.quoteDocumentSettingsJson ?? {},
     quotePrefix: s.quotePrefix,
     invoicePrefix: s.invoicePrefix,
     amendmentPrefix: s.amendmentPrefix,
@@ -95,6 +96,10 @@ export async function PATCH(req: Request) {
       quoteMentions: strOrNull(body.quoteMentions),
       invoiceMentions: strOrNull(body.invoiceMentions),
       accentColor: strOrNull(body.accentColor),
+      quoteDocumentSettingsJson:
+        body.quoteDocumentSettingsJson !== undefined
+          ? body.quoteDocumentSettingsJson
+          : undefined,
       quotePrefix: strRequired(body.quotePrefix),
       invoicePrefix: strRequired(body.invoicePrefix),
       amendmentPrefix: strRequired(body.amendmentPrefix),

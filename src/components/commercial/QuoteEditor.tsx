@@ -22,6 +22,7 @@ import { LibraryPickerModal } from "@/components/commercial/LibraryPickerModal";
 import { LineCompositionDrawer } from "@/components/commercial/LineCompositionDrawer";
 import { QuotePriceCheckPanel } from "@/components/commercial/QuotePriceCheckPanel";
 import { QuoteStatusActions } from "@/components/commercial/QuoteStatusActions";
+import { QuoteIssuanceCheckPanel } from "@/components/commercial/QuoteIssuanceCheckPanel";
 import { QuotePaymentScheduleBlock } from "@/components/commercial/QuotePaymentScheduleBlock";
 import type { QuoteActionDef } from "@/lib/commercial/quote-actions";
 import { shouldOfferPriceCheck } from "@/lib/commercial/price-check-ui";
@@ -198,6 +199,8 @@ export function QuoteEditor({
   const [librarySectionId, setLibrarySectionId] = useState<string | null>(null);
   const [compositionLine, setCompositionLine] = useState<Line | null>(null);
   const [priceCheckOpen, setPriceCheckOpen] = useState(false);
+  const [issuanceOpen, setIssuanceOpen] = useState(false);
+  const [pendingEmitStatus, setPendingEmitStatus] = useState<string | null>(null);
   const [priceCheckSessionBadge, setPriceCheckSessionBadge] = useState<string | null>(null);
   const [marginOpen, setMarginOpen] = useState(false);
   const [addMenuFor, setAddMenuFor] = useState<string | null>(null);
@@ -477,6 +480,11 @@ export function QuoteEditor({
           "Accepter ce devis ? Le PDF de la version courante sera figé. Cette action est irréversible sur le document accepté.",
         );
         if (!ok) return;
+      }
+      if (action.id === "validate" || action.id === "mark_sent") {
+        setPendingEmitStatus(action.toStatus);
+        setIssuanceOpen(true);
+        return;
       }
       void setStatus(action.toStatus);
     }
@@ -1401,6 +1409,28 @@ export function QuoteEditor({
           mutationSeq.current += 1;
           void refreshQuote(mutationSeq.current);
           router.refresh();
+        }}
+      />
+
+      <QuoteIssuanceCheckPanel
+        quoteId={quote.id}
+        open={issuanceOpen}
+        onClose={() => {
+          setIssuanceOpen(false);
+          setPendingEmitStatus(null);
+        }}
+        onDownloadDraft={() => {
+          window.open(
+            `/api/commercial/quotes/${quote.id}/pdf`,
+            "_blank",
+            "noreferrer",
+          );
+        }}
+        onEmit={() => {
+          const st = pendingEmitStatus;
+          setIssuanceOpen(false);
+          setPendingEmitStatus(null);
+          if (st) void setStatus(st);
         }}
       />
     </div>

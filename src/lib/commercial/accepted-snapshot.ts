@@ -118,6 +118,14 @@ async function loadVersionPdfContext(orgId: string, quoteId: string, versionId: 
     version,
     quoteMentions: settings.quoteMentions,
     legalMentions: settings.legalMentions,
+    insuranceMentions: settings.insuranceMentions,
+    accentColor: settings.accentColor,
+    documentSettings: settings.quoteDocumentSettingsJson,
+    bank: {
+      iban: settings.bankIban,
+      bic: settings.bankBic,
+      name: settings.bankName,
+    },
   };
 }
 
@@ -127,8 +135,18 @@ export function generatePdfForQuoteVersion(opts: {
   statusForPdf?: string;
   quoteMentions?: string | null;
   legalMentions?: string | null;
+  insuranceMentions?: string | null;
+  accentColor?: string | null;
+  documentSettings?: unknown;
+  bank?: { iban?: string | null; bic?: string | null; name?: string | null } | null;
 }): Buffer {
-  const input = buildQuotePdfInputFromVersion(opts);
+  const input = buildQuotePdfInputFromVersion({
+    ...opts,
+    documentSettings: opts.documentSettings as
+      | import("@/lib/commercial/pdf/document-settings").QuoteDocumentSettings
+      | null
+      | undefined,
+  });
   return generateCommercialQuotePdf(input);
 }
 
@@ -206,6 +224,10 @@ export async function ensureAcceptedQuoteSnapshot(
     statusForPdf: "ACCEPTED",
     quoteMentions: ctx.quoteMentions,
     legalMentions: ctx.legalMentions,
+    insuranceMentions: ctx.insuranceMentions,
+    accentColor: ctx.accentColor,
+    documentSettings: ctx.documentSettings,
+    bank: ctx.bank,
   });
   const generationMs = Date.now() - t0;
   const hash = sha256Hex(bytes);
@@ -333,6 +355,10 @@ export async function generateCurrentQuotePdfPreview(
     version: ctx.version,
     quoteMentions: ctx.quoteMentions,
     legalMentions: ctx.legalMentions,
+    insuranceMentions: ctx.insuranceMentions,
+    accentColor: ctx.accentColor,
+    documentSettings: ctx.documentSettings,
+    bank: ctx.bank,
   });
   return { buffer, filename: `${quote.number}.pdf` };
 }

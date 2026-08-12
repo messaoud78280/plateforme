@@ -19,6 +19,19 @@ export type CommercialSettingsFormValues = {
   quoteMentions: string | null;
   invoiceMentions: string | null;
   accentColor: string | null;
+  quoteDocumentSettingsJson: {
+    showBankOnQuote?: boolean;
+    paymentModeLabel?: string | null;
+    wasteManagementText?: string | null;
+    wasteCostLabel?: string | null;
+    quoteFeeLabel?: string | null;
+    acceptanceText?: string | null;
+    cgvText?: string | null;
+    footerText?: string | null;
+    requireInsurance?: boolean;
+    requireWaste?: boolean;
+    requireExecutionDuration?: boolean;
+  };
   quotePrefix: string;
   invoicePrefix: string;
   amendmentPrefix: string;
@@ -288,6 +301,146 @@ export function SettingsForm({ initial }: { initial: CommercialSettingsFormValue
             onChange={(e) => set("legalMentions", e.target.value || null)}
           />
         </Field>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4 space-y-3">
+        <h2 className="text-sm font-bold text-slate-900">
+          Documents commerciaux (PDF devis)
+        </h2>
+        <p className="text-[11px] text-slate-500">
+          Personnalisation du devis PDF V2 — pas de conseil juridique automatique.
+        </p>
+        <label className="flex items-center gap-2 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            checked={Boolean(form.quoteDocumentSettingsJson?.showBankOnQuote)}
+            onChange={(e) =>
+              set("quoteDocumentSettingsJson", {
+                ...form.quoteDocumentSettingsJson,
+                showBankOnQuote: e.target.checked,
+              })
+            }
+          />
+          Afficher IBAN / BIC sur le devis
+        </label>
+        <Field label="Mode de règlement">
+          <input
+            className={inputCls}
+            placeholder="Virement bancaire"
+            value={form.quoteDocumentSettingsJson?.paymentModeLabel ?? ""}
+            onChange={(e) =>
+              set("quoteDocumentSettingsJson", {
+                ...form.quoteDocumentSettingsJson,
+                paymentModeLabel: e.target.value || null,
+              })
+            }
+          />
+        </Field>
+        <Field label="Devis gratuit / payant (libellé PDF)">
+          <input
+            className={inputCls}
+            placeholder="Laisser vide pour ne pas afficher"
+            value={form.quoteDocumentSettingsJson?.quoteFeeLabel ?? ""}
+            onChange={(e) =>
+              set("quoteDocumentSettingsJson", {
+                ...form.quoteDocumentSettingsJson,
+                quoteFeeLabel: e.target.value || null,
+              })
+            }
+          />
+        </Field>
+        <Field label="Gestion des déchets">
+          <textarea
+            rows={2}
+            className={inputCls}
+            value={form.quoteDocumentSettingsJson?.wasteManagementText ?? ""}
+            onChange={(e) =>
+              set("quoteDocumentSettingsJson", {
+                ...form.quoteDocumentSettingsJson,
+                wasteManagementText: e.target.value || null,
+              })
+            }
+          />
+        </Field>
+        <Field label="Coût déchets (libellé)">
+          <input
+            className={inputCls}
+            placeholder="Inclus / 350 €…"
+            value={form.quoteDocumentSettingsJson?.wasteCostLabel ?? ""}
+            onChange={(e) =>
+              set("quoteDocumentSettingsJson", {
+                ...form.quoteDocumentSettingsJson,
+                wasteCostLabel: e.target.value || null,
+              })
+            }
+          />
+        </Field>
+        <Field label="Texte bon pour accord">
+          <textarea
+            rows={2}
+            className={inputCls}
+            value={form.quoteDocumentSettingsJson?.acceptanceText ?? ""}
+            onChange={(e) =>
+              set("quoteDocumentSettingsJson", {
+                ...form.quoteDocumentSettingsJson,
+                acceptanceText: e.target.value || null,
+              })
+            }
+          />
+        </Field>
+        <Field label="CGV (annexe PDF)">
+          <textarea
+            rows={4}
+            className={inputCls}
+            value={form.quoteDocumentSettingsJson?.cgvText ?? ""}
+            onChange={(e) =>
+              set("quoteDocumentSettingsJson", {
+                ...form.quoteDocumentSettingsJson,
+                cgvText: e.target.value || null,
+              })
+            }
+          />
+        </Field>
+        <Field label="Pied de page additionnel">
+          <input
+            className={inputCls}
+            value={form.quoteDocumentSettingsJson?.footerText ?? ""}
+            onChange={(e) =>
+              set("quoteDocumentSettingsJson", {
+                ...form.quoteDocumentSettingsJson,
+                footerText: e.target.value || null,
+              })
+            }
+          />
+        </Field>
+        <div className="grid gap-2 sm:grid-cols-2 text-sm text-slate-700">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={Boolean(form.quoteDocumentSettingsJson?.requireInsurance)}
+              onChange={(e) =>
+                set("quoteDocumentSettingsJson", {
+                  ...form.quoteDocumentSettingsJson,
+                  requireInsurance: e.target.checked,
+                })
+              }
+            />
+            Alerter si assurance absente
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={Boolean(form.quoteDocumentSettingsJson?.requireWaste)}
+              onChange={(e) =>
+                set("quoteDocumentSettingsJson", {
+                  ...form.quoteDocumentSettingsJson,
+                  requireWaste: e.target.checked,
+                })
+              }
+            />
+            Alerter si déchets absents
+          </label>
+        </div>
       </section>
 
       {error ? <p className="text-sm text-red-700">{error}</p> : null}

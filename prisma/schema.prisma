@@ -254,6 +254,8 @@ model ExternalOrganization {
   commercialQuotesAsClient CommercialQuote[] @relation("CommercialQuoteClient")
   commercialInvoicesAsClient CommercialInvoice[] @relation("CommercialInvoiceClient")
   commercialComponentsAsSubcontractor CommercialWorkItemComponent[] @relation("CommercialComponentSubcontractor")
+  commercialMaterialPrices CommercialMaterialPrice[] @relation("CommercialMaterialPriceSupplier")
+  preferredForCommercialMaterials CommercialMaterial[] @relation("CommercialMaterialPreferredSupplier")
 
   @@index([hostOrganizationId])
   @@index([hostOrganizationId, type])
@@ -397,6 +399,8 @@ model PurchaseOrderLine {
   order        PurchaseOrder             @relation(fields: [orderId], references: [id], onDelete: Cascade)
   receiptLines PurchaseOrderReceiptLine[]
   materialRequirementLinks MaterialRequirementOrderLink[]
+  /// Préparation V2.2 — historique prix biblio issus d’une commande
+  commercialMaterialPrices CommercialMaterialPrice[]
 
   @@index([orderId])
 }
@@ -4384,23 +4388,31 @@ model CommercialMaterial {
   reference      String?
   family         String?
   unit           String   @default("U")
+  /// Dénomination fournisseur (affichage / legacy) — préféré structuré = preferredSupplierExternalOrgId
   supplierName   String?
   manufacturer   String?
-  /// Source libre du prix courant (catalogue, devis fournisseur, etc.)
+  /// Source libre du prix retenu (MANUAL | PURCHASE_ORDER | IMPORT | texte legacy)
   priceSource    String?
+  /// Prix retenu pour le chiffrage des ouvrages (≠ dernier prix fournisseur)
   currentPriceHt Decimal  @default(0) @db.Decimal(14, 4)
+  /// Date de dernière application du prix retenu
+  referencePriceUpdatedAt DateTime?
+  /// Fournisseur préféré (ExternalOrganization type SUPPLIER) — indépendant du prix retenu
+  preferredSupplierExternalOrgId String?
   notes          String?  @db.Text
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  preferredSupplier ExternalOrganization? @relation("CommercialMaterialPreferredSupplier", fields: [preferredSupplierExternalOrgId], references: [id], onDelete: SetNull)
   prices       CommercialMaterialPrice[]
   components   CommercialWorkItemComponent[]
 
   @@index([organizationId, name])
   @@index([organizationId, reference])
   @@index([organizationId, family])
+  @@index([preferredSupplierExternalOrgId])
 }
 
 model CommercialMaterialPrice {
@@ -4408,16 +4420,28 @@ model CommercialMaterialPrice {
   organizationId String
   materialId     String
   priceHt        Decimal  @db.Decimal(14, 4)
+  /// MANUAL | PURCHASE_ORDER | IMPORT (ou libellé legacy)
   source         String?
+  /// Libellé fournisseur dénormalisé (affichage / legacy)
   supplierName   String?
+  /// Fournisseur structuré (référentiel ExternalOrganization)
+  supplierExternalOrgId String?
+  /// Référence article chez le fournisseur
+  supplierReference String?
+  /// Lien optionnel commande (V2.2 — pas d’auto-matching en V2.1)
+  purchaseOrderLineId String?
   notedAt        DateTime @default(now())
   comment        String?
   createdAt      DateTime @default(now())
 
   material CommercialMaterial @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  supplier ExternalOrganization? @relation("CommercialMaterialPriceSupplier", fields: [supplierExternalOrgId], references: [id], onDelete: SetNull)
+  purchaseOrderLine PurchaseOrderLine? @relation(fields: [purchaseOrderLineId], references: [id], onDelete: SetNull)
 
   @@index([materialId, notedAt])
   @@index([organizationId])
+  @@index([supplierExternalOrgId])
+  @@index([purchaseOrderLineId])
 }
 
 model CommercialLaborResource {

@@ -57,9 +57,14 @@ export default async function BibliothequePage() {
         id: m.id,
         name: m.name,
         unit: m.unit,
+        family: m.family,
         currentPriceHt: m.currentPriceHt,
         supplierName: m.supplierName,
+        preferredSupplierName: m.preferredSupplierName ?? m.supplierName,
+        variationPercent: m.variationPercent ?? null,
+        needsPriceReview: Boolean(m.needsPriceReview),
         updatedAt: m.updatedAt,
+        referencePriceUpdatedAt: m.referencePriceUpdatedAt ?? null,
       }))}
       laborPreview={labor.slice(0, 80).map((l) => ({
         id: l.id,

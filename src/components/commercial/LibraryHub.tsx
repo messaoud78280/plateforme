@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Drawer } from "@/components/ui/Drawer";
 import { HeaderDropdown } from "@/components/ui/HeaderDropdown";
 import { WorkItemEditor } from "@/components/commercial/WorkItemEditor";
+import { MaterialDetailDrawer } from "@/components/commercial/MaterialDetailDrawer";
 import { marginPercentFromCostSell, roundMoney } from "@/lib/commercial/money";
 import { cn } from "@/lib/cn";
 
@@ -77,9 +78,14 @@ export function LibraryHub({
     id: string;
     name: string;
     unit: string;
+    family: string | null;
     currentPriceHt: number;
     supplierName: string | null;
+    preferredSupplierName: string | null;
+    variationPercent: number | null;
+    needsPriceReview: boolean;
     updatedAt: string | Date;
+    referencePriceUpdatedAt: string | Date | null;
   }>;
   laborPreview: Array<{
     id: string;
@@ -102,6 +108,7 @@ export function LibraryHub({
     | { mode: "create-composite" }
     | { mode: "edit"; id: string }
   >(null);
+  const [materialDrawerId, setMaterialDrawerId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -431,7 +438,10 @@ export function LibraryHub({
       ) : null}
 
       {tab === "materiaux" ? (
-        <MaterialsPanel rows={materialsPreview} />
+        <MaterialsPanel
+          rows={materialsPreview}
+          onOpen={(id) => setMaterialDrawerId(id)}
+        />
       ) : tab === "maindoeuvre" ? (
         <LaborPanel rows={laborPreview} />
       ) : filtered.length === 0 && items.filter((i) => i.isActive).length === 0 && chip === "all" && !debouncedQ ? (
@@ -560,6 +570,13 @@ export function LibraryHub({
           refresh();
         }}
       />
+
+      <MaterialDetailDrawer
+        materialId={materialDrawerId}
+        open={Boolean(materialDrawerId)}
+        onClose={() => setMaterialDrawerId(null)}
+        onChanged={refresh}
+      />
     </div>
   );
 }
@@ -623,15 +640,22 @@ function RecentStrip({
 
 function MaterialsPanel({
   rows,
+  onOpen,
 }: {
   rows: Array<{
     id: string;
     name: string;
     unit: string;
+    family: string | null;
     currentPriceHt: number;
     supplierName: string | null;
+    preferredSupplierName: string | null;
+    variationPercent: number | null;
+    needsPriceReview: boolean;
     updatedAt: string | Date;
+    referencePriceUpdatedAt: string | Date | null;
   }>;
+  onOpen: (id: string) => void;
 }) {
   if (rows.length === 0) {
     return (
@@ -645,26 +669,96 @@ function MaterialsPanel({
     );
   }
   return (
-    <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-      {rows.map((m) => (
-        <li key={m.id}>
-          <Link
-            href={`/dashboard/devis-facturation/prix/materiaux/${m.id}`}
-            className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-slate-50"
-          >
-            <div>
-              <p className="font-semibold text-slate-900">{m.name}</p>
-              <p className="text-xs text-slate-500">
-                {m.supplierName ?? "Fournisseur non défini"} · Maj{" "}
-                {new Date(m.updatedAt).toLocaleDateString("fr-FR")}
+    <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      {rows.map((m) => {
+        const supplier = m.preferredSupplierName || m.supplierName;
+        const refDate = m.referencePriceUpdatedAt || m.updatedAt;
+        return (
+          <li key={m.id}>
+            <div className="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50/80">
+              <button
+                type="button"
+                onClick={() => onOpen(m.id)}
+                className="min-w-0 flex-1 text-left"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-semibold text-slate-900">{m.name}</p>
+                  {m.needsPriceReview ? (
+                    <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-800">
+                      À vérifier
+                    </span>
+                  ) : null}
+                </div>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  {[m.family, m.unit].filter(Boolean).join(" · ")}
+                </p>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  {supplier ?? "Fournisseur non défini"} ·{" "}
+                  {relativeUpdated(refDate)}
+                  {m.variationPercent != null && Math.abs(m.variationPercent) >= 0.5 ? (
+                    <span
+                      className={
+                        m.variationPercent > 0
+                          ? " text-amber-700"
+                          : " text-emerald-700"
+                      }
+                    >
+                      {" "}
+                      · {m.variationPercent > 0 ? "+" : ""}
+                      {fmt(m.variationPercent)} %
+                    </span>
+                  ) : null}
+                </p>
+              </button>
+              <p className="shrink-0 tabular-nums text-sm font-semibold text-slate-800">
+                {fmt(m.currentPriceHt)} €/{m.unit}
               </p>
+              <HeaderDropdown
+                align="right"
+                width={220}
+                zIndex={50}
+                panelClassName="rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+                trigger={({ onClick, expanded, triggerRef }) => (
+                  <button
+                    ref={triggerRef}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClick();
+                    }}
+                    aria-expanded={expanded}
+                    className="rounded-lg px-2 py-1.5 text-sm font-bold text-slate-500 hover:bg-slate-100"
+                  >
+                    •••
+                  </button>
+                )}
+              >
+                <button
+                  type="button"
+                  className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50"
+                  onClick={() => onOpen(m.id)}
+                >
+                  Modifier
+                </button>
+                <button
+                  type="button"
+                  className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50"
+                  onClick={() => onOpen(m.id)}
+                >
+                  Ajouter un prix fournisseur
+                </button>
+                <button
+                  type="button"
+                  className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50"
+                  onClick={() => onOpen(m.id)}
+                >
+                  Voir historique
+                </button>
+              </HeaderDropdown>
             </div>
-            <p className="tabular-nums text-sm font-semibold text-slate-800">
-              {fmt(m.currentPriceHt)} € / {m.unit}
-            </p>
-          </Link>
-        </li>
-      ))}
+          </li>
+        );
+      })}
     </ul>
   );
 }

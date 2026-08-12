@@ -776,11 +776,17 @@ export async function refreshWorkItemsAfterMaterialPriceChange(
 ) {
   const comps = await prisma.commercialWorkItemComponent.findMany({
     where: { organizationId: orgId, materialId },
-    select: { id: true, workItemId: true, quantityPerUnit: true, lossPercent: true },
+    select: {
+      id: true,
+      workItemId: true,
+      quantityPerUnit: true,
+      lossPercent: true,
+    },
   });
   if (!comps.length) return { updatedComponents: 0, workItemIds: [] as string[] };
 
   const workItemIds = [...new Set(comps.map((c) => c.workItemId))];
+
   await prisma.$transaction(async (tx) => {
     for (const c of comps) {
       const lineCostHt = calculateComponentLineCost({
@@ -793,15 +799,38 @@ export async function refreshWorkItemsAfterMaterialPriceChange(
         data: { unitCostHt: newPriceHt, lineCostHt },
       });
     }
-    await tx.commercialWorkItem.updateMany({
-      where: { id: { in: workItemIds }, organizationId: orgId },
-      data: { needsPriceRecalc: true },
-    });
+
+    for (const wid of workItemIds) {
+      const workItem = await tx.commercialWorkItem.findFirst({
+        where: { id: wid, organizationId: orgId },
+        include: { components: true },
+      });
+      if (!workItem) continue;
+      const costing = calculateWorkItemCosting({
+        components: workItem.components.map((c) => ({
+          type: c.type,
+          quantityPerUnit: d(c.quantityPerUnit),
+          unitCostHt: d(c.unitCostHt),
+          lossPercent: d(c.lossPercent),
+        })),
+        feesPercent: d(workItem.feesPercent),
+        feesAmountHt: d(workItem.feesAmountHt),
+        sellMode: workItem.sellMode === "FIXED_SELL" ? "FIXED_SELL" : "MARGIN",
+        marginPercent: d(workItem.marginPercent),
+        unitSellHt: d(workItem.unitSellHt),
+      });
+      await tx.commercialWorkItem.update({
+        where: { id: wid },
+        data: {
+          unitCostHt: costing.costPriceHt,
+          unitSellHt: costing.unitSellHt,
+          marginPercent: costing.marquePercent,
+          needsPriceRecalc: false,
+        },
+      });
+    }
   });
 
-  for (const wid of workItemIds) {
-    await recomputeWorkItemCost(orgId, wid);
-  }
   return { updatedComponents: comps.length, workItemIds };
 }
 
@@ -814,7 +843,127 @@ export async function countWorkItemsUsingMaterial(orgId: string, materialId: str
   return rows.length;
 }
 
-/* ─── Matériaux ─── */
+/* ─── Matériaux V2.1 — prix fournisseurs / prix retenu / historique ─── */
+
+export const MATERIAL_PRICE_SOURCE = {
+  MANUAL: "MANUAL",
+  PURCHASE_ORDER: "PURCHASE_ORDER",
+  IMPORT: "IMPORT",
+} as const;
+
+/** Seuil d’alerte écart prix fournisseur vs prix retenu */
+export const MATERIAL_PRICE_DIFF_ALERT_PERCENT = 5;
+/** Prix retenu « ancien » au-delà de N jours → à vérifier */
+export const MATERIAL_REFERENCE_STALE_DAYS = 180;
+const LOW_MARGIN_THRESHOLD = 15;
+
+function supplierDisplayName(s: {
+  tradeName?: string | null;
+  name: string;
+} | null | undefined) {
+  if (!s) return null;
+  return (s.tradeName || s.name).trim() || null;
+}
+
+function normalizePriceSource(raw?: string | null): string {
+  const s = (raw ?? MATERIAL_PRICE_SOURCE.MANUAL).trim().toUpperCase();
+  if (s === "PURCHASE_ORDER" || s === "IMPORT" || s === "MANUAL") return s;
+  return raw?.trim() || MATERIAL_PRICE_SOURCE.MANUAL;
+}
+
+async function assertSupplierInOrg(orgId: string, supplierExternalOrgId: string) {
+  const s = await prisma.externalOrganization.findFirst({
+    where: {
+      id: supplierExternalOrgId,
+      hostOrganizationId: orgId,
+      type: "SUPPLIER",
+    },
+    select: { id: true, name: true, tradeName: true, status: true },
+  });
+  if (!s) throw new Error("Fournisseur introuvable dans cette organisation");
+  return s;
+}
+
+/** Dernier prix par fournisseur (pour UI drawer). */
+export function groupLatestSupplierPrices(
+  prices: Array<{
+    id: string;
+    priceHt: number;
+    supplierName: string | null;
+    supplierExternalOrgId: string | null;
+    supplierReference: string | null;
+    source: string | null;
+    notedAt: Date;
+    supplier?: { id: string; name: string; tradeName: string | null } | null;
+  }>,
+) {
+  const map = new Map<
+    string,
+    {
+      key: string;
+      supplierExternalOrgId: string | null;
+      supplierName: string;
+      priceHt: number;
+      priceId: string;
+      notedAt: Date;
+      source: string | null;
+      supplierReference: string | null;
+    }
+  >();
+  for (const p of prices) {
+    const name =
+      supplierDisplayName(p.supplier) || p.supplierName || "Fournisseur";
+    const key = p.supplierExternalOrgId || `name:${name.toLowerCase()}`;
+    const existing = map.get(key);
+    if (!existing || p.notedAt > existing.notedAt) {
+      map.set(key, {
+        key,
+        supplierExternalOrgId: p.supplierExternalOrgId,
+        supplierName: name,
+        priceHt: p.priceHt,
+        priceId: p.id,
+        notedAt: p.notedAt,
+        source: p.source,
+        supplierReference: p.supplierReference,
+      });
+    }
+  }
+  return [...map.values()].sort((a, b) => b.notedAt.getTime() - a.notedAt.getTime());
+}
+
+export function materialNeedsPriceReview(input: {
+  currentPriceHt: number;
+  referencePriceUpdatedAt: Date | null | undefined;
+  latestSupplierPriceHt: number | null;
+  now?: Date;
+}): {
+  needsReview: boolean;
+  reasons: Array<"STALE" | "SUPPLIER_DIFF" | "NO_PRICE">;
+} {
+  const reasons: Array<"STALE" | "SUPPLIER_DIFF" | "NO_PRICE"> = [];
+  const now = input.now ?? new Date();
+  if (!(input.currentPriceHt > 0)) reasons.push("NO_PRICE");
+  if (input.referencePriceUpdatedAt) {
+    const days =
+      (now.getTime() - input.referencePriceUpdatedAt.getTime()) / 86_400_000;
+    if (days >= MATERIAL_REFERENCE_STALE_DAYS) reasons.push("STALE");
+  } else if (input.currentPriceHt > 0) {
+    reasons.push("STALE");
+  }
+  if (
+    input.latestSupplierPriceHt != null &&
+    input.currentPriceHt > 0
+  ) {
+    const diffPct =
+      Math.abs(input.latestSupplierPriceHt - input.currentPriceHt) /
+      input.currentPriceHt *
+      100;
+    if (diffPct >= MATERIAL_PRICE_DIFF_ALERT_PERCENT) {
+      reasons.push("SUPPLIER_DIFF");
+    }
+  }
+  return { needsReview: reasons.length > 0, reasons };
+}
 
 export async function listMaterials(
   orgId: string,
@@ -831,6 +980,7 @@ export async function listMaterials(
               { name: { contains: q, mode: "insensitive" } },
               { reference: { contains: q, mode: "insensitive" } },
               { family: { contains: q, mode: "insensitive" } },
+              { supplierName: { contains: q, mode: "insensitive" } },
             ],
           }
         : {}),
@@ -838,27 +988,76 @@ export async function listMaterials(
     orderBy: { name: "asc" },
     take: opts?.take ?? 200,
     include: {
-      prices: { orderBy: { notedAt: "desc" }, take: 3 },
+      preferredSupplier: {
+        select: { id: true, name: true, tradeName: true },
+      },
+      // Synthèse uniquement — pas l’historique complet
+      prices: {
+        orderBy: { notedAt: "desc" },
+        take: 2,
+        select: {
+          priceHt: true,
+          notedAt: true,
+          supplierName: true,
+          supplierExternalOrgId: true,
+        },
+      },
       _count: { select: { components: true } },
     },
   });
-  return rows.map((m) => ({
-    ...m,
-    currentPriceHt: d(m.currentPriceHt),
-    prices: m.prices.map((p) => ({ ...p, priceHt: d(p.priceHt) })),
-  }));
+  return rows.map((m) => {
+    const current = d(m.currentPriceHt);
+    const prices = m.prices.map((p) => ({ ...p, priceHt: d(p.priceHt) }));
+    const previous = prices.length > 1 ? prices[1].priceHt : null;
+    const variationPercent =
+      previous != null && previous !== 0
+        ? roundMoney(((current - previous) / previous) * 100, 1)
+        : null;
+    const preferredName =
+      supplierDisplayName(m.preferredSupplier) || m.supplierName;
+    const latestSupplier = prices[0]?.priceHt ?? null;
+    const review = materialNeedsPriceReview({
+      currentPriceHt: current,
+      referencePriceUpdatedAt: m.referencePriceUpdatedAt,
+      latestSupplierPriceHt: latestSupplier,
+    });
+    return {
+      ...m,
+      currentPriceHt: current,
+      preferredSupplierName: preferredName,
+      variationPercent,
+      needsPriceReview: review.needsReview,
+      reviewReasons: review.reasons,
+      // Liste : pas d’historique complet (déjà limité à 2 en query)
+      prices,
+    };
+  });
 }
 
 export async function getMaterial(orgId: string, id: string) {
   const m = await prisma.commercialMaterial.findFirst({
     where: { id, organizationId: orgId },
     include: {
-      prices: { orderBy: { notedAt: "desc" }, take: 50 },
+      preferredSupplier: {
+        select: { id: true, name: true, tradeName: true, city: true },
+      },
+      prices: {
+        orderBy: { notedAt: "desc" },
+        take: 50,
+        include: {
+          supplier: {
+            select: { id: true, name: true, tradeName: true, city: true },
+          },
+        },
+      },
     },
   });
   if (!m) return null;
-  const usedBy = await countWorkItemsUsingMaterial(orgId, id);
-  const prices = m.prices.map((p) => ({ ...p, priceHt: d(p.priceHt) }));
+
+  const prices = m.prices.map((p) => ({
+    ...p,
+    priceHt: d(p.priceHt),
+  }));
   const current = d(m.currentPriceHt);
   const previous = prices.length > 1 ? prices[1].priceHt : null;
   const variationHt =
@@ -867,15 +1066,86 @@ export async function getMaterial(orgId: string, id: string) {
     previous != null && previous !== 0
       ? roundMoney((variationHt! / previous) * 100, 2)
       : null;
+
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+  const oldInWindow = [...prices]
+    .reverse()
+    .find((p) => p.notedAt <= threeMonthsAgo);
+  const evolution3m =
+    oldInWindow && oldInWindow.priceHt !== 0
+      ? roundMoney(((current - oldInWindow.priceHt) / oldInWindow.priceHt) * 100, 1)
+      : variationPercent;
+
+  const supplierQuotes = groupLatestSupplierPrices(prices);
+  const preferredId = m.preferredSupplierExternalOrgId;
+  const usedBy = await listWorkItemsUsingMaterialDetail(orgId, id);
+  const review = materialNeedsPriceReview({
+    currentPriceHt: current,
+    referencePriceUpdatedAt: m.referencePriceUpdatedAt,
+    latestSupplierPriceHt: supplierQuotes[0]?.priceHt ?? null,
+  });
+
+  const referenceSourceLabel = (() => {
+    const match = prices.find(
+      (p) => roundMoney(p.priceHt, 4) === roundMoney(current, 4),
+    );
+    if (!match) return m.priceSource ?? null;
+    const name =
+      supplierDisplayName(match.supplier) || match.supplierName || null;
+    const date = match.notedAt.toLocaleDateString("fr-FR");
+    return name ? `${name} · ${date}` : date;
+  })();
+
   return {
     ...m,
     currentPriceHt: current,
+    preferredSupplierName:
+      supplierDisplayName(m.preferredSupplier) || m.supplierName,
     prices,
-    usedByWorkItemCount: usedBy,
+    supplierQuotes,
+    usedByWorkItemCount: usedBy.length,
+    usedByWorkItems: usedBy,
     previousPriceHt: previous,
     variationHt,
     variationPercent,
+    evolution3mPercent: evolution3m,
+    referenceSourceLabel,
+    needsPriceReview: review.needsReview,
+    reviewReasons: review.reasons,
   };
+}
+
+export async function listWorkItemsUsingMaterialDetail(
+  orgId: string,
+  materialId: string,
+) {
+  const comps = await prisma.commercialWorkItemComponent.findMany({
+    where: { organizationId: orgId, materialId },
+    select: { workItemId: true },
+    distinct: ["workItemId"],
+  });
+  if (!comps.length) return [];
+  const ids = comps.map((c) => c.workItemId);
+  const items = await prisma.commercialWorkItem.findMany({
+    where: { organizationId: orgId, id: { in: ids }, isActive: true },
+    select: {
+      id: true,
+      name: true,
+      saleUnit: true,
+      unitCostHt: true,
+      unitSellHt: true,
+      marginPercent: true,
+      kind: true,
+    },
+    orderBy: { name: "asc" },
+  });
+  return items.map((w) => ({
+    ...w,
+    unitCostHt: d(w.unitCostHt),
+    unitSellHt: d(w.unitSellHt),
+    marginPercent: d(w.marginPercent),
+  }));
 }
 
 export async function createMaterial(
@@ -895,6 +1165,7 @@ export async function createMaterial(
   const name = data.name.trim();
   if (!name) throw new Error("Nom matériau requis");
   const price = data.currentPriceHt ?? 0;
+  const source = normalizePriceSource(data.priceSource ?? MATERIAL_PRICE_SOURCE.MANUAL);
   return prisma.$transaction(async (tx) => {
     const material = await tx.commercialMaterial.create({
       data: {
@@ -905,8 +1176,9 @@ export async function createMaterial(
         unit: data.unit ?? "U",
         supplierName: data.supplierName ?? null,
         manufacturer: data.manufacturer ?? null,
-        priceSource: data.priceSource ?? null,
+        priceSource: source,
         currentPriceHt: price,
+        referencePriceUpdatedAt: price > 0 ? new Date() : null,
         notes: data.notes ?? null,
       },
     });
@@ -916,13 +1188,341 @@ export async function createMaterial(
           organizationId: orgId,
           materialId: material.id,
           priceHt: price,
-          source: data.priceSource ?? "création",
+          source,
           supplierName: data.supplierName ?? null,
         },
       });
     }
     return material;
   });
+}
+
+/**
+ * Ajoute un relevé prix fournisseur sans changer le prix retenu.
+ * Retourne un prompt si l’écart vs prix retenu ≥ 5 %.
+ */
+export async function addMaterialSupplierPrice(
+  orgId: string,
+  materialId: string,
+  data: {
+    priceHt: number;
+    supplierExternalOrgId?: string | null;
+    supplierName?: string | null;
+    supplierReference?: string | null;
+    source?: string | null;
+    notedAt?: Date | null;
+    comment?: string | null;
+    purchaseOrderLineId?: string | null;
+  },
+) {
+  const material = await prisma.commercialMaterial.findFirst({
+    where: { id: materialId, organizationId: orgId },
+    select: { id: true, currentPriceHt: true, unit: true },
+  });
+  if (!material) throw new Error("Matériau introuvable");
+
+  const priceHt = roundMoney(Number(data.priceHt) || 0, 4);
+  if (!(priceHt > 0)) throw new Error("Prix HT invalide");
+
+  let supplierName = data.supplierName?.trim() || null;
+  let supplierExternalOrgId = data.supplierExternalOrgId || null;
+  if (supplierExternalOrgId) {
+    const s = await assertSupplierInOrg(orgId, supplierExternalOrgId);
+    supplierName = supplierDisplayName(s) || supplierName;
+  }
+  if (!supplierName && !supplierExternalOrgId) {
+    throw new Error("Indiquez un fournisseur");
+  }
+
+  if (data.purchaseOrderLineId) {
+    const line = await prisma.purchaseOrderLine.findFirst({
+      where: {
+        id: data.purchaseOrderLineId,
+        order: { organizationId: orgId },
+      },
+      select: { id: true },
+    });
+    if (!line) throw new Error("Ligne de commande introuvable");
+  }
+
+  const source = normalizePriceSource(data.source);
+  const notedAt = data.notedAt ?? new Date();
+
+  const price = await prisma.commercialMaterialPrice.create({
+    data: {
+      organizationId: orgId,
+      materialId,
+      priceHt,
+      source,
+      supplierName,
+      supplierExternalOrgId,
+      supplierReference: data.supplierReference?.trim() || null,
+      purchaseOrderLineId: data.purchaseOrderLineId ?? null,
+      notedAt,
+      comment: data.comment?.trim() || null,
+    },
+  });
+
+  const current = d(material.currentPriceHt);
+  const diffPercent =
+    current > 0
+      ? roundMoney(((priceHt - current) / current) * 100, 1)
+      : null;
+  const suggestApply =
+    current <= 0 ||
+    (diffPercent != null &&
+      Math.abs(diffPercent) >= MATERIAL_PRICE_DIFF_ALERT_PERCENT);
+
+  return {
+    price: { ...price, priceHt },
+    currentPriceHt: current,
+    diffPercent,
+    suggestApply,
+  };
+}
+
+export async function setMaterialPreferredSupplier(
+  orgId: string,
+  materialId: string,
+  supplierExternalOrgId: string | null,
+) {
+  const material = await prisma.commercialMaterial.findFirst({
+    where: { id: materialId, organizationId: orgId },
+    select: { id: true },
+  });
+  if (!material) throw new Error("Matériau introuvable");
+
+  let supplierName: string | null | undefined = undefined;
+  if (supplierExternalOrgId) {
+    const s = await assertSupplierInOrg(orgId, supplierExternalOrgId);
+    supplierName = supplierDisplayName(s);
+  } else {
+    supplierName = null;
+  }
+
+  await prisma.commercialMaterial.update({
+    where: { id: materialId },
+    data: {
+      preferredSupplierExternalOrgId: supplierExternalOrgId,
+      ...(supplierName !== undefined ? { supplierName } : {}),
+    },
+  });
+  return getMaterial(orgId, materialId);
+}
+
+export async function previewMaterialReferencePriceImpact(
+  orgId: string,
+  materialId: string,
+  newPriceHt: number,
+) {
+  const material = await prisma.commercialMaterial.findFirst({
+    where: { id: materialId, organizationId: orgId },
+    select: { id: true, currentPriceHt: true, name: true, unit: true },
+  });
+  if (!material) throw new Error("Matériau introuvable");
+
+  const oldPrice = d(material.currentPriceHt);
+  const next = roundMoney(newPriceHt, 4);
+  const diffPercent =
+    oldPrice > 0 ? roundMoney(((next - oldPrice) / oldPrice) * 100, 1) : null;
+
+  const comps = await prisma.commercialWorkItemComponent.findMany({
+    where: { organizationId: orgId, materialId },
+    include: {
+      workItem: {
+        include: { components: true },
+      },
+    },
+  });
+
+  const byWork = new Map<string, (typeof comps)[0]["workItem"]>();
+  for (const c of comps) {
+    if (c.workItem.organizationId !== orgId) continue;
+    byWork.set(c.workItemId, c.workItem);
+  }
+
+  const impacts: Array<{
+    id: string;
+    name: string;
+    oldCostHt: number;
+    newCostHt: number;
+    oldMarginPercent: number;
+    newMarginPercent: number;
+    marginDeltaPoints: number;
+    belowLowMargin: boolean;
+  }> = [];
+
+  for (const w of byWork.values()) {
+    const simulated = w.components.map((c) => ({
+      type: c.type,
+      quantityPerUnit: d(c.quantityPerUnit),
+      unitCostHt:
+        c.materialId === materialId ? next : d(c.unitCostHt),
+      lossPercent: d(c.lossPercent),
+    }));
+    const oldCosting = calculateWorkItemCosting({
+      components: w.components.map((c) => ({
+        type: c.type,
+        quantityPerUnit: d(c.quantityPerUnit),
+        unitCostHt: d(c.unitCostHt),
+        lossPercent: d(c.lossPercent),
+      })),
+      feesPercent: d(w.feesPercent),
+      feesAmountHt: d(w.feesAmountHt),
+      sellMode: w.sellMode === "FIXED_SELL" ? "FIXED_SELL" : "MARGIN",
+      marginPercent: d(w.marginPercent),
+      unitSellHt: d(w.unitSellHt),
+    });
+    const newCosting = calculateWorkItemCosting({
+      components: simulated,
+      feesPercent: d(w.feesPercent),
+      feesAmountHt: d(w.feesAmountHt),
+      sellMode: w.sellMode === "FIXED_SELL" ? "FIXED_SELL" : "MARGIN",
+      marginPercent: d(w.marginPercent),
+      unitSellHt: d(w.unitSellHt),
+    });
+    const marginDelta = roundMoney(
+      newCosting.marquePercent - oldCosting.marquePercent,
+      1,
+    );
+    impacts.push({
+      id: w.id,
+      name: w.name,
+      oldCostHt: oldCosting.costPriceHt,
+      newCostHt: newCosting.costPriceHt,
+      oldMarginPercent: oldCosting.marquePercent,
+      newMarginPercent: newCosting.marquePercent,
+      marginDeltaPoints: marginDelta,
+      belowLowMargin:
+        newCosting.marquePercent > 0 &&
+        newCosting.marquePercent < LOW_MARGIN_THRESHOLD,
+    });
+  }
+
+  const marginsDropOver2 = impacts.filter((i) => i.marginDeltaPoints <= -2).length;
+  const belowLow = impacts.filter((i) => i.belowLowMargin).length;
+
+  return {
+    materialId,
+    materialName: material.name,
+    unit: material.unit,
+    oldPriceHt: oldPrice,
+    newPriceHt: next,
+    diffPercent,
+    workItemCount: impacts.length,
+    marginsDropOver2Points: marginsDropOver2,
+    belowLowMarginCount: belowLow,
+    lowMarginThreshold: LOW_MARGIN_THRESHOLD,
+    impacts,
+  };
+}
+
+/**
+ * Applique un nouveau prix retenu (+ historique) et recalcule les ouvrages.
+ * Idempotent si le prix est déjà le prix retenu.
+ */
+export async function applyMaterialReferencePrice(
+  orgId: string,
+  materialId: string,
+  data: {
+    priceHt: number;
+    fromPriceId?: string | null;
+    supplierExternalOrgId?: string | null;
+    supplierName?: string | null;
+    source?: string | null;
+    comment?: string | null;
+    refreshWorkItems?: boolean;
+  },
+) {
+  const material = await prisma.commercialMaterial.findFirst({
+    where: { id: materialId, organizationId: orgId },
+    select: {
+      id: true,
+      currentPriceHt: true,
+      supplierName: true,
+      preferredSupplierExternalOrgId: true,
+    },
+  });
+  if (!material) throw new Error("Matériau introuvable");
+
+  let priceHt = roundMoney(Number(data.priceHt) || 0, 4);
+  let supplierName = data.supplierName?.trim() || null;
+  let supplierExternalOrgId = data.supplierExternalOrgId || null;
+  let source = normalizePriceSource(data.source);
+  let supplierReference: string | null = null;
+
+  if (data.fromPriceId) {
+    const from = await prisma.commercialMaterialPrice.findFirst({
+      where: {
+        id: data.fromPriceId,
+        materialId,
+        organizationId: orgId,
+      },
+      include: {
+        supplier: { select: { id: true, name: true, tradeName: true } },
+      },
+    });
+    if (!from) throw new Error("Relevé de prix introuvable");
+    priceHt = d(from.priceHt);
+    supplierExternalOrgId = from.supplierExternalOrgId;
+    supplierName =
+      supplierDisplayName(from.supplier) || from.supplierName;
+    source = normalizePriceSource(from.source);
+    supplierReference = from.supplierReference;
+  }
+
+  if (supplierExternalOrgId) {
+    const s = await assertSupplierInOrg(orgId, supplierExternalOrgId);
+    supplierName = supplierDisplayName(s) || supplierName;
+  }
+
+  const current = d(material.currentPriceHt);
+  if (roundMoney(current, 4) === roundMoney(priceHt, 4)) {
+    return {
+      material: await getMaterial(orgId, materialId),
+      unchanged: true as const,
+      refresh: { updatedComponents: 0, workItemIds: [] as string[] },
+    };
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.commercialMaterialPrice.create({
+      data: {
+        organizationId: orgId,
+        materialId,
+        priceHt,
+        source,
+        supplierName,
+        supplierExternalOrgId,
+        supplierReference,
+        comment: data.comment?.trim() || "Prix retenu mis à jour",
+      },
+    });
+    await tx.commercialMaterial.update({
+      where: { id: materialId },
+      data: {
+        currentPriceHt: priceHt,
+        referencePriceUpdatedAt: new Date(),
+        priceSource: source,
+        ...(supplierName ? { supplierName } : {}),
+      },
+    });
+  });
+
+  let refresh = { updatedComponents: 0, workItemIds: [] as string[] };
+  if (data.refreshWorkItems !== false) {
+    refresh = await refreshWorkItemsAfterMaterialPriceChange(
+      orgId,
+      materialId,
+      priceHt,
+    );
+  }
+
+  return {
+    material: await getMaterial(orgId, materialId),
+    unchanged: false as const,
+    refresh,
+  };
 }
 
 export async function updateMaterial(
@@ -952,38 +1552,30 @@ export async function updateMaterial(
     data.currentPriceHt !== undefined &&
     roundMoney(data.currentPriceHt, 4) !== roundMoney(d(existing.currentPriceHt), 4);
 
-  await prisma.$transaction(async (tx) => {
-    if (priceChanged) {
-      await tx.commercialMaterialPrice.create({
-        data: {
-          organizationId: orgId,
-          materialId: id,
-          priceHt: data.currentPriceHt!,
-          source: data.priceSource ?? "mise à jour",
-          supplierName: data.supplierName ?? null,
-        },
-      });
-    }
-    await tx.commercialMaterial.update({
-      where: { id },
-      data: {
-        ...(data.name !== undefined ? { name: data.name.trim() } : {}),
-        ...(data.reference !== undefined ? { reference: data.reference } : {}),
-        ...(data.family !== undefined ? { family: data.family } : {}),
-        ...(data.unit !== undefined ? { unit: data.unit } : {}),
-        ...(data.supplierName !== undefined ? { supplierName: data.supplierName } : {}),
-        ...(data.manufacturer !== undefined ? { manufacturer: data.manufacturer } : {}),
-        ...(data.priceSource !== undefined ? { priceSource: data.priceSource } : {}),
-        ...(data.currentPriceHt !== undefined ? { currentPriceHt: data.currentPriceHt } : {}),
-        ...(data.notes !== undefined ? { notes: data.notes } : {}),
-        ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
-      },
+  if (priceChanged) {
+    const result = await applyMaterialReferencePrice(orgId, id, {
+      priceHt: data.currentPriceHt!,
+      supplierName: data.supplierName,
+      source: data.priceSource ?? MATERIAL_PRICE_SOURCE.MANUAL,
+      refreshWorkItems: data.refreshWorkItems !== false,
     });
-  });
-
-  if (priceChanged && data.refreshWorkItems !== false) {
-    await refreshWorkItemsAfterMaterialPriceChange(orgId, id, data.currentPriceHt!);
+    return result.material;
   }
+
+  await prisma.commercialMaterial.update({
+    where: { id },
+    data: {
+      ...(data.name !== undefined ? { name: data.name.trim() } : {}),
+      ...(data.reference !== undefined ? { reference: data.reference } : {}),
+      ...(data.family !== undefined ? { family: data.family } : {}),
+      ...(data.unit !== undefined ? { unit: data.unit } : {}),
+      ...(data.supplierName !== undefined ? { supplierName: data.supplierName } : {}),
+      ...(data.manufacturer !== undefined ? { manufacturer: data.manufacturer } : {}),
+      ...(data.priceSource !== undefined ? { priceSource: data.priceSource } : {}),
+      ...(data.notes !== undefined ? { notes: data.notes } : {}),
+      ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+    },
+  });
 
   return getMaterial(orgId, id);
 }

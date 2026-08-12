@@ -4,6 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { calculateDocumentTotals, calculateLine, roundMoney } from "@/lib/commercial/money";
 import { d } from "@/lib/commercial/decimal";
 import { ensureCommercialOrgSettings, nextQuoteNumber } from "@/lib/commercial/settings";
+import {
+  normalizeScheduleForStorage,
+  parsePaymentSchedule,
+  validatePaymentSchedule,
+  type PaymentSchedule,
+} from "@/lib/commercial/payment-schedule";
 
 const EDITABLE_STATUSES: CommercialQuoteStatus[] = ["DRAFT", "TO_VALIDATE", "VALIDATED"];
 
@@ -28,6 +34,7 @@ export const QUOTE_CONTRACTUAL_META_KEYS = [
   "siteAddressSnapshot",
   "validityDate",
   "paymentTerms",
+  "paymentScheduleJson",
   "clientNotes",
   "depositPercent",
   "depositAmountHt",
@@ -67,6 +74,7 @@ async function buildIssuerSnapshot(orgId: string): Promise<Snapshot> {
     select: {
       name: true,
       siret: true,
+      demoEnvironment: { select: { logoUrl: true, companyName: true } },
       owner: {
         select: {
           company: true,
@@ -84,8 +92,9 @@ async function buildIssuerSnapshot(orgId: string): Promise<Snapshot> {
     },
   });
   const owner = org?.owner;
+  const logoUrl = org?.demoEnvironment?.logoUrl?.trim() || null;
   return {
-    name: org?.name ?? owner?.company ?? "Entreprise",
+    name: org?.name ?? org?.demoEnvironment?.companyName ?? owner?.company ?? "Entreprise",
     siret: org?.siret ?? null,
     formeJuridique: owner?.formeJuridique ?? null,
     email: owner?.email ?? null,
@@ -95,6 +104,8 @@ async function buildIssuerSnapshot(orgId: string): Promise<Snapshot> {
     city: owner?.billingCity ?? null,
     postalCode: owner?.billingPostalCode ?? null,
     country: owner?.billingCountry ?? "France",
+    /** Source existante DemoEnvironment — pas de 2ᵉ modèle logo Commercial. */
+    logoPath: logoUrl,
   } as Prisma.InputJsonValue;
 }
 
@@ -138,6 +149,7 @@ export async function createQuote(input: {
   siteAddressSnapshot?: string | null;
   validityDate?: Date | null;
   paymentTerms?: string | null;
+  paymentScheduleJson?: PaymentSchedule | null;
   internalNotes?: string | null;
   clientNotes?: string | null;
   depositPercent?: number | null;
@@ -145,6 +157,12 @@ export async function createQuote(input: {
   const settings = await ensureCommercialOrgSettings(input.orgId);
   const subject = input.subject.trim();
   if (!subject) throw new Error("Objet du devis requis");
+
+  const scheduleNorm = normalizeScheduleForStorage(input.paymentScheduleJson ?? null);
+  if (scheduleNorm) {
+    const v = validatePaymentSchedule(scheduleNorm);
+    if (!v.ok) throw new Error(v.error);
+  }
 
   if (input.clientExternalOrgId) {
     const client = await prisma.externalOrganization.findFirst({
@@ -190,6 +208,7 @@ export async function createQuote(input: {
         internalNotes: input.internalNotes ?? null,
         clientNotes: input.clientNotes ?? null,
         paymentTerms: input.paymentTerms ?? settings.defaultPaymentTerms,
+        paymentScheduleJson: scheduleNorm ?? undefined,
         depositPercent: input.depositPercent ?? null,
         defaultVatRate: settings.defaultVatRate,
       },
@@ -205,6 +224,7 @@ export async function createQuote(input: {
         clientSnapshotJson: clientSnapshotJson ?? undefined,
         issuerSnapshotJson,
         paymentTerms: quote.paymentTerms,
+        paymentScheduleJson: scheduleNorm ?? undefined,
         clientNotes: quote.clientNotes,
       },
     });
@@ -310,7 +330,17 @@ export async function getQuoteDetail(orgId: string, id: string) {
     where: { id, organizationId: orgId },
     include: {
       clientExternalOrg: {
-        select: { id: true, name: true, tradeName: true, email: true, phone: true },
+        select: {
+          id: true,
+          name: true,
+          tradeName: true,
+          email: true,
+          phone: true,
+          address: true,
+          city: true,
+          zipCode: true,
+          siret: true,
+        },
       },
       project: { select: { id: true, title: true } },
       responsible: { select: { id: true, name: true } },
@@ -348,10 +378,12 @@ export async function getQuoteDetail(orgId: string, id: string) {
     marginPercent: d(quote.marginPercent),
     depositPercent: quote.depositPercent != null ? d(quote.depositPercent) : null,
     depositAmountHt: quote.depositAmountHt != null ? d(quote.depositAmountHt) : null,
+    paymentScheduleJson: parsePaymentSchedule(quote.paymentScheduleJson),
     defaultVatRate: d(quote.defaultVatRate),
     currentVersion: version
       ? {
           ...version,
+          paymentScheduleJson: parsePaymentSchedule(version.paymentScheduleJson),
           totalCostHt: d(version.totalCostHt),
           totalSellHt: d(version.totalSellHt),
           totalVat: d(version.totalVat),
@@ -392,6 +424,7 @@ export async function updateQuoteMeta(
     siteAddressSnapshot?: string | null;
     validityDate?: Date | null;
     paymentTerms?: string | null;
+    paymentScheduleJson?: PaymentSchedule | null;
     internalNotes?: string | null;
     clientNotes?: string | null;
     depositPercent?: number | null;
@@ -404,8 +437,17 @@ export async function updateQuoteMeta(
   });
   if (!quote) throw new Error("Devis introuvable");
 
-  const guard = assertQuoteMetaUpdateAllowed(quote.status, data);
+  const guard = assertQuoteMetaUpdateAllowed(quote.status, data as Record<string, unknown>);
   if (!guard.ok) throw new Error(guard.error);
+
+  let scheduleNorm: PaymentSchedule | null | undefined;
+  if (data.paymentScheduleJson !== undefined) {
+    scheduleNorm = normalizeScheduleForStorage(data.paymentScheduleJson);
+    if (scheduleNorm) {
+      const v = validatePaymentSchedule(scheduleNorm);
+      if (!v.ok) throw new Error(v.error);
+    }
+  }
 
   if (data.projectId) {
     const project = await prisma.project.findFirst({
@@ -448,6 +490,9 @@ export async function updateQuoteMeta(
         : {}),
       ...(data.validityDate !== undefined ? { validityDate: data.validityDate } : {}),
       ...(data.paymentTerms !== undefined ? { paymentTerms: data.paymentTerms } : {}),
+      ...(data.paymentScheduleJson !== undefined
+        ? { paymentScheduleJson: scheduleNorm === null ? Prisma.DbNull : scheduleNorm }
+        : {}),
       ...(data.internalNotes !== undefined ? { internalNotes: data.internalNotes } : {}),
       ...(data.clientNotes !== undefined ? { clientNotes: data.clientNotes } : {}),
       ...(data.depositPercent !== undefined ? { depositPercent: data.depositPercent } : {}),
@@ -465,6 +510,14 @@ export async function updateQuoteMeta(
     await prisma.commercialQuoteVersion.update({
       where: { id: quote.currentVersionId },
       data: { paymentTerms: data.paymentTerms },
+    });
+  }
+  if (quote.currentVersionId && data.paymentScheduleJson !== undefined) {
+    await prisma.commercialQuoteVersion.update({
+      where: { id: quote.currentVersionId },
+      data: {
+        paymentScheduleJson: scheduleNorm === null ? Prisma.DbNull : scheduleNorm,
+      },
     });
   }
   if (quote.currentVersionId && clientSnapshotJson !== undefined) {
@@ -886,6 +939,25 @@ export async function addSection(orgId: string, quoteId: string, title: string) 
   });
 }
 
+export async function updateSectionTitle(
+  orgId: string,
+  quoteId: string,
+  sectionId: string,
+  title: string,
+) {
+  const quote = await assertEditableVersion(orgId, quoteId);
+  const versionId = quote.currentVersion!.id;
+  const section = await prisma.commercialQuoteSection.findFirst({
+    where: { id: sectionId, organizationId: orgId, versionId },
+    select: { id: true },
+  });
+  if (!section) throw new Error("Section introuvable");
+  return prisma.commercialQuoteSection.update({
+    where: { id: sectionId },
+    data: { title: title.trim() || "Section" },
+  });
+}
+
 export async function deleteLine(orgId: string, quoteId: string, lineId: string) {
   const quote = await assertEditableVersion(orgId, quoteId);
   const versionId = quote.currentVersion!.id;
@@ -943,7 +1015,12 @@ export async function newVersion(orgId: string, quoteId: string, userId?: string
         lockState: "DRAFT",
         clientSnapshotJson: quote.currentVersion!.clientSnapshotJson ?? undefined,
         issuerSnapshotJson: quote.currentVersion!.issuerSnapshotJson ?? undefined,
-        paymentTerms: quote.paymentTerms,
+        paymentTerms:
+          (quote.currentVersion!.paymentTerms as string | null) ?? quote.paymentTerms,
+        paymentScheduleJson:
+          quote.currentVersion!.paymentScheduleJson ??
+          quote.paymentScheduleJson ??
+          undefined,
         clientNotes: quote.clientNotes,
       },
     });
@@ -983,6 +1060,7 @@ export async function newVersion(orgId: string, quoteId: string, userId?: string
           lineTtc: l.lineTtc,
           marginAmount: l.marginAmount,
           commercialWorkItemId: l.commercialWorkItemId,
+          compositionSnapshotJson: l.compositionSnapshotJson ?? undefined,
           sortOrder: l.sortOrder,
           isOptional: l.isOptional,
         },
@@ -1041,6 +1119,23 @@ export async function transitionQuoteStatus(
     throw new Error(`Transition ${quote.status} → ${toStatus} non autorisée`);
   }
 
+  /** Finalisation (VALIDATED / SENT) : échéancier actif doit totaliser 100 %. */
+  if (toStatus === "VALIDATED" || toStatus === "SENT") {
+    const scheduleRaw =
+      quote.currentVersion?.paymentScheduleJson ?? quote.paymentScheduleJson;
+    const parsed = parsePaymentSchedule(scheduleRaw);
+    if (parsed && parsed.lines.length > 0) {
+      const v = validatePaymentSchedule(parsed, { finalizeStrict: true });
+      if (!v.ok) throw new Error(v.error);
+    }
+    if (!quote.clientExternalOrgId && !quote.clientSnapshotJson) {
+      throw new Error("Client requis avant finalisation");
+    }
+    if (!quote.subject?.trim()) {
+      throw new Error("Objet du devis requis");
+    }
+  }
+
   const issuerSnapshotJson =
     (quote.issuerSnapshotJson as Snapshot | null) ?? (await buildIssuerSnapshot(orgId));
   const clientSnapshotJson =
@@ -1063,6 +1158,10 @@ export async function transitionQuoteStatus(
             issuerSnapshotJson,
             clientSnapshotJson: clientSnapshotJson ?? undefined,
             paymentTerms: quote.paymentTerms,
+            paymentScheduleJson:
+              quote.currentVersion?.paymentScheduleJson ??
+              quote.paymentScheduleJson ??
+              undefined,
             clientNotes: quote.clientNotes,
           },
         });

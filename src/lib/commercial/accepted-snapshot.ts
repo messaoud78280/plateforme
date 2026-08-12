@@ -10,6 +10,7 @@ import { transitionQuoteStatus } from "@/lib/commercial/quotes";
 import { DOCUMENTS_BUCKET, downloadStorageObject } from "@/lib/storage/supabase-object";
 import { generateCommercialQuotePdf } from "@/lib/commercial/pdf-quote";
 import { buildQuotePdfInputFromVersion } from "@/lib/commercial/quote-pdf-input";
+import { ensureCommercialOrgSettings } from "@/lib/commercial/settings";
 
 export const ACCEPTED_PDF_KIND = "ACCEPTED_PDF";
 
@@ -84,6 +85,7 @@ async function loadVersionPdfContext(orgId: string, quoteId: string, versionId: 
       issueDate: true,
       validityDate: true,
       paymentTerms: true,
+      paymentScheduleJson: true,
       clientNotes: true,
       siteAddressSnapshot: true,
       clientSnapshotJson: true,
@@ -92,6 +94,7 @@ async function loadVersionPdfContext(orgId: string, quoteId: string, versionId: 
       acceptedVersionId: true,
       acceptedAt: true,
       projectId: true,
+      project: { select: { title: true } },
     },
   });
   if (!quote) throw new Error("Devis introuvable");
@@ -105,13 +108,25 @@ async function loadVersionPdfContext(orgId: string, quoteId: string, versionId: 
   });
   if (!version) throw new Error("Version introuvable");
 
-  return { quote, version };
+  const settings = await ensureCommercialOrgSettings(orgId);
+
+  return {
+    quote: {
+      ...quote,
+      projectTitle: quote.project?.title ?? null,
+    },
+    version,
+    quoteMentions: settings.quoteMentions,
+    legalMentions: settings.legalMentions,
+  };
 }
 
 export function generatePdfForQuoteVersion(opts: {
   quote: Parameters<typeof buildQuotePdfInputFromVersion>[0]["quote"];
   version: Parameters<typeof buildQuotePdfInputFromVersion>[0]["version"];
   statusForPdf?: string;
+  quoteMentions?: string | null;
+  legalMentions?: string | null;
 }): Buffer {
   const input = buildQuotePdfInputFromVersion(opts);
   return generateCommercialQuotePdf(input);
@@ -189,6 +204,8 @@ export async function ensureAcceptedQuoteSnapshot(
     quote: ctx.quote,
     version: ctx.version,
     statusForPdf: "ACCEPTED",
+    quoteMentions: ctx.quoteMentions,
+    legalMentions: ctx.legalMentions,
   });
   const generationMs = Date.now() - t0;
   const hash = sha256Hex(bytes);
@@ -314,6 +331,8 @@ export async function generateCurrentQuotePdfPreview(
   const buffer = generatePdfForQuoteVersion({
     quote: ctx.quote,
     version: ctx.version,
+    quoteMentions: ctx.quoteMentions,
+    legalMentions: ctx.legalMentions,
   });
   return { buffer, filename: `${quote.number}.pdf` };
 }

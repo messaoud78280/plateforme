@@ -74,6 +74,12 @@ export async function PATCH(req: Request, ctx: Ctx) {
             ? String(body.paymentTerms)
             : null
           : undefined,
+      paymentScheduleJson:
+        body.paymentScheduleJson !== undefined
+          ? (body.paymentScheduleJson as
+              | import("@/lib/commercial/payment-schedule").PaymentSchedule
+              | null)
+          : undefined,
       internalNotes:
         body.internalNotes !== undefined
           ? body.internalNotes

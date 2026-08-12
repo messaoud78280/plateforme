@@ -4,6 +4,7 @@
  */
 import { d } from "@/lib/commercial/decimal";
 import type { QuotePdfInput, QuotePdfSnapshot } from "@/lib/commercial/pdf-quote";
+import { parsePaymentSchedule } from "@/lib/commercial/payment-schedule";
 
 export type QuotePdfVersionSource = {
   id: string;
@@ -11,6 +12,7 @@ export type QuotePdfVersionSource = {
   clientSnapshotJson: unknown;
   issuerSnapshotJson: unknown;
   paymentTerms: string | null;
+  paymentScheduleJson?: unknown;
   clientNotes: string | null;
   totalSellHt: unknown;
   totalVat: unknown;
@@ -21,6 +23,7 @@ export type QuotePdfVersionSource = {
     kind: string;
     reference: string | null;
     designation: string;
+    description?: string | null;
     quantity: unknown;
     unit: string;
     unitSellHt: unknown;
@@ -38,11 +41,13 @@ export type QuotePdfHeaderSource = {
   issueDate: Date;
   validityDate?: Date | null;
   paymentTerms?: string | null;
+  paymentScheduleJson?: unknown;
   clientNotes?: string | null;
   siteAddressSnapshot?: string | null;
   clientSnapshotJson?: unknown;
   issuerSnapshotJson?: unknown;
   currency: string;
+  projectTitle?: string | null;
 };
 
 function asSnapshot(raw: unknown): QuotePdfSnapshot | null {
@@ -55,6 +60,7 @@ function mapLine(l: QuotePdfVersionSource["lines"][number]) {
     kind: l.kind,
     reference: l.reference,
     designation: l.designation,
+    description: l.description ?? null,
     quantity: d(l.quantity),
     unit: l.unit,
     unitSellHt: d(l.unitSellHt),
@@ -67,8 +73,9 @@ function mapLine(l: QuotePdfVersionSource["lines"][number]) {
 export function buildQuotePdfInputFromVersion(opts: {
   quote: QuotePdfHeaderSource;
   version: QuotePdfVersionSource;
-  /** Statut affiché dans le PDF (à l’archivage : ACCEPTED). */
   statusForPdf?: string;
+  quoteMentions?: string | null;
+  legalMentions?: string | null;
 }): QuotePdfInput {
   const { quote, version } = opts;
   const sections = [...version.sections]
@@ -91,6 +98,10 @@ export function buildQuotePdfInputFromVersion(opts: {
     });
   }
 
+  const schedule =
+    parsePaymentSchedule(version.paymentScheduleJson) ??
+    parsePaymentSchedule(quote.paymentScheduleJson);
+
   return {
     number: quote.number,
     subject: quote.subject,
@@ -98,11 +109,16 @@ export function buildQuotePdfInputFromVersion(opts: {
     issueDate: quote.issueDate,
     validityDate: quote.validityDate ?? null,
     paymentTerms: version.paymentTerms ?? quote.paymentTerms ?? null,
+    paymentSchedule: schedule,
     clientNotes: version.clientNotes ?? quote.clientNotes ?? null,
     siteAddressSnapshot: quote.siteAddressSnapshot ?? null,
+    projectTitle: quote.projectTitle ?? null,
+    versionNumber: version.versionNumber,
     issuer: asSnapshot(version.issuerSnapshotJson) ?? asSnapshot(quote.issuerSnapshotJson),
     client: asSnapshot(version.clientSnapshotJson) ?? asSnapshot(quote.clientSnapshotJson),
     currency: quote.currency,
+    quoteMentions: opts.quoteMentions ?? null,
+    legalMentions: opts.legalMentions ?? null,
     totals: {
       totalSellHt: d(version.totalSellHt),
       totalVat: d(version.totalVat),

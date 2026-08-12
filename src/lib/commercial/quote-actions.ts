@@ -48,7 +48,12 @@ export function getQuoteActionsForStatus(input: {
   switch (status) {
     case "DRAFT":
     case "TO_VALIDATE":
-      primary = { id: "validate", label: "Valider", toStatus: "VALIDATED", primary: true };
+      primary = {
+        id: "validate",
+        label: "Finaliser le devis",
+        toStatus: "VALIDATED",
+        primary: true,
+      };
       secondary.push(pdf);
       if (input.canEdit) {
         secondary.push({ id: "mark_sent", label: "Marquer envoyé", toStatus: "SENT" });

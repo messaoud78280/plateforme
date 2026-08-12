@@ -3796,6 +3796,9 @@ model CommercialQuote {
   internalNotes          String?               @db.Text
   clientNotes            String?               @db.Text
   paymentTerms           String?
+  /// Échéancier structuré DF-1B — { basis, lines[{ type, percent, label, sortOrder }] }
+  /// Montants non stockés : calculés depuis totalTtc de la version.
+  paymentScheduleJson    Json?
   depositPercent         Decimal?              @db.Decimal(6, 4)
   depositAmountHt        Decimal?              @db.Decimal(14, 4)
   defaultVatRate         Decimal               @default(20) @db.Decimal(6, 4)
@@ -3843,6 +3846,8 @@ model CommercialQuoteVersion {
   clientSnapshotJson Json?
   issuerSnapshotJson Json?
   paymentTerms     String?
+  /// Copie figée de l’échéancier au moment de la version (DF-1B).
+  paymentScheduleJson Json?
   clientNotes      String?  @db.Text
   totalCostHt      Decimal  @default(0) @db.Decimal(14, 4)
   totalSellHt      Decimal  @default(0) @db.Decimal(14, 4)

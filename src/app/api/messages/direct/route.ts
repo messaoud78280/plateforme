@@ -19,7 +19,9 @@ import {
   type MessageReplyMeta,
 } from "@/lib/messagerie/message-reply";
 import { presentMessagesForViewer } from "@/lib/messagerie/filter-hidden-messages";
-import { resolveMessageNotificationHref } from "@/lib/messagerie/resolve-conversation";
+import { after } from "next/server";
+import { ingestDurableMessageAttachments } from "@/lib/ged/ingest-message-durable";
+import { resolveSharedOrganizationId } from "@/lib/ged/org-scope";
 
 function canUseDirectMessages(role?: string | null): boolean {
   return isManagerRole(role) || isStaffAgent(role) || role === "CLIENT";
@@ -191,8 +193,8 @@ export async function POST(request: Request) {
     void broadcastMessagerieToUser({
       receiverId: receiver.id,
       senderId: session.user.id,
-      senderName: session.user?.name ?? "Quelqu'un",
-      title: session.user?.name ?? "Message direct",
+      senderName: session.user.name ?? "Quelqu'un",
+      title: session.user.name ?? "Message direct",
       preview: formatMediaPreview(
         message.content,
         message.attachmentsJson as MsgAttachment[] | null,
@@ -202,6 +204,39 @@ export async function POST(request: Request) {
       kind: "DIRECT",
       conversationKey: `DIRECT:${session.user.id}`,
     });
+
+    if (hasAttachments) {
+      after(async () => {
+        try {
+          const organizationId = await resolveSharedOrganizationId([
+            session.user.id,
+            receiver.id,
+          ]);
+          if (!organizationId) return;
+          const org = await prisma.organization.findUnique({
+            where: { id: organizationId },
+            select: { ownerUserId: true },
+          });
+          if (!org) return;
+          const companyName =
+            receiver.name?.trim() || session.user.name?.trim() || null;
+          await ingestDurableMessageAttachments({
+            projectId: null,
+            organizationId,
+            clientId: org.ownerUserId,
+            addedById: session.user.id,
+            messageKind: "DIRECT",
+            messageId: message.id,
+            attachments,
+            conversationLabel: companyName,
+            companyName,
+            visibility: "Interne entreprise cliente",
+          });
+        } catch (e) {
+          console.error("GED ingest DM:", e);
+        }
+      });
+    }
 
     return NextResponse.json(message);
   } catch (e) {

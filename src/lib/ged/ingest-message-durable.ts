@@ -14,7 +14,8 @@ type Att = {
 };
 
 export async function ingestDurableMessageAttachments(opts: {
-  projectId: string;
+  projectId?: string | null;
+  organizationId?: string | null;
   clientId: string;
   addedById: string;
   messageKind: string;
@@ -40,6 +41,7 @@ export async function ingestDurableMessageAttachments(opts: {
     }
     const result = await linkMessageAttachmentToChantier({
       projectId: opts.projectId,
+      organizationId: opts.organizationId,
       clientId: opts.clientId,
       addedById: opts.addedById,
       messageKind: opts.messageKind,

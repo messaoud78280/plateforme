@@ -5,6 +5,7 @@
 import { prisma } from "@/lib/prisma";
 import { createServiceRoleClient } from "@/lib/supabase";
 import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { canAccessGedFile } from "@/lib/ged/org-scope";
 import { canAccessDocument } from "@/lib/documents/access";
 import {
   isSharedVisibility,
@@ -100,6 +101,8 @@ async function resolveChantierFile(
       visibility: true,
       deletedAt: true,
       projectId: true,
+      organizationId: true,
+      clientId: true,
       project: {
         select: { id: true, clientId: true, organizationId: true, assignedToId: true },
       },
@@ -109,7 +112,7 @@ async function resolveChantierFile(
     return deny(404, "Document introuvable.");
   }
 
-  const access = await canAccessChantierProject(user, file.projectId);
+  const access = await canAccessGedFile(user, file);
   if (!access.ok) return deny(403, "Non autorisé.");
 
   const dbUser = await loadUserPersonType(user.id);
@@ -120,6 +123,7 @@ async function resolveChantierFile(
     personType === "SUPPLIER" || permissionProfile === "FOURNISSEUR";
 
   if (external) {
+    if (!file.project) return deny(403, "Document interne — non partagé.");
     const scopeOk = await userHasProjectScope(user.id, file.project, "documents");
     if (!scopeOk) return deny(403, "Scope documents refusé.");
 

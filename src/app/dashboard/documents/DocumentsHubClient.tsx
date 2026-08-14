@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { HubDocumentItem, HubGroup, HubSort, HubView } from "@/lib/ged/document-hub-ui";
-import { hubEmptyCopy, recentDayLabel } from "@/lib/ged/document-hub-ui";
+import { hubEmptyCopy, provenanceSummary, recentDayLabel } from "@/lib/ged/document-hub-ui";
 import { GED_ORIGIN_LABELS, type GedOrigin } from "@/lib/ged/origin";
 import { cn } from "@/lib/cn";
 
@@ -204,7 +204,13 @@ export function DocumentsHubClient({
           <button
             key={v.id}
             type="button"
-            onClick={() => go({ view: v.id, page: "1" })}
+            onClick={() =>
+              go({
+                view: v.id,
+                page: "1",
+                ...(v.id === "recent" ? { sort: "recent" } : {}),
+              })
+            }
             className={cn(
               "shrink-0 border-b-2 px-3 py-2.5 text-[13px] font-medium transition",
               view === v.id
@@ -423,7 +429,7 @@ export function DocumentsHubClient({
                   href={drawer.href}
                   className="rounded-full bg-[#1e3a5f] px-4 py-2 text-[13px] font-medium text-white"
                 >
-                  Ajouter
+                  Ajouter le document
                 </Link>
               ) : (
                 <Link
@@ -486,15 +492,9 @@ function DocRow({
         <button type="button" onClick={onOpen} className="min-w-0 flex-1 text-left">
           <p className="truncate text-[15px] font-medium text-slate-900">{it.title}</p>
           <p className="mt-0.5 text-[12px] font-medium uppercase tracking-[0.08em] text-slate-400">
-            {missing ? "Manquante" : it.typeLabel}
+            {missing ? "À récupérer" : it.typeLabel}
           </p>
-          <p className="mt-1 text-[13px] text-slate-600">
-            {[it.projectTitle, it.companyLabel, it.originLabel, it.contextLabel]
-              .filter(Boolean)
-              .filter((v, i, a) => a.indexOf(v) === i)
-              .slice(0, 3)
-              .join(" · ")}
-          </p>
+          <p className="mt-1 text-[13px] text-slate-600">{provenanceSummary(it)}</p>
           <p className="mt-0.5 text-[12px] text-slate-400">{fmtDate(it.createdAt)}</p>
         </button>
         <div className="flex shrink-0 flex-col items-end gap-2 pt-0.5">
@@ -513,7 +513,7 @@ function DocRow({
             </button>
           ) : null}
           <button type="button" onClick={onOpen} className="text-[13px] font-medium text-[#1e3a5f]">
-            {missing ? "Ajouter" : "Ouvrir"}
+            {missing ? "Ajouter le document" : "Ouvrir"}
           </button>
         </div>
       </div>

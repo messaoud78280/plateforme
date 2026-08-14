@@ -3,8 +3,13 @@
  * Même fileUrl, pas de copie.
  */
 import { prisma } from "@/lib/prisma";
+import { classifyDocumentType } from "@/lib/ged/classify-document";
 import { indexSourceDocument } from "@/lib/ged/index-source-document";
 import { suggestFolderCode } from "@/lib/ged/formats";
+import {
+  resolveOrganizationIdForProject,
+  resolveOrganizationIdForUser,
+} from "@/lib/ged/org-scope";
 
 async function pilotageContext(pilotageId: string) {
   return prisma.worksitePilotage.findUnique({
@@ -211,6 +216,7 @@ export async function ingestSubcontractorDocToGed(opts: {
       createdAt: true,
       subcontractor: {
         select: {
+          id: true,
           companyName: true,
           pilotageId: true,
         },
@@ -223,16 +229,25 @@ export async function ingestSubcontractorDocToGed(opts: {
     return { chantierFileId: null, linked: false, reason: "no_project" };
   }
 
-  const name = `${doc.docType} — ${doc.subcontractor.companyName}`.slice(0, 180);
+  const name = (
+    doc.docType.includes(".")
+      ? doc.docType
+      : `${doc.docType} — ${doc.subcontractor.companyName}`
+  ).slice(0, 180);
+  const classified = classifyDocumentType({
+    sourceEntityType: "pilotage_subcontractor_doc",
+    filename: name,
+    currentType: doc.docType,
+  });
   const result = await indexSourceDocument({
     projectId: ctx.projectId,
     clientId: ctx.project.clientId,
     addedById: opts.addedById,
     name,
     fileUrl: doc.fileUrl,
-    documentType: doc.docType || "ST",
-    category: "Sous-traitants",
-    folderCode: "04",
+    documentType: classified.certain ? classified.documentType : doc.docType || "DOCUMENT",
+    category: "Fournisseurs",
+    folderCode: "05",
     classificationStatus: "CLASSE",
     emitterName: doc.subcontractor.companyName,
     createdAt: doc.createdAt,
@@ -242,6 +257,13 @@ export async function ingestSubcontractorDocToGed(opts: {
       entityId: doc.id,
       entityLabel: name,
     },
+    extraLinks: [
+      {
+        entityType: "supplier",
+        entityId: doc.subcontractor.id,
+        entityLabel: doc.subcontractor.companyName,
+      },
+    ],
   });
   return {
     chantierFileId: result.chantierFileId,
@@ -273,28 +295,48 @@ export async function ingestLegacyDocumentToGed(opts: {
   });
   if (!doc?.fileUrl) return { chantierFileId: null, linked: false, reason: "no_file" };
   const projectId = doc.projectId ?? doc.task?.projectId ?? null;
-  if (!projectId) return { chantierFileId: null, linked: false, reason: "no_project" };
+  const organizationId = projectId
+    ? await resolveOrganizationIdForProject(projectId)
+    : await resolveOrganizationIdForUser(doc.clientId);
+  if (!projectId && !organizationId) {
+    return { chantierFileId: null, linked: false, reason: "no_organization" };
+  }
 
+  const classified = classifyDocumentType({
+    filename: doc.name,
+    category: doc.category,
+    currentType: doc.category,
+  });
   const folderCode = suggestFolderCode({
     filename: doc.name,
-    category: doc.category === "CONTRAT" ? "Contractuel" : doc.category === "FACTURE" ? "Factures" : "À classer",
+    category:
+      classified.documentType === "FACTURE"
+        ? "Factures"
+        : classified.documentType === "DEVIS" || classified.documentType === "CONTRAT"
+          ? "Contractuel"
+          : doc.category === "AUTRE"
+            ? "À classer"
+            : "À classer",
+    documentType: classified.documentType,
   });
 
   const result = await indexSourceDocument({
     projectId,
+    organizationId,
     clientId: doc.clientId,
     addedById: opts.addedById || doc.clientId,
     name: doc.name,
     fileUrl: doc.fileUrl,
     fileSize: doc.fileSize,
     mimeType: doc.mimeType,
-    documentType: doc.category || "DOCUMENT",
-    category: doc.category === "AUTRE" ? "À classer" : doc.category,
+    documentType: classified.documentType,
+    category: classified.documentType === "AUTRE" ? "À classer" : classified.documentType,
     folderCode,
-    classificationStatus: folderCode === "00" ? "A_CLASSER" : "CLASSE",
+    classificationStatus: classified.certain ? "CLASSE" : "A_CLASSER",
     sourceDocumentId: doc.id,
     taskId: doc.taskId,
     createdAt: doc.createdAt,
+    documentDate: doc.createdAt,
     dryRun: opts.dryRun,
     primary: {
       entityType: "legacy_document",

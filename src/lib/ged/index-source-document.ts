@@ -9,6 +9,7 @@ import {
   isGedPrimaryEntityType,
   type GedSourceIdentity,
 } from "@/lib/ged/source-identity";
+import { resolveOrganizationIdForProject } from "@/lib/ged/org-scope";
 
 export type IndexSourceResult = {
   chantierFileId: string | null;
@@ -17,7 +18,8 @@ export type IndexSourceResult = {
 };
 
 export type IndexSourceInput = {
-  projectId: string;
+  projectId?: string | null;
+  organizationId?: string | null;
   clientId: string;
   addedById: string;
   name: string;
@@ -124,8 +126,15 @@ export async function indexSourceDocument(input: IndexSourceInput): Promise<Inde
   if (!input.primary.entityType || !input.primary.entityId) {
     return { chantierFileId: null, created: false, reason: "no_identity" };
   }
-  if (!input.projectId || !input.clientId) {
-    return { chantierFileId: null, created: false, reason: "no_project" };
+  if (!input.clientId) {
+    return { chantierFileId: null, created: false, reason: "no_client" };
+  }
+
+  const organizationId =
+    input.organizationId ||
+    (input.projectId ? await resolveOrganizationIdForProject(input.projectId) : null);
+  if (!input.projectId && !organizationId) {
+    return { chantierFileId: null, created: false, reason: "no_organization" };
   }
 
   const matchIds = [
@@ -151,24 +160,29 @@ export async function indexSourceDocument(input: IndexSourceInput): Promise<Inde
     }
     const current = await prisma.chantierFile.findUnique({
       where: { id: existingId },
-      select: { fileUrl: true, deletedAt: true },
+      select: { fileUrl: true, deletedAt: true, organizationId: true },
     });
     const nextUrl = input.fileUrl?.trim() || null;
+    const patch: {
+      fileUrl?: string;
+      mimeType?: string;
+      fileSize?: number;
+      storagePath?: string;
+      deletedAt?: Date | null;
+      organizationId?: string;
+    } = {};
     if (nextUrl && current && isVirtualOrEmptyUrl(current.fileUrl) && !isVirtualOrEmptyUrl(nextUrl)) {
+      patch.fileUrl = nextUrl;
+      if (input.mimeType) patch.mimeType = input.mimeType;
+      if (input.fileSize != null) patch.fileSize = input.fileSize;
+      if (input.storagePath) patch.storagePath = input.storagePath;
+    }
+    if (current?.deletedAt) patch.deletedAt = null;
+    if (organizationId && !current?.organizationId) patch.organizationId = organizationId;
+    if (Object.keys(patch).length > 0) {
       await prisma.chantierFile.update({
         where: { id: existingId },
-        data: {
-          fileUrl: nextUrl,
-          mimeType: input.mimeType ?? undefined,
-          fileSize: input.fileSize ?? undefined,
-          storagePath: input.storagePath ?? undefined,
-          deletedAt: null,
-        },
-      });
-    } else if (current?.deletedAt) {
-      await prisma.chantierFile.update({
-        where: { id: existingId },
-        data: { deletedAt: null },
+        data: patch,
       });
     }
     await ensureLinks(existingId, [input.primary, ...(input.extraLinks ?? [])], input.addedById);
@@ -179,13 +193,17 @@ export async function indexSourceDocument(input: IndexSourceInput): Promise<Inde
     return { chantierFileId: null, created: true, reason: "dry_run" };
   }
 
-  const folderId = await resolveFolderId(input.projectId, input.folderCode);
-  if (!folderId) return { chantierFileId: null, created: false, reason: "no_folder" };
+  let folderId: string | null = null;
+  if (input.projectId) {
+    folderId = await resolveFolderId(input.projectId, input.folderCode);
+    if (!folderId) return { chantierFileId: null, created: false, reason: "no_folder" };
+  }
 
   try {
     const file = await prisma.chantierFile.create({
       data: {
-        projectId: input.projectId,
+        projectId: input.projectId ?? null,
+        organizationId,
         folderId,
         clientId: input.clientId,
         name: input.name.trim().slice(0, 180) || "Document",
@@ -202,7 +220,7 @@ export async function indexSourceDocument(input: IndexSourceInput): Promise<Inde
         isCurrentVersion: true,
         addedById: input.addedById?.trim() || null,
         emitterName: input.emitterName?.trim() || null,
-        documentDate: input.documentDate ?? null,
+        documentDate: input.documentDate ?? input.createdAt ?? null,
         sourceDocumentId: input.sourceDocumentId ?? null,
         taskId: input.taskId ?? null,
         comment: input.comment ?? null,

@@ -58,7 +58,9 @@ async function main() {
   const { prisma } = await import("../src/lib/prisma");
   const { parseAttachmentsJson, isDurableDocument } = await import("../src/lib/ged/durable-file");
   const { ingestDurableMessageAttachments } = await import("../src/lib/ged/ingest-message-durable");
+  const { resolveSharedOrganizationId } = await import("../src/lib/ged/org-scope");
   const { linkPurchaseOrderDocumentToChantier } = await import("../src/lib/ged/link-po-bl-to-chantier");
+  const { classifyDocumentType } = await import("../src/lib/ged/classify-document");
   const {
     ingestCommercialQuoteToGed,
     ingestCommercialInvoiceToGed,
@@ -89,10 +91,24 @@ async function main() {
     for (const stmt of statements) {
       await prisma.$executeRawUnsafe(stmt);
     }
-    console.log("→ Indexes / contrainte unique appliqués\n");
+    console.log("→ Indexes / contrainte unique appliqués");
+
+    const sql203 = await fs.readFile(
+      path.resolve(__dirname, "../prisma/migrations/add-ged-v203-org-scope.sql"),
+      "utf8",
+    );
+    const parts203 = sql203
+      .split(/;\s*\n/)
+      .map((s) => s.replace(/--[^\n]*/g, "").trim())
+      .filter((s) => s.length > 20);
+    for (const stmt of parts203) {
+      await prisma.$executeRawUnsafe(stmt);
+    }
+    console.log("→ projectId nullable / organizationId appliqués\n");
   }
 
   const messagerie = emptyStats();
+  const dmStats = emptyStats();
   const missions = emptyStats();
   const commandes = emptyStats();
   const commercial = emptyStats();
@@ -101,7 +117,6 @@ async function main() {
   const marche = emptyStats();
   const stDocs = emptyStats();
   const legacy = emptyStats();
-  let dmSkipped = 0;
 
   // --- Messagerie chantier ---
   {
@@ -172,10 +187,80 @@ async function main() {
     }
   }
 
-  // --- DM (pas de chantier) ---
-  dmSkipped = await prisma.directMessage.count({
-    where: { deletedAt: null, attachmentsJson: { not: Prisma.DbNull } },
-  });
+  // --- DM (sans chantier, via organizationId) ---
+  if (!projectFilter) {
+    let cursor: string | undefined;
+    for (;;) {
+      const rows = await prisma.directMessage.findMany({
+        where: { deletedAt: null, attachmentsJson: { not: Prisma.DbNull } },
+        orderBy: { id: "asc" },
+        take: BATCH,
+        ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+        select: {
+          id: true,
+          senderId: true,
+          receiverId: true,
+          attachmentsJson: true,
+          createdAt: true,
+          sender: { select: { name: true, company: true } },
+          receiver: { select: { name: true, company: true } },
+        },
+      });
+      if (rows.length === 0) break;
+      cursor = rows[rows.length - 1]!.id;
+      for (const row of rows) {
+        const atts = parseAttachmentsJson(row.attachmentsJson);
+        const durable = atts.filter((a) => isDurableDocument(a));
+        dmStats.analyzed += durable.length;
+        if (durable.length === 0) {
+          dmStats.skipped += atts.length;
+          continue;
+        }
+        try {
+          const organizationId = await resolveSharedOrganizationId([row.senderId, row.receiverId]);
+          if (!organizationId) {
+            dmStats.skipped += durable.length;
+            continue;
+          }
+          const org = await prisma.organization.findUnique({
+            where: { id: organizationId },
+            select: { ownerUserId: true },
+          });
+          if (!org) {
+            dmStats.skipped += durable.length;
+            continue;
+          }
+          const companyName =
+            row.sender.company?.trim() ||
+            row.receiver.company?.trim() ||
+            row.sender.name ||
+            row.receiver.name ||
+            null;
+          const r = await ingestDurableMessageAttachments({
+            projectId: null,
+            organizationId,
+            clientId: org.ownerUserId,
+            addedById: row.senderId,
+            messageKind: "DIRECT",
+            messageId: row.id,
+            attachments: durable,
+            conversationLabel: companyName,
+            companyName,
+            visibility: "Interne entreprise cliente",
+            createdAt: row.createdAt,
+            dryRun,
+          });
+          dmStats.indexed += r.linked;
+          dmStats.existing += r.existing;
+          dmStats.skipped += r.skipped;
+        } catch (e) {
+          dmStats.errors += 1;
+          if (dmStats.errors <= 5) console.error("  DM", row.id, e);
+        }
+      }
+      if (rows.length < BATCH) break;
+    }
+  }
 
   // --- Missions ---
   {
@@ -543,7 +628,7 @@ async function main() {
           fileUrl: { not: "" },
           ...(projectFilter
             ? { OR: [{ projectId: projectFilter }, { task: { projectId: projectFilter } }] }
-            : { OR: [{ projectId: { not: null } }, { task: { projectId: { not: null } } }] }),
+            : {}),
         },
         orderBy: { id: "asc" },
         take: BATCH,
@@ -554,7 +639,66 @@ async function main() {
     legacy,
   );
 
-  const all = [messagerie, missions, commandes, commercial, doe, photos, marche, stDocs, legacy];
+  let reclassified = 0;
+  {
+    let cursor: string | undefined;
+    for (;;) {
+      const rows = await prisma.chantierFile.findMany({
+        where: {
+          deletedAt: null,
+          ...(projectFilter ? { projectId: projectFilter } : {}),
+        },
+        orderBy: { id: "asc" },
+        take: BATCH,
+        ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+        select: {
+          id: true,
+          name: true,
+          documentType: true,
+          category: true,
+          links: { select: { entityType: true }, take: 8 },
+        },
+      });
+      if (rows.length === 0) break;
+      cursor = rows[rows.length - 1]!.id;
+      for (const row of rows) {
+        const source =
+          row.links.find((l) =>
+            [
+              "commercial_quote",
+              "commercial_quote_snapshot",
+              "commercial_invoice",
+              "commercial_progress",
+              "doe_item",
+              "pilotage_photo",
+              "purchase_order_document",
+              "message_attachment",
+            ].includes(l.entityType),
+          )?.entityType ?? null;
+        const next = classifyDocumentType({
+          sourceEntityType: source,
+          filename: row.name,
+          category: row.category,
+          currentType: row.documentType,
+        });
+        if (!next.certain) continue;
+        if (next.documentType === row.documentType) continue;
+        reclassified += 1;
+        if (!dryRun) {
+          await prisma.chantierFile.update({
+            where: { id: row.id },
+            data: {
+              documentType: next.documentType,
+              classificationStatus: "CLASSE",
+            },
+          });
+        }
+      }
+      if (rows.length < BATCH) break;
+    }
+  }
+
+  const all = [messagerie, dmStats, missions, commandes, commercial, doe, photos, marche, stDocs, legacy];
   const total = all.reduce(
     (acc, s) => ({
       analyzed: acc.analyzed + s.analyzed,
@@ -567,6 +711,7 @@ async function main() {
   );
 
   console.log(line("Messagerie", messagerie));
+  console.log(line("DM (sans chantier)", dmStats));
   console.log(line("Missions", missions));
   console.log(line("Commandes", commandes));
   console.log(line("Commercial", commercial));
@@ -575,7 +720,7 @@ async function main() {
   console.log(line("Pièces marché", marche));
   console.log(line("Sous-traitants", stDocs));
   console.log(line("Missions (Document)", legacy));
-  console.log(`DM sans chantier : ${dmSkipped} ignorés (pas de projectId)`);
+  console.log(`Classification : ${reclassified} type(s) ${dryRun ? "à corriger" : "corrigés"}`);
   console.log(line("Total", total));
 
   if (dryRun) {

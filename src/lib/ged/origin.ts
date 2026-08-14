@@ -117,9 +117,19 @@ export function originFromLinks(opts: {
     };
   }
   if (opts.sourceDocumentId) {
-    return { origin: "UPLOAD", label: GED_ORIGIN_LABELS.UPLOAD, refLabel: "Mission", actionLabel: null };
+    return {
+      origin: "CHANTIER",
+      label: "Ajouté depuis le chantier",
+      refLabel: null,
+      actionLabel: "Voir le chantier",
+    };
   }
-  return { origin: "CHANTIER", label: GED_ORIGIN_LABELS.CHANTIER, refLabel: null, actionLabel: "Voir le chantier" };
+  return {
+    origin: "CHANTIER",
+    label: "Ajouté depuis le chantier",
+    refLabel: null,
+    actionLabel: "Voir le chantier",
+  };
 }
 
 export function originHref(opts: {
@@ -147,11 +157,12 @@ export function originHref(opts: {
     const s = links.find((l) => l.entityType === "follow_up_sheet" && l.entityId);
     if (s?.entityId) return `/dashboard/fiches-suivi/${s.entityId}`;
   }
-  if (opts.origin === "MESSAGERIE" && opts.projectId) {
-    return `/dashboard/messagerie?view=chantiers&project=${opts.projectId}`;
+  if (opts.origin === "MESSAGERIE") {
+    if (opts.projectId) return `/dashboard/messagerie?view=chantiers&project=${opts.projectId}`;
+    return "/dashboard/messagerie?view=contacts";
   }
   if (opts.projectId) return `/dashboard/projets/${opts.projectId}#tab-documents`;
-  return null;
+  return "/dashboard/documents";
 }
 
 export function folderDisplayLabel(label: string, _code?: string | null): string {

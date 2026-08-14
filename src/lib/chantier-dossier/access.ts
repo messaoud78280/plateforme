@@ -7,7 +7,11 @@ export function isChantierStaff(role?: string | null) {
 }
 
 /** Vérifie l'accès lecture/écriture au chantier (projet). */
-export async function canAccessChantierProject(user: SessionUser, projectId: string) {
+export async function canAccessChantierProject(
+  user: SessionUser,
+  projectId: string | null | undefined,
+) {
+  if (!projectId) return { ok: false as const, project: null };
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     select: { id: true, clientId: true, assignedToId: true, organizationId: true },

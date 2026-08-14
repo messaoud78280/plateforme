@@ -3,11 +3,8 @@ import type { ChantierFileStatus } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import {
-  canAccessChantierProject,
-  canDeleteChantierFile,
-  canUpdateChantierFileStatus,
-} from "@/lib/chantier-dossier/access";
+import { canDeleteChantierFile, canUpdateChantierFileStatus } from "@/lib/chantier-dossier/access";
+import { canAccessGedFile } from "@/lib/ged/org-scope";
 import { createServiceRoleClient } from "@/lib/supabase";
 import { deleteChantierPdfPreview } from "@/lib/storage/chantier-pdf-preview";
 import { DOCUMENTS_BUCKET, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
@@ -25,13 +22,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const existing = await prisma.chantierFile.findUnique({
     where: { id },
-    select: { projectId: true },
+    select: { projectId: true, organizationId: true, clientId: true },
   });
   if (!existing) {
     return NextResponse.json({ error: "Fichier introuvable" }, { status: 404 });
   }
 
-  const access = await canAccessChantierProject(session.user, existing.projectId);
+  const access = await canAccessGedFile(session.user, existing);
   if (!access.ok) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
@@ -111,6 +108,8 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     where: { id },
     select: {
       projectId: true,
+      organizationId: true,
+      clientId: true,
       fileUrl: true,
       name: true,
       sourceDocumentId: true,
@@ -121,7 +120,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     return NextResponse.json({ error: "Introuvable" }, { status: 404 });
   }
 
-  const access = await canAccessChantierProject(session.user, existing.projectId);
+  const access = await canAccessGedFile(session.user, existing);
   if (!access.ok) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }

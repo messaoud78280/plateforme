@@ -4,7 +4,7 @@
  * Compléments : PurchaseOrderDocument orphelin, Document legacy non synchronisé.
  */
 import { prisma } from "@/lib/prisma";
-import { projectWhereForClientUser } from "@/lib/organization/access";
+import { projectWhereForClientUser, getUserOrganizationIds } from "@/lib/organization/access";
 import {
   canListPurchaseOrders,
   isInternalPurchaseOrderActor,
@@ -22,6 +22,11 @@ import {
   type HubSort,
   type HubView,
 } from "@/lib/ged/document-hub-ui";
+import {
+  displayGedTypeLabel,
+  isExpectedMissingDocument,
+  stripMissingTitleSuffix,
+} from "@/lib/ged/classify-document";
 import { originFromLinks, originHref, type GedLinkLite } from "@/lib/ged/origin";
 
 export type { HubGroup, HubSort, HubView, HubDocumentItem } from "@/lib/ged/document-hub-ui";
@@ -65,16 +70,23 @@ function typeLabel(opts: {
   category?: string | null;
   poKind?: string | null;
   name?: string | null;
+  missing?: boolean;
 }): string {
-  if (opts.poKind === "BL" || opts.documentType === "BL") return "BL";
-  if (opts.documentType) return opts.documentType.toUpperCase();
-  if (opts.category === "Photos") return "PHOTO";
-  if (opts.category === "Plans") return "PLAN";
-  if (opts.category === "DOE") return "DOE";
-  if (opts.category === "Fournisseurs") return "FOURNISSEUR";
-  if (opts.category === "Marché") return "MARCHÉ";
+  if (opts.missing) return "À récupérer";
+  if (opts.poKind === "BL" || opts.documentType === "BL" || opts.documentType === "BON_LIVRAISON") {
+    return displayGedTypeLabel("BON_LIVRAISON");
+  }
+  if (opts.poKind === "BC" || opts.documentType === "BC" || opts.documentType === "BON_COMMANDE") {
+    return displayGedTypeLabel("BON_COMMANDE");
+  }
+  if (opts.documentType) return displayGedTypeLabel(opts.documentType);
+  if (opts.category === "Photos") return displayGedTypeLabel("PHOTO");
+  if (opts.category === "Plans") return displayGedTypeLabel("PLAN");
+  if (opts.category === "DOE") return displayGedTypeLabel("DOE");
+  if (opts.category === "Fournisseurs") return "Fournisseur";
+  if (opts.category === "Marché") return "Marché";
   if (/\.pdf$/i.test(opts.name ?? "")) return "PDF";
-  return opts.category || "DOCUMENT";
+  return displayGedTypeLabel(opts.category) || "Document";
 }
 
 function visibilityShort(v: string | null | undefined): string {
@@ -111,6 +123,7 @@ export async function loadDocumentHub(opts: {
     const isSupplier =
       opts.user.personType === "SUPPLIER" || opts.user.permissionProfile === "FOURNISSEUR";
     const projectWhere = await projectWhereForClientUser(opts.user.id);
+    const userOrgIds = await getUserOrganizationIds(opts.user.id);
     const orgId = await resolvePurchaseOrderOrgId(opts.user);
 
     let supplierExtOrgId: string | null = null;
@@ -219,7 +232,14 @@ export async function loadDocumentHub(opts: {
       viewAnd.push({ favorites: { some: { userId: opts.user.id } } });
     }
     if (view === "missing") {
-      viewAnd.push({ status: { in: ["MANQUANT", "A_RELANCER"] } });
+      viewAnd.push({
+        OR: [
+          { status: { in: ["MANQUANT", "A_RELANCER"] } },
+          { name: { contains: "(manquante)", mode: "insensitive" as const } },
+          { fileUrl: null },
+          { fileUrl: "" },
+        ],
+      });
     }
     if (view === "classify") {
       viewAnd.push({
@@ -229,17 +249,32 @@ export async function loadDocumentHub(opts: {
     if (view === "recent") {
       const since = new Date();
       since.setDate(since.getDate() - 30);
-      viewAnd.push({ createdAt: { gte: since } });
+      // Date du document si connue, sinon date d’arrivée dans BeWork.
+      viewAnd.push({
+        OR: [
+          { documentDate: { gte: since } },
+          { AND: [{ documentDate: null }, { createdAt: { gte: since } }] },
+        ],
+      });
     }
+
+    const scopeWhere = opts.projectId
+      ? { projectId: opts.projectId, project: { is: { AND: [projectWhere] } } }
+      : {
+          OR: [
+            { project: projectWhere },
+            userOrgIds.length > 0
+              ? { projectId: null, organizationId: { in: userOrgIds } }
+              : { projectId: null, clientId: opts.user.id },
+          ],
+        };
 
     const chantierWhere = {
       deletedAt: null,
       archivedAt: null,
       ...(view === "missing" ? {} : { isCurrentVersion: true }),
-      project: opts.projectId
-        ? { id: opts.projectId, AND: [projectWhere] }
-        : projectWhere,
       AND: [
+        scopeWhere,
         ...(externalVisibilityFilter ? [externalVisibilityFilter] : []),
         ...searchAnd,
         ...viewAnd,
@@ -248,12 +283,18 @@ export async function loadDocumentHub(opts: {
 
     const orderBy =
       sort === "oldest"
-        ? { createdAt: "asc" as const }
+        ? ([
+            { documentDate: { sort: "asc" as const, nulls: "last" as const } },
+            { createdAt: "asc" as const },
+          ] as const)
         : sort === "name"
-          ? { name: "asc" as const }
+          ? ({ name: "asc" as const } as const)
           : sort === "type"
-            ? { documentType: "asc" as const }
-            : { createdAt: "desc" as const };
+            ? ({ documentType: "asc" as const } as const)
+            : ([
+                { documentDate: { sort: "desc" as const, nulls: "last" as const } },
+                { createdAt: "desc" as const },
+              ] as const);
 
     const [chantierFiles, chantierTotal] = await Promise.all([
       prisma.chantierFile.findMany({
@@ -268,7 +309,9 @@ export async function loadDocumentHub(opts: {
           category: true,
           visibility: true,
           createdAt: true,
+          documentDate: true,
           mimeType: true,
+          fileUrl: true,
           isCurrentVersion: true,
           projectId: true,
           project: { select: { title: true } },
@@ -298,14 +341,14 @@ export async function loadDocumentHub(opts: {
       const g = inferGroup({
         category: f.category,
         documentType: f.documentType,
-        folderCode: f.folder.code,
+        folderCode: f.folder?.code,
         name: f.name,
       });
       const poLink = f.links.find((l) => l.entityType === "purchase_order");
       const supplierLink = f.links.find((l) => l.entityType === "supplier");
       const origin = originFromLinks({
         links: f.links as GedLinkLite[],
-        folderCode: f.folder.code,
+        folderCode: f.folder?.code,
         sourceDocumentId: f.sourceDocumentId,
       });
       const oHref = originHref({
@@ -313,37 +356,49 @@ export async function loadDocumentHub(opts: {
         links: f.links as GedLinkLite[],
         projectId: f.projectId,
       });
-      const missing = f.status === "MANQUANT" || f.status === "A_RELANCER";
+      const missing = isExpectedMissingDocument({
+        status: f.status,
+        name: f.name,
+        fileUrl: f.fileUrl,
+      });
+      const displayDate = f.documentDate ?? f.createdAt;
       const context =
         origin.refLabel ||
         poLink?.entityLabel ||
         supplierLink?.entityLabel ||
-        f.folder.label ||
         null;
+      const chantierHref = f.projectId
+        ? `/dashboard/projets/${f.projectId}#tab-documents`
+        : oHref || `/dashboard/documents?q=${encodeURIComponent(f.name)}`;
       const href =
         isSupplier || external
           ? poLink?.entityId
             ? `/dashboard/commandes/${poLink.entityId}?focus=documents`
             : `/dashboard/documents?q=${encodeURIComponent(f.name)}`
-          : `/dashboard/projets/${f.projectId}#tab-documents`;
+          : origin.origin === "DEVIS" && oHref
+            ? oHref
+            : f.fileUrl?.startsWith("/api/")
+              ? f.fileUrl
+              : chantierHref;
       return {
         id: `cf:${f.id}`,
         source: "chantier" as const,
-        title: f.name,
+        title: stripMissingTitleSuffix(f.name),
         typeLabel: typeLabel({
           documentType: f.documentType,
           category: f.category,
           name: f.name,
+          missing,
         }),
         group: g,
         projectId: f.projectId,
-        projectTitle: f.project.title,
+        projectTitle: f.project?.title ?? null,
         contextLabel: context,
         visibility: visibilityShort(f.visibility),
         authorName: f.addedBy?.name ?? null,
-        createdAt: f.createdAt.toISOString(),
+        createdAt: displayDate.toISOString(),
         href,
-        mimeHint: f.mimeType,
+        mimeHint: missing ? null : f.mimeType,
         isCurrentVersion: f.isCurrentVersion,
         isExpectedMissing: missing,
         origin: origin.origin,
@@ -492,7 +547,9 @@ export async function loadDocumentHub(opts: {
             id: `doc:${d.id}`,
             source: "legacy" as const,
             title: missingHint ? cleanTitle : d.name,
-            typeLabel: typeLabel({ category: d.category, name: d.name }),
+            typeLabel: missingHint
+              ? "À récupérer"
+              : typeLabel({ category: d.category, name: d.name }),
             group: "administratif" as HubGroup,
             projectId: d.projectId,
             projectTitle: d.project?.title ?? null,

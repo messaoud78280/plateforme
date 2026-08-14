@@ -72,7 +72,7 @@ export function poKindToGedMeta(kind: string): PoGedMeta {
   if (k === "BL") {
     return {
       folderCode: "05",
-      documentType: "BL",
+      documentType: "BON_LIVRAISON",
       category: "Fournisseurs",
       subcategory: "Bon de livraison",
       classificationStatus: "CLASSE",
@@ -81,7 +81,7 @@ export function poKindToGedMeta(kind: string): PoGedMeta {
   if (k === "BC") {
     return {
       folderCode: "02",
-      documentType: "BC",
+      documentType: "BON_COMMANDE",
       category: "Fournisseurs",
       subcategory: "Bon de commande",
       classificationStatus: "CLASSE",

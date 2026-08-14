@@ -180,6 +180,40 @@ export function hubEmptyCopy(opts: {
   };
 }
 
+export function provenanceSummary(it: {
+  origin?: HubOrigin;
+  originLabel?: string;
+  projectTitle?: string | null;
+  companyLabel?: string | null;
+  contextLabel?: string | null;
+  isExpectedMissing?: boolean;
+}): string {
+  if (it.isExpectedMissing) {
+    return [it.projectTitle, it.companyLabel].filter(Boolean).join(" · ");
+  }
+  if (it.origin === "MESSAGERIE") {
+    return [it.companyLabel || it.projectTitle, "Messagerie"].filter(Boolean).join(" · ");
+  }
+  if (it.origin === "COMMANDE") {
+    const ref = (it.contextLabel ?? "").split(" · ")[0] || it.contextLabel;
+    const cmd = ref ? `Commande ${ref.replace(/^Commande\s+/i, "")}` : "Commande";
+    return [it.companyLabel, cmd].filter(Boolean).join(" · ");
+  }
+  if (it.origin === "DEVIS") {
+    return ["Devis & Facturation", it.contextLabel].filter(Boolean).join(" · ");
+  }
+  if (it.origin === "DOE") {
+    return [it.projectTitle, "DOE"].filter(Boolean).join(" · ");
+  }
+  if (it.origin === "FOURNISSEUR") {
+    return [it.companyLabel, "Fournisseur", it.projectTitle].filter(Boolean).join(" · ");
+  }
+  if (it.origin === "FICHE_SUIVI") {
+    return [it.projectTitle, "Fiche suivi", it.contextLabel].filter(Boolean).join(" · ");
+  }
+  return [it.projectTitle, it.originLabel || "Ajouté depuis le chantier"].filter(Boolean).join(" · ");
+}
+
 export function recentDayLabel(iso: string, now = new Date()): string {
   const d = new Date(iso);
   const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());

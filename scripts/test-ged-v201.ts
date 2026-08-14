@@ -12,6 +12,12 @@ import {
 } from "../src/lib/ged/durable-file";
 import { originFromLinks, originHref } from "../src/lib/ged/origin";
 import {
+  classifyDocumentType,
+  displayGedTypeLabel,
+  isExpectedMissingDocument,
+} from "../src/lib/ged/classify-document";
+import { provenanceSummary } from "../src/lib/ged/document-hub-ui";
+import {
   GED_UNIQUE_SOURCE_TYPES,
   gedIndexOwnsStorage,
   messageAttachmentEntityId,
@@ -32,8 +38,9 @@ function tIdentity() {
 }
 
 function tPoMeta() {
-  assert.equal(poKindToGedMeta("BL").documentType, "BL");
+  assert.equal(poKindToGedMeta("BL").documentType, "BON_LIVRAISON");
   assert.equal(poKindToGedMeta("BC").folderCode, "02");
+  assert.equal(poKindToGedMeta("BC").documentType, "BON_COMMANDE");
   assert.equal(poKindToGedMeta("FACTURE").documentType, "FACTURE");
   assert.equal(poKindToGedMeta("AUTRE").classificationStatus, "A_CLASSER");
   console.log("ok classification commande");
@@ -104,6 +111,10 @@ function tProvenance() {
     links: [{ entityType: "commercial_quote", entityId: "q1", entityLabel: "DEV-2026-0014" }],
   });
   assert.equal(devis.actionLabel, "Voir le devis");
+  const chantier = originFromLinks({ links: [], sourceDocumentId: "doc1" });
+  assert.equal(chantier.origin, "CHANTIER");
+  assert.equal(chantier.label, "Ajouté depuis le chantier");
+  assert.notEqual(chantier.refLabel, "Mission");
   const fac = originFromLinks({
     links: [{ entityType: "commercial_invoice", entityId: "i1", entityLabel: "FAC-2026-001" }],
   });
@@ -149,4 +160,51 @@ tDurableParse();
 tProvenance();
 tNoFourthTable();
 tBackfillIdempotentContract();
+
+function tClassify() {
+  assert.equal(classifyDocumentType({ sourceEntityType: "commercial_quote" }).documentType, "DEVIS");
+  assert.equal(classifyDocumentType({ filename: "Devis étanchéité Victor Hugo.pdf", currentType: "CONTRAT" }).documentType, "DEVIS");
+  assert.equal(classifyDocumentType({ poKind: "BL" }).documentType, "BON_LIVRAISON");
+  assert.equal(displayGedTypeLabel("BON_COMMANDE"), "Bon de commande");
+  assert.equal(classifyDocumentType({ filename: "note-interne.bin" }).certain, false);
+  assert.equal(classifyDocumentType({ filename: "facade-1600.jpeg" }).documentType, "PHOTO");
+  assert.equal(
+    isExpectedMissingDocument({
+      status: "RECU",
+      name: "Fiche technique membrane (manquante)",
+      fileUrl: "/demo-assets/placeholder-document.pdf",
+    }),
+    true,
+  );
+  assert.equal(
+    isExpectedMissingDocument({
+      status: "RECU",
+      name: "Devis étanchéité Victor Hugo.pdf",
+      fileUrl: "/demo-assets/placeholder-document.pdf",
+    }),
+    false,
+  );
+  console.log("ok classification déterministe");
+}
+
+function tProvenanceUi() {
+  const line = provenanceSummary({
+    origin: "COMMANDE",
+    companyLabel: "Point.P",
+    contextLabel: "BC-2026-043",
+    projectTitle: "Victor Hugo",
+  });
+  assert.ok(line.includes("Point.P"));
+  assert.ok(line.includes("BC-2026-043"));
+  const miss = provenanceSummary({
+    isExpectedMissing: true,
+    projectTitle: "République",
+    companyLabel: "Point.P",
+  });
+  assert.ok(miss.includes("République"));
+  console.log("ok provenance UI");
+}
+
+tClassify();
+tProvenanceUi();
 console.log("GED V2.0.1 recette OK");

@@ -641,6 +641,7 @@ model Organization {
   commercialSubcontracts        CommercialSubcontract[]
   projectBudgets                ProjectBudget[]
   supplierInvoices              SupplierInvoice[]
+  chantierFiles                 ChantierFile[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -941,8 +942,11 @@ model ChantierFolder {
 // Fichier ou pièce attendue dans une rubrique chantier (GED chantier)
 model ChantierFile {
   id           String             @id @default(cuid())
-  projectId    String
-  folderId     String
+  /// Nullable : document entreprise sans chantier (GED globale).
+  projectId    String?
+  /// Frontière de sécurité si projectId est null.
+  organizationId String?
+  folderId     String?
   clientId     String
   name         String
   fileUrl      String?            // null si statut MANQUANT (pièce attendue)
@@ -979,9 +983,10 @@ model ChantierFile {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  project  Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  folder   ChantierFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  client   User           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  project      Project?        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  organization Organization?   @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  folder       ChantierFolder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  client       User            @relation(fields: [clientId], references: [id], onDelete: Cascade)
   addedBy  User?          @relation("ChantierFileAddedBy", fields: [addedById], references: [id], onDelete: SetNull)
   task     Task?          @relation(fields: [taskId], references: [id], onDelete: SetNull)
   replacesFile ChantierFile?  @relation("ChantierFileVersions", fields: [replacesFileId], references: [id], onDelete: SetNull)
@@ -1003,6 +1008,8 @@ model ChantierFile {
   @@index([projectId, createdAt])
   @@index([status, deletedAt])
   @@index([documentType])
+  @@index([organizationId])
+  @@index([organizationId, createdAt])
 }
 
 /// Lien document GED ↔ élément métier (identité source V2.0.1).

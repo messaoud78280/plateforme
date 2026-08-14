@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { canAccessGedFile } from "@/lib/ged/org-scope";
 import { requirePilotageSession } from "@/lib/pilotage/access";
 import { PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
 
@@ -10,10 +10,10 @@ async function assertFileAccess(fileId: string) {
   const session = await requirePilotageSession();
   const file = await prisma.chantierFile.findUnique({
     where: { id: fileId },
-    select: { id: true, projectId: true, deletedAt: true },
+    select: { id: true, projectId: true, organizationId: true, clientId: true, deletedAt: true },
   });
   if (!file || file.deletedAt) return { ok: false as const, error: "Document introuvable." };
-  const access = await canAccessChantierProject(session.user, file.projectId);
+  const access = await canAccessGedFile(session.user, file);
   if (!access.ok) return { ok: false as const, error: "Accès refusé." };
   return { ok: true as const, session, file };
 }
@@ -41,7 +41,9 @@ export async function classifyChantierFile(formData: FormData) {
   };
   if (folderId) {
     const folder = await prisma.chantierFolder.findFirst({
-      where: { id: folderId, projectId: g.file.projectId },
+      where: g.file.projectId
+        ? { id: folderId, projectId: g.file.projectId }
+        : { id: folderId },
     });
     if (folder) data.folderId = folder.id;
   }
@@ -67,10 +69,10 @@ export async function restoreChantierFile(formData: FormData) {
   const session = await requirePilotageSession();
   const file = await prisma.chantierFile.findUnique({
     where: { id: fileId },
-    select: { id: true, projectId: true },
+    select: { id: true, projectId: true, organizationId: true, clientId: true },
   });
   if (!file) return { ok: false as const, error: "Document introuvable." };
-  const access = await canAccessChantierProject(session.user, file.projectId);
+  const access = await canAccessGedFile(session.user, file);
   if (!access.ok) return { ok: false as const, error: "Accès refusé." };
   await prisma.chantierFile.update({
     where: { id: fileId },

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { canAccessGedFile } from "@/lib/ged/org-scope";
 import { listChantierShareRecipients } from "@/lib/chantier-dossier/share-recipients";
 import { createNotification } from "@/lib/notifications";
 import { createServiceRoleClient } from "@/lib/supabase";
@@ -39,6 +39,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     select: {
       id: true,
       projectId: true,
+      organizationId: true,
+      clientId: true,
       name: true,
       fileUrl: true,
       fileSize: true,
@@ -51,7 +53,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Fichier introuvable ou pièce non déposée" }, { status: 404 });
   }
 
-  const access = await canAccessChantierProject(session.user, file.projectId);
+  const access = await canAccessGedFile(session.user, file);
   if (!access.ok) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }

@@ -22,6 +22,7 @@ import { presentMessagesForViewer } from "@/lib/messagerie/filter-hidden-message
 import { after } from "next/server";
 import { ingestDurableMessageAttachments } from "@/lib/ged/ingest-message-durable";
 import { resolveSharedOrganizationId } from "@/lib/ged/org-scope";
+import { resolveMessageNotificationHref } from "@/lib/messagerie/resolve-conversation";
 
 function canUseDirectMessages(role?: string | null): boolean {
   return isManagerRole(role) || isStaffAgent(role) || role === "CLIENT";

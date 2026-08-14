@@ -32,7 +32,7 @@ export type GedFileRow = {
   previewStatus: string | null;
   visibility: string;
   createdAt: string;
-  folder: { id: string; code: string; label: string };
+  folder: { id: string; code: string; label: string } | null;
   isFavorite?: boolean;
 };
 
@@ -79,7 +79,7 @@ export function PilotageGedPanel({
       if (view === "en-vigueur" && !f.isCurrentVersion) return false;
       if (categoryFilter && f.category !== categoryFilter) return false;
       if (!q.trim()) return true;
-      const hay = `${f.name} ${f.category ?? ""} ${f.documentType ?? ""} ${f.indice ?? ""} ${f.folder.label}`.toLowerCase();
+      const hay = `${f.name} ${f.category ?? ""} ${f.documentType ?? ""} ${f.indice ?? ""} ${f.folder?.label ?? ""}`.toLowerCase();
       return hay.includes(q.trim().toLowerCase());
     });
   }, [files, trashFiles, view, categoryFilter, q]);
@@ -101,7 +101,7 @@ export function PilotageGedPanel({
         <td className="px-3 py-2">
           <p className="font-semibold text-slate-900">{f.name}</p>
           <p className="text-[11px] text-slate-500">
-            {f.folder.label}
+            {f.folder?.label ?? "Document"}
             {!f.isCurrentVersion ? " · Version obsolète" : ""}
             {f.previewStatus ? ` · ${f.previewStatus}` : ""}
           </p>
@@ -268,8 +268,9 @@ export function PilotageGedPanel({
             <article key={f.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <p className="truncate text-sm font-bold text-slate-900">{f.name}</p>
               <p className="mt-1 text-[11px] text-slate-500">
-                {f.folder.label} · {f.category ?? "Sans catégorie"} · v{f.versionLabel ?? "1"}
-                {f.indice ? ` · Indice ${f.indice}` : ""}
+                {[f.folder?.label, f.category, `v${f.versionLabel ?? "1"}`, f.indice ? `Indice ${f.indice}` : null]
+                  .filter(Boolean)
+                  .join(" · ")}
               </p>
               <div className="mt-2 flex flex-wrap gap-1">
                 <StatusBadge status={CHANTIER_FILE_STATUS_LABELS[f.status as keyof typeof CHANTIER_FILE_STATUS_LABELS] ?? f.status} />

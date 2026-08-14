@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
     });
 
     for (const file of staleFiles) {
+      if (!file.projectId || !file.project) continue;
       const actionUrl = `/dashboard/projets/${file.projectId}#dossier-chantier`;
 
       const recentAlert = await prisma.alert.findFirst({
@@ -79,7 +80,8 @@ export async function POST(request: NextRequest) {
 
       const label = file.status === "MANQUANT" ? "manquante" : "à relancer";
       const title = "Pièce chantier " + label;
-      const message = `« ${file.name} » (${file.folder.label}) — ${file.project.title} : pièce ${label} depuis plusieurs jours.`;
+      const folderLabel = file.folder?.label ?? "Documents";
+      const message = `« ${file.name} » (${folderLabel}) — ${file.project.title} : pièce ${label} depuis plusieurs jours.`;
 
       try {
         await prisma.alert.create({

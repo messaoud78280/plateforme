@@ -99,7 +99,7 @@ export async function GET(
     chantierFiles: task.chantierFiles.map((f) => ({
       id: f.id,
       name: f.name,
-      folderLabel: `${f.folder.code} · ${f.folder.label}`,
+      folderLabel: f.folder ? `${f.folder.code} · ${f.folder.label}` : "Document",
     })),
     defaultVisibleDocumentIds: delivery?.visibleDocumentIds?.length
       ? delivery.visibleDocumentIds

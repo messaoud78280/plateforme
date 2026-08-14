@@ -341,6 +341,7 @@ async function collectForClient(userId: string, items: ATraiterItem[]) {
   }
 
   for (const f of missingFiles) {
+    if (!f.project) continue;
     push(items, {
       id: `file-${f.id}`,
       section: f.status === "A_RELANCER" ? "relance" : "urgent",

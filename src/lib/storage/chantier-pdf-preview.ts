@@ -27,8 +27,10 @@ const LIBREOFFICE_EXT = new Set([
 
 const CONVERTAPI_EXT = new Set([".numbers", ".pages", ".key"]);
 
-export function chantierPreviewPdfPath(projectId: string, fileId: string): string {
-  return `chantiers/${projectId}/_previews/${fileId}.pdf`;
+/** Dossier Storage des aperçus PDF. Sans chantier → `_entreprise` (GED V2.0.3). */
+export function chantierPreviewPdfPath(projectId: string | null | undefined, fileId: string): string {
+  const scope = projectId?.trim() || "_entreprise";
+  return `chantiers/${scope}/_previews/${fileId}.pdf`;
 }
 
 export function fileExtension(name: string): string {
@@ -114,7 +116,7 @@ async function convertBufferToPdf(
 
 export async function ensureChantierPdfPreview(params: {
   supabase: SupabaseClient;
-  projectId: string;
+  projectId: string | null;
   fileId: string;
   fileUrl: string;
   name: string;
@@ -158,7 +160,7 @@ export async function ensureChantierPdfPreview(params: {
 
 export async function deleteChantierPdfPreview(
   supabase: SupabaseClient,
-  projectId: string,
+  projectId: string | null,
   fileId: string
 ): Promise<void> {
   const previewPath = chantierPreviewPdfPath(projectId, fileId);

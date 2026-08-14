@@ -102,7 +102,7 @@ export default async function PilotageDocumentViewerPage({
 
       <header className="pilotage-card p-5">
         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-          {pilotage.project.title} · {file.folder.label}
+          {pilotage.project.title} · {file.folder?.label ?? "Document"}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           <h1 className="text-xl font-bold text-slate-900">{file.name}</h1>

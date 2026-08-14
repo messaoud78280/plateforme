@@ -72,7 +72,9 @@ export default async function ChantierManquantsPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {files.map((f) => (
+              {files.map((f) => {
+                if (!f.project) return null;
+                return (
                 <tr key={f.id} className="hover:bg-slate-50/50">
                   <td className="px-4 py-3">
                     <p className="font-medium text-slate-900">{f.project.title}</p>
@@ -82,7 +84,8 @@ export default async function ChantierManquantsPage({
                     {staff ? <p className="text-xs text-slate-500">{f.client.name}</p> : null}
                   </td>
                   <td className="px-4 py-3 text-slate-700">
-                    <span className="font-mono text-xs text-[#1d4ed8]">{f.folder.code}</span> {f.folder.label}
+                    <span className="font-mono text-xs text-[#1d4ed8]">{f.folder?.code}</span>{" "}
+                    {f.folder?.label ?? "Document"}
                   </td>
                   <td className="px-4 py-3 text-slate-800">{f.name}</td>
                   <td className="px-4 py-3">
@@ -101,7 +104,8 @@ export default async function ChantierManquantsPage({
                     </Link>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

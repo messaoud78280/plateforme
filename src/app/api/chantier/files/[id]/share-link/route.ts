@@ -72,7 +72,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
   const body = buildChantierShareMessage({
     fileName: file.name,
-    projectTitle: file.project.title,
+    projectTitle: file.project?.title ?? null,
     downloadUrl: data.signedUrl,
     validityHours: SHARE_LINK_SECONDS / 3600,
   });
@@ -80,7 +80,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   return NextResponse.json({
     url: data.signedUrl,
     fileName: file.name,
-    projectTitle: file.project.title,
+    projectTitle: file.project?.title ?? null,
     expiresIn: SHARE_LINK_SECONDS,
     body,
   });

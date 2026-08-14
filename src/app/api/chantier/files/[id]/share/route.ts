@@ -52,6 +52,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!file?.fileUrl) {
     return NextResponse.json({ error: "Fichier introuvable ou pièce non déposée" }, { status: 404 });
   }
+  if (!file.projectId || !file.project) {
+    return NextResponse.json(
+      { error: "Le partage d’un document se fait depuis un chantier." },
+      { status: 400 },
+    );
+  }
 
   const access = await canAccessGedFile(session.user, file);
   if (!access.ok) {

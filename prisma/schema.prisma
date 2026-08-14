@@ -134,6 +134,8 @@ model User {
   commercialProgressStatementsValidated CommercialProgressStatement[] @relation("CommercialProgressStatementValidatedBy")
   commercialRetentionsReleased CommercialRetentionGuarantee[] @relation("CommercialRetentionReleasedBy")
   projectBudgetsCreated        ProjectBudget[] @relation("ProjectBudgetCreatedBy")
+  supplierInvoicesCreated      SupplierInvoice[] @relation("SupplierInvoiceCreatedBy")
+  supplierInvoicesCancelled    SupplierInvoice[] @relation("SupplierInvoiceCancelledBy")
 
   // Pilotage administratif des travaux
   worksitePilotagesCreated   WorksitePilotage[] @relation("PilotageCreatedBy")
@@ -257,6 +259,7 @@ model ExternalOrganization {
   commercialComponentsAsSubcontractor CommercialWorkItemComponent[] @relation("CommercialComponentSubcontractor")
   commercialMaterialPrices CommercialMaterialPrice[] @relation("CommercialMaterialPriceSupplier")
   preferredForCommercialMaterials CommercialMaterial[] @relation("CommercialMaterialPreferredSupplier")
+  supplierInvoices     SupplierInvoice[]
 
   @@index([hostOrganizationId])
   @@index([hostOrganizationId, type])
@@ -372,6 +375,7 @@ model PurchaseOrder {
   documents PurchaseOrderDocument[]
   receipts  PurchaseOrderReceipt[]
   agendaEvents AgendaEvent[]
+  supplierInvoices SupplierInvoice[]
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
@@ -633,6 +637,7 @@ model Organization {
   commercialProgressStatements CommercialProgressStatement[]
   commercialRetentionGuarantees CommercialRetentionGuarantee[]
   projectBudgets                ProjectBudget[]
+  supplierInvoices              SupplierInvoice[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -813,6 +818,7 @@ model Project {
   commercialInvoices CommercialInvoice[]
   commercialProgressStatements CommercialProgressStatement[]
   projectBudget ProjectBudget?
+  supplierInvoices SupplierInvoice[]
 
   @@index([organizationId])
 }
@@ -860,6 +866,56 @@ model ProjectBudget {
   @@index([organizationId])
   @@index([sourceQuoteId])
   @@index([createdById])
+}
+
+enum SupplierInvoiceStatus {
+  DRAFT
+  RECORDED
+  CANCELLED
+}
+
+enum SupplierInvoiceKind {
+  STANDARD
+  CREDIT
+}
+
+/// PILOTAGE-2 — Facture fournisseur / dépense réelle constatée.
+/// Ne jamais additionner avec la réception du même bon de commande.
+model SupplierInvoice {
+  id                     String                 @id @default(cuid())
+  organizationId         String
+  projectId              String
+  purchaseOrderId        String?
+  externalOrganizationId String
+  /// N° de pièce fournisseur (leur facture)
+  supplierNumber         String
+  kind                   SupplierInvoiceKind    @default(STANDARD)
+  status                 SupplierInvoiceStatus  @default(RECORDED)
+  /// MATERIAL | EQUIPMENT | SUBCONTRACT | OTHER | UNCLASSIFIED
+  category               String
+  invoiceDate            DateTime               @db.Date
+  amountHt               Decimal                @db.Decimal(14, 4)
+  amountVat              Decimal                @default(0) @db.Decimal(14, 4)
+  amountTtc              Decimal                @db.Decimal(14, 4)
+  notes                  String?                @db.Text
+  createdById            String
+  cancelledAt            DateTime?
+  cancelledById          String?
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+
+  organization         Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project              Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  purchaseOrder        PurchaseOrder?       @relation(fields: [purchaseOrderId], references: [id], onDelete: SetNull)
+  externalOrganization ExternalOrganization @relation(fields: [externalOrganizationId], references: [id], onDelete: Restrict)
+  createdBy            User                 @relation("SupplierInvoiceCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  cancelledBy          User?                @relation("SupplierInvoiceCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, externalOrganizationId, supplierNumber])
+  @@index([organizationId, projectId])
+  @@index([organizationId, status])
+  @@index([purchaseOrderId])
+  @@index([externalOrganizationId])
 }
 
 // Rubrique du classeur chantier (01 Devis, 02 Contrats, …)

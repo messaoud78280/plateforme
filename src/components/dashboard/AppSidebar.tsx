@@ -66,6 +66,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
           { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
           { href: "/dashboard/fiches-suivi", label: "Fiches suivi", icon: StickyNote },
           { href: "/dashboard/commandes", label: "Commandes", icon: Briefcase },
+          { href: "/dashboard/depenses", label: "Dépenses", icon: CircleDollarSign },
           { href: "/dashboard/fournisseurs", label: "Fournisseurs", icon: Building2 },
           { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList },
           { href: "/dashboard/documents", label: "Documents", icon: FileText },

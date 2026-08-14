@@ -24,6 +24,10 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const q = url.searchParams.get("q") ?? "";
+  const typesRaw = url.searchParams.get("types");
+  const types = typesRaw
+    ? typesRaw.split(",").map((t) => t.trim()).filter(Boolean)
+    : ["SUPPLIER"];
 
   if (url.searchParams.has("q")) {
     const results = await searchSuppliers({ hostOrganizationId: orgId, query: q });
@@ -31,7 +35,7 @@ export async function GET(req: Request) {
   }
 
   const suppliers = await prisma.externalOrganization.findMany({
-    where: { hostOrganizationId: orgId, type: "SUPPLIER" },
+    where: { hostOrganizationId: orgId, type: { in: types } },
     select: {
       id: true,
       name: true,

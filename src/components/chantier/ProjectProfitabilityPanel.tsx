@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Drawer } from "@/components/ui/Drawer";
 import { roundMoney } from "@/lib/commercial/money";
 import type { ProjectProfitabilityDto } from "@/lib/chantier/project-profitability";
+import { SupplierInvoiceForm } from "@/components/chantier/SupplierInvoiceForm";
 import { cn } from "@/lib/cn";
 
 function fmt(n: number) {
@@ -34,7 +35,8 @@ export function ProjectProfitabilityPanel({
   const [quoteId, setQuoteId] = useState(
     initial.acceptedQuotes[0]?.id ?? "",
   );
-  const [drawer, setDrawer] = useState<"commitments" | "billing" | null>(null);
+  const [drawer, setDrawer] = useState<"commitments" | "billing" | "actuals" | null>(null);
+  const [showInvoiceForm, setShowInvoiceForm] = useState(false);
 
   async function initBudget() {
     if (!quoteId) {
@@ -93,6 +95,7 @@ export function ProjectProfitabilityPanel({
           data.actualTotalHt != null
             ? `${fmt(data.actualTotalHt)} €`
             : "Non disponible",
+        action: () => setDrawer("actuals"),
       },
       {
         label: "Facturé HT",
@@ -258,7 +261,9 @@ export function ProjectProfitabilityPanel({
         </div>
         <p className="mt-2 text-[11px] text-slate-400">
           Estimation basée sur le budget initial et les engagements/dépenses
-          actuellement connus.
+          actuellement connus. Le réel priorise les factures fournisseurs ; la
+          réception n’est utilisée que s’il n’existe pas encore de facture sur
+          le même BC.
         </p>
       </div>
 
@@ -444,6 +449,73 @@ export function ProjectProfitabilityPanel({
           </p>
         ) : null}
       </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-bold text-[#1e3a5f]">
+            Dépenses réelles
+          </h3>
+          <button
+            type="button"
+            className="text-xs font-semibold text-[#1d4ed8]"
+            onClick={() => setShowInvoiceForm((v) => !v)}
+          >
+            {showInvoiceForm ? "Fermer" : "Enregistrer une facture"}
+          </button>
+        </div>
+        <p className="mt-1 text-xs text-slate-500">
+          Facture fournisseur = réel. Réception = réel provisoire tant qu’aucune
+          facture n’est saisie sur le BC.
+        </p>
+        {showInvoiceForm ? (
+          <div className="mt-4 border-t border-slate-100 pt-4">
+            <SupplierInvoiceForm
+              projectId={data.projectId}
+              onCreated={() => {
+                setShowInvoiceForm(false);
+                router.refresh();
+              }}
+            />
+          </div>
+        ) : null}
+      </div>
+
+      <Drawer
+        open={drawer === "actuals"}
+        onClose={() => setDrawer(null)}
+        title="Dépenses réelles"
+        description={
+          data.actualTotalHt != null
+            ? `${fmt(data.actualTotalHt)} € HT`
+            : "Aucune dépense constatée"
+        }
+        widthClass="max-w-md"
+      >
+        {(data.actuals ?? []).length === 0 ? (
+          <p className="text-sm text-slate-500">
+            Aucune facture fournisseur ni réception valorisée.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {(data.actuals ?? []).map((a) => (
+              <li
+                key={a.id}
+                className="rounded-xl border border-slate-100 px-3 py-2"
+              >
+                <p className="text-sm font-semibold">{a.label}</p>
+                <p className="text-xs text-slate-500">
+                  {a.source === "invoice" ? "Facture" : "Réception (provisoire)"}
+                  {a.supplierName ? ` · ${a.supplierName}` : ""}
+                  {a.purchaseOrderNumber ? ` · ${a.purchaseOrderNumber}` : ""}
+                </p>
+                <p className="tabular-nums text-sm font-medium">
+                  {fmt(a.amountHt)} €
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Drawer>
 
       <Drawer
         open={drawer === "commitments"}

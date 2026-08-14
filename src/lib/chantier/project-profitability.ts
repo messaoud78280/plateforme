@@ -19,6 +19,12 @@ import { isCollectibleInvoiceType } from "@/lib/commercial/invoice-status";
 import type { CompositionSnapshot } from "@/lib/commercial/library";
 import { isDueDatePast } from "@/lib/commercial/invoice-status";
 import { effectiveRetentionStatus } from "@/lib/commercial/retention-calc";
+import {
+  classifySupplierCostCategory,
+  parseSupplierInvoiceCategory,
+  resolvePurchaseActualHt,
+  signedSupplierInvoiceHt,
+} from "@/lib/chantier/supplier-invoices";
 
 export type CostCategoryKey =
   | "MATERIAL"
@@ -261,6 +267,16 @@ export type ProjectProfitabilityDto = {
     status: string;
     category: CostCategoryKey;
   }>;
+  actuals: Array<{
+    id: string;
+    source: "invoice" | "receipt";
+    label: string;
+    supplierName: string | null;
+    amountHt: number;
+    category: CostCategoryKey;
+    date: string | null;
+    purchaseOrderNumber: string | null;
+  }>;
 };
 
 /**
@@ -269,8 +285,7 @@ export type ProjectProfitabilityDto = {
  * Sinon : Non classé (pas de matching texte inventé).
  */
 function classifyPoCategory(extType: string | null | undefined): CostCategoryKey {
-  if (extType === "SUBCONTRACTOR") return "SUBCONTRACT";
-  return "UNCLASSIFIED";
+  return classifySupplierCostCategory(extType);
 }
 
 export async function listAcceptedQuotesForProject(
@@ -425,7 +440,7 @@ export async function loadProjectProfitability(
 
   const now = new Date();
 
-  const [budget, acceptedQuotes, orders, invoices, progress, retentions] =
+  const [budget, acceptedQuotes, orders, invoices, progress, retentions, supplierInvoices] =
     await Promise.all([
     prisma.projectBudget.findFirst({
       where: { projectId, organizationId: orgId },
@@ -495,6 +510,20 @@ export async function loadProjectProfitability(
         plannedReleaseDate: true,
       },
     }),
+    prisma.supplierInvoice.findMany({
+      where: { organizationId: orgId, projectId, status: "RECORDED" },
+      select: {
+        id: true,
+        purchaseOrderId: true,
+        supplierNumber: true,
+        kind: true,
+        category: true,
+        invoiceDate: true,
+        amountHt: true,
+        purchaseOrder: { select: { number: true } },
+        externalOrganization: { select: { name: true, tradeName: true } },
+      },
+    }),
   ]);
 
   // —— Engagements / réel achats ——
@@ -515,7 +544,36 @@ export async function loadProjectProfitability(
     UNCLASSIFIED: 0,
   };
   let hasAnyReceiptValue = false;
+  let hasAnyInvoiceValue = false;
   const commitments: ProjectProfitabilityDto["commitments"] = [];
+  const actuals: ProjectProfitabilityDto["actuals"] = [];
+
+  const invoiceHtByPo = new Map<string, number>();
+  for (const inv of supplierInvoices) {
+    const signed = signedSupplierInvoiceHt(inv.kind, d(inv.amountHt));
+    const cat = parseSupplierInvoiceCategory(inv.category) as CostCategoryKey;
+    hasAnyInvoiceValue = true;
+    actualByCat[cat] += signed;
+    if (inv.purchaseOrderId) {
+      invoiceHtByPo.set(
+        inv.purchaseOrderId,
+        (invoiceHtByPo.get(inv.purchaseOrderId) ?? 0) + signed,
+      );
+    }
+    actuals.push({
+      id: inv.id,
+      source: "invoice",
+      label: inv.supplierNumber,
+      supplierName:
+        inv.externalOrganization?.tradeName ||
+        inv.externalOrganization?.name ||
+        null,
+      amountHt: roundMoney(signed, 2),
+      category: cat,
+      date: inv.invoiceDate.toISOString().slice(0, 10),
+      purchaseOrderNumber: inv.purchaseOrder?.number ?? null,
+    });
+  }
 
   for (const po of orders) {
     if (!isCommittedPurchaseOrder(po.status)) continue;
@@ -534,22 +592,42 @@ export async function loadProjectProfitability(
       category: cat,
     });
 
-    // Réel = qty conforme reçue × PU commande
     let receivedHt = 0;
     for (const line of po.lines) {
       if (line.unitPriceHt == null) continue;
       const pu = d(line.unitPriceHt);
       let qtyOk = 0;
       for (const rl of line.receiptLines) {
-        qtyOk +=
-          d(rl.receivedQty) - d(rl.damagedQty) - d(rl.refusedQty);
+        qtyOk += d(rl.receivedQty) - d(rl.damagedQty) - d(rl.refusedQty);
       }
       if (qtyOk > 0) {
         receivedHt += qtyOk * pu;
         hasAnyReceiptValue = true;
       }
     }
-    actualByCat[cat] += receivedHt;
+
+    const hasInvoice = invoiceHtByPo.has(po.id);
+    const resolved = resolvePurchaseActualHt({
+      recordedInvoiceHt: invoiceHtByPo.get(po.id) ?? 0,
+      hasRecordedInvoice: hasInvoice,
+      receiptHt: receivedHt,
+    });
+    if (resolved.source === "receipt") {
+      actualByCat[cat] += resolved.actualHt;
+      actuals.push({
+        id: `receipt-${po.id}`,
+        source: "receipt",
+        label: po.number,
+        supplierName:
+          po.externalOrganization?.tradeName ||
+          po.externalOrganization?.name ||
+          null,
+        amountHt: resolved.actualHt,
+        category: cat,
+        date: null,
+        purchaseOrderNumber: po.number,
+      });
+    }
   }
 
   const planned = {
@@ -578,11 +656,13 @@ export async function loadProjectProfitability(
       const committedHt = roundMoney(committedByCat[key], 2);
       // MO réel : non disponible (pas de pointage) — ne pas afficher 0 trompeur
       const actualAvailable =
-        key === "LABOR" ? false : hasAnyReceiptValue || committedHt > 0;
+        key === "LABOR"
+          ? false
+          : hasAnyInvoiceValue || hasAnyReceiptValue || committedHt > 0;
       const actualHt =
         key === "LABOR"
           ? null
-          : hasAnyReceiptValue
+          : hasAnyInvoiceValue || hasAnyReceiptValue
             ? roundMoney(actualByCat[key], 2)
             : committedHt > 0
               ? roundMoney(actualByCat[key], 2)
@@ -621,9 +701,9 @@ export async function loadProjectProfitability(
     2,
   );
   const actualSum = Object.values(actualByCat).reduce((s, n) => s + n, 0);
-  // V1 : MO réel absent → données réelles toujours incomplètes
   const actualIncomplete = true;
-  const actualTotalHt = hasAnyReceiptValue ? roundMoney(actualSum, 2) : null;
+  const actualTotalHt =
+    hasAnyInvoiceValue || hasAnyReceiptValue ? roundMoney(actualSum, 2) : null;
 
   const forecastTotalHt = roundMoney(
     categoryKeys.reduce((s, k) => {
@@ -781,6 +861,7 @@ export async function loadProjectProfitability(
           : null,
     },
     commitments: commitments.sort((a, b) => b.amountHt - a.amountHt),
+    actuals: actuals.sort((a, b) => Math.abs(b.amountHt) - Math.abs(a.amountHt)),
   };
 }
 

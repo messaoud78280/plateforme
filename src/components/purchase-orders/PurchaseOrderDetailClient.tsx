@@ -15,6 +15,8 @@ import { evaluatePurchaseOrderWorksiteRisk } from "@/lib/purchase-orders/worksit
 import type { PurchaseOrderStatus } from "@prisma/client";
 import { PurchaseOrderMessagerieLink } from "@/components/messagerie/MessagerieContextLinks";
 import { ContextBackButton } from "@/components/ui/ContextBackButton";
+import { SupplierInvoiceForm } from "@/components/chantier/SupplierInvoiceForm";
+import type { SupplierInvoiceDto } from "@/lib/chantier/supplier-invoices";
 import {
   contextBackLabelForHref,
   sanitizeInternalReturnTo,
@@ -168,9 +170,21 @@ export function PurchaseOrderDetailClient({
   const [refuseKey, setRefuseKey] = useState<string>("STOCK");
   const [shareContactId, setShareContactId] = useState(order.contact?.id ?? "");
   const [focusHighlight, setFocusHighlight] = useState<string | null>(null);
+  const [invoices, setInvoices] = useState<SupplierInvoiceDto[]>([]);
 
   const safeReturnTo = sanitizeInternalReturnTo(returnToProp, "/dashboard/commandes");
   const backLabel = contextBackLabelForHref(safeReturnTo, "Retour aux commandes");
+
+  useEffect(() => {
+    if (isSupplierView) return;
+    void (async () => {
+      const res = await fetch(
+        `/api/supplier-invoices?purchaseOrderId=${encodeURIComponent(order.id)}`,
+      );
+      const data = await res.json().catch(() => null);
+      if (res.ok && Array.isArray(data?.invoices)) setInvoices(data.invoices);
+    })();
+  }, [order.id, isSupplierView]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -880,6 +894,52 @@ export function PurchaseOrderDetailClient({
           )}
         </section>
       </div>
+
+      {canAct && order.project && !isSupplierView ? (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+          <h2 className="text-sm font-bold text-slate-900">
+            Facture fournisseur
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Enregistrer la pièce reçue alimente le réel du chantier, sans
+            additionner la réception du même BC.
+          </p>
+          {invoices.length > 0 ? (
+            <ul className="mt-3 space-y-2">
+              {invoices.map((inv) => (
+                <li
+                  key={inv.id}
+                  className="flex items-center justify-between rounded-xl border border-slate-100 px-3 py-2 text-sm"
+                >
+                  <span>
+                    <span className="font-semibold">{inv.supplierNumber}</span>
+                    <span className="ml-2 text-xs text-slate-500">
+                      {inv.kindLabel} · {inv.statusLabel}
+                    </span>
+                  </span>
+                  <span className="tabular-nums font-medium">
+                    {inv.signedHt.toLocaleString("fr-FR")} €
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-sm text-slate-500">Aucune facture saisie.</p>
+          )}
+          <div className="mt-4 border-t border-slate-100 pt-4">
+            <SupplierInvoiceForm
+              projectId={order.project.id}
+              purchaseOrderId={order.id}
+              supplierId={order.externalOrganization.id}
+              supplierName={supplierLabel}
+              defaultAmountHt={
+                order.amountHt != null ? Number(order.amountHt) : null
+              }
+              onCreated={(inv) => setInvoices((prev) => [inv, ...prev])}
+            />
+          </div>
+        </section>
+      ) : null}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5">
         <h2 className="text-sm font-bold text-slate-900">Historique</h2>

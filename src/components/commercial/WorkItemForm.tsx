@@ -115,6 +115,18 @@ function parseNum(s: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
+function parseNonNeg(s: string): number {
+  return Math.max(0, parseNum(s));
+}
+
+function humanError(e: unknown): string {
+  const msg = e instanceof Error ? e.message : "Impossible d’enregistrer.";
+  if (/failed to fetch|network|load failed/i.test(msg)) {
+    return "Connexion interrompue. Réessayez.";
+  }
+  return msg;
+}
+
 function newLocalId() {
   return `tmp-${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -185,10 +197,6 @@ export function WorkItemForm({
   const componentsRef = useRef(components);
   componentsRef.current = components;
   const persistTimers = useRef<Record<string, number>>({});
-
-  const unitValue = UNITS.includes(saleUnit as (typeof UNITS)[number])
-    ? saleUnit
-    : customUnit || saleUnit;
 
   const costing = useMemo(
     () =>
@@ -272,10 +280,10 @@ export function WorkItemForm({
     try {
       const res = await fetch(`/api/commercial/library/work-items/${id}`);
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erreur");
+      if (!res.ok) throw new Error(data.error || "Ouvrage introuvable.");
       applyLoaded(data.workItem as LoadedWorkItem);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur");
+      setError(humanError(e));
     } finally {
       setLoading(false);
     }
@@ -297,16 +305,22 @@ export function WorkItemForm({
     saleUnit === "__custom" ? customUnit.trim() || "U" : saleUnit || "U";
 
   function switchPriceMode(next: PriceMode) {
+    if (next === priceMode) return;
     setPriceMode(next);
     if (next === "direct") {
       setSellMode("FIXED_SELL");
-      if (!unitSellHt && costing.unitSellHt) {
-        setUnitSellHt(String(costing.unitSellHt));
+      if (!unitSellHt && costing.costPriceHt > 0 && costing.unitSellHt > 0) {
+        setUnitSellHt(String(costing.unitSellHt).replace(".", ","));
       }
     } else {
       setSellMode("MARGIN");
-      if (!marginPercent && costing.marquePercent) {
-        setMarginPercent(String(roundMoney(costing.marquePercent, 2)));
+      if (
+        !marginPercent &&
+        costing.costPriceHt > 0 &&
+        costing.marquePercent > 0 &&
+        costing.marquePercent < 100
+      ) {
+        setMarginPercent(String(roundMoney(costing.marquePercent, 2)).replace(".", ","));
       }
     }
   }
@@ -354,7 +368,7 @@ export function WorkItemForm({
       const draft = componentsRef.current.find((c) => c.localId === localId);
       if (!draft || !draft.name.trim() || !activeId) return;
       void persistComponent(draft, activeId).catch((e) => {
-        setError(e instanceof Error ? e.message : "Erreur");
+        setError(humanError(e));
       });
     }, 450);
   }
@@ -374,7 +388,7 @@ export function WorkItemForm({
       try {
         await persistComponent(next, activeId);
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Erreur");
+        setError(humanError(e));
       }
     }
   }
@@ -391,7 +405,7 @@ export function WorkItemForm({
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Erreur");
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Erreur");
+        setError(humanError(e));
       }
     }
   }
@@ -467,7 +481,7 @@ export function WorkItemForm({
         onSaved?.(row);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur");
+      setError(humanError(e));
     } finally {
       setBusy(false);
     }
@@ -488,7 +502,7 @@ export function WorkItemForm({
     <form
       id="work-item-form"
       onSubmit={(e) => void submit(e)}
-      className={cn("space-y-7", isDrawer ? "px-5 py-5" : "space-y-8")}
+      className={cn("space-y-5", isDrawer ? "px-5 py-5" : "")}
     >
       {needsPriceRecalc ? (
         <p
@@ -534,7 +548,7 @@ export function WorkItemForm({
                 setCustomUnit("");
               }}
               className={cn(
-                "min-h-9 rounded-full px-3 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/35",
+                "min-h-10 rounded-full px-3 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/35",
                 saleUnit === u
                   ? "bg-[#1e3a5f] text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200",
@@ -549,7 +563,7 @@ export function WorkItemForm({
             aria-checked={saleUnit === "__custom"}
             onClick={() => setSaleUnit("__custom")}
             className={cn(
-              "min-h-9 rounded-full px-3 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/35",
+              "min-h-10 rounded-full px-3 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/35",
               saleUnit === "__custom"
                 ? "bg-[#1e3a5f] text-white"
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200",
@@ -569,46 +583,42 @@ export function WorkItemForm({
         ) : null}
       </div>
 
-      <div>
-        <p className={labelClass} id="wi-price-mode">
-          Mode de prix
-        </p>
-        <div
-          role="radiogroup"
-          aria-labelledby="wi-price-mode"
-          className="inline-flex rounded-full bg-slate-100 p-1"
-        >
-          {(
-            [
-              ["direct", "Prix direct"],
-              ["calculated", "Prix calculé"],
-            ] as const
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              role="radio"
-              aria-checked={priceMode === id}
-              onClick={() => switchPriceMode(id)}
-              className={cn(
-                "min-h-9 rounded-full px-4 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/35",
-                priceMode === id
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-800",
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+      <div
+        role="radiogroup"
+        aria-label="Mode de prix"
+        className="inline-flex rounded-full bg-slate-100 p-1"
+      >
+        {(
+          [
+            ["direct", "Prix direct"],
+            ["calculated", "Prix calculé"],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            role="radio"
+            aria-checked={priceMode === id}
+            onClick={() => switchPriceMode(id)}
+            className={cn(
+              "min-h-10 rounded-full px-4 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/35",
+              priceMode === id
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-800",
+            )}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
-      <div
-        className={cn(
-          "grid transition-[grid-template-rows,opacity] duration-200 ease-out",
-          priceMode === "direct" ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-        )}
-      >
+      <div>
+        <div
+          className={cn(
+            "grid transition-[grid-template-rows,opacity] duration-200 ease-out",
+            priceMode === "direct" ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+          )}
+        >
         <div className="overflow-hidden">
           <div
             className={priceMode === "direct" ? "pb-1" : "pointer-events-none h-0"}
@@ -624,7 +634,7 @@ export function WorkItemForm({
                 value={unitSellHt}
                 onChange={(e) => setUnitSellHt(e.target.value)}
                 inputMode="decimal"
-                placeholder="65,00"
+                placeholder="850,00"
                 className={cn(inputClass, "pr-16 tabular-nums")}
               />
               <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-slate-400">
@@ -668,7 +678,7 @@ export function WorkItemForm({
 
               {components.length === 0 && !pickerOpen ? (
                 <p className="text-sm text-slate-500">
-                  Ajoutez les matériaux, la main-d’œuvre, le matériel ou la sous-traitance.
+                  Ajoutez ce que contient l’ouvrage.
                 </p>
               ) : (
                 <ul className="divide-y divide-slate-100">
@@ -684,23 +694,26 @@ export function WorkItemForm({
               )}
             </div>
 
-            <CostSummary
-              costing={costing}
-              unit={resolvedUnit}
-              marginPercent={marginPercent}
-              onMarginChange={(v) => {
-                setSellMode("MARGIN");
-                setMarginPercent(v);
-              }}
-              sellMode={sellMode}
-              unitSellHt={unitSellHt}
-              onSellChange={(v) => {
-                setSellMode("FIXED_SELL");
-                setUnitSellHt(v);
-              }}
-            />
+            {components.length > 0 ? (
+              <CostSummary
+                costing={costing}
+                unit={resolvedUnit}
+                marginPercent={marginPercent}
+                onMarginChange={(v) => {
+                  setSellMode("MARGIN");
+                  setMarginPercent(v);
+                }}
+                sellMode={sellMode}
+                unitSellHt={unitSellHt}
+                onSellChange={(v) => {
+                  setSellMode("FIXED_SELL");
+                  setUnitSellHt(v);
+                }}
+              />
+            ) : null}
           </div>
         </div>
+      </div>
       </div>
 
       <div>
@@ -766,15 +779,20 @@ export function WorkItemForm({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={labelClass} htmlFor="wi-fees-pct">
-                    Frais %
+                    Frais
                   </label>
-                  <input
-                    id="wi-fees-pct"
-                    value={feesPercent}
-                    onChange={(e) => setFeesPercent(e.target.value)}
-                    inputMode="decimal"
-                    className={cn(inputClass, "tabular-nums")}
-                  />
+                  <div className="relative">
+                    <input
+                      id="wi-fees-pct"
+                      value={feesPercent}
+                      onChange={(e) => setFeesPercent(e.target.value)}
+                      inputMode="decimal"
+                      className={cn(inputClass, "pr-8 tabular-nums")}
+                    />
+                    <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-slate-400">
+                      %
+                    </span>
+                  </div>
                 </div>
                 <div>
                   <label className={labelClass} htmlFor="wi-fees-amt">
@@ -812,7 +830,7 @@ export function WorkItemForm({
             disabled={!canSubmit || busy}
             className="rounded-xl bg-[#1e3a5f] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50"
           >
-            {busy ? "…" : submitLabel}
+            {busy ? (isPersisted ? "Enregistrement…" : "Création…") : submitLabel}
           </button>
           {onCancel ? (
             <button
@@ -837,7 +855,7 @@ export function WorkItemForm({
       <div className="min-h-0 flex-1 overflow-y-auto">{body}</div>
       <div className="shrink-0 border-t border-slate-200 bg-white px-5 py-3">
         <div className="flex items-center gap-3">
-          {priceMode === "calculated" ? (
+          {priceMode === "calculated" && components.length > 0 ? (
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
                 Prix de vente
@@ -853,10 +871,10 @@ export function WorkItemForm({
             disabled={!canSubmit || busy}
             className={cn(
               "min-h-11 rounded-xl bg-[#1e3a5f] px-5 text-sm font-bold text-white transition disabled:opacity-50",
-              priceMode === "calculated" ? "shrink-0" : "w-full",
+              priceMode === "calculated" && components.length > 0 ? "shrink-0" : "w-full",
             )}
           >
-            {busy ? "…" : submitLabel}
+            {busy ? (isPersisted ? "Enregistrement…" : "Création…") : submitLabel}
           </button>
         </div>
       </div>
@@ -884,10 +902,10 @@ function CostSummary({
   return (
     <div className="space-y-4 border-t border-slate-100 pt-5">
       <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
           Coût de revient
         </p>
-        <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-slate-900">
+        <p className="mt-1 text-lg font-medium tabular-nums tracking-tight text-slate-600">
           {fmt(costing.costPriceHt)} € / {unit}
         </p>
       </div>
@@ -898,19 +916,16 @@ function CostSummary({
         {sellMode === "FIXED_SELL" ? (
           <p className="text-sm tabular-nums text-slate-700">
             {fmt(costing.marquePercent)} %
-            <span className="ml-2 text-xs font-normal text-slate-400">
-              (taux de marque)
-            </span>
           </p>
         ) : (
-          <div className="relative max-w-[10rem]">
+          <div className="relative max-w-[8.5rem]">
             <input
               id="wi-margin"
               value={marginPercent}
               onChange={(e) => onMarginChange(e.target.value)}
               inputMode="decimal"
-              placeholder="0"
-              aria-label="Marge (taux de marque)"
+              placeholder="25"
+              aria-label="Marge"
               className={cn(inputClass, "pr-8 tabular-nums")}
             />
             <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-slate-400">
@@ -922,7 +937,7 @@ function CostSummary({
       {sellMode === "FIXED_SELL" ? (
         <div>
           <label className={labelClass} htmlFor="wi-sell-calc">
-            Prix de vente fixé
+            Prix de vente
           </label>
           <input
             id="wi-sell-calc"
@@ -934,10 +949,10 @@ function CostSummary({
         </div>
       ) : null}
       <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
           Prix de vente
         </p>
-        <p className="mt-1 text-3xl font-semibold tabular-nums tracking-tight text-[#1e3a5f]">
+        <p className="mt-1 text-[1.75rem] font-semibold tabular-nums tracking-tight text-slate-900">
           {fmt(costing.unitSellHt)} € HT
           <span className="ml-1 text-base font-medium text-slate-400">/ {unit}</span>
         </p>
@@ -965,27 +980,26 @@ function ComponentLine({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-slate-900">{row.name}</p>
-          <p className="mt-0.5 text-xs text-slate-400">{TYPE_LABELS[row.type]}</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
             <input
               aria-label={`Quantité ${row.name}`}
               value={row.qtyInput ?? String(row.quantityPerUnit).replace(".", ",")}
               onChange={(e) =>
                 onChange({
                   qtyInput: e.target.value,
-                  quantityPerUnit: parseNum(e.target.value),
+                  quantityPerUnit: parseNonNeg(e.target.value),
                 })
               }
               inputMode="decimal"
-              className="h-9 w-[4.5rem] rounded-lg border border-slate-200 px-2 text-sm tabular-nums outline-none focus:border-[#1e3a5f]/40 focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/25"
+              className="h-10 w-[4.25rem] rounded-lg border border-slate-200 bg-white px-2 text-sm tabular-nums outline-none focus:border-[#1e3a5f]/40 focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/25"
             />
             <input
               aria-label={`Unité ${row.name}`}
               value={row.unit}
               onChange={(e) => onChange({ unit: e.target.value })}
-              className="h-9 w-14 rounded-lg border border-slate-200 px-2 text-sm outline-none focus:border-[#1e3a5f]/40 focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/25"
+              className="h-10 w-12 rounded-lg border border-slate-200 bg-white px-1.5 text-center text-sm outline-none focus:border-[#1e3a5f]/40 focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/25"
             />
-            <span>×</span>
+            <span className="px-0.5 text-slate-400">×</span>
             <div className="relative">
               <input
                 aria-label={`Coût unitaire ${row.name}`}
@@ -993,11 +1007,11 @@ function ComponentLine({
                 onChange={(e) =>
                   onChange({
                     costInput: e.target.value,
-                    unitCostHt: parseNum(e.target.value),
+                    unitCostHt: parseNonNeg(e.target.value),
                   })
                 }
                 inputMode="decimal"
-                className="h-9 w-[5.5rem] rounded-lg border border-slate-200 px-2 pr-5 text-sm tabular-nums outline-none focus:border-[#1e3a5f]/40 focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/25"
+                className="h-10 w-[5.25rem] rounded-lg border border-slate-200 bg-white px-2 pr-5 text-sm tabular-nums outline-none focus:border-[#1e3a5f]/40 focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/25"
               />
               <span className="pointer-events-none absolute inset-y-0 right-1.5 flex items-center text-xs text-slate-400">
                 €
@@ -1005,14 +1019,14 @@ function ComponentLine({
             </div>
           </div>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-2">
+        <div className="flex shrink-0 flex-col items-end gap-1 pt-0.5">
           <p className="text-sm font-semibold tabular-nums text-slate-900">
             {fmt(line)} €
           </p>
           <button
             type="button"
             onClick={onRemove}
-            className="text-xs font-medium text-slate-400 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/35"
+            className="min-h-8 text-xs font-medium text-slate-400 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/35"
           >
             Retirer
           </button>
@@ -1185,7 +1199,7 @@ function ResourcePicker({
         }
       } catch (e) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Erreur");
+          setError(humanError(e));
           setResults([]);
         }
       } finally {
@@ -1233,7 +1247,7 @@ function ResourcePicker({
     <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-3">
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Rechercher dans la bibliothèque
+          Rechercher
         </p>
         <button
           type="button"
@@ -1281,7 +1295,7 @@ function ResourcePicker({
         {loading ? (
           <p className="px-1 py-3 text-sm text-slate-500">Recherche…</p>
         ) : results.length === 0 ? (
-          <p className="px-1 py-3 text-sm text-slate-500">Aucun résultat dans la bibliothèque.</p>
+          <p className="px-1 py-3 text-sm text-slate-500">Aucun résultat.</p>
         ) : (
           <ul>
             {results.slice(0, 40).map((r) => (

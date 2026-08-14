@@ -212,10 +212,18 @@ export function LibraryHub({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur");
-      setToast("Ouvrage dupliqué");
-      refresh();
+      setToast("Copie créée");
       if (data.workItem?.id) {
-        setDrawer({ mode: "edit", id: data.workItem.id });
+        upsertItem({
+          ...item,
+          id: String(data.workItem.id),
+          name: String(data.workItem.name ?? `${item.name} (copie)`),
+          reference: data.workItem.reference ?? null,
+          isFavorite: false,
+          quoteLineCount: 0,
+          updatedAt: new Date().toISOString(),
+        });
+        setDrawer({ mode: "edit", id: String(data.workItem.id) });
       }
     } catch (e) {
       setToast(e instanceof Error ? e.message : "Erreur");
@@ -225,7 +233,7 @@ export function LibraryHub({
   }
 
   async function archive(item: LibraryHubRow) {
-    if (!confirm(`Archiver « ${item.name} » ?`)) return;
+    if (!confirm(`Archiver « ${item.name} » ?\nVous le retrouverez dans le filtre Archivés.`)) return;
     setBusyId(item.id);
     try {
       const res = await fetch(`/api/commercial/library/work-items/${item.id}`, {
@@ -238,7 +246,7 @@ export function LibraryHub({
       setItems((prev) =>
         prev.map((x) => (x.id === item.id ? { ...x, isActive: false } : x)),
       );
-      setToast("Ouvrage archivé");
+      setToast("Archivé — retrouvez-le dans Archivés");
     } catch (e) {
       setToast(e instanceof Error ? e.message : "Erreur");
     } finally {
@@ -259,7 +267,7 @@ export function LibraryHub({
       setItems((prev) =>
         prev.map((x) => (x.id === item.id ? { ...x, isActive: true } : x)),
       );
-      setToast("Ouvrage restauré");
+      setToast("Restauré — l’ouvrage est de nouveau dans la liste");
     } catch (e) {
       setToast(e instanceof Error ? e.message : "Erreur");
     } finally {
@@ -270,7 +278,7 @@ export function LibraryHub({
   async function remove(item: LibraryHubRow) {
     if (item.quoteLineCount > 0) {
       alert(
-        `Cet ouvrage est utilisé dans ${item.quoteLineCount} devis. Il peut être archivé mais pas supprimé.`,
+        "Cet ouvrage est utilisé dans un devis. Archivez-le plutôt que de le supprimer.",
       );
       return;
     }
@@ -283,7 +291,7 @@ export function LibraryHub({
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         if (data.code === "WORK_ITEM_IN_USE") {
-          alert(data.error || "Ouvrage utilisé — archivez-le.");
+          alert("Cet ouvrage est utilisé dans un devis. Archivez-le plutôt que de le supprimer.");
           return;
         }
         throw new Error(data.error || "Erreur");
@@ -306,8 +314,8 @@ export function LibraryHub({
 
   const chips: { id: Chip; label: string }[] = [
     { id: "all", label: "Tous" },
-    { id: "simple", label: "Simples" },
-    { id: "compose", label: "Composés" },
+    { id: "simple", label: "Prix direct" },
+    { id: "compose", label: "Prix calculé" },
     { id: "verify", label: "À vérifier" },
     { id: "archived", label: "Archivés" },
   ];
@@ -486,8 +494,9 @@ export function LibraryHub({
           ) : null}
         <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           {filtered.map((item) => {
+            const missingPrice = !(item.unitSellHt > 0);
             const marge = marqueOf(item);
-            const low = marge > 0 && marge < LOW_MARGIN;
+            const low = !missingPrice && marge > 0 && marge < LOW_MARGIN;
             return (
               <li key={item.id}>
                 <div className="group flex flex-col gap-3 px-4 py-3.5 transition hover:bg-slate-50/80 sm:flex-row sm:items-center sm:gap-4">
@@ -500,6 +509,11 @@ export function LibraryHub({
                       <p className="truncate text-[15px] font-semibold text-slate-900">
                         {item.name}
                       </p>
+                      {missingPrice ? (
+                        <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+                          Prix à renseigner
+                        </span>
+                      ) : null}
                       {item.needsPriceRecalc ? (
                         <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-800">
                           À vérifier
@@ -507,28 +521,29 @@ export function LibraryHub({
                       ) : null}
                       {low ? (
                         <span className="text-[11px] font-medium text-amber-700">
-                          ⚠ Marge {fmt(marge)} %
+                          Marge {fmt(marge)} %
                         </span>
                       ) : null}
                     </div>
                     <p className="mt-0.5 text-xs text-slate-500">
-                      {[item.family, item.saleUnit, item.kind === "COMPOSITE" ? "Composé" : "Simple"]
+                      {[
+                        item.family,
+                        item.saleUnit,
+                        item.kind === "COMPOSITE" ? "Prix calculé" : "Prix direct",
+                      ]
                         .filter(Boolean)
                         .join(" · ")}
                       {item.reference ? ` · ${item.reference}` : ""}
                     </p>
-                    <p className="mt-1 text-[11px] text-slate-400">
-                      {relativeUpdated(item.updatedAt)}
-                    </p>
                   </button>
 
-                  <div className="flex shrink-0 items-end gap-5 sm:gap-6">
+                  <div className="flex shrink-0 items-end gap-4 sm:gap-6">
                     <div className="text-right">
                       <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
                         Coût
                       </p>
                       <p className="tabular-nums text-sm font-medium text-slate-700">
-                        {fmt(item.unitCostHt)} €
+                        {missingPrice && item.kind === "SIMPLE" ? "—" : `${fmt(item.unitCostHt)} €`}
                       </p>
                     </div>
                     <div className="text-right">
@@ -536,20 +551,24 @@ export function LibraryHub({
                         Vente HT
                       </p>
                       <p className="tabular-nums text-sm font-semibold text-slate-900">
-                        {fmt(item.unitSellHt)} €
+                        {missingPrice ? "—" : `${fmt(item.unitSellHt)} €`}
                       </p>
                     </div>
-                    <div className="text-right">
+                    <div className="hidden text-right sm:block">
                       <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
                         Marge
                       </p>
                       <p
                         className={cn(
                           "tabular-nums text-sm font-semibold",
-                          low ? "text-amber-700" : "text-emerald-700",
+                          missingPrice
+                            ? "text-slate-400"
+                            : low
+                              ? "text-amber-700"
+                              : "text-slate-700",
                         )}
                       >
-                        {fmt(marge)} %
+                        {missingPrice ? "—" : `${fmt(marge)} %`}
                       </p>
                     </div>
                     <button
@@ -557,7 +576,7 @@ export function LibraryHub({
                       disabled={busyId === item.id}
                       onClick={() => void toggleFavorite(item)}
                       className={cn(
-                        "text-lg leading-none",
+                        "flex h-10 w-10 items-center justify-center text-lg leading-none",
                         item.isFavorite ? "text-amber-500" : "text-slate-300 hover:text-amber-400",
                       )}
                       aria-label={item.isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
@@ -656,7 +675,7 @@ function RecentStrip({
               {i.name}
             </p>
             <p className="tabular-nums text-[11px] text-slate-500">
-              {fmt(i.unitSellHt)} € HT
+              {i.unitSellHt > 0 ? `${fmt(i.unitSellHt)} € HT` : "Prix à renseigner"}
             </p>
           </button>
         ))}
@@ -864,7 +883,7 @@ function RowMenu({
           disabled={busy}
           aria-expanded={expanded}
           aria-label={`Actions de l’ouvrage ${item.name}`}
-          className="rounded-lg px-2 py-1.5 text-sm font-bold text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+          className="flex h-10 min-w-10 items-center justify-center rounded-lg px-2 text-sm font-bold text-slate-500 hover:bg-slate-100 disabled:opacity-50"
         >
           •••
         </button>
@@ -923,7 +942,7 @@ function WorkItemCreateEditDrawer({
       title={state?.mode === "edit" ? "Modifier l’ouvrage" : "Nouvel ouvrage"}
       description={
         state?.mode === "edit"
-          ? "Les devis déjà figés conservent leurs valeurs historiques."
+          ? "Les devis déjà établis ne sont pas modifiés."
           : "Créez votre ouvrage en quelques secondes."
       }
       widthClass="max-w-lg"

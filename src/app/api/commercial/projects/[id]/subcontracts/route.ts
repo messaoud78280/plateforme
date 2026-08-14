@@ -7,14 +7,14 @@ import {
   type SubcontractStatus,
 } from "@/lib/commercial/subcontracts";
 
-type Ctx = { params: Promise<{ projectId: string }> };
+type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_req: Request, ctx: Ctx) {
   const auth = await requireCommercialApiSession();
   if (auth.error || !auth.session) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
-  const { projectId } = await ctx.params;
+  const { id: projectId } = await ctx.params;
   try {
     const items = await listSubcontracts(auth.orgId, projectId);
     return NextResponse.json({ items });
@@ -30,7 +30,7 @@ export async function POST(req: Request, ctx: Ctx) {
   if (auth.error || !auth.session) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
-  const { projectId } = await ctx.params;
+  const { id: projectId } = await ctx.params;
   const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
   if (!body) {
     return NextResponse.json({ error: "Corps invalide" }, { status: 400 });

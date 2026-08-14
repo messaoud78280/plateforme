@@ -25,6 +25,7 @@ export function detectCountryCode(request: NextRequest): string | null {
 export function shouldSkipGeoBlock(pathname: string): boolean {
   if (pathname === "/robots.txt" || pathname === "/sitemap.xml") return true;
   if (pathname === "/favicon.ico") return true;
+  if (pathname === "/api/health" || pathname === "/api/health-db") return true;
   if (pathname.startsWith("/access-denied")) return true;
   if (pathname.startsWith("/_next/")) return true;
   if (/\.(ico|png|jpg|jpeg|gif|webp|svg|woff2?|txt|xml)$/i.test(pathname)) return true;

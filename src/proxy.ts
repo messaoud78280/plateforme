@@ -20,6 +20,14 @@ function getCanonicalHost(): string {
 /** Domaines apex à rediriger vers l’hôte canonique (sans www). */
 const APEX_REDIRECT_HOSTS = new Set(["bework.fr"]);
 
+/** Healthcheck Railway : Host = healthcheck.railway.app — ne jamais rediriger. */
+const HEALTHCHECK_PATHS = new Set(["/api/health", "/api/health-db"]);
+const PASSTHROUGH_HOSTS = new Set([
+  "healthcheck.railway.app",
+  "localhost",
+  "127.0.0.1",
+]);
+
 const BLOCKED_COUNTRIES = parseBlockedCountries(process.env.BLOCKED_COUNTRIES);
 
 function geoBlockResponse(request: NextRequest): NextResponse | null {
@@ -47,6 +55,10 @@ function geoBlockResponse(request: NextRequest): NextResponse | null {
 }
 
 export function proxy(request: NextRequest) {
+  if (HEALTHCHECK_PATHS.has(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
   const indexNowKey = process.env.INDEXNOW_API_KEY?.trim();
   if (indexNowKey) {
     const keyMatch = request.nextUrl.pathname.match(/^\/([a-zA-Z0-9-]{8,128})\.txt$/);
@@ -67,7 +79,7 @@ export function proxy(request: NextRequest) {
   const canonicalHost = getCanonicalHost();
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
 
-  if (!host || host === canonicalHost) {
+  if (!host || host === canonicalHost || PASSTHROUGH_HOSTS.has(host)) {
     return NextResponse.next();
   }
 
@@ -83,6 +95,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg|woff2?|txt|xml)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|api/health(?:-db)?|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg|woff2?|txt|xml)$).*)",
   ],
 };

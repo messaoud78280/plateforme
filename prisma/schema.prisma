@@ -1000,6 +1000,8 @@ model ChantierFile {
   @@index([deletedAt])
   @@index([isCurrentVersion])
   @@index([checksum])
+  @@index([projectId, createdAt])
+  @@index([status, deletedAt])
 }
 
 /// Lien document GED ↔ élément Pilotage / chantier

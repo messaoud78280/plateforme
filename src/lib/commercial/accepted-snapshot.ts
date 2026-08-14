@@ -376,6 +376,20 @@ export async function acceptQuoteWithPdfArchive(opts: {
   );
   try {
     const result = await ensureAcceptedQuoteSnapshot(opts.orgId, opts.quoteId);
+    if (result.snapshot) {
+      try {
+        const { ingestAcceptedQuoteSnapshot } = await import("@/lib/ged/ingest-quote-snapshot");
+        await ingestAcceptedQuoteSnapshot({
+          organizationId: opts.orgId,
+          quoteId: opts.quoteId,
+          snapshotId: result.snapshot.id,
+          storageKey: result.snapshot.storageKey,
+          addedById: opts.actorUserId,
+        });
+      } catch (gedErr) {
+        console.error("GED ingest devis accepté:", gedErr);
+      }
+    }
     return {
       quote,
       snapshot: result.snapshot,

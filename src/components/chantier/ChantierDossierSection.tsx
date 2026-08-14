@@ -42,11 +42,14 @@ export function ChantierDossierSection({
   canEdit: boolean;
 }) {
   const router = useRouter();
-  const [expandedFolder, setExpandedFolder] = useState<string | null>(folders[0]?.id ?? null);
+  const [expandedFolder, setExpandedFolder] = useState<string | null>(
+    folders.find((f) => f.files.length > 0)?.id ?? folders[0]?.id ?? null,
+  );
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [preview, setPreview] = useState<DocumentPreviewItem | null>(null);
   const [shareFile, setShareFile] = useState<{ id: string; name: string } | null>(null);
+  const [showAllFolders, setShowAllFolders] = useState(false);
 
   async function uploadToFolder(folderId: string, file: File) {
     const share = window.confirm(
@@ -189,9 +192,9 @@ export function ChantierDossierSection({
         fileName={shareFile?.name ?? ""}
       />
       <div className="border-b border-slate-100 px-6 py-5">
-        <h2 className="text-xl font-semibold text-slate-900">Classeur chantier (documents)</h2>
+        <h2 className="text-xl font-semibold text-slate-900">Documents du chantier</h2>
         <p className="mt-1 text-sm text-slate-600">
-          11 rubriques standard BTP — déposez les pièces au bon endroit, ou marquez une pièce à récupérer.
+          Même GED que Documents global — filtrée sur ce chantier. Les pièces arrivent aussi depuis la messagerie, les commandes et les devis.
         </p>
         {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
       </div>
@@ -200,6 +203,8 @@ export function ChantierDossierSection({
         {folders.map((folder) => {
           const open = expandedFolder === folder.id;
           const missingCount = folder.files.filter((f) => f.status === "MANQUANT" || f.status === "A_RELANCER").length;
+          const isEmpty = folder.files.length === 0;
+          if (!showAllFolders && isEmpty && folder.code !== "00") return null;
           return (
             <div key={folder.id}>
               <button
@@ -208,11 +213,12 @@ export function ChantierDossierSection({
                 className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left hover:bg-slate-50/80"
               >
                 <span className="min-w-0">
-                  <span className="font-mono text-xs font-semibold text-[#1d4ed8]">{folder.code}</span>
-                  <span className="ml-2 font-medium text-slate-900">{folder.label}</span>
-                  <span className="ml-2 text-sm text-slate-500">
-                    ({folder.files.length} doc{folder.files.length !== 1 ? "s" : ""})
-                  </span>
+                  <span className="font-medium text-slate-900">{folder.label}</span>
+                  {folder.files.length > 0 ? (
+                    <span className="ml-2 text-sm text-slate-500">
+                      {folder.files.length} doc{folder.files.length !== 1 ? "s" : ""}
+                    </span>
+                  ) : null}
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
                   {missingCount > 0 ? (
@@ -392,6 +398,17 @@ export function ChantierDossierSection({
             </div>
           );
         })}
+        {!showAllFolders && folders.some((f) => f.files.length === 0 && f.code !== "00") ? (
+          <div className="px-6 py-4">
+            <button
+              type="button"
+              onClick={() => setShowAllFolders(true)}
+              className="text-sm font-medium text-[#1e3a5f] hover:underline"
+            >
+              Voir toutes les catégories
+            </button>
+          </div>
+        ) : null}
       </div>
     </section>
   );

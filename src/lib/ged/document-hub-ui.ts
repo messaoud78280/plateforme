@@ -1,4 +1,4 @@
-/** Helpers UI GED-V2A.3 — sans Prisma (safe client). */
+/** Helpers UI GED V2 — sans Prisma (safe client). */
 
 export type HubGroup =
   | "all"
@@ -9,9 +9,22 @@ export type HubGroup =
   | "doe"
   | "photos";
 
+export type HubView = "all" | "recent" | "favorites" | "missing" | "classify";
+
 export type HubSort = "recent" | "oldest" | "name" | "type";
 
 export type HubDocSource = "chantier" | "purchase_order" | "legacy";
+
+export type HubOrigin =
+  | "MESSAGERIE"
+  | "COMMANDE"
+  | "CHANTIER"
+  | "FOURNISSEUR"
+  | "DEVIS"
+  | "DOE"
+  | "FICHE_SUIVI"
+  | "UPLOAD"
+  | "BEWORK";
 
 export type HubDocumentItem = {
   id: string;
@@ -28,12 +41,20 @@ export type HubDocumentItem = {
   href: string;
   mimeHint: string | null;
   isCurrentVersion: boolean;
-  /** Pièce attendue sans fichier réel — ne pas proposer « Ouvrir ». */
   isExpectedMissing?: boolean;
+  origin?: HubOrigin;
+  originLabel?: string;
+  originHref?: string | null;
+  originActionLabel?: string | null;
+  isFavorite?: boolean;
+  versionLabel?: string | null;
+  indice?: string | null;
+  companyLabel?: string | null;
+  chantierFileId?: string | null;
 };
 
 const GROUP_DEFS: { id: HubGroup; label: string }[] = [
-  { id: "all", label: "Tous" },
+  { id: "all", label: "Tous types" },
   { id: "chantiers", label: "Chantiers" },
   { id: "administratif", label: "Administratif" },
   { id: "commandes", label: "Commandes" },
@@ -42,7 +63,15 @@ const GROUP_DEFS: { id: HubGroup; label: string }[] = [
   { id: "photos", label: "Photos" },
 ];
 
-/** Onglets hub selon le portail (interne vs client vs fournisseur). */
+export const HUB_VIEWS: { id: HubView; label: string }[] = [
+  { id: "all", label: "Tous" },
+  { id: "recent", label: "Récents" },
+  { id: "favorites", label: "Favoris" },
+  { id: "missing", label: "À récupérer" },
+  { id: "classify", label: "À classer" },
+];
+
+/** Onglets type (filtres) selon le portail. */
 export function hubGroupsForPersona(
   personType?: string | null,
   permissionProfile?: string | null,
@@ -53,14 +82,14 @@ export function hubGroupsForPersona(
     personType === "CLIENT_EXT" || permissionProfile === "CLIENT";
   if (isSupplier) {
     return [
-      { id: "all", label: "Tous" },
+      { id: "all", label: "Tous types" },
       { id: "commandes", label: "Commandes" },
       { id: "fournisseurs", label: "Livraisons" },
     ];
   }
   if (isClient) {
     return [
-      { id: "all", label: "Tous" },
+      { id: "all", label: "Tous types" },
       { id: "chantiers", label: "Chantiers" },
       { id: "commandes", label: "Commandes" },
     ];
@@ -68,8 +97,41 @@ export function hubGroupsForPersona(
   return GROUP_DEFS;
 }
 
+export function hubViewsForPersona(
+  personType?: string | null,
+  permissionProfile?: string | null,
+): { id: HubView; label: string }[] {
+  const isSupplier =
+    personType === "SUPPLIER" || permissionProfile === "FOURNISSEUR";
+  const isClient =
+    personType === "CLIENT_EXT" || permissionProfile === "CLIENT";
+  if (isSupplier || isClient) {
+    return HUB_VIEWS.filter((v) => v.id === "all" || v.id === "recent" || v.id === "favorites");
+  }
+  return HUB_VIEWS;
+}
+
+export function originActionLabel(origin?: HubOrigin | null): string | null {
+  switch (origin) {
+    case "MESSAGERIE":
+      return "Voir la conversation";
+    case "COMMANDE":
+      return "Voir la commande";
+    case "DEVIS":
+      return "Voir le devis";
+    case "FICHE_SUIVI":
+      return "Voir la fiche";
+    case "DOE":
+    case "CHANTIER":
+      return "Voir le chantier";
+    default:
+      return null;
+  }
+}
+
 export function hubEmptyCopy(opts: {
   group: HubGroup;
+  view?: HubView;
   personType?: string | null;
   permissionProfile?: string | null;
   hostCompany?: string | null;
@@ -80,48 +142,50 @@ export function hubEmptyCopy(opts: {
     opts.personType === "CLIENT_EXT" || opts.permissionProfile === "CLIENT";
   const host = opts.hostCompany?.trim() || "votre partenaire";
 
+  if (opts.view === "favorites") {
+    return {
+      title: "Aucun favori",
+      body: "Marquez d’une étoile les plans, CCTP ou contrats que vous consultez souvent.",
+    };
+  }
+  if (opts.view === "missing") {
+    return {
+      title: "Rien à récupérer",
+      body: "Les pièces encore manquantes (fiches techniques, attestations, PV) apparaîtront ici.",
+    };
+  }
+  if (opts.view === "classify") {
+    return {
+      title: "Rien à classer",
+      body: "Les documents sans chantier ou type suffisamment connu apparaîtront ici.",
+    };
+  }
+
   if (isSupplier) {
     return {
-      title: "Aucun document partagé pour le moment.",
+      title: "Aucun document",
       body: `Les documents liés à vos commandes apparaîtront ici lorsque ${host} les partagera.`,
     };
   }
   if (isClient) {
     return {
-      title: "Aucun document partagé pour le moment.",
+      title: "Aucun document",
       body: `Les documents que ${host} partage avec vous apparaîtront ici.`,
     };
   }
 
-  switch (opts.group) {
-    case "doe":
-      return { title: "Aucun document DOE.", body: "Ajoutez un document DOE ou modifiez les filtres." };
-    case "commandes":
-      return {
-        title: "Aucun document lié aux commandes.",
-        body: "Les BL et pièces de commande apparaîtront ici.",
-      };
-    case "photos":
-      return { title: "Aucune photo documentaire.", body: "Ajoutez une photo depuis un chantier." };
-    case "administratif":
-      return {
-        title: "Aucun document administratif.",
-        body: "Contrats, CCTP et pièces admin apparaîtront ici.",
-      };
-    case "fournisseurs":
-      return {
-        title: "Aucun document fournisseur.",
-        body: "BL, fiches techniques et pièces fournisseur.",
-      };
-    case "chantiers":
-      return {
-        title: "Aucun document chantier.",
-        body: "Plans, photos et pièces de chantier.",
-      };
-    default:
-      return {
-        title: "Aucun document ici.",
-        body: "Ajoutez votre premier document ou modifiez les filtres.",
-      };
-  }
+  return {
+    title: "Aucun document",
+    body: "Les documents ajoutés depuis vos chantiers et outils BeWork apparaîtront ici automatiquement.",
+  };
+}
+
+export function recentDayLabel(iso: string, now = new Date()): string {
+  const d = new Date(iso);
+  const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startDoc = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diff = Math.round((startToday.getTime() - startDoc.getTime()) / 86400000);
+  if (diff === 0) return "Aujourd’hui";
+  if (diff === 1) return "Hier";
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
 }

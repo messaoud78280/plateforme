@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -33,6 +34,7 @@ import {
   ChannelSendMembershipError,
   createChannelMessageWithSenderMembership,
 } from "@/lib/messagerie/channel-send-guarantee";
+import { ingestDurableMessageAttachments } from "@/lib/ged/ingest-message-durable";
 
 const VALID_CHANNELS = new Set(["INTERNE", "CLIENT", "FOURNISSEUR", "SOUS_TRAITANT"]);
 
@@ -388,6 +390,33 @@ export async function POST(request: Request) {
         at: message.createdAt.toISOString(),
         kind: "PROJECT",
         conversationKey: `PROJECT:${projectId}:${resolvedChannelId}`,
+      });
+    }
+
+    if (attachments.length > 0) {
+      after(async () => {
+        try {
+          const ch = await prisma.projectChannel.findUnique({
+            where: { id: resolvedChannelId },
+            select: {
+              externalOrganization: { select: { name: true, tradeName: true } },
+            },
+          });
+          const companyName =
+            ch?.externalOrganization?.tradeName || ch?.externalOrganization?.name || null;
+          await ingestDurableMessageAttachments({
+            projectId,
+            clientId: project.clientId,
+            addedById: session.user.id,
+            messageKind: "PROJECT",
+            messageId: message.id,
+            attachments,
+            conversationLabel: project.title,
+            companyName,
+          });
+        } catch (e) {
+          console.error("GED ingest messagerie:", e);
+        }
       });
     }
 

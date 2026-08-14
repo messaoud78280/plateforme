@@ -20,6 +20,8 @@ export async function linkMessageAttachmentToChantier(opts: {
   messageKind: string;
   messageId: string;
   attachment: Att;
+  conversationLabel?: string | null;
+  companyName?: string | null;
 }): Promise<{ ok: true; chantierFileId: string } | { ok: false; error: string }> {
   const fileUrl = opts.attachment.fileUrl?.trim();
   if (!fileUrl) return { ok: false, error: "Pièce jointe sans fichier" };
@@ -51,6 +53,10 @@ export async function linkMessageAttachmentToChantier(opts: {
   if (!folder) return { ok: false, error: "Rubrique introuvable" };
 
   const isImage = Boolean(opts.attachment.mimeType?.startsWith("image/"));
+  const conversationLabel = [opts.companyName, opts.conversationLabel]
+    .map((s) => s?.trim())
+    .filter(Boolean)
+    .join(" — ");
   const file = await prisma.chantierFile.create({
     data: {
       projectId: opts.projectId,
@@ -66,6 +72,7 @@ export async function linkMessageAttachmentToChantier(opts: {
       visibility: "Interne entreprise cliente",
       classificationStatus: isImage ? "CLASSE" : "A_CLASSER",
       addedById: opts.addedById,
+      emitterName: opts.companyName?.trim() || null,
     },
     select: { id: true },
   });
@@ -75,7 +82,7 @@ export async function linkMessageAttachmentToChantier(opts: {
       fileId: file.id,
       entityType: "message_attachment",
       entityId: `${opts.messageKind}:${opts.messageId}:${fileUrl.slice(-48)}`,
-      entityLabel: "Messagerie",
+      entityLabel: conversationLabel || "Messagerie",
       createdById: opts.addedById,
     },
   });

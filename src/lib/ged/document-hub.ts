@@ -16,13 +16,16 @@ import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import { withPerfLog } from "@/lib/perf/server-timing";
 import {
   hubGroupsForPersona,
+  originActionLabel,
   type HubDocumentItem,
   type HubGroup,
   type HubSort,
+  type HubView,
 } from "@/lib/ged/document-hub-ui";
+import { originFromLinks, originHref, type GedLinkLite } from "@/lib/ged/origin";
 
-export type { HubGroup, HubSort, HubDocumentItem } from "@/lib/ged/document-hub-ui";
-export { hubGroupsForPersona, hubEmptyCopy } from "@/lib/ged/document-hub-ui";
+export type { HubGroup, HubSort, HubView, HubDocumentItem } from "@/lib/ged/document-hub-ui";
+export { hubGroupsForPersona, hubEmptyCopy, hubViewsForPersona } from "@/lib/ged/document-hub-ui";
 
 export type HubListResult = {
   items: HubDocumentItem[];
@@ -90,14 +93,18 @@ export async function loadDocumentHub(opts: {
   user: PurchaseOrderSessionUser & { name?: string | null };
   page?: number;
   group?: HubGroup;
+  view?: HubView;
   search?: string;
   projectId?: string;
+  origin?: string;
   sort?: HubSort;
 }): Promise<HubListResult> {
   return withPerfLog("loadDocumentHub", async () => {
     const page = Math.max(1, opts.page ?? 1);
     const group = opts.group ?? "all";
+    const view = opts.view ?? "all";
     const search = (opts.search ?? "").trim();
+    const originFilter = (opts.origin ?? "").trim().toUpperCase();
     const sort = opts.sort ?? "recent";
     const external = isExternalPortalUser(opts.user.personType);
     const internal = isInternalPurchaseOrderActor(opts.user);
@@ -177,28 +184,65 @@ export async function loadDocumentHub(opts: {
             }
           : null;
 
+    const searchTokens = search
+      .split(/\s+/)
+      .map((t) => t.trim())
+      .filter((t) => t.length >= 2)
+      .slice(0, 6);
+
+    const searchAnd =
+      searchTokens.length === 0
+        ? []
+        : searchTokens.map((token) => ({
+            OR: [
+              { name: { contains: token, mode: "insensitive" as const } },
+              { documentType: { contains: token, mode: "insensitive" as const } },
+              { category: { contains: token, mode: "insensitive" as const } },
+              { emitterName: { contains: token, mode: "insensitive" as const } },
+              { tags: { contains: token, mode: "insensitive" as const } },
+              { indice: { contains: token, mode: "insensitive" as const } },
+              { versionLabel: { contains: token, mode: "insensitive" as const } },
+              { project: { title: { contains: token, mode: "insensitive" as const } } },
+              {
+                links: {
+                  some: { entityLabel: { contains: token, mode: "insensitive" as const } },
+                },
+              },
+              {
+                folder: { label: { contains: token, mode: "insensitive" as const } },
+              },
+            ],
+          }));
+
+    const viewAnd: object[] = [];
+    if (view === "favorites") {
+      viewAnd.push({ favorites: { some: { userId: opts.user.id } } });
+    }
+    if (view === "missing") {
+      viewAnd.push({ status: { in: ["MANQUANT", "A_RELANCER"] } });
+    }
+    if (view === "classify") {
+      viewAnd.push({
+        OR: [{ classificationStatus: "A_CLASSER" }, { folder: { code: "00" } }],
+      });
+    }
+    if (view === "recent") {
+      const since = new Date();
+      since.setDate(since.getDate() - 30);
+      viewAnd.push({ createdAt: { gte: since } });
+    }
+
     const chantierWhere = {
       deletedAt: null,
       archivedAt: null,
-      isCurrentVersion: true,
+      ...(view === "missing" ? {} : { isCurrentVersion: true }),
       project: opts.projectId
         ? { id: opts.projectId, AND: [projectWhere] }
         : projectWhere,
       AND: [
         ...(externalVisibilityFilter ? [externalVisibilityFilter] : []),
-        ...(search
-          ? [
-              {
-                OR: [
-                  { name: { contains: search, mode: "insensitive" as const } },
-                  { documentType: { contains: search, mode: "insensitive" as const } },
-                  { category: { contains: search, mode: "insensitive" as const } },
-                  { emitterName: { contains: search, mode: "insensitive" as const } },
-                  { project: { title: { contains: search, mode: "insensitive" as const } } },
-                ],
-              },
-            ]
-          : []),
+        ...searchAnd,
+        ...viewAnd,
       ],
     };
 
@@ -230,8 +274,19 @@ export async function loadDocumentHub(opts: {
           project: { select: { title: true } },
           folder: { select: { code: true, label: true } },
           addedBy: { select: { name: true } },
+          sourceDocumentId: true,
+          status: true,
+          classificationStatus: true,
+          indice: true,
+          versionLabel: true,
+          emitterName: true,
+          favorites: {
+            where: { userId: opts.user.id },
+            select: { id: true },
+            take: 1,
+          },
           links: {
-            take: 4,
+            take: 8,
             select: { entityType: true, entityLabel: true, entityId: true },
           },
         },
@@ -247,11 +302,30 @@ export async function loadDocumentHub(opts: {
         name: f.name,
       });
       const poLink = f.links.find((l) => l.entityType === "purchase_order");
+      const supplierLink = f.links.find((l) => l.entityType === "supplier");
+      const origin = originFromLinks({
+        links: f.links as GedLinkLite[],
+        folderCode: f.folder.code,
+        sourceDocumentId: f.sourceDocumentId,
+      });
+      const oHref = originHref({
+        origin: origin.origin,
+        links: f.links as GedLinkLite[],
+        projectId: f.projectId,
+      });
+      const missing = f.status === "MANQUANT" || f.status === "A_RELANCER";
       const context =
+        origin.refLabel ||
         poLink?.entityLabel ||
-        f.links.find((l) => l.entityType === "supplier")?.entityLabel ||
+        supplierLink?.entityLabel ||
         f.folder.label ||
         null;
+      const href =
+        isSupplier || external
+          ? poLink?.entityId
+            ? `/dashboard/commandes/${poLink.entityId}?focus=documents`
+            : `/dashboard/documents?q=${encodeURIComponent(f.name)}`
+          : `/dashboard/projets/${f.projectId}#tab-documents`;
       return {
         id: `cf:${f.id}`,
         source: "chantier" as const,
@@ -268,14 +342,19 @@ export async function loadDocumentHub(opts: {
         visibility: visibilityShort(f.visibility),
         authorName: f.addedBy?.name ?? null,
         createdAt: f.createdAt.toISOString(),
-        href:
-          isSupplier || external
-            ? poLink?.entityId
-              ? `/dashboard/commandes/${poLink.entityId}?focus=documents`
-              : `/dashboard/documents?q=${encodeURIComponent(f.name)}`
-            : `/dashboard/projets/${f.projectId}#tab-documents`,
+        href,
         mimeHint: f.mimeType,
         isCurrentVersion: f.isCurrentVersion,
+        isExpectedMissing: missing,
+        origin: origin.origin,
+        originLabel: origin.label,
+        originHref: oHref,
+        originActionLabel: originActionLabel(origin.origin),
+        isFavorite: f.favorites.length > 0,
+        versionLabel: f.versionLabel,
+        indice: f.indice,
+        companyLabel: supplierLink?.entityLabel ?? f.emitterName ?? null,
+        chantierFileId: f.id,
       };
     });
 
@@ -283,6 +362,7 @@ export async function loadDocumentHub(opts: {
     let orphanPo: HubDocumentItem[] = [];
     if (
       page === 1 &&
+      (view === "all" || view === "recent") &&
       canListPurchaseOrders(opts.user) &&
       orgId &&
       (group === "all" || group === "commandes" || group === "fournisseurs")
@@ -362,13 +442,19 @@ export async function loadDocumentHub(opts: {
             href: `/dashboard/commandes/${d.order.id}${d.kind === "BL" ? "?focus=receiving" : "?focus=documents"}`,
             mimeHint: null,
             isCurrentVersion: true,
+            origin: "COMMANDE" as const,
+            originLabel: "Commande",
+            originHref: `/dashboard/commandes/${d.order.id}${d.kind === "BL" ? "?focus=receiving" : "?focus=documents"}`,
+            originActionLabel: "Voir la commande",
+            companyLabel: supplier,
+            chantierFileId: null,
           };
         });
     }
 
     // Legacy Document (page 1) — hors sync classeur
     let legacy: HubDocumentItem[] = [];
-    if (page === 1 && internal && (group === "all" || group === "administratif")) {
+    if (page === 1 && internal && view === "all" && (group === "all" || group === "administratif")) {
       const synced = await prisma.chantierFile.findMany({
         where: { sourceDocumentId: { not: null } },
         select: { sourceDocumentId: true },
@@ -424,9 +510,11 @@ export async function loadDocumentHub(opts: {
         });
     }
 
-    const merged = [...items, ...orphanPo, ...legacy].filter(
-      (it) => group === "all" || it.group === group,
-    );
+    const merged = [...items, ...orphanPo, ...legacy].filter((it) => {
+      if (group !== "all" && it.group !== group) return false;
+      if (originFilter && it.origin && it.origin !== originFilter) return false;
+      return true;
+    });
     merged.sort((a, b) => {
       if (sort === "name") return a.title.localeCompare(b.title, "fr");
       if (sort === "type") return a.typeLabel.localeCompare(b.typeLabel, "fr");

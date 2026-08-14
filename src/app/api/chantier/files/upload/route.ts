@@ -137,8 +137,17 @@ export async function POST(request: Request) {
 
   const duplicate = await prisma.chantierFile.findFirst({
     where: { projectId, checksum, deletedAt: null },
-    select: { id: true, name: true },
+    select: { id: true, name: true, fileUrl: true, storagePath: true },
   });
+
+  if (duplicate && !replacesFileId) {
+    return NextResponse.json({
+      id: duplicate.id,
+      fileUrl: duplicate.fileUrl,
+      duplicateOf: { id: duplicate.id, name: duplicate.name },
+      classificationStatus: "CLASSE",
+    });
+  }
 
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
   const storagePath = `chantiers/${projectId}/${folder.code}/${Date.now()}-${safeName}`;
@@ -164,6 +173,29 @@ export async function POST(request: Request) {
   const classificationStatus = classifyLater || folder.code === "00" ? "A_CLASSER" : "CLASSE";
 
   try {
+    const { fulfillMatchingPlaceholder } = await import("@/lib/ged/fulfill-placeholder");
+    const fulfilled = await fulfillMatchingPlaceholder({
+      projectId,
+      folderId,
+      filename: displayName,
+      fileUrl: storedRef,
+      fileSize: file.size,
+      mimeType: file.type || null,
+      storagePath,
+      checksum,
+      addedById: session.user.id,
+    });
+    if (fulfilled) {
+      return NextResponse.json({
+        id: fulfilled.id,
+        fileUrl: storedRef,
+        duplicateOf: duplicate ? { id: duplicate.id, name: duplicate.name } : null,
+        classificationStatus: "CLASSE",
+        previewStatus: previewModeLabel(previewMode),
+        fulfilledExpected: true,
+      });
+    }
+
     if (replacesFileId) {
       const prev = await prisma.chantierFile.findFirst({
         where: { id: replacesFileId, projectId, deletedAt: null },

@@ -8,8 +8,10 @@ import { isInternalPurchaseOrderActor } from "@/lib/purchase-orders/access";
 import { loadDocumentHub } from "@/lib/ged/document-hub";
 import {
   hubGroupsForPersona,
+  hubViewsForPersona,
   type HubGroup,
   type HubSort,
+  type HubView,
 } from "@/lib/ged/document-hub-ui";
 import { DocumentsHubClient } from "./DocumentsHubClient";
 import { DocumentsPageClient } from "./DocumentsPageClient";
@@ -29,6 +31,7 @@ const HUB_GROUPS = new Set<HubGroup>([
 ]);
 
 const HUB_SORTS = new Set<HubSort>(["recent", "oldest", "name", "type"]);
+const HUB_VIEWS = new Set<HubView>(["all", "recent", "favorites", "missing", "classify"]);
 
 export default async function DocumentsPage({
   searchParams,
@@ -42,6 +45,9 @@ export default async function DocumentsPage({
     sort?: string;
     order?: string;
     group?: string;
+    view?: string;
+    projectId?: string;
+    origin?: string;
     legacy?: string;
     hub?: string;
   }>;
@@ -83,6 +89,15 @@ export default async function DocumentsPage({
     const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
     const sortParam = (params.sort ?? "recent") as HubSort;
     const sort = HUB_SORTS.has(sortParam) ? sortParam : "recent";
+    const viewParam = (params.view ?? "all") as HubView;
+    const allowedViews = hubViewsForPersona(dbUser?.personType, dbUser?.permissionProfile);
+    const view = allowedViews.some((v) => v.id === viewParam)
+      ? viewParam
+      : HUB_VIEWS.has(viewParam) && !external
+        ? viewParam
+        : "all";
+    const filterProjectId = (params.projectId ?? "").trim();
+    const origin = (params.origin ?? "").trim();
 
     const projectWhere = await projectWhereForClientUser(session.user.id);
     const hostCompany = session.user.demoCompanyName ?? null;
@@ -98,14 +113,17 @@ export default async function DocumentsPage({
         },
         page,
         group,
+        view,
         search,
         sort,
+        projectId: filterProjectId || undefined,
+        origin: origin || undefined,
       }),
       prisma.project.findMany({
         where: projectWhere,
         select: { id: true, title: true },
         orderBy: { updatedAt: "desc" },
-        take: 12,
+        take: 80,
       }),
     ]);
 
@@ -116,8 +134,12 @@ export default async function DocumentsPage({
         page={hub.page}
         pageSize={hub.pageSize}
         group={group}
+        view={view}
         search={search}
         sort={sort}
+        projectId={filterProjectId}
+        origin={origin}
+        views={allowedViews}
         groups={hub.groups}
         projects={projects}
         canUploadChantier={!external}

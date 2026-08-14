@@ -15,6 +15,8 @@ import {
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import { withPerfLog } from "@/lib/perf/server-timing";
 import {
+  DOC_TYPE_ALIASES,
+  documentTypeMatches,
   hubGroupsForPersona,
   originActionLabel,
   type HubDocumentItem,
@@ -38,6 +40,9 @@ export type HubListResult = {
   page: number;
   pageSize: number;
   groups: { id: HubGroup; label: string; count?: number }[];
+  classifyCount: number;
+  missingCount: number;
+  companies: string[];
 };
 
 const PAGE_SIZE = 50;
@@ -110,6 +115,9 @@ export async function loadDocumentHub(opts: {
   projectId?: string;
   origin?: string;
   sort?: HubSort;
+  docType?: string;
+  company?: string;
+  since?: string;
 }): Promise<HubListResult> {
   return withPerfLog("loadDocumentHub", async () => {
     const page = Math.max(1, opts.page ?? 1);
@@ -118,6 +126,9 @@ export async function loadDocumentHub(opts: {
     const search = (opts.search ?? "").trim();
     const originFilter = (opts.origin ?? "").trim().toUpperCase();
     const sort = opts.sort ?? "recent";
+    const docType = (opts.docType ?? "").trim().toUpperCase();
+    const company = (opts.company ?? "").trim();
+    const since = (opts.since ?? "").trim();
     const external = isExternalPortalUser(opts.user.personType);
     const internal = isInternalPurchaseOrderActor(opts.user);
     const isSupplier =
@@ -247,13 +258,50 @@ export async function loadDocumentHub(opts: {
       });
     }
     if (view === "recent") {
-      const since = new Date();
-      since.setDate(since.getDate() - 30);
+      const recentSince = new Date();
+      recentSince.setDate(recentSince.getDate() - 30);
       // Date du document si connue, sinon date d’arrivée dans BeWork.
       viewAnd.push({
         OR: [
-          { documentDate: { gte: since } },
-          { AND: [{ documentDate: null }, { createdAt: { gte: since } }] },
+          { documentDate: { gte: recentSince } },
+          { AND: [{ documentDate: null }, { createdAt: { gte: recentSince } }] },
+        ],
+      });
+    }
+    if (docType) {
+      const aliases = DOC_TYPE_ALIASES[docType] ?? [docType];
+      viewAnd.push({
+        OR: [
+          { documentType: { in: aliases } },
+          { documentType: { equals: docType, mode: "insensitive" as const } },
+        ],
+      });
+    }
+    if (company) {
+      viewAnd.push({
+        OR: [
+          { emitterName: { contains: company, mode: "insensitive" as const } },
+          {
+            links: {
+              some: { entityLabel: { contains: company, mode: "insensitive" as const } },
+            },
+          },
+        ],
+      });
+    }
+    if (since === "30" || since === "year") {
+      const from =
+        since === "year"
+          ? new Date(new Date().getFullYear(), 0, 1)
+          : (() => {
+              const d = new Date();
+              d.setDate(d.getDate() - 30);
+              return d;
+            })();
+      viewAnd.push({
+        OR: [
+          { documentDate: { gte: from } },
+          { AND: [{ documentDate: null }, { createdAt: { gte: from } }] },
         ],
       });
     }
@@ -283,18 +331,25 @@ export async function loadDocumentHub(opts: {
 
     const orderBy =
       sort === "oldest"
-        ? ([
+        ? [
             { documentDate: { sort: "asc" as const, nulls: "last" as const } },
             { createdAt: "asc" as const },
-          ] as const)
+          ]
         : sort === "name"
-          ? ({ name: "asc" as const } as const)
+          ? { name: "asc" as const }
           : sort === "type"
-            ? ({ documentType: "asc" as const } as const)
-            : ([
+            ? { documentType: "asc" as const }
+            : [
                 { documentDate: { sort: "desc" as const, nulls: "last" as const } },
                 { createdAt: "desc" as const },
-              ] as const);
+              ];
+
+    const baseScope = {
+      deletedAt: null,
+      archivedAt: null,
+      isCurrentVersion: true,
+      AND: [scopeWhere, ...(externalVisibilityFilter ? [externalVisibilityFilter] : [])],
+    };
 
     const [chantierFiles, chantierTotal] = await Promise.all([
       prisma.chantierFile.findMany({
@@ -335,6 +390,32 @@ export async function loadDocumentHub(opts: {
         },
       }),
       prisma.chantierFile.count({ where: chantierWhere }),
+    ]);
+
+    const [classifyCount, missingCount, companyRows] = await Promise.all([
+      prisma.chantierFile.count({
+        where: {
+          ...baseScope,
+          OR: [{ classificationStatus: "A_CLASSER" }, { folder: { code: "00" } }],
+        },
+      }),
+      prisma.chantierFile.count({
+        where: {
+          ...baseScope,
+          OR: [
+            { status: { in: ["MANQUANT", "A_RELANCER"] } },
+            { name: { contains: "(manquante)", mode: "insensitive" as const } },
+            { fileUrl: null },
+            { fileUrl: "" },
+          ],
+        },
+      }),
+      prisma.chantierFile.findMany({
+        where: { ...baseScope, emitterName: { not: null } },
+        select: { emitterName: true },
+        distinct: ["emitterName"],
+        take: 40,
+      }),
     ]);
 
     const items: HubDocumentItem[] = chantierFiles.map((f) => {
@@ -570,6 +651,11 @@ export async function loadDocumentHub(opts: {
     const merged = [...items, ...orphanPo, ...legacy].filter((it) => {
       if (group !== "all" && it.group !== group) return false;
       if (originFilter && it.origin && it.origin !== originFilter) return false;
+      if (docType && !documentTypeMatches(it, docType)) return false;
+      if (company) {
+        const blob = `${it.companyLabel ?? ""} ${it.contextLabel ?? ""}`.toLowerCase();
+        if (!blob.includes(company.toLowerCase())) return false;
+      }
       return true;
     });
     merged.sort((a, b) => {
@@ -585,6 +671,12 @@ export async function loadDocumentHub(opts: {
       page,
       pageSize: PAGE_SIZE,
       groups: hubGroupsForPersona(opts.user.personType, opts.user.permissionProfile),
+      classifyCount,
+      missingCount,
+      companies: companyRows
+        .map((r) => r.emitterName?.trim() ?? "")
+        .filter(Boolean)
+        .slice(0, 40),
     };
   });
 }

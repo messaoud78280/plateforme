@@ -63,6 +63,7 @@
     "test:ged-v2": "npx tsx scripts/test-ged-v2.ts",
     "test:ged-v201": "npx tsx scripts/test-ged-v201.ts",
     "test:ged-v203": "npx tsx scripts/test-ged-v203.ts",
+    "test:ged-v21": "npx tsx scripts/test-ged-v21.ts",
     "test:chantiers-v2b-portfolio": "npx tsx scripts/test-chantiers-v2b-portfolio.ts",
     "test:chantiers-v2b1-coherence": "npx tsx scripts/test-chantiers-v2b1-coherence.ts",
     "test:pilotage-v2a-portfolio": "npx tsx scripts/test-pilotage-v2a-portfolio.ts",

@@ -104,7 +104,7 @@ export function originFromLinks(opts: {
       origin: "DOE",
       label: GED_ORIGIN_LABELS.DOE,
       refLabel: doe?.entityLabel ?? null,
-      actionLabel: "Voir le chantier",
+      actionLabel: "Voir le DOE",
     };
   }
   const supplier = links.find((l) => l.entityType === "supplier");
@@ -113,7 +113,7 @@ export function originFromLinks(opts: {
       origin: "FOURNISSEUR",
       label: GED_ORIGIN_LABELS.FOURNISSEUR,
       refLabel: supplier.entityLabel ?? null,
-      actionLabel: "Voir le chantier",
+      actionLabel: "Voir le fournisseur",
     };
   }
   if (opts.sourceDocumentId) {
@@ -160,6 +160,13 @@ export function originHref(opts: {
   if (opts.origin === "MESSAGERIE") {
     if (opts.projectId) return `/dashboard/messagerie?view=chantiers&project=${opts.projectId}`;
     return "/dashboard/messagerie?view=contacts";
+  }
+  if (opts.origin === "DOE") {
+    if (opts.projectId) return `/dashboard/projets/${opts.projectId}#tab-documents`;
+    return "/dashboard/documents";
+  }
+  if (opts.origin === "FOURNISSEUR") {
+    return "/dashboard/fournisseurs";
   }
   if (opts.projectId) return `/dashboard/projets/${opts.projectId}#tab-documents`;
   return "/dashboard/documents";

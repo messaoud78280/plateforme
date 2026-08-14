@@ -48,6 +48,9 @@ export default async function DocumentsPage({
     view?: string;
     projectId?: string;
     origin?: string;
+    docType?: string;
+    company?: string;
+    since?: string;
     legacy?: string;
     hub?: string;
   }>;
@@ -98,6 +101,9 @@ export default async function DocumentsPage({
         : "all";
     const filterProjectId = (params.projectId ?? "").trim();
     const origin = (params.origin ?? "").trim();
+    const docType = (params.docType ?? "").trim();
+    const company = (params.company ?? "").trim();
+    const since = (params.since ?? "").trim();
 
     const projectWhere = await projectWhereForClientUser(session.user.id);
     const hostCompany = session.user.demoCompanyName ?? null;
@@ -118,6 +124,9 @@ export default async function DocumentsPage({
         sort,
         projectId: filterProjectId || undefined,
         origin: origin || undefined,
+        docType: docType || undefined,
+        company: company || undefined,
+        since: since || undefined,
       }),
       prisma.project.findMany({
         where: projectWhere,
@@ -139,9 +148,13 @@ export default async function DocumentsPage({
         sort={sort}
         projectId={filterProjectId}
         origin={origin}
+        docType={docType}
+        company={company}
+        since={since}
         views={allowedViews}
-        groups={hub.groups}
         projects={projects}
+        companies={hub.companies}
+        classifyCount={hub.classifyCount}
         canUploadChantier={!external}
         personType={dbUser?.personType}
         permissionProfile={dbUser?.permissionProfile}

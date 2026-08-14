@@ -97,6 +97,18 @@ async function main() {
     "attestation Martin sans chantier",
   );
 
+  const hubMembrane = await loadDocumentHub({ user: asSetrim, search: "membrane", page: 1 });
+  assert.ok(hubMembrane.items.some((i) => /membrane/i.test(i.title)), "membrane");
+
+  const hubDoe = await loadDocumentHub({ user: asSetrim, search: "DOE", page: 1 });
+  assert.ok(hubDoe.items.some((i) => /doe/i.test(`${i.title} ${i.typeLabel}`)), "DOE");
+
+  assert.ok(
+    hubBl.items.every((i) => !/BON_LIVRAISON|FICHE_TECHNIQUE/.test(i.typeLabel)),
+    "pas d’enum technique dans typeLabel",
+  );
+  assert.equal(typeof hubSetrim.classifyCount, "number");
+
   const victor = await prisma.project.findFirst({
     where: { organizationId: setrim.id, title: { contains: "Victor Hugo" } },
     select: { id: true },

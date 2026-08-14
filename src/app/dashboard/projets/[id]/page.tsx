@@ -57,6 +57,7 @@ import { ProjectMateriauxSection } from "@/components/projects/ProjectMateriauxS
 import { loadMaterialRequirementsForProject } from "@/lib/materiaux/load-for-project";
 import { isInternalPurchaseOrderActor } from "@/lib/purchase-orders/access";
 import { canAccessCommercialModule } from "@/lib/commercial/access";
+import { loadDocumentHub } from "@/lib/ged/document-hub";
 
 export default async function ProjetDetailPage({
   params,
@@ -248,7 +249,7 @@ export default async function ProjetDetailPage({
   const canSeeMateriaux =
     !isExternalViewer && isInternalPurchaseOrderActor(session.user);
 
-  const [chantierFolders, missingCount, ops, contractuelRaw, billingHint, materiauxRows, profitability] =
+  const [chantierFolders, missingCount, ops, contractuelRaw, billingHint, materiauxRows, profitability, chantierHub] =
     await Promise.all([
       canSeeDocuments
         ? prisma.chantierFolder.findMany({
@@ -333,6 +334,24 @@ export default async function ProjetDetailPage({
             return null;
           })
         : Promise.resolve(null),
+      canSeeDocuments
+        ? loadDocumentHub({
+            user: {
+              id: session.user.id,
+              role: session.user.role,
+              personType: actorProfile?.personType ?? session.user.personType ?? null,
+              permissionProfile: actorProfile?.permissionProfile ?? null,
+              name: session.user.name ?? null,
+            },
+            page: 1,
+            projectId: id,
+            view: "all",
+            sort: "recent",
+          }).catch((e) => {
+            console.error("[ProjetDetail] GED hub:", e);
+            return { items: [], classifyCount: 0, missingCount: 0, companies: [], total: 0, page: 1, pageSize: 50, groups: [] };
+          })
+        : Promise.resolve({ items: [], classifyCount: 0, missingCount: 0, companies: [], total: 0, page: 1, pageSize: 50, groups: [] }),
     ]);
 
   const dossierFolders = chantierFolders.map((folder) => ({
@@ -541,7 +560,14 @@ export default async function ProjetDetailPage({
       ) : null}
       <ChantierOrphanMissionBanner projectId={id} orphans={orphanMissions} />
       <div id="dossier-chantier">
-        <ChantierDossierSection projectId={id} folders={dossierFolders} canEdit={canEditDossier} />
+        <ChantierDossierSection
+          projectId={id}
+          projectTitle={project.title}
+          folders={dossierFolders}
+          canEdit={canEditDossier}
+          hubItems={chantierHub.items}
+          classifyCount={chantierHub.classifyCount}
+        />
       </div>
       {!isExternalViewer && project.documents.length > 0 ? (
         <div className="rounded-xl surface-metallic-light p-6">

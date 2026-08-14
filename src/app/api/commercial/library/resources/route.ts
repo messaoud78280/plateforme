@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireCommercialApiSession } from "@/lib/commercial/access";
+import { prisma } from "@/lib/prisma";
 import {
   createMaterial,
   createLaborResource,
@@ -21,6 +22,28 @@ export async function GET(req: Request) {
   }
   if (kind === "equipment") {
     return NextResponse.json({ equipment: await listEquipmentResources(auth.orgId) });
+  }
+  if (kind === "subcontract") {
+    const query = q?.trim();
+    const subcontractors = await prisma.externalOrganization.findMany({
+      where: {
+        hostOrganizationId: auth.orgId,
+        type: "SUBCONTRACTOR",
+        status: "ACTIVE",
+        ...(query
+          ? {
+              OR: [
+                { name: { contains: query, mode: "insensitive" } },
+                { tradeName: { contains: query, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+      },
+      select: { id: true, name: true, tradeName: true },
+      orderBy: { name: "asc" },
+      take: 50,
+    });
+    return NextResponse.json({ subcontractors });
   }
   return NextResponse.json({ materials: await listMaterials(auth.orgId, { q }) });
 }

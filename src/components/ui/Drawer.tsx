@@ -18,6 +18,7 @@ export function Drawer({
   widthClass = "max-w-md",
   dismissible = true,
   className,
+  scrollBody = true,
 }: {
   open: boolean;
   onClose: () => void;
@@ -29,6 +30,8 @@ export function Drawer({
   widthClass?: string;
   dismissible?: boolean;
   className?: string;
+  /** false = le contenu gère le scroll (footer interne sticky). */
+  scrollBody?: boolean;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -75,7 +78,14 @@ export function Drawer({
             {description ? <p className="mt-1 text-sm text-bework-muted">{description}</p> : null}
           </div>
         )}
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
+        <div
+          className={cn(
+            "min-h-0 flex-1",
+            scrollBody ? "overflow-y-auto px-5 py-4" : "flex flex-col overflow-hidden",
+          )}
+        >
+          {children}
+        </div>
         {footer ? (
           <div className="shrink-0 border-t border-[color:var(--cc-border)] bg-[color:var(--cc-chrome)]/50 px-5 py-3">
             {footer}

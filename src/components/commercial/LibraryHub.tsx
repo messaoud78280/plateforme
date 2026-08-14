@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Drawer } from "@/components/ui/Drawer";
 import { HeaderDropdown } from "@/components/ui/HeaderDropdown";
-import { WorkItemEditor } from "@/components/commercial/WorkItemEditor";
+import { WorkItemForm, type WorkItemFormRow } from "@/components/commercial/WorkItemForm";
 import { MaterialDetailDrawer } from "@/components/commercial/MaterialDetailDrawer";
 import { marginPercentFromCostSell, roundMoney } from "@/lib/commercial/money";
 import { cn } from "@/lib/cn";
@@ -102,11 +102,7 @@ export function LibraryHub({
   const [items, setItems] = useState(initialItems);
   const [toast, setToast] = useState<string | null>(null);
   const [drawer, setDrawer] = useState<
-    | null
-    | { mode: "create-type" }
-    | { mode: "create-simple" }
-    | { mode: "create-composite" }
-    | { mode: "edit"; id: string }
+    null | { mode: "create" } | { mode: "edit"; id: string }
   >(null);
   const [materialDrawerId, setMaterialDrawerId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -150,6 +146,36 @@ export function LibraryHub({
   }, [items, tab, chip, debouncedQ]);
 
   const refresh = useCallback(() => router.refresh(), [router]);
+
+  const families = useMemo(() => {
+    const set = new Set<string>();
+    for (const i of items) {
+      if (i.family) set.add(i.family);
+    }
+    for (const m of materialsPreview) {
+      if (m.family) set.add(m.family);
+    }
+    return Array.from(set);
+  }, [items, materialsPreview]);
+
+  function upsertItem(row: WorkItemFormRow) {
+    setItems((prev) => {
+      const existing = prev.find((x) => x.id === row.id);
+      const merged: LibraryHubRow = {
+        ...(existing ?? {
+          isActive: true,
+          isFavorite: false,
+          needsPriceRecalc: false,
+          quoteLineCount: 0,
+          updatedAt: new Date().toISOString(),
+        }),
+        ...row,
+        quoteLineCount: existing?.quoteLineCount ?? row.quoteLineCount ?? 0,
+        isFavorite: existing?.isFavorite ?? row.isFavorite,
+      };
+      return [merged, ...prev.filter((x) => x.id !== row.id)];
+    });
+  }
 
   async function toggleFavorite(item: LibraryHubRow) {
     setBusyId(item.id);
@@ -376,7 +402,7 @@ export function LibraryHub({
           </HeaderDropdown>
           <button
             type="button"
-            onClick={() => setDrawer({ mode: "create-type" })}
+            onClick={() => setDrawer({ mode: "create" })}
             className="rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#152a45]"
           >
             + Nouvel ouvrage
@@ -445,7 +471,7 @@ export function LibraryHub({
       ) : tab === "maindoeuvre" ? (
         <LaborPanel rows={laborPreview} />
       ) : filtered.length === 0 && items.filter((i) => i.isActive).length === 0 && chip === "all" && !debouncedQ ? (
-        <EmptyLibrary onCreate={() => setDrawer({ mode: "create-type" })} />
+        <EmptyLibrary onCreate={() => setDrawer({ mode: "create" })} />
       ) : filtered.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center text-sm text-slate-500">
           Aucun résultat.
@@ -559,15 +585,16 @@ export function LibraryHub({
 
       <WorkItemCreateEditDrawer
         state={drawer}
-        onNavigate={(next) => setDrawer(next)}
-        onClose={() => {
-          setDrawer(null);
-          refresh();
-        }}
-        onCreated={(id) => {
+        families={families}
+        onClose={() => setDrawer(null)}
+        onCreated={(row) => {
+          upsertItem(row);
           setToast("Ouvrage créé");
-          setDrawer({ mode: "edit", id });
-          refresh();
+          setDrawer(null);
+        }}
+        onSaved={(row) => {
+          upsertItem(row);
+          setToast("Ouvrage enregistré");
         }}
       />
 
@@ -588,17 +615,17 @@ function EmptyLibrary({ onCreate }: { onCreate: () => void }) {
         Votre bibliothèque est vide
       </h2>
       <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-        Ajoutez vos ouvrages pour préparer vos devis plus rapidement.
+        Ajoutez votre premier ouvrage pour commencer à chiffrer.
       </p>
       <button
         type="button"
         onClick={onCreate}
         className="mt-6 rounded-xl bg-[#1e3a5f] px-5 py-2.5 text-sm font-bold text-white"
       >
-        Créer mon premier ouvrage
+        Créer un ouvrage
       </button>
       <p className="mt-4 text-xs text-slate-400">
-        Vous pouvez également créer un devis sans utiliser la bibliothèque.
+        Importer une bibliothèque — bientôt dans le menu •••
       </p>
     </div>
   );
@@ -836,6 +863,7 @@ function RowMenu({
           }}
           disabled={busy}
           aria-expanded={expanded}
+          aria-label={`Actions de l’ouvrage ${item.name}`}
           className="rounded-lg px-2 py-1.5 text-sm font-bold text-slate-500 hover:bg-slate-100 disabled:opacity-50"
         >
           •••
@@ -873,217 +901,45 @@ function RowMenu({
 
 function WorkItemCreateEditDrawer({
   state,
-  onNavigate,
+  families,
   onClose,
   onCreated,
+  onSaved,
 }: {
-  state:
-    | null
-    | { mode: "create-type" }
-    | { mode: "create-simple" }
-    | { mode: "create-composite" }
-    | { mode: "edit"; id: string };
-  onNavigate: (
-    next:
-      | { mode: "create-type" }
-      | { mode: "create-simple" }
-      | { mode: "create-composite" }
-      | { mode: "edit"; id: string },
-  ) => void;
+  state: null | { mode: "create" } | { mode: "edit"; id: string };
+  families: string[];
   onClose: () => void;
-  onCreated: (id: string) => void;
+  onCreated: (row: WorkItemFormRow) => void;
+  onSaved: (row: WorkItemFormRow) => void;
 }) {
   const open = Boolean(state);
-  const [name, setName] = useState("");
-  const [unit, setUnit] = useState("U");
-  const [sell, setSell] = useState("");
-  const [family, setFamily] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [more, setMore] = useState(false);
-
-  useEffect(() => {
-    if (!state || state.mode === "edit") return;
-    setName("");
-    setUnit("U");
-    setSell("");
-    setFamily("");
-    setError(null);
-    setMore(false);
-  }, [state]);
-
-  async function create(kind: "SIMPLE" | "COMPOSITE") {
-    if (!name.trim()) {
-      setError("Indiquez un nom");
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    try {
-      const body: Record<string, unknown> = {
-        name: name.trim(),
-        kind,
-        saleUnit: unit.trim() || "U",
-        family: family.trim() || null,
-      };
-      if (kind === "SIMPLE") {
-        body.unitSellHt = Number(sell) || 0;
-        body.sellMode = "FIXED_SELL";
-      }
-      const res = await fetch("/api/commercial/library/work-items", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erreur");
-      onCreated(String(data.workItem.id));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  const title =
-    state?.mode === "edit"
-      ? "Modifier l’ouvrage"
-      : state?.mode === "create-type"
-        ? "Nouvel ouvrage"
-        : state?.mode === "create-simple"
-          ? "Ouvrage simple"
-          : state?.mode === "create-composite"
-            ? "Ouvrage composé"
-            : "";
+  const formKey =
+    state?.mode === "edit" ? `edit-${state.id}` : state?.mode === "create" ? "create" : "closed";
 
   return (
     <Drawer
       open={open}
       onClose={onClose}
-      title={title}
+      title={state?.mode === "edit" ? "Modifier l’ouvrage" : "Nouvel ouvrage"}
       description={
-        state?.mode === "create-type"
-          ? "Choisissez le type pour commencer rapidement."
-          : state?.mode === "edit"
-            ? "Les devis existants conservent leurs valeurs historiques."
-            : undefined
+        state?.mode === "edit"
+          ? "Les devis déjà figés conservent leurs valeurs historiques."
+          : "Créez votre ouvrage en quelques secondes."
       }
-      widthClass="max-w-xl"
+      widthClass="max-w-lg"
+      scrollBody={false}
     >
-      {state?.mode === "create-type" ? (
-        <div className="space-y-3">
-          <button
-            type="button"
-            className="w-full rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-[#1e3a5f]/30 hover:shadow-md"
-            onClick={() => onNavigate({ mode: "create-simple" })}
-          >
-            <p className="text-base font-semibold text-slate-900">Simple</p>
-            <p className="mt-1 text-sm text-slate-500">
-              Un prix renseigné directement.
-            </p>
-          </button>
-          <button
-            type="button"
-            className="w-full rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-[#1e3a5f]/30 hover:shadow-md"
-            onClick={() => onNavigate({ mode: "create-composite" })}
-          >
-            <p className="text-base font-semibold text-slate-900">Composé</p>
-            <p className="mt-1 text-sm text-slate-500">
-              Calculé à partir de matériaux, main-d’œuvre, matériel ou sous-traitance.
-            </p>
-          </button>
-          <p className="pt-2 text-center text-[11px] text-slate-400">
-            Préparation assistée par IA — prochainement
-          </p>
-        </div>
-      ) : null}
-
-      {(state?.mode === "create-simple" || state?.mode === "create-composite") && (
-        <div className="space-y-4">
-          <button
-            type="button"
-            onClick={() => onNavigate({ mode: "create-type" })}
-            className="text-xs font-semibold text-slate-500 hover:text-[#1e3a5f]"
-          >
-            ← Type d’ouvrage
-          </button>
-          <label className="block text-xs font-semibold text-slate-500">
-            Nom de l’ouvrage
-            <input
-              autoFocus
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
-              placeholder="Ex. Mur parpaing 20 cm"
-            />
-          </label>
-          <label className="block text-xs font-semibold text-slate-500">
-            Unité
-            <input
-              value={unit}
-              onChange={(e) => setUnit(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
-              placeholder="m², ml, U…"
-            />
-          </label>
-          {state.mode === "create-simple" ? (
-            <label className="block text-xs font-semibold text-slate-500">
-              Prix de vente HT
-              <input
-                value={sell}
-                onChange={(e) => setSell(e.target.value)}
-                inputMode="decimal"
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm tabular-nums"
-                placeholder="0,00"
-              />
-            </label>
-          ) : (
-            <label className="block text-xs font-semibold text-slate-500">
-              Famille
-              <input
-                value={family}
-                onChange={(e) => setFamily(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
-                placeholder="Maçonnerie…"
-              />
-            </label>
-          )}
-
-          <button
-            type="button"
-            className="text-xs font-semibold text-[#1d4ed8]"
-            onClick={() => setMore((v) => !v)}
-          >
-            {more ? "Masquer" : "Ajouter des informations complémentaires"}
-          </button>
-          {more && state.mode === "create-simple" ? (
-            <label className="block text-xs font-semibold text-slate-500">
-              Famille
-              <input
-                value={family}
-                onChange={(e) => setFamily(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
-              />
-            </label>
-          ) : null}
-
-          {error ? <p className="text-sm text-red-700">{error}</p> : null}
-
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() =>
-              void create(state.mode === "create-composite" ? "COMPOSITE" : "SIMPLE")
-            }
-            className="w-full rounded-xl bg-[#1e3a5f] py-3 text-sm font-bold text-white disabled:opacity-50"
-          >
-            {busy ? "…" : "Créer l’ouvrage"}
-          </button>
-        </div>
-      )}
-
-      {state?.mode === "edit" ? (
-        <WorkItemEditor workItemId={state.id} embedded onDone={onClose} />
+      {state ? (
+        <WorkItemForm
+          key={formKey}
+          mode={state.mode === "edit" ? "edit" : "create"}
+          workItemId={state.mode === "edit" ? state.id : undefined}
+          families={families}
+          layout="drawer"
+          onCreated={onCreated}
+          onSaved={onSaved}
+          onCancel={onClose}
+        />
       ) : null}
     </Drawer>
   );

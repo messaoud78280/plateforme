@@ -122,8 +122,16 @@ function TotalsBlock({
 
 export function ProgressStatementEditor({
   initial,
+  projectSubcontractors = [],
 }: {
   initial: Statement;
+  projectSubcontractors?: Array<{
+    id: string;
+    companyName: string;
+    scope: string;
+    contractAmountHt: number;
+    statusLabel: string;
+  }>;
 }) {
   const router = useRouter();
   const [statement, setStatement] = useState(initial);
@@ -334,6 +342,39 @@ export function ProgressStatementEditor({
         </p>
       ) : null}
       {msg ? <p className="text-xs text-emerald-700">{msg}</p> : null}
+
+      {projectSubcontractors.length > 0 ? (
+        <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+            Sous-traitants du chantier
+          </p>
+          <p className="mt-0.5 text-[11px] text-slate-400">
+            Information interne — sans impact sur cette situation.
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {projectSubcontractors.map((st) => (
+              <li
+                key={st.id}
+                className="flex flex-wrap items-baseline justify-between gap-2 text-sm"
+              >
+                <span className="font-medium text-slate-800">
+                  {st.companyName}
+                  <span className="font-normal text-slate-500">
+                    {" "}
+                    — {st.scope}
+                  </span>
+                </span>
+                <span className="tabular-nums font-semibold text-slate-900">
+                  {fmt(st.contractAmountHt)} € HT
+                  <span className="ml-2 text-[11px] font-medium text-slate-400">
+                    {st.statusLabel}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
         <TotalsBlock

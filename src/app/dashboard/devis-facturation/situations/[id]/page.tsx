@@ -4,6 +4,7 @@ import {
   resolveCommercialOrgId,
 } from "@/lib/commercial/access";
 import { getProgressStatementDetail } from "@/lib/commercial/progress-statements";
+import { listSubcontracts } from "@/lib/commercial/subcontracts";
 import { ProgressStatementEditor } from "@/components/commercial/ProgressStatementEditor";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +48,10 @@ export default async function SituationPage({
     invoice: { id: string; number: string } | null;
     lines: Array<Record<string, unknown>>;
   };
+
+  const projectSubcontractors = s.project
+    ? await listSubcontracts(orgId, s.project.id).catch(() => [])
+    : [];
 
   return (
     <ProgressStatementEditor
@@ -160,6 +165,13 @@ export default async function SituationPage({
           remainingSellHt: Number(l.remainingSellHt),
         })),
       }}
+      projectSubcontractors={projectSubcontractors.map((st) => ({
+        id: st.id,
+        companyName: st.companyName,
+        scope: st.scope,
+        contractAmountHt: st.contractAmountHt,
+        statusLabel: st.statusLabel,
+      }))}
     />
   );
 }

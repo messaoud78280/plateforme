@@ -48,6 +48,7 @@ import {
 } from "@/lib/chantier-dossier/constants";
 import { chantierStatusBadgeTone } from "@/lib/chantier-lifecycle";
 import { ChantierContractuelPanel } from "@/components/chantier/ChantierContractuelPanel";
+import { ChantierSubcontractorsPanel } from "@/components/chantier/ChantierSubcontractorsPanel";
 import { ProjectProfitabilityPanel } from "@/components/chantier/ProjectProfitabilityPanel";
 import { loadProjectProfitability } from "@/lib/chantier/project-profitability";
 import { canEditPilotageOperational } from "@/lib/pilotage/access";
@@ -681,6 +682,10 @@ export default async function ProjetDetailPage({
       <ProjectProfitabilityPanel initial={profitability} />
     ) : null;
 
+  const sousTraitantsPanel = canSeeContractuel ? (
+    <ChantierSubcontractorsPanel projectId={project.id} canEdit={isStaff} />
+  ) : null;
+
   return (
     <div className="space-y-5">
       <ContextBackButton
@@ -837,6 +842,7 @@ export default async function ProjetDetailPage({
           documents: documentsPanel,
           messages: messagesPanel,
           partage: partagePanel,
+          "sous-traitants": sousTraitantsPanel,
           contractuel: contractuelPanel,
           rentabilite: rentabilitePanel,
           pilotage: organisationPanel,

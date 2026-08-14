@@ -260,6 +260,7 @@ model ExternalOrganization {
   commercialMaterialPrices CommercialMaterialPrice[] @relation("CommercialMaterialPriceSupplier")
   preferredForCommercialMaterials CommercialMaterial[] @relation("CommercialMaterialPreferredSupplier")
   supplierInvoices     SupplierInvoice[]
+  commercialSubcontracts CommercialSubcontract[]
 
   @@index([hostOrganizationId])
   @@index([hostOrganizationId, type])
@@ -284,6 +285,7 @@ model ExternalOrgContact {
   externalOrganization ExternalOrganization @relation(fields: [externalOrganizationId], references: [id], onDelete: Cascade)
   user                 User?                @relation("ExternalOrgContactUser", fields: [userId], references: [id], onDelete: SetNull)
   purchaseOrders       PurchaseOrder[]      @relation("PurchaseOrderContact")
+  commercialSubcontracts CommercialSubcontract[]
 
   @@index([externalOrganizationId])
   @@index([userId])
@@ -636,6 +638,7 @@ model Organization {
   commercialQuoteSnapshots  CommercialQuoteSnapshot[]
   commercialProgressStatements CommercialProgressStatement[]
   commercialRetentionGuarantees CommercialRetentionGuarantee[]
+  commercialSubcontracts        CommercialSubcontract[]
   projectBudgets                ProjectBudget[]
   supplierInvoices              SupplierInvoice[]
 
@@ -817,6 +820,7 @@ model Project {
   commercialQuotes CommercialQuote[]
   commercialInvoices CommercialInvoice[]
   commercialProgressStatements CommercialProgressStatement[]
+  commercialSubcontracts CommercialSubcontract[]
   projectBudget ProjectBudget?
   supplierInvoices SupplierInvoice[]
 
@@ -4370,6 +4374,45 @@ model CommercialInvoiceLine {
 
   @@index([invoiceId, sortOrder])
   @@index([organizationId])
+}
+
+/// DF-6D — Relation de sous-traitance chantier (suivi contractuel interne).
+/// Ne modifie jamais devis, situations, factures, encaissements ni CA.
+enum CommercialSubcontractStatus {
+  PREPARATION
+  IN_PROGRESS
+  COMPLETED
+}
+
+model CommercialSubcontract {
+  id                     String                       @id @default(cuid())
+  organizationId         String
+  projectId              String
+  externalOrganizationId String
+  /// Lot / objet (saisie libre)
+  scope                  String
+  contractAmountHt       Decimal                      @db.Decimal(14, 4)
+  status                 CommercialSubcontractStatus  @default(PREPARATION)
+  contractRef            String?
+  contractDate           DateTime?                    @db.Date
+  startDate              DateTime?                    @db.Date
+  endDate                DateTime?                    @db.Date
+  contactId              String?
+  notes                  String?                      @db.Text
+  /// 0–100, facultatif. Réalisé = montant × % (informatif uniquement).
+  progressPercent        Decimal?                     @db.Decimal(6, 2)
+  createdAt              DateTime                     @default(now())
+  updatedAt              DateTime                     @updatedAt
+
+  organization         Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project              Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  externalOrganization ExternalOrganization @relation(fields: [externalOrganizationId], references: [id], onDelete: Restrict)
+  contact              ExternalOrgContact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, projectId])
+  @@index([organizationId, status])
+  @@index([projectId])
+  @@index([externalOrganizationId])
 }
 
 /// Règlements clients BTP — AUCUNE relation avec Payment SaaS/Stripe

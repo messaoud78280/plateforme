@@ -8,6 +8,10 @@ import { buildVatBreakdownFromLines } from "../src/lib/commercial/quote-pdf-inpu
 import { validateQuoteIssuancePayload } from "../src/lib/commercial/validate-quote-issuance";
 import { sha256Hex } from "../src/lib/commercial/accepted-snapshot";
 
+function pdfPageCount(buf: Buffer): number {
+  return (buf.toString("latin1").match(/\/Type\s*\/Page(?!s)/g) || []).length;
+}
+
 function baseInput(over: Partial<QuotePdfInput> = {}): QuotePdfInput {
   return {
     number: "DEV-2026-0042",
@@ -259,6 +263,7 @@ function baseInput(over: Partial<QuotePdfInput> = {}): QuotePdfInput {
   const ms = Date.now() - t0;
   assert.ok(pdf.length > 5_000);
   assert.ok(ms < 15_000, `génération trop lente: ${ms}ms`);
+  assert.ok(pdfPageCount(pdf) >= 3, "100 lignes = plusieurs pages");
   console.log(`✓ Test 7 — 100 lignes (${ms} ms)`);
 }
 
@@ -280,7 +285,153 @@ function baseInput(over: Partial<QuotePdfInput> = {}): QuotePdfInput {
 {
   const draft = generateCommercialQuotePdf(baseInput({ status: "DRAFT" }));
   assert.ok(draft.length > 400);
-  console.log("✓ Test 9 — brouillon généré (filigrane)");
+  assert.ok(draft.toString("latin1").includes("BROUILLON"));
+  const sent = generateCommercialQuotePdf(baseInput({ status: "SENT" }));
+  assert.ok(!sent.toString("latin1").includes("BROUILLON"));
+  const validated = generateCommercialQuotePdf(baseInput({ status: "VALIDATED" }));
+  assert.ok(!validated.toString("latin1").includes("BROUILLON"));
+  console.log("✓ Test 9 — filigrane brouillon uniquement");
+}
+
+{
+  const smoke = generateCommercialQuotePdf(
+    baseInput({
+      number: "DEV-2026-SMOKE1",
+      subject: "Réfection étanchéité toiture-terrasse",
+      status: "DRAFT",
+      clientNotes: "Accès à confirmer.",
+      siteAddressSnapshot: "Versailles",
+      projectTitle: "Résidence Les Jardins",
+      issuer: {
+        name: "SETRIM",
+        tradeName: "SETRIM",
+        siret: "12345678900012",
+        vatNumber: "FR12345678900",
+        email: "contact@setrim.fr",
+        phone: "01 00 00 00 00",
+        addressLine1: "10 rue de l’Industrie",
+        city: "Versailles",
+        postalCode: "78000",
+      },
+      client: { name: "Syndic Horizon Copro", city: "Versailles" },
+      insuranceMentions: null,
+      documentSettings: { paymentModeLabel: "Virement bancaire" },
+      bank: null,
+      totals: { totalSellHt: 10_200, totalVat: 2_040, totalTtc: 12_240 },
+      vatBreakdown: [{ rate: 20, baseHt: 10_200, vat: 2_040 }],
+      sections: [
+        {
+          title: "Étanchéité",
+          lines: [
+            {
+              kind: "WORK",
+              reference: "ET-01",
+              designation: "Étanchéité bicouche élastomère",
+              description:
+                "Fourniture et mise en œuvre comprenant préparation du support.\n\nAccès chantier à confirmer avec le syndic.",
+              quantity: 120,
+              unit: "m²",
+              unitSellHt: 85,
+              vatRate: 20,
+              lineSellHt: 10_200,
+              isOptional: false,
+            },
+          ],
+        },
+        {
+          title: "Options",
+          lines: [
+            {
+              kind: "OPTION",
+              reference: "OPT-1",
+              designation: "Relevé d’acrotères",
+              quantity: 1,
+              unit: "U",
+              unitSellHt: 1_500,
+              vatRate: 20,
+              lineSellHt: 1_500,
+              isOptional: true,
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  const pages = pdfPageCount(smoke);
+  assert.equal(pages, 1, `devis court doit tenir sur 1 page, obtenu ${pages}`);
+  const latin = smoke.toString("latin1");
+  assert.ok(latin.includes("DEV-2026-SMOKE1"));
+  assert.ok(latin.includes("BROUILLON"));
+  console.log("✓ Test 9b — devis court 1 page (SMOKE1)");
+}
+
+{
+  const units = ["U", "ml", "m²", "m³", "kg", "t", "h", "jour", "forfait"] as const;
+  const pdf = generateCommercialQuotePdf(
+    baseInput({
+      status: "SENT",
+      sections: [
+        {
+          title: "Unités",
+          lines: units.map((unit, i) => ({
+            kind: "WORK" as const,
+            reference: `U-${i}`,
+            designation: `Ouvrage ${unit}`,
+            quantity: i === 0 ? 1 : 12.5,
+            unit,
+            unitSellHt: i === 0 ? 850 : 85,
+            vatRate: 20,
+            lineSellHt: (i === 0 ? 850 : 85) * (i === 0 ? 1 : 12.5),
+            isOptional: false,
+          })),
+        },
+      ],
+      totals: { totalSellHt: 10_000, totalVat: 2_000, totalTtc: 12_000 },
+    }),
+  );
+  assert.ok(pdfPageCount(pdf) >= 1);
+  assert.ok(pdf.toString("latin1").includes("m"));
+  console.log("✓ Test 9c — unités BTP");
+}
+
+{
+  const pdf = generateCommercialQuotePdf(
+    baseInput({
+      status: "SENT",
+      sections: [
+        {
+          title: "Montants",
+          lines: [
+            {
+              kind: "WORK",
+              designation: "Petite ligne",
+              quantity: 1,
+              unit: "U",
+              unitSellHt: 850,
+              vatRate: 20,
+              lineSellHt: 850,
+            },
+            {
+              kind: "WORK",
+              designation: "Chantier important",
+              quantity: 1,
+              unit: "U",
+              unitSellHt: 1_245_630.5,
+              vatRate: 20,
+              lineSellHt: 1_245_630.5,
+            },
+          ],
+        },
+      ],
+      totals: {
+        totalSellHt: 1_246_480.5,
+        totalVat: 249_296.1,
+        totalTtc: 1_495_776.6,
+      },
+    }),
+  );
+  assert.ok(pdf.length > 400);
+  console.log("✓ Test 9d — montants importants");
 }
 
 {

@@ -23,6 +23,15 @@ export function fmtDate(d: Date): string {
   });
 }
 
+/** Date longue type « 12 août 2026 » — en-tête devis. */
+export function fmtDateLong(d: Date): string {
+  return d.toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 export function fmtQty(n: number): string {
   if (Number.isInteger(n)) {
     return pdfSafe(new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(n));

@@ -9,8 +9,8 @@ export function tryDrawLogo(
   logoPath: string | null | undefined,
   x: number,
   y: number,
-  maxW = 42,
-  maxH = 16,
+  maxW = 52,
+  maxH = 20,
 ): number {
   if (!logoPath?.trim()) return 0;
   try {
@@ -39,7 +39,7 @@ export function tryDrawLogo(
       h = w;
     } else {
       w = maxW;
-      h = Math.min(maxH, maxW * 0.38);
+      h = Math.min(maxH, maxW * 0.42);
     }
     doc.addImage(
       `data:image/${mime};base64,${data.toString("base64")}`,

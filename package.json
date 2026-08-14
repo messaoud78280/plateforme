@@ -14,7 +14,7 @@
     "db:setup": "echo '→ Création des tables...' && npm run db:push && echo '→ Création des comptes...' && npm run db:seed && echo '→ Terminé.'",
     "build": "bash scripts/build-production.sh",
     "postbuild": "npm run --silent seo:ping-indexnow || true",
-    "start": "next start --hostname :: --port ${PORT:-3000}",
+    "start": "bash scripts/start-production.sh",
     "lint": "eslint",
     "db:seed": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx prisma/seed.ts",
     "db:seed:equipe": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx prisma/seed-equipe-bework.ts",

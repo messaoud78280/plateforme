@@ -9,12 +9,13 @@
       "package-lock.json",
       "next.config.ts",
       "railpack.json",
-      "scripts/build-production.sh"
+      "scripts/build-production.sh",
+      "scripts/start-production.sh"
     ]
   },
   "deploy": {
     "healthcheckPath": "/api/health",
-    "healthcheckTimeout": 180,
+    "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 5
   }

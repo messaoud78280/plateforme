@@ -15,7 +15,7 @@
     }
   },
   "deploy": {
-    "startCommand": "npm start",
+    "startCommand": "bash scripts/start-production.sh",
     "aptPackages": ["libreoffice-nogui", "fontconfig", "fonts-liberation"]
   }
 }

@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -20,6 +21,7 @@ import {
 } from "@/lib/messagerie/message-reply";
 import { presentMessagesForViewer } from "@/lib/messagerie/filter-hidden-messages";
 import { resolveMessageNotificationHref } from "@/lib/messagerie/resolve-conversation";
+import { ingestDurableMessageAttachments } from "@/lib/ged/ingest-message-durable";
 
 /** GET /api/tasks/[id]/messages — Messages de la tâche (filtrés par participant).
  * Query : take (défaut 50, max 100) · before=<ISO> (charger plus ancien) · after=<ISO|id> (poll incrémental)
@@ -328,6 +330,25 @@ export async function POST(
       kind: "TASK",
       conversationKey: `TASK:${taskId}`,
     });
+
+    if (files.length > 0 && task.projectId) {
+      after(async () => {
+        try {
+          await ingestDurableMessageAttachments({
+            projectId: task.projectId!,
+            clientId: task.clientId,
+            addedById: session.user.id,
+            messageKind: "TASK",
+            messageId: message.id,
+            attachments: files,
+            conversationLabel: task.title,
+            visibility: internal ? "Interne BeWork" : "Interne entreprise cliente",
+          });
+        } catch (e) {
+          console.error("GED ingest mission:", e);
+        }
+      });
+    }
 
     return NextResponse.json(message);
   } catch (e) {

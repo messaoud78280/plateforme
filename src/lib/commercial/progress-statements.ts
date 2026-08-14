@@ -739,6 +739,15 @@ export async function validateProgressStatement(input: {
     });
   });
 
+  void import("@/lib/ged/ingest-commercial-document")
+    .then(({ ingestCommercialProgressToGed }) =>
+      ingestCommercialProgressToGed({
+        statementId: statement.id,
+        addedById: input.userId,
+      }),
+    )
+    .catch((e) => console.error("GED ingest situation:", e));
+
   return getProgressStatementDetail(input.orgId, statement.id);
 }
 

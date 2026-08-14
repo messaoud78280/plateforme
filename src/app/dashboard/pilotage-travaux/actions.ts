@@ -535,6 +535,16 @@ export async function createMarketDocument(
     entityId: created.id,
     entityLabel: title,
   });
+  if (created.fileUrl) {
+    void import("@/lib/ged/ingest-pilotage-document")
+      .then(({ ingestMarketDocumentToGed }) =>
+        ingestMarketDocumentToGed({
+          marketDocumentId: created.id,
+          addedById: session.user.id,
+        }),
+      )
+      .catch((e) => console.error("GED ingest pièce marché:", e));
+  }
   revalidatePilotage(pilotageId);
   return { ok: true };
 }

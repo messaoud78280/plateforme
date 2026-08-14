@@ -349,7 +349,7 @@ export async function loadDocumentHub(opts: {
         origin: origin.origin,
         originLabel: origin.label,
         originHref: oHref,
-        originActionLabel: originActionLabel(origin.origin),
+        originActionLabel: origin.actionLabel ?? originActionLabel(origin.origin),
         isFavorite: f.favorites.length > 0,
         versionLabel: f.versionLabel,
         indice: f.indice,

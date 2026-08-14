@@ -1,32 +1,24 @@
 /**
- * GED-V2A — Lien BL commande → classeur chantier (même fileUrl, pas de copie).
- * PurchaseOrderDocument reste la source pour DELIVERY_NOTE_MISSING.
- * ChantierFile + ChantierFileLink = projection multi-contexte.
+ * GED V2.0.1 — tout document commande (BC, BL, devis, FT, facture…) → classeur.
+ * Même fileUrl, pas de copie. PurchaseOrderDocument reste la source métier.
  */
 import { prisma } from "@/lib/prisma";
-import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
+import { indexSourceDocument } from "@/lib/ged/index-source-document";
+import { poKindToGedMeta } from "@/lib/ged/source-identity";
 import { withPerfLog } from "@/lib/perf/server-timing";
 
-export async function linkPurchaseOrderBlToChantier(opts: {
+export async function linkPurchaseOrderDocumentToChantier(opts: {
   orderId: string;
-  receiptId: string;
   purchaseOrderDocumentId: string;
   fileUrl: string;
   fileName: string;
   addedById: string;
+  kind?: string;
+  receiptId?: string | null;
+  createdAt?: Date;
+  dryRun?: boolean;
 }): Promise<{ chantierFileId: string | null; linked: boolean; reason?: string }> {
-  return withPerfLog("linkPurchaseOrderBlToChantier", async () => {
-    const existing = await prisma.chantierFileLink.findFirst({
-      where: {
-        entityType: "purchase_order_document",
-        entityId: opts.purchaseOrderDocumentId,
-      },
-      select: { fileId: true },
-    });
-    if (existing) {
-      return { chantierFileId: existing.fileId, linked: false, reason: "already_linked" };
-    }
-
+  return withPerfLog("linkPurchaseOrderDocumentToChantier", async () => {
     const order = await prisma.purchaseOrder.findUnique({
       where: { id: opts.orderId },
       select: {
@@ -40,85 +32,76 @@ export async function linkPurchaseOrderBlToChantier(opts: {
     });
 
     if (!order?.projectId || !order.project) {
-      return {
-        chantierFileId: null,
-        linked: false,
-        reason: "no_project",
-      };
+      return { chantierFileId: null, linked: false, reason: "no_project" };
     }
 
-    await ensureChantierFolders(order.projectId);
-    const folder =
-      (await prisma.chantierFolder.findFirst({
-        where: { projectId: order.projectId, code: "05" },
-        select: { id: true },
-      })) ??
-      (await prisma.chantierFolder.findFirst({
-        where: { projectId: order.projectId, code: "00" },
-        select: { id: true },
-      }));
-
-    if (!folder) {
-      return { chantierFileId: null, linked: false, reason: "no_folder" };
-    }
-
+    const kind = (opts.kind || "AUTRE").toUpperCase();
+    const meta = poKindToGedMeta(kind);
     const supplierName =
       order.externalOrganization.tradeName || order.externalOrganization.name;
-    const name = opts.fileName.trim() || `BL ${order.number}`;
+    const name = opts.fileName.trim() || `${kind} ${order.number}`;
 
-    const file = await prisma.chantierFile.create({
-      data: {
-        projectId: order.projectId,
-        folderId: folder.id,
-        clientId: order.project.clientId,
-        name,
-        fileUrl: opts.fileUrl,
-        status: "RECU",
-        documentType: "BL",
-        category: "Fournisseurs",
-        subcategory: "Bon de livraison",
-        visibility: "Interne entreprise cliente",
-        classificationStatus: "CLASSE",
-        isCurrentVersion: true,
-        addedById: opts.addedById,
-        emitterName: supplierName,
+    const extra: { entityType: string; entityId: string; entityLabel?: string | null }[] = [
+      {
+        entityType: "purchase_order",
+        entityId: order.id,
+        entityLabel: order.number,
       },
-      select: { id: true },
+      {
+        entityType: "supplier",
+        entityId: order.externalOrganizationId,
+        entityLabel: supplierName,
+      },
+    ];
+    if (opts.receiptId) {
+      extra.push({
+        entityType: "purchase_order_receipt",
+        entityId: opts.receiptId,
+        entityLabel: "Réception",
+      });
+    }
+
+    const result = await indexSourceDocument({
+      projectId: order.projectId,
+      clientId: order.project.clientId,
+      addedById: opts.addedById,
+      name,
+      fileUrl: opts.fileUrl,
+      documentType: meta.documentType,
+      category: meta.category,
+      subcategory: meta.subcategory,
+      folderCode: meta.folderCode,
+      classificationStatus: meta.classificationStatus,
+      emitterName: supplierName,
+      createdAt: opts.createdAt,
+      dryRun: opts.dryRun,
+      primary: {
+        entityType: "purchase_order_document",
+        entityId: opts.purchaseOrderDocumentId,
+        entityLabel: kind,
+      },
+      extraLinks: extra,
     });
 
-    await prisma.chantierFileLink.createMany({
-      data: [
-        {
-          fileId: file.id,
-          entityType: "purchase_order",
-          entityId: order.id,
-          entityLabel: order.number,
-          createdById: opts.addedById,
-        },
-        {
-          fileId: file.id,
-          entityType: "purchase_order_receipt",
-          entityId: opts.receiptId,
-          entityLabel: "Réception",
-          createdById: opts.addedById,
-        },
-        {
-          fileId: file.id,
-          entityType: "purchase_order_document",
-          entityId: opts.purchaseOrderDocumentId,
-          entityLabel: "BL",
-          createdById: opts.addedById,
-        },
-        {
-          fileId: file.id,
-          entityType: "supplier",
-          entityId: order.externalOrganizationId,
-          entityLabel: supplierName,
-          createdById: opts.addedById,
-        },
-      ],
-    });
+    return {
+      chantierFileId: result.chantierFileId,
+      linked: result.created,
+      reason: result.reason,
+    };
+  });
+}
 
-    return { chantierFileId: file.id, linked: true };
+/** Compat GED V2 — BL réception. */
+export async function linkPurchaseOrderBlToChantier(opts: {
+  orderId: string;
+  receiptId: string;
+  purchaseOrderDocumentId: string;
+  fileUrl: string;
+  fileName: string;
+  addedById: string;
+}): Promise<{ chantierFileId: string | null; linked: boolean; reason?: string }> {
+  return linkPurchaseOrderDocumentToChantier({
+    ...opts,
+    kind: "BL",
   });
 }

@@ -33,7 +33,7 @@ export function originFromLinks(opts: {
   links: GedLinkLite[];
   folderCode?: string | null;
   sourceDocumentId?: string | null;
-}): { origin: GedOrigin; label: string; refLabel: string | null } {
+}): { origin: GedOrigin; label: string; refLabel: string | null; actionLabel: string | null } {
   const links = opts.links ?? [];
   const msg = links.find((l) => l.entityType === "message_attachment");
   if (msg) {
@@ -41,6 +41,7 @@ export function originFromLinks(opts: {
       origin: "MESSAGERIE",
       label: GED_ORIGIN_LABELS.MESSAGERIE,
       refLabel: msg.entityLabel && msg.entityLabel !== "Messagerie" ? msg.entityLabel : null,
+      actionLabel: "Voir la conversation",
     };
   }
   const po = links.find(
@@ -55,19 +56,37 @@ export function originFromLinks(opts: {
       origin: "COMMANDE",
       label: GED_ORIGIN_LABELS.COMMANDE,
       refLabel: [po.entityLabel, supplier?.entityLabel].filter(Boolean).join(" · ") || null,
+      actionLabel: "Voir la commande",
     };
   }
-  const quote = links.find(
-    (l) =>
-      l.entityType === "commercial_quote" ||
-      l.entityType === "commercial_invoice" ||
-      l.entityType === "commercial_progress",
-  );
+  const inv = links.find((l) => l.entityType === "commercial_invoice");
+  if (inv) {
+    const isAvoir = (inv.entityLabel ?? "").toLowerCase().includes("avoir");
+    return {
+      origin: "DEVIS",
+      label: GED_ORIGIN_LABELS.DEVIS,
+      refLabel: inv.entityLabel ?? null,
+      actionLabel: isAvoir ? "Voir l’avoir" : "Voir la facture",
+    };
+  }
+  const st = links.find((l) => l.entityType === "commercial_progress");
+  if (st) {
+    return {
+      origin: "DEVIS",
+      label: GED_ORIGIN_LABELS.DEVIS,
+      refLabel: st.entityLabel ?? null,
+      actionLabel: "Voir la situation",
+    };
+  }
+  const quote =
+    links.find((l) => l.entityType === "commercial_quote") ??
+    links.find((l) => l.entityType === "commercial_quote_snapshot");
   if (quote) {
     return {
       origin: "DEVIS",
       label: GED_ORIGIN_LABELS.DEVIS,
       refLabel: quote.entityLabel ?? null,
+      actionLabel: "Voir le devis",
     };
   }
   const sheet = links.find((l) => l.entityType === "follow_up_sheet");
@@ -76,6 +95,16 @@ export function originFromLinks(opts: {
       origin: "FICHE_SUIVI",
       label: GED_ORIGIN_LABELS.FICHE_SUIVI,
       refLabel: sheet.entityLabel ?? null,
+      actionLabel: "Voir la fiche",
+    };
+  }
+  const doe = links.find((l) => l.entityType === "doe_item");
+  if (doe || opts.folderCode === "11") {
+    return {
+      origin: "DOE",
+      label: GED_ORIGIN_LABELS.DOE,
+      refLabel: doe?.entityLabel ?? null,
+      actionLabel: "Voir le chantier",
     };
   }
   const supplier = links.find((l) => l.entityType === "supplier");
@@ -84,15 +113,13 @@ export function originFromLinks(opts: {
       origin: "FOURNISSEUR",
       label: GED_ORIGIN_LABELS.FOURNISSEUR,
       refLabel: supplier.entityLabel ?? null,
+      actionLabel: "Voir le chantier",
     };
   }
-  if (opts.folderCode === "11") {
-    return { origin: "DOE", label: GED_ORIGIN_LABELS.DOE, refLabel: null };
-  }
   if (opts.sourceDocumentId) {
-    return { origin: "UPLOAD", label: GED_ORIGIN_LABELS.UPLOAD, refLabel: "Mission" };
+    return { origin: "UPLOAD", label: GED_ORIGIN_LABELS.UPLOAD, refLabel: "Mission", actionLabel: null };
   }
-  return { origin: "CHANTIER", label: GED_ORIGIN_LABELS.CHANTIER, refLabel: null };
+  return { origin: "CHANTIER", label: GED_ORIGIN_LABELS.CHANTIER, refLabel: null, actionLabel: "Voir le chantier" };
 }
 
 export function originHref(opts: {
@@ -107,11 +134,14 @@ export function originHref(opts: {
   }
   if (opts.origin === "DEVIS") {
     const q = links.find((l) => l.entityType === "commercial_quote" && l.entityId);
-    if (q?.entityId) return `/dashboard/devis-facturation/devis/${q.entityId}`;
+    if (q?.entityId && !links.some((l) => l.entityType === "commercial_invoice" || l.entityType === "commercial_progress")) {
+      return `/dashboard/devis-facturation/devis/${q.entityId}`;
+    }
     const inv = links.find((l) => l.entityType === "commercial_invoice" && l.entityId);
     if (inv?.entityId) return `/dashboard/devis-facturation/factures/${inv.entityId}`;
     const st = links.find((l) => l.entityType === "commercial_progress" && l.entityId);
     if (st?.entityId) return `/dashboard/devis-facturation/situations/${st.entityId}`;
+    if (q?.entityId) return `/dashboard/devis-facturation/devis/${q.entityId}`;
   }
   if (opts.origin === "FICHE_SUIVI") {
     const s = links.find((l) => l.entityType === "follow_up_sheet" && l.entityId);

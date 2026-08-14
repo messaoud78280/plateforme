@@ -112,6 +112,13 @@ export async function POST(request: Request) {
           messageId,
         });
       }
+      if (messageKind === "PROJECT" || messageKind === "TASK") {
+        void import("@/lib/ged/index-source-document")
+          .then(({ archiveGedIndexesForMessage }) =>
+            archiveGedIndexesForMessage({ messageKind, messageId }),
+          )
+          .catch((e) => console.error("GED archive message:", e));
+      }
     }
 
     return NextResponse.json({ ok: true, results });

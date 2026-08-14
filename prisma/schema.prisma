@@ -1002,9 +1002,11 @@ model ChantierFile {
   @@index([checksum])
   @@index([projectId, createdAt])
   @@index([status, deletedAt])
+  @@index([documentType])
 }
 
-/// Lien document GED ↔ élément Pilotage / chantier
+/// Lien document GED ↔ élément métier (identité source V2.0.1).
+/// Unique partiel SQL sur types primaires : prisma/migrations/add-ged-v201-source-identity.sql
 model ChantierFileLink {
   id          String   @id @default(cuid())
   fileId      String

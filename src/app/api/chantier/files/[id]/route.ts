@@ -11,6 +11,7 @@ import {
 import { createServiceRoleClient } from "@/lib/supabase";
 import { deleteChantierPdfPreview } from "@/lib/storage/chantier-pdf-preview";
 import { DOCUMENTS_BUCKET, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
+import { gedIndexOwnsStorage, isGedPrimaryEntityType } from "@/lib/ged/source-identity";
 
 const STATUSES: ChantierFileStatus[] = ["RECU", "A_VERIFIER", "VALIDE", "MANQUANT", "A_RELANCER"];
 
@@ -108,7 +109,13 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   const { id } = await params;
   const existing = await prisma.chantierFile.findUnique({
     where: { id },
-    select: { projectId: true, fileUrl: true, name: true },
+    select: {
+      projectId: true,
+      fileUrl: true,
+      name: true,
+      sourceDocumentId: true,
+      links: { select: { entityType: true }, take: 20 },
+    },
   });
   if (!existing) {
     return NextResponse.json({ error: "Introuvable" }, { status: 404 });
@@ -125,9 +132,17 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     );
   }
 
+  const hasPrimarySourceLink = existing.links.some((l) => isGedPrimaryEntityType(l.entityType));
+  const ownsStorage = gedIndexOwnsStorage({
+    fileUrl: existing.fileUrl,
+    projectId: existing.projectId,
+    hasPrimarySourceLink,
+    sourceDocumentId: existing.sourceDocumentId,
+  });
+
   const supabase = createServiceRoleClient();
   if (supabase) {
-    if (existing.fileUrl) {
+    if (ownsStorage && existing.fileUrl) {
       const path = extractStoragePathFromUrl(existing.fileUrl, DOCUMENTS_BUCKET);
       if (path) {
         const { error: storageError } = await supabase.storage.from(DOCUMENTS_BUCKET).remove([path]);
@@ -139,6 +154,13 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     await deleteChantierPdfPreview(supabase, existing.projectId, id);
   }
 
-  await prisma.chantierFile.delete({ where: { id } });
+  if (hasPrimarySourceLink || existing.sourceDocumentId) {
+    await prisma.chantierFile.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  } else {
+    await prisma.chantierFile.delete({ where: { id } });
+  }
   return NextResponse.json({ ok: true });
 }

@@ -22,8 +22,12 @@ export async function ingestDurableMessageAttachments(opts: {
   attachments: Att[];
   conversationLabel?: string | null;
   companyName?: string | null;
-}): Promise<{ linked: number; skipped: number }> {
+  visibility?: string;
+  createdAt?: Date;
+  dryRun?: boolean;
+}): Promise<{ linked: number; existing: number; skipped: number }> {
   let linked = 0;
+  let existing = 0;
   let skipped = 0;
   for (const att of opts.attachments) {
     if (!att.fileUrl) {
@@ -43,9 +47,13 @@ export async function ingestDurableMessageAttachments(opts: {
       attachment: att,
       conversationLabel: opts.conversationLabel,
       companyName: opts.companyName,
+      visibility: opts.visibility,
+      createdAt: opts.createdAt,
+      dryRun: opts.dryRun,
     });
-    if (result.ok) linked += 1;
-    else skipped += 1;
+    if (!result.ok) skipped += 1;
+    else if (result.created) linked += 1;
+    else existing += 1;
   }
-  return { linked, skipped };
+  return { linked, existing, skipped };
 }

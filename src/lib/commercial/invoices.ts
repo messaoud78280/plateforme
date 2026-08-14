@@ -639,8 +639,8 @@ export async function issueInvoice(orgId: string, invoiceId: string, actorUserId
 
   const dueDate = invoice.dueDate ?? defaultDueDateFromIssue(invoice.issueDate ?? new Date());
 
-  return prisma.$transaction(async (tx) => {
-    const updated = await tx.commercialInvoice.update({
+  const updated = await prisma.$transaction(async (tx) => {
+    const next = await tx.commercialInvoice.update({
       where: { id: invoiceId },
       data: {
         status: "ISSUED",
@@ -659,8 +659,16 @@ export async function issueInvoice(orgId: string, invoiceId: string, actorUserId
         actorUserId,
       },
     });
-    return updated;
+    return next;
   });
+
+  void import("@/lib/ged/ingest-commercial-document")
+    .then(({ ingestCommercialInvoiceToGed }) =>
+      ingestCommercialInvoiceToGed({ invoiceId, addedById: actorUserId }),
+    )
+    .catch((e) => console.error("GED ingest facture:", e));
+
+  return updated;
 }
 
 /** Enregistre un règlement client BTP — n’utilise PAS prisma.payment (SaaS). */

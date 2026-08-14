@@ -1244,7 +1244,7 @@ export async function transitionQuoteStatus(
     (quote.clientSnapshotJson as Snapshot | null) ??
     (await buildClientSnapshot(quote.clientExternalOrgId));
 
-  return prisma.$transaction(async (tx) => {
+  const updated = await prisma.$transaction(async (tx) => {
     const data: Prisma.CommercialQuoteUpdateInput = { status: toStatus };
 
     if (toStatus === "SENT") {
@@ -1281,7 +1281,7 @@ export async function transitionQuoteStatus(
       }
     }
 
-    const updated = await tx.commercialQuote.update({
+    const next = await tx.commercialQuote.update({
       where: { id: quoteId },
       data,
     });
@@ -1298,8 +1298,18 @@ export async function transitionQuoteStatus(
       },
     });
 
-    return updated;
+    return next;
   });
+
+  if (toStatus === "SENT" || toStatus === "ACCEPTED" || toStatus === "VIEWED") {
+    void import("@/lib/ged/ingest-commercial-document")
+      .then(({ ingestCommercialQuoteToGed }) =>
+        ingestCommercialQuoteToGed({ quoteId, addedById: actorUserId }),
+      )
+      .catch((e) => console.error("GED ingest devis:", e));
+  }
+
+  return updated;
 }
 
 export function isQuoteEditable(status: CommercialQuoteStatus, lockState?: string | null) {

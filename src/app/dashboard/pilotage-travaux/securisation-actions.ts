@@ -535,6 +535,11 @@ export async function createPilotagePhoto(formData: FormData) {
     entityId: item.id,
     entityLabel: item.title ?? item.category,
   });
+  void import("@/lib/ged/ingest-pilotage-document")
+    .then(({ ingestPilotagePhotoToGed }) =>
+      ingestPilotagePhotoToGed({ photoId: item.id, addedById: g.session!.user.id }),
+    )
+    .catch((e) => console.error("GED ingest photo:", e));
   revalidatePilotage(pilotageId);
   return { ok: true as const };
 }

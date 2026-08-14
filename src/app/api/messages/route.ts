@@ -413,6 +413,8 @@ export async function POST(request: Request) {
             attachments,
             conversationLabel: project.title,
             companyName,
+            visibility:
+              legacyChannel === "INTERNE" ? "Interne BeWork" : "Interne entreprise cliente",
           });
         } catch (e) {
           console.error("GED ingest messagerie:", e);

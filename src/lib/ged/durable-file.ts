@@ -47,6 +47,43 @@ export function isDurableDocument(opts: {
   return false;
 }
 
+export type ParsedAttachment = {
+  name?: string;
+  fileUrl?: string;
+  fileSize?: number;
+  mimeType?: string | null;
+  kind?: string | null;
+};
+
+/** Pièces jointes messagerie / mission — JSON Prisma ou tableau déjà parsé. */
+export function parseAttachmentsJson(raw: unknown): ParsedAttachment[] {
+  let value: unknown = raw;
+  if (value == null) return [];
+  if (typeof value === "string") {
+    try {
+      value = JSON.parse(value);
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(value)) return [];
+  const out: ParsedAttachment[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object") continue;
+    const rec = item as Record<string, unknown>;
+    const fileUrl = typeof rec.fileUrl === "string" ? rec.fileUrl.trim() : "";
+    if (!fileUrl) continue;
+    out.push({
+      name: typeof rec.name === "string" ? rec.name : undefined,
+      fileUrl,
+      fileSize: typeof rec.fileSize === "number" ? rec.fileSize : undefined,
+      mimeType: typeof rec.mimeType === "string" ? rec.mimeType : null,
+      kind: typeof rec.kind === "string" ? rec.kind : null,
+    });
+  }
+  return out;
+}
+
 /** Photos / vidéos chantier — GED uniquement si dépôt chantier explicite, pas chaque PJ chat. */
 export function isMediaAttachment(opts: {
   name?: string | null;

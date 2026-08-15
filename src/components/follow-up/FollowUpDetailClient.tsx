@@ -11,6 +11,10 @@ import {
   URGENCY_STYLES,
 } from "@/lib/follow-up/types";
 import { FollowUpMessagerieLink } from "@/components/messagerie/MessagerieContextLinks";
+import {
+  buildPrepareBillingHref,
+  isPrepareBillingStatus,
+} from "@/lib/facturation/prepare-billing";
 
 type TeamUser = { id: string; name: string; email: string };
 
@@ -275,6 +279,23 @@ export function FollowUpDetailClient({
           </div>
         ) : null}
       </header>
+
+      {isPrepareBillingStatus(sheet.status) && sheet.projectId ? (
+        <section className="rounded-2xl border border-slate-200 bg-white p-4">
+          <p className="text-xs text-slate-500">
+            Signal opérationnel — ne crée pas de chiffre d’affaires.
+          </p>
+          <Link
+            href={buildPrepareBillingHref({
+              projectId: sheet.projectId,
+              sheetId: sheet.id,
+            })}
+            className="mt-2 inline-flex rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
+          >
+            Préparer la facturation
+          </Link>
+        </section>
+      ) : null}
 
       {!sheet.nextActionDone && sheet.nextAction && (
         <section className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-4">

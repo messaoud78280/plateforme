@@ -251,14 +251,14 @@ export function ChantierOpsOverview({
         <Section
           title="Facturation"
           count={billingHint.count}
-          action={{ href: billingHint.href, label: "Voir" }}
+          action={{ href: billingHint.href, label: "Préparer" }}
         >
           <p className="text-sm font-medium text-slate-800">{billingHint.label}</p>
           <Link
             href={billingHint.href}
             className="mt-2 inline-block text-xs font-semibold text-[#1d4ed8] hover:underline"
           >
-            Voir la facturation →
+            Préparer la facturation →
           </Link>
         </Section>
       ) : null}

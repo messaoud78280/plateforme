@@ -44,7 +44,7 @@ export function FacturationHomeBanner() {
   } else if (aSurveiller > 0) {
     detail = `${aSurveiller} dossier${aSurveiller > 1 ? "s" : ""} à surveiller.`;
   } else if (data.aFacturer > 0) {
-    detail = `${data.aFacturer} dossier${data.aFacturer > 1 ? "s" : ""} en étape facturation.`;
+    detail = `${data.aFacturer} besoin${data.aFacturer > 1 ? "s" : ""} opérationnel${data.aFacturer > 1 ? "s" : ""} à préparer — pas encore des factures.`;
   } else {
     detail = `${data.attention} action${data.attention > 1 ? "s" : ""} de facturation.`;
   }

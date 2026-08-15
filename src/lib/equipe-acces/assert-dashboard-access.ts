@@ -1,10 +1,9 @@
 import { redirect } from "next/navigation";
-import { isHrefAllowedForPersona } from "@/lib/equipe-acces/nav-by-persona";
+import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 
 /**
  * Garde serveur — sidebar ≠ sécurité.
- * Applique la whitelist persona (FOURNISSEUR, CLIENT, CONDUCTEUR, …).
- * DIRECTION / ADMINISTRATIF / DEFAULT_INTERNAL : pas de filtre (allowed = null).
+ * Politique unique : `canAccessDashboardHref` (whitelist + extras sidebar).
  */
 export function assertDashboardHrefAllowed(opts: {
   href: string;
@@ -12,7 +11,7 @@ export function assertDashboardHrefAllowed(opts: {
   permissionProfile?: string | null;
 }): void {
   if (
-    !isHrefAllowedForPersona(opts.href, opts.personType, opts.permissionProfile)
+    !canAccessDashboardHref(opts.href, opts.personType, opts.permissionProfile)
   ) {
     redirect("/dashboard");
   }

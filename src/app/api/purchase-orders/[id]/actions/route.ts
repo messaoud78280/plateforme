@@ -14,6 +14,7 @@ import {
   sharePurchaseOrderWithSupplier,
 } from "@/lib/purchase-orders/supplier-collaboration";
 import { prisma } from "@/lib/prisma";
+import { forbiddenUnlessDashboardHref } from "@/lib/equipe-acces/assert-api-dashboard-access";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -25,6 +26,8 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!isInternalPurchaseOrderActor(session.user)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/commandes");
+  if (personaDeny) return personaDeny;
 
   const { id } = await ctx.params;
   const orgId = await resolvePurchaseOrderOrgId(session.user);

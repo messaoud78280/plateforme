@@ -5,6 +5,7 @@ import {
   isInternalPurchaseOrderActor,
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
+import { forbiddenUnlessDashboardHref } from "@/lib/equipe-acces/assert-api-dashboard-access";
 import { cancelSupplierInvoice } from "@/lib/chantier/supplier-invoices";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -17,6 +18,8 @@ export async function POST(_req: Request, ctx: Ctx) {
   if (!isInternalPurchaseOrderActor(session.user)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/depenses");
+  if (personaDeny) return personaDeny;
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) {
     return NextResponse.json({ error: "Organisation introuvable" }, { status: 403 });

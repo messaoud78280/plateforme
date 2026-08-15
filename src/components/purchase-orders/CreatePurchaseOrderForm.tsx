@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { PurchaseCostCategorySelect } from "@/components/purchase-orders/PurchaseCostCategorySelect";
+import type { SupplierCostCategory } from "@/lib/purchase-orders/cost-category";
 
 type ProjectOpt = { id: string; title: string; siteAddress: string | null; siteCity: string | null };
 type TeamOpt = { id: string; name: string };
@@ -20,6 +22,7 @@ type Line = {
   unitPriceHt: string;
   materialRequirementId?: string | null;
   neededAtHint?: string | null;
+  costCategory?: SupplierCostCategory;
 };
 
 export type PrefillPurchaseOrderLine = {
@@ -36,6 +39,7 @@ const emptyLine = (): Line => ({
   unit: "U",
   unitPriceHt: "",
   materialRequirementId: null,
+  costCategory: undefined,
 });
 
 export function CreatePurchaseOrderForm({
@@ -78,6 +82,7 @@ export function CreatePurchaseOrderForm({
           unitPriceHt: "",
           materialRequirementId: l.materialRequirementId,
           neededAtHint: l.neededAt ?? null,
+          costCategory: "MATERIAL",
         }))
       : [emptyLine()],
   );
@@ -97,6 +102,9 @@ export function CreatePurchaseOrderForm({
   const [error, setError] = useState<string | null>(null);
   const [newSupplierOpen, setNewSupplierOpen] = useState(false);
   const [newSupplierName, setNewSupplierName] = useState("");
+  const [defaultCostCategory, setDefaultCostCategory] = useState<SupplierCostCategory>(
+    prefillLines && prefillLines.length > 0 ? "MATERIAL" : "UNCLASSIFIED",
+  );
 
   const selectedProject = projects.find((p) => p.id === projectId);
   const fromMateriaux = Boolean(prefillLines && prefillLines.length > 0);
@@ -173,11 +181,13 @@ export function CreatePurchaseOrderForm({
           deliveryAddress,
           deliveryInstructions: showDetails ? deliveryInstructions : null,
           internalNotes: showDetails ? internalNotes : null,
+          defaultCostCategory,
           lines: lines.map((l) => ({
             designation: l.designation,
             quantity: Number(l.quantity),
             unit: l.unit,
             unitPriceHt: l.unitPriceHt === "" ? null : Number(l.unitPriceHt),
+            costCategory: l.costCategory || defaultCostCategory,
             materialRequirementId: l.materialRequirementId || null,
             quantityAllocated: l.materialRequirementId
               ? Number(l.quantity)
@@ -276,6 +286,20 @@ export function CreatePurchaseOrderForm({
             </div>
           ) : null}
         </div>
+
+        <label className="block space-y-1">
+          <span className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            Type de dépense
+          </span>
+          <PurchaseCostCategorySelect
+            value={defaultCostCategory}
+            onChange={setDefaultCostCategory}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          />
+          <span className="text-[11px] text-slate-400">
+            Appliqué à toutes les lignes. Une ligne peut être précisée ensuite.
+          </span>
+        </label>
 
         <label className="block space-y-1">
           <span className="text-xs font-bold uppercase tracking-wide text-slate-500">Objet *</span>

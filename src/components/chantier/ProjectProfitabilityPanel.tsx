@@ -116,8 +116,9 @@ export function ProjectProfitabilityPanel({
           Aucun budget initial
         </h2>
         <p className="mt-2 max-w-xl text-sm text-slate-500">
-          Initialisez le budget depuis un devis accepté pour comparer prévu,
-          engagé, facturé et encaissé. Le budget sera figé à cette date.
+          Le budget se crée à l’acceptation du devis. Relancez ici uniquement
+          si l’initialisation automatique a échoué. Le budget sera figé à cette
+          date.
         </p>
         {data.acceptedQuotes.length === 0 ? (
           <p className="mt-4 text-sm text-amber-800">
@@ -145,7 +146,7 @@ export function ProjectProfitabilityPanel({
               onClick={() => void initBudget()}
               className="rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
             >
-              {busy ? "…" : "Initialiser le budget"}
+              {busy ? "…" : "Relancer l’initialisation"}
             </button>
           </div>
         )}
@@ -266,6 +267,28 @@ export function ProjectProfitabilityPanel({
           le même BC.
         </p>
       </div>
+
+      {(() => {
+        const unclassified = data.categories.find((c) => c.key === "UNCLASSIFIED");
+        const ht = unclassified?.committedHt ?? 0;
+        if (ht <= 0.004) return null;
+        const first = data.commitments.find((c) => c.category === "UNCLASSIFIED");
+        return (
+          <p className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+            {fmt(ht)} € d’engagements à classer.{" "}
+            <Link
+              href={
+                first
+                  ? `/dashboard/commandes/${first.id}`
+                  : "/dashboard/commandes"
+              }
+              className="font-semibold text-[#1d4ed8] hover:underline"
+            >
+              Voir
+            </Link>
+          </p>
+        );
+      })()}
 
       {data.commercial.billingLagWarning ? (
         <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
@@ -530,12 +553,13 @@ export function ProjectProfitabilityPanel({
           <ul className="space-y-2">
             {data.commitments.map((c) => (
               <li
-                key={c.id}
+                key={`${c.id}:${c.category}`}
                 className="rounded-xl border border-slate-100 px-3 py-2"
               >
                 <p className="text-sm font-semibold">{c.number}</p>
                 <p className="text-xs text-slate-500">
                   {c.supplierName ?? "Fournisseur"} · {c.status}
+                  {c.category === "UNCLASSIFIED" ? " · À classer" : ""}
                 </p>
                 <p className="tabular-nums text-sm font-medium">
                   {fmt(c.amountHt)} €

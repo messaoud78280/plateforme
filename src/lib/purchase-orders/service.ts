@@ -9,6 +9,7 @@ import {
 import { syncPurchaseOrderDeliveryEvent } from "@/lib/purchase-orders/sync-delivery";
 import { createNotification } from "@/lib/notifications";
 import { safeSyncPurchaseOrderAttentionAfterMutation } from "@/lib/purchase-orders/attention/sync-notifications";
+import { resolvePurchaseLineCostCategory } from "@/lib/purchase-orders/cost-category";
 
 export type CreatePurchaseOrderLineInput = {
   designation: string;
@@ -19,6 +20,7 @@ export type CreatePurchaseOrderLineInput = {
   /** MATERIAUX-V1B — allouer cette ligne à un besoin (même unité) */
   materialRequirementId?: string | null;
   quantityAllocated?: number | null;
+  costCategory?: string | null;
 };
 
 export type CreatePurchaseOrderInput = {
@@ -38,6 +40,7 @@ export type CreatePurchaseOrderInput = {
   internalNotes?: string | null;
   deliveryInstructions?: string | null;
   urgency?: string | null;
+  defaultCostCategory?: string | null;
   /** Champs détail optionnels */
   details?: {
     supplierRef?: string | null;
@@ -86,6 +89,7 @@ export async function createPurchaseOrder(input: CreatePurchaseOrderInput) {
         l.quantityAllocated != null && Number.isFinite(Number(l.quantityAllocated))
           ? Number(l.quantityAllocated)
           : null,
+      costCategory: l.costCategory ?? null,
     }))
     .filter((l) => l.designation && l.quantity > 0);
 
@@ -162,6 +166,7 @@ export async function createPurchaseOrder(input: CreatePurchaseOrderInput) {
         internalNotes: input.internalNotes ?? undefined,
         supplierNotes: input.details?.supplierNotes ?? undefined,
         urgency: input.urgency ?? undefined,
+        defaultCostCategory: input.defaultCostCategory ?? undefined,
         lines: {
           create: lines.map((l, i) => ({
             designation: l.designation,
@@ -169,6 +174,11 @@ export async function createPurchaseOrder(input: CreatePurchaseOrderInput) {
             unit: l.unit,
             unitPriceHt: l.unitPriceHt ?? undefined,
             tvaRate: l.tvaRate ?? undefined,
+            costCategory: resolvePurchaseLineCostCategory({
+              costCategory: l.costCategory,
+              hasMaterialRequirement: Boolean(l.materialRequirementId),
+              defaultCostCategory: input.defaultCostCategory,
+            }),
             sortOrder: i,
           })),
         },

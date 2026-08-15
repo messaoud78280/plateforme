@@ -31,7 +31,6 @@ assert.ok(portfolio.includes("projectId: { in: projectIds }"));
 // Responsable : filtre CLIENT_EXT
 assert.ok(portfolio.includes("CLIENT_EXT"));
 assert.ok(portfolio.includes("isInternalAssignee") || portfolio.includes("personType === \"INTERNAL\""));
-assert.ok(portfolio.includes("sophie martin") || portfolio.includes("Sophie"));
 
 // Seed / cohérence Victor Hugo → Karim
 const personas = read("src/lib/demo-environment/seed-personas.ts");

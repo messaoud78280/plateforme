@@ -18,8 +18,8 @@ import { resolveConversationHref } from "@/lib/messagerie/resolve-conversation";
 import {
   defaultMessageChannelForPerson,
   isExternalPortalUser,
-  isHrefAllowedForPersona,
 } from "@/lib/equipe-acces/nav-by-persona";
+import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 import { withPerfLog } from "@/lib/perf/server-timing";
 
 export type SearchResultKind =
@@ -213,7 +213,7 @@ export async function searchGlobal(opts: {
     const supplier = isSupplierPurchaseOrderActor(opts.user);
 
     const navEmpty = NAV_ITEMS.filter((n) => {
-      if (!isHrefAllowedForPersona(n.href, opts.user.personType, opts.user.permissionProfile)) {
+      if (!canAccessDashboardHref(n.href, opts.user.personType, opts.user.permissionProfile)) {
         return false;
       }
       if (!canListPurchaseOrders(opts.user) && n.id === "nav-commandes") return false;
@@ -232,7 +232,13 @@ export async function searchGlobal(opts: {
 
     const actionsEmpty = ACTION_ITEMS.filter((a) => {
       if (a.internalOnly && !internal) return false;
-      if (external && !isHrefAllowedForPersona(a.href.split("?")[0]!, opts.user.personType, opts.user.permissionProfile)) {
+      if (
+        !canAccessDashboardHref(
+          a.href.split("?")[0]!,
+          opts.user.personType,
+          opts.user.permissionProfile,
+        )
+      ) {
         return false;
       }
       return true;
@@ -258,8 +264,7 @@ export async function searchGlobal(opts: {
     const actions = ACTION_ITEMS.filter((a) => {
       if (a.internalOnly && !internal) return false;
       if (
-        external &&
-        !isHrefAllowedForPersona(
+        !canAccessDashboardHref(
           a.href.split("?")[0]!,
           opts.user.personType,
           opts.user.permissionProfile,
@@ -282,7 +287,7 @@ export async function searchGlobal(opts: {
     );
 
     const nav = NAV_ITEMS.filter((n) => {
-      if (!isHrefAllowedForPersona(n.href, opts.user.personType, opts.user.permissionProfile)) {
+      if (!canAccessDashboardHref(n.href, opts.user.personType, opts.user.permissionProfile)) {
         return false;
       }
       if (!canListPurchaseOrders(opts.user) && n.id === "nav-commandes") return false;
@@ -368,8 +373,13 @@ export async function searchGlobal(opts: {
           })
         : Promise.resolve([]);
 
+    const canSeeSuppliers = canAccessDashboardHref(
+      "/dashboard/fournisseurs",
+      opts.user.personType,
+      opts.user.permissionProfile,
+    );
     const suppliersPromise =
-      internal && orgId
+      internal && orgId && canSeeSuppliers
         ? searchSuppliers({ hostOrganizationId: orgId, query: q, take })
         : Promise.resolve([]);
 
@@ -601,12 +611,12 @@ export async function searchGlobal(opts: {
       take,
     });
 
-    const canSeeAgenda = isHrefAllowedForPersona(
+    const canSeeAgenda = canAccessDashboardHref(
       "/dashboard/agenda",
       opts.user.personType,
       opts.user.permissionProfile,
     );
-    const canSeeProjects = isHrefAllowedForPersona(
+    const canSeeProjects = canAccessDashboardHref(
       "/dashboard/projets",
       opts.user.personType,
       opts.user.permissionProfile,

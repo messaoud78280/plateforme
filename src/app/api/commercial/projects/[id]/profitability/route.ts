@@ -8,7 +8,7 @@ import {
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_req: Request, ctx: Ctx) {
-  const auth = await requireCommercialApiSession();
+  const auth = await requireCommercialApiSession("/dashboard/rentabilite");
   if (auth.error || !auth.session) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
@@ -21,7 +21,7 @@ export async function GET(_req: Request, ctx: Ctx) {
 }
 
 export async function POST(req: Request, ctx: Ctx) {
-  const auth = await requireCommercialApiSession();
+  const auth = await requireCommercialApiSession("/dashboard/rentabilite");
   if (auth.error || !auth.session) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }

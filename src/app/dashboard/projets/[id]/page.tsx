@@ -56,7 +56,7 @@ import { isActionOpen, isVisaPending, isOverdue } from "@/lib/pilotage/calculati
 import { ProjectMateriauxSection } from "@/components/projects/ProjectMateriauxSection";
 import { loadMaterialRequirementsForProject } from "@/lib/materiaux/load-for-project";
 import { isInternalPurchaseOrderActor } from "@/lib/purchase-orders/access";
-import { canAccessCommercialModule } from "@/lib/commercial/access";
+import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 import { loadDocumentHub } from "@/lib/ged/document-hub";
 
 export default async function ProjetDetailPage({
@@ -244,7 +244,12 @@ export default async function ProjetDetailPage({
     actorProfile?.personType !== "SUPPLIER";
 
   const canSeeRentabilite =
-    canSeeContractuel && canAccessCommercialModule(session.user);
+    canSeeContractuel &&
+    canAccessDashboardHref(
+      "/dashboard/rentabilite",
+      actorProfile?.personType ?? session.user.personType,
+      actorProfile?.permissionProfile ?? session.user.permissionProfile,
+    );
 
   const canSeeMateriaux =
     !isExternalViewer && isInternalPurchaseOrderActor(session.user);

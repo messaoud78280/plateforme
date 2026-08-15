@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { BackLink } from "@/components/ui/BackLink";
 import { cn } from "@/lib/cn";
 import { withReturnTo } from "@/lib/navigation/safe-return-to";
+import { buildPrepareBillingHref } from "@/lib/facturation/prepare-billing";
 
 export const dynamic = "force-dynamic";
 
@@ -87,7 +88,7 @@ export default async function FacturationPage({
       <PageHeader
         eyebrow="Pilotage chantier"
         title="À facturer"
-        description="Dossiers / chantiers qui nécessitent une action de facturation — pas la facture financière elle-même (Devis & Facturation)."
+        description="Besoins opérationnels à préparer dans Commercial — une fiche À facturer n’est pas du chiffre d’affaires."
         actions={
           <Link
             href={withReturnTo("/dashboard/a-traiter", "/dashboard/facturation")}
@@ -268,7 +269,10 @@ export default async function FacturationPage({
                         const prepareHref =
                           row.projectId &&
                           (row.status === "A_FACTURER" || row.bucket === "a_facturer")
-                            ? `/dashboard/devis-facturation/factures/preparer?projectId=${row.projectId}`
+                            ? buildPrepareBillingHref({
+                                projectId: row.projectId,
+                                sheetId: row.id,
+                              })
                             : null;
                         return (
                           <tr key={row.id} className="border-b border-slate-100">
@@ -295,7 +299,7 @@ export default async function FacturationPage({
                                   href={prepareHref}
                                   className="inline-flex rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white"
                                 >
-                                  Préparer la facture
+                                  Préparer la facturation
                                 </Link>
                               ) : (
                                 <Link
@@ -319,7 +323,10 @@ export default async function FacturationPage({
                     const prepareHref =
                       row.projectId &&
                       (row.status === "A_FACTURER" || row.bucket === "a_facturer")
-                        ? `/dashboard/devis-facturation/factures/preparer?projectId=${row.projectId}`
+                        ? buildPrepareBillingHref({
+                            projectId: row.projectId,
+                            sheetId: row.id,
+                          })
                         : null;
                     return (
                       <li
@@ -345,7 +352,7 @@ export default async function FacturationPage({
                             href={prepareHref}
                             className="mt-2 inline-flex rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
                           >
-                            Préparer la facture
+                            Préparer la facturation
                           </Link>
                         ) : (
                           <p className="mt-2 text-[12px] font-semibold text-[#1e3a5f]">

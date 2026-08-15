@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { AccueilOpsSummary } from "@/lib/accueil/load-accueil-ops";
 import { MessagesHomeBanner } from "@/components/dashboard/MessagesHomeBanner";
 import { FacturationHomeBanner } from "@/components/dashboard/FacturationHomeBanner";
+import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 import { cn } from "@/lib/cn";
 
 function fmtTime(iso: string) {
@@ -119,10 +120,19 @@ function QuickActionMenu({ links }: { links: AccueilOpsSummary["links"] }) {
 export function AccueilOpsHome({
   ops,
   scopeHrefBase = "/dashboard",
+  personType,
+  permissionProfile,
 }: {
   ops: AccueilOpsSummary;
   scopeHrefBase?: string;
+  personType?: string | null;
+  permissionProfile?: string | null;
 }) {
+  const showRentabilite = canAccessDashboardHref(
+    "/dashboard/rentabilite",
+    personType,
+    permissionProfile,
+  );
   const scopeHint =
     ops.canSwitchScope && ops.scope === "team"
       ? "Vue Équipe"
@@ -251,23 +261,25 @@ export function AccueilOpsHome({
           {/* 1c — FACTURATION anti-oubli (masqué si rien) */}
           <FacturationHomeBanner />
 
-          {/* 1d — Rentabilité chantiers (PILOTAGE-1) */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]">
-                Rentabilité chantiers
-              </h2>
-              <Link
-                href="/dashboard/rentabilite"
-                className="text-xs font-semibold text-[#1d4ed8] hover:underline"
-              >
-                Voir la rentabilité →
-              </Link>
-            </div>
-            <p className="mt-2 text-sm text-slate-500">
-              Marge prévue vs estimée, engagé, facturé et encaissé — sans IA.
-            </p>
-          </section>
+          {/* 1d — Rentabilité chantiers (PILOTAGE-1) — SEC-1 : Direction / Administratif */}
+          {showRentabilite ? (
+            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]">
+                  Rentabilité chantiers
+                </h2>
+                <Link
+                  href="/dashboard/rentabilite"
+                  className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+                >
+                  Voir la rentabilité →
+                </Link>
+              </div>
+              <p className="mt-2 text-sm text-slate-500">
+                Marge prévue vs estimée, engagé, facturé et encaissé — sans IA.
+              </p>
+            </section>
+          ) : null}
 
           {/* 2 — AUJOURD’HUI */}
           <section data-demo-target="accueil-aujourdhui">

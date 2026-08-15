@@ -6,6 +6,7 @@ import {
   isInternalPurchaseOrderActor,
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
+import { forbiddenUnlessDashboardHref } from "@/lib/equipe-acces/assert-api-dashboard-access";
 import { searchSuppliers, upsertSupplier } from "@/lib/suppliers/service";
 
 export async function GET(req: Request) {
@@ -16,6 +17,8 @@ export async function GET(req: Request) {
   if (!isInternalPurchaseOrderActor(session.user)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/fournisseurs");
+  if (personaDeny) return personaDeny;
 
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) {
@@ -62,6 +65,8 @@ export async function POST(req: Request) {
   if (!isInternalPurchaseOrderActor(session.user)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/fournisseurs");
+  if (personaDeny) return personaDeny;
 
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) {

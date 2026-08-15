@@ -29,6 +29,7 @@ export async function POST(req: Request, ctx: Ctx) {
         quote: result.quote,
         pdfArchived: result.pdfArchived,
         pdfArchiveError: result.pdfArchiveError,
+        budgetInit: result.budgetInit,
       });
     }
 

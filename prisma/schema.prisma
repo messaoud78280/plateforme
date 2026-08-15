@@ -358,6 +358,8 @@ model PurchaseOrder {
   urgency                  String?
   /// Visible par le compte fournisseur uniquement si true
   sharedWithSupplier       Boolean             @default(false)
+  /// ECO-1 — défaut de type de dépense pour les lignes (MATERIAL | EQUIPMENT | …)
+  defaultCostCategory      String?
 
   createdAt                DateTime            @default(now())
   updatedAt                DateTime            @updatedAt
@@ -399,6 +401,8 @@ model PurchaseOrderLine {
   /// CACHE UI uniquement — source de vérité = PurchaseOrderReceiptLine (non annulées).
   /// Recalculé par refreshLineCaches() après chaque réception. Ne jamais alerter dessus.
   receivedQty    Decimal  @default(0) @db.Decimal(14, 3)
+  /// ECO-1 — MATERIAL | EQUIPMENT | SUBCONTRACT | OTHER | UNCLASSIFIED | null = à classer
+  costCategory   String?
   sortOrder      Int      @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

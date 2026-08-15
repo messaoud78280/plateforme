@@ -8,6 +8,7 @@ import {
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
 import { createPurchaseOrder } from "@/lib/purchase-orders/service";
+import { forbiddenUnlessDashboardHref } from "@/lib/equipe-acces/assert-api-dashboard-access";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -17,6 +18,8 @@ export async function GET() {
   if (!canListPurchaseOrders(session.user)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/commandes");
+  if (personaDeny) return personaDeny;
 
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) {
@@ -77,6 +80,8 @@ export async function POST(req: Request) {
   if (!isInternalPurchaseOrderActor(session.user)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/commandes");
+  if (personaDeny) return personaDeny;
 
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) {
@@ -111,6 +116,9 @@ export async function POST(req: Request) {
         : null,
       internalNotes: body.internalNotes ? String(body.internalNotes) : null,
       urgency: body.urgency ? String(body.urgency) : null,
+      defaultCostCategory: body.defaultCostCategory
+        ? String(body.defaultCostCategory)
+        : null,
       status: body.status === "BROUILLON" ? "BROUILLON" : "A_CONFIRMER",
       lines: lines.map((l: Record<string, unknown>) => ({
         designation: String(l.designation ?? ""),
@@ -124,6 +132,7 @@ export async function POST(req: Request) {
           l.tvaRate === null || l.tvaRate === undefined || l.tvaRate === ""
             ? null
             : Number(l.tvaRate),
+        costCategory: l.costCategory ? String(l.costCategory) : null,
         materialRequirementId: l.materialRequirementId
           ? String(l.materialRequirementId)
           : null,

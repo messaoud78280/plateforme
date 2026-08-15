@@ -13,6 +13,8 @@ import { sanitizeOrderForSupplier } from "@/lib/purchase-orders/supplier-collabo
 import { syncPurchaseOrderDeliveryEvent } from "@/lib/purchase-orders/sync-delivery";
 import { createNotification } from "@/lib/notifications";
 import { safeSyncPurchaseOrderAttentionAfterMutation } from "@/lib/purchase-orders/attention/sync-notifications";
+import { forbiddenUnlessDashboardHref } from "@/lib/equipe-acces/assert-api-dashboard-access";
+import { parsePurchaseCostCategory } from "@/lib/purchase-orders/cost-category";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -24,6 +26,8 @@ export async function GET(_req: Request, ctx: Ctx) {
   if (!canListPurchaseOrders(session.user)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/commandes");
+  if (personaDeny) return personaDeny;
 
   const { id } = await ctx.params;
   const orgId = await resolvePurchaseOrderOrgId(session.user);
@@ -72,6 +76,8 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (!isInternalPurchaseOrderActor(session.user)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/commandes");
+  if (personaDeny) return personaDeny;
 
   const { id } = await ctx.params;
   const orgId = await resolvePurchaseOrderOrgId(session.user);
@@ -108,6 +114,18 @@ export async function PATCH(req: Request, ctx: Ctx) {
     delete body.confirmedDeliveryAt;
   }
 
+  if (Array.isArray(body.lineCostCategories)) {
+    for (const raw of body.lineCostCategories as Record<string, unknown>[]) {
+      const lineId = String(raw.id ?? "").trim();
+      if (!lineId) continue;
+      const cat = parsePurchaseCostCategory(raw.costCategory);
+      await prisma.purchaseOrderLine.updateMany({
+        where: { id: lineId, orderId: id },
+        data: { costCategory: cat },
+      });
+    }
+  }
+
   if (Array.isArray(body.lines)) {
     const lines = body.lines as Record<string, unknown>[];
     await prisma.purchaseOrderLine.deleteMany({ where: { orderId: id } });
@@ -126,6 +144,9 @@ export async function PATCH(req: Request, ctx: Ctx) {
             l.tvaRate === null || l.tvaRate === undefined || l.tvaRate === ""
               ? null
               : Number(l.tvaRate),
+          costCategory: l.costCategory
+            ? parsePurchaseCostCategory(l.costCategory)
+            : null,
           sortOrder: i,
         }))
         .filter((l) => l.designation && l.quantity > 0),
@@ -178,6 +199,13 @@ export async function PATCH(req: Request, ctx: Ctx) {
         : {}),
       ...(body.internalNotes !== undefined
         ? { internalNotes: body.internalNotes ? String(body.internalNotes) : null }
+        : {}),
+      ...(body.defaultCostCategory !== undefined
+        ? {
+            defaultCostCategory: body.defaultCostCategory
+              ? parsePurchaseCostCategory(body.defaultCostCategory)
+              : null,
+          }
         : {}),
     },
     include: purchaseOrderDetailInclude,

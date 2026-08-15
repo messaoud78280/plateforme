@@ -390,20 +390,51 @@ export async function acceptQuoteWithPdfArchive(opts: {
         console.error("GED ingest devis accepté:", gedErr);
       }
     }
+    const budgetInit = await tryBudgetAfterAccept(opts);
     return {
       quote,
       snapshot: result.snapshot,
       pdfArchived: true as const,
       pdfArchiveError: null as string | null,
       generationMs: result.generationMs,
+      budgetInit,
     };
   } catch (e) {
+    const budgetInit = await tryBudgetAfterAccept(opts);
     return {
       quote,
       snapshot: null,
       pdfArchived: false as const,
       pdfArchiveError: e instanceof Error ? e.message : "Archivage PDF à finaliser",
       generationMs: 0,
+      budgetInit,
+    };
+  }
+}
+
+async function tryBudgetAfterAccept(opts: {
+  orgId: string;
+  quoteId: string;
+  actorUserId: string;
+}) {
+  try {
+    const { tryInitializeProjectBudgetAfterAccept } = await import(
+      "@/lib/chantier/try-initialize-project-budget"
+    );
+    return tryInitializeProjectBudgetAfterAccept({
+      orgId: opts.orgId,
+      quoteId: opts.quoteId,
+      userId: opts.actorUserId,
+    });
+  } catch (e) {
+    console.error(
+      "[eco-3] auto-init budget failed (acceptation conservée):",
+      e instanceof Error ? e.message : e,
+    );
+    return {
+      status: "FAILED" as const,
+      budgetId: null as string | null,
+      error: e instanceof Error ? e.message : "Initialisation budget impossible",
     };
   }
 }

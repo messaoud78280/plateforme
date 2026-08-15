@@ -8,6 +8,7 @@ import {
   isInternalPurchaseOrderActor,
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
+import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 import { PURCHASE_ORDER_STATUS_LABELS } from "@/lib/purchase-orders/status";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,11 @@ export default async function FournisseurDetailPage({
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion");
   if (!isInternalPurchaseOrderActor(session.user)) redirect("/dashboard");
+  assertDashboardHrefAllowed({
+    href: "/dashboard/fournisseurs",
+    personType: session.user.personType,
+    permissionProfile: session.user.permissionProfile,
+  });
 
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) redirect("/dashboard");

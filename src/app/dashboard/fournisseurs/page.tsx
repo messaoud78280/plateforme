@@ -10,6 +10,7 @@ import {
   isInternalPurchaseOrderActor,
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
+import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,11 @@ export default async function FournisseursPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/fournisseurs");
   if (!isInternalPurchaseOrderActor(session.user)) redirect("/dashboard");
+  assertDashboardHrefAllowed({
+    href: "/dashboard/fournisseurs",
+    personType: session.user.personType,
+    permissionProfile: session.user.permissionProfile,
+  });
 
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) redirect("/dashboard");

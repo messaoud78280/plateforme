@@ -5,6 +5,7 @@ import {
   ensureOrganizationForOwner,
   getUserOrganizationIds,
 } from "@/lib/organization/access";
+import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 
 export type EquipeAdminContext = {
   actorId: string;
@@ -27,6 +28,15 @@ export async function requireEquipeAdmin(): Promise<
   }
   if (session.user.role !== "CLIENT") {
     return { ok: false, status: 403, error: "Réservé aux comptes entreprise" };
+  }
+  if (
+    !canAccessDashboardHref(
+      "/dashboard/equipe",
+      session.user.personType,
+      session.user.permissionProfile,
+    )
+  ) {
+    return { ok: false, status: 403, error: "Non autorisé" };
   }
 
   const actor = await prisma.user.findUnique({

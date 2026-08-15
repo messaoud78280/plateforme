@@ -6,6 +6,7 @@ import {
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
 import { cancelPurchaseOrderReceipt } from "@/lib/purchase-orders/receiving";
+import { forbiddenUnlessDashboardHref } from "@/lib/equipe-acces/assert-api-dashboard-access";
 
 type Ctx = { params: Promise<{ id: string; receiptId: string }> };
 
@@ -17,6 +18,8 @@ export async function POST(_req: Request, ctx: Ctx) {
   if (!isInternalPurchaseOrderActor(session.user)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/commandes");
+  if (personaDeny) return personaDeny;
 
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) return NextResponse.json({ error: "Non autorisé" }, { status: 403 });

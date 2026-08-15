@@ -9,6 +9,7 @@ import {
   isSupplierPurchaseOrderActor,
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
+import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 import { PURCHASE_ORDER_STATUS_LABELS } from "@/lib/purchase-orders/status";
 import { loadPurchaseOrdersListView } from "@/lib/purchase-orders/list-view";
 import { PurchaseOrdersListClient } from "@/components/purchase-orders/PurchaseOrdersListClient";
@@ -136,7 +137,11 @@ export default async function CommandesPage() {
       rows={rows}
       summary={summary}
       canCreate={canCreate}
-      canOpenSupplier={canCreate}
+      canOpenSupplier={canAccessDashboardHref(
+        "/dashboard/fournisseurs",
+        session.user.personType,
+        session.user.permissionProfile,
+      )}
     />
   );
 }

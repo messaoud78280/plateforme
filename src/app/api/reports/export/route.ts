@@ -9,6 +9,7 @@ import {
 } from "@/lib/validation/reportParams";
 import { jsPDF } from "jspdf";
 import { isAgencyOrManager, isClientRole, isManager as isManagerRole } from "@/lib/authz";
+import { forbiddenUnlessDashboardHref } from "@/lib/equipe-acces/assert-api-dashboard-access";
 
 const PERIOD_LABELS: Record<PeriodKey, string> = {
   "7d": "7 jours",
@@ -36,6 +37,8 @@ export async function GET(request: NextRequest) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/rapports");
+  if (personaDeny) return personaDeny;
 
   const period = parseReportPeriodParam(request.nextUrl.searchParams.get("period"));
   if (period === null) {

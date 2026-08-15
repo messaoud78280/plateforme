@@ -13,6 +13,7 @@ import { getPurchaseOrderReceivingState } from "@/lib/purchase-orders/receiving"
 import { canReceivePurchaseOrder } from "@/lib/purchase-orders/receiving";
 import { PurchaseOrderDetailClient } from "@/components/purchase-orders/PurchaseOrderDetailClient";
 import { sanitizeInternalReturnTo } from "@/lib/navigation/safe-return-to";
+import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +71,16 @@ export default async function CommandeDetailPage({
         isInternalPurchaseOrderActor(session.user) &&
         canReceivePurchaseOrder(session.user)
       }
+      canPrepareSupplierInvoice={canAccessDashboardHref(
+        "/dashboard/depenses",
+        session.user.personType,
+        session.user.permissionProfile,
+      )}
+      canOpenSupplier={canAccessDashboardHref(
+        "/dashboard/fournisseurs",
+        session.user.personType,
+        session.user.permissionProfile,
+      )}
       isSupplierView={isSupplier}
       receiving={receiving}
       returnTo={sanitizeInternalReturnTo(returnToRaw, "/dashboard/commandes")}

@@ -17,6 +17,17 @@ import { PurchaseOrderMessagerieLink } from "@/components/messagerie/MessagerieC
 import { ContextBackButton } from "@/components/ui/ContextBackButton";
 import { SupplierInvoiceForm } from "@/components/chantier/SupplierInvoiceForm";
 import type { SupplierInvoiceDto } from "@/lib/chantier/supplier-invoices";
+import { PurchaseCostCategorySelect } from "@/components/purchase-orders/PurchaseCostCategorySelect";
+import {
+  derivePurchaseOrderInvoiceCategory,
+  parsePurchaseCostCategory,
+  PURCHASE_COST_CATEGORY_LABELS,
+  type SupplierCostCategory,
+} from "@/lib/purchase-orders/cost-category";
+import {
+  buildSupplierInvoicePrefill,
+  summarizePoSupplierBilling,
+} from "@/lib/chantier/prepare-supplier-invoice";
 import {
   contextBackLabelForHref,
   sanitizeInternalReturnTo,
@@ -28,6 +39,8 @@ const FOCUS_IDS: Record<string, string> = {
   receiving: "po-focus-receiving",
   documents: "po-focus-documents",
   delivery: "po-focus-delivery",
+  invoice: "po-focus-invoice",
+  facture: "po-focus-invoice",
 };
 type OrderDetail = {
   id: string;
@@ -74,6 +87,7 @@ type OrderDetail = {
   responsible: { id: string; name: string } | null;
   validator: { id: string; name: string } | null;
   followUpSheet: { id: string; title: string } | null;
+  defaultCostCategory?: string | null;
   lines: {
     id: string;
     designation: string;
@@ -81,6 +95,7 @@ type OrderDetail = {
     unit: string;
     unitPriceHt: string | number | null;
     receivedQty: string | number;
+    costCategory?: string | null;
   }[];
   events: {
     id: string;
@@ -148,6 +163,8 @@ export function PurchaseOrderDetailClient({
   order: initial,
   canAct,
   canReceive = false,
+  canPrepareSupplierInvoice = false,
+  canOpenSupplier = false,
   isSupplierView = false,
   receiving = null,
   returnTo: returnToProp = null,
@@ -155,6 +172,8 @@ export function PurchaseOrderDetailClient({
   order: OrderDetail;
   canAct: boolean;
   canReceive?: boolean;
+  canPrepareSupplierInvoice?: boolean;
+  canOpenSupplier?: boolean;
   isSupplierView?: boolean;
   receiving?: ReceivingState;
   /** Chemin interne validé (?returnTo=) — ex. À traiter / chantier. */
@@ -171,6 +190,73 @@ export function PurchaseOrderDetailClient({
   const [shareContactId, setShareContactId] = useState(order.contact?.id ?? "");
   const [focusHighlight, setFocusHighlight] = useState<string | null>(null);
   const [invoices, setInvoices] = useState<SupplierInvoiceDto[]>([]);
+  const [prepareInvoice, setPrepareInvoice] = useState(false);
+  const invoiceCategory = useMemo(
+    () =>
+      derivePurchaseOrderInvoiceCategory({
+        lines: order.lines.map((l) => ({
+          quantity: Number(l.quantity),
+          unitPriceHt: l.unitPriceHt == null ? null : Number(l.unitPriceHt),
+          costCategory: l.costCategory,
+        })),
+        defaultCostCategory: order.defaultCostCategory,
+      }),
+    [order.lines, order.defaultCostCategory],
+  );
+  const invoicePrefill = useMemo(() => {
+    if (!order.project) return null;
+    return buildSupplierInvoicePrefill({
+      supplierId: order.externalOrganization.id,
+      supplierName:
+        order.externalOrganization.tradeName || order.externalOrganization.name,
+      projectId: order.project.id,
+      projectTitle: order.project.title,
+      purchaseOrderId: order.id,
+      purchaseOrderNumber: order.number,
+      orderAmountHt: order.amountHt != null ? Number(order.amountHt) : null,
+      defaultCostCategory: order.defaultCostCategory,
+      lines: order.lines.map((l) => {
+        const rec = receiving?.lines.find((x) => x.orderLineId === l.id);
+        return {
+          designation: l.designation,
+          quantity: Number(l.quantity),
+          unit: l.unit,
+          unitPriceHt: l.unitPriceHt == null ? null : Number(l.unitPriceHt),
+          costCategory: l.costCategory,
+          receivedConforming: rec?.receivedConforming ?? Number(l.receivedQty) ?? 0,
+        };
+      }),
+    });
+  }, [order, receiving]);
+  const billing = useMemo(
+    () =>
+      summarizePoSupplierBilling({
+        orderHt: order.amountHt != null ? Number(order.amountHt) : null,
+        invoices,
+      }),
+    [order.amountHt, invoices],
+  );
+
+  async function updateLineCategory(lineId: string, costCategory: SupplierCostCategory) {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/purchase-orders/${order.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lineCostCategories: [{ id: lineId, costCategory }],
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur");
+      if (data.order) setOrder(data.order);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   const safeReturnTo = sanitizeInternalReturnTo(returnToProp, "/dashboard/commandes");
   const backLabel = contextBackLabelForHref(safeReturnTo, "Retour aux commandes");
@@ -200,6 +286,7 @@ export function PurchaseOrderDetailClient({
       if (!el) return;
       el.scrollIntoView({ behavior: "smooth", block: "start" });
       setFocusHighlight(el.id);
+      if (el.id === "po-focus-invoice") setPrepareInvoice(true);
       window.setTimeout(() => setFocusHighlight(null), 2200);
       const url = new URL(window.location.href);
       url.searchParams.delete("focus");
@@ -716,15 +803,27 @@ export function PurchaseOrderDetailClient({
         <ul className="mt-3 divide-y divide-slate-100">
           {order.lines.map((l) => {
             const rs = receiving?.lines.find((x) => x.orderLineId === l.id);
+            const cat = parsePurchaseCostCategory(l.costCategory);
             return (
-              <li key={l.id} className="flex flex-wrap justify-between gap-2 py-2.5 text-sm">
+              <li key={l.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
                 <span className="font-medium text-slate-900">{l.designation}</span>
-                <span className="text-slate-600">
+                <span className="flex flex-wrap items-center gap-2 text-slate-600">
                   {rs
                     ? `${rs.receivedConforming} / ${rs.ordered} ${l.unit}`
                     : `${Number(l.quantity)} ${l.unit}`}
                   {rs && rs.remaining > 0 ? ` · reste ${rs.remaining}` : ""}
                   {!isSupplierView && l.unitPriceHt != null ? ` · ${money(l.unitPriceHt)} / u` : ""}
+                  {isSupplierView ? (
+                    <span className="text-xs text-slate-500">
+                      {PURCHASE_COST_CATEGORY_LABELS[cat]}
+                    </span>
+                  ) : (
+                    <PurchaseCostCategorySelect
+                      value={cat}
+                      onChange={(next) => void updateLineCategory(l.id, next)}
+                      className="rounded-lg border border-slate-200 px-2 py-1 text-xs"
+                    />
+                  )}
                 </span>
               </li>
             );
@@ -767,15 +866,37 @@ export function PurchaseOrderDetailClient({
         ) : (
           <p className="mt-2 text-sm text-slate-500">Aucune réception enregistrée.</p>
         )}
-        {canReceive &&
-        !["ANNULEE", "CLOTUREE", "BROUILLON", "RECUE"].includes(order.status) ? (
-          <Link
-            href={`/dashboard/commandes/${order.id}/reception`}
-            className="mt-3 inline-flex rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
-          >
-            Réceptionner
-          </Link>
-        ) : null}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {canReceive &&
+          !["ANNULEE", "CLOTUREE", "BROUILLON", "RECUE"].includes(order.status) ? (
+            <Link
+              href={`/dashboard/commandes/${order.id}/reception`}
+              className="inline-flex rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
+            >
+              Réceptionner
+            </Link>
+          ) : null}
+          {canPrepareSupplierInvoice &&
+          canAct &&
+          order.project &&
+          !isSupplierView &&
+          order.receipts &&
+          order.receipts.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => {
+                setPrepareInvoice(true);
+                document.getElementById("po-focus-invoice")?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "start",
+                });
+              }}
+              className="inline-flex rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-800"
+            >
+              Préparer la facture fournisseur
+            </button>
+          ) : null}
+        </div>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -896,7 +1017,10 @@ export function PurchaseOrderDetailClient({
       </div>
 
       {canAct && order.project && !isSupplierView ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+        <section
+          id="po-focus-invoice"
+          className={`rounded-2xl border border-slate-200 bg-white p-5 ${focusRing("po-focus-invoice")}`}
+        >
           <h2 className="text-sm font-bold text-slate-900">
             Facture fournisseur
           </h2>
@@ -904,6 +1028,36 @@ export function PurchaseOrderDetailClient({
             Enregistrer la pièce reçue alimente le réel du chantier, sans
             additionner la réception du même BC.
           </p>
+          <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-[10px] font-bold uppercase text-slate-500">Commandé</dt>
+              <dd className="tabular-nums font-medium">{money(order.amountHt)}</dd>
+            </div>
+            <div>
+              <dt className="text-[10px] font-bold uppercase text-slate-500">Réceptionné</dt>
+              <dd className="tabular-nums font-medium">
+                {invoicePrefill?.hasReceipt
+                  ? `${money(invoicePrefill.receivedAmountHt)} · ${invoicePrefill.receivedQty} / ${invoicePrefill.orderedQty}`
+                  : "Aucune réception enregistrée"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[10px] font-bold uppercase text-slate-500">Facturé fournisseur</dt>
+              <dd className="tabular-nums font-medium">
+                {order.amountHt != null
+                  ? `${billing.invoicedHt.toLocaleString("fr-FR")} € / ${Number(order.amountHt).toLocaleString("fr-FR")} €`
+                  : `${billing.invoicedHt.toLocaleString("fr-FR")} €`}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[10px] font-bold uppercase text-slate-500">Reste théorique</dt>
+              <dd className="tabular-nums font-medium">
+                {billing.remainingHt == null
+                  ? "—"
+                  : `${billing.remainingHt.toLocaleString("fr-FR")} €`}
+              </dd>
+            </div>
+          </dl>
           {invoices.length > 0 ? (
             <ul className="mt-3 space-y-2">
               {invoices.map((inv) => (
@@ -926,18 +1080,31 @@ export function PurchaseOrderDetailClient({
           ) : (
             <p className="mt-2 text-sm text-slate-500">Aucune facture saisie.</p>
           )}
-          <div className="mt-4 border-t border-slate-100 pt-4">
-            <SupplierInvoiceForm
-              projectId={order.project.id}
-              purchaseOrderId={order.id}
-              supplierId={order.externalOrganization.id}
-              supplierName={supplierLabel}
-              defaultAmountHt={
-                order.amountHt != null ? Number(order.amountHt) : null
-              }
-              onCreated={(inv) => setInvoices((prev) => [inv, ...prev])}
-            />
-          </div>
+          {canPrepareSupplierInvoice && prepareInvoice ? (
+            <div className="mt-4 border-t border-slate-100 pt-4">
+              <SupplierInvoiceForm
+                projectId={order.project.id}
+                purchaseOrderId={order.id}
+                supplierId={order.externalOrganization.id}
+                supplierName={supplierLabel}
+                defaultCategory={invoiceCategory}
+                hideCategory={invoicePrefill?.categoryKnown ?? invoiceCategory !== "UNCLASSIFIED"}
+                context={invoicePrefill}
+                onCreated={(inv) => {
+                  setInvoices((prev) => [inv, ...prev]);
+                  setPrepareInvoice(false);
+                }}
+              />
+            </div>
+          ) : canPrepareSupplierInvoice ? (
+            <button
+              type="button"
+              onClick={() => setPrepareInvoice(true)}
+              className="mt-4 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-800"
+            >
+              Ajouter / préparer une facture
+            </button>
+          ) : null}
         </section>
       ) : null}
 
@@ -957,12 +1124,16 @@ export function PurchaseOrderDetailClient({
       {!isSupplierView && order.project ? (
         <p className="text-xs text-slate-500">
           Fournisseur :{" "}
-          <Link
-            href={`/dashboard/fournisseurs/${order.externalOrganization.id}`}
-            className="font-semibold text-[#1d4ed8]"
-          >
-            {supplierLabel}
-          </Link>
+          {canOpenSupplier ? (
+            <Link
+              href={`/dashboard/fournisseurs/${order.externalOrganization.id}`}
+              className="font-semibold text-[#1d4ed8]"
+            >
+              {supplierLabel}
+            </Link>
+          ) : (
+            <span className="font-semibold text-slate-800">{supplierLabel}</span>
+          )}
           {" · "}
           Chantier :{" "}
           <Link href={`/dashboard/projets/${order.project.id}`} className="font-semibold text-[#1d4ed8]">

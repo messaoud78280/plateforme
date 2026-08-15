@@ -5,10 +5,14 @@ import {
   isInternalPurchaseOrderActor,
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
+import { forbiddenUnlessDashboardHref } from "@/lib/equipe-acces/assert-api-dashboard-access";
 import {
   createSupplierInvoice,
   listSupplierInvoices,
 } from "@/lib/chantier/supplier-invoices";
+import { attachSupplierInvoicePdfToPurchaseOrder } from "@/lib/chantier/attach-supplier-invoice-pdf";
+import { createServiceRoleClient } from "@/lib/supabase";
+import { buildDocumentsStorageRef, DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
@@ -18,6 +22,8 @@ export async function GET(req: Request) {
   if (!isInternalPurchaseOrderActor(session.user)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/depenses");
+  if (personaDeny) return personaDeny;
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) {
     return NextResponse.json({ error: "Organisation introuvable" }, { status: 403 });
@@ -40,13 +46,34 @@ export async function POST(req: Request) {
   if (!isInternalPurchaseOrderActor(session.user)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/depenses");
+  if (personaDeny) return personaDeny;
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) {
     return NextResponse.json({ error: "Organisation introuvable" }, { status: 403 });
   }
 
-  const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
-  if (!body) {
+  const contentType = req.headers.get("content-type") || "";
+  let body: Record<string, unknown> = {};
+  let pdfFile: File | null = null;
+  try {
+    if (contentType.includes("multipart/form-data")) {
+      const form = await req.formData();
+      for (const [key, value] of form.entries()) {
+        if (key === "pdfFile" && typeof value === "object" && value && "arrayBuffer" in value) {
+          pdfFile = value as File;
+        } else {
+          body[key] = String(value);
+        }
+      }
+    } else {
+      const json = (await req.json().catch(() => null)) as Record<string, unknown> | null;
+      if (!json) {
+        return NextResponse.json({ error: "Corps invalide" }, { status: 400 });
+      }
+      body = json;
+    }
+  } catch {
     return NextResponse.json({ error: "Corps invalide" }, { status: 400 });
   }
 
@@ -68,6 +95,39 @@ export async function POST(req: Request) {
       amountTtc: body.amountTtc != null ? Number(body.amountTtc) : undefined,
       notes: body.notes ? String(body.notes) : null,
     });
+
+    if (pdfFile && invoice.purchaseOrderId) {
+      const supabase = createServiceRoleClient();
+      if (!supabase) {
+        return NextResponse.json(
+          { invoice, warning: "Facture enregistrée — stockage PDF indisponible" },
+          { status: 201 },
+        );
+      }
+      const buf = Buffer.from(await pdfFile.arrayBuffer());
+      if (buf.length > 12 * 1024 * 1024) {
+        return NextResponse.json(
+          { invoice, warning: "Facture enregistrée — PDF trop volumineux (12 Mo)" },
+          { status: 201 },
+        );
+      }
+      const safeName = pdfFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `purchase-orders/${invoice.purchaseOrderId}/facture/${Date.now()}-${safeName}`;
+      const { error } = await supabase.storage.from(DOCUMENTS_BUCKET).upload(path, buf, {
+        contentType: pdfFile.type || "application/pdf",
+        upsert: false,
+      });
+      if (!error) {
+        await attachSupplierInvoicePdfToPurchaseOrder({
+          orderId: invoice.purchaseOrderId,
+          addedById: session.user.id,
+          fileUrl: buildDocumentsStorageRef(path),
+          fileName: pdfFile.name,
+          invoiceNumber: invoice.supplierNumber,
+        });
+      }
+    }
+
     return NextResponse.json({ invoice }, { status: 201 });
   } catch (e) {
     const err = e as Error & { code?: string };

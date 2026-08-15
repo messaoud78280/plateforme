@@ -36,6 +36,8 @@ import {
 import { displayUserRoleLabel } from "@/lib/equipe-acces/display-role";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 
 export const metadata: Metadata = {
   robots: SEO_NOINDEX_ROBOTS,
@@ -110,6 +112,15 @@ export default async function DashboardLayout({
     logoUrl: demoLogoUrl,
     loginIdentifier: demoLoginIdentifier,
   });
+
+  const pathname = (await headers()).get("x-dashboard-pathname");
+  if (pathname) {
+    assertDashboardHrefAllowed({
+      href: pathname,
+      personType,
+      permissionProfile,
+    });
+  }
 
   return (
     <div className="flex min-h-dvh bg-[color:var(--cc-surface-muted)]">

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useMessagerieUnread } from "@/hooks/useMessagerieUnread";
-import { isHrefAllowedForPersona } from "@/lib/equipe-acces/nav-by-persona";
+import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 
 type Tab = {
   href: string;
@@ -72,7 +72,7 @@ export function MobileBottomNav({
 
   const tabs = (
     isSupplier ? SUPPLIER_TABS : isClient ? CLIENT_TABS : INTERNAL_TABS
-  ).filter((tab) => isHrefAllowedForPersona(tab.href, personType, permissionProfile));
+  ).filter((tab) => canAccessDashboardHref(tab.href, personType, permissionProfile));
 
   if (hideForThread) {
     return null;

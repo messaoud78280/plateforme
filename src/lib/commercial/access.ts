@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ensureOrganizationForOwner } from "@/lib/organization/access";
 import { isAgencyOrManager, isAgent, isClientRole } from "@/lib/authz";
+import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 
 export type CommercialSessionUser = {
   id: string;
@@ -57,7 +58,7 @@ export function canAccessCommercialModule(user: CommercialSessionUser): boolean 
   return true;
 }
 
-/** Session obligatoire + accès module ; sinon redirection. */
+/** Session obligatoire + accès module + persona sur le href demandé. */
 export async function requireCommercialSession(
   callbackUrl = "/dashboard/devis-facturation",
 ) {
@@ -68,15 +69,35 @@ export async function requireCommercialSession(
   if (!canAccessCommercialModule(session.user)) {
     redirect("/dashboard");
   }
+  if (
+    !canAccessDashboardHref(
+      callbackUrl,
+      session.user.personType,
+      session.user.permissionProfile,
+    )
+  ) {
+    redirect("/dashboard");
+  }
   return session;
 }
 
-export async function requireCommercialApiSession() {
+export async function requireCommercialApiSession(
+  requiredHref = "/dashboard/devis-facturation",
+) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return { error: "Non authentifié" as const, status: 401 as const, session: null };
   }
   if (!canAccessCommercialModule(session.user)) {
+    return { error: "Non autorisé" as const, status: 403 as const, session: null };
+  }
+  if (
+    !canAccessDashboardHref(
+      requiredHref,
+      session.user.personType,
+      session.user.permissionProfile,
+    )
+  ) {
     return { error: "Non autorisé" as const, status: 403 as const, session: null };
   }
   const orgId = await resolveCommercialOrgId(session.user);

@@ -12,6 +12,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
 import { roundMoney } from "@/lib/commercial/money";
+import { derivePurchaseOrderInvoiceCategory } from "@/lib/purchase-orders/cost-category";
 
 export type SupplierCostCategory =
   | "MATERIAL"
@@ -243,6 +244,15 @@ export async function createSupplierInvoice(input: {
   if (!supplier) throw new Error("Fournisseur introuvable");
 
   let purchaseOrderId: string | null = input.purchaseOrderId ?? null;
+  let poForCategory: {
+    defaultCostCategory: string | null;
+    lines: Array<{
+      quantity: unknown;
+      unitPriceHt: unknown;
+      costCategory: string | null;
+      materialRequirementLinks: { id: string }[];
+    }>;
+  } | null = null;
   if (purchaseOrderId) {
     const po = await prisma.purchaseOrder.findFirst({
       where: {
@@ -253,6 +263,15 @@ export async function createSupplierInvoice(input: {
         id: true,
         projectId: true,
         externalOrganizationId: true,
+        defaultCostCategory: true,
+        lines: {
+          select: {
+            quantity: true,
+            unitPriceHt: true,
+            costCategory: true,
+            materialRequirementLinks: { select: { id: true }, take: 1 },
+          },
+        },
       },
     });
     if (!po) throw new Error("Commande introuvable");
@@ -262,12 +281,26 @@ export async function createSupplierInvoice(input: {
     if (po.projectId && po.projectId !== input.projectId) {
       throw new Error("La commande n’est pas rattachée à ce chantier");
     }
+    poForCategory = po;
   }
 
   const kind: SupplierInvoiceKind = input.kind === "CREDIT" ? "CREDIT" : "STANDARD";
+  const categoryFromPo = poForCategory
+    ? derivePurchaseOrderInvoiceCategory({
+        lines: poForCategory.lines.map((line) => ({
+          quantity: d(line.quantity),
+          unitPriceHt: line.unitPriceHt != null ? d(line.unitPriceHt) : null,
+          costCategory: line.costCategory,
+          hasMaterialRequirement: line.materialRequirementLinks.length > 0,
+        })),
+        defaultCostCategory: poForCategory.defaultCostCategory,
+      })
+    : null;
   const category = input.category
     ? parseSupplierInvoiceCategory(input.category)
-    : classifySupplierCostCategory(supplier.type);
+    : categoryFromPo && categoryFromPo !== "UNCLASSIFIED"
+      ? categoryFromPo
+      : classifySupplierCostCategory(supplier.type);
   const amountVat = roundMoney(Math.max(0, input.amountVat ?? 0), 2);
   const amountTtc =
     input.amountTtc != null && Number.isFinite(input.amountTtc)

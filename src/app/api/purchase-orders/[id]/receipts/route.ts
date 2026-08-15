@@ -13,6 +13,7 @@ import {
 } from "@/lib/purchase-orders/receiving";
 import { createServiceRoleClient } from "@/lib/supabase";
 import { buildDocumentsStorageRef, DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
+import { forbiddenUnlessDashboardHref } from "@/lib/equipe-acces/assert-api-dashboard-access";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -21,6 +22,8 @@ export async function GET(_req: Request, ctx: Ctx) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/commandes");
+  if (personaDeny) return personaDeny;
 
   const { id } = await ctx.params;
   const orgId = await resolvePurchaseOrderOrgId(session.user);
@@ -95,6 +98,8 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!isInternalPurchaseOrderActor(session.user) || !canReceivePurchaseOrder(session.user)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
+  const personaDeny = forbiddenUnlessDashboardHref(session.user, "/dashboard/commandes");
+  if (personaDeny) return personaDeny;
 
   const { id } = await ctx.params;
   const orgId = await resolvePurchaseOrderOrgId(session.user);

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { isHrefAllowedForPersona } from "@/lib/equipe-acces/nav-by-persona";
+import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 
 const PREFETCH_HREFS = [
   "/dashboard",
@@ -30,7 +30,7 @@ export function PrefetchMainRoutes({
   useEffect(() => {
     const timer = window.setTimeout(() => {
       for (const href of PREFETCH_HREFS) {
-        if (!isHrefAllowedForPersona(href, personType, permissionProfile)) continue;
+        if (!canAccessDashboardHref(href, personType, permissionProfile)) continue;
         try {
           router.prefetch(href);
         } catch {

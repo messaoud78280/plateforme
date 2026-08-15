@@ -20,11 +20,14 @@ import type { CompositionSnapshot } from "@/lib/commercial/library";
 import { isDueDatePast } from "@/lib/commercial/invoice-status";
 import { effectiveRetentionStatus } from "@/lib/commercial/retention-calc";
 import {
-  classifySupplierCostCategory,
   parseSupplierInvoiceCategory,
   resolvePurchaseActualHt,
   signedSupplierInvoiceHt,
 } from "@/lib/chantier/supplier-invoices";
+import {
+  aggregateCommittedByCategory,
+  resolvePurchaseLineCostCategory,
+} from "@/lib/purchase-orders/cost-category";
 
 export type CostCategoryKey =
   | "MATERIAL"
@@ -37,10 +40,10 @@ export type CostCategoryKey =
 export const COST_CATEGORY_LABELS: Record<CostCategoryKey, string> = {
   MATERIAL: "Matériaux",
   LABOR: "Main-d’œuvre",
-  EQUIPMENT: "Matériel",
+  EQUIPMENT: "Matériel / location",
   SUBCONTRACT: "Sous-traitance",
   OTHER: "Autres",
-  UNCLASSIFIED: "Non classé",
+  UNCLASSIFIED: "À classer",
 };
 
 export type ProfitabilityHealth = "STABLE" | "WATCH" | "CRITICAL";
@@ -279,15 +282,6 @@ export type ProjectProfitabilityDto = {
   }>;
 };
 
-/**
- * Classification engagement → poste budgétaire.
- * Uniquement si la donnée org externe est fiable (type SUBCONTRACTOR).
- * Sinon : Non classé (pas de matching texte inventé).
- */
-function classifyPoCategory(extType: string | null | undefined): CostCategoryKey {
-  return classifySupplierCostCategory(extType);
-}
-
 export async function listAcceptedQuotesForProject(
   orgId: string,
   projectId: string,
@@ -453,6 +447,7 @@ export async function loadProjectProfitability(
         number: true,
         status: true,
         amountHt: true,
+        defaultCostCategory: true,
         externalOrganization: {
           select: { name: true, tradeName: true, type: true },
         },
@@ -461,6 +456,8 @@ export async function loadProjectProfitability(
             id: true,
             quantity: true,
             unitPriceHt: true,
+            costCategory: true,
+            materialRequirementLinks: { select: { id: true }, take: 1 },
             receiptLines: {
               where: { receipt: { cancelledAt: null } },
               select: {
@@ -577,22 +574,38 @@ export async function loadProjectProfitability(
 
   for (const po of orders) {
     if (!isCommittedPurchaseOrder(po.status)) continue;
-    const amountHt = po.amountHt != null ? d(po.amountHt) : 0;
-    const cat = classifyPoCategory(po.externalOrganization?.type);
-    committedByCat[cat] += amountHt;
-    commitments.push({
-      id: po.id,
-      number: po.number,
-      supplierName:
-        po.externalOrganization?.tradeName ||
-        po.externalOrganization?.name ||
-        null,
-      amountHt: roundMoney(amountHt, 2),
-      status: po.status,
-      category: cat,
+    const slices = aggregateCommittedByCategory({
+      lines: po.lines.map((line) => ({
+        quantity: d(line.quantity),
+        unitPriceHt: line.unitPriceHt != null ? d(line.unitPriceHt) : null,
+        costCategory: line.costCategory,
+        hasMaterialRequirement: line.materialRequirementLinks.length > 0,
+      })),
+      amountHt: po.amountHt != null ? d(po.amountHt) : null,
+      defaultCostCategory: po.defaultCostCategory,
     });
+    const supplierName =
+      po.externalOrganization?.tradeName ||
+      po.externalOrganization?.name ||
+      null;
+    for (const [cat, amountHt] of Object.entries(slices) as [
+      CostCategoryKey,
+      number,
+    ][]) {
+      if (amountHt <= 0.004) continue;
+      committedByCat[cat] += amountHt;
+      commitments.push({
+        id: po.id,
+        number: po.number,
+        supplierName,
+        amountHt: roundMoney(amountHt, 2),
+        status: po.status,
+        category: cat,
+      });
+    }
 
     let receivedHt = 0;
+    const receivedByCat: Partial<Record<CostCategoryKey, number>> = {};
     for (const line of po.lines) {
       if (line.unitPriceHt == null) continue;
       const pu = d(line.unitPriceHt);
@@ -601,8 +614,15 @@ export async function loadProjectProfitability(
         qtyOk += d(rl.receivedQty) - d(rl.damagedQty) - d(rl.refusedQty);
       }
       if (qtyOk > 0) {
-        receivedHt += qtyOk * pu;
+        const lineRec = qtyOk * pu;
+        receivedHt += lineRec;
         hasAnyReceiptValue = true;
+        const lineCat = resolvePurchaseLineCostCategory({
+          costCategory: line.costCategory,
+          hasMaterialRequirement: line.materialRequirementLinks.length > 0,
+          defaultCostCategory: po.defaultCostCategory,
+        }) as CostCategoryKey;
+        receivedByCat[lineCat] = (receivedByCat[lineCat] ?? 0) + lineRec;
       }
     }
 
@@ -613,20 +633,22 @@ export async function loadProjectProfitability(
       receiptHt: receivedHt,
     });
     if (resolved.source === "receipt") {
-      actualByCat[cat] += resolved.actualHt;
-      actuals.push({
-        id: `receipt-${po.id}`,
-        source: "receipt",
-        label: po.number,
-        supplierName:
-          po.externalOrganization?.tradeName ||
-          po.externalOrganization?.name ||
-          null,
-        amountHt: resolved.actualHt,
-        category: cat,
-        date: null,
-        purchaseOrderNumber: po.number,
-      });
+      for (const [cat, amt] of Object.entries(receivedByCat) as [
+        CostCategoryKey,
+        number,
+      ][]) {
+        actualByCat[cat] += amt;
+        actuals.push({
+          id: `receipt-${po.id}-${cat}`,
+          source: "receipt",
+          label: po.number,
+          supplierName,
+          amountHt: roundMoney(amt, 2),
+          category: cat,
+          date: null,
+          purchaseOrderNumber: po.number,
+        });
+      }
     }
   }
 

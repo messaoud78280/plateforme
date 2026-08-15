@@ -103,7 +103,7 @@ export function ReceivePurchaseOrderForm({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur");
-      router.push(`/dashboard/commandes/${orderId}`);
+      router.push(`/dashboard/commandes/${orderId}?focus=invoice`);
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");

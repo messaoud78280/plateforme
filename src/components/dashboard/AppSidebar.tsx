@@ -32,10 +32,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { isNavHrefAllowedForDemo } from "@/lib/demo-environment/nav-modules";
-import {
-  canManageEquipe,
-  isHrefAllowedForPersona,
-} from "@/lib/equipe-acces/nav-by-persona";
+import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 import { MessagerieNavBadge } from "@/components/dashboard/MessagerieNavBadge";
 
 type NavItem = {
@@ -243,23 +240,8 @@ export function AppSidebar({
         if (isDemo && !isNavHrefAllowedForDemo(item.href, demoModules ?? [])) {
           return false;
         }
-        if (role === "CLIENT") {
-          if (
-            item.href === "/dashboard/equipe" &&
-            !canManageEquipe(personType, permissionProfile)
-          ) {
-            return false;
-          }
-          if (!isHrefAllowedForPersona(item.href, personType, permissionProfile)) {
-            return false;
-          }
-          if (
-            item.href === "/dashboard/livraisons" &&
-            personType !== "SUPPLIER" &&
-            permissionProfile !== "FOURNISSEUR"
-          ) {
-            return false;
-          }
+        if (!canAccessDashboardHref(item.href, personType, permissionProfile)) {
+          return false;
         }
         return true;
       }),

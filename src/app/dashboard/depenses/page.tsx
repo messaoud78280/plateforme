@@ -6,6 +6,7 @@ import {
 } from "@/lib/purchase-orders/access";
 import { listSupplierInvoices } from "@/lib/chantier/supplier-invoices";
 import { DepensesListClient } from "@/components/chantier/DepensesListClient";
+import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,11 @@ export default async function DepensesPage() {
   if (!isInternalPurchaseOrderActor(session.user)) {
     redirect("/dashboard");
   }
+  assertDashboardHrefAllowed({
+    href: "/dashboard/depenses",
+    personType: session.user.personType,
+    permissionProfile: session.user.permissionProfile,
+  });
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) redirect("/dashboard");
 

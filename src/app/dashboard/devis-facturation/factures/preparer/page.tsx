@@ -5,18 +5,23 @@ import {
   requireCommercialSession,
   resolveCommercialOrgId,
 } from "@/lib/commercial/access";
-import { prisma } from "@/lib/prisma";
 import { loadDealFinancialSummary } from "@/lib/commercial/deal-summary";
 import { loadAmendmentDetail } from "@/lib/commercial/amendment-billing";
-import { PrepareInvoiceForm } from "@/components/commercial/PrepareInvoiceForm";
 import { PrepareAmendmentInvoiceForm } from "@/components/commercial/PrepareAmendmentInvoiceForm";
+import { PrepareBillingFromOps } from "@/components/facturation/PrepareBillingFromOps";
+import { resolvePrepareBillingContext } from "@/lib/facturation/prepare-billing";
 
 export const dynamic = "force-dynamic";
 
 export default async function PreparerFacturePage({
   searchParams,
 }: {
-  searchParams: Promise<{ projectId?: string; amendmentId?: string }>;
+  searchParams: Promise<{
+    projectId?: string;
+    amendmentId?: string;
+    sheetId?: string;
+    quoteId?: string;
+  }>;
 }) {
   const session = await requireCommercialSession(
     "/dashboard/devis-facturation/factures/preparer",
@@ -52,35 +57,22 @@ export default async function PreparerFacturePage({
     );
   }
 
-  const projectId = sp.projectId?.trim();
-  if (!projectId) notFound();
+  const projectId = sp.projectId?.trim() || null;
+  const sheetId = sp.sheetId?.trim() || null;
+  if (!projectId && !sheetId) notFound();
 
-  const project = await prisma.project.findFirst({
-    where: { id: projectId, organizationId: orgId },
-    select: { id: true, title: true },
-  });
-  if (!project) notFound();
-
-  const quotes = await prisma.commercialQuote.findMany({
-    where: {
-      organizationId: orgId,
-      projectId: project.id,
-      status: "ACCEPTED",
-    },
-    select: {
-      id: true,
-      number: true,
-      subject: true,
-      clientExternalOrgId: true,
-    },
-    orderBy: { acceptedAt: "desc" },
+  const context = await resolvePrepareBillingContext({
+    orgId,
+    projectId,
+    sheetId,
+    quoteId: sp.quoteId?.trim() || null,
   });
 
-  const options = [];
-  for (const q of quotes) {
+  const invoiceQuotes = [];
+  for (const q of context.quotes) {
     const summary = await loadDealFinancialSummary(orgId, q.id);
     if (!summary) continue;
-    options.push({
+    invoiceQuotes.push({
       id: q.id,
       number: q.number,
       subject: q.subject,
@@ -91,19 +83,27 @@ export default async function PreparerFacturePage({
     });
   }
 
+  const backHref = context.sheet
+    ? `/dashboard/fiches-suivi/${context.sheet.id}`
+    : context.project
+      ? `/dashboard/projets/${context.project.id}`
+      : "/dashboard/facturation";
+
   return (
     <div className="mx-auto max-w-xl space-y-6">
-      <BackLink href="/dashboard/facturation">À facturer</BackLink>
+      <BackLink href={backHref}>
+        {context.sheet ? "Retour à la fiche" : context.project ? "Retour au chantier" : "À facturer"}
+      </BackLink>
       <PageHeader
         eyebrow="Devis & Facturation"
-        title="Préparer la facture"
-        description={`Chantier · ${project.title} — validation humaine obligatoire.`}
+        title="Préparer la facturation"
+        description={
+          context.project
+            ? `${context.project.title} — le montant vient du moteur Commercial, pas de la fiche.`
+            : "Contexte commercial à compléter."
+        }
       />
-      <PrepareInvoiceForm
-        projectId={project.id}
-        projectTitle={project.title}
-        quotes={options}
-      />
+      <PrepareBillingFromOps context={context} invoiceQuotes={invoiceQuotes} />
     </div>
   );
 }

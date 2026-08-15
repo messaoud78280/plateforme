@@ -7,6 +7,7 @@ import { followUpSheetAccessWhere } from "@/lib/follow-up/access";
 import { loadAttentionForSheets } from "@/lib/follow-up/attention/batch";
 import { STATUS_LABELS } from "@/lib/follow-up/types";
 import { withReturnTo } from "@/lib/navigation/safe-return-to";
+import { buildPrepareBillingHref } from "@/lib/facturation/prepare-billing";
 import {
   type BillingFilter,
   type BillingKpi,
@@ -369,9 +370,18 @@ export async function getProjectBillingHint(opts: {
           ? "Facturation à préparer"
           : "À facturer",
     count: n,
-    href: withReturnTo(
-      `${FACTURATION_HREF}?filtre=a_facturer`,
-      `/dashboard/projets/${opts.projectId}`,
-    ),
+    href:
+      open.length === 1 && open[0]?.projectId
+        ? withReturnTo(
+            buildPrepareBillingHref({
+              projectId: open[0].projectId,
+              sheetId: open[0].id,
+            }),
+            `/dashboard/projets/${opts.projectId}`,
+          )
+        : withReturnTo(
+            `${FACTURATION_HREF}?filtre=a_facturer`,
+            `/dashboard/projets/${opts.projectId}`,
+          ),
   };
 }

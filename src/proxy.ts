@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 import {
   detectCountryCode,
   isCountryBlocked,
   parseBlockedCountries,
   shouldSkipGeoBlock,
 } from "@/lib/geo-block";
+import {
+  canAccessDashboardApi,
+  canAccessDashboardHref,
+  requiredHrefForApiPath,
+} from "@/lib/equipe-acces/dashboard-policy";
 
 /** Hôte canonique (ex. www.bework.fr) — dérivé de NEXT_PUBLIC_SITE_URL en prod. */
 function getCanonicalHost(): string {
@@ -54,7 +60,60 @@ function geoBlockResponse(request: NextRequest): NextResponse | null {
   });
 }
 
-export function proxy(request: NextRequest) {
+function tokenPersona(token: { personType?: unknown; permissionProfile?: unknown }) {
+  return {
+    personType: (token.personType as string | null | undefined) ?? null,
+    permissionProfile: (token.permissionProfile as string | null | undefined) ?? null,
+  };
+}
+
+/** SEC-1 — pages dashboard + APIs mappées. Next 16 : un seul fichier proxy. */
+async function applyPersonaGate(
+  request: NextRequest,
+  requestHeaders: Headers,
+): Promise<NextResponse | null> {
+  const { pathname } = request.nextUrl;
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  const mappedApi = requiredHrefForApiPath(pathname);
+  const isDashboard = pathname.startsWith("/dashboard");
+  if (!isDashboard && !mappedApi) return null;
+
+  const token = await getToken({ req: request, secret });
+  const authenticated = Boolean(token?.id || token?.sub);
+  const { personType, permissionProfile } = token
+    ? tokenPersona(token)
+    : { personType: null, permissionProfile: null };
+
+  if (isDashboard) {
+    if (!authenticated) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/connexion";
+      url.search = `?callbackUrl=${encodeURIComponent(pathname)}`;
+      return NextResponse.redirect(url);
+    }
+    if (!canAccessDashboardHref(pathname, personType, permissionProfile)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  if (!authenticated) {
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  }
+  if (!canAccessDashboardApi(pathname, personType, permissionProfile)) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+  }
+  return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
+export async function proxy(request: NextRequest) {
   if (HEALTHCHECK_PATHS.has(request.nextUrl.pathname)) {
     return NextResponse.next();
   }
@@ -79,18 +138,24 @@ export function proxy(request: NextRequest) {
   const canonicalHost = getCanonicalHost();
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
 
-  if (!host || host === canonicalHost || PASSTHROUGH_HOSTS.has(host)) {
-    return NextResponse.next();
+  if (host && host !== canonicalHost && !PASSTHROUGH_HOSTS.has(host)) {
+    if (APEX_REDIRECT_HOSTS.has(host)) {
+      const url = request.nextUrl.clone();
+      url.protocol = "https:";
+      url.host = canonicalHost;
+      return NextResponse.redirect(url, 308);
+    }
   }
 
-  if (APEX_REDIRECT_HOSTS.has(host)) {
-    const url = request.nextUrl.clone();
-    url.protocol = "https:";
-    url.host = canonicalHost;
-    return NextResponse.redirect(url, 308);
+  const requestHeaders = new Headers(request.headers);
+  if (request.nextUrl.pathname.startsWith("/dashboard")) {
+    requestHeaders.set("x-dashboard-pathname", request.nextUrl.pathname);
   }
 
-  return NextResponse.next();
+  const gated = await applyPersonaGate(request, requestHeaders);
+  if (gated) return gated;
+
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {

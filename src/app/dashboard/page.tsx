@@ -94,7 +94,11 @@ export default async function DashboardPage({
     });
     return (
       <div className="mx-auto w-full max-w-[1400px] space-y-4 px-1 sm:px-2 xl:max-w-[1520px]">
-        <AccueilOpsHome ops={ops} />
+        <AccueilOpsHome
+          ops={ops}
+          personType={portalUser?.personType ?? session.user.personType ?? null}
+          permissionProfile={portalUser?.permissionProfile ?? null}
+        />
       </div>
     );
   }
@@ -785,7 +789,11 @@ export default async function DashboardPage({
     });
     return (
       <div className="mx-auto w-full max-w-[1400px] space-y-4 px-1 sm:px-2 xl:max-w-[1520px]">
-        <AccueilOpsHome ops={homeOps} />
+        <AccueilOpsHome
+          ops={homeOps}
+          personType={portal?.personType ?? null}
+          permissionProfile={portal?.permissionProfile ?? null}
+        />
       </div>
     );
   }

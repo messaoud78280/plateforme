@@ -82,7 +82,10 @@ function testMobileMessagerieChrome() {
   assert.match(missions, /← Discussions/);
   assert.match(missions, /safe-area-inset-bottom/);
   assert.match(missions, /min-h-\[52px\]/);
-  assert.match(missions, /Caméra/);
+  assert.doesNotMatch(missions, /Caméra/);
+  assert.doesNotMatch(missions, /capture=/);
+  assert.match(missions, /Photos/);
+  assert.match(missions, /Document/);
   assert.doesNotMatch(missions, /VoiceRecorderPanel/);
 
   const view = read("src/components/messagerie/MessagerieView.tsx");

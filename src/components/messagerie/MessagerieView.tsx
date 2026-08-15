@@ -4,6 +4,12 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PhotoPreviewGrid } from "@/components/messagerie/PhotoPreviewGrid";
+import {
+  MESSAGERIE_DOC_ACCEPT,
+  MESSAGERIE_PHOTO_ACCEPT,
+  MessagerieAttachMenu,
+  pickMessageriePhotoFiles,
+} from "@/components/messagerie/MessagerieAttachMenu";
 import { MessageBeworkActions } from "@/components/messagerie/MessageBeworkActions";
 import { MessagerieAttachmentsBlock } from "@/components/messagerie/MessagerieSecureMedia";
 import {
@@ -1382,29 +1388,18 @@ export function MessagerieView({
                 ))}
               </div>
               <input
-                id="chantier-camera-input"
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="sr-only"
-                onChange={(e) => {
-                  const files = e.target.files;
-                  if (!files?.length) return;
-                  setPhotoPreview({ files: Array.from(files).slice(0, 6), comment: "" });
-                  setAttachMenuOpen(false);
-                  e.target.value = "";
-                }}
-              />
-              <input
                 id="chantier-photo-input"
                 type="file"
-                accept="image/*"
+                accept={MESSAGERIE_PHOTO_ACCEPT}
                 className="sr-only"
                 multiple
                 onChange={(e) => {
-                  const files = e.target.files;
-                  if (!files?.length) return;
-                  setPhotoPreview({ files: Array.from(files).slice(0, 6), comment: "" });
+                  const files = pickMessageriePhotoFiles(e.target.files);
+                  if (files.length) {
+                    setPhotoPreview({ files, comment: "" });
+                  } else if (e.target.files?.length) {
+                    setError("Seules les photos sont acceptées (JPEG, PNG, GIF, WebP).");
+                  }
                   setAttachMenuOpen(false);
                   e.target.value = "";
                 }}
@@ -1412,7 +1407,7 @@ export function MessagerieView({
               <input
                 id="chantier-doc-input"
                 type="file"
-                accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.doc"
+                accept={MESSAGERIE_DOC_ACCEPT}
                 className="sr-only"
                 multiple
                 onChange={(e) => {
@@ -1484,43 +1479,14 @@ export function MessagerieView({
                 </div>
               ) : null}
               <form onSubmit={handleSend} className="flex items-end gap-2">
-                <div className="relative mb-0.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAttachMenuOpen((v) => !v);
-                    }}
-                    className="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100"
-                    title="Joindre"
-                    aria-label="Joindre une photo ou un document"
-                  >
-                    <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                    </svg>
-                  </button>
-                  {attachMenuOpen ? (
-                    <div className="absolute bottom-12 left-0 z-30 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
-                      <label
-                        htmlFor="chantier-camera-input"
-                        className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm hover:bg-slate-50"
-                      >
-                        Caméra
-                      </label>
-                      <label
-                        htmlFor="chantier-photo-input"
-                        className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm hover:bg-slate-50"
-                      >
-                        Photo
-                      </label>
-                      <label
-                        htmlFor="chantier-doc-input"
-                        className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm hover:bg-slate-50"
-                        onClick={() => setAttachMenuOpen(false)}
-                      >
-                        Document
-                      </label>
-                    </div>
-                  ) : null}
+                <div className="mb-0.5">
+                  <MessagerieAttachMenu
+                    open={attachMenuOpen}
+                    onOpenChange={setAttachMenuOpen}
+                    photoInputId="chantier-photo-input"
+                    docInputId="chantier-doc-input"
+                    tone="chantier"
+                  />
                 </div>
                 <textarea
                   value={sendContent}

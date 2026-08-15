@@ -21,6 +21,12 @@ import {
   type MsgAttachment,
 } from "@/lib/messagerie/media-preview";
 import { PhotoPreviewGrid } from "@/components/messagerie/PhotoPreviewGrid";
+import {
+  MESSAGERIE_DOC_ACCEPT,
+  MESSAGERIE_PHOTO_ACCEPT,
+  MessagerieAttachMenu,
+  pickMessageriePhotoFiles,
+} from "@/components/messagerie/MessagerieAttachMenu";
 import { MessagerieAttachmentsBlock } from "@/components/messagerie/MessagerieSecureMedia";
 import { MESSAGERIE_MEDIA_MAX_BYTES } from "@/lib/messagerie/media-storage";
 import {
@@ -690,7 +696,6 @@ export function MessagerieMissionsView({
   const missionFileId = "mission-file-input";
   const missionPhotoId = "mission-photo-input";
   const replyPhotoId = "reply-photo-input";
-  const replyCameraId = "reply-camera-input";
   const replyDocId = "reply-doc-input";
   const [directAttachMenuOpen, setDirectAttachMenuOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -3096,29 +3101,18 @@ export function MessagerieMissionsView({
                     🔒 Message interne
                   </p>
                   <input
-                    id={replyCameraId}
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="sr-only"
-                    onChange={(e) => {
-                      const files = e.target.files;
-                      if (!files?.length) return;
-                      setPhotoPreview({ files: Array.from(files).slice(0, 6), comment: "" });
-                      setDirectAttachMenuOpen(false);
-                      e.target.value = "";
-                    }}
-                  />
-                  <input
                     id={replyPhotoId}
                     type="file"
-                    accept="image/*"
+                    accept={MESSAGERIE_PHOTO_ACCEPT}
                     className="sr-only"
                     multiple
                     onChange={(e) => {
-                      const files = e.target.files;
-                      if (!files?.length) return;
-                      setPhotoPreview({ files: Array.from(files).slice(0, 6), comment: "" });
+                      const files = pickMessageriePhotoFiles(e.target.files);
+                      if (files.length) {
+                        setPhotoPreview({ files, comment: "" });
+                      } else if (e.target.files?.length) {
+                        alert("Seules les photos sont acceptées (JPEG, PNG, GIF, WebP).");
+                      }
                       setDirectAttachMenuOpen(false);
                       e.target.value = "";
                     }}
@@ -3126,7 +3120,7 @@ export function MessagerieMissionsView({
                   <input
                     id={replyDocId}
                     type="file"
-                    accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.doc"
+                    accept={MESSAGERIE_DOC_ACCEPT}
                     className="sr-only"
                     multiple
                     onChange={(e) => {
@@ -3209,42 +3203,13 @@ export function MessagerieMissionsView({
                       </div>
                     )}
                     <div className="flex items-end gap-2">
-                      <div className="relative mb-0.5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDirectAttachMenuOpen((v) => !v);
-                          }}
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#54656f] hover:bg-[#e9edef]"
-                          title="Joindre"
-                        >
-                          <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                          </svg>
-                        </button>
-                        {directAttachMenuOpen ? (
-                          <div className="absolute bottom-12 left-0 z-30 w-48 overflow-hidden rounded-xl border border-[#d1d7db] bg-white shadow-lg">
-                            <label
-                              htmlFor={replyCameraId}
-                              className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
-                            >
-                              Caméra
-                            </label>
-                            <label
-                              htmlFor={replyPhotoId}
-                              className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
-                            >
-                              Photo
-                            </label>
-                            <label
-                              htmlFor={replyDocId}
-                              className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
-                              onClick={() => setDirectAttachMenuOpen(false)}
-                            >
-                              Document
-                            </label>
-                          </div>
-                        ) : null}
+                      <div className="mb-0.5">
+                        <MessagerieAttachMenu
+                          open={directAttachMenuOpen}
+                          onOpenChange={setDirectAttachMenuOpen}
+                          photoInputId={replyPhotoId}
+                          docInputId={replyDocId}
+                        />
                       </div>
                       <textarea
                         value={replyDirectContent}
@@ -3767,7 +3732,7 @@ export function MessagerieMissionsView({
               <input
                 id={missionFileId}
                 type="file"
-                accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.doc"
+                accept={MESSAGERIE_DOC_ACCEPT}
                 className="sr-only"
                 multiple
                 onChange={(e) => handleFileUpload(e, setMissionAttachments)}
@@ -3775,27 +3740,16 @@ export function MessagerieMissionsView({
               <input
                 id={missionPhotoId}
                 type="file"
-                accept="image/*"
+                accept={MESSAGERIE_PHOTO_ACCEPT}
                 className="sr-only"
                 multiple
                 onChange={(e) => {
-                  const files = e.target.files;
-                  if (!files?.length) return;
-                  setPhotoPreview({ files: Array.from(files).slice(0, 6), comment: "" });
-                  setAttachMenuOpen(false);
-                  e.target.value = "";
-                }}
-              />
-              <input
-                id="mission-camera-input"
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="sr-only"
-                onChange={(e) => {
-                  const files = e.target.files;
-                  if (!files?.length) return;
-                  setPhotoPreview({ files: Array.from(files).slice(0, 6), comment: "" });
+                  const files = pickMessageriePhotoFiles(e.target.files);
+                  if (files.length) {
+                    setPhotoPreview({ files, comment: "" });
+                  } else if (e.target.files?.length) {
+                    alert("Seules les photos sont acceptées (JPEG, PNG, GIF, WebP).");
+                  }
                   setAttachMenuOpen(false);
                   e.target.value = "";
                 }}
@@ -3868,42 +3822,13 @@ export function MessagerieMissionsView({
                 </div>
               )}
               <form id="mission-send-form" onSubmit={handleSend} className="flex items-end gap-2">
-                <div className="relative mb-0.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAttachMenuOpen((v) => !v);
-                    }}
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#54656f] hover:bg-[#e9edef]"
-                    title="Joindre"
-                  >
-                    <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                    </svg>
-                  </button>
-                  {attachMenuOpen ? (
-                    <div className="absolute bottom-12 left-0 z-30 w-48 overflow-hidden rounded-xl border border-[#d1d7db] bg-white shadow-lg">
-                        <label
-                          htmlFor="mission-camera-input"
-                          className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
-                        >
-                          Caméra
-                        </label>
-                        <label
-                          htmlFor={missionPhotoId}
-                          className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
-                        >
-                          Photo
-                        </label>
-                        <label
-                          htmlFor={missionFileId}
-                          className="block min-h-11 cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
-                          onClick={() => setAttachMenuOpen(false)}
-                        >
-                          Document
-                        </label>
-                    </div>
-                  ) : null}
+                <div className="mb-0.5">
+                  <MessagerieAttachMenu
+                    open={attachMenuOpen}
+                    onOpenChange={setAttachMenuOpen}
+                    photoInputId={missionPhotoId}
+                    docInputId={missionFileId}
+                  />
                 </div>
                 <div className="relative min-w-0 flex-1">
                   <textarea

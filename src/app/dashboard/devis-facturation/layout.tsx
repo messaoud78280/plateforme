@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import { requireCommercialSession } from "@/lib/commercial/access";
-import { CommercialSubNav } from "@/components/commercial/CommercialSubNav";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Devis & Facturation — BeWork",
+    template: "%s — BeWork",
+  },
+};
 
 export default async function DevisFacturationLayout({
   children,
@@ -7,10 +14,5 @@ export default async function DevisFacturationLayout({
   children: React.ReactNode;
 }) {
   await requireCommercialSession();
-  return (
-    <div className="space-y-6">
-      <CommercialSubNav />
-      {children}
-    </div>
-  );
+  return children;
 }

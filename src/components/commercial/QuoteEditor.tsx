@@ -221,6 +221,10 @@ export function QuoteEditor({
     metaRef.current = meta;
   }, [meta]);
 
+  useEffect(() => {
+    if (quote.number) document.title = `${quote.number} — BeWork`;
+  }, [quote.number]);
+
   const version = quote.currentVersion;
   const lines = version?.lines ?? [];
   const sections = useMemo(
@@ -771,8 +775,8 @@ export function QuoteEditor({
   return (
     <div className="relative pb-24">
       {/* Barre sticky */}
-      <div className="sticky top-0 z-30 -mx-1 mb-4 border-b border-slate-200/80 bg-white/95 px-1 py-3 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
+      <div className="sticky top-12 z-30 -mx-1 mb-4 border-b border-slate-200/80 bg-white/95 px-1 py-3 backdrop-blur">
+        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
               {COMMERCIAL_QUOTE_STATUS_LABELS[quote.status] ?? quote.status}
@@ -817,11 +821,11 @@ export function QuoteEditor({
       </div>
 
       {error ? (
-        <p className="mx-auto mb-3 max-w-4xl text-sm text-red-700">{error}</p>
+        <p className="mx-auto mb-3 max-w-[1500px] text-sm text-red-700">{error}</p>
       ) : null}
 
       {!canEdit ? (
-        <p className="mx-auto mb-3 max-w-4xl rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+        <p className="mx-auto mb-3 max-w-[1500px] rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
           {version?.lockState && version.lockState !== "DRAFT"
             ? "Version figée — utilisez « Nouvelle version » (menu •••) ou un avenant. Ne modifiez jamais silencieusement une version envoyée ou acceptée."
             : "Document non modifiable dans cet état — créez une nouvelle version ou un avenant si besoin."}
@@ -829,7 +833,7 @@ export function QuoteEditor({
       ) : null}
 
       {/* Document */}
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-[1500px]">
         <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           {/* Émetteur ↔ Client */}
           <div className="grid gap-6 border-b border-slate-100 px-5 py-6 sm:grid-cols-2 sm:px-8">

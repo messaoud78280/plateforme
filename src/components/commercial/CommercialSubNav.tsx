@@ -10,10 +10,10 @@ const primary = [
   { href: "/dashboard/devis-facturation/devis", label: "Devis" },
   { href: "/dashboard/devis-facturation/factures", label: "Factures" },
   { href: "/dashboard/devis-facturation/encaissements", label: "Encaissements" },
+  { href: "/dashboard/devis-facturation/bibliotheque", label: "Bibliothèque" },
 ];
 
 const referentiel = [
-  { href: "/dashboard/devis-facturation/bibliotheque", label: "Bibliothèque" },
   { href: "/dashboard/devis-facturation/prix", label: "Prix" },
   { href: "/dashboard/devis-facturation/parametres", label: "Paramètres" },
 ];
@@ -26,7 +26,7 @@ export function CommercialSubNav() {
 
   return (
     <nav
-      className="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm"
+      className="flex flex-nowrap items-center gap-0.5"
       aria-label="Devis & Facturation"
     >
       {primary.map((l) => {
@@ -38,10 +38,10 @@ export function CommercialSubNav() {
             key={l.href}
             href={l.href}
             className={cn(
-              "inline-flex items-center rounded-lg px-3 py-2 text-xs font-semibold transition sm:text-sm",
+              "inline-flex shrink-0 items-center rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors duration-150",
               active
-                ? "bg-[#1e3a5f] text-white shadow-sm"
-                : "text-slate-600 hover:bg-slate-50 hover:text-[#1e3a5f]",
+                ? "text-[#1e3a5f]"
+                : "text-slate-500 hover:bg-slate-50 hover:text-slate-800",
             )}
             aria-current={active ? "page" : undefined}
           >
@@ -49,17 +49,13 @@ export function CommercialSubNav() {
           </Link>
         );
       })}
-      {/*
-        Portal via HeaderDropdown : le menu absolute était masqué par le contenu
-        frère (page) sous la barre — pas un overflow:hidden sur le nav.
-      */}
       <HeaderDropdown
         key={pathname}
         panelId="commercial-referentiel-menu"
         align="left"
         width={176}
         zIndex={50}
-        panelClassName="rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
+        panelClassName="rounded-xl border border-slate-200 bg-white p-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
         trigger={({ onClick, expanded, triggerRef }) => (
           <button
             ref={triggerRef}
@@ -69,13 +65,13 @@ export function CommercialSubNav() {
             aria-haspopup="menu"
             aria-controls="commercial-referentiel-menu"
             className={cn(
-              "inline-flex items-center rounded-lg px-3 py-2 text-xs font-semibold sm:text-sm",
+              "inline-flex shrink-0 items-center rounded-md px-2.5 py-1.5 text-[13px] font-medium",
               refActive || expanded
-                ? "bg-slate-100 text-[#1e3a5f]"
-                : "text-slate-600 hover:bg-slate-50",
+                ? "text-[#1e3a5f]"
+                : "text-slate-500 hover:bg-slate-50 hover:text-slate-800",
             )}
           >
-            Référentiel ▾
+            Référentiel
           </button>
         )}
       >
@@ -88,9 +84,9 @@ export function CommercialSubNav() {
               href={l.href}
               role="menuitem"
               className={cn(
-                "block rounded-lg px-3 py-2 text-xs font-semibold",
+                "block rounded-lg px-3 py-2 text-[13px] font-medium",
                 active
-                  ? "bg-slate-100 text-[#1e3a5f]"
+                  ? "bg-slate-50 text-[#1e3a5f]"
                   : "text-slate-700 hover:bg-slate-50",
               )}
               aria-current={active ? "page" : undefined}

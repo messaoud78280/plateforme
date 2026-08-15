@@ -38,6 +38,9 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
+import { isCommercialWorkspacePath } from "@/lib/commercial/workspace";
+import { CommercialWorkspaceHeader } from "@/components/commercial/CommercialWorkspaceHeader";
+import { CommercialLaunchLink } from "@/components/dashboard/CommercialLaunchLink";
 
 export const metadata: Metadata = {
   robots: SEO_NOINDEX_ROBOTS,
@@ -122,6 +125,28 @@ export default async function DashboardLayout({
     });
   }
 
+  if (isCommercialWorkspacePath(pathname)) {
+    return (
+      <div className="flex min-h-dvh flex-col bg-[color:var(--cc-surface-muted)]">
+        <SkipLink />
+        <EnvironmentBanner environment={env} />
+        {isDemo ? (
+          <DemoTenantBanner companyName={companyName} expiresAt={demoExpiresIso} />
+        ) : null}
+        <CommercialWorkspaceHeader />
+        <UiPreferencesProvider userId={session.user.id}>
+          <main
+            id="contenu-principal"
+            tabIndex={-1}
+            className="cc-enter w-full min-w-0 flex-1 px-3 py-4 pb-16 sm:px-5 sm:py-5 lg:px-6"
+          >
+            {children}
+          </main>
+        </UiPreferencesProvider>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-dvh bg-[color:var(--cc-surface-muted)]">
       <SkipLink />
@@ -174,6 +199,10 @@ export default async function DashboardLayout({
               <MessagerieHeaderShortcut key={session.user.id} />
               <NotificationsDropdown key={session.user.id} userId={session.user.id} />
             </div>
+            <CommercialLaunchLink
+              personType={personType}
+              permissionProfile={permissionProfile}
+            />
             <OutilsCommunication />
             <UserAccountDropdown
               key={session.user.id}

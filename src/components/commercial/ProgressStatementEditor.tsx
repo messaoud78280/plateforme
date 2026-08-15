@@ -275,7 +275,7 @@ export function ProgressStatementEditor({
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4 pb-24">
+    <div className="mx-auto max-w-[1500px] space-y-4 pb-24">
       <div className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-slate-50/95 px-1 py-3 backdrop-blur">
         <div>
           <Link

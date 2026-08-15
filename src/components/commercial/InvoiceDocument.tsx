@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -101,6 +101,9 @@ function partyLines(s: Snapshot | null): string[] {
 export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (invoice.number) document.title = `${invoice.number} — BeWork`;
+  }, [invoice.number]);
   const [error, setError] = useState<string | null>(null);
   const issuer = invoice.issuerSnapshotJson;
   const client = invoice.clientSnapshotJson;

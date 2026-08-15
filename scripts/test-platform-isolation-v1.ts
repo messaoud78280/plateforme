@@ -52,11 +52,20 @@ function testConfigsDistinct() {
     companyName: "Dupont Étanchéité",
     loginIdentifier: "dupont",
   });
+  const batinord = getPlatformConfigForOrganization({
+    isDemo: true,
+    companyName: "BATINORD",
+    loginIdentifier: "batinord",
+  });
 
   assert.equal(bework.key, "bework_internal");
   assert.equal(setrim.key, "setrim");
   assert.equal(clientTest.key, "client_test");
   assert.equal(generic.key, "generic_demo");
+  assert.equal(batinord.key, "generic_demo");
+  assert.equal(isSetrimPlatform(batinord), false);
+  assert.equal(batinord.branding.displayName, "BATINORD");
+  assert.equal(batinord.features.commercialTour, false);
 
   assert.notEqual(bework.branding.displayName, setrim.branding.displayName);
   assert.equal(bework.branding.displayName, "BeWork");

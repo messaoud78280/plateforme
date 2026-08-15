@@ -175,7 +175,7 @@ export function AccueilOpsHome({
         </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.9fr)] lg:items-start xl:grid-cols-[minmax(0,1.75fr)_minmax(300px,0.85fr)]">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.9fr)] lg:items-start xl:grid-cols-[minmax(0,1.75fr)_minmax(300px,0.85fr)]">
         <div data-demo-target="accueil-a-traiter">
         <DashboardSection
           demoTarget="accueil-a-traiter"
@@ -211,7 +211,7 @@ export function AccueilOpsHome({
         {hasToday ? (
           <aside
             data-demo-target="accueil-aujourdhui"
-            className="rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm lg:sticky lg:top-4"
+            className="rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm lg:sticky lg:top-4 lg:row-span-2"
           >
             <div className="flex items-start justify-between gap-3">
               <h2 className="text-[15px] font-bold tracking-tight text-[#1e3a5f]">
@@ -297,7 +297,7 @@ export function AccueilOpsHome({
         ) : (
           <aside
             data-demo-target="accueil-aujourdhui"
-            className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm"
+            className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm lg:row-span-2"
           >
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-[15px] font-bold tracking-tight text-[#1e3a5f]">
@@ -313,119 +313,121 @@ export function AccueilOpsHome({
             <p className="mt-2 text-[13px] text-slate-500">Rien de prévu aujourd’hui.</p>
           </aside>
         )}
-      </div>
 
-      {showFacturation || showRentabilite ? (
-        <section className="rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:divide-x sm:divide-slate-100 sm:gap-0">
-            {showFacturation ? (
-              <div className="min-w-0 flex-1 sm:pr-6">
-                <FacturationHomeBanner />
+        <div className="space-y-5 lg:col-start-1">
+          {showFacturation || showRentabilite ? (
+            <section className="rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:divide-x sm:divide-slate-100 sm:gap-0">
+                {showFacturation ? (
+                  <div className="min-w-0 flex-1 sm:pr-6">
+                    <FacturationHomeBanner />
+                  </div>
+                ) : null}
+                {showRentabilite ? (
+                  <div className="min-w-0 flex-1 sm:pl-6">
+                    <Link
+                      href="/dashboard/rentabilite"
+                      className="block rounded-xl py-1 transition-colors duration-150 hover:bg-slate-50/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
+                    >
+                      <p className="text-[13px] font-semibold text-slate-500">Rentabilité</p>
+                      <p className="mt-1 text-[15px] font-bold text-[#1e3a5f]">
+                        Voir la marge
+                      </p>
+                      <p className="mt-0.5 text-[12px] text-slate-500">
+                        Prévisionnel, engagé et encaissé
+                      </p>
+                    </Link>
+                  </div>
+                ) : null}
               </div>
-            ) : null}
-            {showRentabilite ? (
-              <div className="min-w-0 flex-1 sm:pl-6">
-                <Link
-                  href="/dashboard/rentabilite"
-                  className="block rounded-xl py-1 transition-colors duration-150 hover:bg-slate-50/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
-                >
-                  <p className="text-[13px] font-semibold text-slate-500">Rentabilité</p>
-                  <p className="mt-1 text-[15px] font-bold text-[#1e3a5f]">
-                    Voir la marge
-                  </p>
-                  <p className="mt-0.5 text-[12px] text-slate-500">
-                    Prévisionnel, engagé et encaissé
-                  </p>
-                </Link>
-              </div>
-            ) : null}
-          </div>
-        </section>
-      ) : null}
+            </section>
+          ) : null}
 
-      <MessagesHomeBanner variant="card" />
+          <MessagesHomeBanner variant="card" />
 
-      {watchChantiers.length > 0 ? (
-        <DashboardSection
-          demoTarget="accueil-chantiers"
-          title="Chantiers à surveiller"
-          action={{ href: ops.links.projets, label: "Voir chantiers →" }}
-        >
-          <ul className="space-y-2">
-            {watchChantiers.map((c) => {
-              const signals = [
-                c.criticalCount > 0
-                  ? `${c.criticalCount} critique${c.criticalCount > 1 ? "s" : ""}`
-                  : null,
-                c.overdueTasks > 0
-                  ? `${c.overdueTasks} tâche${c.overdueTasks > 1 ? "s" : ""} en retard`
-                  : null,
-                c.attentionCount > 0 && c.criticalCount === 0
-                  ? `${c.attentionCount} à traiter`
-                  : null,
-              ].filter(Boolean);
-              return (
-                <li key={c.id}>
-                  <Link
-                    href={`/dashboard/projets/${c.id}`}
-                    className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-slate-50/40 px-3.5 py-3 transition-colors duration-150 hover:bg-white hover:border-slate-300"
-                  >
-                    <span className="min-w-0">
-                      <span className="block truncate text-[15px] font-bold text-slate-950">
-                        {c.title}
+          {watchChantiers.length > 0 ? (
+            <DashboardSection
+              demoTarget="accueil-chantiers"
+              title="Chantiers à surveiller"
+              action={{ href: ops.links.projets, label: "Voir chantiers →" }}
+            >
+              <ul className="space-y-2">
+                {watchChantiers.map((c) => {
+                  const signals = [
+                    c.criticalCount > 0
+                      ? `${c.criticalCount} critique${c.criticalCount > 1 ? "s" : ""}`
+                      : null,
+                    c.overdueTasks > 0
+                      ? `${c.overdueTasks} tâche${c.overdueTasks > 1 ? "s" : ""} en retard`
+                      : null,
+                    c.attentionCount > 0 && c.criticalCount === 0
+                      ? `${c.attentionCount} à traiter`
+                      : null,
+                  ].filter(Boolean);
+                  return (
+                    <li key={c.id}>
+                      <Link
+                        href={`/dashboard/projets/${c.id}`}
+                        className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-slate-50/40 px-3.5 py-3 transition-colors duration-150 hover:bg-white hover:border-slate-300"
+                      >
+                        <span className="min-w-0">
+                          <span className="block truncate text-[15px] font-bold text-slate-950">
+                            {c.title}
+                          </span>
+                          {signals.length > 0 ? (
+                            <span className="mt-0.5 block text-[13px] text-slate-600">
+                              {signals.join(" · ")}
+                            </span>
+                          ) : null}
+                        </span>
+                        <span
+                          aria-hidden
+                          className="text-[18px] font-light text-slate-400 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"
+                        >
+                          ›
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </DashboardSection>
+          ) : null}
+
+          {upcoming.length > 0 ? (
+            <DashboardSection
+              title="Prochainement"
+              action={{ href: ops.links.agenda, label: "Voir Agenda →" }}
+            >
+              <ol className="space-y-3">
+                {upcoming.map((ev) => (
+                  <li key={ev.id} className="flex gap-3">
+                    <span className="w-[4.5rem] shrink-0 pt-0.5 text-[13px] font-medium text-slate-400">
+                      {formatAgendaWhen(ev.startAt)}
+                    </span>
+                    <Link
+                      href={`/dashboard/agenda?event=${ev.id}`}
+                      className="min-w-0 flex-1 rounded-lg transition-colors duration-150 hover:bg-slate-50/80"
+                    >
+                      <span className="text-[14px] font-semibold text-slate-900">
+                        <span className="mr-1" aria-hidden>
+                          {agendaIcon(ev.type)}
+                        </span>
+                        {ev.title}
                       </span>
-                      {signals.length > 0 ? (
-                        <span className="mt-0.5 block text-[13px] text-slate-600">
-                          {signals.join(" · ")}
+                      {ev.projectTitle ? (
+                        <span className="mt-0.5 block text-[13px] text-slate-500">
+                          {ev.projectTitle}
                         </span>
                       ) : null}
-                    </span>
-                    <span
-                      aria-hidden
-                      className="text-[18px] font-light text-slate-400 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"
-                    >
-                      ›
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </DashboardSection>
-      ) : null}
-
-      {upcoming.length > 0 ? (
-        <DashboardSection
-          title="Prochainement"
-          action={{ href: ops.links.agenda, label: "Voir Agenda →" }}
-        >
-          <ol className="space-y-3">
-            {upcoming.map((ev) => (
-              <li key={ev.id} className="flex gap-3">
-                <span className="w-[4.5rem] shrink-0 pt-0.5 text-[13px] font-medium text-slate-400">
-                  {formatAgendaWhen(ev.startAt)}
-                </span>
-                <Link
-                  href={`/dashboard/agenda?event=${ev.id}`}
-                  className="min-w-0 flex-1 rounded-lg transition-colors duration-150 hover:bg-slate-50/80"
-                >
-                  <span className="text-[14px] font-semibold text-slate-900">
-                    <span className="mr-1" aria-hidden>
-                      {agendaIcon(ev.type)}
-                    </span>
-                    {ev.title}
-                  </span>
-                  {ev.projectTitle ? (
-                    <span className="mt-0.5 block text-[13px] text-slate-500">
-                      {ev.projectTitle}
-                    </span>
-                  ) : null}
-                </Link>
-              </li>
-            ))}
-          </ol>
-        </DashboardSection>
-      ) : null}
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            </DashboardSection>
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }

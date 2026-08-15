@@ -7,26 +7,12 @@ import { MessagesHomeBanner } from "@/components/dashboard/MessagesHomeBanner";
 import { FacturationHomeBanner } from "@/components/dashboard/FacturationHomeBanner";
 import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 import { cn } from "@/lib/cn";
-
-function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Europe/Paris",
-  });
-}
-
-function urgencyTone(u: string) {
-  if (u === "CRITIQUE") return "border-l-red-600 bg-red-50/40";
-  if (u === "URGENT") return "border-l-red-500 bg-red-50/25";
-  if (u === "IMPORTANT") return "border-l-amber-500 bg-amber-50/30";
-  return "border-l-slate-300 bg-slate-50/40";
-}
-
-function urgencyLabel(u: string) {
-  if (u === "CRITIQUE" || u === "URGENT" || u === "IMPORTANT") return u;
-  return null;
-}
+import {
+  DashboardSection,
+  PriorityRow,
+  TodayRow,
+  attentionTypeLabel,
+} from "@/components/dashboard/accueil-ui";
 
 function agendaIcon(type: string) {
   if (type === "LIVRAISON") return "🚚";
@@ -35,38 +21,31 @@ function agendaIcon(type: string) {
   return "·";
 }
 
-function SideSection({
-  title,
-  count,
-  action,
-  children,
-}: {
-  title: string;
-  count?: number | string;
-  action?: { href: string; label: string };
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="border-b border-slate-200/80 pb-4 last:border-b-0 last:pb-0">
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
-          {title}
-          {count != null ? (
-            <span className="ml-2 tabular-nums text-slate-900">{count}</span>
-          ) : null}
-        </h2>
-        {action ? (
-          <Link
-            href={action.href}
-            className="shrink-0 text-xs font-semibold text-[#1d4ed8] hover:underline"
-          >
-            {action.label}
-          </Link>
-        ) : null}
-      </div>
-      <div className="mt-2.5">{children}</div>
-    </section>
-  );
+function formatAgendaWhen(iso: string) {
+  return new Date(iso).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    timeZone: "Europe/Paris",
+  });
+}
+
+function buildHeaderLine(ops: AccueilOpsSummary) {
+  const parts: string[] = [];
+  if (ops.attentionTotal > 0) {
+    parts.push(
+      `${ops.attentionTotal} à traiter`,
+    );
+  }
+  const todayDeliveries = ops.orders.filter((o) =>
+    (o.deliveryLabel ?? "").toLowerCase().includes("aujourd"),
+  ).length;
+  if (todayDeliveries > 0) {
+    parts.push(
+      `${todayDeliveries} livraison${todayDeliveries > 1 ? "s" : ""} aujourd’hui`,
+    );
+  }
+  if (parts.length > 0) return parts.join(" · ");
+  return "Rien d’urgent à traiter aujourd’hui.";
 }
 
 function QuickActionMenu({ links }: { links: AccueilOpsSummary["links"] }) {
@@ -95,17 +74,17 @@ function QuickActionMenu({ links }: { links: AccueilOpsSummary["links"] }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex min-h-10 items-center rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#16304f]"
+        className="inline-flex h-8 items-center rounded-full bg-[#1e3a5f] px-3 text-[13px] font-semibold text-white transition-colors duration-150 hover:bg-[#16304f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/35"
       >
         + Action
       </button>
       {open ? (
-        <div className="absolute right-0 z-20 mt-1.5 min-w-[210px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+        <div className="absolute right-0 z-20 mt-1.5 min-w-[200px] rounded-xl border border-slate-200/80 bg-white py-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
           {items.map((it) => (
             <Link
               key={it.label}
               href={it.href}
-              className="block px-3.5 py-2.5 text-sm text-slate-800 hover:bg-slate-50"
+              className="block px-3.5 py-2 text-[13px] text-slate-700 transition-colors duration-150 hover:bg-slate-50"
               onClick={() => setOpen(false)}
             >
               {it.label}
@@ -133,34 +112,47 @@ export function AccueilOpsHome({
     personType,
     permissionProfile,
   );
-  const scopeHint =
-    ops.canSwitchScope && ops.scope === "team"
-      ? "Vue Équipe"
-      : ops.canSwitchScope && ops.scope === "mine"
-        ? "Vue Moi"
-        : null;
+  const showFacturation = canAccessDashboardHref(
+    "/dashboard/facturation",
+    personType,
+    permissionProfile,
+  );
+  const visibleAttention = ops.attention.slice(0, 3);
+  const todayAgenda =
+    ops.agendaTitle === "Aujourd’hui" ? ops.agenda.slice(0, 2) : [];
+  const todayOrders = ops.orders.slice(0, 3);
+  const todayTasks = ops.tasks.slice(0, 3);
+  const upcoming =
+    ops.agendaTitle === "Prochainement" ? ops.agenda.slice(0, 3) : [];
+  const watchChantiers = ops.chantiers.slice(0, 3);
+  const hasToday =
+    todayAgenda.length > 0 || todayOrders.length > 0 || todayTasks.length > 0;
+  const dateLabel =
+    ops.dateLabel.charAt(0).toUpperCase() + ops.dateLabel.slice(1);
+  const seeAllLabel =
+    ops.attentionTotal > 3
+      ? `Voir les ${ops.attentionTotal} éléments →`
+      : "Voir tout →";
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-[#1e3a5f] sm:text-[1.75rem]">
+    <div className="space-y-7">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-[1.65rem] font-semibold tracking-tight text-slate-900 sm:text-[1.75rem]">
             Bonjour {ops.firstName}
           </h1>
-          <p className="mt-1 text-sm capitalize text-slate-500">{ops.dateLabel}</p>
-          <p className="mt-1 text-sm text-slate-600">
-            Voici ce qui mérite votre attention aujourd’hui.
-          </p>
+          <p className="mt-1 text-[13px] text-slate-400">{dateLabel}</p>
+          <p className="mt-2 text-[14px] text-slate-600">{buildHeaderLine(ops)}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {ops.canSwitchScope ? (
-            <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-xs font-semibold">
+            <div className="inline-flex rounded-full bg-slate-100/90 p-0.5 text-[12px] font-medium">
               <Link
                 href={`${scopeHrefBase}?vue=moi`}
                 className={cn(
-                  "rounded-md px-2.5 py-1.5",
+                  "rounded-full px-2.5 py-1 transition-colors duration-150",
                   ops.scope === "mine"
-                    ? "bg-white text-slate-900 shadow-sm"
+                    ? "bg-white text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
                     : "text-slate-500 hover:text-slate-800",
                 )}
               >
@@ -169,9 +161,9 @@ export function AccueilOpsHome({
               <Link
                 href={`${scopeHrefBase}?vue=equipe`}
                 className={cn(
-                  "rounded-md px-2.5 py-1.5",
+                  "rounded-full px-2.5 py-1 transition-colors duration-150",
                   ops.scope === "team"
-                    ? "bg-white text-slate-900 shadow-sm"
+                    ? "bg-white text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
                     : "text-slate-500 hover:text-slate-800",
                 )}
               >
@@ -183,307 +175,257 @@ export function AccueilOpsHome({
         </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.9fr)] lg:gap-8 xl:grid-cols-[minmax(0,1.75fr)_minmax(300px,0.85fr)]">
-        {/* Colonne principale */}
-        <div className="space-y-6">
-          {/* 1 — À TRAITER (héros) */}
-          <section
-            data-demo-target="accueil-a-traiter"
-            className="rounded-2xl border border-[#1e3a5f]/15 bg-white p-4 shadow-sm sm:p-5"
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(260px,0.85fr)] lg:items-start">
+        <div data-demo-target="accueil-a-traiter">
+        <DashboardSection
+          demoTarget="accueil-a-traiter"
+          title="À traiter"
+          badge={ops.attentionTotal > 0 ? ops.attentionTotal : null}
+          subtitle={
+            ops.attentionTotal > 0
+              ? "Les priorités qui demandent votre attention"
+              : null
+          }
+          action={{ href: ops.links.aTraiter, label: seeAllLabel }}
+        >
+          {visibleAttention.length === 0 ? (
+            <p className="py-1 text-[14px] text-slate-500">Rien à traiter pour le moment.</p>
+          ) : (
+            <ul className="divide-y divide-slate-100">
+              {visibleAttention.map((item) => (
+                <li key={item.id}>
+                  <PriorityRow
+                    href={item.href}
+                    urgency={item.urgency}
+                    typeLabel={attentionTypeLabel(item.id, item.reason)}
+                    title={item.projectTitle || item.title}
+                    subtitle={item.reason}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </DashboardSection>
+        </div>
+
+        {hasToday ? (
+          <aside
+            data-demo-target="accueil-aujourdhui"
+            className="rounded-2xl border border-slate-200/70 bg-white px-5 py-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] lg:sticky lg:top-4"
           >
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]">
-                À traiter
-                <span className="ml-2.5 tabular-nums text-slate-900">{ops.attentionTotal}</span>
-                {scopeHint ? (
-                  <span className="ml-2 text-[10px] font-semibold normal-case tracking-normal text-slate-400">
-                    · {scopeHint}
-                  </span>
-                ) : null}
-              </h2>
-              <Link
-                href={ops.links.aTraiter}
-                className="text-xs font-semibold text-[#1d4ed8] hover:underline"
-              >
-                Voir tout →
-              </Link>
-            </div>
-
-            {ops.attention.length === 0 ? (
-              <p className="mt-4 text-sm font-medium text-emerald-800">
-                ✓ Rien d’urgent à traiter.
-              </p>
-            ) : (
-              <ul className="mt-3 space-y-2">
-                {ops.attention.map((item) => (
-                  <li key={item.id}>
-                    <Link
-                      href={item.href}
-                      className={cn(
-                        "flex items-start justify-between gap-3 rounded-xl border-l-[3px] px-3 py-2.5 transition hover:bg-white",
-                        urgencyTone(item.urgency),
-                      )}
-                    >
-                      <span className="min-w-0">
-                        {urgencyLabel(item.urgency) ? (
-                          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                            {urgencyLabel(item.urgency)}
-                          </span>
-                        ) : null}
-                        <span className="block text-sm font-bold text-slate-950">
-                          {item.title}
-                        </span>
-                        {item.projectTitle ? (
-                          <span className="mt-0.5 block text-xs font-medium text-slate-600">
-                            {item.projectTitle}
-                          </span>
-                        ) : null}
-                        <span className="mt-0.5 block text-xs text-slate-500">{item.reason}</span>
-                      </span>
-                      <span className="shrink-0 self-center text-xs font-bold text-[#1d4ed8]">
-                        Voir
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {ops.attentionCapped ? (
-              <p className="mt-2 text-[11px] text-slate-400">
-                Aperçu Accueil — le board À traiter peut en contenir davantage.
-              </p>
-            ) : null}
-          </section>
-
-          {/* 1b — MESSAGES (réflexe principal, sans écraser À traiter) */}
-          <MessagesHomeBanner variant="card" />
-
-          {/* 1c — FACTURATION anti-oubli (masqué si rien) */}
-          <FacturationHomeBanner />
-
-          {/* 1d — Rentabilité chantiers (PILOTAGE-1) — SEC-1 : Direction / Administratif */}
-          {showRentabilite ? (
-            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]">
-                  Rentabilité chantiers
-                </h2>
-                <Link
-                  href="/dashboard/rentabilite"
-                  className="text-xs font-semibold text-[#1d4ed8] hover:underline"
-                >
-                  Voir la rentabilité →
-                </Link>
-              </div>
-              <p className="mt-2 text-sm text-slate-500">
-                Marge prévue vs estimée, engagé, facturé et encaissé — sans IA.
-              </p>
-            </section>
-          ) : null}
-
-          {/* 2 — AUJOURD’HUI */}
-          <section data-demo-target="accueil-aujourdhui">
-            <div className="flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">
-              <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]">
-                {ops.agendaTitle}
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="text-[15px] font-semibold tracking-tight text-slate-900">
+                Aujourd’hui
               </h2>
               <Link
                 href={ops.links.agenda}
-                className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+                className="text-[13px] font-medium text-[#1d4ed8] transition-colors duration-150 hover:text-[#1e3a5f]"
               >
                 Voir Agenda
               </Link>
             </div>
-            {ops.agenda.length === 0 ? (
-              <p className="mt-3 text-sm text-slate-500">Aucun événement proche.</p>
-            ) : (
-              <ul className="mt-3 space-y-0">
-                {ops.agenda.map((ev) => (
-                  <li
-                    key={ev.id}
-                    className="flex gap-3 border-b border-slate-100 py-2.5 last:border-b-0"
-                  >
-                    <span className="w-12 shrink-0 pt-0.5 text-sm font-bold tabular-nums text-slate-800">
-                      {ops.agendaTitle === "Prochainement"
-                        ? new Date(ev.startAt).toLocaleDateString("fr-FR", {
-                            day: "numeric",
-                            month: "short",
-                          })
-                        : fmtTime(ev.startAt)}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="mr-1.5 text-sm" aria-hidden>
-                        {agendaIcon(ev.type)}
-                      </span>
-                      <Link
-                        href={`/dashboard/agenda?event=${ev.id}`}
-                        className="text-sm font-bold text-slate-950 hover:underline"
-                      >
-                        {ev.title}
-                      </Link>
-                      {ev.projectTitle ? (
-                        <span className="mt-0.5 block text-xs text-slate-500">
-                          {ev.projectTitle}
-                        </span>
-                      ) : null}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
 
-          {/* 3 — CHANTIERS */}
-          {ops.chantiers.length > 0 ? (
-            <section data-demo-target="accueil-chantiers">
-              <div className="flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">
-                <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
-                  Chantiers à surveiller
-                </h2>
+            {todayAgenda.length > 0 ? (
+              <div className="mt-3">
+                <ul>
+                  {todayAgenda.map((ev) => (
+                    <li key={ev.id}>
+                      <TodayRow
+                        href={`/dashboard/agenda?event=${ev.id}`}
+                        eyebrow={`${new Date(ev.startAt).toLocaleTimeString("fr-FR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          timeZone: "Europe/Paris",
+                        })} · ${ev.type === "LIVRAISON" ? "Livraison" : "Agenda"}`}
+                        title={ev.title}
+                        subtitle={ev.projectTitle}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {todayOrders.length > 0 ? (
+              <div className={todayAgenda.length > 0 ? "mt-5" : "mt-3"}>
+                <p className="text-[12px] font-medium text-slate-400">Livraisons</p>
+                <ul className="mt-1">
+                  {todayOrders.map((o) => (
+                    <li key={o.id}>
+                      <TodayRow
+                        href={o.href}
+                        eyebrow={o.deliveryLabel || o.statusLabel}
+                        title={o.supplierName}
+                        subtitle={o.projectTitle}
+                      />
+                    </li>
+                  ))}
+                </ul>
                 <Link
-                  href={ops.links.projets}
-                  className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+                  href={ops.links.commandes}
+                  className="mt-1 inline-block text-[13px] font-medium text-[#1d4ed8] transition-colors duration-150 hover:text-[#1e3a5f]"
                 >
-                  Voir chantiers
+                  Voir les commandes
                 </Link>
               </div>
-              <ul className="mt-3 space-y-3">
-                {ops.chantiers.map((c) => {
-                  const signals = [
-                    c.attentionCount > 0 ? `${c.attentionCount} À traiter` : null,
-                    c.criticalCount > 0
-                      ? `${c.criticalCount} critique${c.criticalCount > 1 ? "s" : ""}`
-                      : null,
-                    c.urgentCount > 0
-                      ? `${c.urgentCount} urgent${c.urgentCount > 1 ? "s" : ""}`
-                      : null,
-                    c.overdueTasks > 0
-                      ? `${c.overdueTasks} tâche${c.overdueTasks > 1 ? "s" : ""} en retard`
-                      : null,
-                    c.nextDeliveryLabel,
-                    c.nextEventLabel && !c.nextDeliveryLabel ? c.nextEventLabel : null,
-                  ].filter(Boolean);
-                  return (
-                    <li
-                      key={c.id}
-                      className="flex flex-col gap-2 rounded-xl border border-slate-200/90 bg-white px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold uppercase tracking-wide text-slate-900">
-                          {c.title}
-                        </p>
-                        <p className="mt-1 text-xs leading-relaxed text-slate-600">
-                          {signals.join(" · ")}
-                        </p>
-                      </div>
-                      <Link
-                        href={`/dashboard/projets/${c.id}`}
-                        className="shrink-0 text-xs font-bold text-[#1d4ed8] hover:underline"
-                      >
-                        Ouvrir le chantier
-                      </Link>
+            ) : null}
+
+            {todayTasks.length > 0 ? (
+              <div className={todayOrders.length > 0 || todayAgenda.length > 0 ? "mt-5" : "mt-3"}>
+                <p className="text-[12px] font-medium text-slate-400">Tâches</p>
+                <ul className="mt-1">
+                  {todayTasks.map((t) => (
+                    <li key={t.id}>
+                      <TodayRow
+                        href={`/dashboard/taches/${t.id}`}
+                        eyebrow={t.overdue ? "En retard" : t.dueLabel || "À faire"}
+                        title={t.title}
+                        subtitle={t.projectTitle}
+                      />
                     </li>
-                  );
-                })}
-              </ul>
-            </section>
-          ) : null}
-
-          {ops.teamToday.length > 0 ? (
-            <section className="hidden lg:block">
-              <h2 className="border-b border-slate-200 pb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                Équipe aujourd’hui
-              </h2>
-              <ul className="mt-2 space-y-1.5 text-sm">
-                {ops.teamToday.map((t) => (
-                  <li key={t.id}>
-                    <span className="font-semibold text-slate-800">{t.name}</span>
-                    {t.projectTitle ? (
-                      <span className="text-slate-500"> — {t.projectTitle}</span>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-        </div>
-
-        {/* Colonne secondaire */}
-        <aside className="space-y-0 rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 lg:sticky lg:top-4 lg:self-start">
-          {ops.orders.length > 0 ? (
-            <SideSection
-              title="Commandes & livraisons"
-              action={{ href: ops.links.commandes, label: "Voir" }}
-            >
-              <ul className="space-y-2">
-                {ops.orders.map((o) => (
-                  <li key={o.id}>
-                    <Link
-                      href={o.href}
-                      className="block rounded-lg px-2 py-1.5 hover:bg-slate-50"
-                    >
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="text-sm font-bold text-slate-900">
-                          {o.supplierName}
-                        </span>
-                        <span
-                          className={cn(
-                            "text-[10px] font-semibold uppercase",
-                            o.hasIssue ? "text-amber-700" : "text-slate-500",
-                          )}
-                        >
-                          {o.statusLabel}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-500">
-                        {[o.number, o.projectTitle].filter(Boolean).join(" · ")}
-                      </p>
-                      {o.deliveryLabel ? (
-                        <p className="mt-0.5 text-xs font-medium text-slate-700">
-                          {o.deliveryLabel}
-                        </p>
-                      ) : null}
-                      {o.receiptLabel ? (
-                        <p className="mt-0.5 text-xs font-semibold text-slate-700">
-                          {o.receiptLabel}
-                        </p>
-                      ) : null}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </SideSection>
-          ) : null}
-
-          <SideSection
-            title="Mes tâches"
-            action={{ href: ops.links.taches, label: "Voir" }}
+                  ))}
+                </ul>
+                <Link
+                  href={ops.links.taches}
+                  className="mt-1 inline-block text-[13px] font-medium text-[#1d4ed8] transition-colors duration-150 hover:text-[#1e3a5f]"
+                >
+                  Voir les tâches
+                </Link>
+              </div>
+            ) : null}
+          </aside>
+        ) : (
+          <aside
+            data-demo-target="accueil-aujourdhui"
+            className="rounded-2xl border border-slate-200/70 bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
           >
-            {ops.tasks.length === 0 ? (
-              <p className="text-sm text-slate-500">Aucune tâche prioritaire.</p>
-            ) : (
-              <ul className="space-y-2">
-                {ops.tasks.map((t) => (
-                  <li key={t.id}>
-                    <Link
-                      href={`/dashboard/taches/${t.id}`}
-                      className="block rounded-lg px-2 py-1.5 hover:bg-slate-50"
-                    >
-                      <span className="text-sm font-semibold text-slate-900">{t.title}</span>
-                      <span className="mt-0.5 block text-xs text-slate-500">
-                        {[t.projectTitle, t.dueLabel].filter(Boolean).join(" · ")}
-                        {t.overdue ? (
-                          <span className="ml-1.5 font-semibold text-red-700">Retard</span>
-                        ) : null}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </SideSection>
-        </aside>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-[15px] font-semibold tracking-tight text-slate-900">
+                Aujourd’hui
+              </h2>
+              <Link
+                href={ops.links.agenda}
+                className="text-[13px] font-medium text-[#1d4ed8] transition-colors duration-150 hover:text-[#1e3a5f]"
+              >
+                Voir Agenda
+              </Link>
+            </div>
+            <p className="mt-2 text-[13px] text-slate-500">Rien de prévu aujourd’hui.</p>
+          </aside>
+        )}
       </div>
+
+      {showFacturation || showRentabilite ? (
+        <section className="rounded-2xl border border-slate-200/70 bg-white px-5 py-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:divide-x sm:divide-slate-100 sm:gap-0">
+            {showFacturation ? (
+              <div className="min-w-0 flex-1 sm:pr-6">
+                <FacturationHomeBanner />
+              </div>
+            ) : null}
+            {showRentabilite ? (
+              <div className="min-w-0 flex-1 sm:pl-6">
+                <Link
+                  href="/dashboard/rentabilite"
+                  className="block rounded-xl py-1 transition-colors duration-150 hover:bg-slate-50/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
+                >
+                  <p className="text-[13px] font-medium text-slate-500">Rentabilité</p>
+                  <p className="mt-1 text-[15px] font-semibold text-slate-900">
+                    Voir la marge
+                  </p>
+                  <p className="mt-0.5 text-[12px] text-slate-400">
+                    Prévisionnel, engagé et encaissé
+                  </p>
+                </Link>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      <MessagesHomeBanner variant="card" />
+
+      {watchChantiers.length > 0 ? (
+        <DashboardSection
+          demoTarget="accueil-chantiers"
+          title="Chantiers à surveiller"
+          action={{ href: ops.links.projets, label: "Voir chantiers →" }}
+        >
+          <ul className="divide-y divide-slate-100">
+            {watchChantiers.map((c) => {
+              const signals = [
+                c.criticalCount > 0
+                  ? `${c.criticalCount} critique${c.criticalCount > 1 ? "s" : ""}`
+                  : null,
+                c.overdueTasks > 0
+                  ? `${c.overdueTasks} tâche${c.overdueTasks > 1 ? "s" : ""} en retard`
+                  : null,
+                c.attentionCount > 0 && c.criticalCount === 0
+                  ? `${c.attentionCount} à traiter`
+                  : null,
+              ].filter(Boolean);
+              return (
+                <li key={c.id}>
+                  <Link
+                    href={`/dashboard/projets/${c.id}`}
+                    className="group flex items-center justify-between gap-3 py-2.5 transition-colors duration-150 hover:bg-slate-50/70"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-[15px] font-semibold text-slate-900">
+                        {c.title}
+                      </span>
+                      {signals.length > 0 ? (
+                        <span className="mt-0.5 block text-[13px] text-slate-500">
+                          {signals.join(" · ")}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span
+                      aria-hidden
+                      className="text-[18px] font-light text-slate-300 transition-transform duration-150 group-hover:translate-x-0.5"
+                    >
+                      ›
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </DashboardSection>
+      ) : null}
+
+      {upcoming.length > 0 ? (
+        <DashboardSection
+          title="Prochainement"
+          action={{ href: ops.links.agenda, label: "Voir Agenda →" }}
+        >
+          <ol className="space-y-3">
+            {upcoming.map((ev) => (
+              <li key={ev.id} className="flex gap-3">
+                <span className="w-[4.5rem] shrink-0 pt-0.5 text-[13px] font-medium text-slate-400">
+                  {formatAgendaWhen(ev.startAt)}
+                </span>
+                <Link
+                  href={`/dashboard/agenda?event=${ev.id}`}
+                  className="min-w-0 flex-1 rounded-lg transition-colors duration-150 hover:bg-slate-50/80"
+                >
+                  <span className="text-[14px] font-semibold text-slate-900">
+                    <span className="mr-1" aria-hidden>
+                      {agendaIcon(ev.type)}
+                    </span>
+                    {ev.title}
+                  </span>
+                  {ev.projectTitle ? (
+                    <span className="mt-0.5 block text-[13px] text-slate-500">
+                      {ev.projectTitle}
+                    </span>
+                  ) : null}
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </DashboardSection>
+      ) : null}
     </div>
   );
 }

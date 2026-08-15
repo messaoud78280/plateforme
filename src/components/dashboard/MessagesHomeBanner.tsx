@@ -7,7 +7,7 @@ import {
   subscribeMessagerieEvents,
   subscribeMessagerieUnread,
 } from "@/lib/perf/messagerie-unread-bus";
-import { cn } from "@/lib/cn";
+import { DashboardSection } from "@/components/dashboard/accueil-ui";
 
 type PreviewItem = {
   id: string;
@@ -68,87 +68,44 @@ export function MessagesHomeBanner({ variant = "aside" }: { variant?: Variant })
   }, [scheduleReload]);
 
   const previews = items.slice(0, 3);
-  const isCard = variant === "card";
+  void variant;
 
-  if (!loaded) {
-    return (
-      <section
-        className={cn(
-          isCard
-            ? "rounded-2xl border border-[#1e3a5f]/15 bg-white p-4 shadow-sm sm:p-5"
-            : "border-b border-slate-200/80 pb-4",
-        )}
-        aria-busy
-      >
-        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
-          Messages
-        </p>
-        <div className="mt-3 h-10 animate-pulse rounded-lg bg-slate-100" />
-      </section>
-    );
+  if (!loaded || total <= 0 || previews.length === 0) {
+    return null;
   }
 
+  const first = previews[0]!;
+
   return (
-    <section
-      className={cn(
-        isCard
-          ? "rounded-2xl border border-[#1e3a5f]/15 bg-white p-4 shadow-sm sm:p-5"
-          : "border-b border-slate-200/80 pb-4 last:border-b-0 last:pb-0",
-      )}
-      data-testid="accueil-messages"
+    <DashboardSection
+      title="Messages"
+      badge={`${total} nouveau${total > 1 ? "x" : ""}`}
+      action={{ href: "/dashboard/messagerie", label: "Voir →" }}
     >
-      <div className="flex items-baseline justify-between gap-3">
-        <h2
-          className={cn(
-            isCard
-              ? "text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]"
-              : "text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500",
-          )}
-        >
-          Messages
-          {total > 0 ? (
-            <span className="ml-2.5 tabular-nums text-slate-900">
-              {total} nouveau{total > 1 ? "x" : ""}
-            </span>
-          ) : null}
-        </h2>
+      <div data-testid="accueil-messages">
         <Link
-          href="/dashboard/messagerie"
-          className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+          href={first.href}
+          className="group flex min-h-[52px] items-center justify-between gap-3 rounded-xl py-1 transition-colors duration-150 hover:bg-slate-50/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
         >
-          Voir la messagerie →
+          <span className="min-w-0">
+            <span className="block truncate text-[15px] font-semibold text-slate-900">
+              {first.title}
+            </span>
+            {first.preview ? (
+              <span className="mt-0.5 block truncate text-[13px] text-slate-500">
+                {first.preview}
+              </span>
+            ) : null}
+          </span>
+          <span
+            aria-hidden
+            className="text-[18px] font-light text-slate-300 transition-transform duration-150 group-hover:translate-x-0.5"
+          >
+            ›
+          </span>
         </Link>
+        <p className="sr-only">Voir la messagerie →</p>
       </div>
-      {total <= 0 || previews.length === 0 ? (
-        <p className="mt-3 text-sm text-slate-500">Pas de nouveau message.</p>
-      ) : (
-        <ul className="mt-3 space-y-1.5">
-          {previews.map((it) => (
-            <li key={it.id}>
-              <Link
-                href={it.href}
-                className="flex min-h-[44px] items-center justify-between gap-2 rounded-xl px-2.5 py-2 hover:bg-slate-50"
-              >
-                <span className="min-w-0">
-                  <span className="block truncate text-[15px] font-semibold text-slate-900">
-                    {it.title}
-                  </span>
-                  {it.preview ? (
-                    <span className="mt-0.5 block truncate text-[13px] text-slate-600">
-                      {it.preview}
-                    </span>
-                  ) : null}
-                </span>
-                {it.unread > 0 ? (
-                  <span className="inline-flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full bg-[#1e3a5f] px-1.5 text-[10px] font-bold text-white">
-                    {it.unread}
-                  </span>
-                ) : null}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+    </DashboardSection>
   );
 }

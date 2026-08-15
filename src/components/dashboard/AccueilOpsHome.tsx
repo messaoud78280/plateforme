@@ -74,7 +74,7 @@ function QuickActionMenu({ links }: { links: AccueilOpsSummary["links"] }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-8 items-center rounded-full bg-[#1e3a5f] px-3 text-[13px] font-semibold text-white transition-colors duration-150 hover:bg-[#16304f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/35"
+        className="inline-flex min-h-10 items-center rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-xs font-bold text-white transition-colors duration-150 hover:bg-[#16304f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/35"
       >
         + Action
       </button>
@@ -119,7 +119,7 @@ export function AccueilOpsHome({
   );
   const visibleAttention = ops.attention.slice(0, 3);
   const todayAgenda =
-    ops.agendaTitle === "Aujourd’hui" ? ops.agenda.slice(0, 2) : [];
+    ops.agendaTitle === "Aujourd’hui" ? ops.agenda.slice(0, 3) : [];
   const todayOrders = ops.orders.slice(0, 3);
   const todayTasks = ops.tasks.slice(0, 3);
   const upcoming =
@@ -135,24 +135,24 @@ export function AccueilOpsHome({
       : "Voir tout →";
 
   return (
-    <div className="space-y-7">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-5">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-[1.65rem] font-semibold tracking-tight text-slate-900 sm:text-[1.75rem]">
+          <h1 className="text-2xl font-extrabold tracking-tight text-[#1e3a5f] sm:text-[1.75rem]">
             Bonjour {ops.firstName}
           </h1>
-          <p className="mt-1 text-[13px] text-slate-400">{dateLabel}</p>
-          <p className="mt-2 text-[14px] text-slate-600">{buildHeaderLine(ops)}</p>
+          <p className="mt-1 text-sm text-slate-500">{dateLabel}</p>
+          <p className="mt-1 text-sm font-medium text-slate-700">{buildHeaderLine(ops)}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {ops.canSwitchScope ? (
-            <div className="inline-flex rounded-full bg-slate-100/90 p-0.5 text-[12px] font-medium">
+            <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-xs font-semibold">
               <Link
                 href={`${scopeHrefBase}?vue=moi`}
                 className={cn(
-                  "rounded-full px-2.5 py-1 transition-colors duration-150",
+                  "rounded-md px-2.5 py-1.5 transition-colors duration-150",
                   ops.scope === "mine"
-                    ? "bg-white text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+                    ? "bg-white text-slate-900 shadow-sm"
                     : "text-slate-500 hover:text-slate-800",
                 )}
               >
@@ -161,9 +161,9 @@ export function AccueilOpsHome({
               <Link
                 href={`${scopeHrefBase}?vue=equipe`}
                 className={cn(
-                  "rounded-full px-2.5 py-1 transition-colors duration-150",
+                  "rounded-md px-2.5 py-1.5 transition-colors duration-150",
                   ops.scope === "team"
-                    ? "bg-white text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+                    ? "bg-white text-slate-900 shadow-sm"
                     : "text-slate-500 hover:text-slate-800",
                 )}
               >
@@ -175,7 +175,7 @@ export function AccueilOpsHome({
         </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(260px,0.85fr)] lg:items-start">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.9fr)] lg:items-start xl:grid-cols-[minmax(0,1.75fr)_minmax(300px,0.85fr)]">
         <div data-demo-target="accueil-a-traiter">
         <DashboardSection
           demoTarget="accueil-a-traiter"
@@ -191,7 +191,7 @@ export function AccueilOpsHome({
           {visibleAttention.length === 0 ? (
             <p className="py-1 text-[14px] text-slate-500">Rien à traiter pour le moment.</p>
           ) : (
-            <ul className="divide-y divide-slate-100">
+            <ul className="space-y-2">
               {visibleAttention.map((item) => (
                 <li key={item.id}>
                   <PriorityRow
@@ -211,15 +211,15 @@ export function AccueilOpsHome({
         {hasToday ? (
           <aside
             data-demo-target="accueil-aujourdhui"
-            className="rounded-2xl border border-slate-200/70 bg-white px-5 py-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] lg:sticky lg:top-4"
+            className="rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm lg:sticky lg:top-4"
           >
             <div className="flex items-start justify-between gap-3">
-              <h2 className="text-[15px] font-semibold tracking-tight text-slate-900">
+              <h2 className="text-[15px] font-bold tracking-tight text-[#1e3a5f]">
                 Aujourd’hui
               </h2>
               <Link
                 href={ops.links.agenda}
-                className="text-[13px] font-medium text-[#1d4ed8] transition-colors duration-150 hover:text-[#1e3a5f]"
+                className="text-[13px] font-semibold text-[#1d4ed8] hover:underline"
               >
                 Voir Agenda
               </Link>
@@ -248,7 +248,7 @@ export function AccueilOpsHome({
 
             {todayOrders.length > 0 ? (
               <div className={todayAgenda.length > 0 ? "mt-5" : "mt-3"}>
-                <p className="text-[12px] font-medium text-slate-400">Livraisons</p>
+                <p className="text-[12px] font-bold uppercase tracking-wide text-slate-500">Livraisons</p>
                 <ul className="mt-1">
                   {todayOrders.map((o) => (
                     <li key={o.id}>
@@ -263,7 +263,7 @@ export function AccueilOpsHome({
                 </ul>
                 <Link
                   href={ops.links.commandes}
-                  className="mt-1 inline-block text-[13px] font-medium text-[#1d4ed8] transition-colors duration-150 hover:text-[#1e3a5f]"
+                  className="mt-1 inline-block text-[13px] font-semibold text-[#1d4ed8] hover:underline"
                 >
                   Voir les commandes
                 </Link>
@@ -272,7 +272,7 @@ export function AccueilOpsHome({
 
             {todayTasks.length > 0 ? (
               <div className={todayOrders.length > 0 || todayAgenda.length > 0 ? "mt-5" : "mt-3"}>
-                <p className="text-[12px] font-medium text-slate-400">Tâches</p>
+                <p className="text-[12px] font-bold uppercase tracking-wide text-slate-500">Tâches</p>
                 <ul className="mt-1">
                   {todayTasks.map((t) => (
                     <li key={t.id}>
@@ -287,7 +287,7 @@ export function AccueilOpsHome({
                 </ul>
                 <Link
                   href={ops.links.taches}
-                  className="mt-1 inline-block text-[13px] font-medium text-[#1d4ed8] transition-colors duration-150 hover:text-[#1e3a5f]"
+                  className="mt-1 inline-block text-[13px] font-semibold text-[#1d4ed8] hover:underline"
                 >
                   Voir les tâches
                 </Link>
@@ -297,15 +297,15 @@ export function AccueilOpsHome({
         ) : (
           <aside
             data-demo-target="accueil-aujourdhui"
-            className="rounded-2xl border border-slate-200/70 bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+            className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm"
           >
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-[15px] font-semibold tracking-tight text-slate-900">
+              <h2 className="text-[15px] font-bold tracking-tight text-[#1e3a5f]">
                 Aujourd’hui
               </h2>
               <Link
                 href={ops.links.agenda}
-                className="text-[13px] font-medium text-[#1d4ed8] transition-colors duration-150 hover:text-[#1e3a5f]"
+                className="text-[13px] font-semibold text-[#1d4ed8] hover:underline"
               >
                 Voir Agenda
               </Link>
@@ -316,7 +316,7 @@ export function AccueilOpsHome({
       </div>
 
       {showFacturation || showRentabilite ? (
-        <section className="rounded-2xl border border-slate-200/70 bg-white px-5 py-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <section className="rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:divide-x sm:divide-slate-100 sm:gap-0">
             {showFacturation ? (
               <div className="min-w-0 flex-1 sm:pr-6">
@@ -329,11 +329,11 @@ export function AccueilOpsHome({
                   href="/dashboard/rentabilite"
                   className="block rounded-xl py-1 transition-colors duration-150 hover:bg-slate-50/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
                 >
-                  <p className="text-[13px] font-medium text-slate-500">Rentabilité</p>
-                  <p className="mt-1 text-[15px] font-semibold text-slate-900">
+                  <p className="text-[13px] font-semibold text-slate-500">Rentabilité</p>
+                  <p className="mt-1 text-[15px] font-bold text-[#1e3a5f]">
                     Voir la marge
                   </p>
-                  <p className="mt-0.5 text-[12px] text-slate-400">
+                  <p className="mt-0.5 text-[12px] text-slate-500">
                     Prévisionnel, engagé et encaissé
                   </p>
                 </Link>
@@ -351,7 +351,7 @@ export function AccueilOpsHome({
           title="Chantiers à surveiller"
           action={{ href: ops.links.projets, label: "Voir chantiers →" }}
         >
-          <ul className="divide-y divide-slate-100">
+          <ul className="space-y-2">
             {watchChantiers.map((c) => {
               const signals = [
                 c.criticalCount > 0
@@ -368,21 +368,21 @@ export function AccueilOpsHome({
                 <li key={c.id}>
                   <Link
                     href={`/dashboard/projets/${c.id}`}
-                    className="group flex items-center justify-between gap-3 py-2.5 transition-colors duration-150 hover:bg-slate-50/70"
+                    className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-slate-50/40 px-3.5 py-3 transition-colors duration-150 hover:bg-white hover:border-slate-300"
                   >
                     <span className="min-w-0">
-                      <span className="block truncate text-[15px] font-semibold text-slate-900">
+                      <span className="block truncate text-[15px] font-bold text-slate-950">
                         {c.title}
                       </span>
                       {signals.length > 0 ? (
-                        <span className="mt-0.5 block text-[13px] text-slate-500">
+                        <span className="mt-0.5 block text-[13px] text-slate-600">
                           {signals.join(" · ")}
                         </span>
                       ) : null}
                     </span>
                     <span
                       aria-hidden
-                      className="text-[18px] font-light text-slate-300 transition-transform duration-150 group-hover:translate-x-0.5"
+                      className="text-[18px] font-light text-slate-400 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"
                     >
                       ›
                     </span>

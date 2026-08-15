@@ -93,7 +93,7 @@ export default async function DashboardPage({
       scope,
     });
     return (
-      <div className="mx-auto w-full max-w-[1240px]">
+      <div className="mx-auto w-full max-w-[1400px] space-y-4 px-1 sm:px-2 xl:max-w-[1520px]">
         <AccueilOpsHome
           ops={ops}
           personType={portalUser?.personType ?? session.user.personType ?? null}
@@ -788,7 +788,7 @@ export default async function DashboardPage({
         vueParam === "moi" ? "mine" : vueParam === "equipe" ? "team" : defaultScope,
     });
     return (
-      <div className="mx-auto w-full max-w-[1240px]">
+      <div className="mx-auto w-full max-w-[1400px] space-y-4 px-1 sm:px-2 xl:max-w-[1520px]">
         <AccueilOpsHome
           ops={homeOps}
           personType={portal?.personType ?? null}

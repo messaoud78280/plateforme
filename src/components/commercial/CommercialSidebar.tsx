@@ -145,7 +145,7 @@ export function CommercialSidebar({
                             "flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-[background,color] duration-150",
                             collapsed && "justify-center px-2",
                             active
-                              ? "bg-bework-navy-deep text-white shadow-sm"
+                              ? "bw-nav-active"
                               : "text-slate-600 hover:bg-white/80 hover:text-bework-navy",
                             l.action && !active && "font-semibold text-bework-accent",
                           )}
@@ -220,7 +220,7 @@ export function CommercialSidebar({
             aria-label="Fermer"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex w-[min(100%,280px)] flex-col bg-bework-chrome shadow-xl">
+          <aside className="absolute inset-y-0 left-0 flex w-[min(100%,280px)] flex-col bw-sidebar-shell shadow-xl">
             <div className="flex justify-end p-2">
               <button
                 type="button"
@@ -238,7 +238,7 @@ export function CommercialSidebar({
 
       <aside
         className={cn(
-          "sticky top-0 hidden h-dvh shrink-0 border-r border-bework-navy/10 bg-bework-chrome lg:block",
+          "sticky top-0 hidden h-dvh shrink-0 bw-sidebar-shell lg:block",
           collapsed ? "w-[72px]" : "w-[240px]",
         )}
       >

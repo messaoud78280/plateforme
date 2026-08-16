@@ -1,18 +1,18 @@
 /**
- * BeWork DESIGN-SYSTEM-2 — miroir TS des tokens CSS.
- * Source de vérité visuelle : src/app/globals.css (:root --cc-* / --bw-*).
+ * BeWork UI-COLOR-2 — miroir TS des tokens CSS.
+ * Source de vérité visuelle : src/app/globals.css (:root --cc-* / --bw-* / --primary*).
  *
- * Philosophie : identité avant-gardiste BTP — navy + accents maîtrisés.
+ * Philosophie : identité avant-gardiste BTP — navy + accents maîtrisés, coloré sans flashy.
  */
 export const BEWORK_CC = {
   navy: "#173b67",
   navyDeep: "#132f4c",
-  navySoft: "#e8eef5",
+  navySoft: "#e4ecf6",
   ink: "#0f172a",
   muted: "#64748b",
   surface: "#ffffff",
-  surfaceMuted: "#f3f6fa",
-  chrome: "#f2f5f9",
+  surfaceMuted: "#eef3f9",
+  chrome: "#edf2f8",
   accent: "#2563eb",
   cyan: "#13a6c8",
   intel: "#7c5ce6",
@@ -21,14 +21,22 @@ export const BEWORK_CC = {
   critical: "#c2413a",
 } as const;
 
+/** Alias primary demandés UI-COLOR-2 */
+export const BEWORK_PRIMARY = {
+  primary: "#2563eb",
+  soft: "#e8f0fe",
+  muted: "#dbe7fb",
+  foreground: "#ffffff",
+} as const;
+
 export const BEWORK_SOFT = {
-  navy: "#e8eef5",
-  accent: "#e8f0fe",
-  cyan: "#e6f7fb",
-  ok: "#ecfdf5",
-  watch: "#fff7ed",
-  critical: "#fef2f2",
-  violet: "#f3f0ff",
+  navy: "#e4ecf6",
+  accent: "#e4eefd",
+  cyan: "#dff4f9",
+  ok: "#e6f9f1",
+  watch: "#fff4e6",
+  critical: "#fdeceb",
+  violet: "#eee9ff",
 } as const;
 
 /** Échelle radius V3 (px conceptuels → rem). */
@@ -62,14 +70,18 @@ export type StatusTone =
 
 export function statusToneFromLabel(label: string): StatusTone {
   const s = label.toLowerCase();
-  if (/(critique|retard|bloqu|refus|erreur|danger|impay)/.test(s)) return "critical";
-  if (/(vigilance|attente|à vérifier|surveill|échéance|orange|urgent|à traiter|partiel)/.test(s)) {
+  if (/(critique|retard|bloqu|refus|erreur|danger|impay|annul)/.test(s)) return "critical";
+  if (
+    /(vigilance|attente|à vérifier|surveill|échéance|orange|urgent|important|à traiter|partiel|à récupérer|à classer|brouillon)/.test(
+      s,
+    )
+  ) {
     return "watch";
   }
-  if (/(valid|conforme|termin|ok|reçu|payé|levé|accepté|réalis)/.test(s)) return "ok";
-  if (/(analyse|ia|modèle|extraction|intel|avenant|étude)/.test(s)) return "intel";
-  if (/(métré|document|info|cyan|émis|situation)/.test(s)) return "cyan";
-  if (/(cours|envoi|prépar|progress|envoyé)/.test(s)) return "info";
+  if (/(valid|conforme|termin|ok|reçu|payé|levé|accepté|réalis|actif|facturé)/.test(s)) return "ok";
+  if (/(analyse|ia|modèle|extraction|intel|avenant|étude|favori)/.test(s)) return "intel";
+  if (/(métré|document|info|cyan|émis|situation|archiv)/.test(s)) return "cyan";
+  if (/(cours|envoi|prépar|progress|envoyé|confirmation)/.test(s)) return "info";
   return "neutral";
 }
 

@@ -216,7 +216,7 @@ export function AccueilOpsHome({
         {hasToday ? (
           <aside
             data-demo-target="accueil-aujourdhui"
-            className="rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm lg:sticky lg:top-4 lg:row-span-2"
+            className="rounded-2xl bw-surface-tinted-cyan px-5 py-5 shadow-sm lg:sticky lg:top-4 lg:row-span-2"
           >
             <div className="flex items-start justify-between gap-3">
               <h2 className="text-[15px] font-bold tracking-tight text-[#1e3a5f]">
@@ -302,7 +302,7 @@ export function AccueilOpsHome({
         ) : (
           <aside
             data-demo-target="accueil-aujourdhui"
-            className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm lg:row-span-2"
+            className="rounded-2xl bw-surface-tinted-navy px-5 py-4 shadow-sm lg:row-span-2"
           >
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-[15px] font-bold tracking-tight text-[#1e3a5f]">
@@ -321,8 +321,8 @@ export function AccueilOpsHome({
 
         <div className="space-y-5 lg:col-start-1">
           {showFacturation || showRentabilite ? (
-            <section className="rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm">
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:divide-x sm:divide-slate-100 sm:gap-0">
+            <section className="rounded-2xl bw-surface-tinted-ok px-5 py-5 shadow-sm">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:divide-x sm:divide-bework-navy/10 sm:gap-0">
                 {showFacturation ? (
                   <div className="min-w-0 flex-1 sm:pr-6">
                     <FacturationHomeBanner />
@@ -373,7 +373,7 @@ export function AccueilOpsHome({
                     <li key={c.id}>
                       <Link
                         href={`/dashboard/projets/${c.id}`}
-                        className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-slate-50/40 px-3.5 py-3 transition-colors duration-150 hover:bg-white hover:border-slate-300"
+                        className="group flex items-center justify-between gap-3 rounded-xl border border-bework-navy/10 bg-white/70 px-3.5 py-3 transition-colors duration-150 hover:bg-bework-soft-accent hover:border-bework-accent/25"
                       >
                         <span className="min-w-0">
                           <span className="block truncate text-[15px] font-bold text-slate-950">

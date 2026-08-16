@@ -124,7 +124,7 @@ export default async function DevisFacturationDashboardPage() {
               label: "En retard",
               value: `${money(bundle.enRetardTtc)} €`,
               hint: "TTC",
-              card: retardHot ? "bw-surface-tinted-critical" : "bg-white border border-slate-200/90",
+              card: retardHot ? "bw-surface-tinted-critical" : "bw-surface-tinted-navy",
               valueClass: retardHot ? "text-bework-critical" : "text-slate-900",
             },
           ].map((k) => (
@@ -140,7 +140,7 @@ export default async function DevisFacturationDashboardPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className="rounded-2xl border border-slate-200/90 bg-white p-5">
+        <section className="rounded-2xl bw-surface-tinted-accent p-5">
           <div className="flex items-center justify-between">
             <h2 className="text-[15px] font-semibold text-slate-900">À faire</h2>
             <Link
@@ -186,8 +186,8 @@ export default async function DevisFacturationDashboardPage() {
           )}
         </section>
 
-        <section className="rounded-2xl border border-slate-200/90 bg-white p-5">
-          <h2 className="text-[15px] font-semibold text-slate-900">Trésorerie clients</h2>
+        <section className="rounded-2xl bw-kpi-finance p-5">
+          <h2 className="text-[15px] font-semibold text-bework-navy">Trésorerie clients</h2>
           <dl className="mt-4 grid grid-cols-2 gap-3">
             {[
               { k: "Facturé ce mois", v: `${money(bundle.factureMoisHt)} €`, u: "HT" },
@@ -195,12 +195,12 @@ export default async function DevisFacturationDashboardPage() {
               { k: "Reste à encaisser", v: `${money(bundle.aEncaisserTtc)} €`, u: "TTC" },
               { k: "En retard", v: `${money(bundle.enRetardTtc)} €`, u: "TTC" },
             ].map((row) => (
-              <div key={row.k} className="rounded-xl bg-slate-50 px-3 py-3">
-                <dt className="text-[11px] font-medium text-slate-500">{row.k}</dt>
-                <dd className="mt-1 text-[18px] font-semibold tabular-nums text-slate-900">
+              <div key={row.k} className="rounded-xl border border-bework-cyan/15 bg-white/70 px-3 py-3">
+                <dt className="text-[11px] font-medium text-bework-muted">{row.k}</dt>
+                <dd className="mt-1 text-[18px] font-semibold tabular-nums text-bework-ink">
                   {row.v}
                 </dd>
-                <dd className="text-[10px] uppercase tracking-wide text-slate-400">
+                <dd className="text-[10px] uppercase tracking-wide text-bework-muted">
                   {row.u}
                 </dd>
               </div>
@@ -275,7 +275,7 @@ function DocTable({
   }>;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white">
+    <section className="overflow-hidden rounded-2xl border border-bework-navy/12 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] shadow-[var(--cc-shadow)]">
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
         <h2 className="text-[15px] font-semibold text-slate-900">{title}</h2>
         <Link href={href} className="text-[12px] font-medium text-[#1e3a5f] hover:underline">

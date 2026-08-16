@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 /**
- * DESIGN-SYSTEM-V3 — header de page compact.
- * Pas de grosse card décorative : typographie + espace.
+ * DESIGN-SYSTEM-V3 / UI-COLOR-2 — header de page compact.
+ * Pas de grosse card décorative : typographie + accent discret.
  */
 export function PageHeader({
   eyebrow,
@@ -23,7 +23,7 @@ export function PageHeader({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           {eyebrow ? (
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-bework-muted">
+            <p className="inline-flex items-center rounded-full bg-bework-soft-navy px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-bework-navy">
               {eyebrow}
             </p>
           ) : null}

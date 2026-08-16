@@ -37,7 +37,7 @@ export function CommercialWorkspaceHeader() {
     !pathname.match(/\/devis\/[^/]+$/);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-bework-navy/10 bg-white/90 backdrop-blur-sm">
+    <header className="sticky top-0 z-30 border-b border-bework-navy/10 bg-[color-mix(in_srgb,var(--bw-soft-navy)_30%,rgba(255,255,255,0.9))] backdrop-blur-sm">
       <div className="flex min-h-12 items-center justify-between gap-3 px-3 py-2 sm:px-5">
         <h1 className="truncate text-[15px] font-semibold tracking-tight text-bework-navy-deep">
           {title}

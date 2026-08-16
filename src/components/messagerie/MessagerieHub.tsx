@@ -62,25 +62,24 @@ export function MessagerieHub(props: Props) {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white">
+    <div className="flex h-full min-h-0 flex-col bg-[color:var(--cc-surface-muted)]">
       <div
         className={cn(
-          "flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-3 py-2.5",
+          "flex shrink-0 flex-wrap items-center gap-2 border-b border-bework-navy/10 bg-[linear-gradient(180deg,#ffffff_0%,#eef3f9_100%)] px-3 py-2.5",
           threadOpen && "hidden md:flex",
         )}
       >
-        <h1 className="mr-1 text-base font-bold tracking-tight text-[#1e3a5f] md:text-lg">
+        <h1 className="mr-1 text-base font-bold tracking-tight text-bework-navy md:text-lg">
           Messagerie
         </h1>
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => switchView("missions")}
-            className={`min-h-9 rounded-full px-3.5 py-1.5 text-xs font-semibold ${
-              view === "missions"
-                ? "bg-[#1e3a5f] text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
+            className={cn(
+              "bw-chip min-h-9",
+              view === "missions" ? "bw-chip-active" : "bw-chip-idle",
+            )}
             aria-pressed={view === "missions"}
           >
             Discussions
@@ -88,11 +87,10 @@ export function MessagerieHub(props: Props) {
           <button
             type="button"
             onClick={() => switchView("chantiers")}
-            className={`min-h-9 rounded-full px-3.5 py-1.5 text-xs font-semibold ${
-              view === "chantiers"
-                ? "bg-[#1e3a5f] text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
+            className={cn(
+              "bw-chip min-h-9",
+              view === "chantiers" ? "bw-chip-active" : "bw-chip-idle",
+            )}
             aria-pressed={view === "chantiers"}
             title="Conversations par chantier"
           >
@@ -113,7 +111,7 @@ export function MessagerieHub(props: Props) {
             managerId={props.managerId}
           />
         ) : (
-          <div className="h-full overflow-auto bg-[#f1f5f9] p-2 sm:p-3">
+          <div className="h-full overflow-auto bg-[color:var(--bw-soft-navy)] p-2 sm:p-3">
             <MessagerieView
               sessionUserId={props.sessionUserId}
               initialProjectId={projectParam}

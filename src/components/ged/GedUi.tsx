@@ -197,7 +197,7 @@ export function GedSearchField({
           }
         }}
         placeholder={placeholder}
-        className="h-14 w-full rounded-2xl border border-slate-200/90 bg-white pl-12 pr-12 text-[15px] text-slate-900 outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-slate-400 focus:border-[#1e3a5f]/25 focus:ring-4 focus:ring-[#1e3a5f]/10"
+        className="h-14 w-full rounded-2xl border border-bework-navy/15 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] pl-12 pr-12 text-[15px] text-slate-900 outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-slate-400 focus:border-bework-accent/40 focus:ring-4 focus:ring-bework-accent/15"
         aria-label="Rechercher un document"
         autoComplete="off"
       />
@@ -251,7 +251,7 @@ export function GedViewTabs({
 }) {
   return (
     <nav
-      className="inline-flex max-w-full gap-0.5 overflow-x-auto rounded-xl border border-slate-200/80 bg-slate-50/80 p-1"
+      className="inline-flex max-w-full gap-0.5 overflow-x-auto rounded-xl border border-bework-navy/12 bg-bework-soft-navy/60 p-1"
       aria-label="Vues documents"
     >
       {views.map((v) => {

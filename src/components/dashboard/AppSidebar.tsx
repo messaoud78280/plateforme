@@ -341,7 +341,7 @@ export function AppSidebar({
         {sections.map((section) => (
           <div key={section.id}>
             {!collapsed ? (
-              <p className="mb-1.5 px-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-bework-muted/90">
+              <p className="mb-1.5 px-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-bework-navy/55">
                 {section.label}
               </p>
             ) : null}
@@ -363,13 +363,13 @@ export function AppSidebar({
                       }}
                       prefetch
                       className={cn(
-                        "flex items-center gap-2.5 rounded-[var(--cc-radius)] px-2.5 py-2 text-[0.875rem] font-medium transition-[background,color,transform] duration-150 active:scale-[0.98]",
+                        "bw-nav-item active:scale-[0.98]",
                         collapsed && "justify-center px-2",
                         active
-                          ? "bg-bework-navy-deep text-white shadow-sm"
+                          ? "bw-nav-active"
                           : pending
-                            ? "bg-bework-accent/10 text-bework-navy"
-                            : "text-bework-ink/70 hover:bg-white/80 hover:text-bework-navy",
+                            ? "bw-nav-pending"
+                            : undefined,
                       )}
                       aria-current={active ? "page" : undefined}
                       aria-busy={pending || undefined}
@@ -396,8 +396,8 @@ export function AppSidebar({
       <div className={cn("border-t border-[color:var(--cc-border)] p-3", collapsed && "px-2")}>
         <div
           className={cn(
-            "mb-2 flex items-center gap-2.5 rounded-[var(--cc-radius)] bg-white/70 px-2.5 py-2",
-            collapsed && "justify-center bg-transparent px-0",
+            "mb-2 flex items-center gap-2.5 bw-user-card px-2.5 py-2",
+            collapsed && "justify-center bg-transparent px-0 border-0 shadow-none",
           )}
         >
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bework-navy/10 text-[11px] font-semibold text-bework-navy">
@@ -416,7 +416,7 @@ export function AppSidebar({
           <button
             type="button"
             onClick={toggleCollapsed}
-            className="hidden items-center justify-center rounded-lg border border-slate-200 bg-white p-2 text-bework-muted hover:text-bework-navy lg:inline-flex"
+            className="hidden items-center justify-center rounded-lg border border-bework-navy/15 bg-bework-soft-navy/60 p-2 text-bework-muted hover:bg-bework-soft-accent hover:text-bework-navy lg:inline-flex"
             aria-label={collapsed ? "Développer le menu" : "Réduire le menu"}
           >
             {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
@@ -425,7 +425,7 @@ export function AppSidebar({
             type="button"
             onClick={() => signOut({ callbackUrl: isDemo ? "/connexion/demo" : "/connexion" })}
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 py-2 text-[11px] font-semibold text-bework-ink hover:bg-slate-50",
+              "inline-flex items-center justify-center gap-1.5 rounded-lg border border-bework-navy/15 bg-bework-soft-navy/50 px-2 py-2 text-[11px] font-semibold text-bework-navy hover:bg-bework-soft-critical hover:border-bework-critical/25 hover:text-bework-critical",
               !collapsed && "flex-1",
             )}
             aria-label="Déconnexion"
@@ -458,7 +458,7 @@ export function AppSidebar({
             aria-label="Fermer le menu"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex w-[272px] flex-col bg-[color:var(--cc-surface-muted)] shadow-[var(--cc-shadow-hover)]">
+          <aside className="absolute inset-y-0 left-0 flex w-[272px] flex-col bw-sidebar-shell shadow-[var(--cc-shadow-hover)]">
             {navBody}
           </aside>
         </div>
@@ -466,7 +466,7 @@ export function AppSidebar({
 
       <aside
         className={cn(
-          "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-[color:var(--cc-border)] bg-[color:var(--cc-surface-muted)] lg:flex",
+          "sticky top-0 hidden h-dvh shrink-0 flex-col bw-sidebar-shell lg:flex",
           collapsed ? "w-[76px]" : "w-[252px]",
         )}
       >

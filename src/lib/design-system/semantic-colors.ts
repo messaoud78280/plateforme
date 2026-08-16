@@ -84,7 +84,7 @@ const TONE: Record<BwTone, ToneSurface> = {
   },
   neutral: {
     tone: "neutral",
-    surface: "bg-white border border-bework-border",
+    surface: "bw-section-card",
     iconPill: "bw-icon-pill bg-slate-100 text-slate-600",
     text: "text-slate-600",
     border: "border-slate-200",
@@ -244,6 +244,68 @@ export const FINANCE_KPI_TONE = {
   margeOk: "ok" as BwTone,
   margeWatch: "watch" as BwTone,
   margeCritical: "critical" as BwTone,
+};
+
+/** Tâches — statuts / priorités */
+export const TASK_STATUS_TONE: Record<string, BwTone> = {
+  a_faire: "accent",
+  "à_faire": "accent",
+  en_cours: "cyan",
+  a_valider: "violet",
+  "à_valider": "violet",
+  terminee: "ok",
+  terminée: "ok",
+  en_retard: "critical",
+  critique: "critical",
+  urgent: "critical",
+  prioritaire: "watch",
+  important: "watch",
+  a_surveiller: "watch",
+  "à_surveiller": "watch",
+  standard: "neutral",
+};
+
+/** Bibliothèque — types d’éléments */
+export const LIBRARY_KIND_TONE: Record<string, BwTone> = {
+  ouvrage: "accent",
+  ouvrages: "accent",
+  materiau: "cyan",
+  materiaux: "cyan",
+  matériau: "cyan",
+  matériaux: "cyan",
+  main_oeuvre: "violet",
+  "main-dœuvre": "violet",
+  maindoeuvre: "violet",
+  favori: "watch",
+  favoris: "watch",
+  prix_direct: "ok",
+  prix_calcule: "cyan",
+  prix_calculé: "cyan",
+  a_verifier: "watch",
+  "à_vérifier": "watch",
+  archive: "neutral",
+  archivé: "neutral",
+};
+
+/** Fournisseurs — badges opérationnels */
+export const SUPPLIER_BADGE_TONE: Record<string, BwTone> = {
+  actif: "ok",
+  active: "ok",
+  fiche_active: "ok",
+  commande_en_cours: "accent",
+  confirmation_attendue: "watch",
+  archive: "neutral",
+  archivé: "neutral",
+};
+
+/** Fiches suivi — urgences */
+export const FOLLOW_UP_URGENCY_TONE: Record<string, BwTone> = {
+  critique: "critical",
+  urgent: "critical",
+  important: "watch",
+  a_surveiller: "cyan",
+  "à_surveiller": "cyan",
+  normal: "neutral",
 };
 
 export function resolveTone(

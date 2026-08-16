@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cn } from "@/lib/cn";
 
 const sectionSurface =
-  "rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm";
+  "bw-section-card px-5 py-5";
 
 export function DashboardSection({
   title,
@@ -29,23 +29,23 @@ export function DashboardSection({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h2 className="text-[15px] font-bold tracking-tight text-[#1e3a5f]">
+            <h2 className="text-[15px] font-bold tracking-tight text-bework-navy">
               {title}
             </h2>
             {badge != null && badge !== "" ? (
-              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#1e3a5f]/8 px-1.5 text-[11px] font-bold tabular-nums text-[#1e3a5f]">
+              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-bework-soft-accent px-1.5 text-[11px] font-bold tabular-nums text-bework-accent">
                 {badge}
               </span>
             ) : null}
           </div>
           {subtitle ? (
-            <p className="mt-0.5 text-[13px] text-slate-500">{subtitle}</p>
+            <p className="mt-0.5 text-[13px] text-bework-muted">{subtitle}</p>
           ) : null}
         </div>
         {action ? (
           <Link
             href={action.href}
-            className="shrink-0 pt-0.5 text-[13px] font-semibold text-[#1d4ed8] transition-colors duration-150 hover:underline"
+            className="shrink-0 pt-0.5 text-[13px] font-semibold text-bework-accent transition-colors duration-150 hover:underline"
           >
             {action.label}
           </Link>

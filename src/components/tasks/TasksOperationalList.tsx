@@ -61,56 +61,56 @@ function rowAccent(row: TaskListRow): {
   if (row.isOverdue) {
     return {
       bar: "bg-bework-critical",
-      soft: "bg-[color:var(--bw-soft-critical)]/70",
+      soft: "bg-[color:var(--bw-soft-critical)]/80",
       hover: "hover:bg-[color:var(--bw-soft-critical)]",
     };
   }
   if (row.priority === "URGENT") {
     return {
       bar: "bg-bework-critical",
-      soft: "bg-white",
-      hover: "hover:bg-[color:var(--bw-soft-critical)]/50",
+      soft: "bg-[color:var(--bw-soft-critical)]/45",
+      hover: "hover:bg-[color:var(--bw-soft-critical)]/70",
     };
   }
   if (row.priority === "PRIORITAIRE") {
     return {
       bar: "bg-bework-watch",
-      soft: "bg-white",
-      hover: "hover:bg-[color:var(--bw-soft-watch)]/60",
+      soft: "bg-[color:var(--bw-soft-watch)]/55",
+      hover: "hover:bg-[color:var(--bw-soft-watch)]/80",
     };
   }
   if (row.statusBucket === "a_valider") {
     return {
       bar: "bg-bework-intel",
-      soft: "bg-white",
-      hover: "hover:bg-[color:var(--bw-soft-violet)]/70",
+      soft: "bg-[color:var(--bw-soft-violet)]/55",
+      hover: "hover:bg-[color:var(--bw-soft-violet)]/80",
     };
   }
   if (row.statusBucket === "en_cours") {
     return {
       bar: "bg-bework-cyan",
-      soft: "bg-white",
-      hover: "hover:bg-[color:var(--bw-soft-cyan)]/70",
+      soft: "bg-[color:var(--bw-soft-cyan)]/55",
+      hover: "hover:bg-[color:var(--bw-soft-cyan)]/80",
     };
   }
   if (row.statusBucket === "a_faire") {
     return {
       bar: "bg-bework-accent",
-      soft: "bg-white",
-      hover: "hover:bg-[color:var(--bw-soft-accent)]/70",
+      soft: "bg-[color:var(--bw-soft-accent)]/55",
+      hover: "hover:bg-[color:var(--bw-soft-accent)]/80",
     };
   }
   if (row.statusBucket === "terminee") {
     return {
       bar: "bg-bework-ok",
-      soft: "bg-white",
-      hover: "hover:bg-[color:var(--bw-soft-ok)]/70",
+      soft: "bg-[color:var(--bw-soft-ok)]/55",
+      hover: "hover:bg-[color:var(--bw-soft-ok)]/80",
     };
   }
   return {
-    bar: "bg-slate-300",
-    soft: "bg-white",
-    hover: "hover:bg-bework-navy-soft/50",
+    bar: "bg-bework-navy/30",
+    soft: "bg-[color:var(--bw-soft-navy)]/50",
+    hover: "hover:bg-bework-navy-soft/70",
   };
 }
 
@@ -125,8 +125,8 @@ function SummaryKpis({ summary }: { summary: TaskListSummary }) {
     {
       label: "En retard",
       value: summary.enRetard,
-      tone: summary.enRetard > 0 ? "bw-surface-tinted-critical" : "bg-white border border-slate-200/90",
-      valueClass: summary.enRetard > 0 ? "text-bework-critical" : "text-slate-700",
+      tone: summary.enRetard > 0 ? "bw-surface-tinted-critical" : "bw-surface-tinted-navy",
+      valueClass: summary.enRetard > 0 ? "text-bework-critical" : "text-bework-navy",
     },
     {
       label: "À faire",
@@ -274,7 +274,7 @@ function CreateTaskPanel({
   }
 
   return (
-    <div className="rounded-2xl border border-bework-navy/10 bg-white p-5 shadow-[var(--cc-shadow)]">
+    <div className="rounded-2xl bw-surface-tinted-navy p-5 shadow-[var(--cc-shadow)]">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-[15px] font-semibold text-bework-navy-deep">Nouvelle tâche</h2>
         <button type="button" onClick={onClose} className="btn-cc-ghost !min-h-8 !text-xs">
@@ -491,7 +491,7 @@ export function TasksOperationalList({
 
       {rows.length > 0 ? <SummaryKpis summary={summary} /> : null}
 
-      <div className="rounded-2xl border border-bework-navy/10 bg-white/90 p-3 shadow-sm sm:p-3.5">
+      <div className="rounded-2xl border border-bework-accent/15 bg-[color:var(--bw-soft-accent)]/55 p-3 shadow-sm sm:p-3.5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <input
             type="search"

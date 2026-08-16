@@ -178,8 +178,8 @@ export function SiteVisitsWorkspace({
           type="button"
           onClick={() => setFilter("all")}
           className={cn(
-            "shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold",
-            filter === "all" ? "bg-[#1e3a5f] text-white" : "bg-slate-100 text-slate-700",
+            "bw-chip shrink-0",
+            filter === "all" ? "bw-chip-active" : "bw-chip-idle",
           )}
         >
           Tous
@@ -190,8 +190,8 @@ export function SiteVisitsWorkspace({
             type="button"
             onClick={() => setFilter(f.id)}
             className={cn(
-              "shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold",
-              filter === f.id ? "bg-[#1e3a5f] text-white" : "bg-slate-100 text-slate-700",
+              "bw-chip shrink-0",
+              filter === f.id ? "bw-chip-active" : "bw-chip-idle",
             )}
           >
             {f.label}
@@ -207,16 +207,17 @@ export function SiteVisitsWorkspace({
         {filtered.map((v) => (
           <li
             key={v.id}
-            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+            className="rounded-2xl bw-card-accent p-4"
+            style={{ ["--bw-card-tone" as string]: "var(--cc-cyan)" }}
           >
             <Link href={`/dashboard/visites-metres/${v.id}`} className="block">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="font-semibold text-slate-900">
+                  <p className="font-semibold text-bework-ink">
                     {v.siteName || v.clientName}
                   </p>
-                  <p className="truncate text-sm text-slate-500">{v.siteAddress}</p>
-                  <p className="mt-1 text-xs text-slate-600">
+                  <p className="truncate text-sm text-bework-muted">{v.siteAddress}</p>
+                  <p className="mt-1 text-xs text-bework-muted">
                     Visite{v.responsibleName ? ` ${v.responsibleName}` : ""} ·{" "}
                     {formatWhen(v.scheduledAt)}
                   </p>

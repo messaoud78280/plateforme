@@ -87,7 +87,7 @@ export function SuppliersWorkspace({
         </div>
       </header>
 
-      <div className="rounded-2xl border border-bework-navy/10 bg-white/90 p-3 shadow-sm">
+      <div className="rounded-2xl bw-surface-tinted-navy p-3 shadow-sm">
         <input
           type="search"
           value={q}
@@ -106,7 +106,7 @@ export function SuppliersWorkspace({
           onAction={() => setCreateOpen(true)}
         />
       ) : filtered.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-8 text-center text-sm text-bework-muted">
+        <p className="rounded-xl border border-dashed border-bework-navy/15 bg-bework-soft-navy/40 px-4 py-8 text-center text-sm text-bework-muted">
           Aucun fournisseur ne correspond à votre recherche.
         </p>
       ) : (
@@ -127,7 +127,7 @@ export function SuppliersWorkspace({
               <li key={s.id}>
                 <Link
                   href={`/dashboard/fournisseurs/${s.id}`}
-                  className="group relative flex flex-wrap items-center justify-between gap-3 overflow-hidden rounded-xl border border-bework-navy/10 bg-white px-4 py-3.5 shadow-sm transition-[background,box-shadow,transform] duration-150 hover:-translate-y-px hover:bg-bework-navy-soft/40 hover:shadow-[var(--cc-shadow-hover)]"
+                  className="group relative flex flex-wrap items-center justify-between gap-3 overflow-hidden rounded-xl border border-bework-navy/12 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] px-4 py-3.5 shadow-sm transition-[background,box-shadow,transform] duration-150 hover:-translate-y-px hover:bg-bework-soft-accent/80 hover:shadow-[var(--cc-shadow-hover)]"
                 >
                   <span
                     className="absolute inset-y-0 left-0 w-[3px] bg-bework-cyan"
@@ -153,13 +153,21 @@ export function SuppliersWorkspace({
                       </span>
                     )}
                   </span>
-                  <span
-                    className={cn(
-                      "badge-cc shrink-0",
-                      s.status === "ACTIVE" ? "badge-cc-ok" : "badge-cc-neutral",
-                    )}
-                  >
-                    {s.status === "ACTIVE" ? "Actif" : "Inactif"}
+                  <span className="flex shrink-0 flex-col items-end gap-1.5">
+                    <span
+                      className={cn(
+                        "badge-cc",
+                        s.status === "ACTIVE" ? "badge-cc-ok" : "badge-cc-neutral",
+                      )}
+                    >
+                      {s.status === "ACTIVE" ? "Fiche active" : "Inactif"}
+                    </span>
+                    {s.openOrdersCount > 0 ? (
+                      <span className="badge-cc badge-cc-info">Commande en cours</span>
+                    ) : null}
+                    {s.awaitingConfirmCount > 0 ? (
+                      <span className="badge-cc badge-cc-watch">Confirmation attendue</span>
+                    ) : null}
                   </span>
                 </Link>
               </li>

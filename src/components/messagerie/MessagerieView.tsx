@@ -908,10 +908,10 @@ export function MessagerieView({
   }
 
   return (
-    <div className="relative flex h-[calc(100vh-12rem)] overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/80">
+    <div className="relative flex h-[calc(100vh-12rem)] overflow-hidden rounded-2xl bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] shadow-[var(--cc-shadow)] ring-1 ring-bework-navy/10">
       {/* Colonne gauche : chantiers → conversations imbriquées */}
       <aside
-        className={`w-full shrink-0 flex-col border-r border-slate-200 bg-white md:flex md:w-[min(100%,340px)] ${
+        className={`w-full shrink-0 flex-col border-r border-bework-navy/10 bg-[color:var(--bw-soft-navy)]/40 md:flex md:w-[min(100%,340px)] ${
           mobileShowThread ? "hidden md:flex" : "flex"
         }`}
       >
@@ -1306,7 +1306,7 @@ export function MessagerieView({
                             className={`rounded-2xl px-4 py-2.5 ${
                               isMe
                                 ? "rounded-tr-md bg-[#1d4ed8] text-white"
-                                : "rounded-tl-md bg-slate-100 text-slate-800"
+                                : "rounded-tl-md bg-[color:var(--bw-soft-navy)] text-bework-ink"
                             }`}
                           >
                             {deletedLabel ? (
@@ -1359,7 +1359,7 @@ export function MessagerieView({
               </div>
             </div>
 
-            <div className="shrink-0 border-t border-slate-200 bg-[#f8fafc] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:p-4 md:pb-4">
+            <div className="shrink-0 border-t border-bework-navy/10 bg-[color:var(--bw-soft-navy)]/55 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:p-4 md:pb-4">
               {replyTarget ? (
                 <MessageReplyComposerBanner
                   reply={replyTarget}

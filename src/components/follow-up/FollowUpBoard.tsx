@@ -94,9 +94,9 @@ export function FollowUpBoard({ sheets, activeFilter }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-wrap items-end gap-3 rounded-2xl bw-surface-tinted-navy p-4 shadow-sm">
         <label className="min-w-[180px] flex-1 space-y-1">
-          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Recherche</span>
+          <span className="text-[10px] font-bold uppercase tracking-wide text-bework-navy/70">Recherche</span>
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}

@@ -183,7 +183,7 @@ function KanbanCard({
         e.dataTransfer.effectAllowed = "move";
       }}
       className={cn(
-        "relative rounded-xl border bg-white px-2.5 py-2 shadow-sm transition",
+        "relative rounded-xl border border-bework-navy/10 bg-[linear-gradient(180deg,#ffffff_0%,#f7f9fc_100%)] px-2.5 py-2 shadow-sm transition",
         border,
         canEdit ? "cursor-grab active:cursor-grabbing" : "",
         dragging ? "opacity-40 ring-2 ring-[#1e3a5f]/40" : "hover:border-slate-300 hover:shadow",
@@ -647,7 +647,7 @@ export function FollowUpKanban({
                 <section
                   key={col.statusKey}
                   className={cn(
-                    "relative flex w-[260px] shrink-0 flex-col rounded-2xl border bg-slate-50/80 transition",
+                    "relative flex w-[260px] shrink-0 flex-col rounded-2xl border border-bework-navy/12 bg-bework-soft-navy/35 transition",
                     isOver
                       ? "border-[#1e3a5f] bg-[#1e3a5f]/5 ring-2 ring-[#1e3a5f]/20"
                       : "border-slate-200",

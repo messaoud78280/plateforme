@@ -423,11 +423,11 @@ export function LibraryHub({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Rechercher un ouvrage, référence, famille…"
-          className="w-full rounded-2xl border border-slate-200/90 bg-white px-4 py-3.5 text-[15px] text-slate-900 shadow-sm outline-none ring-0 placeholder:text-slate-400 focus:border-[#1e3a5f]/40 focus:shadow-md"
+          className="w-full rounded-2xl border border-bework-navy/15 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] px-4 py-3.5 text-[15px] text-slate-900 shadow-sm outline-none ring-0 placeholder:text-slate-400 focus:border-bework-accent/40 focus:shadow-[var(--cc-focus-ring)]"
         />
       </div>
 
-      <div className="flex gap-1 overflow-x-auto border-b border-slate-200 pb-px">
+      <div className="flex gap-1 overflow-x-auto border-b border-bework-navy/10 pb-px">
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -436,8 +436,8 @@ export function LibraryHub({
             className={cn(
               "shrink-0 border-b-2 px-3 py-2 text-sm font-semibold transition",
               tab === t.id
-                ? "border-[#1e3a5f] text-[#1e3a5f]"
-                : "border-transparent text-slate-500 hover:text-slate-800",
+                ? "border-bework-navy text-bework-navy"
+                : "border-transparent text-bework-muted hover:text-bework-navy",
             )}
           >
             {t.label}
@@ -453,10 +453,8 @@ export function LibraryHub({
               type="button"
               onClick={() => setChip(c.id)}
               className={cn(
-                "rounded-full px-3 py-1 text-xs font-semibold transition",
-                chip === c.id
-                  ? "bg-[#1e3a5f] text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                "bw-chip",
+                chip === c.id ? "bw-chip-active" : "bw-chip-idle",
               )}
             >
               {c.label}
@@ -481,7 +479,7 @@ export function LibraryHub({
       ) : filtered.length === 0 && items.filter((i) => i.isActive).length === 0 && chip === "all" && !debouncedQ ? (
         <EmptyLibrary onCreate={() => setDrawer({ mode: "create" })} />
       ) : filtered.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center text-sm text-slate-500">
+        <p className="rounded-2xl border border-dashed border-bework-navy/15 bg-bework-soft-navy/40 px-6 py-12 text-center text-sm text-bework-muted">
           Aucun résultat.
         </p>
       ) : (
@@ -492,14 +490,14 @@ export function LibraryHub({
               onOpen={(id) => setDrawer({ mode: "edit", id })}
             />
           ) : null}
-        <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <ul className="divide-y divide-bework-navy/8 overflow-hidden rounded-2xl border border-bework-navy/12 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] shadow-[var(--cc-shadow)]">
           {filtered.map((item) => {
             const missingPrice = !(item.unitSellHt > 0);
             const marge = marqueOf(item);
             const low = !missingPrice && marge > 0 && marge < LOW_MARGIN;
             return (
               <li key={item.id}>
-                <div className="group flex flex-col gap-3 px-4 py-3.5 transition hover:bg-slate-50/80 sm:flex-row sm:items-center sm:gap-4">
+                <div className="group flex flex-col gap-3 px-4 py-3.5 transition hover:bg-bework-soft-accent/50 sm:flex-row sm:items-center sm:gap-4">
                   <button
                     type="button"
                     onClick={() => setDrawer({ mode: "edit", id: item.id })}
@@ -510,17 +508,19 @@ export function LibraryHub({
                         {item.name}
                       </p>
                       {missingPrice ? (
-                        <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
-                          Prix à renseigner
-                        </span>
+                        <span className="badge-cc badge-cc-neutral">Prix à renseigner</span>
                       ) : null}
                       {item.needsPriceRecalc ? (
-                        <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-800">
-                          À vérifier
-                        </span>
+                        <span className="badge-cc badge-cc-watch">À vérifier</span>
+                      ) : null}
+                      {item.isFavorite ? (
+                        <span className="badge-cc badge-cc-intel">Favori</span>
+                      ) : null}
+                      {!item.isActive ? (
+                        <span className="badge-cc badge-cc-cyan">Archivé</span>
                       ) : null}
                       {low ? (
-                        <span className="text-[11px] font-medium text-amber-700">
+                        <span className="text-[11px] font-medium text-bework-watch">
                           Marge {fmt(marge)} %
                         </span>
                       ) : null}

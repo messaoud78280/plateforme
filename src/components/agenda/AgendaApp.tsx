@@ -626,7 +626,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
 
   return (
     <div
-      className="flex h-[calc(100dvh-4.5rem)] min-h-[560px] w-full bg-[#eef2f7]/80"
+      className="flex h-[calc(100dvh-4.5rem)] min-h-[560px] w-full bg-[color:var(--cc-surface-muted)]"
       data-agenda-zoom={zoom}
       style={
         {
@@ -640,7 +640,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
         } as CSSProperties
       }
     >
-      <div className="m-2 flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:m-3 lg:m-3 lg:mr-2">
+      <div className="m-2 flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-bework-navy/12 bg-[linear-gradient(180deg,#ffffff_0%,#f7f9fc_100%)] shadow-[var(--cc-shadow)] sm:m-3 lg:m-3 lg:mr-2">
         {returnNav ? (
           <div className="border-b border-slate-100 px-3 py-2 sm:px-4">
             <Link
@@ -697,7 +697,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
             </h1>
           </div>
 
-          <div className="mx-auto hidden rounded-lg bg-slate-100 p-0.5 sm:flex">
+          <div className="mx-auto hidden rounded-lg bg-bework-soft-navy p-0.5 sm:flex">
             {VIEW_LABELS.map((v) => (
               <button
                 key={v.id}
@@ -705,8 +705,8 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
                 onClick={() => setView(v.id)}
                 className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
                   view === v.id
-                    ? "bg-white text-[#1e3a5f] shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
+                    ? "bg-white text-bework-navy shadow-sm"
+                    : "text-bework-muted hover:text-bework-navy"
                 }`}
               >
                 {v.label}

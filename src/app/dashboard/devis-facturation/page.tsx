@@ -12,6 +12,7 @@ import {
 } from "@/lib/commercial/money";
 import { loadCommercialDashboardBundle } from "@/lib/commercial/dashboard-bundle";
 import { quoteNextActionLabel } from "@/lib/commercial/dashboard-kpis";
+import { cn } from "@/lib/cn";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +49,7 @@ export default async function DevisFacturationDashboardPage() {
 
   if (bundle.quoteCount === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center">
+      <div className="rounded-2xl border border-dashed border-bework-navy/20 bg-bework-navy-soft px-6 py-16 text-center">
         <p className="text-lg font-semibold text-slate-900">
           Créez votre premier devis
         </p>
@@ -57,7 +58,7 @@ export default async function DevisFacturationDashboardPage() {
         </p>
         <Link
           href="/dashboard/devis-facturation/devis/nouveau"
-          className="mt-6 inline-flex rounded-xl bg-[#1e3a5f] px-5 py-3 text-sm font-bold text-white"
+          className="btn-cc-primary mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-bold"
         >
           + Nouveau devis
         </Link>
@@ -65,17 +66,19 @@ export default async function DevisFacturationDashboardPage() {
     );
   }
 
+  const retardHot = bundle.enRetardTtc > 0;
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-12">
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-6 lg:col-span-5">
-          <p className="text-[13px] font-medium text-slate-500">À encaisser</p>
-          <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums text-slate-900">
+        <div className="bw-kpi-hero rounded-2xl p-6 lg:col-span-5">
+          <p className="text-[13px] font-medium text-white/75">À encaisser</p>
+          <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums text-white">
             {money(bundle.aEncaisserTtc)} €
           </p>
-          <p className="mt-1 text-[12px] text-slate-400">TTC — reste dû ouvert</p>
-          {bundle.enRetardTtc > 0 ? (
-            <p className="mt-4 text-[13px] font-medium text-amber-800">
+          <p className="mt-1 text-[12px] text-white/60">TTC — reste dû ouvert</p>
+          {retardHot ? (
+            <p className="mt-4 text-[13px] font-medium text-amber-200">
               dont {money(bundle.enRetardTtc)} € en retard
             </p>
           ) : null}
@@ -86,38 +89,47 @@ export default async function DevisFacturationDashboardPage() {
               label: "Devis en attente",
               value: String(bundle.envoyes),
               hint: `${money(bundle.pipelineDevisHt)} € HT pipeline`,
+              card: "bw-surface-tinted-violet",
+              valueClass: "text-bework-intel",
             },
             {
               label: "Devis acceptés",
               value: `${money(bundle.devisAcceptesHt)} €`,
               hint: "HT — hors avenants",
+              card: "bw-surface-tinted-ok",
+              valueClass: "text-bework-ok",
             },
             {
               label: "Facturé ce mois",
               value: `${money(bundle.factureMoisHt)} €`,
               hint: "HT",
+              card: "bw-kpi-finance",
+              valueClass: "text-bework-cyan",
             },
             {
               label: "Encaissé ce mois",
               value: `${money(bundle.encaisseMoisTtc)} €`,
               hint: "TTC",
+              card: "bw-kpi-ok",
+              valueClass: "text-bework-ok",
             },
             {
               label: "Contrat accepté",
               value: `${money(bundle.contratAccepteHt)} €`,
               hint: "HT devis + avenants",
+              card: "bw-surface-tinted-accent",
+              valueClass: "text-bework-accent",
             },
             {
               label: "En retard",
               value: `${money(bundle.enRetardTtc)} €`,
               hint: "TTC",
+              card: retardHot ? "bw-surface-tinted-critical" : "bg-white border border-slate-200/90",
+              valueClass: retardHot ? "text-bework-critical" : "text-slate-900",
             },
           ].map((k) => (
-            <div
-              key={k.label}
-              className="rounded-xl border border-slate-200/90 bg-white p-4"
-            >
-              <p className="text-[20px] font-semibold tabular-nums text-slate-900">
+            <div key={k.label} className={cn("rounded-xl p-4", k.card)}>
+              <p className={cn("text-[20px] font-semibold tabular-nums", k.valueClass)}>
                 {k.value}
               </p>
               <p className="mt-1 text-[13px] font-medium text-slate-700">{k.label}</p>

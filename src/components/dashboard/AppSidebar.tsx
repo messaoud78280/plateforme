@@ -366,15 +366,20 @@ export function AppSidebar({
                         "flex items-center gap-2.5 rounded-[var(--cc-radius)] px-2.5 py-2 text-[0.875rem] font-medium transition-[background,color,transform] duration-150 active:scale-[0.98]",
                         collapsed && "justify-center px-2",
                         active
-                          ? "bg-bework-navy text-white"
+                          ? "bg-bework-navy-deep text-white shadow-sm"
                           : pending
-                            ? "bg-bework-navy/10 text-bework-navy"
+                            ? "bg-bework-accent/10 text-bework-navy"
                             : "text-bework-ink/70 hover:bg-white/80 hover:text-bework-navy",
                       )}
                       aria-current={active ? "page" : undefined}
                       aria-busy={pending || undefined}
                     >
-                      <Icon className={cn("h-4 w-4 shrink-0 stroke-[1.75]", active ? "opacity-95" : "opacity-65")} />
+                      <Icon
+                        className={cn(
+                          "h-4 w-4 shrink-0 stroke-[1.75]",
+                          active ? "text-sky-300" : "opacity-65",
+                        )}
+                      />
                       {!collapsed ? <span className="truncate">{item.label}</span> : null}
                       {!collapsed && item.href === "/dashboard/messagerie" ? (
                         <MessagerieNavBadge active={active} />

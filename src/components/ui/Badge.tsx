@@ -8,6 +8,7 @@ const toneClass: Record<StatusTone, string> = {
   watch: "badge-cc badge-cc-watch",
   critical: "badge-cc badge-cc-critical",
   intel: "badge-cc badge-cc-intel",
+  cyan: "badge-cc badge-cc-cyan",
 };
 
 export function Badge({

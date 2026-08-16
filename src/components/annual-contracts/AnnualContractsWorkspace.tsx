@@ -480,10 +480,32 @@ function Kpi({
   value: string;
   hint?: string;
 }) {
+  const tone =
+    label === "À préparer"
+      ? "bw-surface-tinted-cyan"
+      : label === "À facturer"
+        ? "bw-surface-tinted-watch"
+        : label === "Payées"
+          ? "bw-surface-tinted-ok"
+          : label === "En préparation"
+            ? "bw-surface-tinted-violet"
+            : label === "Facturées"
+              ? "bw-surface-tinted-accent"
+              : label === "Dans les 30 jours"
+                ? "bw-surface-tinted-navy"
+                : "bg-white border border-slate-200/80";
+  const valueTone =
+    label === "Payées"
+      ? "text-bework-ok"
+      : label === "À facturer"
+        ? "text-bework-watch"
+        : label === "À préparer"
+          ? "text-bework-cyan"
+          : "text-bework-navy";
   return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-sm">
+    <div className={cn("rounded-2xl px-4 py-3 shadow-sm", tone)}>
       <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums text-[#1e3a5f]">{value}</p>
+      <p className={cn("mt-1 text-2xl font-semibold tabular-nums", valueTone)}>{value}</p>
       {hint ? <p className="mt-0.5 text-[11px] text-slate-400">{hint}</p> : null}
     </div>
   );
@@ -793,10 +815,12 @@ function PlanningView({
                           className={cn(
                             "w-full rounded-lg px-1.5 py-1 text-left text-[10px] leading-tight ring-1",
                             inter.status === "COMPLETED"
-                              ? "bg-emerald-50 text-emerald-900 ring-emerald-100"
+                              ? "bg-[color:var(--bw-soft-ok)] text-bework-ok ring-bework-ok/20"
                               : inter.status === "SCHEDULED"
-                                ? "bg-sky-50 text-sky-900 ring-sky-100"
-                                : "bg-slate-50 text-slate-800 ring-slate-200",
+                                ? "bg-[color:var(--bw-soft-accent)] text-bework-accent ring-bework-accent/20"
+                                : inter.status === "TO_PREPARE"
+                                  ? "bg-[color:var(--bw-soft-cyan)] text-bework-cyan ring-bework-cyan/20"
+                                  : "bg-slate-50 text-slate-800 ring-slate-200",
                           )}
                         >
                           <span className="font-semibold">

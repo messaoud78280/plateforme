@@ -93,11 +93,11 @@ export function CommercialSidebar({
           href="/dashboard/devis-facturation"
           className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
         >
-          <p className="text-[15px] font-semibold tracking-tight text-[#1e3a5f]">
+          <p className="text-[15px] font-semibold tracking-tight text-bework-navy-deep">
             {collapsed ? "BW" : "BeWork"}
           </p>
           {!collapsed ? (
-            <p className="mt-0.5 text-[13px] font-medium text-slate-600">
+            <p className="mt-0.5 text-[13px] font-medium text-bework-navy/80">
               Devis & Facturation
             </p>
           ) : null}
@@ -121,7 +121,7 @@ export function CommercialSidebar({
                 <button
                   type="button"
                   onClick={() => toggleGroup(g.id)}
-                  className="mb-1 flex w-full items-center justify-between px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400"
+                  className="mb-1 flex w-full items-center justify-between px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-bework-navy/45"
                 >
                   {g.label}
                   <ChevronDown
@@ -142,12 +142,12 @@ export function CommercialSidebar({
                           href={l.href}
                           title={l.label}
                           className={cn(
-                            "flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors",
+                            "flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-[background,color] duration-150",
                             collapsed && "justify-center px-2",
                             active
-                              ? "bg-[#1e3a5f]/[0.08] text-[#1e3a5f]"
-                              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
-                            l.action && !active && "text-[#1e3a5f]",
+                              ? "bg-bework-navy-deep text-white shadow-sm"
+                              : "text-slate-600 hover:bg-white/80 hover:text-bework-navy",
+                            l.action && !active && "font-semibold text-bework-accent",
                           )}
                           aria-current={active ? "page" : undefined}
                         >
@@ -220,7 +220,7 @@ export function CommercialSidebar({
             aria-label="Fermer"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex w-[min(100%,280px)] flex-col bg-white shadow-xl">
+          <aside className="absolute inset-y-0 left-0 flex w-[min(100%,280px)] flex-col bg-bework-chrome shadow-xl">
             <div className="flex justify-end p-2">
               <button
                 type="button"
@@ -238,7 +238,7 @@ export function CommercialSidebar({
 
       <aside
         className={cn(
-          "sticky top-0 hidden h-dvh shrink-0 border-r border-slate-200/80 bg-white lg:block",
+          "sticky top-0 hidden h-dvh shrink-0 border-r border-bework-navy/10 bg-bework-chrome lg:block",
           collapsed ? "w-[72px]" : "w-[240px]",
         )}
       >

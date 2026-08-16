@@ -351,20 +351,43 @@ export function SiteVisitDetailClient({
       </header>
 
       <nav
-        className="sticky top-0 z-10 -mx-1 overflow-x-auto rounded-xl border border-slate-200/80 bg-white/95 p-1 backdrop-blur"
+        className="sticky top-0 z-10 -mx-1 overflow-x-auto rounded-xl border border-bework-navy/10 bg-white/95 p-1 backdrop-blur"
         aria-label="Étapes de la visite"
       >
         <div className="flex gap-0.5">
-          {VISIT_STEPS.map((s, i) => (
+          {VISIT_STEPS.map((s, i) => {
+            const stepTone =
+              s.id === "infos"
+                ? "accent"
+                : s.id === "metres"
+                  ? "cyan"
+                  : s.id === "existant"
+                    ? "watch"
+                    : s.id === "logistique"
+                      ? "violet"
+                      : s.id === "medias"
+                        ? "navy"
+                        : "ok";
+            const activeClass =
+              stepTone === "accent"
+                ? "bg-bework-accent text-white"
+                : stepTone === "cyan"
+                  ? "bg-bework-cyan text-white"
+                  : stepTone === "watch"
+                    ? "bg-bework-watch text-white"
+                    : stepTone === "violet"
+                      ? "bg-bework-intel text-white"
+                      : stepTone === "navy"
+                        ? "bg-bework-navy-deep text-white"
+                        : "bg-bework-ok text-white";
+            return (
             <button
               key={s.id}
               type="button"
               onClick={() => setStep(s.id)}
               className={cn(
-                "shrink-0 rounded-lg px-2.5 py-2 text-left transition-colors",
-                step === s.id
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-600 hover:bg-slate-50",
+                "shrink-0 rounded-lg px-2.5 py-2 text-left transition-colors duration-150",
+                step === s.id ? activeClass : "text-slate-600 hover:bg-slate-50",
               )}
             >
               <span className="block text-[10px] font-medium opacity-70">
@@ -374,7 +397,8 @@ export function SiteVisitDetailClient({
                 {s.short}
               </span>
             </button>
-          ))}
+            );
+          })}
         </div>
       </nav>
 

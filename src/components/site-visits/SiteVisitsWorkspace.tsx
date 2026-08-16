@@ -6,6 +6,21 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SITE_VISIT_FILTERS } from "@/lib/site-visits/types";
+import { badgeClassForTone, type BwTone } from "@/lib/design-system/semantic-colors";
+
+const VISIT_STATUS_BADGE_TONE: Record<string, BwTone> = {
+  TO_PLAN: "neutral",
+  SCHEDULED: "accent",
+  IN_PROGRESS: "cyan",
+  INCOMPLETE: "watch",
+  READY_TO_QUOTE: "ok",
+  TRANSMITTED: "violet",
+  CANCELLED: "neutral",
+};
+
+function visitStatusBadgeClass(status: string): string {
+  return badgeClassForTone(VISIT_STATUS_BADGE_TONE[status] ?? "neutral");
+}
 
 export type VisitListItem = {
   id: string;
@@ -206,7 +221,7 @@ export function SiteVisitsWorkspace({
                     {formatWhen(v.scheduledAt)}
                   </p>
                 </div>
-                <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                <span className={cn("shrink-0", visitStatusBadgeClass(v.status))}>
                   {v.statusLabel}
                 </span>
               </div>

@@ -13,6 +13,11 @@ import {
   COMMERCIAL_QUOTE_STATUS_LABELS,
   roundMoney,
 } from "@/lib/commercial/money";
+import {
+  badgeClassForTone,
+  DEVIS_STATUS_TONE,
+} from "@/lib/design-system/semantic-colors";
+import { cn } from "@/lib/cn";
 import { QuoteAcceptedNextSteps } from "@/components/commercial/QuoteAcceptedNextSteps";
 import { ProgressStatementsPanel } from "@/components/commercial/ProgressStatementsPanel";
 import { QuoteRetentionPanel } from "@/components/commercial/QuoteRetentionPanel";
@@ -778,7 +783,13 @@ export function QuoteEditor({
       <div className="sticky top-12 z-30 -mx-1 mb-4 border-b border-slate-200/80 bg-white/95 px-1 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+            <span
+              className={cn(
+                badgeClassForTone(
+                  DEVIS_STATUS_TONE[quote.status] ?? "neutral",
+                ),
+              )}
+            >
               {COMMERCIAL_QUOTE_STATUS_LABELS[quote.status] ?? quote.status}
             </span>
             {saveLabel ? (

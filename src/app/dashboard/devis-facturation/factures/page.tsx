@@ -10,6 +10,11 @@ import {
   COMMERCIAL_INVOICE_TYPE_LABELS,
   roundMoney,
 } from "@/lib/commercial/money";
+import {
+  badgeClassForTone,
+  FACTURE_STATUS_TONE,
+} from "@/lib/design-system/semantic-colors";
+import { cn } from "@/lib/cn";
 
 export const dynamic = "force-dynamic";
 
@@ -88,7 +93,15 @@ export default async function FacturesPage({
                     {roundMoney(inv.amountDue, 2).toLocaleString("fr-FR")} €
                   </td>
                   <td className="px-4 py-2.5">
-                    {COMMERCIAL_INVOICE_STATUS_LABELS[inv.status] ?? inv.status}
+                    <span
+                      className={cn(
+                        badgeClassForTone(
+                          FACTURE_STATUS_TONE[inv.status] ?? "neutral",
+                        ),
+                      )}
+                    >
+                      {COMMERCIAL_INVOICE_STATUS_LABELS[inv.status] ?? inv.status}
+                    </span>
                   </td>
                 </tr>
               ))}

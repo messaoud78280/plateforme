@@ -26,15 +26,15 @@ export const AGENDA_EVENT_TYPES = [
 
 export type AgendaEventTypeId = (typeof AGENDA_EVENT_TYPES)[number]["id"];
 
-/** Couleurs fonctionnelles discrètes (charte BeWork). */
+/** Couleurs fonctionnelles — DESIGN-SYSTEM-2 (Agenda / Planning). */
 export const AGENDA_COLOR_MAP: Record<string, { bg: string; border: string; text: string }> = {
-  reunion: { bg: "#eff6ff", border: "#3b82f6", text: "#1e3a5f" },
-  chantier: { bg: "#ecfdf5", border: "#10b981", text: "#064e3b" },
-  livraison: { bg: "#fff7ed", border: "#f97316", text: "#9a3412" },
-  echeance: { bg: "#fef2f2", border: "#ef4444", text: "#991b1b" },
-  admin: { bg: "#f8fafc", border: "#64748b", text: "#334155" },
-  interne: { bg: "#f5f3ff", border: "#8b5cf6", text: "#4c1d95" },
-  personnel: { bg: "#fdf4ff", border: "#d946ef", text: "#86198f" },
+  reunion: { bg: "#f3f0ff", border: "#7c5ce6", text: "#4c1d95" },
+  chantier: { bg: "#e6f7fb", border: "#13a6c8", text: "#0e7490" },
+  livraison: { bg: "#fff7ed", border: "#d97706", text: "#9a3412" },
+  echeance: { bg: "#fef2f2", border: "#c2413a", text: "#9f2a24" },
+  admin: { bg: "#e8eef5", border: "#173b67", text: "#132f4c" },
+  interne: { bg: "#e8f0fe", border: "#2563eb", text: "#1d4ed8" },
+  personnel: { bg: "#f3f0ff", border: "#7c5ce6", text: "#5b21b6" },
 };
 
 export function agendaTypeMeta(type: string) {

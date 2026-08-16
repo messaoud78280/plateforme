@@ -37,16 +37,16 @@ export function CommercialWorkspaceHeader() {
     !pathname.match(/\/devis\/[^/]+$/);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-bework-navy/10 bg-white/90 backdrop-blur-sm">
       <div className="flex min-h-12 items-center justify-between gap-3 px-3 py-2 sm:px-5">
-        <h1 className="truncate text-[15px] font-semibold tracking-tight text-slate-900">
+        <h1 className="truncate text-[15px] font-semibold tracking-tight text-bework-navy-deep">
           {title}
         </h1>
         <div className="flex shrink-0 items-center gap-2">
           {showNewQuote ? (
             <Link
               href="/dashboard/devis-facturation/devis/nouveau"
-              className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-[#16304f]"
+              className="btn-cc-primary rounded-lg px-3 py-1.5 text-[13px]"
             >
               + Nouveau devis
             </Link>

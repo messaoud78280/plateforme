@@ -3010,7 +3010,7 @@ export function MessagerieMissionsView({
                               <div
                                 className={`rounded-lg px-2.5 py-1.5 shadow-sm ${
                                   isMe
-                                    ? "rounded-tr-sm bg-[#d9fdd3] text-[#111b21]"
+                                    ? "rounded-tr-sm bg-[#e0f4fb] text-[#111b21]"
                                     : "rounded-tl-sm bg-white text-[#111b21]"
                                 }`}
                               >
@@ -3378,7 +3378,7 @@ export function MessagerieMissionsView({
               }}
             >
               {dragOver ? (
-                <div className="pointer-events-none absolute inset-4 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-[#00a884] bg-[#d9fdd3]/70 text-sm font-semibold text-[#008069]">
+                <div className="pointer-events-none absolute inset-4 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-[#00a884] bg-[#e0f4fb]/70 text-sm font-semibold text-[#008069]">
                   Déposez photos ou documents ici
                 </div>
               ) : null}
@@ -3594,7 +3594,7 @@ export function MessagerieMissionsView({
                             <div
                               className={`relative rounded-lg px-2.5 py-1.5 shadow-sm ${
                                 isMe
-                                  ? "rounded-tr-sm bg-[#d9fdd3] text-[#111b21]"
+                                  ? "rounded-tr-sm bg-[#e0f4fb] text-[#111b21]"
                                   : "rounded-tl-sm bg-white text-[#111b21]"
                               } ${m.isInternal ? "ring-1 ring-amber-400" : ""}`}
                             >

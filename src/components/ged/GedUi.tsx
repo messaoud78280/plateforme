@@ -20,10 +20,27 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { HubCategoryId, HubCategoryStat, HubView } from "@/lib/ged/document-hub-ui";
+import { toneSurface, type BwTone } from "@/lib/design-system/semantic-colors";
 
 /** Conteneur largeur GED — aligné vue Catégories. */
 export const GED_SHELL_CLASS =
   "mx-auto w-full max-w-[1200px] space-y-8 px-4 pb-20 pt-8 sm:px-6 lg:px-8";
+
+const GED_CATEGORY_TONE: Record<HubCategoryId, BwTone> = {
+  devis_avenants: "accent",
+  factures_situations: "ok",
+  plans_techniques: "navy",
+  fiches_techniques: "cyan",
+  commandes_bl: "watch",
+  fournisseurs: "violet",
+  comptes_rendus: "navy",
+  photos: "violet",
+  doe: "navy",
+  marche_dce: "accent",
+  securite_methodes: "critical",
+  qualite_controles: "cyan",
+  autres: "neutral",
+};
 
 export const CATEGORY_ICONS: Record<HubCategoryId, LucideIcon> = {
   devis_avenants: Calculator,
@@ -318,16 +335,20 @@ export function GedCategoryGrid({
           cat.availableCount === 0
             ? null
             : `${cat.availableCount} document${cat.availableCount > 1 ? "s" : ""}`;
+        const tone = toneSurface(GED_CATEGORY_TONE[cat.id] ?? "neutral");
         return (
           <li key={cat.id} className="h-full">
             <button
               type="button"
               onClick={() => onOpen(cat.id)}
-              className="group flex h-full w-full flex-col rounded-2xl border border-slate-200/90 bg-white p-5 text-left transition-[border-color,background-color] duration-200 hover:border-slate-300 hover:bg-slate-50/60 sm:p-6"
+              className={cn(
+                "group flex h-full w-full flex-col rounded-2xl p-5 text-left transition-[filter,box-shadow,transform] duration-200 hover:brightness-[0.985] sm:p-6",
+                tone.surface,
+              )}
             >
               <div className="flex items-start gap-3">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 ring-1 ring-slate-100">
-                  <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+                <span className={cn(tone.iconPill)} aria-hidden>
+                  <Icon className="h-4 w-4" strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-[16px] font-semibold leading-snug tracking-tight text-slate-900">
@@ -341,14 +362,14 @@ export function GedCategoryGrid({
                     </p>
                   )}
                   {cat.missingCount > 0 ? (
-                    <span className="mt-2 inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-[12px] font-medium text-amber-800/85 ring-1 ring-amber-100/80">
+                    <span className="badge-cc badge-cc-watch mt-2">
                       {cat.missingCount} à récupérer
                     </span>
                   ) : null}
                 </div>
               </div>
               {previews.length > 0 ? (
-                <ul className="mt-5 min-h-[4.5rem] space-y-1.5 border-t border-slate-100 pt-4">
+                <ul className="mt-5 min-h-[4.5rem] space-y-1.5 border-t border-black/5 pt-4">
                   {previews.map((titlePreview, idx) => (
                     <li
                       key={`${cat.id}-${idx}`}
@@ -369,9 +390,9 @@ export function GedCategoryGrid({
                   ) : null}
                 </ul>
               ) : (
-                <div className="mt-5 min-h-[4.5rem] border-t border-slate-100 pt-4" />
+                <div className="mt-5 min-h-[4.5rem] border-t border-black/5 pt-4" />
               )}
-              <div className="mt-auto flex items-center gap-1 pt-5 text-[13px] font-medium text-[#1e3a5f]">
+              <div className={cn("mt-auto flex items-center gap-1 pt-5 text-[13px] font-medium", tone.text)}>
                 <span>Voir les documents</span>
                 <ChevronRight
                   className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"

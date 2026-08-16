@@ -8,6 +8,11 @@ import {
   COMMERCIAL_INVOICE_TYPE_LABELS,
   roundMoney,
 } from "@/lib/commercial/money";
+import {
+  badgeClassForTone,
+  FACTURE_STATUS_TONE,
+} from "@/lib/design-system/semantic-colors";
+import { cn } from "@/lib/cn";
 import { RecordPaymentForm } from "@/components/commercial/RecordPaymentForm";
 import { InvoiceDueDateEditor } from "@/components/commercial/InvoiceDueDateEditor";
 
@@ -217,7 +222,12 @@ export function InvoiceDocument({
               Origine : Contrat annuel {invoice.annualContractOrigin.clientName}
             </Link>
           ) : null}
-          <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-700">
+          <span
+            className={cn(
+              badgeClassForTone(FACTURE_STATUS_TONE[invoice.status] ?? "neutral"),
+              "uppercase tracking-wide",
+            )}
+          >
             {COMMERCIAL_INVOICE_STATUS_LABELS[invoice.status] ?? invoice.status}
           </span>
           <span className="text-xs text-slate-500">

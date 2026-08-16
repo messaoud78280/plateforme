@@ -437,26 +437,74 @@ export function AccueilOpsHome({
   );
 }
 
+const ATTENTION_CARD_TONE: Record<
+  AttentionDisplayCategorySummary["id"],
+  { surface: string; pill: string; count: string; hover: string }
+> = {
+  annual_contract: {
+    surface: "bw-surface-tinted-cyan",
+    pill: "bw-icon-pill bw-icon-pill-cyan",
+    count: "text-bework-cyan",
+    hover: "hover:brightness-[0.98]",
+  },
+  tasks_followup: {
+    surface: "bw-surface-tinted-violet",
+    pill: "bw-icon-pill bw-icon-pill-violet",
+    count: "text-bework-intel",
+    hover: "hover:brightness-[0.98]",
+  },
+  purchase_order: {
+    surface: "bw-surface-tinted-watch",
+    pill: "bw-icon-pill bw-icon-pill-watch",
+    count: "text-bework-watch",
+    hover: "hover:brightness-[0.98]",
+  },
+  billing: {
+    surface: "bw-surface-tinted-ok",
+    pill: "bw-icon-pill bw-icon-pill-ok",
+    count: "text-bework-ok",
+    hover: "hover:brightness-[0.98]",
+  },
+  other: {
+    surface: "bw-surface-tinted-navy",
+    pill: "bw-icon-pill bw-icon-pill-navy",
+    count: "text-bework-navy",
+    hover: "hover:brightness-[0.98]",
+  },
+};
+
 function AttentionCategoryCard({
   category,
 }: {
   category: AttentionDisplayCategorySummary;
 }) {
   const meta = urgencyMeta(category.maxUrgency);
+  const tone = ATTENTION_CARD_TONE[category.id];
   return (
     <Link
       href={category.href}
-      className="group flex items-start justify-between gap-3 rounded-xl border border-slate-200/90 bg-white px-3.5 py-3 transition-colors duration-150 hover:border-slate-300 hover:bg-slate-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
+      className={cn(
+        "group flex items-start justify-between gap-3 rounded-xl px-3.5 py-3 transition-[filter,box-shadow,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bework-accent/30",
+        tone.surface,
+        tone.hover,
+      )}
     >
       <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2">
-          <span className={cn("h-2 w-2 shrink-0 rounded-full", meta.dot)} aria-hidden />
+        <span className="flex items-center gap-2.5">
+          <span className={cn(tone.pill, "h-8 w-8")} aria-hidden>
+            <span className={cn("h-2 w-2 rounded-full", meta.dot)} />
+          </span>
           <span className="truncate text-[13px] font-semibold text-slate-900">
             {category.label}
           </span>
         </span>
-        <span className="mt-1 flex items-baseline gap-2">
-          <span className="text-2xl font-extrabold tabular-nums tracking-tight text-[#1e3a5f]">
+        <span className="mt-1.5 flex items-baseline gap-2 pl-[2.625rem]">
+          <span
+            className={cn(
+              "text-2xl font-extrabold tabular-nums tracking-tight",
+              tone.count,
+            )}
+          >
             {category.count}
           </span>
           {category.gravitySummary ? (
@@ -465,11 +513,13 @@ function AttentionCategoryCard({
             </span>
           ) : null}
         </span>
-        <span className="mt-0.5 block text-[12px] text-slate-500">{category.shortHint}</span>
+        <span className="mt-0.5 block pl-[2.625rem] text-[12px] text-slate-500">
+          {category.shortHint}
+        </span>
       </span>
       <span
         aria-hidden
-        className="pt-1 text-[18px] font-light text-slate-300 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"
+        className="pt-1 text-[18px] font-light text-slate-300 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-bework-navy"
       >
         ›
       </span>

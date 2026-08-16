@@ -39,7 +39,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 import { isCommercialWorkspacePath } from "@/lib/commercial/workspace";
-import { CommercialWorkspaceHeader } from "@/components/commercial/CommercialWorkspaceHeader";
+import { CommercialWorkspaceShell } from "@/components/commercial/CommercialWorkspaceShell";
 import { CommercialLaunchLink } from "@/components/dashboard/CommercialLaunchLink";
 
 export const metadata: Metadata = {
@@ -133,15 +133,14 @@ export default async function DashboardLayout({
         {isDemo ? (
           <DemoTenantBanner companyName={companyName} expiresAt={demoExpiresIso} />
         ) : null}
-        <CommercialWorkspaceHeader />
         <UiPreferencesProvider userId={session.user.id}>
-          <main
-            id="contenu-principal"
-            tabIndex={-1}
-            className="cc-enter w-full min-w-0 flex-1 px-3 py-4 pb-16 sm:px-5 sm:py-5 lg:px-6"
+          <CommercialWorkspaceShell
+            personType={personType}
+            permissionProfile={permissionProfile}
+            orgLabel={companyName ?? dbCompany}
           >
             {children}
-          </main>
+          </CommercialWorkspaceShell>
         </UiPreferencesProvider>
       </div>
     );

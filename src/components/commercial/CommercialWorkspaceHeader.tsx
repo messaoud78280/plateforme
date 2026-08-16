@@ -1,33 +1,57 @@
 "use client";
 
 import Link from "next/link";
-import { CommercialSubNav } from "@/components/commercial/CommercialSubNav";
+import { usePathname } from "next/navigation";
+
+function pageTitle(pathname: string): string {
+  if (pathname.endsWith("/devis/nouveau")) return "Nouveau devis";
+  if (pathname.includes("/devis/") && pathname !== "/dashboard/devis-facturation/devis") {
+    return "Devis";
+  }
+  if (pathname.includes("/factures/preparer")) return "Préparer une facture";
+  if (pathname.includes("/factures/")) return "Facture";
+  if (pathname.includes("/situations/")) return "Situation";
+  if (pathname.includes("/clients/")) return "Client";
+  if (pathname.endsWith("/devis")) return "Devis";
+  if (pathname.endsWith("/factures")) return "Factures";
+  if (pathname.endsWith("/encaissements")) return "Encaissements";
+  if (pathname.endsWith("/situations")) return "Situations";
+  if (pathname.endsWith("/avenants")) return "Avenants";
+  if (pathname.endsWith("/bibliotheque")) return "Bibliothèque";
+  if (pathname.endsWith("/prix")) return "Prix";
+  if (pathname.endsWith("/parametres")) return "Textes & conditions";
+  if (pathname.endsWith("/clients")) return "Clients";
+  if (pathname.endsWith("/journal")) return "Journal des ventes";
+  if (pathname.includes("/suivi/devis-a-relancer")) return "Devis à relancer";
+  if (pathname.includes("/suivi/impayes")) return "Factures impayées";
+  if (pathname.includes("/suivi/echeances")) return "Échéances";
+  if (pathname === "/dashboard/devis-facturation") return "Vue d’ensemble";
+  return "Devis & Facturation";
+}
 
 export function CommercialWorkspaceHeader() {
+  const pathname = usePathname() ?? "";
+  const title = pageTitle(pathname);
+  const showNewQuote =
+    !pathname.includes("/devis/nouveau") &&
+    !pathname.match(/\/devis\/[^/]+$/);
+
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur">
-      <div className="flex min-h-12 flex-wrap items-center gap-x-4 gap-y-2 px-3 py-1.5 sm:px-5">
-        <Link
-          href="/dashboard/devis-facturation"
-          className="flex min-w-0 shrink-0 items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
-        >
-          <span className="text-[15px] font-semibold tracking-tight text-[#1e3a5f]">
-            BeWork
-          </span>
-          <span className="h-4 w-px bg-slate-200" aria-hidden />
-          <span className="truncate text-[14px] font-medium text-slate-600">
-            Devis & Facturation
-          </span>
-        </Link>
-        <div className="min-w-0 flex-1 overflow-x-auto">
-          <CommercialSubNav />
+    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur">
+      <div className="flex min-h-12 items-center justify-between gap-3 px-3 py-2 sm:px-5">
+        <h1 className="truncate text-[15px] font-semibold tracking-tight text-slate-900">
+          {title}
+        </h1>
+        <div className="flex shrink-0 items-center gap-2">
+          {showNewQuote ? (
+            <Link
+              href="/dashboard/devis-facturation/devis/nouveau"
+              className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-[#16304f]"
+            >
+              + Nouveau devis
+            </Link>
+          ) : null}
         </div>
-        <Link
-          href="/dashboard"
-          className="shrink-0 text-[13px] font-medium text-slate-600 transition-colors duration-150 hover:text-[#1e3a5f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
-        >
-          ← Retour à la plateforme
-        </Link>
       </div>
     </header>
   );

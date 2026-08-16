@@ -26,7 +26,7 @@ function testPathHelper() {
 function testLayoutBranch() {
   const layout = read("src/app/dashboard/layout.tsx");
   assert.match(layout, /isCommercialWorkspacePath/);
-  assert.match(layout, /CommercialWorkspaceHeader/);
+  assert.match(layout, /CommercialWorkspaceShell/);
   assert.match(layout, /CommercialLaunchLink/);
   const nested = read("src/app/dashboard/devis-facturation/layout.tsx");
   assert.match(nested, /requireCommercialSession/);
@@ -47,20 +47,21 @@ function testLaunchLink() {
 
 function testWorkspaceHeader() {
   const header = read("src/components/commercial/CommercialWorkspaceHeader.tsx");
-  assert.match(header, /Retour à la plateforme/);
-  assert.match(header, /href="\/dashboard"/);
+  assert.match(header, /Nouveau devis/);
+  assert.doesNotMatch(header, /CommercialSubNav/);
   assert.doesNotMatch(header, /window\.close/);
-  assert.match(header, /CommercialSubNav/);
-  const nav = read("src/components/commercial/CommercialSubNav.tsx");
+  const sidebar = read("src/components/commercial/CommercialSidebar.tsx");
+  assert.match(sidebar, /Retour à la plateforme/);
+  assert.match(sidebar, /href="\/dashboard"/);
+  const nav = read("src/lib/commercial/workspace-nav.ts");
   assert.match(nav, /Vue d’ensemble/);
   assert.match(nav, /Devis/);
   assert.match(nav, /Factures/);
   assert.match(nav, /Encaissements/);
   assert.match(nav, /Bibliothèque/);
-  assert.doesNotMatch(nav, /Situations/);
-  assert.doesNotMatch(nav, /Avoirs/);
-  assert.doesNotMatch(nav, /À facturer/);
-  console.log("✓ header Commercial : nav réelle, pas de lien mort");
+  assert.doesNotMatch(nav, /Avoir/);
+  assert.doesNotMatch(nav, /Facture électronique/);
+  console.log("✓ shell Commercial : sidebar réelle, pas de lien mort");
 }
 
 function testNavPagesExist() {
@@ -72,15 +73,12 @@ function testNavPagesExist() {
     "src/app/dashboard/devis-facturation/bibliotheque/page.tsx",
     "src/app/dashboard/devis-facturation/prix/page.tsx",
     "src/app/dashboard/devis-facturation/parametres/page.tsx",
+    "src/app/dashboard/devis-facturation/situations/page.tsx",
   ];
   for (const p of pages) {
     assert.ok(existsSync(join(root, p)), p);
   }
-  assert.equal(
-    existsSync(join(root, "src/app/dashboard/devis-facturation/situations/page.tsx")),
-    false,
-  );
-  console.log("✓ chaque onglet visible a une page");
+  console.log("✓ chaque entrée visible a une page");
 }
 
 function testPermissions() {

@@ -8,7 +8,7 @@ import type { AttentionCode, SerializedAttention } from "@/lib/follow-up/attenti
 import { formatKanbanDueLabel } from "@/lib/follow-up/urgency";
 import { purchaseOrderAttentionActionUrl } from "@/lib/purchase-orders/attention/sync-notifications";
 
-export type AttentionSubjectType = "FOLLOW_UP" | "PURCHASE_ORDER";
+export type AttentionSubjectType = "FOLLOW_UP" | "PURCHASE_ORDER" | "ANNUAL_CONTRACT";
 
 export type AttentionProblemCategory =
   | "ECHEANCE"

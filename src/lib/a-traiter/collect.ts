@@ -31,6 +31,7 @@ import {
   isInternalPurchaseOrderActor,
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
+import { collectAnnualContractAttentionCards } from "@/lib/annual-contracts/attention-collect";
 import { ttlGet, ttlSet } from "@/lib/perf/ttl-cache";
 import {
   withPerfLog,
@@ -598,12 +599,15 @@ async function collectUnifiedAttentionCards(
   light = false,
   takeOverride?: number,
 ): Promise<{ cards: ATraiterAttentionCard[]; capped: boolean }> {
-  // Une seule résolution org pour Follow-up + PO (évite double ensureOrganizationForOwner).
+  // Org partagée Follow-up / PO / contrats annuels.
   const sharedOrgId = isInternalPurchaseOrderActor(sessionUser)
     ? await resolvePurchaseOrderOrgId(sessionUser)
     : null;
+  const annualOrgId =
+    sharedOrgId ??
+    (await resolvePurchaseOrderOrgId(sessionUser).catch(() => null));
 
-  const [followUp, purchaseOrder] = await Promise.all([
+  const [followUp, purchaseOrder, annualContracts] = await Promise.all([
     timedBranch(
       "a-traiter.followUpAttention",
       collectFollowUpAttentionCards(
@@ -624,13 +628,26 @@ async function collectUnifiedAttentionCards(
         sharedOrgId,
       ),
     ),
+    timedBranch(
+      "a-traiter.annualContractAttention",
+      collectAnnualContractAttentionCards(
+        sessionUser,
+        annualOrgId,
+        light,
+        takeOverride,
+      ),
+    ),
   ]);
   const take = takeOverride ?? (light ? 40 : 120);
   const capped =
     typeof takeOverride === "number" &&
-    (followUp.sampled >= take || purchaseOrder.sampled >= take);
+    (followUp.sampled >= take ||
+      purchaseOrder.sampled >= take ||
+      annualContracts.sampled >= take);
   return {
-    cards: [...followUp.cards, ...purchaseOrder.cards].sort(sortAttentionCards),
+    cards: [...followUp.cards, ...purchaseOrder.cards, ...annualContracts.cards].sort(
+      sortAttentionCards,
+    ),
     capped,
   };
 }

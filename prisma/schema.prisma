@@ -646,6 +646,7 @@ model Organization {
   projectBudgets                ProjectBudget[]
   supplierInvoices              SupplierInvoice[]
   chantierFiles                 ChantierFile[]
+  annualServiceContracts        AnnualServiceContract[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -828,6 +829,7 @@ model Project {
   commercialSubcontracts CommercialSubcontract[]
   projectBudget ProjectBudget?
   supplierInvoices SupplierInvoice[]
+  annualServiceContracts AnnualServiceContract[]
 
   @@index([organizationId])
 }
@@ -4662,4 +4664,77 @@ model CommercialStatusEvent {
 
   @@index([organizationId, entityType, entityId])
   @@index([createdAt])
+}
+
+/// Contrats d’intervention annuels (entretien / CE) — SETRIM & tenants internes.
+enum AnnualContractStatus {
+  ACTIVE
+  TERMINATING
+  TERMINATED
+}
+
+enum AnnualInterventionStatus {
+  TO_PREPARE
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model AnnualServiceContract {
+  id               String               @id @default(cuid())
+  organizationId   String
+  /// Syndic / client
+  clientName       String
+  siteName         String?
+  siteAddress      String
+  /// CA | CE | AUTRE
+  contractType     String               @default("CE")
+  amountHt         Decimal              @db.Decimal(14, 2)
+  plannedCrewCount Int?
+  plannedDuration  String?
+  comment          String?              @db.Text
+  status           AnnualContractStatus @default(ACTIVE)
+  nextPlannedDate  DateTime?            @db.Date
+  projectId        String?
+  /// Clé d’idempotence seed démo (ex. SETRIM-CE-LOISELET)
+  demoKey          String?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  organization Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project?                   @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  interventions AnnualServiceIntervention[]
+
+  @@unique([organizationId, demoKey])
+  @@index([organizationId, status])
+  @@index([organizationId, nextPlannedDate])
+  @@index([projectId])
+}
+
+model AnnualServiceIntervention {
+  id                 String                   @id @default(cuid())
+  contractId         String
+  organizationId     String
+  plannedDate        DateTime                 @db.Date
+  completedAt        DateTime?
+  plannedCrewCount   Int?
+  actualCrewCount    Int?
+  plannedDuration    String?
+  status             AnnualInterventionStatus @default(TO_PREPARE)
+  comment            String?                  @db.Text
+  agendaEventId      String?
+  followUpSheetId    String?
+  billingNeededAt    DateTime?
+  billedAt           DateTime?
+  commercialInvoiceId String?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+
+  contract AnnualServiceContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, plannedDate])
+  @@index([organizationId, status])
+  @@index([contractId, plannedDate])
+  @@index([agendaEventId])
+  @@index([followUpSheetId])
 }

@@ -50,7 +50,7 @@ const PO_ACTIVE: PurchaseOrderStatus[] = [
 
 export type ChantierOpsAttentionItem = {
   id: string;
-  subjectType: "FOLLOW_UP" | "PURCHASE_ORDER";
+  subjectType: "FOLLOW_UP" | "PURCHASE_ORDER" | "ANNUAL_CONTRACT";
   title: string;
   reason: string;
   urgency: string;

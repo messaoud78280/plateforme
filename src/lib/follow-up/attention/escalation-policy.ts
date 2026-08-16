@@ -8,7 +8,7 @@ import { urgencyRank } from "@/lib/follow-up/urgency";
 
 export type EscalationStage = "INITIAL" | "REMINDER_1" | "REMINDER_2" | "ESCALATION";
 
-export type AttentionSubjectType = "FOLLOW_UP" | "PURCHASE_ORDER";
+export type AttentionSubjectType = "FOLLOW_UP" | "PURCHASE_ORDER" | "ANNUAL_CONTRACT";
 
 export type LevelEscalationPolicy = {
   /** Heures après INITIAL avant REMINDER_1 (0 = pas de rappel). */
@@ -130,6 +130,9 @@ export function buildStagedAttentionDedupeKey(parts: AttentionDedupeParts): stri
   const subjectType = parts.subjectType ?? "FOLLOW_UP";
   if (subjectType === "PURCHASE_ORDER") {
     return `ATTENTION:PURCHASE_ORDER:${parts.userId}:${parts.sheetId}:${parts.code}:${parts.level}:${parts.episode}:${stage}`;
+  }
+  if (subjectType === "ANNUAL_CONTRACT") {
+    return `ATTENTION:ANNUAL_CONTRACT:${parts.userId}:${parts.sheetId}:${parts.code}:${parts.level}:${parts.episode}:${stage}`;
   }
   return `ATTENTION:${parts.userId}:${parts.sheetId}:${parts.code}:${parts.level}:${parts.episode}:${stage}`;
 }

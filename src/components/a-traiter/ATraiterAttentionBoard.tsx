@@ -117,6 +117,7 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
             <option value="all">Tous</option>
             <option value="FOLLOW_UP">Fiches</option>
             <option value="PURCHASE_ORDER">Commandes</option>
+            <option value="ANNUAL_CONTRACT">Contrats annuels</option>
           </select>
         </label>
         <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">

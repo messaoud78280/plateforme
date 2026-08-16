@@ -51,6 +51,7 @@ const DOMAINS = [
   "/dashboard/projets",
   "/dashboard/planning",
   "/dashboard/agenda",
+  "/dashboard/contrats-annuels",
   "/dashboard/commandes",
   "/dashboard/depenses",
   "/dashboard/fournisseurs",
@@ -79,6 +80,7 @@ const ALLOWED: Record<string, readonly string[]> = {
     "/dashboard/projets",
     "/dashboard/planning",
     "/dashboard/agenda",
+    "/dashboard/contrats-annuels",
     "/dashboard/commandes",
     "/dashboard/documents",
     "/dashboard/devis-facturation",
@@ -201,6 +203,10 @@ function testApiMapping() {
   assert.equal(
     requiredHrefForApiPath("/api/purchase-orders/xyz"),
     "/dashboard/commandes",
+  );
+  assert.equal(
+    requiredHrefForApiPath("/api/annual-contracts"),
+    "/dashboard/contrats-annuels",
   );
   assert.equal(requiredHrefForApiPath("/api/chantier/files/1"), null);
 }

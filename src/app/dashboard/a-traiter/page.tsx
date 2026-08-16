@@ -66,7 +66,11 @@ function formatWhen(d: Date) {
   });
 }
 
-export default async function ATraiterPage() {
+export default async function ATraiterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string }>;
+}) {
   const session = await getCachedServerSession();
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard/a-traiter");
@@ -78,11 +82,14 @@ export default async function ATraiterPage() {
     permissionProfile: session.user.permissionProfile,
   });
 
+  const sp = await searchParams;
+
   const snapshot = await withPerfLog("collectATraiter:page", () =>
     collectATraiter({
       id: session.user.id,
       role: session.user.role,
       personType: session.user.personType ?? null,
+      permissionProfile: session.user.permissionProfile ?? null,
     }),
   );
 
@@ -161,6 +168,7 @@ export default async function ATraiterPage() {
         cards={snapshot.attentionCards}
         currentUserId={session.user.id}
         canEdit={canEdit}
+        initialDisplayType={sp.type ?? null}
       />
 
       {snapshot.items.length > 0 ? (

@@ -9,10 +9,10 @@ import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 import { cn } from "@/lib/cn";
 import {
   DashboardSection,
-  PriorityRow,
   TodayRow,
-  attentionTypeLabel,
+  urgencyMeta,
 } from "@/components/dashboard/accueil-ui";
+import type { AttentionDisplayCategorySummary } from "@/lib/a-traiter/display-categories";
 
 function agendaIcon(type: string) {
   if (type === "LIVRAISON") return "🚚";
@@ -117,7 +117,7 @@ export function AccueilOpsHome({
     personType,
     permissionProfile,
   );
-  const visibleAttention = ops.attention.slice(0, 3);
+  const visibleCategories = ops.attentionCategories;
   const todayAgenda =
     ops.agendaTitle === "Aujourd’hui" ? ops.agenda.slice(0, 3) : [];
   const todayOrders = ops.orders.slice(0, 3);
@@ -130,7 +130,7 @@ export function AccueilOpsHome({
   const dateLabel =
     ops.dateLabel.charAt(0).toUpperCase() + ops.dateLabel.slice(1);
   const seeAllLabel =
-    ops.attentionTotal > 3
+    ops.attentionTotal > 0
       ? `Voir les ${ops.attentionTotal} éléments →`
       : "Voir tout →";
 
@@ -183,24 +183,29 @@ export function AccueilOpsHome({
           badge={ops.attentionTotal > 0 ? ops.attentionTotal : null}
           subtitle={
             ops.attentionTotal > 0
-              ? "Les priorités qui demandent votre attention"
+              ? "Les domaines qui demandent votre attention"
               : null
           }
           action={{ href: ops.links.aTraiter, label: seeAllLabel }}
         >
-          {visibleAttention.length === 0 ? (
+          {visibleCategories.length === 0 ? (
             <p className="py-1 text-[14px] text-slate-500">Rien à traiter pour le moment.</p>
           ) : (
-            <ul className="space-y-2">
-              {visibleAttention.map((item) => (
-                <li key={item.id}>
-                  <PriorityRow
-                    href={item.href}
-                    urgency={item.urgency}
-                    typeLabel={attentionTypeLabel(item.id, item.reason)}
-                    title={item.projectTitle || item.title}
-                    subtitle={item.reason}
-                  />
+            <ul
+              className={cn(
+                "grid gap-2",
+                visibleCategories.length >= 4
+                  ? "grid-cols-1 sm:grid-cols-2"
+                  : visibleCategories.length === 3
+                    ? "grid-cols-1 sm:grid-cols-3"
+                    : visibleCategories.length === 2
+                      ? "grid-cols-1 sm:grid-cols-2"
+                      : "grid-cols-1",
+              )}
+            >
+              {visibleCategories.map((cat) => (
+                <li key={cat.id}>
+                  <AttentionCategoryCard category={cat} />
                 </li>
               ))}
             </ul>
@@ -429,5 +434,45 @@ export function AccueilOpsHome({
         </div>
       </div>
     </div>
+  );
+}
+
+function AttentionCategoryCard({
+  category,
+}: {
+  category: AttentionDisplayCategorySummary;
+}) {
+  const meta = urgencyMeta(category.maxUrgency);
+  return (
+    <Link
+      href={category.href}
+      className="group flex items-start justify-between gap-3 rounded-xl border border-slate-200/90 bg-white px-3.5 py-3 transition-colors duration-150 hover:border-slate-300 hover:bg-slate-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
+    >
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-2">
+          <span className={cn("h-2 w-2 shrink-0 rounded-full", meta.dot)} aria-hidden />
+          <span className="truncate text-[13px] font-semibold text-slate-900">
+            {category.label}
+          </span>
+        </span>
+        <span className="mt-1 flex items-baseline gap-2">
+          <span className="text-2xl font-extrabold tabular-nums tracking-tight text-[#1e3a5f]">
+            {category.count}
+          </span>
+          {category.gravitySummary ? (
+            <span className={cn("text-[11px] font-medium", meta.text)}>
+              {category.gravitySummary}
+            </span>
+          ) : null}
+        </span>
+        <span className="mt-0.5 block text-[12px] text-slate-500">{category.shortHint}</span>
+      </span>
+      <span
+        aria-hidden
+        className="pt-1 text-[18px] font-light text-slate-300 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"
+      >
+        ›
+      </span>
+    </Link>
   );
 }

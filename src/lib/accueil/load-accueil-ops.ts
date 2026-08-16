@@ -6,6 +6,10 @@ import { TaskStatus, type PurchaseOrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { previewATraiterForHome } from "@/lib/a-traiter/collect";
 import type { ATraiterAttentionCard } from "@/lib/a-traiter/attention-board";
+import {
+  buildAttentionDisplayCategories,
+  type AttentionDisplayCategorySummary,
+} from "@/lib/a-traiter/display-categories";
 import { projectWhereForClientUser } from "@/lib/organization/access";
 import { PURCHASE_ORDER_STATUS_LABELS } from "@/lib/purchase-orders/status";
 import { purchaseOrderAttentionActionUrl } from "@/lib/purchase-orders/attention/sync-notifications";
@@ -101,6 +105,8 @@ export type AccueilOpsSummary = {
   attentionTotal: number;
   attentionCapped: boolean;
   attention: AccueilAttentionItem[];
+  /** ATTENTION-UI-2 — synthèses par famille (max 4, sans carte vide). */
+  attentionCategories: AttentionDisplayCategorySummary[];
   agendaTitle: "Aujourd’hui" | "Prochainement";
   agenda: AccueilAgendaItem[];
   chantiers: AccueilChantierWatch[];
@@ -214,6 +220,7 @@ export async function loadAccueilOps(opts: {
           id: opts.userId,
           role: opts.role,
           personType: opts.personType,
+          permissionProfile: opts.permissionProfile,
         },
         { mineOnly },
       ),
@@ -590,6 +597,10 @@ export async function loadAccueilOps(opts: {
       attentionTotal: attentionSnap.total,
       attentionCapped: Boolean(attentionSnap.attentionCapped),
       attention: mapAttention(attentionSnap.attentionCards),
+      attentionCategories: buildAttentionDisplayCategories(attentionSnap.attentionCards, {
+        limit: 4,
+        baseHref: "/dashboard/a-traiter",
+      }),
       agendaTitle,
       agenda: agendaSource.map((e) => ({
         id: e.id,

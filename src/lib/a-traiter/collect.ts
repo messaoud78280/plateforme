@@ -84,6 +84,7 @@ export async function collectATraiter(
     id: string;
     role?: string | null;
     personType?: string | null;
+    permissionProfile?: string | null;
   },
   opts?: { light?: boolean; countOnly?: boolean; homePreview?: boolean; mineOnly?: boolean },
 ): Promise<ATraiterSnapshot> {
@@ -103,7 +104,7 @@ export async function collectATraiter(
   const agentOnly = isAgent(sessionUser) && !isAgencyOrManager(sessionUser);
   const mineOnly = Boolean(opts?.mineOnly) || agentOnly;
   /** Plafond d’échantillon attention pour le badge — jamais présenté comme exact si atteint. */
-  const attentionTake = countOnly ? 200 : homePreview ? 12 : undefined;
+  const attentionTake = countOnly ? 200 : homePreview ? 40 : undefined;
 
   // Items métier + attention : indépendants → parallèle (évite waterfall staff→attention).
   const itemsPromise = (async () => {
@@ -124,7 +125,7 @@ export async function collectATraiter(
           id: user.id,
           role: user.role,
           personType: user.personType,
-          permissionProfile: (user as { permissionProfile?: string | null }).permissionProfile,
+          permissionProfile: user.permissionProfile ?? null,
         },
         mineOnly ? user.id : null,
         light,
@@ -163,9 +164,7 @@ export async function collectATraiter(
       ? attentionCards.filter(
           (c) => c.effectiveUrgency === "CRITIQUE" || c.effectiveUrgency === "URGENT",
         )
-      : homePreview
-        ? attentionCards.slice(0, 5)
-        : attentionCards,
+      : attentionCards,
     attentionCounts,
     hotCount,
     items,
@@ -876,12 +875,13 @@ export async function summarizeATraiter(user: {
   return summary;
 }
 
-/** Accueil V2A — cartes attention (max 5) sans collect staff/client. */
+/** Accueil V2A — cartes attention (échantillon home) sans collect staff/client. */
 export async function previewATraiterForHome(
   user: {
     id: string;
     role?: string | null;
     personType?: string | null;
+    permissionProfile?: string | null;
   },
   opts?: { mineOnly?: boolean },
 ) {

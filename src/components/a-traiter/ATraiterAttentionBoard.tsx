@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ATTENTION_CATEGORY_LABELS,
   ATTENTION_URGENCY_ORDER,
@@ -11,6 +12,13 @@ import {
   type AttentionProblemCategory,
   type AttentionSubjectType,
 } from "@/lib/a-traiter/attention-board";
+import {
+  ATTENTION_DISPLAY_CATEGORIES,
+  buildAttentionDisplayCategories,
+  filterCardsByDisplayCategory,
+  parseAttentionDisplayTypeParam,
+  type AttentionDisplayCategoryId,
+} from "@/lib/a-traiter/display-categories";
 import { URGENCY_LABELS, URGENCY_STYLES, type UrgencyLevel } from "@/lib/follow-up/types";
 import { FollowUpInlineActions } from "@/components/follow-up/FollowUpInlineActions";
 import { cn } from "@/lib/cn";
@@ -19,9 +27,16 @@ type Props = {
   cards: ATraiterAttentionCard[];
   currentUserId: string;
   canEdit: boolean;
+  initialDisplayType?: string | null;
 };
 
-export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props) {
+export function ATraiterAttentionBoard({
+  cards,
+  currentUserId,
+  canEdit,
+  initialDisplayType = null,
+}: Props) {
+  const router = useRouter();
   const [q, setQ] = useState("");
   const [mineOnly, setMineOnly] = useState(false);
   const [urgency, setUrgency] = useState<UrgencyLevel | "all">("all");
@@ -39,7 +54,15 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
     return "all";
   });
   const [subjectType, setSubjectType] = useState<AttentionSubjectType | "all">("all");
+  const [displayType, setDisplayType] = useState<AttentionDisplayCategoryId | "all">(() =>
+    parseAttentionDisplayTypeParam(initialDisplayType),
+  );
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const displayCategories = useMemo(
+    () => buildAttentionDisplayCategories(cards, { limit: 8 }),
+    [cards],
+  );
 
   const assignees = useMemo(() => {
     const map = new Map<string, string>();
@@ -64,21 +87,9 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
     return [...set].sort((a, b) => a.localeCompare(b, "fr"));
   }, [cards]);
 
-  const filtered = useMemo(
-    () =>
-      filterAttentionCards(cards, {
-        q,
-        mineOnly,
-        currentUserId,
-        urgency,
-        assigneeId,
-        clientName,
-        projectTitle,
-        category,
-        subjectType,
-      }),
-    [
-      cards,
+  const filtered = useMemo(() => {
+    const byDisplay = filterCardsByDisplayCategory(cards, displayType);
+    return filterAttentionCards(byDisplay, {
       q,
       mineOnly,
       currentUserId,
@@ -88,8 +99,29 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
       projectTitle,
       category,
       subjectType,
-    ],
-  );
+    });
+  }, [
+    cards,
+    displayType,
+    q,
+    mineOnly,
+    currentUserId,
+    urgency,
+    assigneeId,
+    clientName,
+    projectTitle,
+    category,
+    subjectType,
+  ]);
+
+  function selectDisplayType(next: AttentionDisplayCategoryId | "all") {
+    setDisplayType(next);
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (next === "all") url.searchParams.delete("type");
+    else url.searchParams.set("type", ATTENTION_DISPLAY_CATEGORIES[next].typeParam);
+    router.replace(url.pathname + url.search, { scroll: false });
+  }
 
   const groups = useMemo(() => groupAttentionCards(filtered), [filtered]);
 
@@ -97,6 +129,36 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
 
   return (
     <div className="space-y-4" data-demo-target="a-traiter-board">
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => selectDisplayType("all")}
+          className={cn(
+            "rounded-full px-3 py-1.5 text-xs font-semibold transition",
+            displayType === "all"
+              ? "bg-[#1e3a5f] text-white"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+          )}
+        >
+          Tous {cards.length}
+        </button>
+        {displayCategories.map((cat) => (
+          <button
+            key={cat.id}
+            type="button"
+            onClick={() => selectDisplayType(cat.id)}
+            className={cn(
+              "rounded-full px-3 py-1.5 text-xs font-semibold transition",
+              displayType === cat.id
+                ? "bg-[#1e3a5f] text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+            )}
+          >
+            {cat.label} {cat.count}
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-wrap items-end gap-2 rounded-[var(--cc-radius-lg)] border border-[color:var(--cc-border)] bg-white p-3 shadow-[var(--cc-shadow)]">
         <label className="min-w-[140px] flex-1 text-[11px] font-semibold uppercase tracking-wide text-bework-muted">
           Recherche
@@ -394,6 +456,14 @@ function AttentionCard({
             className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
           >
             Voir la mission
+          </Link>
+        ) : null}
+        {card.subjectType === "ANNUAL_CONTRACT" ? (
+          <Link
+            href="/dashboard/contrats-annuels"
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
+          >
+            Contrats annuels
           </Link>
         ) : null}
         {card.subjectType === "FOLLOW_UP" &&

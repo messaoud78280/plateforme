@@ -25,16 +25,48 @@ import {
 } from "@/lib/ged/document-hub-ui";
 import {
   CATEGORY_TO_DOCUMENT_TYPE,
-  formatCategoryCounts,
   type HubCategoryId,
 } from "@/lib/ged/hub-categories";
 import { cn } from "@/lib/cn";
+import type { LucideIcon } from "lucide-react";
+import {
+  Archive,
+  Building2,
+  Calculator,
+  Camera,
+  CheckCircle2,
+  ChevronRight,
+  ClipboardList,
+  FileSpreadsheet,
+  FileText,
+  FolderOpen,
+  Package,
+  Receipt,
+  Search,
+  Shield,
+} from "lucide-react";
 
 const SORT_OPTIONS: { id: HubSort; label: string }[] = [
   { id: "recent", label: "Plus récents" },
   { id: "oldest", label: "Plus anciens" },
   { id: "name", label: "Nom A-Z" },
 ];
+
+const CATEGORY_ICONS: Record<HubCategoryId, LucideIcon> = {
+  devis_avenants: Calculator,
+  factures_situations: Receipt,
+  plans_techniques: FileSpreadsheet,
+  fiches_techniques: FileText,
+  commandes_bl: Package,
+  fournisseurs: Building2,
+  comptes_rendus: ClipboardList,
+  photos: Camera,
+  doe: Archive,
+  marche_dce: FolderOpen,
+  securite_methodes: Shield,
+  qualite_controles: CheckCircle2,
+  autres: FileText,
+};
 
 const RECENT_Q_KEY = "bework.ged.recentSearches";
 
@@ -320,21 +352,25 @@ export function DocumentsHubClient({
     : "Rechercher un document, chantier, fournisseur, référence…";
 
   return (
-    <div className="mx-auto w-full max-w-[1040px] space-y-6 px-4 pb-16 pt-6 sm:px-6">
+    <div className="mx-auto w-full max-w-[1200px] space-y-8 px-4 pb-20 pt-8 sm:px-6 lg:px-8">
       <DocumentPreviewModal
         open={Boolean(preview)}
         onClose={() => setPreview(null)}
         item={preview}
       />
 
-      <header className="space-y-2">
-        <h1 className="text-[2rem] font-semibold tracking-tight text-[#1e3a5f] sm:text-[2.25rem]">
+      <header className="space-y-2.5">
+        <h1 className="text-[1.75rem] font-semibold tracking-tight text-[#1e3a5f] sm:text-[2rem]">
           {title}
         </h1>
-        <p className="max-w-xl text-[15px] leading-relaxed text-slate-500">{subtitle}</p>
+        <p className="max-w-2xl text-[15px] leading-relaxed text-slate-500">{subtitle}</p>
       </header>
 
       <div className="relative">
+        <Search
+          className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400"
+          aria-hidden
+        />
         <input
           ref={searchRef}
           value={q}
@@ -354,7 +390,7 @@ export function DocumentsHubClient({
             }
           }}
           placeholder={searchPlaceholder}
-          className="h-14 w-full rounded-2xl border border-slate-200/80 bg-white px-5 pr-12 text-[15px] text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-[#1e3a5f]/30 focus:ring-4 focus:ring-[#1e3a5f]/8"
+          className="h-14 w-full rounded-2xl border border-slate-200/90 bg-white pl-12 pr-12 text-[15px] text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#1e3a5f]/25 focus:ring-4 focus:ring-[#1e3a5f]/10"
           aria-label="Rechercher un document"
           autoComplete="off"
         />
@@ -401,48 +437,80 @@ export function DocumentsHubClient({
         ) : null}
       </div>
 
-      <nav className="flex gap-1 overflow-x-auto border-b border-slate-100 pb-px" aria-label="Vues documents">
-        {shownViews.map((v) => (
-          <button
-            key={v.id}
-            type="button"
-            onClick={() =>
-              go({
-                view: v.id,
-                page: "1",
-                group: "all",
-                ...(v.id === "recent" ? { sort: "recent" } : {}),
-              })
-            }
-            className={cn(
-              "shrink-0 border-b-2 px-3 py-2.5 text-[13px] font-medium transition",
-              view === v.id
-                ? "border-[#1e3a5f] text-[#1e3a5f]"
-                : "border-transparent text-slate-500 hover:text-slate-800",
-            )}
-          >
-            {v.label}
-          </button>
-        ))}
+      <nav
+        className="inline-flex max-w-full gap-0.5 overflow-x-auto rounded-xl border border-slate-200/80 bg-slate-50/80 p-1"
+        aria-label="Vues documents"
+      >
+        {shownViews.map((v) => {
+          const active = view === v.id;
+          const isClassify = v.id === "classify";
+          const tabLabel = isClassify ? "À classer" : v.label;
+          return (
+            <button
+              key={v.id}
+              type="button"
+              onClick={() =>
+                go({
+                  view: v.id,
+                  page: "1",
+                  group: "all",
+                  ...(v.id === "recent" ? { sort: "recent" } : {}),
+                })
+              }
+              className={cn(
+                "inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors duration-150",
+                active
+                  ? "border border-slate-200/90 bg-white text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+                  : "border border-transparent text-slate-500 hover:text-slate-800",
+              )}
+            >
+              {tabLabel}
+              {isClassify && classifyCount > 0 ? (
+                <span
+                  className={cn(
+                    "inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums",
+                    active
+                      ? "bg-amber-50 text-amber-800/80"
+                      : "bg-slate-200/70 text-slate-600",
+                  )}
+                >
+                  {classifyCount}
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
       </nav>
 
       {inCategory ? (
-        <div className="flex flex-wrap items-center gap-2 text-[13px]">
-          <button
-            type="button"
-            onClick={() => go({ view: "categories", group: "all", page: "1" })}
-            className="font-medium text-slate-500 hover:text-[#1e3a5f]"
-          >
-            Catégories
-          </button>
-          <span className="text-slate-300">/</span>
-          <span className="font-semibold text-[#1e3a5f]">{hubCategoryLabel(group)}</span>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 pt-1 text-[13px]">
           <button
             type="button"
             onClick={() => go({ view: "all", group: "all", page: "1" })}
+            className="font-medium text-slate-400 transition-colors hover:text-[#1e3a5f]"
+          >
+            Documents
+          </button>
+          <span className="text-slate-300" aria-hidden>
+            /
+          </span>
+          <button
+            type="button"
+            onClick={() => go({ view: "categories", group: "all", page: "1" })}
+            className="font-medium text-slate-500 transition-colors hover:text-[#1e3a5f]"
+          >
+            Catégories
+          </button>
+          <span className="text-slate-300" aria-hidden>
+            /
+          </span>
+          <span className="font-semibold text-slate-900">{hubCategoryLabel(group)}</span>
+          <button
+            type="button"
+            onClick={() => go({ view: "categories", group: "all", page: "1" })}
             className="ml-auto text-[12px] font-medium text-[#1e3a5f] hover:underline"
           >
-            Tous les documents
+            Toutes les catégories
           </button>
         </div>
       ) : null}
@@ -512,43 +580,93 @@ export function DocumentsHubClient({
       )}
 
       {showCategoryCards ? (
-        <div className="space-y-1" aria-busy={pending}>
+        <div className="pt-1" aria-busy={pending}>
           {(categoryStats ?? []).length === 0 ? (
-            <div className="py-14 text-center">
+            <div className="py-16 text-center">
               <p className="text-lg font-medium text-slate-800">{empty.title}</p>
               <p className="mx-auto mt-2 max-w-md text-[14px] leading-relaxed text-slate-500">
                 {empty.body}
               </p>
             </div>
           ) : (
-            <ul className="divide-y divide-slate-100">
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
               {(categoryStats ?? []).map((cat) => {
-                const counts = formatCategoryCounts(cat.availableCount, cat.missingCount);
+                const Icon = CATEGORY_ICONS[cat.id] ?? FileText;
                 const totalCat = cat.availableCount + cat.missingCount;
+                const previews = cat.previewTitles.slice(0, 3);
+                const extra = Math.max(0, totalCat - previews.length);
+                const availableLabel =
+                  cat.availableCount === 0
+                    ? null
+                    : `${cat.availableCount} document${cat.availableCount > 1 ? "s" : ""}`;
                 return (
-                  <li key={cat.id}>
+                  <li key={cat.id} className="h-full">
                     <button
                       type="button"
                       onClick={() =>
                         go({ view: "categories", group: cat.id, page: "1" })
                       }
-                      className="flex w-full items-start gap-3 py-3.5 text-left transition hover:bg-slate-50/80 sm:items-center"
+                      className="group flex h-full w-full flex-col rounded-2xl border border-slate-200/90 bg-white p-5 text-left transition-[border-color,background-color] duration-200 hover:border-slate-300 hover:bg-slate-50/60 sm:p-6"
                     >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[15px] font-semibold text-slate-900">{cat.label}</p>
-                        <p className="mt-0.5 text-[13px] text-slate-500">{counts}</p>
-                        {cat.previewTitles.length > 0 ? (
-                          <p className="mt-1 hidden truncate text-[12px] text-slate-400 sm:block">
-                            {cat.previewTitles.join(" · ")}
-                          </p>
-                        ) : null}
-                      </div>
-                      <span className="shrink-0 self-center text-[13px] font-medium text-[#1e3a5f]">
-                        <span className="hidden sm:inline">Voir les {totalCat} →</span>
-                        <span className="sm:hidden" aria-hidden>
-                          ›
+                      <div className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 ring-1 ring-slate-100">
+                          <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
                         </span>
-                      </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[16px] font-semibold leading-snug tracking-tight text-slate-900">
+                            {cat.label}
+                          </p>
+                          {availableLabel ? (
+                            <p className="mt-1.5 text-[14px] font-medium text-slate-700">
+                              {availableLabel}
+                            </p>
+                          ) : (
+                            <p className="mt-1.5 text-[14px] font-medium text-slate-500">
+                              Aucun fichier disponible
+                            </p>
+                          )}
+                          {cat.missingCount > 0 ? (
+                            <span className="mt-2 inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-[12px] font-medium text-amber-800/85 ring-1 ring-amber-100/80">
+                              {cat.missingCount} à récupérer
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      {previews.length > 0 ? (
+                        <ul className="mt-5 min-h-[4.5rem] space-y-1.5 border-t border-slate-100 pt-4">
+                          {previews.map((titlePreview, idx) => (
+                            <li
+                              key={`${cat.id}-${idx}`}
+                              className={cn(
+                                "truncate text-[13px] text-slate-500",
+                                idx === 2 && "hidden sm:block",
+                              )}
+                            >
+                              {titlePreview}
+                            </li>
+                          ))}
+                          {extra > 0 ? (
+                            <li className="text-[12px] font-medium text-slate-400">
+                              + {extra} autre{extra > 1 ? "s" : ""}
+                            </li>
+                          ) : previews.length === 3 ? (
+                            <li className="text-[12px] font-medium text-slate-400 sm:hidden">
+                              + 1 autre
+                            </li>
+                          ) : null}
+                        </ul>
+                      ) : (
+                        <div className="mt-5 min-h-[4.5rem] border-t border-slate-100 pt-4" />
+                      )}
+
+                      <div className="mt-auto flex items-center gap-1 pt-5 text-[13px] font-medium text-[#1e3a5f]">
+                        <span>Voir les documents</span>
+                        <ChevronRight
+                          className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                          aria-hidden
+                        />
+                      </div>
                     </button>
                   </li>
                 );

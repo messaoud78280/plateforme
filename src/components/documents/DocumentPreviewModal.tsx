@@ -221,7 +221,7 @@ export function DocumentPreviewModal({
                 target="_blank"
                 rel="noopener noreferrer"
                 download={item.name}
-                className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
+                className="rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#16304f]"
               >
                 Télécharger
               </a>
@@ -229,7 +229,7 @@ export function DocumentPreviewModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               Fermer
             </button>
@@ -250,29 +250,34 @@ export function DocumentPreviewModal({
           ) : error ? (
             <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
               <p className="text-base font-semibold text-slate-900">
-                Impossible d’ouvrir ce document.
+                Impossible d’ouvrir ce document
               </p>
               <p className="mt-2 text-sm text-slate-600">
-                {error === "Impossible d’ouvrir ce document."
-                  ? "Le fichier est inaccessible ou n’est plus disponible."
-                  : error}
+                Le fichier n’est pas disponible actuellement.
               </p>
               <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                  className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                 >
                   Fermer
                 </button>
-                {item.chantierFileId || item.url ? (
+                {downloadHref ? (
+                  <a
+                    href={downloadHref}
+                    download={item.name}
+                    className="rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#16304f]"
+                  >
+                    Télécharger le document
+                  </a>
+                ) : item.chantierFileId || item.url ? (
                   <button
                     type="button"
                     onClick={() => {
                       setError("");
                       setPreviewUrl(null);
                       setLoading(true);
-                      // Relance l’effet via bascule légère
                       const id = item.chantierFileId;
                       if (id) {
                         void fetch(chantierPreviewUrl(id))

@@ -8,6 +8,15 @@ import {
 import { DocumentPreviewModal, type DocumentPreviewItem } from "@/components/documents/DocumentPreviewModal";
 import { ChantierFileShareDialog } from "@/components/chantier/ChantierFileShareDialog";
 import { GedDocumentRow } from "@/components/ged/GedDocumentRow";
+import {
+  GedBackLink,
+  GedBreadcrumb,
+  GedCategoryGrid,
+  GedEmptyState,
+  GedPrimaryButton,
+  GedSecondaryButton,
+  GedViewTabs,
+} from "@/components/ged/GedUi";
 import { displayGedTypeLabel } from "@/lib/ged/classify-document";
 import { folderDisplayLabel } from "@/lib/ged/origin";
 import type { HubDocumentItem, HubView, HubCategoryId } from "@/lib/ged/document-hub-ui";
@@ -15,14 +24,14 @@ import {
   HUB_DOC_TYPES,
   HUB_ORIGIN_FILTERS,
   hubCategoryLabel,
+  hubEmptyCopy,
   hubItemMatchesQuery,
   visibleHubViews,
 } from "@/lib/ged/document-hub-ui";
 import {
   buildCategoryStats,
-  formatCategoryCounts,
 } from "@/lib/ged/hub-categories";
-import { cn } from "@/lib/cn";
+import { Search } from "lucide-react";
 
 export type ChantierFolderWithFiles = {
   id: string;
@@ -315,7 +324,7 @@ export function ChantierDossierSection({
   const firstFolder = folders[0]?.id;
 
   return (
-    <section id="dossier-chantier" className="scroll-mt-24 rounded-xl border border-slate-200 bg-white shadow-sm">
+    <section id="dossier-chantier" className="scroll-mt-24 space-y-6 rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6">
       <DocumentPreviewModal
         open={Boolean(preview)}
         onClose={() => setPreview(null)}
@@ -329,11 +338,20 @@ export function ChantierDossierSection({
         fileName={shareFile?.name ?? ""}
       />
 
-      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+      <div className="space-y-3">
+        {projectTitle ? (
+          <GedBackLink href={`/dashboard/projets/${projectId}`} label={projectTitle} />
+        ) : null}
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">Documents du chantier</h2>
-            <p className="mt-1 text-sm text-slate-500">Tous les documents liés à ce chantier.</p>
+            <h2 className="text-[1.5rem] font-semibold tracking-tight text-[#1e3a5f] sm:text-[1.75rem]">
+              Documents
+            </h2>
+            <p className="mt-1 text-[15px] text-slate-500">
+              {projectTitle
+                ? `Tous les documents de ${projectTitle}`
+                : "Tous les documents liés à ce chantier."}
+            </p>
             {fileCount > 0 || missingCount > 0 ? (
               <p className="mt-1.5 text-[12px] text-slate-400">
                 {fileCount} document{fileCount !== 1 ? "s" : ""}
@@ -345,13 +363,9 @@ export function ChantierDossierSection({
           </div>
           {canEdit ? (
             <div className="relative">
-              <button
-                type="button"
-                onClick={() => setAddOpen((o) => !o)}
-                className="rounded-full bg-[#1e3a5f] px-3.5 py-1.5 text-[13px] font-medium text-white hover:bg-[#16304f]"
-              >
+              <GedPrimaryButton onClick={() => setAddOpen((o) => !o)} aria-expanded={addOpen}>
                 Ajouter
-              </button>
+              </GedPrimaryButton>
               {addOpen && firstFolder ? (
                 <div className="absolute right-0 z-20 mt-1.5 w-56 rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
                   <label className="block cursor-pointer px-3 py-2 text-[13px] text-slate-700 hover:bg-slate-50">
@@ -382,104 +396,95 @@ export function ChantierDossierSection({
             </div>
           ) : null}
         </div>
-        {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      </div>
 
-        <div className="relative mt-4">
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={`Rechercher dans ${projectTitle || "ce chantier"}…`}
-            className="h-12 w-full rounded-2xl border border-slate-200/80 bg-white px-4 pr-10 text-[14px] text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#1e3a5f]/30 focus:ring-4 focus:ring-[#1e3a5f]/8"
-            aria-label="Rechercher dans ce chantier"
-            autoComplete="off"
-          />
-          {q ? (
-            <button
-              type="button"
-              onClick={() => setQ("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-              aria-label="Effacer la recherche"
-            >
-              ×
-            </button>
-          ) : null}
-        </div>
-
-        <nav className="mt-4 flex gap-1 overflow-x-auto border-b border-slate-100 pb-px" aria-label="Vues documents du chantier">
-          {shownViews.map((v) => (
-            <button
-              key={v.id}
-              type="button"
-              onClick={() => {
-                setView(v.id);
-                setCategoryFilter(null);
-                setShowAllDocs(v.id !== "all");
-              }}
-              className={cn(
-                "shrink-0 border-b-2 px-3 py-2 text-[13px] font-medium",
-                view === v.id
-                  ? "border-[#1e3a5f] text-[#1e3a5f]"
-                  : "border-transparent text-slate-500 hover:text-slate-800",
-              )}
-            >
-              {v.label}
-            </button>
-          ))}
-        </nav>
-
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div className="relative">
+        <Search
+          className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400"
+          aria-hidden
+        />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Rechercher un document, chantier, fournisseur, référence…"
+          className="h-14 w-full rounded-2xl border border-slate-200/90 bg-white pl-12 pr-12 text-[15px] text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#1e3a5f]/25 focus:ring-4 focus:ring-[#1e3a5f]/10"
+          aria-label="Rechercher dans ce chantier"
+          autoComplete="off"
+        />
+        {q ? (
           <button
             type="button"
-            onClick={() => setFiltersOpen((o) => !o)}
-            className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[13px] font-medium text-slate-600"
-            aria-expanded={filtersOpen}
+            onClick={() => setQ("")}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+            aria-label="Effacer la recherche"
           >
-            Filtres
+            ×
           </button>
-        </div>
-        {filtersOpen ? (
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <label className="block text-[12px] font-medium text-slate-500">
-              Type
-              <select
-                value={docType}
-                onChange={(e) => setDocType(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-              >
-                {HUB_DOC_TYPES.map((t) => (
-                  <option key={t.id || "all"} value={t.id}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block text-[12px] font-medium text-slate-500">
-              Source
-              <select
-                value={origin}
-                onChange={(e) => setOrigin(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-              >
-                <option value="">Toutes</option>
-                {HUB_ORIGIN_FILTERS.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
         ) : null}
       </div>
 
+      <GedViewTabs
+        views={shownViews}
+        active={view}
+        classifyCount={classifyCount}
+        onChange={(id) => {
+          setView(id);
+          setCategoryFilter(null);
+          setShowAllDocs(id !== "all");
+        }}
+      />
+
+      <div className="flex flex-wrap items-center gap-2">
+        <GedSecondaryButton
+          onClick={() => setFiltersOpen((o) => !o)}
+          aria-expanded={filtersOpen}
+        >
+          Filtres
+        </GedSecondaryButton>
+      </div>
+      {filtersOpen ? (
+        <div className="grid gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-4 sm:grid-cols-2">
+          <label className="block text-[12px] font-medium text-slate-500">
+            Type
+            <select
+              value={docType}
+              onChange={(e) => setDocType(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+            >
+              {HUB_DOC_TYPES.map((t) => (
+                <option key={t.id || "all"} value={t.id}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-[12px] font-medium text-slate-500">
+            Source
+            <select
+              value={origin}
+              onChange={(e) => setOrigin(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+            >
+              <option value="">Toutes</option>
+              {HUB_ORIGIN_FILTERS.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      ) : null}
+
       {showLanding ? (
-        <div className="px-5 py-5 sm:px-6">
+        <div>
           {recents.length > 0 ? (
             <section className="mb-8">
               <h3 className="mb-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                 Récemment
               </h3>
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200/90 bg-white px-1 sm:px-2">
                 {recents.map((it) => (
                   <GedDocumentRow
                     key={it.id}
@@ -511,7 +516,7 @@ export function ChantierDossierSection({
             <h3 className="mb-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-slate-400">
               Par catégorie
             </h3>
-            <div className="divide-y divide-slate-100 rounded-xl border border-slate-100">
+            <div className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200/90">
               {visibleFolders.map((folder) => (
                 <FolderBlock
                   key={folder.id}
@@ -543,82 +548,85 @@ export function ChantierDossierSection({
           </section>
         </div>
       ) : showCategoryCards ? (
-        <div className="px-5 py-4 sm:px-6">
-          {categoryStats.length === 0 ? (
-            <p className="py-8 text-center text-sm text-slate-500">Aucune catégorie pour ce chantier.</p>
-          ) : (
-            <ul className="divide-y divide-slate-100">
-              {categoryStats.map((cat) => {
-                const counts = formatCategoryCounts(cat.availableCount, cat.missingCount);
-                const totalCat = cat.availableCount + cat.missingCount;
-                return (
-                  <li key={cat.id}>
-                    <button
-                      type="button"
-                      onClick={() => setCategoryFilter(cat.id)}
-                      className="flex w-full items-center gap-3 py-3 text-left hover:bg-slate-50/80"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[15px] font-semibold text-slate-900">{cat.label}</p>
-                        <p className="mt-0.5 text-[13px] text-slate-500">{counts}</p>
-                      </div>
-                      <span className="shrink-0 text-[13px] font-medium text-[#1e3a5f]">
-                        <span className="hidden sm:inline">Voir les {totalCat} →</span>
-                        <span className="sm:hidden">›</span>
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
+        <GedCategoryGrid
+          stats={categoryStats}
+          onOpen={(id) => setCategoryFilter(id)}
+          empty={
+            <GedEmptyState
+              title="Aucune catégorie"
+              body="Aucune catégorie pour ce chantier."
+            />
+          }
+        />
       ) : (
-        <div className="px-5 py-4 sm:px-6">
+        <div>
           {view === "categories" && categoryFilter ? (
-            <div className="mb-3 flex flex-wrap items-center gap-2 text-[13px]">
-              <button
-                type="button"
+            <div className="mb-4 space-y-2">
+              <GedBackLink
+                label="Toutes les catégories"
                 onClick={() => setCategoryFilter(null)}
-                className="font-medium text-slate-500 hover:text-[#1e3a5f]"
-              >
-                Catégories
-              </button>
-              <span className="text-slate-300">/</span>
-              <span className="font-semibold text-[#1e3a5f]">
+              />
+              <GedBreadcrumb
+                items={[
+                  { label: projectTitle || "Chantier" },
+                  {
+                    label: "Documents",
+                    onClick: () => {
+                      setView("all");
+                      setCategoryFilter(null);
+                      setShowAllDocs(false);
+                    },
+                  },
+                  { label: hubCategoryLabel(categoryFilter) },
+                ]}
+              />
+              <h3 className="text-[1.125rem] font-semibold text-slate-900">
                 {hubCategoryLabel(categoryFilter)}
-              </span>
+              </h3>
             </div>
           ) : null}
           {searching && filteredItems.length === 0 ? (
-            <div className="py-10 text-center">
-              <p className="text-[15px] font-medium text-slate-800">Aucun résultat pour « {q.trim()} »</p>
-              <button
-                type="button"
-                onClick={() => setQ("")}
-                className="mt-4 text-[13px] font-medium text-[#1e3a5f] hover:underline"
-              >
-                Effacer la recherche
-              </button>
-            </div>
+            <GedEmptyState
+              title="Aucun résultat"
+              body="Aucun document ne correspond à votre recherche."
+              action={
+                <button
+                  type="button"
+                  onClick={() => setQ("")}
+                  className="text-[13px] font-medium text-[#1e3a5f] hover:underline"
+                >
+                  Effacer la recherche
+                </button>
+              }
+            />
           ) : !searching && (docType || origin) && filteredItems.length === 0 ? (
-            <div className="py-10 text-center">
-              <p className="text-[15px] font-medium text-slate-800">Aucun document ne correspond à ces filtres.</p>
-              <button
-                type="button"
-                onClick={() => {
-                  setDocType("");
-                  setOrigin("");
-                }}
-                className="mt-4 text-[13px] font-medium text-[#1e3a5f] hover:underline"
-              >
-                Effacer les filtres
-              </button>
-            </div>
+            <GedEmptyState
+              title="Aucun résultat"
+              body="Aucun document ne correspond à ces filtres."
+              action={
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDocType("");
+                    setOrigin("");
+                  }}
+                  className="text-[13px] font-medium text-[#1e3a5f] hover:underline"
+                >
+                  Effacer les filtres
+                </button>
+              }
+            />
           ) : filteredItems.length === 0 ? (
-            <p className="py-8 text-center text-sm text-slate-500">Aucun document pour l’instant.</p>
+            <GedEmptyState
+              {...hubEmptyCopy({
+                group: "all",
+                view,
+                search: q,
+                hasFilters: Boolean(docType || origin),
+              })}
+            />
           ) : (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200/90 bg-white px-1 sm:px-2">
               {filteredItems.map((it) => (
                 <GedDocumentRow
                   key={it.id}
@@ -696,7 +704,7 @@ function FolderBlock({
         </span>
         <span className="flex shrink-0 items-center gap-2">
           {missingCount > 0 ? (
-            <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800">
+            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800/90 ring-1 ring-amber-100/80">
               {missingCount} à récupérer
             </span>
           ) : null}

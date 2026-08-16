@@ -249,15 +249,15 @@ export function hubEmptyCopy(opts: {
   const q = (opts.search ?? "").trim();
   if (q) {
     return {
-      title: `Aucun résultat pour « ${q} »`,
-      body: "Essayez un autre mot, un chantier ou une référence.",
+      title: "Aucun résultat",
+      body: "Aucun document ne correspond à votre recherche.",
       action: "clear-search",
     };
   }
   if (opts.hasFilters) {
     return {
-      title: "Aucun document ne correspond à ces filtres.",
-      body: "Retirez un filtre pour élargir la recherche.",
+      title: "Aucun résultat",
+      body: "Aucun document ne correspond à ces filtres.",
       action: "clear-filters",
     };
   }
@@ -271,19 +271,19 @@ export function hubEmptyCopy(opts: {
   if (opts.view === "favorites") {
     return {
       title: "Aucun favori",
-      body: "Marquez d’une étoile les plans, CCTP ou contrats que vous consultez souvent.",
+      body: "Ajoutez une étoile aux documents que vous consultez souvent.",
     };
   }
   if (opts.view === "missing") {
     return {
-      title: "Rien à récupérer",
-      body: "Les pièces encore manquantes (fiches techniques, attestations, PV) apparaîtront ici.",
+      title: "Aucun document à récupérer",
+      body: "Tous les documents attendus sont disponibles.",
     };
   }
   if (opts.view === "classify") {
     return {
       title: "Rien à classer",
-      body: "Les documents sans chantier ou type suffisamment connu apparaîtront ici.",
+      body: "Ces documents ont besoin d’une catégorie — aucun pour l’instant.",
     };
   }
   if (opts.view === "categories" && opts.group === "all") {
@@ -308,7 +308,7 @@ export function hubEmptyCopy(opts: {
 
   return {
     title: "Aucun document",
-    body: "Les documents ajoutés depuis vos chantiers et outils BeWork apparaîtront ici automatiquement.",
+    body: "Ajoutez votre premier document.",
     action: "add",
   };
 }

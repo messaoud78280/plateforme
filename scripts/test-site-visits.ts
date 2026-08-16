@@ -64,6 +64,60 @@ async function main() {
   assert.equal(unitsCompatible("m²", "m2"), true);
   assert.equal(unitsCompatible("ml", "m²"), false);
 
+  const { buildQuoteImpactPoints } = await import("../src/lib/site-visits/impact");
+  const { buildVisitSummary } = await import("../src/lib/site-visits/summary");
+  const impact = buildQuoteImpactPoints({
+    constraints: {
+      accessLevel: "Difficile",
+      access: ["Accès nacelle", "Stationnement difficile"],
+      supportState: "Dégradé",
+      supportObservations: ["Infiltration"],
+      asbestosStatus: "Diagnostic à demander",
+      waste: ["Évacuation à prévoir"],
+      means: ["Nacelle", "Protection des parties communes"],
+    },
+  });
+  assert.ok(impact.some((p) => p.id === "nacelle"));
+  assert.ok(impact.some((p) => p.id === "dechets"));
+  assert.ok(impact.some((p) => p.id === "support" && p.severity === "warn"));
+  assert.ok(impact.some((p) => p.id === "amiante" && p.severity === "warn"));
+  assert.ok(!impact.some((p) => /pas d.amiante/i.test(p.label)));
+
+  const summary = buildVisitSummary({
+    clientName: "Résidence Les Peupliers",
+    siteName: "Résidence Les Peupliers",
+    constraints: {
+      supportState: "Dégradé",
+      means: ["Nacelle"],
+      waste: ["Évacuation à prévoir"],
+    },
+    measurements: [
+      {
+        zone: "Terrasse principale",
+        label: "Étanchéité",
+        unit: "m²",
+        computedQuantity: 89.28,
+        quantityLabel: "89,28 m²",
+      },
+      {
+        zone: null,
+        label: "Acrotères",
+        unit: "ml",
+        computedQuantity: 38.5,
+        quantityLabel: "38,50 ml",
+      },
+    ],
+    missingOpen: [{ label: "Diagnostic amiante à obtenir" }],
+    photoCount: 2,
+    documentCount: 1,
+    estimatedCrewCount: 2,
+    estimatedDuration: "3 jours",
+  });
+  assert.equal(summary.ready, false);
+  assert.equal(summary.missingOpenCount, 1);
+  assert.ok(summary.completenessLabel.includes("1 information"));
+  assert.ok(summary.totalsByUnit.some((t) => t.unit === "m²"));
+
   // SEC-1 / personas
   assert.equal(
     canAccessSiteVisits({ personType: "CLIENT_EXT", permissionProfile: "CLIENT" }),

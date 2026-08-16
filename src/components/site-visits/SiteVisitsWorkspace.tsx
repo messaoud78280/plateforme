@@ -16,12 +16,16 @@ export type VisitListItem = {
   responsibleName: string | null;
   status: string;
   statusLabel: string;
+  estimatedCrewCount?: number | null;
+  estimatedDuration?: string | null;
   stats: {
     measurementCount: number;
     photoCount: number;
     documentCount: number;
     missingOpenCount: number;
     quantitySummary: string[];
+    totalsByUnit?: string[];
+    impactPreview?: string[];
   };
   commercialQuoteNumber: string | null;
   commercialQuoteHref: string | null;
@@ -198,21 +202,59 @@ export function SiteVisitsWorkspace({
                   </p>
                   <p className="truncate text-sm text-slate-500">{v.siteAddress}</p>
                   <p className="mt-1 text-xs text-slate-600">
+                    Visite{v.responsibleName ? ` ${v.responsibleName}` : ""} ·{" "}
                     {formatWhen(v.scheduledAt)}
-                    {v.responsibleName ? ` · ${v.responsibleName}` : ""}
                   </p>
                 </div>
-                <span className="shrink-0 rounded-md bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700">
+                <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
                   {v.statusLabel}
                 </span>
               </div>
-              {(v.stats.measurementCount > 0 || v.stats.photoCount > 0) && (
-                <p className="mt-2 text-xs text-slate-600">
-                  {v.stats.quantitySummary.slice(0, 2).join(" · ") ||
-                    `${v.stats.measurementCount} relevé(s)`}
-                  {v.stats.photoCount ? ` · ${v.stats.photoCount} photo(s)` : ""}
-                  {v.stats.documentCount ? ` · ${v.stats.documentCount} doc(s)` : ""}
-                </p>
+              {(v.stats.totalsByUnit?.length ||
+                v.stats.measurementCount > 0 ||
+                v.stats.photoCount > 0) && (
+                <div className="mt-3 space-y-1.5">
+                  {v.stats.totalsByUnit && v.stats.totalsByUnit.length > 0 ? (
+                    <p className="text-[13px] font-medium tabular-nums text-[#1e3a5f]">
+                      {v.stats.totalsByUnit.join(" · ")}
+                    </p>
+                  ) : v.stats.quantitySummary.length > 0 ? (
+                    <p className="text-[13px] text-slate-700">
+                      {v.stats.quantitySummary.slice(0, 3).join(" · ")}
+                    </p>
+                  ) : null}
+                  <p className="text-[12px] text-slate-500">
+                    {v.stats.photoCount > 0
+                      ? `${v.stats.photoCount} photo${v.stats.photoCount > 1 ? "s" : ""}`
+                      : null}
+                    {v.stats.photoCount > 0 && v.stats.documentCount > 0
+                      ? " · "
+                      : null}
+                    {v.stats.documentCount > 0
+                      ? `${v.stats.documentCount} plan${v.stats.documentCount > 1 ? "s" : ""}`
+                      : null}
+                    {(v.estimatedCrewCount || v.estimatedDuration) &&
+                    (v.stats.photoCount > 0 || v.stats.documentCount > 0)
+                      ? " · "
+                      : null}
+                    {v.estimatedCrewCount
+                      ? `${v.estimatedCrewCount} pers.`
+                      : null}
+                    {v.estimatedCrewCount && v.estimatedDuration ? " · " : null}
+                    {v.estimatedDuration ?? null}
+                  </p>
+                  {v.stats.impactPreview && v.stats.impactPreview.length > 0 ? (
+                    <p className="text-[12px] text-slate-600">
+                      {v.stats.impactPreview.slice(0, 3).join(" · ")}
+                    </p>
+                  ) : null}
+                  {v.stats.missingOpenCount > 0 ? (
+                    <p className="text-[12px] font-medium text-amber-800">
+                      {v.stats.missingOpenCount} info
+                      {v.stats.missingOpenCount > 1 ? "s" : ""} à obtenir
+                    </p>
+                  ) : null}
+                </div>
               )}
             </Link>
             <div className="mt-3 flex flex-wrap gap-2">

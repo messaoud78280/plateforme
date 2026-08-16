@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { createQuote, addLineFromWorkItem } from "@/lib/commercial/quotes";
 import { d } from "@/lib/commercial/decimal";
 import { unitsCompatible } from "@/lib/site-visits/measurements";
+import { buildQuoteImpactPoints } from "@/lib/site-visits/impact";
 
 export type CreateQuoteFromVisitResult = {
   action: "created" | "opened";
@@ -49,6 +50,11 @@ export async function createOrOpenQuoteFromVisit(opts: {
     })
     .join("\n");
 
+  const impactPoints = buildQuoteImpactPoints({
+    constraints: visit.constraintsJson,
+  });
+  const impactNotes = impactPoints.map((p) => `- ${p.label}`).join("\n");
+
   const clientSnapshotJson: Prisma.InputJsonValue = {
     name: visit.clientName,
     address: visit.siteAddress,
@@ -68,8 +74,9 @@ export async function createOrOpenQuoteFromVisit(opts: {
     internalNotes: [
       `Origine : visite terrain ${visit.id}`,
       visit.clientNeed ? `Besoin client : ${visit.clientNeed}` : null,
-      visit.comments ? `Notes : ${visit.comments}` : null,
+      visit.comments ? `Notes terrain : ${visit.comments}` : null,
       measureNotes ? `Avant-métré :\n${measureNotes}` : null,
+      impactNotes ? `Points terrain à considérer :\n${impactNotes}` : null,
       visit.estimatedCrewCount
         ? `Équipe estimée : ${visit.estimatedCrewCount}`
         : null,

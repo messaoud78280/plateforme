@@ -58,17 +58,29 @@ async function main() {
     {
       demoKey: "SETRIM-VISIT-PEUPLIERS",
       clientName: "Résidence Les Peupliers",
+      siteName: "Résidence Les Peupliers",
       siteAddress: "12 Allée des Peupliers, 94000 Créteil",
       subject: "Étanchéité terrasse",
       clientNeed:
-        "Réfection complète de l’étanchéité terrasse avec remplacement de l’isolant.",
+        "Réfection de l’étanchéité de la toiture terrasse avec remplacement de l’isolant.",
       status: "READY_TO_QUOTE" as const,
       scheduledAt: new Date("2026-08-16T09:00:00.000Z"),
       estimatedCrewCount: 2,
       estimatedDuration: "3 jours",
+      constraintsJson: {
+        accessLevel: "Moyen",
+        access: ["Accès toiture", "Accès nacelle", "Stationnement difficile"],
+        occupation: ["Site occupé", "Copropriété"],
+        supportState: "Dégradé",
+        supportObservations: ["Infiltration", "Décollement", "Ancien revêtement"],
+        asbestosStatus: "Diagnostic à demander",
+        waste: ["Évacuation à prévoir", "Benne nécessaire"],
+        means: ["Nacelle", "Protection des parties communes"],
+        estimatedDifficulty: "Standard",
+      },
       measurements: [
         {
-          zone: "Terrasse bâtiment A",
+          zone: "Terrasse principale",
           label: "Étanchéité terrasse",
           measureType: "SURFACE" as const,
           lengthM: 12.4,
@@ -93,7 +105,7 @@ async function main() {
           computedQuantity: 4,
         },
       ],
-      missing: [] as string[],
+      missing: ["Diagnostic amiante à obtenir"] as string[],
     },
     {
       demoKey: "SETRIM-VISIT-REPUBLIQUE",
@@ -164,6 +176,7 @@ async function main() {
         organizationId: orgId,
         demoKey: s.demoKey,
         clientName: s.clientName,
+        siteName: "siteName" in s ? s.siteName ?? null : null,
         siteAddress: s.siteAddress,
         subject: s.subject,
         clientNeed: s.clientNeed,
@@ -171,6 +184,10 @@ async function main() {
         scheduledAt: s.scheduledAt,
         estimatedCrewCount: s.estimatedCrewCount,
         estimatedDuration: s.estimatedDuration,
+        constraintsJson:
+          "constraintsJson" in s && s.constraintsJson
+            ? s.constraintsJson
+            : undefined,
         createdById: owner.ownerUserId,
         responsibleId: owner.ownerUserId,
         measurements: {

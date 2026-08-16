@@ -9,7 +9,9 @@ import {
   formatQuantityLabel,
   type MeasureType,
 } from "@/lib/site-visits/measurements";
-import { SITE_VISIT_STATUS_LABELS, type SiteVisitConstraints } from "@/lib/site-visits/types";
+import { SITE_VISIT_STATUS_LABELS, normalizeConstraints, type SiteVisitConstraints } from "@/lib/site-visits/types";
+import { buildVisitSummary } from "@/lib/site-visits/summary";
+import { buildQuoteImpactPoints } from "@/lib/site-visits/impact";
 import { syncSiteVisitAgenda } from "@/lib/site-visits/agenda-sync";
 
 export type CreateSiteVisitInput = {
@@ -30,8 +32,7 @@ export type CreateSiteVisitInput = {
 };
 
 function serializeConstraints(raw: unknown): SiteVisitConstraints {
-  if (!raw || typeof raw !== "object") return {};
-  return raw as SiteVisitConstraints;
+  return normalizeConstraints(raw);
 }
 
 export function serializeVisit(
@@ -111,6 +112,22 @@ export function serializeVisit(
   const missingOpen = (v.missingInfos ?? []).filter((i) => !i.resolvedAt);
   const photos = (v.medias ?? []).filter((m) => m.kind === "PHOTO");
   const docs = (v.medias ?? []).filter((m) => m.kind === "DOCUMENT");
+  const constraints = serializeConstraints(v.constraintsJson);
+  const impactPoints = buildQuoteImpactPoints({
+    constraints,
+    missingOpenLabels: missingOpen.map((i) => i.label),
+  });
+  const summary = buildVisitSummary({
+    siteName: v.siteName,
+    clientName: v.clientName,
+    constraints,
+    measurements,
+    missingOpen: missingOpen.map((i) => ({ label: i.label })),
+    photoCount: photos.length,
+    documentCount: docs.length,
+    estimatedCrewCount: v.estimatedCrewCount,
+    estimatedDuration: v.estimatedDuration,
+  });
   return {
     id: v.id,
     clientName: v.clientName,
@@ -130,7 +147,7 @@ export function serializeVisit(
     timeConstraints: v.timeConstraints,
     siteOccupied: v.siteOccupied,
     comments: v.comments,
-    constraints: serializeConstraints(v.constraintsJson),
+    constraints,
     estimatedCrewCount: v.estimatedCrewCount,
     estimatedDuration: v.estimatedDuration,
     status: v.status,
@@ -139,7 +156,7 @@ export function serializeVisit(
     commercialQuoteId: v.commercialQuoteId,
     commercialQuoteNumber: v.commercialQuote?.number ?? null,
     commercialQuoteHref: v.commercialQuoteId
-      ? `/dashboard/devis-facturation/devis/${v.commercialQuoteId}`
+      ? `/dashboard/devis-facturation/devis/${v.commercialQuoteId}?fromVisit=${v.id}`
       : null,
     measurements,
     missingInfos: (v.missingInfos ?? []).map((i) => ({
@@ -157,6 +174,8 @@ export function serializeVisit(
       fileUrl: m.fileUrl,
       mimeType: m.mimeType,
     })),
+    impactPoints,
+    summary,
     stats: {
       measurementCount: measurements.length,
       photoCount: photos.length,
@@ -165,6 +184,11 @@ export function serializeVisit(
       quantitySummary: measurements
         .slice(0, 5)
         .map((m) => `${m.label} : ${m.quantityLabel}`),
+      totalsByUnit: summary.totalsByUnit.map((t) => t.label),
+      impactPreview: impactPoints
+        .filter((p) => p.severity === "info")
+        .slice(0, 4)
+        .map((p) => p.label),
     },
   };
 }
@@ -323,7 +347,11 @@ export async function updateSiteVisit(opts: {
   if (typeof d0.comments === "string" || d0.comments === null)
     patch.comments = typeof d0.comments === "string" ? d0.comments.trim() || null : null;
   if (d0.constraints != null && typeof d0.constraints === "object") {
-    patch.constraintsJson = d0.constraints as Prisma.InputJsonValue;
+    const merged = normalizeConstraints({
+      ...normalizeConstraints(existing.constraintsJson),
+      ...(d0.constraints as object),
+    });
+    patch.constraintsJson = merged as Prisma.InputJsonValue;
   }
   if (typeof d0.estimatedCrewCount === "number" || d0.estimatedCrewCount === null)
     patch.estimatedCrewCount =

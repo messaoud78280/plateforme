@@ -18,7 +18,8 @@ type WorkItem = {
 };
 
 /**
- * Panneau devis : associer relevés visite → ouvrages CommercialWorkItem.
+ * Panneau devis : associer relevés visite → ouvrages CommercialWorkItem
+ * + points terrain à considérer (sans auto-pricing).
  */
 export function VisitQuoteMeasurementsPanel({
   visitId,
@@ -30,6 +31,10 @@ export function VisitQuoteMeasurementsPanel({
   canEdit: boolean;
 }) {
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
+  const [impactPoints, setImpactPoints] = useState<
+    Array<{ id: string; label: string; severity: string }>
+  >([]);
+  const [visitHref, setVisitHref] = useState<string | null>(null);
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
   const [selected, setSelected] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -44,6 +49,8 @@ export function VisitQuoteMeasurementsPanel({
       if (vRes.ok) {
         const data = await vRes.json();
         setMeasurements(data.visit?.measurements ?? []);
+        setImpactPoints(data.visit?.impactPoints ?? []);
+        setVisitHref(`/dashboard/visites-metres/${visitId}`);
       }
       if (wRes.ok) {
         const data = await wRes.json();
@@ -115,55 +122,90 @@ export function VisitQuoteMeasurementsPanel({
     }
   }
 
-  if (measurements.length === 0) return null;
+  if (measurements.length === 0 && impactPoints.length === 0) return null;
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4">
-      <h2 className="text-sm font-bold text-[#1e3a5f]">Avant-métré de la visite</h2>
-      <p className="mt-1 text-xs text-slate-500">
-        Associez un relevé à un ouvrage — la quantité est reprise, jamais le prix.
-      </p>
-      {msg ? <p className="mt-2 text-xs text-slate-700">{msg}</p> : null}
-      <ul className="mt-3 space-y-3">
-        {measurements.map((m) => (
-          <li
-            key={m.id}
-            className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2"
-          >
-            <p className="text-sm font-medium text-slate-900">
-              {m.zone ? `${m.zone} — ` : ""}
-              {m.label}
-            </p>
-            <p className="text-sm tabular-nums text-[#1e3a5f]">{m.quantityLabel}</p>
-            {canEdit ? (
-              <div className="mt-2 flex flex-wrap gap-2">
-                <select
-                  value={selected[m.id] ?? ""}
-                  onChange={(e) =>
-                    setSelected({ ...selected, [m.id]: e.target.value })
-                  }
-                  className="min-w-[12rem] flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-xs"
-                >
-                  <option value="">Choisir un ouvrage…</option>
-                  {workItems.map((w) => (
-                    <option key={w.id} value={w.id}>
-                      {w.name} ({w.saleUnit})
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void apply(m.id)}
-                  className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
-                >
-                  Ajouter au devis
-                </button>
-              </div>
-            ) : null}
-          </li>
-        ))}
-      </ul>
+    <section className="space-y-4">
+      {visitHref ? (
+        <a
+          href={visitHref}
+          className="inline-flex text-[13px] font-medium text-[#1e3a5f] hover:underline"
+        >
+          Voir le relevé terrain →
+        </a>
+      ) : null}
+
+      {measurements.length > 0 ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <h2 className="text-sm font-bold text-[#1e3a5f]">Avant-métré de la visite</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Associez un relevé à un ouvrage — la quantité est reprise, jamais le prix.
+          </p>
+          {msg ? <p className="mt-2 text-xs text-slate-700">{msg}</p> : null}
+          <ul className="mt-3 space-y-3">
+            {measurements.map((m) => (
+              <li
+                key={m.id}
+                className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2"
+              >
+                <p className="text-sm font-medium text-slate-900">
+                  {m.zone ? `${m.zone} — ` : ""}
+                  {m.label}
+                </p>
+                <p className="text-sm tabular-nums text-[#1e3a5f]">{m.quantityLabel}</p>
+                {canEdit ? (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <select
+                      value={selected[m.id] ?? ""}
+                      onChange={(e) =>
+                        setSelected({ ...selected, [m.id]: e.target.value })
+                      }
+                      className="min-w-[12rem] flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-xs"
+                    >
+                      <option value="">Choisir un ouvrage…</option>
+                      {workItems.map((w) => (
+                        <option key={w.id} value={w.id}>
+                          {w.name} ({w.saleUnit})
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void apply(m.id)}
+                      className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+                    >
+                      Ajouter au devis
+                    </button>
+                  </div>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {impactPoints.length > 0 ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <h2 className="text-sm font-bold text-[#1e3a5f]">
+            Points terrain à considérer
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Suggestions déterministes — non importées automatiquement, sans prix.
+          </p>
+          <ul className="mt-3 space-y-2">
+            {impactPoints.map((p) => (
+              <li
+                key={p.id}
+                className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[13px] text-slate-800"
+              >
+                {p.severity === "warn" ? "⚠ " : "☑ "}
+                {p.label}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </section>
   );
 }

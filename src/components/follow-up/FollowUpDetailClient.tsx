@@ -30,6 +30,7 @@ type Sheet = {
   id: string;
   title: string;
   clientName: string | null;
+  reference?: string | null;
   osNumber: string | null;
   orderNumber: string | null;
   workObject: string | null;
@@ -142,6 +143,28 @@ export function FollowUpDetailClient({
     attention &&
     attention.effectiveUrgency !== "NORMAL" &&
     (attention.primaryReason || attention.attentionItems.length > 0);
+
+  const annualInterventionId =
+    typeof sheet.reference === "string" && sheet.reference.startsWith("ASI:")
+      ? sheet.reference.slice(4)
+      : null;
+
+  async function prepareAnnualInvoice() {
+    if (!annualInterventionId) return;
+    setBusy(true);
+    try {
+      const res = await fetch(
+        `/api/annual-contracts/interventions/${annualInterventionId}/prepare-invoice`,
+        { method: "POST" },
+      );
+      const data = await res.json();
+      if (res.ok && data.href) {
+        window.open(data.href, "_blank", "noopener,noreferrer");
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
 
   useEffect(() => {
     void fetch("/api/follow-up/options")
@@ -280,7 +303,36 @@ export function FollowUpDetailClient({
         ) : null}
       </header>
 
-      {isPrepareBillingStatus(sheet.status) && sheet.projectId ? (
+      {annualInterventionId && isPrepareBillingStatus(sheet.status) ? (
+        <section className="rounded-2xl border border-slate-200 bg-white p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Contrat annuel
+          </p>
+          <p className="mt-1 text-sm text-slate-700">
+            {sheet.clientName ?? "Client"}
+            {sheet.siteAddress ? ` — ${sheet.siteAddress}` : ""}
+            {sheet.amountHt != null ? ` · ${sheet.amountHt} € HT proposés` : ""}
+          </p>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void prepareAnnualInvoice()}
+            className="mt-2 inline-flex rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
+          >
+            {sheet.nextAction?.toLowerCase().includes("continuer")
+              ? "Continuer la facture"
+              : "Préparer la facture"}
+          </button>
+          <Link
+            href="/dashboard/contrats-annuels?view=piloter"
+            className="ml-2 text-xs font-semibold text-[#1e3a5f] hover:underline"
+          >
+            Voir le contrat
+          </Link>
+        </section>
+      ) : null}
+
+      {isPrepareBillingStatus(sheet.status) && sheet.projectId && !annualInterventionId ? (
         <section className="rounded-2xl border border-slate-200 bg-white p-4">
           <p className="text-xs text-slate-500">
             Signal opérationnel — ne crée pas de chiffre d’affaires.
@@ -494,22 +546,50 @@ export function FollowUpDetailClient({
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
             />
           </label>
-          <label className="space-y-1 text-xs">
-            <span className="font-semibold text-slate-600">N° OS</span>
-            <input
-              value={edit.osNumber}
-              onChange={(e) => setEdit({ ...edit, osNumber: e.target.value })}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            />
-          </label>
-          <label className="space-y-1 text-xs">
-            <span className="font-semibold text-slate-600">N° commande</span>
-            <input
-              value={edit.orderNumber}
-              onChange={(e) => setEdit({ ...edit, orderNumber: e.target.value })}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            />
-          </label>
+          {annualInterventionId && !edit.osNumber && !edit.orderNumber ? (
+            <details className="sm:col-span-2 rounded-lg border border-slate-100 bg-slate-50/80 px-3 py-2">
+              <summary className="cursor-pointer text-xs font-semibold text-slate-500">
+                Champs secondaires (N° OS / commande)
+              </summary>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="space-y-1 text-xs">
+                  <span className="font-semibold text-slate-600">N° OS</span>
+                  <input
+                    value={edit.osNumber}
+                    onChange={(e) => setEdit({ ...edit, osNumber: e.target.value })}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  />
+                </label>
+                <label className="space-y-1 text-xs">
+                  <span className="font-semibold text-slate-600">N° commande</span>
+                  <input
+                    value={edit.orderNumber}
+                    onChange={(e) => setEdit({ ...edit, orderNumber: e.target.value })}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  />
+                </label>
+              </div>
+            </details>
+          ) : (
+            <>
+              <label className="space-y-1 text-xs">
+                <span className="font-semibold text-slate-600">N° OS</span>
+                <input
+                  value={edit.osNumber}
+                  onChange={(e) => setEdit({ ...edit, osNumber: e.target.value })}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                />
+              </label>
+              <label className="space-y-1 text-xs">
+                <span className="font-semibold text-slate-600">N° commande</span>
+                <input
+                  value={edit.orderNumber}
+                  onChange={(e) => setEdit({ ...edit, orderNumber: e.target.value })}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                />
+              </label>
+            </>
+          )}
           <label className="space-y-1 text-xs">
             <span className="font-semibold text-slate-600">Montant HT (€)</span>
             <input

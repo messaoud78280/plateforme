@@ -135,6 +135,35 @@ export function AnnualContractsWorkspace({
     }
   }
 
+  async function prepareInvoice(interventionId: string) {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch(
+        `/api/annual-contracts/interventions/${interventionId}/prepare-invoice`,
+        { method: "POST" },
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Échec préparation facture");
+      setMessage(
+        data.action === "created"
+          ? `Brouillon ${data.invoiceNumber} créé — ouverture Devis & Facturation.`
+          : data.action === "continue"
+            ? `Brouillon ${data.invoiceNumber} — continuer la facture.`
+            : `Facture ${data.invoiceNumber} — ouverture.`,
+      );
+      await reload();
+      router.refresh();
+      if (data.href) {
+        window.open(data.href, "_blank", "noopener,noreferrer");
+      }
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const portfolio = useMemo(() => {
     let list = board.contracts;
     const q = query.trim().toLowerCase();
@@ -212,10 +241,17 @@ export function AnnualContractsWorkspace({
         description="Interventions récurrentes — préparer, confirmer, réaliser, facturer."
       />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-7">
         <Kpi label="À préparer" value={String(board.kpis.toPrepare)} />
         <Kpi label="Dans les 30 jours" value={String(board.kpis.within30)} />
         <Kpi label="À facturer" value={String(board.kpis.toBill)} />
+        {board.includeFinancials ? (
+          <>
+            <Kpi label="En préparation" value={String(board.kpis.preparing ?? 0)} />
+            <Kpi label="Facturées" value={String(board.kpis.invoiced ?? 0)} />
+            <Kpi label="Payées" value={String(board.kpis.paid ?? 0)} />
+          </>
+        ) : null}
         <Kpi
           label="Portefeuille annuel HT"
           value={board.kpis.portfolioHtLabel ?? "—"}
@@ -263,9 +299,11 @@ export function AnnualContractsWorkspace({
       {view === "piloter" ? (
         <PilotView
           pilot={board.pilot}
+          includeFinancials={board.includeFinancials}
           onOpen={(c) => setSelected(c)}
           onSchedule={schedule}
           onComplete={complete}
+          onPrepareInvoice={prepareInvoice}
           busy={busy}
         />
       ) : null}
@@ -384,6 +422,7 @@ export function AnnualContractsWorkspace({
           onClose={() => setSelected(null)}
           onSchedule={schedule}
           onComplete={complete}
+          onPrepareInvoice={prepareInvoice}
         />
       ) : null}
     </div>
@@ -410,15 +449,19 @@ function Kpi({
 
 function PilotView({
   pilot,
+  includeFinancials,
   onOpen,
   onSchedule,
   onComplete,
+  onPrepareInvoice,
   busy,
 }: {
   pilot: Board["pilot"];
+  includeFinancials: boolean;
   onOpen: (c: SerializedAnnualContract) => void;
   onSchedule: (id: string) => void;
   onComplete: (id: string) => void;
+  onPrepareInvoice: (id: string) => void;
   busy: boolean;
 }) {
   if (pilot.length === 0) {
@@ -445,7 +488,20 @@ function PilotView({
             <span className="ml-2 text-slate-400">({items.length})</span>
           </h2>
           <ul className="space-y-2">
-            {items.map((item) => (
+            {items.map((item) => {
+              const yearLabel =
+                item.bucket === "to_bill"
+                  ? `Intervention ${item.intervention.plannedYear ?? ""}`
+                  : item.bucket === "to_prepare" ||
+                      item.bucket === "to_confirm" ||
+                      item.bucket === "within_7" ||
+                      item.bucket === "within_15" ||
+                      item.bucket === "overdue"
+                    ? item.intervention.plannedYear
+                      ? `Prochaine intervention ${item.intervention.plannedYear}`
+                      : "À programmer"
+                    : null;
+              return (
               <li
                 key={`${item.bucket}-${item.intervention.id}`}
                 className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
@@ -458,6 +514,11 @@ function PilotView({
                   <p className="font-medium text-slate-900">{item.contract.clientName}</p>
                   <p className="truncate text-sm text-slate-500">{item.contract.siteAddress}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
+                    {yearLabel ? (
+                      <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                        {yearLabel}
+                      </span>
+                    ) : null}
                     {item.intervention.plannedDate ? (
                       <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs tabular-nums text-slate-700">
                         {new Date(item.intervention.plannedDate + "T00:00:00Z").toLocaleDateString(
@@ -470,12 +531,21 @@ function PilotView({
                         À programmer
                       </span>
                     )}
-                    {item.intervention.plannedCrewCount ? (
-                      <span className="text-xs text-slate-500">
-                        {item.intervention.plannedCrewCount} compagnons
+                    {includeFinancials && item.contract.amountHtLabel ? (
+                      <span className="text-xs tabular-nums text-slate-600">
+                        {item.contract.amountHtLabel}
                       </span>
                     ) : null}
-                    {item.intervention.attentionReason ? (
+                    {item.intervention.billingStateLabel ? (
+                      <span className="rounded-md bg-orange-50 px-2 py-0.5 text-xs text-orange-900">
+                        {item.intervention.billingStateLabel}
+                        {item.intervention.commercialInvoiceNumber
+                          ? ` · ${item.intervention.commercialInvoiceNumber}`
+                          : ""}
+                      </span>
+                    ) : null}
+                    {item.intervention.attentionReason &&
+                    !item.intervention.billingStateLabel ? (
                       <span
                         className={cn(
                           "rounded-md px-2 py-0.5 text-xs",
@@ -511,24 +581,41 @@ function PilotView({
                       Intervention réalisée
                     </button>
                   ) : null}
-                  {item.bucket === "to_bill" && item.intervention.followUpSheetId ? (
-                    <Link
-                      href={`/dashboard/fiches-suivi?sheet=${encodeURIComponent(item.intervention.followUpSheetId)}`}
-                      className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-medium text-white"
-                    >
-                      Préparer la facturation
-                    </Link>
-                  ) : item.bucket === "to_bill" ? (
-                    <Link
-                      href="/dashboard/facturation?filtre=a_facturer"
-                      className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-medium text-white"
-                    >
-                      Voir À facturer
-                    </Link>
+                  {item.bucket === "to_bill" && includeFinancials ? (
+                    item.intervention.billingState === "invoiced" ||
+                    item.intervention.billingState === "paid" ? (
+                      <a
+                        href={item.intervention.commercialInvoiceHref ?? "#"}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-medium text-white"
+                      >
+                        Voir la facture →
+                      </a>
+                    ) : item.intervention.billingState === "preparing" ? (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => onPrepareInvoice(item.intervention.id)}
+                        className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+                      >
+                        Continuer la facture →
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => onPrepareInvoice(item.intervention.id)}
+                        className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+                      >
+                        Préparer la facture →
+                      </button>
+                    )
                   ) : null}
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </section>
       ))}
@@ -680,6 +767,7 @@ function Drawer({
   onClose,
   onSchedule,
   onComplete,
+  onPrepareInvoice,
 }: {
   contract: SerializedAnnualContract;
   includeFinancials: boolean;
@@ -687,8 +775,15 @@ function Drawer({
   onClose: () => void;
   onSchedule: (id: string) => void;
   onComplete: (id: string) => void;
+  onPrepareInvoice: (id: string) => void;
 }) {
   const open = contract.openIntervention;
+  const toBill = contract.history.find(
+    (h) => h.billingState === "to_bill" || h.billingState === "preparing",
+  );
+  const billed = contract.history.find(
+    (h) => h.billingState === "invoiced" || h.billingState === "paid",
+  );
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={onClose}>
       <aside
@@ -737,7 +832,9 @@ function Drawer({
           ) : null}
           {open ? (
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <p className="text-xs font-medium uppercase text-slate-400">Intervention ouverte</p>
+              <p className="text-xs font-medium uppercase text-slate-400">
+                Prochaine intervention {open.plannedYear ?? ""}
+              </p>
               <p className="mt-1 font-medium">{open.statusLabel}</p>
               {open.attentionReason ? (
                 <p className={cn("mt-1 inline-block rounded px-2 py-0.5 text-xs", urgencyClass(open.attentionLevel))}>
@@ -753,6 +850,7 @@ function Drawer({
                 {contract.history.map((h) => (
                   <li key={h.id} className="rounded-lg border border-slate-100 px-3 py-2">
                     <p className="font-medium">
+                      Intervention {h.plannedYear ?? ""} —{" "}
                       {h.plannedDate
                         ? new Date(h.plannedDate + "T00:00:00Z").toLocaleDateString("fr-FR", {
                             timeZone: "UTC",
@@ -760,8 +858,11 @@ function Drawer({
                         : "—"}{" "}
                       — {h.statusLabel}
                     </p>
-                    {h.billingNeeded ? (
-                      <p className="text-xs text-orange-700">À facturer</p>
+                    {h.billingStateLabel ? (
+                      <p className="text-xs text-orange-700">
+                        {h.billingStateLabel}
+                        {h.commercialInvoiceNumber ? ` · ${h.commercialInvoiceNumber}` : ""}
+                      </p>
                     ) : null}
                   </li>
                 ))}
@@ -790,19 +891,27 @@ function Drawer({
               Intervention réalisée
             </button>
           ) : null}
-          {contract.history.some((h) => h.billingNeeded) ? (
-            <Link
-              href={
-                contract.history.find((h) => h.followUpSheetId)?.followUpSheetId
-                  ? `/dashboard/fiches-suivi?sheet=${encodeURIComponent(
-                      contract.history.find((h) => h.followUpSheetId)!.followUpSheetId!,
-                    )}`
-                  : "/dashboard/facturation?filtre=a_facturer"
-              }
+          {includeFinancials && toBill ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onPrepareInvoice(toBill.id)}
+              className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-medium text-white disabled:opacity-40"
+            >
+              {toBill.billingState === "preparing"
+                ? "Continuer la facture →"
+                : "Préparer la facture →"}
+            </button>
+          ) : null}
+          {includeFinancials && billed?.commercialInvoiceHref ? (
+            <a
+              href={billed.commercialInvoiceHref}
+              target="_blank"
+              rel="noreferrer"
               className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium"
             >
-              Préparer la facturation
-            </Link>
+              Voir la facture →
+            </a>
           ) : null}
           {open?.agendaEventId ? (
             <Link

@@ -66,6 +66,7 @@
     "db:seed-setrim-eco": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/seed-setrim-economic-scenario.ts",
     "db:seed-setrim-annual-contracts": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/seed-setrim-annual-contracts.ts",
     "test:annual-contracts": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/test-annual-contracts.ts",
+    "test:annual-contracts-invoice": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/test-annual-contracts-invoice.ts",
     "db:seed-batinord-pilot": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/seed-batinord-pilot.ts",
     "test:batinord-onboarding": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/test-batinord-onboarding.ts",
     "test:batinord-http": "npx tsx scripts/test-batinord-http.ts",

@@ -440,6 +440,9 @@ export async function createStandardInvoice(input: {
   projectId?: string | null;
   dueDate?: Date | null;
   type?: CommercialInvoiceType;
+  /** Snapshots libres (ex. contrat annuel sans devis). */
+  clientSnapshotJson?: Prisma.InputJsonValue | null;
+  issuerSnapshotJson?: Prisma.InputJsonValue | null;
   lines: Array<{
     designation: string;
     quantity?: number;
@@ -580,8 +583,14 @@ export async function createStandardInvoice(input: {
         projectId: input.projectId ?? quoteSnapshots?.projectId ?? null,
         clientExternalOrgId:
           input.clientExternalOrgId ?? quoteSnapshots?.clientExternalOrgId ?? null,
-        clientSnapshotJson: quoteSnapshots?.clientSnapshotJson ?? undefined,
-        issuerSnapshotJson: quoteSnapshots?.issuerSnapshotJson ?? undefined,
+        clientSnapshotJson:
+          input.clientSnapshotJson ??
+          (quoteSnapshots?.clientSnapshotJson as Prisma.InputJsonValue | undefined) ??
+          undefined,
+        issuerSnapshotJson:
+          input.issuerSnapshotJson ??
+          (quoteSnapshots?.issuerSnapshotJson as Prisma.InputJsonValue | undefined) ??
+          undefined,
         issueDate: new Date(),
         dueDate: input.dueDate ?? null,
         subject,
@@ -667,6 +676,12 @@ export async function issueInvoice(orgId: string, invoiceId: string, actorUserId
       ingestCommercialInvoiceToGed({ invoiceId, addedById: actorUserId }),
     )
     .catch((e) => console.error("GED ingest facture:", e));
+
+  void import("@/lib/annual-contracts/sync-invoice-status")
+    .then(({ onAnnualInvoiceIssued }) =>
+      onAnnualInvoiceIssued({ orgId, invoiceId, actorUserId }),
+    )
+    .catch((e) => console.error("Contrats annuels sync émission:", e));
 
   return updated;
 }

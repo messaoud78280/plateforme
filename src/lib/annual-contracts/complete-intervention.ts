@@ -72,10 +72,13 @@ export async function completeAnnualIntervention(
         amountHt,
         status: "A_FACTURER",
         urgencyOverride: "IMPORTANT",
-        nextAction: "Préparer la facturation",
+        nextAction: "Préparer la facture",
         nextActionAt: completedAt,
+        reference: `ASI:${intervention.id}`,
         notes: [
-          `Montant annuel suggéré : ${amountHt.toFixed(2)} € HT (suggestion — pas une facture officielle).`,
+          `Source : contrat annuel ${intervention.contract.contractType}.`,
+          `Montant annuel suggéré : ${amountHt.toFixed(2)} € HT (proposition — à valider sur la facture).`,
+          `Site : ${intervention.contract.siteAddress}`,
           input.comment ?? intervention.comment,
           intervention.contract.comment,
         ]
@@ -160,9 +163,8 @@ export async function completeAnnualIntervention(
     });
   }
 
-  const billingNote = intervention.contract.projectId
-    ? "Fiche A_FACTURER créée — préparer via le moteur Commercial si un devis accepté existe sur le chantier lié."
-    : "Fiche A_FACTURER créée (sans chantier lié). Ne pas inventer de projet : facturer via le parcours Commercial supporté, ou rattacher un chantier réel si besoin.";
+  const billingNote =
+    "Fiche A_FACTURER créée. Utiliser « Préparer la facture » pour ouvrir un brouillon Commercial prérempli (sans créer de chantier).";
 
   return {
     interventionId: intervention.id,

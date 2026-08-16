@@ -16,7 +16,15 @@ export type AnnualContractActor = {
   demoRootUserId?: string | null;
 };
 
-export function canAccessAnnualContracts(user: AnnualContractActor): boolean {
+/** Sous-ensemble pour contrôles SEC-1 sans id session (API route guards). */
+export type AnnualContractPermissionUser = {
+  id?: string;
+  role?: string | null;
+  personType?: string | null;
+  permissionProfile?: string | null;
+};
+
+export function canAccessAnnualContracts(user: AnnualContractPermissionUser): boolean {
   if (isExternalPortalUser(user.personType)) return false;
   const profile = (user.permissionProfile ?? "").toUpperCase();
   if (profile === "CLIENT" || profile === "FOURNISSEUR") return false;
@@ -28,7 +36,7 @@ export function canAccessAnnualContracts(user: AnnualContractActor): boolean {
 }
 
 /** SEC-1 — montants / portefeuille HT réservés Direction & Administratif (+ owner sans profil). */
-export function canViewAnnualContractFinancials(user: AnnualContractActor): boolean {
+export function canViewAnnualContractFinancials(user: AnnualContractPermissionUser): boolean {
   if (!canAccessAnnualContracts(user)) return false;
   const profile = (user.permissionProfile ?? "").toUpperCase();
   if (!profile) return true;

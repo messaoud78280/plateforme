@@ -52,6 +52,7 @@ export async function collectAnnualContractAttentionCards(
           status: true,
         },
       },
+      commercialInvoice: { select: { status: true } },
     },
     orderBy: { plannedDate: "asc" },
     take,
@@ -75,27 +76,30 @@ export async function collectAnnualContractAttentionCards(
         ? evaluateAnnualBillingAttention({
             billingNeededAt: i.billingNeededAt,
             billedAt: i.billedAt,
+            invoiceStatus: i.commercialInvoice?.status ?? null,
             now,
           })
         : null;
     const att = bill ?? prep;
     if (!att) continue;
 
+    const actionUrl = `/dashboard/contrats-annuels?view=piloter&contract=${encodeURIComponent(i.contract.id)}&intervention=${encodeURIComponent(i.id)}`;
+
+    const actionLabel = bill
+      ? i.commercialInvoice?.status === "DRAFT"
+        ? "Continuer la facture"
+        : "Préparer la facture"
+      : "Ouvrir le contrat";
+
     const item: SerializedAttention["attentionItems"][number] = {
       code: att.code,
       level: att.level,
       reason: att.reason,
-      actionLabel: bill ? "Préparer la facturation" : "Ouvrir le contrat",
+      actionLabel,
       dueAt: i.plannedDate.toISOString(),
       overdueByHours: null,
       relatedEntity: null,
     };
-
-    const actionUrl = bill
-      ? i.followUpSheetId
-        ? `/dashboard/fiches-suivi?sheet=${encodeURIComponent(i.followUpSheetId)}`
-        : `/dashboard/facturation?filtre=a_facturer`
-      : `/dashboard/contrats-annuels?view=piloter&contract=${encodeURIComponent(i.contract.id)}&intervention=${encodeURIComponent(i.id)}`;
 
     cards.push({
       subjectType: "ANNUAL_CONTRACT",

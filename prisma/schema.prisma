@@ -4217,6 +4217,7 @@ model CommercialInvoice {
   payments           CommercialPayment[]
   withholdRetentions CommercialRetentionGuarantee[] @relation("RetentionSituationInvoice")
   settlementRetention CommercialRetentionGuarantee? @relation("RetentionSettlementInvoice")
+  annualServiceIntervention AnnualServiceIntervention?
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
@@ -4726,11 +4727,13 @@ model AnnualServiceIntervention {
   followUpSheetId    String?
   billingNeededAt    DateTime?
   billedAt           DateTime?
-  commercialInvoiceId String?
+  /// Facture Commercial liée (DRAFT ou émise) — idempotence V2
+  commercialInvoiceId String?                 @unique
   createdAt          DateTime                 @default(now())
   updatedAt          DateTime                 @updatedAt
 
   contract AnnualServiceContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  commercialInvoice CommercialInvoice? @relation(fields: [commercialInvoiceId], references: [id], onDelete: SetNull)
 
   @@index([organizationId, plannedDate])
   @@index([organizationId, status])

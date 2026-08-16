@@ -13,10 +13,18 @@ import {
   type AnnualPilotBucket,
 } from "@/lib/annual-contracts/types";
 
+export type AnnualBillingState =
+  | "none"
+  | "to_bill"
+  | "preparing"
+  | "invoiced"
+  | "paid";
+
 export type SerializedAnnualIntervention = {
   id: string;
   contractId: string;
   plannedDate: string | null;
+  plannedYear: number | null;
   completedAt: string | null;
   plannedCrewCount: number | null;
   actualCrewCount: number | null;
@@ -27,6 +35,11 @@ export type SerializedAnnualIntervention = {
   agendaEventId: string | null;
   followUpSheetId: string | null;
   billingNeeded: boolean;
+  billingState: AnnualBillingState;
+  billingStateLabel: string;
+  commercialInvoiceId: string | null;
+  commercialInvoiceNumber: string | null;
+  commercialInvoiceHref: string | null;
   attentionLevel: string | null;
   attentionReason: string | null;
 };
@@ -50,6 +63,23 @@ export type SerializedAnnualContract = {
   history: SerializedAnnualIntervention[];
 };
 
+function deriveBillingState(opts: {
+  billingNeededAt: Date | null;
+  billedAt: Date | null;
+  invoiceStatus: string | null;
+}): { state: AnnualBillingState; label: string } {
+  const st = opts.invoiceStatus;
+  if (st === "PAID") return { state: "paid", label: "Payée" };
+  if (st && !["DRAFT", "CANCELLED"].includes(st)) {
+    return { state: "invoiced", label: "Facturée" };
+  }
+  if (st === "DRAFT") return { state: "preparing", label: "Facture en préparation" };
+  if (opts.billingNeededAt && !opts.billedAt) {
+    return { state: "to_bill", label: "À facturer" };
+  }
+  return { state: "none", label: "" };
+}
+
 function serializeIntervention(
   i: {
     id: string;
@@ -65,9 +95,12 @@ function serializeIntervention(
     followUpSheetId: string | null;
     billingNeededAt: Date | null;
     billedAt: Date | null;
+    commercialInvoiceId: string | null;
+    commercialInvoice: { id: string; number: string; status: string } | null;
   },
   now: Date,
 ): SerializedAnnualIntervention {
+  const invoiceStatus = i.commercialInvoice?.status ?? null;
   const prep = evaluateAnnualInterventionAttention({
     plannedDate: i.plannedDate,
     status: i.status,
@@ -76,13 +109,21 @@ function serializeIntervention(
   const bill = evaluateAnnualBillingAttention({
     billingNeededAt: i.billingNeededAt,
     billedAt: i.billedAt,
+    invoiceStatus,
     now,
   });
   const att = bill ?? prep;
+  const billing = deriveBillingState({
+    billingNeededAt: i.billingNeededAt,
+    billedAt: i.billedAt,
+    invoiceStatus,
+  });
+  const invoiceId = i.commercialInvoice?.id ?? i.commercialInvoiceId;
   return {
     id: i.id,
     contractId: i.contractId,
     plannedDate: i.plannedDate.toISOString().slice(0, 10),
+    plannedYear: i.plannedDate.getUTCFullYear(),
     completedAt: i.completedAt?.toISOString() ?? null,
     plannedCrewCount: i.plannedCrewCount,
     actualCrewCount: i.actualCrewCount,
@@ -92,7 +133,14 @@ function serializeIntervention(
     comment: i.comment,
     agendaEventId: i.agendaEventId,
     followUpSheetId: i.followUpSheetId,
-    billingNeeded: Boolean(i.billingNeededAt && !i.billedAt),
+    billingNeeded: billing.state === "to_bill" || billing.state === "preparing",
+    billingState: billing.state,
+    billingStateLabel: billing.label,
+    commercialInvoiceId: invoiceId,
+    commercialInvoiceNumber: i.commercialInvoice?.number ?? null,
+    commercialInvoiceHref: invoiceId
+      ? `/dashboard/devis-facturation/factures/${invoiceId}`
+      : null,
     attentionLevel: att?.level ?? null,
     attentionReason: att?.reason ?? null,
   };
@@ -112,6 +160,11 @@ export async function loadAnnualContractsBoard(opts: {
     where: { organizationId: opts.organizationId },
     include: {
       interventions: {
+        include: {
+          commercialInvoice: {
+            select: { id: true, number: true, status: true },
+          },
+        },
         orderBy: { plannedDate: "desc" },
       },
     },
@@ -245,7 +298,22 @@ export async function loadAnnualContractsBoard(opts: {
     const d = daysBetweenDateOnly(today, new Date(c.nextPlannedDate + "T00:00:00.000Z"));
     return d >= 0 && d <= 30;
   }).length;
-  const toBillCount = pilot.filter((p) => p.bucket === "to_bill").length;
+  const toBillCount = pilot.filter(
+    (p) =>
+      p.bucket === "to_bill" && p.intervention.billingState === "to_bill",
+  ).length;
+  const preparingCount = serialized.reduce(
+    (n, c) => n + c.history.filter((h) => h.billingState === "preparing").length,
+    0,
+  );
+  const invoicedCount = serialized.reduce(
+    (n, c) => n + c.history.filter((h) => h.billingState === "invoiced").length,
+    0,
+  );
+  const paidCount = serialized.reduce(
+    (n, c) => n + c.history.filter((h) => h.billingState === "paid").length,
+    0,
+  );
   const portfolioHt = opts.includeFinancials
     ? active.reduce((s, c) => s + Number(c.amountHt), 0)
     : null;
@@ -259,6 +327,9 @@ export async function loadAnnualContractsBoard(opts: {
       toPrepare: toPrepareCount,
       within30,
       toBill: toBillCount,
+      preparing: preparingCount,
+      invoiced: invoicedCount,
+      paid: paidCount,
       portfolioHt,
       portfolioHtLabel:
         portfolioHt != null ? formatAmountHt(portfolioHt) : null,

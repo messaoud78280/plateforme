@@ -78,22 +78,33 @@ export function evaluateAnnualInterventionAttention(opts: {
   return null;
 }
 
-/** Escalade facturation après réalisation sans vraie facture. */
+/** Escalade facturation après réalisation sans vraie facture émise. */
 export function evaluateAnnualBillingAttention(opts: {
   billingNeededAt: Date | null | undefined;
   billedAt: Date | null | undefined;
+  /** Statut CommercialInvoice liée si connue. */
+  invoiceStatus?: string | null;
   now?: Date;
 }): AnnualAttentionEval | null {
   if (!opts.billingNeededAt || opts.billedAt) return null;
+  const issued =
+    opts.invoiceStatus &&
+    !["DRAFT", "CANCELLED"].includes(opts.invoiceStatus);
+  if (issued) return null;
+
   const now = opts.now ?? new Date();
   const days = Math.floor(
     (now.getTime() - opts.billingNeededAt.getTime()) / 86_400_000,
   );
+  const draft = opts.invoiceStatus === "DRAFT";
+
   if (days >= 7) {
     return {
       level: "CRITIQUE",
       code: "BILLING_PENDING",
-      reason: "Intervention réalisée — facturation en retard",
+      reason: draft
+        ? "Facture brouillon à finaliser (retard)"
+        : "Intervention réalisée — facturation en retard",
       daysUntil: -days,
     };
   }
@@ -101,14 +112,14 @@ export function evaluateAnnualBillingAttention(opts: {
     return {
       level: "URGENT",
       code: "BILLING_PENDING",
-      reason: "À facturer — rappel",
+      reason: draft ? "Facture brouillon à finaliser" : "À facturer — rappel",
       daysUntil: -days,
     };
   }
   return {
     level: "IMPORTANT",
     code: "BILLING_PENDING",
-    reason: "À facturer",
+    reason: draft ? "Facture en préparation" : "À facturer",
     daysUntil: -days,
   };
 }

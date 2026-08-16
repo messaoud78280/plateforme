@@ -22,16 +22,30 @@ const STATUTS = ["EN_ATTENTE", "EN_TRAITEMENT", "TRAITE", "ARCHIVE"] as const;
 
 const HUB_GROUPS = new Set<HubGroup>([
   "all",
-  "chantiers",
-  "administratif",
-  "commandes",
+  "devis_avenants",
+  "factures_situations",
+  "plans_techniques",
+  "fiches_techniques",
+  "commandes_bl",
   "fournisseurs",
-  "doe",
+  "comptes_rendus",
   "photos",
+  "doe",
+  "marche_dce",
+  "securite_methodes",
+  "qualite_controles",
+  "autres",
 ]);
 
 const HUB_SORTS = new Set<HubSort>(["recent", "oldest", "name", "type"]);
-const HUB_VIEWS = new Set<HubView>(["all", "recent", "favorites", "missing", "classify"]);
+const HUB_VIEWS = new Set<HubView>([
+  "all",
+  "recent",
+  "favorites",
+  "missing",
+  "categories",
+  "classify",
+]);
 
 export default async function DocumentsPage({
   searchParams,
@@ -155,6 +169,7 @@ export default async function DocumentsPage({
         projects={projects}
         companies={hub.companies}
         classifyCount={hub.classifyCount}
+        categoryStats={hub.categoryStats}
         canUploadChantier={!external}
         personType={dbUser?.personType}
         permissionProfile={dbUser?.permissionProfile}

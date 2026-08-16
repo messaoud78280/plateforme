@@ -5,16 +5,29 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { DocumentPreviewModal, type DocumentPreviewItem } from "@/components/documents/DocumentPreviewModal";
 import { GedDocumentRow } from "@/components/ged/GedDocumentRow";
-import type { HubDocumentItem, HubGroup, HubSort, HubView } from "@/lib/ged/document-hub-ui";
+import type {
+  HubCategoryStat,
+  HubDocumentItem,
+  HubGroup,
+  HubSort,
+  HubView,
+} from "@/lib/ged/document-hub-ui";
 import {
+  HUB_CATEGORY_DEFS,
   HUB_DATE_FILTERS,
   HUB_DOC_TYPES,
   HUB_ORIGIN_FILTERS,
   formatGedShortDate,
+  hubCategoryLabel,
   hubEmptyCopy,
   recentDayLabel,
   visibleHubViews,
 } from "@/lib/ged/document-hub-ui";
+import {
+  CATEGORY_TO_DOCUMENT_TYPE,
+  formatCategoryCounts,
+  type HubCategoryId,
+} from "@/lib/ged/hub-categories";
 import { cn } from "@/lib/cn";
 
 const SORT_OPTIONS: { id: HubSort; label: string }[] = [
@@ -64,6 +77,7 @@ export function DocumentsHubClient({
   projects,
   companies,
   classifyCount,
+  categoryStats,
   canUploadChantier,
   personType,
   permissionProfile,
@@ -89,6 +103,7 @@ export function DocumentsHubClient({
   projects: { id: string; title: string }[];
   companies: string[];
   classifyCount: number;
+  categoryStats?: HubCategoryStat[];
   canUploadChantier: boolean;
   personType?: string | null;
   permissionProfile?: string | null;
@@ -106,6 +121,7 @@ export function DocumentsHubClient({
   const [drawer, setDrawer] = useState<HubDocumentItem | null>(null);
   const [preview, setPreview] = useState<DocumentPreviewItem | null>(null);
   const [favBusy, setFavBusy] = useState<string | null>(null);
+  const [catBusy, setCatBusy] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -116,7 +132,13 @@ export function DocumentsHubClient({
   const external = isSupplier || isClient;
   const hideProject = Boolean(hideProjectFilter);
 
-  const hasFilters = Boolean(projectId || origin || docType || company || since || (group !== "all"));
+  const showCategoryCards =
+    view === "categories" && group === "all" && !search.trim() && (categoryStats?.length ?? 0) >= 0;
+  const inCategory = view === "categories" && group !== "all";
+
+  const hasFilters = Boolean(
+    projectId || origin || docType || company || since || (group !== "all" && view !== "categories"),
+  );
   const empty = hubEmptyCopy({
     group,
     view,
@@ -194,8 +216,33 @@ export function DocumentsHubClient({
     });
   }
 
+  async function changeCategory(it: HubDocumentItem, next: HubCategoryId) {
+    if (!it.chantierFileId) return;
+    setCatBusy(true);
+    try {
+      const res = await fetch(`/api/chantier/files/${it.chantierFileId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentType: CATEGORY_TO_DOCUMENT_TYPE[next] }),
+      });
+      if (res.ok) {
+        setDrawer(null);
+        router.refresh();
+      }
+    } finally {
+      setCatBusy(false);
+    }
+  }
+
   const chips = useMemo(() => {
     const out: { key: string; label: string; clear: Record<string, string> }[] = [];
+    if (inCategory) {
+      out.push({
+        key: "group",
+        label: hubCategoryLabel(group),
+        clear: { view: "categories", group: "all", page: "1" },
+      });
+    }
     if (projectId && !hideProject) {
       const t = projects.find((p) => p.id === projectId)?.title ?? "Chantier";
       out.push({ key: "project", label: `Chantier : ${t}`, clear: { projectId: "", page: "1" } });
@@ -216,7 +263,7 @@ export function DocumentsHubClient({
       out.push({ key: "since", label: `Date : ${dl}`, clear: { since: "", page: "1" } });
     }
     return out;
-  }, [projectId, origin, docType, company, since, projects, hideProject]);
+  }, [projectId, origin, docType, company, since, projects, hideProject, inCategory, group]);
 
   const groupedRecent = useMemo(() => {
     if (view !== "recent") return null;
@@ -363,6 +410,7 @@ export function DocumentsHubClient({
               go({
                 view: v.id,
                 page: "1",
+                group: "all",
                 ...(v.id === "recent" ? { sort: "recent" } : {}),
               })
             }
@@ -378,6 +426,28 @@ export function DocumentsHubClient({
         ))}
       </nav>
 
+      {inCategory ? (
+        <div className="flex flex-wrap items-center gap-2 text-[13px]">
+          <button
+            type="button"
+            onClick={() => go({ view: "categories", group: "all", page: "1" })}
+            className="font-medium text-slate-500 hover:text-[#1e3a5f]"
+          >
+            Catégories
+          </button>
+          <span className="text-slate-300">/</span>
+          <span className="font-semibold text-[#1e3a5f]">{hubCategoryLabel(group)}</span>
+          <button
+            type="button"
+            onClick={() => go({ view: "all", group: "all", page: "1" })}
+            className="ml-auto text-[12px] font-medium text-[#1e3a5f] hover:underline"
+          >
+            Tous les documents
+          </button>
+        </div>
+      ) : null}
+
+      {showCategoryCards ? null : (
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
@@ -439,7 +509,55 @@ export function DocumentsHubClient({
           </div>
         ) : null}
       </div>
+      )}
 
+      {showCategoryCards ? (
+        <div className="space-y-1" aria-busy={pending}>
+          {(categoryStats ?? []).length === 0 ? (
+            <div className="py-14 text-center">
+              <p className="text-lg font-medium text-slate-800">{empty.title}</p>
+              <p className="mx-auto mt-2 max-w-md text-[14px] leading-relaxed text-slate-500">
+                {empty.body}
+              </p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-slate-100">
+              {(categoryStats ?? []).map((cat) => {
+                const counts = formatCategoryCounts(cat.availableCount, cat.missingCount);
+                const totalCat = cat.availableCount + cat.missingCount;
+                return (
+                  <li key={cat.id}>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        go({ view: "categories", group: cat.id, page: "1" })
+                      }
+                      className="flex w-full items-start gap-3 py-3.5 text-left transition hover:bg-slate-50/80 sm:items-center"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[15px] font-semibold text-slate-900">{cat.label}</p>
+                        <p className="mt-0.5 text-[13px] text-slate-500">{counts}</p>
+                        {cat.previewTitles.length > 0 ? (
+                          <p className="mt-1 hidden truncate text-[12px] text-slate-400 sm:block">
+                            {cat.previewTitles.join(" · ")}
+                          </p>
+                        ) : null}
+                      </div>
+                      <span className="shrink-0 self-center text-[13px] font-medium text-[#1e3a5f]">
+                        <span className="hidden sm:inline">Voir les {totalCat} →</span>
+                        <span className="sm:hidden" aria-hidden>
+                          ›
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      ) : (
+        <>
       {filtersOpen ? (
         <div className="grid gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-4 sm:grid-cols-2 lg:grid-cols-3">
           {hideProject ? null : (
@@ -662,6 +780,8 @@ export function DocumentsHubClient({
           </button>
         </div>
       ) : null}
+        </>
+      )}
 
       {drawer ? (
         <div
@@ -689,6 +809,8 @@ export function DocumentsHubClient({
               <Info label="Entreprise" value={drawer.companyLabel} />
               <Info label="Date" value={formatGedShortDate(drawer.createdAt)} />
               <Info label="Source" value={drawer.originLabel} />
+              <Info label="Catégorie" value={hubCategoryLabel(drawer.group)} />
+              <Info label="État" value={drawer.isExpectedMissing ? "À récupérer" : "Disponible"} />
               <Info label="Référence" value={drawer.contextLabel} />
               {drawer.indice || drawer.versionLabel ? (
                 <Info
@@ -697,6 +819,34 @@ export function DocumentsHubClient({
                     .filter(Boolean)
                     .join(" — ")}
                 />
+              ) : null}
+              {drawer.chantierFileId && !external ? (
+                <div>
+                  <dt className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-400">
+                    Changer de catégorie
+                  </dt>
+                  <dd className="mt-1.5">
+                    <select
+                      disabled={catBusy}
+                      defaultValue={drawer.group === "all" ? "autres" : drawer.group}
+                      onChange={(e) => {
+                        const next = e.target.value as HubCategoryId;
+                        void changeCategory(drawer, next);
+                      }}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
+                      aria-label="Changer de catégorie"
+                    >
+                      {HUB_CATEGORY_DEFS.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="mt-1 text-[11px] text-slate-400">
+                      Modifie uniquement le classement — le fichier n’est pas déplacé.
+                    </p>
+                  </dd>
+                </div>
               ) : null}
             </dl>
             <div className="flex flex-wrap gap-2 border-t border-slate-100 px-6 py-4">

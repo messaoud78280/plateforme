@@ -30,6 +30,9 @@ export const GED_TYPE_LABELS: Record<string, string> = {
   CONFIRMATION: "Confirmation",
   MARCHE: "Marché",
   "MARCHÉ": "Marché",
+  FOURNISSEUR: "Fournisseur",
+  SECURITE: "Sécurité",
+  QUALITE: "Qualité",
 };
 
 export function displayGedTypeLabel(code?: string | null): string {
@@ -102,8 +105,9 @@ function classifyFromFilename(filename: string): string | null {
   if (/\bfacture\b|\bfac-\d|\bfact-\d/.test(n)) return "FACTURE";
   if (/\bbon de livraison\b|\bbl[-_ ]?\d|\bbl-\d/.test(n)) return "BON_LIVRAISON";
   if (/\bbon de commande\b|\bbc[-_ ]?\d|\bbc-\d/.test(n)) return "BON_COMMANDE";
-  if (/fiche.?technique/.test(n)) return "FICHE_TECHNIQUE";
+  // DOE prime sur « fiche technique » (ex. DOE-Fiche-technique-…)
   if (/\bdoe\b/.test(n)) return "DOE";
+  if (/fiche.?technique/.test(n)) return "FICHE_TECHNIQUE";
   if (/compte.?rendu|\bcr[-_ ]?\d/.test(n)) return "COMPTE_RENDU";
   if (/attestation|decennale|rc pro/.test(n)) return "ATTESTATION";
   if (/\.dwg\b|\.dxf\b|\.ifc\b|\bplan\b/.test(n)) return "PLAN";

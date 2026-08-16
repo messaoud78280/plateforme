@@ -19,11 +19,17 @@ import {
   documentTypeMatches,
   hubGroupsForPersona,
   originActionLabel,
+  type HubCategoryStat,
   type HubDocumentItem,
   type HubGroup,
   type HubSort,
   type HubView,
 } from "@/lib/ged/document-hub-ui";
+import {
+  buildCategoryStats,
+  inferHubCategory,
+  type HubCategoryId,
+} from "@/lib/ged/hub-categories";
 import {
   displayGedTypeLabel,
   isExpectedMissingDocument,
@@ -43,9 +49,12 @@ export type HubListResult = {
   classifyCount: number;
   missingCount: number;
   companies: string[];
+  categoryStats?: HubCategoryStat[];
 };
 
 const PAGE_SIZE = 50;
+const CATEGORY_SCAN_LIMIT = 2500;
+const PROJECT_HUB_LIMIT = 500;
 
 function inferGroup(opts: {
   category?: string | null;
@@ -53,21 +62,133 @@ function inferGroup(opts: {
   folderCode?: string | null;
   name?: string | null;
   poKind?: string | null;
-}): HubGroup {
-  const blob = `${opts.category ?? ""} ${opts.documentType ?? ""} ${opts.name ?? ""} ${opts.poKind ?? ""}`.toLowerCase();
-  const code = opts.folderCode ?? "";
-  if (code === "11" || /doe/.test(blob)) return "doe";
-  if (code === "07" || opts.category === "Photos" || /\.(jpe?g|png|webp|heic)$/i.test(opts.name ?? "")) {
-    return "photos";
+  entityTypes?: string[] | null;
+}): HubCategoryId {
+  return inferHubCategory(opts);
+}
+
+function categoryWhereHint(group: HubGroup): object | null {
+  if (group === "all") return null;
+  switch (group) {
+    case "devis_avenants":
+      return {
+        OR: [
+          { documentType: { in: ["DEVIS", "DEVIS_FOURNISSEUR"] } },
+          { folder: { code: "01" } },
+          { name: { contains: "DEV-", mode: "insensitive" as const } },
+          { name: { contains: "devis", mode: "insensitive" as const } },
+          {
+            links: {
+              some: { entityType: { in: ["commercial_quote", "commercial_quote_snapshot"] } },
+            },
+          },
+        ],
+      };
+    case "factures_situations":
+      return {
+        OR: [
+          { documentType: { in: ["FACTURE", "SITUATION", "AVOIR"] } },
+          { folder: { code: "09" } },
+          { name: { contains: "FAC-", mode: "insensitive" as const } },
+          {
+            links: {
+              some: { entityType: { in: ["commercial_invoice", "commercial_progress"] } },
+            },
+          },
+        ],
+      };
+    case "plans_techniques":
+      return {
+        OR: [
+          { documentType: "PLAN" },
+          { folder: { code: "03" } },
+          { category: { equals: "Plans", mode: "insensitive" as const } },
+        ],
+      };
+    case "fiches_techniques":
+      return {
+        OR: [
+          { documentType: "FICHE_TECHNIQUE" },
+          { name: { contains: "fiche technique", mode: "insensitive" as const } },
+          { name: { contains: "fiche-technique", mode: "insensitive" as const } },
+        ],
+      };
+    case "commandes_bl":
+      return {
+        OR: [
+          {
+            documentType: {
+              in: ["BON_COMMANDE", "BON_LIVRAISON", "BC", "BL", "CONFIRMATION"],
+            },
+          },
+          { folder: { code: "02" } },
+          {
+            links: {
+              some: {
+                entityType: { in: ["purchase_order", "purchase_order_document"] },
+              },
+            },
+          },
+        ],
+      };
+    case "fournisseurs":
+      return {
+        OR: [
+          { documentType: { in: ["FOURNISSEUR", "ATTESTATION"] } },
+          { folder: { code: { in: ["04", "05"] } } },
+          { category: { equals: "Fournisseurs", mode: "insensitive" as const } },
+        ],
+      };
+    case "comptes_rendus":
+      return {
+        OR: [{ documentType: "COMPTE_RENDU" }, { folder: { code: "06" } }],
+      };
+    case "photos":
+      return {
+        OR: [
+          { documentType: "PHOTO" },
+          { folder: { code: "07" } },
+          { category: { equals: "Photos", mode: "insensitive" as const } },
+          { links: { some: { entityType: "pilotage_photo" } } },
+        ],
+      };
+    case "doe":
+      return {
+        OR: [
+          { documentType: "DOE" },
+          { folder: { code: { in: ["10", "11"] } } },
+          { category: { equals: "DOE", mode: "insensitive" as const } },
+          { name: { contains: "DOE", mode: "insensitive" as const } },
+          { links: { some: { entityType: "doe_item" } } },
+        ],
+      };
+    case "marche_dce":
+      return {
+        OR: [
+          { documentType: { in: ["CONTRAT", "MARCHE", "MARCHÉ"] } },
+          { folder: { code: "12" } },
+          { category: { equals: "Marché", mode: "insensitive" as const } },
+        ],
+      };
+    case "securite_methodes":
+      return {
+        OR: [{ documentType: "SECURITE" }, { folder: { code: "13" } }],
+      };
+    case "qualite_controles":
+      return {
+        OR: [{ documentType: "QUALITE" }, { folder: { code: "14" } }],
+      };
+    case "autres":
+      return {
+        OR: [
+          { documentType: { in: ["AUTRE", "DOCUMENT"] } },
+          { folder: { code: "00" } },
+          { documentType: null },
+        ],
+      };
+    default:
+      return null;
   }
-  if (code === "05" || /fournisseur|bl\b|bon de livraison|facture/.test(blob) || opts.poKind === "BL") {
-    return "fournisseurs";
-  }
-  if (opts.poKind || /commande|bc-|confirmation/.test(blob)) return "commandes";
-  if (code === "12" || code === "02" || /marché|contrat|administratif|cctp|ccap|rh|fiscal/.test(blob)) {
-    return "administratif";
-  }
-  return "chantiers";
 }
 
 function typeLabel(opts: {
@@ -317,6 +438,10 @@ export async function loadDocumentHub(opts: {
           ],
         };
 
+    const categoryHint = categoryWhereHint(group);
+    const categoriesOverview =
+      view === "categories" && group === "all" && !search;
+
     const chantierWhere = {
       deletedAt: null,
       archivedAt: null,
@@ -326,6 +451,7 @@ export async function loadDocumentHub(opts: {
         ...(externalVisibilityFilter ? [externalVisibilityFilter] : []),
         ...searchAnd,
         ...viewAnd,
+        ...(categoryHint && !categoriesOverview ? [categoryHint] : []),
       ],
     };
 
@@ -351,12 +477,103 @@ export async function loadDocumentHub(opts: {
       AND: [scopeWhere, ...(externalVisibilityFilter ? [externalVisibilityFilter] : [])],
     };
 
+    let categoryStats: HubCategoryStat[] | undefined;
+
+    if (categoriesOverview) {
+      const lightRows = await prisma.chantierFile.findMany({
+        where: {
+          deletedAt: null,
+          archivedAt: null,
+          isCurrentVersion: true,
+          AND: [
+            scopeWhere,
+            ...(externalVisibilityFilter ? [externalVisibilityFilter] : []),
+            ...viewAnd,
+          ],
+        },
+        take: CATEGORY_SCAN_LIMIT,
+        select: {
+          name: true,
+          documentType: true,
+          category: true,
+          status: true,
+          fileUrl: true,
+          folder: { select: { code: true } },
+          links: { take: 8, select: { entityType: true } },
+        },
+      });
+
+      categoryStats = buildCategoryStats(
+        lightRows.map((f) => {
+          const groupId = inferGroup({
+            category: f.category,
+            documentType: f.documentType,
+            folderCode: f.folder?.code,
+            name: f.name,
+            entityTypes: f.links.map((l) => l.entityType),
+          });
+          return {
+            group: groupId,
+            title: stripMissingTitleSuffix(f.name),
+            isExpectedMissing: isExpectedMissingDocument({
+              status: f.status,
+              name: f.name,
+              fileUrl: f.fileUrl,
+            }),
+          };
+        }),
+      );
+
+      const [classifyCountOv, missingCountOv, companyRowsOv] = await Promise.all([
+        prisma.chantierFile.count({
+          where: {
+            ...baseScope,
+            OR: [{ classificationStatus: "A_CLASSER" }, { folder: { code: "00" } }],
+          },
+        }),
+        prisma.chantierFile.count({
+          where: {
+            ...baseScope,
+            OR: [
+              { status: { in: ["MANQUANT", "A_RELANCER"] } },
+              { name: { contains: "(manquante)", mode: "insensitive" as const } },
+              { fileUrl: null },
+              { fileUrl: "" },
+            ],
+          },
+        }),
+        prisma.chantierFile.findMany({
+          where: { ...baseScope, emitterName: { not: null } },
+          select: { emitterName: true },
+          distinct: ["emitterName"],
+          take: 40,
+        }),
+      ]);
+
+      return {
+        items: [],
+        total: lightRows.length,
+        page: 1,
+        pageSize: PAGE_SIZE,
+        groups: hubGroupsForPersona(opts.user.personType, opts.user.permissionProfile),
+        classifyCount: classifyCountOv,
+        missingCount: missingCountOv,
+        companies: companyRowsOv
+          .map((r) => r.emitterName?.trim() ?? "")
+          .filter(Boolean)
+          .slice(0, 40),
+        categoryStats,
+      };
+    }
+
+    const listPageSize = opts.projectId ? PROJECT_HUB_LIMIT : PAGE_SIZE;
+
     const [chantierFiles, chantierTotal] = await Promise.all([
       prisma.chantierFile.findMany({
         where: chantierWhere,
         orderBy,
-        skip: (page - 1) * PAGE_SIZE,
-        take: PAGE_SIZE,
+        skip: (page - 1) * listPageSize,
+        take: listPageSize,
         select: {
           id: true,
           name: true,
@@ -424,6 +641,7 @@ export async function loadDocumentHub(opts: {
         documentType: f.documentType,
         folderCode: f.folder?.code,
         name: f.name,
+        entityTypes: f.links.map((l) => l.entityType),
       });
       const poLink = f.links.find((l) => l.entityType === "purchase_order");
       const supplierLink = f.links.find((l) => l.entityType === "supplier");
@@ -498,10 +716,10 @@ export async function loadDocumentHub(opts: {
     let orphanPo: HubDocumentItem[] = [];
     if (
       page === 1 &&
-      (view === "all" || view === "recent") &&
+      (view === "all" || view === "recent" || view === "categories") &&
       canListPurchaseOrders(opts.user) &&
       orgId &&
-      (group === "all" || group === "commandes" || group === "fournisseurs")
+      (group === "all" || group === "commandes_bl" || group === "fournisseurs")
     ) {
       const supplierActor = isSupplierPurchaseOrderActor(opts.user);
 
@@ -590,7 +808,7 @@ export async function loadDocumentHub(opts: {
 
     // Legacy Document (page 1) — hors sync classeur
     let legacy: HubDocumentItem[] = [];
-    if (page === 1 && internal && view === "all" && (group === "all" || group === "administratif")) {
+    if (page === 1 && internal && (view === "all" || view === "categories") && (group === "all" || group === "autres" || group === "marche_dce")) {
       const synced = await prisma.chantierFile.findMany({
         where: { sourceDocumentId: { not: null } },
         select: { sourceDocumentId: true },
@@ -631,7 +849,7 @@ export async function loadDocumentHub(opts: {
             typeLabel: missingHint
               ? "À récupérer"
               : typeLabel({ category: d.category, name: d.name }),
-            group: "administratif" as HubGroup,
+            group: "autres" as HubGroup,
             projectId: d.projectId,
             projectTitle: d.project?.title ?? null,
             contextLabel: missingHint ? "Document attendu" : typeLabel({ category: d.category, name: d.name }),
@@ -669,7 +887,7 @@ export async function loadDocumentHub(opts: {
       items: merged,
       total: chantierTotal + (page === 1 ? orphanPo.length + legacy.length : 0),
       page,
-      pageSize: PAGE_SIZE,
+      pageSize: listPageSize,
       groups: hubGroupsForPersona(opts.user.personType, opts.user.permissionProfile),
       classifyCount,
       missingCount,
@@ -677,6 +895,7 @@ export async function loadDocumentHub(opts: {
         .map((r) => r.emitterName?.trim() ?? "")
         .filter(Boolean)
         .slice(0, 40),
+      categoryStats,
     };
   });
 }

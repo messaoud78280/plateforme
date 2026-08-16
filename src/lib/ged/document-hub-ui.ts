@@ -1,15 +1,23 @@
 /** Helpers UI GED V2 — sans Prisma (safe client). */
 
-export type HubGroup =
-  | "all"
-  | "chantiers"
-  | "administratif"
-  | "commandes"
-  | "fournisseurs"
-  | "doe"
-  | "photos";
+import {
+  HUB_CATEGORY_DEFS,
+  type HubCategoryId,
+  type HubCategoryStat,
+  type HubGroup,
+  hubCategoryLabel,
+} from "@/lib/ged/hub-categories";
 
-export type HubView = "all" | "recent" | "favorites" | "missing" | "classify";
+export type { HubCategoryId, HubCategoryStat, HubGroup };
+export { HUB_CATEGORY_DEFS, hubCategoryLabel };
+
+export type HubView =
+  | "all"
+  | "recent"
+  | "favorites"
+  | "missing"
+  | "classify"
+  | "categories";
 
 export type HubSort = "recent" | "oldest" | "name" | "type";
 
@@ -54,13 +62,8 @@ export type HubDocumentItem = {
 };
 
 const GROUP_DEFS: { id: HubGroup; label: string }[] = [
-  { id: "all", label: "Tous types" },
-  { id: "chantiers", label: "Chantiers" },
-  { id: "administratif", label: "Administratif" },
-  { id: "commandes", label: "Commandes" },
-  { id: "fournisseurs", label: "Fournisseurs" },
-  { id: "doe", label: "DOE" },
-  { id: "photos", label: "Photos" },
+  { id: "all", label: "Tous" },
+  ...HUB_CATEGORY_DEFS.map((c) => ({ id: c.id as HubGroup, label: c.label })),
 ];
 
 export const HUB_VIEWS: { id: HubView; label: string }[] = [
@@ -68,10 +71,11 @@ export const HUB_VIEWS: { id: HubView; label: string }[] = [
   { id: "recent", label: "Récents" },
   { id: "favorites", label: "Favoris" },
   { id: "missing", label: "À récupérer" },
+  { id: "categories", label: "Catégories" },
   { id: "classify", label: "À classer" },
 ];
 
-/** Onglets type (filtres) selon le portail. */
+/** Catégories visibles selon le portail (pas de doublon métier). */
 export function hubGroupsForPersona(
   personType?: string | null,
   permissionProfile?: string | null,
@@ -82,16 +86,21 @@ export function hubGroupsForPersona(
     personType === "CLIENT_EXT" || permissionProfile === "CLIENT";
   if (isSupplier) {
     return [
-      { id: "all", label: "Tous types" },
-      { id: "commandes", label: "Commandes" },
-      { id: "fournisseurs", label: "Livraisons" },
+      { id: "all", label: "Tous" },
+      { id: "commandes_bl", label: "Commandes & bons de livraison" },
+      { id: "fiches_techniques", label: "Fiches techniques" },
+      { id: "factures_situations", label: "Factures & situations" },
+      { id: "fournisseurs", label: "Fournisseurs" },
     ];
   }
   if (isClient) {
     return [
-      { id: "all", label: "Tous types" },
-      { id: "chantiers", label: "Chantiers" },
-      { id: "commandes", label: "Commandes" },
+      { id: "all", label: "Tous" },
+      { id: "plans_techniques", label: "Plans & pièces techniques" },
+      { id: "factures_situations", label: "Factures & situations" },
+      { id: "comptes_rendus", label: "Comptes rendus" },
+      { id: "photos", label: "Photos chantier" },
+      { id: "doe", label: "DOE / fin de chantier" },
     ];
   }
   return GROUP_DEFS;
@@ -106,7 +115,13 @@ export function hubViewsForPersona(
   const isClient =
     personType === "CLIENT_EXT" || permissionProfile === "CLIENT";
   if (isSupplier || isClient) {
-    return HUB_VIEWS.filter((v) => v.id === "all" || v.id === "recent" || v.id === "favorites");
+    return HUB_VIEWS.filter(
+      (v) =>
+        v.id === "all" ||
+        v.id === "recent" ||
+        v.id === "favorites" ||
+        v.id === "categories",
+    );
   }
   return HUB_VIEWS;
 }
@@ -269,6 +284,12 @@ export function hubEmptyCopy(opts: {
     return {
       title: "Rien à classer",
       body: "Les documents sans chantier ou type suffisamment connu apparaîtront ici.",
+    };
+  }
+  if (opts.view === "categories" && opts.group === "all") {
+    return {
+      title: "Aucune catégorie",
+      body: "Les documents classés par type métier apparaîtront ici dès qu’ils sont disponibles.",
     };
   }
 

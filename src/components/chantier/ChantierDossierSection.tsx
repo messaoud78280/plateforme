@@ -10,13 +10,18 @@ import { ChantierFileShareDialog } from "@/components/chantier/ChantierFileShare
 import { GedDocumentRow } from "@/components/ged/GedDocumentRow";
 import { displayGedTypeLabel } from "@/lib/ged/classify-document";
 import { folderDisplayLabel } from "@/lib/ged/origin";
-import type { HubDocumentItem, HubView } from "@/lib/ged/document-hub-ui";
+import type { HubDocumentItem, HubView, HubCategoryId } from "@/lib/ged/document-hub-ui";
 import {
   HUB_DOC_TYPES,
   HUB_ORIGIN_FILTERS,
+  hubCategoryLabel,
   hubItemMatchesQuery,
   visibleHubViews,
 } from "@/lib/ged/document-hub-ui";
+import {
+  buildCategoryStats,
+  formatCategoryCounts,
+} from "@/lib/ged/hub-categories";
 import { cn } from "@/lib/cn";
 
 export type ChantierFolderWithFiles = {
@@ -47,6 +52,7 @@ const CHANTIER_VIEWS: { id: HubView; label: string }[] = [
   { id: "recent", label: "Récents" },
   { id: "favorites", label: "Favoris" },
   { id: "missing", label: "À récupérer" },
+  { id: "categories", label: "Catégories" },
   { id: "classify", label: "À classer" },
 ];
 
@@ -77,6 +83,7 @@ export function ChantierDossierSection({
   const [showAllDocs, setShowAllDocs] = useState(false);
   const [q, setQ] = useState("");
   const [view, setView] = useState<HubView>("all");
+  const [categoryFilter, setCategoryFilter] = useState<HubCategoryId | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [docType, setDocType] = useState("");
   const [origin, setOrigin] = useState("");
@@ -90,17 +97,32 @@ export function ChantierDossierSection({
 
   const shownViews = visibleHubViews(CHANTIER_VIEWS, classifyCount);
 
+  const categoryStats = useMemo(
+    () =>
+      buildCategoryStats(
+        hubItems.map((it) => ({
+          group: it.group === "all" ? "autres" : it.group,
+          title: it.title,
+          isExpectedMissing: it.isExpectedMissing,
+        })),
+      ),
+    [hubItems],
+  );
+
   const filteredItems = useMemo(() => {
     let list = hubItems;
     if (q.trim()) list = list.filter((it) => hubItemMatchesQuery(it, q));
     if (view === "favorites") list = list.filter((it) => it.isFavorite);
     if (view === "missing") list = list.filter((it) => it.isExpectedMissing);
     if (view === "classify") {
-      list = list.filter((it) => it.group === "administratif" && it.typeLabel === "À classer");
+      list = list.filter((it) => it.group === "autres" && it.typeLabel === "À classer");
     }
     if (view === "recent") {
       const since = Date.now() - 30 * 86400000;
       list = list.filter((it) => new Date(it.createdAt).getTime() >= since);
+    }
+    if (view === "categories" && categoryFilter) {
+      list = list.filter((it) => it.group === categoryFilter);
     }
     if (docType) {
       const label = HUB_DOC_TYPES.find((t) => t.id === docType)?.label;
@@ -108,7 +130,10 @@ export function ChantierDossierSection({
     }
     if (origin) list = list.filter((it) => it.origin === origin);
     return list;
-  }, [hubItems, q, view, docType, origin]);
+  }, [hubItems, q, view, docType, origin, categoryFilter]);
+
+  const showCategoryCards =
+    view === "categories" && !categoryFilter && q.trim().length < 2;
 
   const recents = useMemo(() => {
     return [...hubItems]
@@ -387,6 +412,7 @@ export function ChantierDossierSection({
               type="button"
               onClick={() => {
                 setView(v.id);
+                setCategoryFilter(null);
                 setShowAllDocs(v.id !== "all");
               }}
               className={cn(
@@ -516,8 +542,54 @@ export function ChantierDossierSection({
             ) : null}
           </section>
         </div>
+      ) : showCategoryCards ? (
+        <div className="px-5 py-4 sm:px-6">
+          {categoryStats.length === 0 ? (
+            <p className="py-8 text-center text-sm text-slate-500">Aucune catégorie pour ce chantier.</p>
+          ) : (
+            <ul className="divide-y divide-slate-100">
+              {categoryStats.map((cat) => {
+                const counts = formatCategoryCounts(cat.availableCount, cat.missingCount);
+                const totalCat = cat.availableCount + cat.missingCount;
+                return (
+                  <li key={cat.id}>
+                    <button
+                      type="button"
+                      onClick={() => setCategoryFilter(cat.id)}
+                      className="flex w-full items-center gap-3 py-3 text-left hover:bg-slate-50/80"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[15px] font-semibold text-slate-900">{cat.label}</p>
+                        <p className="mt-0.5 text-[13px] text-slate-500">{counts}</p>
+                      </div>
+                      <span className="shrink-0 text-[13px] font-medium text-[#1e3a5f]">
+                        <span className="hidden sm:inline">Voir les {totalCat} →</span>
+                        <span className="sm:hidden">›</span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       ) : (
         <div className="px-5 py-4 sm:px-6">
+          {view === "categories" && categoryFilter ? (
+            <div className="mb-3 flex flex-wrap items-center gap-2 text-[13px]">
+              <button
+                type="button"
+                onClick={() => setCategoryFilter(null)}
+                className="font-medium text-slate-500 hover:text-[#1e3a5f]"
+              >
+                Catégories
+              </button>
+              <span className="text-slate-300">/</span>
+              <span className="font-semibold text-[#1e3a5f]">
+                {hubCategoryLabel(categoryFilter)}
+              </span>
+            </div>
+          ) : null}
           {searching && filteredItems.length === 0 ? (
             <div className="py-10 text-center">
               <p className="text-[15px] font-medium text-slate-800">Aucun résultat pour « {q.trim()} »</p>

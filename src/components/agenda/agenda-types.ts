@@ -36,6 +36,11 @@ export type AgendaEventDTO = {
   attendees: { id: string; status: string; user: { id: string; name: string; email: string } }[];
   followUpSheet?: { id: string; title: string } | null;
   purchaseOrder?: AgendaPurchaseOrderSummary | null;
+  annualContract?: {
+    id: string;
+    clientName: string;
+    href: string;
+  } | null;
 };
 
 export type AgendaProjectOption = { id: string; title: string };

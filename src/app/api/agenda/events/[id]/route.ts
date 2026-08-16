@@ -45,11 +45,27 @@ export async function GET(_request: Request, ctx: Ctx) {
   const event = await canAccessEvent(session.user, id);
   if (!event) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
   const canOpenPo = isInternalPurchaseOrderActor(session.user);
+
+  const annualLink = await prisma.annualServiceIntervention.findFirst({
+    where: { agendaEventId: id },
+    select: {
+      contractId: true,
+      contract: { select: { clientName: true } },
+    },
+  });
+
   return NextResponse.json({
     event: {
       ...event,
       purchaseOrder: serializePurchaseOrderForAgenda(event.purchaseOrder, { canOpen: canOpenPo }),
       linkedPurchaseOrder: Boolean(event.purchaseOrderId),
+      annualContract: annualLink
+        ? {
+            id: annualLink.contractId,
+            clientName: annualLink.contract.clientName,
+            href: `/dashboard/contrats-annuels?view=piloter&contract=${encodeURIComponent(annualLink.contractId)}`,
+          }
+        : null,
     },
   });
 }

@@ -94,6 +94,11 @@ export function AgendaSidePanel({
   const [miniOpen, setMiniOpen] = useState(false);
   const [participantsOpen, setParticipantsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [annualContract, setAnnualContract] = useState<{
+    id: string;
+    clientName: string;
+    href: string;
+  } | null>(null);
   const moreRef = useRef<HTMLDivElement>(null);
   const month = startOfMonth(cursor);
   const days = monthGrid(cursor);
@@ -102,7 +107,33 @@ export function AgendaSidePanel({
   useEffect(() => {
     setParticipantsOpen(false);
     setMoreOpen(false);
-  }, [selectedEvent?.id]);
+    setAnnualContract(selectedEvent?.annualContract ?? null);
+  }, [selectedEvent?.id, selectedEvent?.annualContract]);
+
+  useEffect(() => {
+    if (!selectedEvent?.id || selectedEvent.annualContract) return;
+    if (selectedEvent.type !== "INTERVENTION" && !selectedEvent.title.startsWith("CE —")) {
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(`/api/agenda/events/${encodeURIComponent(selectedEvent.id)}`, {
+          credentials: "same-origin",
+        });
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as {
+          event?: { annualContract?: typeof annualContract };
+        };
+        if (!cancelled) setAnnualContract(data.event?.annualContract ?? null);
+      } catch {
+        if (!cancelled) setAnnualContract(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedEvent?.id, selectedEvent?.annualContract, selectedEvent?.type, selectedEvent?.title]);
 
   useEffect(() => {
     if (!moreOpen) return;
@@ -644,6 +675,11 @@ export function AgendaSidePanel({
 
                   {/* Liens contextuels (pas au même niveau que Modifier) */}
                   <div className="flex flex-wrap gap-2">
+                    {annualContract ? (
+                      <Link href={annualContract.href} className={btnSecondary}>
+                        Voir le contrat annuel
+                      </Link>
+                    ) : null}
                     {po?.canOpen && primary?.kind !== "open_po" && primary?.kind !== "receive_po" ? (
                       <Link href={`/dashboard/commandes/${po.id}`} className={btnSecondary}>
                         Voir commande

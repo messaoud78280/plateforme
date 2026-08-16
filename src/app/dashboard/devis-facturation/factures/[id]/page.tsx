@@ -5,23 +5,32 @@ import {
 } from "@/lib/commercial/access";
 import { getInvoiceDetail } from "@/lib/commercial/invoices";
 import { InvoiceDocument } from "@/components/commercial/InvoiceDocument";
+import { sanitizeInternalReturnTo } from "@/lib/navigation/safe-return-to";
 
 export const dynamic = "force-dynamic";
 
 export default async function FactureDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ returnTo?: string }>;
 }) {
   const session = await requireCommercialSession();
   const orgId = await resolveCommercialOrgId(session.user);
   const { id } = await params;
+  const sp = await searchParams;
   if (!orgId) notFound();
   const inv = await getInvoiceDetail(orgId, id);
   if (!inv) notFound();
 
+  const returnTo = sp.returnTo
+    ? sanitizeInternalReturnTo(sp.returnTo, "/dashboard/devis-facturation/factures")
+    : null;
+
   return (
     <InvoiceDocument
+      returnTo={returnTo}
       invoice={{
         id: inv.id,
         number: inv.number,
@@ -45,10 +54,13 @@ export default async function FactureDetailPage({
         prorataAmountHt: inv.prorataAmountHt,
         prorataRate: inv.prorataRate,
         clientNotes: inv.clientNotes,
-        issuerSnapshotJson: (inv.issuerSnapshotJson as Record<string, string | null> | null) ?? null,
-        clientSnapshotJson: (inv.clientSnapshotJson as Record<string, string | null> | null) ?? null,
+        issuerSnapshotJson:
+          (inv.issuerSnapshotJson as Record<string, string | null> | null) ?? null,
+        clientSnapshotJson:
+          (inv.clientSnapshotJson as Record<string, string | null> | null) ?? null,
         quote: inv.quote,
         project: inv.project,
+        annualContractOrigin: inv.annualContractOrigin,
         lines: inv.lines.map((l) => ({
           id: l.id,
           designation: l.designation,

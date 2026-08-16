@@ -8,6 +8,7 @@ import { createStandardInvoice } from "@/lib/commercial/invoices";
 import { ensureCommercialOrgSettings } from "@/lib/commercial/settings";
 import { d } from "@/lib/commercial/decimal";
 import { canViewAnnualContractFinancials } from "@/lib/annual-contracts/access";
+import { annualInvoiceHref } from "@/lib/annual-contracts/nav";
 
 export type PrepareAnnualInvoiceResult = {
   action: "created" | "continue" | "view";
@@ -17,8 +18,8 @@ export type PrepareAnnualInvoiceResult = {
   href: string;
 };
 
-function invoiceHref(invoiceId: string): string {
-  return `/dashboard/devis-facturation/factures/${invoiceId}`;
+function invoiceHref(invoiceId: string, contractId: string): string {
+  return annualInvoiceHref({ invoiceId, contractId });
 }
 
 function formatDateFr(date: Date): string {
@@ -111,7 +112,7 @@ export async function prepareAnnualInterventionInvoice(opts: {
         invoiceId: inv.id,
         invoiceNumber: inv.number,
         status: inv.status,
-        href: invoiceHref(inv.id),
+        href: invoiceHref(inv.id, intervention.contract.id),
       };
     } else {
       return {
@@ -119,7 +120,7 @@ export async function prepareAnnualInterventionInvoice(opts: {
         invoiceId: inv.id,
         invoiceNumber: inv.number,
         status: inv.status,
-        href: invoiceHref(inv.id),
+        href: invoiceHref(inv.id, intervention.contract.id),
       };
     }
   }
@@ -200,6 +201,6 @@ export async function prepareAnnualInterventionInvoice(opts: {
     invoiceId: invoice.id,
     invoiceNumber: invoice.number,
     status: invoice.status,
-    href: invoiceHref(invoice.id),
+    href: invoiceHref(invoice.id, intervention.contract.id),
   };
 }

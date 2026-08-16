@@ -78,11 +78,24 @@ export async function getInvoiceDetail(orgId: string, id: string) {
       project: { select: { id: true, title: true } },
       clientExternalOrg: { select: { id: true, name: true, tradeName: true } },
       createdBy: { select: { id: true, name: true } },
+      annualServiceIntervention: {
+        select: {
+          contractId: true,
+          contract: { select: { clientName: true } },
+        },
+      },
     },
   });
   if (!inv) return null;
   return {
     ...inv,
+    annualContractOrigin: inv.annualServiceIntervention
+      ? {
+          contractId: inv.annualServiceIntervention.contractId,
+          clientName: inv.annualServiceIntervention.contract.clientName,
+          href: `/dashboard/contrats-annuels?view=piloter&contract=${encodeURIComponent(inv.annualServiceIntervention.contractId)}`,
+        }
+      : null,
     totalSellHt: d(inv.totalSellHt),
     totalVat: d(inv.totalVat),
     totalTtc: d(inv.totalTtc),

@@ -52,6 +52,11 @@ type InvoiceDoc = {
   clientSnapshotJson: Snapshot | null;
   quote: { id: string; number: string; subject: string } | null;
   project: { id: string; title: string } | null;
+  annualContractOrigin?: {
+    contractId: string;
+    clientName: string;
+    href: string;
+  } | null;
   lines: Array<{
     id: string;
     designation: string;
@@ -98,7 +103,13 @@ function partyLines(s: Snapshot | null): string[] {
   return out.length ? out : ["—"];
 }
 
-export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
+export function InvoiceDocument({
+  invoice,
+  returnTo,
+}: {
+  invoice: InvoiceDoc;
+  returnTo?: string | null;
+}) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -118,6 +129,14 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
       (invoice.dueDate &&
         new Date(invoice.dueDate).getTime() <
           new Date().setHours(0, 0, 0, 0)));
+  const backHref = returnTo?.startsWith("/dashboard")
+    ? returnTo
+    : "/dashboard/devis-facturation/factures";
+  const backLabel = returnTo?.includes("contrats-annuels")
+    ? invoice.annualContractOrigin
+      ? `← ${invoice.annualContractOrigin.clientName}`
+      : "← Voir le contrat annuel"
+    : "← Factures";
 
   async function issue() {
     if (!confirm("Émettre cette facture ? Elle ne pourra plus être modifiée comme brouillon.")) {
@@ -185,11 +204,19 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDoc }) {
       <div className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-slate-50/95 px-1 py-3 backdrop-blur">
         <div className="flex flex-wrap items-center gap-2">
           <Link
-            href="/dashboard/devis-facturation/factures"
+            href={backHref}
             className="text-xs font-semibold text-slate-600 hover:text-[#1e3a5f]"
           >
-            ← Factures
+            {backLabel}
           </Link>
+          {invoice.annualContractOrigin && !returnTo?.includes("contrats-annuels") ? (
+            <Link
+              href={invoice.annualContractOrigin.href}
+              className="text-xs font-medium text-[#1e3a5f] hover:underline"
+            >
+              Origine : Contrat annuel {invoice.annualContractOrigin.clientName}
+            </Link>
+          ) : null}
           <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-700">
             {COMMERCIAL_INVOICE_STATUS_LABELS[invoice.status] ?? invoice.status}
           </span>

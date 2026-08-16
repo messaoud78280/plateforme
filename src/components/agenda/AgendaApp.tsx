@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   Filter,
@@ -97,6 +98,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
   const [navOrigin, setNavOrigin] = useState<{ view: AgendaView; cursor: string } | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [duplicateFrom, setDuplicateFrom] = useState<AgendaEventDTO | null>(null);
+  const [returnNav, setReturnNav] = useState<{ href: string; label: string } | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -165,16 +167,56 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
     void loadEvents();
   }, [loadEvents]);
 
+  /** Deep-link : ?date=&event=&returnTo= — positionne sur la date réelle de l’événement. */
   useEffect(() => {
     if (typeof window === "undefined") return;
+    let cancelled = false;
     const params = new URLSearchParams(window.location.search);
     const eventId = params.get("event");
+    const dateParam = params.get("date");
     const projectId = params.get("projectId");
     const wantNew = params.get("new") === "1";
+    const returnToRaw = params.get("returnTo");
+    const returnLabel = params.get("returnLabel");
+
+    if (returnToRaw?.startsWith("/dashboard")) {
+      setReturnNav({
+        href: returnToRaw,
+        label: returnLabel?.trim() || "Retour",
+      });
+    }
+
+    function applyDate(isoDay: string) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDay)) return;
+      setCursor(startOfDay(new Date(`${isoDay}T12:00:00`)));
+      setView("day");
+    }
+
+    if (dateParam) applyDate(dateParam);
+
     if (eventId) {
       setSelectedEventId(eventId);
       setPanelOpen(true);
       setView("day");
+      if (!dateParam) {
+        void (async () => {
+          try {
+            const res = await fetch(`/api/agenda/events/${encodeURIComponent(eventId)}`, {
+              credentials: "same-origin",
+            });
+            if (!res.ok || cancelled) return;
+            const data = (await res.json()) as { event?: { startAt?: string } };
+            const startAt = data.event?.startAt;
+            if (!startAt || cancelled) return;
+            const d = new Date(startAt);
+            if (Number.isNaN(d.getTime())) return;
+            const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+            applyDate(iso);
+          } catch {
+            /* ignore */
+          }
+        })();
+      }
     }
     if (projectId) {
       setProjectFilter(projectId);
@@ -191,6 +233,9 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
       });
       setCreateOpen(true);
     }
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -596,6 +641,19 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
       }
     >
       <div className="m-2 flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:m-3 lg:m-3 lg:mr-2">
+        {returnNav ? (
+          <div className="border-b border-slate-100 px-3 py-2 sm:px-4">
+            <Link
+              href={returnNav.href}
+              className="inline-flex items-center gap-1 text-[13px] font-medium text-slate-500 transition-colors hover:text-[#1e3a5f]"
+            >
+              <span aria-hidden>←</span>
+              {returnNav.label.startsWith("Retour")
+                ? returnNav.label
+                : `Retour au contrat — ${returnNav.label}`}
+            </Link>
+          </div>
+        ) : null}
         {/* Ligne 1 — période + vues */}
         <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 px-3 py-2 sm:px-4">
           <div className="flex items-center gap-1">

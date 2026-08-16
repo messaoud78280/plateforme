@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { AnnualContractDrawer } from "@/components/annual-contracts/AnnualContractDrawer";
+import { resolveAnnualPrimaryAction } from "@/lib/annual-contracts/primary-action";
 import type { loadAnnualContractsBoard } from "@/lib/annual-contracts/load-board";
 import type {
   SerializedAnnualContract,
   SerializedAnnualIntervention,
 } from "@/lib/annual-contracts/load-board";
+import { annualInvoiceHref } from "@/lib/annual-contracts/nav";
 
 type Board = Awaited<ReturnType<typeof loadAnnualContractsBoard>>;
 type ViewId = "piloter" | "planning" | "portefeuille";
@@ -87,13 +90,25 @@ export function AnnualContractsWorkspace({
     }
   }
 
-  async function schedule(interventionId: string) {
+  async function schedule(
+    interventionId: string,
+    body: {
+      plannedDate?: string;
+      plannedCrewCount?: number;
+      plannedDuration?: string;
+      comment?: string;
+    } = {},
+  ) {
     setBusy(true);
     setMessage(null);
     try {
       const res = await fetch(
         `/api/annual-contracts/interventions/${interventionId}/schedule`,
-        { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" },
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        },
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Échec programmation");
@@ -107,7 +122,14 @@ export function AnnualContractsWorkspace({
     }
   }
 
-  async function complete(interventionId: string) {
+  async function complete(
+    interventionId: string,
+    body: {
+      completedAt?: string;
+      actualCrewCount?: number;
+      comment?: string;
+    } = {},
+  ) {
     setBusy(true);
     setMessage(null);
     try {
@@ -116,14 +138,14 @@ export function AnnualContractsWorkspace({
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({}),
+          body: JSON.stringify(body),
         },
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Échec réalisation");
       setMessage(
         data.nextPlannedDate
-          ? `Réalisée. À facturer créé. Prochaine échéance : ${data.nextPlannedDate}.`
+          ? `Réalisée. À facturer. Prochaine échéance : ${data.nextPlannedDate}.`
           : `Réalisée. ${data.billingNote}`,
       );
       await reload();
@@ -155,13 +177,34 @@ export function AnnualContractsWorkspace({
       await reload();
       router.refresh();
       if (data.href) {
-        window.open(data.href, "_blank", "noopener,noreferrer");
+        const href =
+          selected
+            ? annualInvoiceHref({
+                invoiceId: data.invoiceId,
+                contractId: selected.id,
+              })
+            : String(data.href);
+        window.open(href, "_blank", "noopener,noreferrer");
       }
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Erreur");
     } finally {
       setBusy(false);
     }
+  }
+
+  function openContract(c: SerializedAnnualContract) {
+    setSelected(c);
+    const url = new URL(window.location.href);
+    url.searchParams.set("contract", c.id);
+    window.history.replaceState({}, "", url.toString());
+  }
+
+  function closeContract() {
+    setSelected(null);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("contract");
+    window.history.replaceState({}, "", url.toString());
   }
 
   const portfolio = useMemo(() => {
@@ -300,8 +343,7 @@ export function AnnualContractsWorkspace({
         <PilotView
           pilot={board.pilot}
           includeFinancials={board.includeFinancials}
-          onOpen={(c) => setSelected(c)}
-          onSchedule={schedule}
+          onOpen={openContract}
           onComplete={complete}
           onPrepareInvoice={prepareInvoice}
           busy={busy}
@@ -320,7 +362,7 @@ export function AnnualContractsWorkspace({
           }}
           onOpen={(contractId) => {
             const c = board.contracts.find((x) => x.id === contractId);
-            if (c) setSelected(c);
+            if (c) openContract(c);
           }}
           pending={pending}
         />
@@ -380,7 +422,7 @@ export function AnnualContractsWorkspace({
                   <tr
                     key={c.id}
                     className="cursor-pointer border-t border-slate-100 hover:bg-slate-50/80"
-                    onClick={() => setSelected(c)}
+                    onClick={() => openContract(c)}
                   >
                     <td className="px-4 py-3 font-medium text-slate-900">{c.clientName}</td>
                     <td className="px-4 py-3 text-slate-600">{c.siteAddress}</td>
@@ -415,11 +457,11 @@ export function AnnualContractsWorkspace({
       ) : null}
 
       {selected ? (
-        <Drawer
+        <AnnualContractDrawer
           contract={selected}
           includeFinancials={board.includeFinancials}
           busy={busy}
-          onClose={() => setSelected(null)}
+          onClose={closeContract}
           onSchedule={schedule}
           onComplete={complete}
           onPrepareInvoice={prepareInvoice}
@@ -451,7 +493,6 @@ function PilotView({
   pilot,
   includeFinancials,
   onOpen,
-  onSchedule,
   onComplete,
   onPrepareInvoice,
   busy,
@@ -459,8 +500,10 @@ function PilotView({
   pilot: Board["pilot"];
   includeFinancials: boolean;
   onOpen: (c: SerializedAnnualContract) => void;
-  onSchedule: (id: string) => void;
-  onComplete: (id: string) => void;
+  onComplete: (
+    id: string,
+    body?: { completedAt?: string; actualCrewCount?: number; comment?: string },
+  ) => void;
   onPrepareInvoice: (id: string) => void;
   busy: boolean;
 }) {
@@ -504,13 +547,10 @@ function PilotView({
               return (
               <li
                 key={`${item.bucket}-${item.intervention.id}`}
-                className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
+                className="flex cursor-pointer flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50/80 sm:flex-row sm:items-center sm:justify-between"
+                onClick={() => onOpen(item.contract)}
               >
-                <button
-                  type="button"
-                  className="min-w-0 flex-1 text-left"
-                  onClick={() => onOpen(item.contract)}
-                >
+                <div className="min-w-0 flex-1 text-left">
                   <p className="font-medium text-slate-900">{item.contract.clientName}</p>
                   <p className="truncate text-sm text-slate-500">{item.contract.siteAddress}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -556,62 +596,90 @@ function PilotView({
                       </span>
                     ) : null}
                   </div>
-                </button>
-                <div className="flex flex-wrap gap-2">
-                  {item.bucket !== "to_bill" &&
-                  item.intervention.status !== "SCHEDULED" &&
-                  item.intervention.status !== "COMPLETED" ? (
-                    <button
-                      type="button"
-                      disabled={busy || !item.intervention.plannedDate}
-                      onClick={() => onSchedule(item.intervention.id)}
-                      className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
-                    >
-                      Programmer / confirmer
-                    </button>
-                  ) : null}
-                  {item.bucket !== "to_bill" &&
-                  item.intervention.status !== "COMPLETED" ? (
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => onComplete(item.intervention.id)}
-                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40"
-                    >
-                      Intervention réalisée
-                    </button>
-                  ) : null}
-                  {item.bucket === "to_bill" && includeFinancials ? (
-                    item.intervention.billingState === "invoiced" ||
-                    item.intervention.billingState === "paid" ? (
-                      <a
-                        href={item.intervention.commercialInvoiceHref ?? "#"}
-                        target="_blank"
-                        rel="noreferrer"
+                </div>
+                <div
+                  className="flex flex-wrap gap-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {(() => {
+                    const primary = resolveAnnualPrimaryAction(item.contract, {
+                      includeFinancials,
+                    });
+                    if (primary.kind === "none") return null;
+                    if (
+                      primary.kind === "view_invoice" ||
+                      primary.kind === "view_paid_invoice"
+                    ) {
+                      const invId = primary.invoiceHref?.split("/").pop()?.split("?")[0];
+                      if (!invId) return null;
+                      return (
+                        <a
+                          href={annualInvoiceHref({
+                            invoiceId: invId,
+                            contractId: item.contract.id,
+                          })}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-medium text-white"
+                        >
+                          {primary.label} →
+                        </a>
+                      );
+                    }
+                    if (
+                      primary.kind === "prepare_invoice" ||
+                      primary.kind === "continue_invoice"
+                    ) {
+                      return (
+                        <button
+                          type="button"
+                          disabled={busy || !primary.interventionId}
+                          onClick={() =>
+                            primary.interventionId &&
+                            onPrepareInvoice(primary.interventionId)
+                          }
+                          className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+                        >
+                          {primary.label} →
+                        </button>
+                      );
+                    }
+                    if (primary.kind === "complete") {
+                      return (
+                        <button
+                          type="button"
+                          disabled={busy || !primary.interventionId}
+                          onClick={() =>
+                            primary.interventionId && onComplete(primary.interventionId)
+                          }
+                          className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+                        >
+                          {primary.label}
+                        </button>
+                      );
+                    }
+                    if (primary.kind === "schedule") {
+                      return (
+                        <button
+                          type="button"
+                          disabled={busy || !primary.interventionId}
+                          onClick={() => onOpen(item.contract)}
+                          className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+                        >
+                          {primary.label}
+                        </button>
+                      );
+                    }
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => onOpen(item.contract)}
                         className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-medium text-white"
                       >
-                        Voir la facture →
-                      </a>
-                    ) : item.intervention.billingState === "preparing" ? (
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => onPrepareInvoice(item.intervention.id)}
-                        className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
-                      >
-                        Continuer la facture →
+                        {primary.label}
                       </button>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => onPrepareInvoice(item.intervention.id)}
-                        className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
-                      >
-                        Préparer la facture →
-                      </button>
-                    )
-                  ) : null}
+                    );
+                  })()}
                 </div>
               </li>
               );
@@ -756,173 +824,6 @@ function PlanningView({
           </tbody>
         </table>
       </div>
-    </div>
-  );
-}
-
-function Drawer({
-  contract,
-  includeFinancials,
-  busy,
-  onClose,
-  onSchedule,
-  onComplete,
-  onPrepareInvoice,
-}: {
-  contract: SerializedAnnualContract;
-  includeFinancials: boolean;
-  busy: boolean;
-  onClose: () => void;
-  onSchedule: (id: string) => void;
-  onComplete: (id: string) => void;
-  onPrepareInvoice: (id: string) => void;
-}) {
-  const open = contract.openIntervention;
-  const toBill = contract.history.find(
-    (h) => h.billingState === "to_bill" || h.billingState === "preparing",
-  );
-  const billed = contract.history.find(
-    (h) => h.billingState === "invoiced" || h.billingState === "paid",
-  );
-  return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={onClose}>
-      <aside
-        className="flex h-full w-full max-w-md flex-col bg-white shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between border-b border-slate-100 px-5 py-4">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-slate-400">Contrat annuel</p>
-            <h3 className="text-lg font-semibold text-[#1e3a5f]">{contract.clientName}</h3>
-            <p className="text-sm text-slate-500">{contract.siteAddress}</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg px-2 py-1 text-slate-400 hover:bg-slate-100"
-          >
-            Fermer
-          </button>
-        </div>
-        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4 text-sm">
-          <Row label="Statut" value={contract.statusLabel} />
-          {includeFinancials ? (
-            <Row label="Montant annuel HT" value={contract.amountHtLabel ?? "—"} />
-          ) : null}
-          <Row
-            label="Compagnons prévus"
-            value={contract.plannedCrewCount != null ? String(contract.plannedCrewCount) : "—"}
-          />
-          <Row label="Durée prévue" value={contract.plannedDuration ?? "—"} />
-          <Row
-            label="Prochaine intervention"
-            value={
-              contract.nextPlannedDate
-                ? new Date(contract.nextPlannedDate + "T00:00:00Z").toLocaleDateString("fr-FR", {
-                    timeZone: "UTC",
-                  })
-                : "À programmer"
-            }
-          />
-          {contract.comment ? (
-            <div>
-              <p className="text-xs font-medium uppercase text-slate-400">Commentaire</p>
-              <p className="mt-1 whitespace-pre-wrap text-slate-700">{contract.comment}</p>
-            </div>
-          ) : null}
-          {open ? (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <p className="text-xs font-medium uppercase text-slate-400">
-                Prochaine intervention {open.plannedYear ?? ""}
-              </p>
-              <p className="mt-1 font-medium">{open.statusLabel}</p>
-              {open.attentionReason ? (
-                <p className={cn("mt-1 inline-block rounded px-2 py-0.5 text-xs", urgencyClass(open.attentionLevel))}>
-                  {open.attentionReason}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
-          {contract.history.length > 0 ? (
-            <div>
-              <p className="text-xs font-medium uppercase text-slate-400">Historique</p>
-              <ul className="mt-2 space-y-2">
-                {contract.history.map((h) => (
-                  <li key={h.id} className="rounded-lg border border-slate-100 px-3 py-2">
-                    <p className="font-medium">
-                      Intervention {h.plannedYear ?? ""} —{" "}
-                      {h.plannedDate
-                        ? new Date(h.plannedDate + "T00:00:00Z").toLocaleDateString("fr-FR", {
-                            timeZone: "UTC",
-                          })
-                        : "—"}{" "}
-                      — {h.statusLabel}
-                    </p>
-                    {h.billingStateLabel ? (
-                      <p className="text-xs text-orange-700">
-                        {h.billingStateLabel}
-                        {h.commercialInvoiceNumber ? ` · ${h.commercialInvoiceNumber}` : ""}
-                      </p>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </div>
-        <div className="flex flex-wrap gap-2 border-t border-slate-100 px-5 py-4">
-          {open && open.status === "TO_PREPARE" && open.plannedDate ? (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => onSchedule(open.id)}
-              className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-medium text-white disabled:opacity-40"
-            >
-              Programmer / confirmer
-            </button>
-          ) : null}
-          {open && open.status !== "COMPLETED" ? (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => onComplete(open.id)}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium disabled:opacity-40"
-            >
-              Intervention réalisée
-            </button>
-          ) : null}
-          {includeFinancials && toBill ? (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => onPrepareInvoice(toBill.id)}
-              className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-medium text-white disabled:opacity-40"
-            >
-              {toBill.billingState === "preparing"
-                ? "Continuer la facture →"
-                : "Préparer la facture →"}
-            </button>
-          ) : null}
-          {includeFinancials && billed?.commercialInvoiceHref ? (
-            <a
-              href={billed.commercialInvoiceHref}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium"
-            >
-              Voir la facture →
-            </a>
-          ) : null}
-          {open?.agendaEventId ? (
-            <Link
-              href={`/dashboard/agenda?event=${encodeURIComponent(open.agendaEventId)}`}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium"
-            >
-              Voir dans l’Agenda
-            </Link>
-          ) : null}
-        </div>
-      </aside>
     </div>
   );
 }

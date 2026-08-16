@@ -145,6 +145,15 @@ export function CreatePurchaseOrderForm({
         body: JSON.stringify({ name: newSupplierName.trim(), activity: "Fournitures bâtiment" }),
       });
       const data = await res.json();
+      if (res.status === 409 && Array.isArray(data.duplicates) && data.duplicates[0]) {
+        const d = data.duplicates[0] as { id: string; name: string; tradeName?: string | null };
+        setSupplierId(d.id);
+        setSupplierQ(d.tradeName || d.name);
+        setNewSupplierOpen(false);
+        setNewSupplierName("");
+        void searchSuppliers(d.tradeName || d.name);
+        return;
+      }
       if (!res.ok) throw new Error(data.error || "Erreur");
       setSupplierId(data.organization.id);
       setSupplierQ(data.organization.name);

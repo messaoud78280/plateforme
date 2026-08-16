@@ -1,17 +1,13 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import {
   isInternalPurchaseOrderActor,
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
 import { forbiddenUnlessDashboardHref } from "@/lib/equipe-acces/assert-api-dashboard-access";
-import {
-  createSupplier,
-  searchSuppliers,
-  type SupplierInput,
-} from "@/lib/suppliers/service";
+import { updateSupplier, type SupplierInput } from "@/lib/suppliers/service";
+import { prisma } from "@/lib/prisma";
 
 function parseSupplierBody(body: Record<string, unknown> | null): SupplierInput | null {
   if (!body?.name || typeof body.name !== "string") return null;
@@ -48,7 +44,10 @@ function parseSupplierBody(body: Record<string, unknown> | null): SupplierInput 
   };
 }
 
-export async function GET(req: Request) {
+export async function GET(
+  _req: Request,
+  ctx: { params: Promise<{ id: string }> },
+) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
@@ -64,39 +63,53 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Organisation introuvable" }, { status: 403 });
   }
 
-  const url = new URL(req.url);
-  const q = url.searchParams.get("q") ?? "";
-  const typesRaw = url.searchParams.get("types");
-  const types = typesRaw
-    ? typesRaw.split(",").map((t) => t.trim()).filter(Boolean)
-    : ["SUPPLIER"];
-
-  if (url.searchParams.has("q")) {
-    const results = await searchSuppliers({ hostOrganizationId: orgId, query: q });
-    return NextResponse.json({ suppliers: results });
+  const { id } = await ctx.params;
+  const supplier = await prisma.externalOrganization.findFirst({
+    where: { id, hostOrganizationId: orgId, type: "SUPPLIER" },
+    include: {
+      contacts: {
+        where: { isPrimary: true },
+        take: 1,
+      },
+    },
+  });
+  if (!supplier) {
+    return NextResponse.json({ error: "Fournisseur introuvable" }, { status: 404 });
   }
 
-  const suppliers = await prisma.externalOrganization.findMany({
-    where: { hostOrganizationId: orgId, type: { in: types } },
-    select: {
-      id: true,
-      name: true,
-      tradeName: true,
-      activity: true,
-      city: true,
-      phone: true,
-      email: true,
-      status: true,
-      _count: { select: { contacts: true, purchaseOrders: true } },
+  const primary = supplier.contacts[0] ?? null;
+  return NextResponse.json({
+    supplier: {
+      id: supplier.id,
+      name: supplier.name,
+      tradeName: supplier.tradeName,
+      activity: supplier.activity,
+      address: supplier.address,
+      zipCode: supplier.zipCode,
+      city: supplier.city,
+      phone: supplier.phone,
+      email: supplier.email,
+      website: supplier.website,
+      siret: supplier.siret,
+      paymentTerms: supplier.paymentTerms,
+      notes: supplier.notes,
+      contact: primary
+        ? {
+            firstName: primary.firstName,
+            lastName: primary.lastName,
+            jobTitle: primary.jobTitle,
+            email: primary.email,
+            phone: primary.phone,
+          }
+        : null,
     },
-    orderBy: { name: "asc" },
-    take: 100,
   });
-
-  return NextResponse.json({ suppliers });
 }
 
-export async function POST(req: Request) {
+export async function PATCH(
+  req: Request,
+  ctx: { params: Promise<{ id: string }> },
+) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
@@ -112,44 +125,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Organisation introuvable" }, { status: 403 });
   }
 
+  const { id } = await ctx.params;
   const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
   const data = parseSupplierBody(body);
   if (!data) {
     return NextResponse.json({ error: "Nom requis" }, { status: 400 });
   }
 
-  const force = Boolean(body?.forceCreate);
-
   try {
-    const result = await createSupplier({
+    const result = await updateSupplier({
       hostOrganizationId: orgId,
+      id,
       data,
-      force,
     });
-
-    if (!result.ok) {
-      return NextResponse.json(
-        {
-          error: result.blockedBySiret
-            ? "Un fournisseur avec ce SIRET existe déjà."
-            : "Un fournisseur similaire existe déjà",
-          duplicates: result.duplicates,
-          blockedBySiret: result.blockedBySiret,
-        },
-        { status: 409 },
-      );
-    }
-
-    return NextResponse.json(
-      {
-        ok: true,
-        organization: result.organization,
-        contactId: result.contactId,
-      },
-      { status: 201 },
-    );
+    return NextResponse.json({ ok: true, ...result });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Erreur";
-    return NextResponse.json({ error: msg }, { status: 400 });
+    const status = msg.includes("introuvable") ? 404 : 400;
+    return NextResponse.json({ error: msg }, { status });
   }
 }

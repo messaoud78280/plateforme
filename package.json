@@ -54,6 +54,7 @@
     "migrate:messagerie-legacy-media": "npx tsx scripts/migrate-messagerie-legacy-media.ts",
     "migrate:documents-storage-refs": "npx tsx scripts/migrate-documents-storage-refs.ts",
     "test:documents-storage-refs": "npx tsx scripts/test-documents-storage-refs.ts",
+    "test:ged-fix-open": "npx tsx scripts/test-ged-fix-open.ts",
     "test:equipe-acces-v2a": "npx tsx scripts/test-equipe-acces-v2a.ts",
     "test:dashboard-persona-policy": "npx tsx scripts/test-dashboard-persona-policy.ts",
     "test:dashboard-persona-http": "npx tsx scripts/test-dashboard-persona-http.ts",

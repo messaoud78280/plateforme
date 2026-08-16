@@ -26,6 +26,25 @@ export function extractStoragePathFromUrl(url: string, bucket: string): string |
     return path;
   }
 
+  // Path nu historique (chantiers/…, commercial/…) dans le bucket documents
+  if (
+    bucket === DOCUMENTS_BUCKET &&
+    !raw.includes("://") &&
+    !raw.startsWith("/") &&
+    (raw.startsWith("chantiers/") ||
+      raw.startsWith("purchase-orders/") ||
+      raw.startsWith("commercial/") ||
+      raw.startsWith("reports/") ||
+      raw.startsWith("appointments/") ||
+      raw.startsWith("projects/") ||
+      raw.startsWith("orgs/") ||
+      raw.startsWith("skill-") ||
+      raw.startsWith("dico-") ||
+      raw.startsWith("dm/"))
+  ) {
+    return raw.replace(/^\/+/, "");
+  }
+
   try {
     const s = new URL(raw).toString();
     const idx = s.indexOf("/storage/v1/object/");

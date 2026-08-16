@@ -55,13 +55,25 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   );
 
   if (!access.ok) {
-    return NextResponse.json({ error: access.error }, { status: access.status });
+    return NextResponse.json(
+      { error: "Impossible d’ouvrir ce document." },
+      { status: access.status },
+    );
+  }
+
+  // PDF Commercial / routes app — redirection après ACL GED (pas de JSON technique).
+  if (access.appFilePath) {
+    const target = new URL(access.appFilePath, request.url);
+    return NextResponse.redirect(target);
   }
 
   if (asRedirect) {
     const signed = await issueDocumentSignedUrl(access);
     if ("error" in signed) {
-      return NextResponse.json({ error: signed.error }, { status: signed.status });
+      return NextResponse.json(
+        { error: "Impossible d’ouvrir ce document." },
+        { status: signed.status },
+      );
     }
     return NextResponse.redirect(signed.url);
   }
@@ -101,7 +113,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
     return NextResponse.json(
       {
-        error: "Aperçu PDF indisponible pour ce format",
+        error: "Impossible d’ouvrir ce document.",
         hint: conversionHint(access.fileName),
       },
       { status: 422 },
@@ -110,7 +122,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   const downloaded = await streamDocumentBytes(access);
   if (!downloaded) {
-    return NextResponse.json({ error: "Impossible de lire le fichier" }, { status: 502 });
+    return NextResponse.json(
+      { error: "Impossible d’ouvrir ce document." },
+      { status: 502 },
+    );
   }
 
   const contentType = access.mimeType || downloaded.contentType || "application/octet-stream";

@@ -73,9 +73,11 @@ export function classifyDocumentsRef(raw: string | null | undefined): DocumentsR
     !original.includes("://") &&
     (original.startsWith("chantiers/") ||
       original.startsWith("purchase-orders/") ||
+      original.startsWith("commercial/") ||
       original.startsWith("reports/") ||
       original.startsWith("appointments/") ||
       original.startsWith("projects/") ||
+      original.startsWith("orgs/") ||
       original.startsWith("skill-") ||
       original.startsWith("dico-") ||
       original.startsWith("dm/"))

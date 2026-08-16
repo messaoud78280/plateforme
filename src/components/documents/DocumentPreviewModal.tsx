@@ -128,17 +128,27 @@ export function DocumentPreviewModal({
             if (!cancelled) setError("Erreur lors de la conversion en PDF.");
           }
         } else {
-          if (!cancelled) setPreviewUrl(proxyUrl);
-          if (kind === "pdf") setShowAsPdf(true);
-          if (kind === "text") {
-            try {
-              const resp = await fetch(proxyUrl);
-              if (!resp.ok) throw new Error("fetch");
+          // Vérifier que le proxy renvoie bien un fichier (jamais d’iframe JSON).
+          try {
+            const resp = await fetch(proxyUrl, { method: "GET", credentials: "same-origin" });
+            if (cancelled) return;
+            const ct = (resp.headers.get("content-type") || "").toLowerCase();
+            if (!resp.ok || ct.includes("application/json")) {
+              setError("Impossible d’ouvrir ce document.");
+            } else if (kind === "text") {
               const t = await resp.text();
-              if (!cancelled) setTextContent(t);
-            } catch {
-              if (!cancelled) setError("Impossible de charger l’aperçu texte.");
+              if (!cancelled) {
+                setTextContent(t);
+                setPreviewUrl(proxyUrl);
+              }
+            } else {
+              if (!cancelled) {
+                setPreviewUrl(proxyUrl);
+                if (kind === "pdf") setShowAsPdf(true);
+              }
             }
+          } catch {
+            if (!cancelled) setError("Impossible d’ouvrir ce document.");
           }
         }
       } else if (item.url) {
@@ -238,15 +248,56 @@ export function DocumentPreviewModal({
                 : "Chargement de l’aperçu…"}
             </div>
           ) : error ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-800">
-              {error}
-              {downloadHref ? (
-                <p className="mt-3">
-                  <a href={downloadHref} className="font-semibold text-[#1d4ed8] hover:underline" download>
-                    Télécharger le fichier
-                  </a>
-                </p>
-              ) : null}
+            <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+              <p className="text-base font-semibold text-slate-900">
+                Impossible d’ouvrir ce document.
+              </p>
+              <p className="mt-2 text-sm text-slate-600">
+                {error === "Impossible d’ouvrir ce document."
+                  ? "Le fichier est inaccessible ou n’est plus disponible."
+                  : error}
+              </p>
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Fermer
+                </button>
+                {item.chantierFileId || item.url ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setError("");
+                      setPreviewUrl(null);
+                      setLoading(true);
+                      // Relance l’effet via bascule légère
+                      const id = item.chantierFileId;
+                      if (id) {
+                        void fetch(chantierPreviewUrl(id))
+                          .then(async (resp) => {
+                            const ct = (resp.headers.get("content-type") || "").toLowerCase();
+                            if (!resp.ok || ct.includes("application/json")) {
+                              setError("Impossible d’ouvrir ce document.");
+                            } else {
+                              setPreviewUrl(chantierPreviewUrl(id));
+                              setShowAsPdf(kind === "pdf");
+                            }
+                          })
+                          .catch(() => setError("Impossible d’ouvrir ce document."))
+                          .finally(() => setLoading(false));
+                      } else {
+                        setLoading(false);
+                        setError("Impossible d’ouvrir ce document.");
+                      }
+                    }}
+                    className="rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white"
+                  >
+                    Réessayer
+                  </button>
+                ) : null}
+              </div>
             </div>
           ) : showAsPdf && previewUrl ? (
             <iframe

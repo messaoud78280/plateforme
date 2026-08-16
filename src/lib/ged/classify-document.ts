@@ -3,6 +3,11 @@
  * Source connue → type connu. Sinon nom seulement si le signal est certain.
  */
 
+import {
+  canOpenGedFileUrl,
+  isDemoPlaceholderFileUrl,
+} from "@/lib/ged/file-openability";
+
 export const GED_TYPE_LABELS: Record<string, string> = {
   DEVIS: "Devis",
   DEVIS_FOURNISSEUR: "Devis fournisseur",
@@ -116,6 +121,9 @@ export function isExpectedMissingDocument(opts: {
   if (st === "MANQUANT" || st === "A_RELANCER") return true;
   if (/\(\s*manquante\s*\)/i.test(opts.name ?? "")) return true;
   if (!(opts.fileUrl ?? "").trim()) return true;
+  // GED-FIX-1 — placeholder démo / URL non ouvrable ≠ fichier réel
+  if (isDemoPlaceholderFileUrl(opts.fileUrl)) return true;
+  if (!canOpenGedFileUrl(opts.fileUrl)) return true;
   return false;
 }
 

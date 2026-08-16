@@ -30,8 +30,12 @@ import {
 import {
   DOCUMENTS_BUCKET,
   downloadStorageObject,
-  extractStoragePathFromUrl,
 } from "@/lib/storage/supabase-object";
+import {
+  isAppServedFileUrl,
+  isDemoPlaceholderFileUrl,
+  resolveDocumentsObjectPath,
+} from "@/lib/ged/file-openability";
 
 export type DocumentAccessKind =
   | "CHANTIER_FILE"
@@ -63,6 +67,8 @@ export type DocumentAccessOk = {
   fileName: string;
   mimeType: string | null;
   storedUrl: string;
+  /** Route app authentifiée (ex. PDF Commercial) — pas d’objet Storage. */
+  appFilePath?: string | null;
 };
 
 export type DocumentAccessDenied = {
@@ -109,6 +115,9 @@ async function resolveChantierFile(
     },
   });
   if (!file || file.deletedAt || !file.fileUrl) {
+    return deny(404, "Document introuvable.");
+  }
+  if (isDemoPlaceholderFileUrl(file.fileUrl)) {
     return deny(404, "Document introuvable.");
   }
 
@@ -196,8 +205,22 @@ async function resolveChantierFile(
     };
   }
 
-  const path = extractStoragePathFromUrl(file.fileUrl, DOCUMENTS_BUCKET);
-  if (!path) return deny(400, "Référence stockage invalide.");
+  if (isAppServedFileUrl(file.fileUrl)) {
+    return {
+      ok: true,
+      kind: "CHANTIER_FILE",
+      resourceId: file.id,
+      bucket: "",
+      path: "",
+      fileName: file.name,
+      mimeType: file.mimeType,
+      storedUrl: file.fileUrl,
+      appFilePath: file.fileUrl,
+    };
+  }
+
+  const path = resolveDocumentsObjectPath(file.fileUrl);
+  if (!path) return deny(404, "Document introuvable.");
 
   return {
     ok: true,
@@ -258,8 +281,8 @@ async function resolvePurchaseOrderDocument(
     }
   }
 
-  const path = extractStoragePathFromUrl(doc.fileUrl, DOCUMENTS_BUCKET);
-  if (!path) return deny(400, "Référence stockage invalide.");
+  const path = resolveDocumentsObjectPath(doc.fileUrl);
+  if (!path) return deny(404, "Document introuvable.");
 
   return {
     ok: true,
@@ -302,8 +325,8 @@ async function resolveLegacyDocument(
     return deny(403, "Document legacy non accessible aux portails externes.");
   }
 
-  const path = extractStoragePathFromUrl(doc.fileUrl, DOCUMENTS_BUCKET);
-  if (!path) return deny(400, "Référence stockage invalide.");
+  const path = resolveDocumentsObjectPath(doc.fileUrl);
+  if (!path) return deny(404, "Document introuvable.");
 
   return {
     ok: true,
@@ -437,8 +460,21 @@ async function okDocumentsRef(
   },
 ): Promise<DocumentAccessResult> {
   if (!(await opts.allowIf())) return deny(403, "Non autorisé.");
-  const path = extractStoragePathFromUrl(opts.storedUrl, DOCUMENTS_BUCKET);
-  if (!path) return deny(400, "Référence stockage invalide.");
+  if (isAppServedFileUrl(opts.storedUrl)) {
+    return {
+      ok: true,
+      kind: opts.kind,
+      resourceId: opts.resourceId,
+      bucket: "",
+      path: "",
+      fileName: opts.fileName,
+      mimeType: opts.mimeType,
+      storedUrl: opts.storedUrl,
+      appFilePath: opts.storedUrl,
+    };
+  }
+  const path = resolveDocumentsObjectPath(opts.storedUrl);
+  if (!path) return deny(404, "Document introuvable.");
   return {
     ok: true,
     kind: opts.kind,
@@ -687,6 +723,12 @@ export async function issueDocumentSignedUrl(
   access: DocumentAccessOk,
   expiresIn = SIGNED_TTL_SEC,
 ): Promise<{ url: string; expiresIn: number } | { error: string; status: number }> {
+  if (access.appFilePath) {
+    return { url: access.appFilePath, expiresIn: Math.min(20 * 60, Math.max(60, expiresIn)) };
+  }
+  if (!access.bucket || !access.path) {
+    return { error: "Document introuvable.", status: 404 };
+  }
   const supabase = createServiceRoleClient();
   if (!supabase) return { error: "Stockage indisponible", status: 503 };
 
@@ -703,6 +745,8 @@ export async function issueDocumentSignedUrl(
 
 /** Stream binaire après ACL (preview / download). */
 export async function streamDocumentBytes(access: DocumentAccessOk) {
+  if (access.appFilePath) return null;
+  if (!access.bucket || !access.path) return null;
   const supabase = createServiceRoleClient();
   if (!supabase) return null;
   return downloadStorageObject(supabase, access.bucket, access.path);

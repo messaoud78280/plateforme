@@ -74,12 +74,30 @@ export async function POST(req: Request) {
   );
 
   if (!access.ok) {
-    return NextResponse.json({ error: access.error }, { status: access.status });
+    return NextResponse.json(
+      { error: "Impossible d’ouvrir ce document." },
+      { status: access.status === 403 ? 403 : access.status === 404 ? 404 : 400 },
+    );
+  }
+
+  if (access.appFilePath) {
+    return NextResponse.json({
+      signedUrl: access.appFilePath,
+      expiresIn: 15 * 60,
+      fileName: access.fileName,
+      mimeType: access.mimeType,
+      kind: access.kind,
+      resourceId: access.resourceId,
+      delivery: "app",
+    });
   }
 
   const signed = await issueDocumentSignedUrl(access, Number(body.expiresIn ?? 15 * 60));
   if ("error" in signed) {
-    return NextResponse.json({ error: signed.error }, { status: signed.status });
+    return NextResponse.json(
+      { error: "Impossible d’ouvrir ce document." },
+      { status: signed.status },
+    );
   }
 
   return NextResponse.json({

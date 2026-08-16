@@ -9,7 +9,10 @@ import { loadDealFinancialSummary } from "@/lib/commercial/deal-summary";
 import { loadAmendmentDetail } from "@/lib/commercial/amendment-billing";
 import { PrepareAmendmentInvoiceForm } from "@/components/commercial/PrepareAmendmentInvoiceForm";
 import { PrepareBillingFromOps } from "@/components/facturation/PrepareBillingFromOps";
+import { PrepareInvoiceHub } from "@/components/commercial/PrepareInvoiceHub";
 import { resolvePrepareBillingContext } from "@/lib/facturation/prepare-billing";
+import { loadPrepareInvoiceSources } from "@/lib/commercial/prepare-invoice-hub";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +62,39 @@ export default async function PreparerFacturePage({
 
   const projectId = sp.projectId?.trim() || null;
   const sheetId = sp.sheetId?.trim() || null;
-  if (!projectId && !sheetId) notFound();
+
+  // Sans contexte query → hub de préparation (sidebar « Préparer une facture »)
+  if (!projectId && !sheetId) {
+    const [hub, clients, projects] = await Promise.all([
+      loadPrepareInvoiceSources(orgId),
+      prisma.externalOrganization.findMany({
+        where: {
+          hostOrganizationId: orgId,
+          type: { in: ["CLIENT_EXT", "CLIENT"] },
+          status: "ACTIVE",
+        },
+        select: { id: true, name: true, tradeName: true, city: true },
+        orderBy: { name: "asc" },
+        take: 200,
+      }),
+      prisma.project.findMany({
+        where: { organizationId: orgId },
+        select: { id: true, title: true },
+        orderBy: { updatedAt: "desc" },
+        take: 80,
+      }),
+    ]);
+
+    return (
+      <PrepareInvoiceHub
+        sources={hub.sources}
+        clients={clients}
+        projects={projects}
+        defaultVatRate={hub.defaultVatRate}
+        defaultCurrency={hub.defaultCurrency}
+      />
+    );
+  }
 
   const context = await resolvePrepareBillingContext({
     orgId,

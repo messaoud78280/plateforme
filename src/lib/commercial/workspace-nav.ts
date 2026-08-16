@@ -148,12 +148,19 @@ export function isCommercialNavActive(
     const base = link.href.split("?")[0]!;
     return pathname === base || pathname.startsWith(`${base}/`);
   }
-  // COMMERCIAL-QUOTE-UI-3 — /devis ne doit pas être actif sur /devis/nouveau
-  // (évite double aplat bleu : action « Créer » + liste « Devis »).
+  // COMMERCIAL-QUOTE-UI-3 / COMMERCIAL-INVOICE-FIX —
+  // Les listes parentes ne doivent pas être « actives » sur les routes d’action.
   if (
     link.href.endsWith("/devis") &&
     !link.href.endsWith("/devis/nouveau") &&
     (pathname === `${link.href}/nouveau` || pathname.startsWith(`${link.href}/nouveau/`))
+  ) {
+    return false;
+  }
+  if (
+    link.href.endsWith("/factures") &&
+    !link.href.endsWith("/factures/preparer") &&
+    (pathname === `${link.href}/preparer` || pathname.startsWith(`${link.href}/preparer/`))
   ) {
     return false;
   }

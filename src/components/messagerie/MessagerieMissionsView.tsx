@@ -20,13 +20,17 @@ import {
   isImageAttachment,
   type MsgAttachment,
 } from "@/lib/messagerie/media-preview";
-import { PhotoPreviewGrid } from "@/components/messagerie/PhotoPreviewGrid";
 import {
   MESSAGERIE_DOC_ACCEPT,
   MESSAGERIE_PHOTO_ACCEPT,
   MessagerieAttachMenu,
+  pickMessagerieDocFiles,
   pickMessageriePhotoFiles,
 } from "@/components/messagerie/MessagerieAttachMenu";
+import {
+  MessagerieComposerAttachments,
+  useAttachmentPreviewUrls,
+} from "@/components/messagerie/MessagerieComposerAttachments";
 import { MessagerieAttachmentsBlock } from "@/components/messagerie/MessagerieSecureMedia";
 import { MESSAGERIE_MEDIA_MAX_BYTES } from "@/lib/messagerie/media-storage";
 import {
@@ -687,10 +691,8 @@ export function MessagerieMissionsView({
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
   const [pendingNewCount, setPendingNewCount] = useState(0);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<{
-    files: File[];
-    comment: string;
-  } | null>(null);
+  const { previewUrls, rememberPreview, forgetPreview, clearPreviews } =
+    useAttachmentPreviewUrls();
   const sendLockRef = useRef(false);
   const directFileId = "direct-file-input";
   const missionFileId = "mission-file-input";
@@ -699,6 +701,7 @@ export function MessagerieMissionsView({
   const replyDocId = "reply-doc-input";
   const [directAttachMenuOpen, setDirectAttachMenuOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
   const highlightMessageId = useRef<string | null>(null);
   const [replyTarget, setReplyTarget] = useState<MessageReplyMeta | null>(null);
   const [selectionMode, setSelectionMode] = useState(false);
@@ -1394,6 +1397,7 @@ export function MessagerieMissionsView({
     setSending(true);
     setSendContent("");
     setMissionAttachments([]);
+    clearPreviews();
     setReplyTarget(null);
     stickToBottomRef.current = true;
     setMessages((prev) => [...prev, optimistic]);
@@ -1494,9 +1498,7 @@ export function MessagerieMissionsView({
         setUploadProgress(`Envoi… ${i}/${list.length}`);
         let file = raw;
         if (file.size > MESSAGERIE_MEDIA_MAX_BYTES) {
-          alert(
-            `« ${file.name} » dépasse 15 Mo. Compressez la photo ou choisissez un fichier plus léger, puis réessayez.`,
-          );
+          alert("Impossible d’envoyer ce fichier.");
           continue;
         }
         if (file.type.startsWith("image/")) {
@@ -1511,7 +1513,7 @@ export function MessagerieMissionsView({
           const res = await fetch("/api/messages/direct/upload", { method: "POST", body: fd });
           const data = await res.json().catch(() => ({}));
           if (res.ok && data.fileUrl) {
-            uploaded.push({
+            const att: AttachmentItem = {
               name: data.name ?? file.name,
               fileUrl: data.fileUrl,
               fileSize: data.fileSize ?? file.size,
@@ -1520,12 +1522,15 @@ export function MessagerieMissionsView({
               durationSec: data.durationSec ?? opts?.durationSec,
               bucket: data.bucket,
               storagePath: data.storagePath,
-            });
+            };
+            rememberPreview(att.fileUrl, raw);
+            rememberPreview(att.name, raw);
+            uploaded.push(att);
           } else {
-            alert(data?.error ?? `Échec de l’envoi de « ${file.name} »`);
+            alert("Impossible d’envoyer ce fichier.");
           }
         } catch {
-          alert(`Échec réseau pour « ${file.name} ». Réessayez.`);
+          alert("Impossible d’envoyer ce fichier.");
         }
       }
       if (uploaded.length > 0) {
@@ -1538,12 +1543,18 @@ export function MessagerieMissionsView({
     }
   }
 
-  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, setAttachments: React.Dispatch<React.SetStateAction<AttachmentItem[]>>) {
+  async function handleFileUpload(
+    e: React.ChangeEvent<HTMLInputElement>,
+    setAttachments: React.Dispatch<React.SetStateAction<AttachmentItem[]>>,
+  ) {
     const input = e.target;
-    const files = input.files;
-    if (!files?.length) return;
-    await uploadFiles(files, setAttachments);
+    const files = pickMessagerieDocFiles(input.files);
     input.value = "";
+    if (!files.length) {
+      if (e.target.files?.length) alert("Impossible d’envoyer ce fichier.");
+      return;
+    }
+    await uploadFiles(files, setAttachments);
   }
 
   async function handleReplyDirect(e: React.FormEvent) {
@@ -1589,6 +1600,7 @@ export function MessagerieMissionsView({
     if (!opts?.retryTempId) {
       setReplyDirectContent("");
       setReplyAttachments([]);
+      clearPreviews();
       setReplyTarget(null);
       setDirectThreadMessages((prev) => [...prev, optimistic]);
       setDirectMessages((prev) => [optimistic, ...prev]);
@@ -3108,13 +3120,15 @@ export function MessagerieMissionsView({
                     multiple
                     onChange={(e) => {
                       const files = pickMessageriePhotoFiles(e.target.files);
-                      if (files.length) {
-                        setPhotoPreview({ files, comment: "" });
-                      } else if (e.target.files?.length) {
-                        alert("Seules les photos sont acceptées (JPEG, PNG, GIF, WebP).");
-                      }
                       setDirectAttachMenuOpen(false);
                       e.target.value = "";
+                      if (files.length) {
+                        void uploadFiles(files, setReplyAttachments).then(() => {
+                          composerRef.current?.focus();
+                        });
+                      } else if (e.target.files?.length) {
+                        alert("Impossible d’envoyer ce fichier.");
+                      }
                     }}
                   />
                   <input
@@ -3124,84 +3138,36 @@ export function MessagerieMissionsView({
                     className="sr-only"
                     multiple
                     onChange={(e) => {
-                      if (e.target.files?.length) {
-                        void uploadFiles(e.target.files, setReplyAttachments);
-                      }
+                      const files = pickMessagerieDocFiles(e.target.files);
                       setDirectAttachMenuOpen(false);
                       e.target.value = "";
+                      if (files.length) {
+                        void uploadFiles(files, setReplyAttachments).then(() => {
+                          composerRef.current?.focus();
+                        });
+                      } else if (e.target.files?.length) {
+                        alert("Impossible d’envoyer ce fichier.");
+                      }
                     }}
                   />
                   {uploadProgress ? (
                     <p className="mb-1.5 px-1 text-xs font-semibold text-[#008069]">{uploadProgress}</p>
                   ) : null}
-                  {photoPreview && selectedDirectContactId && !selectedTaskId ? (
-                    <div className="mb-2 rounded-2xl border border-[#d1d7db] bg-white p-3 shadow-sm">
-                      <p className="mb-2 text-sm font-semibold text-[#111b21]">
-                        Aperçu · {photoPreview.files.length} photo
-                        {photoPreview.files.length > 1 ? "s" : ""}
-                      </p>
-                      <PhotoPreviewGrid files={photoPreview.files} />
-                      <input
-                        value={photoPreview.comment}
-                        onChange={(e) =>
-                          setPhotoPreview((p) => (p ? { ...p, comment: e.target.value } : p))
-                        }
-                        placeholder="Commentaire (optionnel)"
-                        className="mb-2 w-full rounded-lg border border-[#d1d7db] px-3 py-2 text-sm"
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setPhotoPreview(null)}
-                          className="rounded-full border border-[#d1d7db] px-3 py-1.5 text-sm font-semibold text-[#54656f]"
-                        >
-                          Annuler
-                        </button>
-                        <button
-                          type="button"
-                          disabled={uploadingAttach || sendingReply}
-                          onClick={async () => {
-                            if (!photoPreview) return;
-                            const comment = photoPreview.comment.trim();
-                            const uploaded = await uploadFiles(
-                              photoPreview.files,
-                              setReplyAttachments,
-                            );
-                            setPhotoPreview(null);
-                            if (uploaded.length) {
-                              await sendDirectReply(comment, uploaded);
-                            }
-                          }}
-                          className="rounded-full bg-[#00a884] px-4 py-1.5 text-sm font-bold text-white disabled:opacity-50"
-                        >
-                          Envoyer
-                        </button>
-                      </div>
-                    </div>
-                  ) : null}
                   <form id="direct-reply-form" onSubmit={handleReplyDirect} className="space-y-2">
-                    {replyAttachments.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {replyAttachments.map((a, i) => (
-                          <span
-                            key={i}
-                            className="flex items-center gap-1 rounded-full bg-white px-2 py-1 text-xs text-[#111b21]"
-                          >
-                            {isAudioAttachment(a) ? "🎤" : isImageAttachment(a) ? "📷" : "📄"}{" "}
-                            {a.name}
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setReplyAttachments((p) => p.filter((_, j) => j !== i))
-                              }
-                              className="text-[#667781] hover:text-red-600"
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    <MessagerieComposerAttachments
+                      attachments={replyAttachments}
+                      previewUrls={previewUrls}
+                      onRemove={(i) => {
+                        setReplyAttachments((p) => {
+                          const removed = p[i];
+                          if (removed) {
+                            forgetPreview(removed.fileUrl);
+                            forgetPreview(removed.name);
+                          }
+                          return p.filter((_, j) => j !== i);
+                        });
+                      }}
+                    />
                     <div className="flex items-end gap-2">
                       <div className="mb-0.5">
                         <MessagerieAttachMenu
@@ -3212,6 +3178,7 @@ export function MessagerieMissionsView({
                         />
                       </div>
                       <textarea
+                        ref={composerRef}
                         value={replyDirectContent}
                         onChange={(e) => setReplyDirectContent(e.target.value)}
                         onKeyDown={(e) =>
@@ -3735,7 +3702,18 @@ export function MessagerieMissionsView({
                 accept={MESSAGERIE_DOC_ACCEPT}
                 className="sr-only"
                 multiple
-                onChange={(e) => handleFileUpload(e, setMissionAttachments)}
+                onChange={(e) => {
+                  const files = pickMessagerieDocFiles(e.target.files);
+                  setAttachMenuOpen(false);
+                  e.target.value = "";
+                  if (files.length) {
+                    void uploadFiles(files, setMissionAttachments).then(() => {
+                      composerRef.current?.focus();
+                    });
+                  } else if (e.target.files?.length) {
+                    alert("Impossible d’envoyer ce fichier.");
+                  }
+                }}
               />
               <input
                 id={missionPhotoId}
@@ -3745,82 +3723,34 @@ export function MessagerieMissionsView({
                 multiple
                 onChange={(e) => {
                   const files = pickMessageriePhotoFiles(e.target.files);
-                  if (files.length) {
-                    setPhotoPreview({ files, comment: "" });
-                  } else if (e.target.files?.length) {
-                    alert("Seules les photos sont acceptées (JPEG, PNG, GIF, WebP).");
-                  }
                   setAttachMenuOpen(false);
                   e.target.value = "";
+                  if (files.length) {
+                    void uploadFiles(files, setMissionAttachments).then(() => {
+                      composerRef.current?.focus();
+                    });
+                  } else if (e.target.files?.length) {
+                    alert("Impossible d’envoyer ce fichier.");
+                  }
                 }}
               />
               {uploadProgress ? (
                 <p className="mb-1.5 px-1 text-xs font-semibold text-[#008069]">{uploadProgress}</p>
               ) : null}
-              {photoPreview ? (
-                <div className="mb-2 rounded-2xl border border-[#d1d7db] bg-white p-3 shadow-sm">
-                  <p className="mb-2 text-sm font-semibold text-[#111b21]">
-                    Aperçu · {photoPreview.files.length} photo
-                    {photoPreview.files.length > 1 ? "s" : ""}
-                  </p>
-                  <PhotoPreviewGrid files={photoPreview.files} />
-                  <input
-                    value={photoPreview.comment}
-                    onChange={(e) =>
-                      setPhotoPreview((p) => (p ? { ...p, comment: e.target.value } : p))
+              <MessagerieComposerAttachments
+                attachments={missionAttachments}
+                previewUrls={previewUrls}
+                onRemove={(i) => {
+                  setMissionAttachments((p) => {
+                    const removed = p[i];
+                    if (removed) {
+                      forgetPreview(removed.fileUrl);
+                      forgetPreview(removed.name);
                     }
-                    placeholder="Commentaire (optionnel)"
-                    className="mb-2 w-full rounded-lg border border-[#d1d7db] px-3 py-2 text-sm"
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPhotoPreview(null)}
-                      className="rounded-full border border-[#d1d7db] px-3 py-1.5 text-sm font-semibold text-[#54656f]"
-                    >
-                      Annuler
-                    </button>
-                    <button
-                      type="button"
-                      disabled={uploadingAttach || sending}
-                      onClick={async () => {
-                        if (!photoPreview) return;
-                        const comment = photoPreview.comment.trim();
-                        const uploaded = await uploadFiles(
-                          photoPreview.files,
-                          setMissionAttachments,
-                        );
-                        setPhotoPreview(null);
-                        if (uploaded.length) {
-                          await sendMissionMessage(comment, uploaded);
-                        }
-                      }}
-                      className="rounded-full bg-[#00a884] px-4 py-1.5 text-sm font-bold text-white disabled:opacity-50"
-                    >
-                      Envoyer
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-              {missionAttachments.length > 0 && (
-                <div className="mb-2 flex flex-wrap gap-2 px-1">
-                  {missionAttachments.map((a, i) => (
-                    <span
-                      key={i}
-                      className="flex items-center gap-1 rounded-full bg-white px-2 py-1 text-xs text-[#111b21] shadow-sm"
-                    >
-                      {isAudioAttachment(a) ? "🎤" : isImageAttachment(a) ? "🖼️" : "📄"} {a.name}
-                      <button
-                        type="button"
-                        onClick={() => setMissionAttachments((p) => p.filter((_, j) => j !== i))}
-                        className="text-[#667781] hover:text-red-600"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
+                    return p.filter((_, j) => j !== i);
+                  });
+                }}
+              />
               <form id="mission-send-form" onSubmit={handleSend} className="flex items-end gap-2">
                 <div className="mb-0.5">
                   <MessagerieAttachMenu
@@ -3832,6 +3762,7 @@ export function MessagerieMissionsView({
                 </div>
                 <div className="relative min-w-0 flex-1">
                   <textarea
+                    ref={composerRef}
                     value={sendContent}
                     onChange={(e) => setSendContent(e.target.value)}
                     placeholder="Écrire un message..."

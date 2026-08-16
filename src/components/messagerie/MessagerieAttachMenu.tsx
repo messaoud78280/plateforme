@@ -4,12 +4,13 @@ import { useEffect, useRef } from "react";
 import { FileText, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-/** Formats réellement acceptés par /api/messages/direct/upload (images). */
+/** Formats images réellement acceptés par /api/messages/direct/upload. */
 export const MESSAGERIE_PHOTO_ACCEPT =
-  "image/jpeg,image/png,image/jpg,image/gif,image/webp,image/*";
+  "image/jpeg,image/png,image/jpg,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp";
 
 /** Formats document réellement acceptés par l’upload messagerie. */
-export const MESSAGERIE_DOC_ACCEPT = ".pdf,.docx,.xlsx,.xls,.csv,.txt,.doc";
+export const MESSAGERIE_DOC_ACCEPT =
+  ".pdf,.docx,.xlsx,.xls,.csv,.txt,.doc,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain";
 
 export function pickMessageriePhotoFiles(list: FileList | File[] | null): File[] {
   if (!list) return [];
@@ -22,6 +23,39 @@ export function pickMessageriePhotoFiles(list: FileList | File[] | null): File[]
       return /\.(jpe?g|png|gif|webp)$/i.test(f.name);
     })
     .slice(0, 6);
+}
+
+export function pickMessagerieDocFiles(list: FileList | File[] | null): File[] {
+  if (!list) return [];
+  const ok = /\.(pdf|docx?|xlsx?|csv|txt)$/i;
+  return Array.from(list)
+    .filter((f) => {
+      if (!(f instanceof File) || !f.size) return false;
+      const mime = (f.type || "").toLowerCase();
+      if (mime.startsWith("image/") || mime.startsWith("video/") || mime.startsWith("audio/")) {
+        return false;
+      }
+      if (
+        mime === "application/pdf" ||
+        mime === "text/plain" ||
+        mime === "text/csv" ||
+        mime.includes("word") ||
+        mime.includes("excel") ||
+        mime.includes("spreadsheet")
+      ) {
+        return true;
+      }
+      return ok.test(f.name);
+    })
+    .slice(0, 6);
+}
+
+function triggerFileInput(inputId: string) {
+  const input = document.getElementById(inputId);
+  if (input instanceof HTMLInputElement) {
+    input.value = "";
+    input.click();
+  }
 }
 
 export function MessagerieAttachMenu({
@@ -55,6 +89,18 @@ export function MessagerieAttachMenu({
     };
   }, [open, onOpenChange]);
 
+  function openPhotos() {
+    // Fermer d’abord : le label ne doit pas être démonté pendant l’activation du picker.
+    onOpenChange(false);
+    // click() après fermeture — l’input reste monté hors du menu.
+    window.setTimeout(() => triggerFileInput(photoInputId), 0);
+  }
+
+  function openDocs() {
+    onOpenChange(false);
+    window.setTimeout(() => triggerFileInput(docInputId), 0);
+  }
+
   return (
     <div className="relative" ref={rootRef}>
       <button
@@ -81,24 +127,24 @@ export function MessagerieAttachMenu({
           aria-label="Pièces jointes"
           className="absolute bottom-12 left-0 z-30 w-56 overflow-hidden rounded-xl border border-slate-200/90 bg-white py-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
         >
-          <label
+          <button
+            type="button"
             role="menuitem"
-            htmlFor={photoInputId}
-            className="flex min-h-12 cursor-pointer items-center gap-3 px-3.5 py-2.5 text-[14px] font-medium text-slate-800 transition-colors duration-150 hover:bg-slate-50"
-            onClick={() => onOpenChange(false)}
+            className="flex min-h-12 w-full cursor-pointer items-center gap-3 px-3.5 py-2.5 text-left text-[14px] font-medium text-slate-800 transition-colors duration-150 hover:bg-slate-50"
+            onClick={openPhotos}
           >
             <ImageIcon className="h-5 w-5 shrink-0 text-slate-500" aria-hidden />
             Photos
-          </label>
-          <label
+          </button>
+          <button
+            type="button"
             role="menuitem"
-            htmlFor={docInputId}
-            className="flex min-h-12 cursor-pointer items-center gap-3 px-3.5 py-2.5 text-[14px] font-medium text-slate-800 transition-colors duration-150 hover:bg-slate-50"
-            onClick={() => onOpenChange(false)}
+            className="flex min-h-12 w-full cursor-pointer items-center gap-3 px-3.5 py-2.5 text-left text-[14px] font-medium text-slate-800 transition-colors duration-150 hover:bg-slate-50"
+            onClick={openDocs}
           >
             <FileText className="h-5 w-5 shrink-0 text-slate-500" aria-hidden />
             Document
-          </label>
+          </button>
         </div>
       ) : null}
     </div>

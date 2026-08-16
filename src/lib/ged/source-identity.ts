@@ -16,6 +16,7 @@ export const GED_PRIMARY_ENTITY_TYPES = [
   "pilotage_market_document",
   "legacy_document",
   "pilotage_subcontractor_doc",
+  "site_visit_media",
 ] as const;
 
 export type GedPrimaryEntityType = (typeof GED_PRIMARY_ENTITY_TYPES)[number];

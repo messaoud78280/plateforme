@@ -153,6 +153,8 @@ export async function createQuote(input: {
   internalNotes?: string | null;
   clientNotes?: string | null;
   depositPercent?: number | null;
+  /** Snapshot libre (ex. visite sans ExternalOrg). */
+  clientSnapshotJson?: Prisma.InputJsonValue | null;
 }) {
   const settings = await ensureCommercialOrgSettings(input.orgId);
   const subject = input.subject.trim();
@@ -185,7 +187,9 @@ export async function createQuote(input: {
   }
 
   const issuerSnapshotJson = await buildIssuerSnapshot(input.orgId);
-  const clientSnapshotJson = await buildClientSnapshot(input.clientExternalOrgId ?? null);
+  const clientSnapshotJson =
+    input.clientSnapshotJson ??
+    (await buildClientSnapshot(input.clientExternalOrgId ?? null));
 
   return prisma.$transaction(async (tx) => {
     const number = await nextQuoteNumber(input.orgId, tx);

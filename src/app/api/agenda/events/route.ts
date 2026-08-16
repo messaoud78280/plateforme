@@ -182,6 +182,22 @@ export async function GET(request: Request) {
     const taskByMsg = new Map(taskMsgs.map((m) => [m.id, m.taskId]));
     const canOpenPo = isInternalPurchaseOrderActor(session.user);
 
+    const visitAgendaIds = events
+      .filter((e) => e.type === "VISITE_CHANTIER")
+      .map((e) => e.id);
+    const siteVisitsLinked =
+      visitAgendaIds.length > 0
+        ? await prisma.siteVisit.findMany({
+            where: { agendaEventId: { in: visitAgendaIds } },
+            select: { id: true, agendaEventId: true },
+          })
+        : [];
+    const visitIdByAgenda = new Map(
+      siteVisitsLinked
+        .filter((v) => v.agendaEventId)
+        .map((v) => [v.agendaEventId!, v.id]),
+    );
+
     const agendaEvents = events.flatMap((e) => {
       const projectForSeed =
         e.project == null
@@ -307,11 +323,13 @@ export async function GET(request: Request) {
           purchaseOrder: poSummary,
           deliveryVisual: poSummary?.deliveryVisual ?? null,
           source: "agenda" as const,
-          href: sheet
-            ? `/dashboard/fiches-suivi/${sheet.id}`
-            : poSummary?.canOpen
-              ? `/dashboard/commandes/${poSummary.id}`
-              : (null as string | null),
+          href: visitIdByAgenda.get(e.id)
+            ? `/dashboard/visites-metres/${visitIdByAgenda.get(e.id)}`
+            : sheet
+              ? `/dashboard/fiches-suivi/${sheet.id}`
+              : poSummary?.canOpen
+                ? `/dashboard/commandes/${poSummary.id}`
+                : (null as string | null),
           followUpSheetId: sheet?.id ?? e.followUpSheetId ?? null,
           followUpSheet: sheet ? { id: sheet.id, title: sheetTitle ?? "Fiche" } : null,
           sourceMessageKind: lite ? null : (e.sourceMessageKind ?? null),

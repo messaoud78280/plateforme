@@ -125,6 +125,8 @@ model User {
   materialRequirementsValidated MaterialRequirement[] @relation("MaterialRequirementValidatedBy")
   commercialQuotesCreated      CommercialQuote[] @relation("CommercialQuoteCreatedBy")
   commercialQuotesResponsible  CommercialQuote[] @relation("CommercialQuoteResponsible")
+  siteVisitsCreated            SiteVisit[] @relation("SiteVisitCreatedBy")
+  siteVisitsResponsible        SiteVisit[] @relation("SiteVisitResponsible")
   commercialInvoicesCreated    CommercialInvoice[] @relation("CommercialInvoiceCreatedBy")
   commercialPaymentsRecorded   CommercialPayment[] @relation("CommercialPaymentRecordedBy")
   commercialPaymentsCancelled  CommercialPayment[] @relation("CommercialPaymentCancelledBy")
@@ -255,6 +257,7 @@ model ExternalOrganization {
   purchaseOrders   PurchaseOrder[]
   projectChannels  ProjectChannel[]
   commercialQuotesAsClient CommercialQuote[] @relation("CommercialQuoteClient")
+  siteVisitsAsClient       SiteVisit[] @relation("SiteVisitClient")
   commercialInvoicesAsClient CommercialInvoice[] @relation("CommercialInvoiceClient")
   commercialComponentsAsSubcontractor CommercialWorkItemComponent[] @relation("CommercialComponentSubcontractor")
   commercialMaterialPrices CommercialMaterialPrice[] @relation("CommercialMaterialPriceSupplier")
@@ -647,6 +650,7 @@ model Organization {
   supplierInvoices              SupplierInvoice[]
   chantierFiles                 ChantierFile[]
   annualServiceContracts        AnnualServiceContract[]
+  siteVisits                    SiteVisit[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -830,6 +834,7 @@ model Project {
   projectBudget ProjectBudget?
   supplierInvoices SupplierInvoice[]
   annualServiceContracts AnnualServiceContract[]
+  siteVisits             SiteVisit[]
 
   @@index([organizationId])
 }
@@ -3986,6 +3991,7 @@ model CommercialQuote {
   progressStatements   CommercialProgressStatement[]
   retentionGuarantees  CommercialRetentionGuarantee[]
   projectBudgets       ProjectBudget[]
+  siteVisit            SiteVisit?
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
@@ -4740,4 +4746,147 @@ model AnnualServiceIntervention {
   @@index([contractId, plannedDate])
   @@index([agendaEventId])
   @@index([followUpSheetId])
+}
+
+/// VISITES-METRES-1 — Visite commerciale / avant-métré (avant devis).
+enum SiteVisitStatus {
+  TO_PLAN
+  SCHEDULED
+  IN_PROGRESS
+  INCOMPLETE
+  READY_TO_QUOTE
+  TRANSMITTED
+  CANCELLED
+}
+
+enum SiteVisitMeasureType {
+  SURFACE
+  LENGTH
+  VOLUME
+  QUANTITY
+  FREE
+}
+
+enum SiteVisitMediaKind {
+  PHOTO
+  DOCUMENT
+}
+
+model SiteVisit {
+  id                   String          @id @default(cuid())
+  organizationId       String
+  clientName           String
+  siteName             String?
+  siteAddress          String
+  contactName          String?
+  contactPhone         String?
+  clientExternalOrgId  String?
+  /// Optionnel — jamais de faux chantier.
+  projectId            String?
+  scheduledAt          DateTime?
+  responsibleId        String?
+  createdById          String
+  subject              String
+  clientNeed           String?         @db.Text
+  urgencyNote          String?
+  timeConstraints      String?
+  siteOccupied         Boolean         @default(false)
+  comments             String?         @db.Text
+  /// Checklist contraintes (accès, occupation, état support, autre).
+  constraintsJson      Json?
+  estimatedCrewCount   Int?
+  estimatedDuration    String?
+  status               SiteVisitStatus @default(TO_PLAN)
+  agendaEventId        String?
+  /// Devis Commercial lié — idempotence « Créer le devis ».
+  commercialQuoteId    String?         @unique
+  demoKey              String?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  organization      Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project           Project?                   @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  clientExternalOrg ExternalOrganization?      @relation("SiteVisitClient", fields: [clientExternalOrgId], references: [id], onDelete: SetNull)
+  responsible       User?                      @relation("SiteVisitResponsible", fields: [responsibleId], references: [id], onDelete: SetNull)
+  createdBy         User                       @relation("SiteVisitCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  commercialQuote   CommercialQuote?           @relation(fields: [commercialQuoteId], references: [id], onDelete: SetNull)
+  measurements      SiteVisitMeasurement[]
+  missingInfos      SiteVisitMissingInfo[]
+  medias            SiteVisitMedia[]
+
+  @@unique([organizationId, demoKey])
+  @@index([organizationId, status])
+  @@index([organizationId, scheduledAt])
+  @@index([projectId])
+  @@index([agendaEventId])
+  @@index([responsibleId])
+  @@index([clientExternalOrgId])
+}
+
+model SiteVisitMeasurement {
+  id                String               @id @default(cuid())
+  visitId           String
+  organizationId    String
+  zone              String?
+  label             String
+  measureType       SiteVisitMeasureType
+  lengthM           Decimal?             @db.Decimal(14, 4)
+  widthM            Decimal?             @db.Decimal(14, 4)
+  heightM           Decimal?             @db.Decimal(14, 4)
+  quantityValue     Decimal?             @db.Decimal(14, 4)
+  unit              String
+  computedQuantity  Decimal              @db.Decimal(14, 4)
+  observation       String?              @db.Text
+  sortOrder         Int                  @default(0)
+  /// Si modifié après transmission devis (V1 simple).
+  modifiedAfterTransmit Boolean          @default(false)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  visit  SiteVisit        @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  medias SiteVisitMedia[]
+
+  @@index([visitId, sortOrder])
+  @@index([organizationId])
+}
+
+model SiteVisitMissingInfo {
+  id             String    @id @default(cuid())
+  visitId        String
+  organizationId String
+  label          String
+  resolvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  visit SiteVisit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@index([visitId])
+  @@index([organizationId])
+}
+
+model SiteVisitMedia {
+  id             String            @id @default(cuid())
+  visitId        String
+  organizationId String
+  measurementId  String?
+  kind           SiteVisitMediaKind @default(PHOTO)
+  name           String
+  caption        String?
+  fileUrl        String?
+  mimeType       String?
+  fileSize       Int?
+  storagePath    String?
+  chantierFileId String?
+  createdById    String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  visit       SiteVisit             @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  measurement SiteVisitMeasurement? @relation(fields: [measurementId], references: [id], onDelete: SetNull)
+
+  @@index([visitId])
+  @@index([organizationId])
+  @@index([measurementId])
+  @@index([chantierFileId])
 }

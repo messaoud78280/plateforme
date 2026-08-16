@@ -19,6 +19,7 @@ const CLIENT_NAV_GATES: NavModuleGate[] = [
   { href: "/dashboard/messages", modules: ["planning"] },
   { href: "/dashboard/agenda", modules: ["planning"] },
   { href: "/dashboard/contrats-annuels", modules: ["planning", "chantiers"] },
+  { href: "/dashboard/visites-metres", modules: ["planning", "chantiers", "devis"] },
   { href: "/dashboard/fiches-suivi", modules: ["planning", "taches", "commandes", "administratif"] },
   { href: "/dashboard/documents", modules: ["documents"] },
   { href: "/dashboard/rapports", modules: ["direction"] },

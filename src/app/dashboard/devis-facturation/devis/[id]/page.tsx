@@ -14,17 +14,21 @@ import { prisma } from "@/lib/prisma";
 import { loadAcceptedArchiveUi } from "@/lib/commercial/accepted-snapshot";
 import { ensureCommercialOrgSettings } from "@/lib/commercial/settings";
 import { d } from "@/lib/commercial/decimal";
+import { VisitQuoteMeasurementsPanel } from "@/components/site-visits/VisitQuoteMeasurementsPanel";
 
 export const dynamic = "force-dynamic";
 
 export default async function DevisDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ fromVisit?: string }>;
 }) {
   const session = await requireCommercialSession();
   const orgId = await resolveCommercialOrgId(session.user);
   const { id } = await params;
+  const sp = await searchParams;
   if (!orgId) notFound();
 
   const quote = await getQuoteDetail(orgId, id);
@@ -33,6 +37,16 @@ export default async function DevisDetailPage({
   const canEdit =
     ["DRAFT", "TO_VALIDATE", "VALIDATED"].includes(quote.status) &&
     quote.currentVersion?.lockState === "DRAFT";
+
+  const fromVisitId =
+    sp.fromVisit ??
+    (
+      await prisma.siteVisit.findFirst({
+        where: { organizationId: orgId, commercialQuoteId: id },
+        select: { id: true },
+      })
+    )?.id ??
+    null;
 
   const [summary, invoiceStats, archive, settings] = await Promise.all([
     quote.status === "ACCEPTED" || quote.acceptedAt
@@ -74,6 +88,13 @@ export default async function DevisDetailPage({
         <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-950">
           Validité dépassée — le statut stocké n’est pas modifié automatiquement.
         </p>
+      ) : null}
+      {fromVisitId ? (
+        <VisitQuoteMeasurementsPanel
+          visitId={fromVisitId}
+          quoteId={id}
+          canEdit={canEdit}
+        />
       ) : null}
       <QuoteEditor
         initial={quote as never}

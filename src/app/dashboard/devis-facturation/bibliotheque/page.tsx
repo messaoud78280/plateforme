@@ -12,6 +12,8 @@ import {
   LibraryHub,
   type LibraryHubRow,
 } from "@/components/commercial/LibraryHub";
+import { ensureCommercialOrgSettings } from "@/lib/commercial/settings";
+import { d } from "@/lib/commercial/decimal";
 
 export const dynamic = "force-dynamic";
 
@@ -22,13 +24,15 @@ export default async function BibliothequePage() {
   const orgId = await resolveCommercialOrgId(session.user);
   if (!orgId) return null;
 
-  const [activeItems, archivedItems, stats, materials, labor] = await Promise.all([
-    listWorkItems(orgId, { take: 300, active: true }),
-    listWorkItems(orgId, { take: 100, active: false }),
-    getLibraryHubStats(orgId),
-    listMaterials(orgId, { take: 80 }),
-    listLaborResources(orgId),
-  ]);
+  const [activeItems, archivedItems, stats, materials, labor, settings] =
+    await Promise.all([
+      listWorkItems(orgId, { take: 300, active: true }),
+      listWorkItems(orgId, { take: 100, active: false }),
+      getLibraryHubStats(orgId),
+      listMaterials(orgId, { take: 80 }),
+      listLaborResources(orgId),
+      ensureCommercialOrgSettings(orgId),
+    ]);
 
   const rows: LibraryHubRow[] = [...activeItems, ...archivedItems].map((w) => ({
     id: w.id,
@@ -72,6 +76,14 @@ export default async function BibliothequePage() {
         hourlyCostHt: l.hourlyCostHt,
         loadedCostHt: l.loadedCostHt,
       }))}
+      minMarginPercent={
+        settings.minMarginPercent != null ? d(settings.minMarginPercent) : null
+      }
+      targetMarginPercent={
+        settings.targetMarginPercent != null
+          ? d(settings.targetMarginPercent)
+          : null
+      }
     />
   );
 }

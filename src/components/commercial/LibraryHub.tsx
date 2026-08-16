@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Package, Search, Sparkles, Star, Wrench } from "lucide-react";
 import { Drawer } from "@/components/ui/Drawer";
 import { HeaderDropdown } from "@/components/ui/HeaderDropdown";
 import { WorkItemForm, type WorkItemFormRow } from "@/components/commercial/WorkItemForm";
@@ -39,6 +40,7 @@ export type LibraryHubStats = {
 
 type Tab = "ouvrages" | "materiaux" | "maindoeuvre" | "favoris";
 type Chip = "all" | "simple" | "compose" | "verify" | "archived";
+type MarginFilter = "all" | "below_min" | "above_target";
 
 function fmt(n: number) {
   return roundMoney(n, 2).toLocaleString("fr-FR", {
@@ -64,13 +66,40 @@ function marqueOf(w: LibraryHubRow) {
   );
 }
 
-const LOW_MARGIN = 15;
+function formatSaleUnit(unit: string) {
+  const u = unit.trim().toLowerCase();
+  if (u === "ens" || u === "ens.") return "Ensemble";
+  return unit;
+}
+
+function updatedAtMs(d: string | Date) {
+  const t = new Date(d).getTime();
+  return Number.isNaN(t) ? 0 : t;
+}
+
+function marginBadgeClass(
+  marge: number,
+  missingPrice: boolean,
+  minMarginPercent: number | null | undefined,
+  targetMarginPercent: number | null | undefined,
+) {
+  if (missingPrice) return "badge-cc badge-cc-neutral";
+  const hasMin = minMarginPercent != null;
+  const hasTarget = targetMarginPercent != null;
+  if (!hasMin && !hasTarget) return "badge-cc badge-cc-neutral";
+  if (hasMin && marge < minMarginPercent!) return "badge-cc badge-cc-critical";
+  if (hasTarget && marge < targetMarginPercent!) return "badge-cc badge-cc-watch";
+  if (hasTarget && marge >= targetMarginPercent!) return "badge-cc badge-cc-ok";
+  return "badge-cc badge-cc-neutral";
+}
 
 export function LibraryHub({
   initialItems,
   stats,
   materialsPreview,
   laborPreview,
+  minMarginPercent = null,
+  targetMarginPercent = null,
 }: {
   initialItems: LibraryHubRow[];
   stats: LibraryHubStats;
@@ -93,12 +122,16 @@ export function LibraryHub({
     hourlyCostHt: number;
     loadedCostHt: number | null;
   }>;
+  minMarginPercent?: number | null;
+  targetMarginPercent?: number | null;
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("ouvrages");
   const [chip, setChip] = useState<Chip>("all");
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
+  const [familyFilter, setFamilyFilter] = useState("");
+  const [marginFilter, setMarginFilter] = useState<MarginFilter>("all");
   const [items, setItems] = useState(initialItems);
   const [toast, setToast] = useState<string | null>(null);
   const [drawer, setDrawer] = useState<
@@ -106,6 +139,9 @@ export function LibraryHub({
   >(null);
   const [materialDrawerId, setMaterialDrawerId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  const hasMarginSettings =
+    minMarginPercent != null || targetMarginPercent != null;
 
   useEffect(() => {
     setItems(initialItems);
@@ -122,6 +158,17 @@ export function LibraryHub({
     return () => clearTimeout(t);
   }, [toast]);
 
+  const families = useMemo(() => {
+    const set = new Set<string>();
+    for (const i of items) {
+      if (i.family) set.add(i.family);
+    }
+    for (const m of materialsPreview) {
+      if (m.family) set.add(m.family);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "fr"));
+  }, [items, materialsPreview]);
+
   const filtered = useMemo(() => {
     let list = items;
     if (tab === "favoris") list = list.filter((i) => i.isFavorite && i.isActive);
@@ -131,6 +178,22 @@ export function LibraryHub({
     if (chip === "archived") list = list.filter((i) => !i.isActive);
     if (chip !== "archived" && tab !== "favoris") {
       list = list.filter((i) => i.isActive);
+    }
+    if (familyFilter) {
+      list = list.filter((i) => i.family === familyFilter);
+    }
+    if (hasMarginSettings && marginFilter !== "all") {
+      list = list.filter((i) => {
+        if (!(i.unitSellHt > 0)) return false;
+        const marge = marqueOf(i);
+        if (marginFilter === "below_min" && minMarginPercent != null) {
+          return marge < minMarginPercent;
+        }
+        if (marginFilter === "above_target" && targetMarginPercent != null) {
+          return marge >= targetMarginPercent;
+        }
+        return true;
+      });
     }
     if (debouncedQ) {
       const qq = debouncedQ.toLowerCase();
@@ -143,20 +206,26 @@ export function LibraryHub({
       );
     }
     return list;
-  }, [items, tab, chip, debouncedQ]);
+  }, [
+    items,
+    tab,
+    chip,
+    debouncedQ,
+    familyFilter,
+    marginFilter,
+    hasMarginSettings,
+    minMarginPercent,
+    targetMarginPercent,
+  ]);
+
+  const recentItems = useMemo(() => {
+    return items
+      .filter((i) => i.isActive)
+      .sort((a, b) => updatedAtMs(b.updatedAt) - updatedAtMs(a.updatedAt))
+      .slice(0, 4);
+  }, [items]);
 
   const refresh = useCallback(() => router.refresh(), [router]);
-
-  const families = useMemo(() => {
-    const set = new Set<string>();
-    for (const i of items) {
-      if (i.family) set.add(i.family);
-    }
-    for (const m of materialsPreview) {
-      if (m.family) set.add(m.family);
-    }
-    return Array.from(set);
-  }, [items, materialsPreview]);
 
   function upsertItem(row: WorkItemFormRow) {
     setItems((prev) => {
@@ -305,50 +374,71 @@ export function LibraryHub({
     }
   }
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "ouvrages", label: "Ouvrages" },
-    { id: "materiaux", label: "Matériaux" },
-    { id: "maindoeuvre", label: "Main-d’œuvre" },
-    { id: "favoris", label: "Favoris" },
+  const tabs: { id: Tab; label: string; count: number; activeClass: string }[] = [
+    {
+      id: "ouvrages",
+      label: "Ouvrages",
+      count: stats.ouvrages,
+      activeClass: "border-bework-accent text-bework-accent",
+    },
+    {
+      id: "materiaux",
+      label: "Matériaux",
+      count: stats.materiaux,
+      activeClass: "border-bework-cyan text-[#0e7490]",
+    },
+    {
+      id: "maindoeuvre",
+      label: "Main-d’œuvre",
+      count: stats.mainOeuvre,
+      activeClass: "border-bework-ok text-[#047857]",
+    },
+    {
+      id: "favoris",
+      label: "Favoris",
+      count: stats.favorites,
+      activeClass: "border-bework-watch text-[#b45309]",
+    },
   ];
 
-  const chips: { id: Chip; label: string }[] = [
-    { id: "all", label: "Tous" },
-    { id: "simple", label: "Prix direct" },
-    { id: "compose", label: "Prix calculé" },
-    { id: "verify", label: "À vérifier" },
-    { id: "archived", label: "Archivés" },
+  const chips: { id: Chip; label: string; idleClass: string }[] = [
+    { id: "all", label: "Tous", idleClass: "bw-chip-idle" },
+    { id: "simple", label: "Prix direct", idleClass: "bw-chip-accent" },
+    { id: "compose", label: "Prix calculé", idleClass: "bw-chip-violet" },
+    { id: "verify", label: "À vérifier", idleClass: "bw-chip-watch" },
+    { id: "archived", label: "Archivés", idleClass: "bw-chip-idle" },
   ];
+
+  const searchPlaceholder =
+    families.length > 0
+      ? "Rechercher un ouvrage, référence, famille…"
+      : "Rechercher un ouvrage, référence…";
+
+  const showOuvrageFilters = tab === "ouvrages" || tab === "favoris";
+  const showExtraFilters =
+    showOuvrageFilters &&
+    (families.length > 0 || hasMarginSettings);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="mx-auto w-full max-w-[1320px] space-y-5">
+      <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 max-w-2xl">
-          <h1 className="text-2xl font-semibold tracking-tight text-[#1e3a5f] sm:text-3xl">
+          <h1 className="text-2xl font-semibold tracking-tight text-bework-navy sm:text-3xl">
             Bibliothèque
           </h1>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-            Vos ouvrages, matériaux et prix de référence pour chiffrer rapidement
-            et protéger vos marges.
+          <p className="mt-1.5 text-sm leading-relaxed text-bework-muted">
+            Ouvrages, matériaux catalogue et ressources MO pour chiffrer vite et
+            protéger vos marges.
           </p>
-          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-            <span>
-              <strong className="font-semibold text-slate-700">
-                {stats.ouvrages}
-              </strong>{" "}
-              ouvrages
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="badge-cc badge-cc-info">
+              {stats.ouvrages} ouvrages
             </span>
-            <span>
-              <strong className="font-semibold text-slate-700">
-                {stats.materiaux}
-              </strong>{" "}
-              matériaux
+            <span className="badge-cc badge-cc-cyan">
+              {stats.materiaux} matériaux catalogue
             </span>
-            <span>
-              <strong className="font-semibold text-slate-700">
-                {stats.mainOeuvre}
-              </strong>{" "}
-              main-d’œuvre
+            <span className="badge-cc badge-cc-ok">
+              {stats.mainOeuvre} ressources MO
             </span>
             {stats.needsRecalc > 0 ? (
               <button
@@ -357,9 +447,9 @@ export function LibraryHub({
                   setTab("ouvrages");
                   setChip("verify");
                 }}
-                className="font-semibold text-amber-700 hover:underline"
+                className="badge-cc badge-cc-watch cursor-pointer transition hover:opacity-90"
               >
-                ⚠ {stats.needsRecalc} prix à vérifier
+                {stats.needsRecalc} à vérifier
               </button>
             ) : null}
           </div>
@@ -370,14 +460,14 @@ export function LibraryHub({
             align="right"
             width={220}
             zIndex={50}
-            panelClassName="rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+            panelClassName="rounded-xl border border-bework-navy/12 bg-white py-1 shadow-lg"
             trigger={({ onClick, expanded, triggerRef }) => (
               <button
                 ref={triggerRef}
                 type="button"
                 onClick={onClick}
                 aria-expanded={expanded}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                className="btn-cc-ghost !min-h-10 !px-3"
               >
                 •••
               </button>
@@ -385,45 +475,46 @@ export function LibraryHub({
           >
             <a
               href="/api/commercial/library/work-items?format=csv"
-              className="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              className="block px-3 py-2 text-sm text-bework-ink hover:bg-bework-soft-navy"
               role="menuitem"
             >
               Exporter CSV
             </a>
             <Link
               href="/dashboard/devis-facturation/prix"
-              className="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              className="block px-3 py-2 text-sm text-bework-ink hover:bg-bework-soft-navy"
               role="menuitem"
             >
-              Gérer les prix / familles
+              Prix / familles
             </Link>
             <Link
               href="/dashboard/devis-facturation/parametres"
-              className="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              className="block px-3 py-2 text-sm text-bework-ink hover:bg-bework-soft-navy"
               role="menuitem"
             >
               Paramètres
             </Link>
-            <p className="border-t border-slate-100 px-3 py-2 text-[11px] text-slate-400">
-              Import CSV — prochainement
-            </p>
           </HeaderDropdown>
           <button
             type="button"
             onClick={() => setDrawer({ mode: "create" })}
-            className="rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#152a45]"
+            className="btn-cc-primary"
           >
             + Nouvel ouvrage
           </button>
         </div>
-      </div>
+      </header>
 
       <div className="relative">
+        <Search
+          className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-bework-muted"
+          aria-hidden
+        />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Rechercher un ouvrage, référence, famille…"
-          className="w-full rounded-2xl border border-bework-navy/15 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] px-4 py-3.5 text-[15px] text-slate-900 shadow-sm outline-none ring-0 placeholder:text-slate-400 focus:border-bework-accent/40 focus:shadow-[var(--cc-focus-ring)]"
+          placeholder={searchPlaceholder}
+          className="h-12 w-full rounded-2xl border border-bework-navy/15 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] pl-10 pr-4 text-[15px] text-bework-ink shadow-sm outline-none placeholder:text-bework-muted/70 focus:border-bework-accent/40 focus:shadow-[var(--cc-focus-ring)]"
         />
       </div>
 
@@ -434,18 +525,19 @@ export function LibraryHub({
             type="button"
             onClick={() => setTab(t.id)}
             className={cn(
-              "shrink-0 border-b-2 px-3 py-2 text-sm font-semibold transition",
+              "shrink-0 border-b-2 px-3 py-2.5 text-sm font-semibold transition",
               tab === t.id
-                ? "border-bework-navy text-bework-navy"
+                ? t.activeClass
                 : "border-transparent text-bework-muted hover:text-bework-navy",
             )}
           >
-            {t.label}
+            {t.label}{" "}
+            <span className="tabular-nums opacity-80">{t.count}</span>
           </button>
         ))}
       </div>
 
-      {(tab === "ouvrages" || tab === "favoris") && (
+      {showOuvrageFilters ? (
         <div className="flex flex-wrap gap-1.5">
           {chips.map((c) => (
             <button
@@ -454,14 +546,54 @@ export function LibraryHub({
               onClick={() => setChip(c.id)}
               className={cn(
                 "bw-chip",
-                chip === c.id ? "bw-chip-active" : "bw-chip-idle",
+                chip === c.id ? "bw-chip-active" : c.idleClass,
               )}
             >
               {c.label}
             </button>
           ))}
         </div>
-      )}
+      ) : null}
+
+      {showExtraFilters ? (
+        <div className="flex flex-wrap gap-2">
+          {families.length > 0 ? (
+            <select
+              value={familyFilter}
+              onChange={(e) => setFamilyFilter(e.target.value)}
+              className="h-10 rounded-xl border border-bework-navy/15 bg-white px-3 text-sm text-bework-ink shadow-sm outline-none focus:border-bework-accent/40 focus:shadow-[var(--cc-focus-ring)]"
+              aria-label="Filtrer par famille"
+            >
+              <option value="">Toutes les familles</option>
+              {families.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
+            </select>
+          ) : null}
+          {hasMarginSettings ? (
+            <select
+              value={marginFilter}
+              onChange={(e) => setMarginFilter(e.target.value as MarginFilter)}
+              className="h-10 rounded-xl border border-bework-navy/15 bg-white px-3 text-sm text-bework-ink shadow-sm outline-none focus:border-bework-accent/40 focus:shadow-[var(--cc-focus-ring)]"
+              aria-label="Filtrer par marge"
+            >
+              <option value="all">Toutes les marges</option>
+              {minMarginPercent != null ? (
+                <option value="below_min">
+                  &lt; {fmt(minMarginPercent)} %
+                </option>
+              ) : null}
+              {targetMarginPercent != null ? (
+                <option value="above_target">
+                  ≥ {fmt(targetMarginPercent)} %
+                </option>
+              ) : null}
+            </select>
+          ) : null}
+        </div>
+      ) : null}
 
       {toast ? (
         <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
@@ -476,7 +608,12 @@ export function LibraryHub({
         />
       ) : tab === "maindoeuvre" ? (
         <LaborPanel rows={laborPreview} />
-      ) : filtered.length === 0 && items.filter((i) => i.isActive).length === 0 && chip === "all" && !debouncedQ ? (
+      ) : filtered.length === 0 &&
+        items.filter((i) => i.isActive).length === 0 &&
+        chip === "all" &&
+        !debouncedQ &&
+        !familyFilter &&
+        marginFilter === "all" ? (
         <EmptyLibrary onCreate={() => setDrawer({ mode: "create" })} />
       ) : filtered.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-bework-navy/15 bg-bework-soft-navy/40 px-6 py-12 text-center text-sm text-bework-muted">
@@ -484,121 +621,54 @@ export function LibraryHub({
         </p>
       ) : (
         <>
-          {!debouncedQ && chip === "all" && tab === "ouvrages" ? (
+          {!debouncedQ &&
+          chip === "all" &&
+          tab === "ouvrages" &&
+          !familyFilter &&
+          marginFilter === "all" ? (
             <RecentStrip
-              items={items.filter((i) => i.isActive).slice(0, 5)}
+              items={recentItems}
               onOpen={(id) => setDrawer({ mode: "edit", id })}
             />
           ) : null}
-        <ul className="divide-y divide-bework-navy/8 overflow-hidden rounded-2xl border border-bework-navy/12 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] shadow-[var(--cc-shadow)]">
-          {filtered.map((item) => {
-            const missingPrice = !(item.unitSellHt > 0);
-            const marge = marqueOf(item);
-            const low = !missingPrice && marge > 0 && marge < LOW_MARGIN;
-            return (
-              <li key={item.id}>
-                <div className="group flex flex-col gap-3 px-4 py-3.5 transition hover:bg-bework-soft-accent/50 sm:flex-row sm:items-center sm:gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setDrawer({ mode: "edit", id: item.id })}
-                    className="min-w-0 flex-1 text-left"
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="truncate text-[15px] font-semibold text-slate-900">
-                        {item.name}
-                      </p>
-                      {missingPrice ? (
-                        <span className="badge-cc badge-cc-neutral">Prix à renseigner</span>
-                      ) : null}
-                      {item.needsPriceRecalc ? (
-                        <span className="badge-cc badge-cc-watch">À vérifier</span>
-                      ) : null}
-                      {item.isFavorite ? (
-                        <span className="badge-cc badge-cc-intel">Favori</span>
-                      ) : null}
-                      {!item.isActive ? (
-                        <span className="badge-cc badge-cc-cyan">Archivé</span>
-                      ) : null}
-                      {low ? (
-                        <span className="text-[11px] font-medium text-bework-watch">
-                          Marge {fmt(marge)} %
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="mt-0.5 text-xs text-slate-500">
-                      {[
-                        item.family,
-                        item.saleUnit,
-                        item.kind === "COMPOSITE" ? "Prix calculé" : "Prix direct",
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                      {item.reference ? ` · ${item.reference}` : ""}
-                    </p>
-                  </button>
 
-                  <div className="flex shrink-0 items-end gap-4 sm:gap-6">
-                    <div className="text-right">
-                      <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                        Coût
-                      </p>
-                      <p className="tabular-nums text-sm font-medium text-slate-700">
-                        {missingPrice && item.kind === "SIMPLE" ? "—" : `${fmt(item.unitCostHt)} €`}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                        Vente HT
-                      </p>
-                      <p className="tabular-nums text-sm font-semibold text-slate-900">
-                        {missingPrice ? "—" : `${fmt(item.unitSellHt)} €`}
-                      </p>
-                    </div>
-                    <div className="hidden text-right sm:block">
-                      <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                        Marge
-                      </p>
-                      <p
-                        className={cn(
-                          "tabular-nums text-sm font-semibold",
-                          missingPrice
-                            ? "text-slate-400"
-                            : low
-                              ? "text-amber-700"
-                              : "text-slate-700",
-                        )}
-                      >
-                        {missingPrice ? "—" : `${fmt(marge)} %`}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      disabled={busyId === item.id}
-                      onClick={() => void toggleFavorite(item)}
-                      className={cn(
-                        "flex h-10 w-10 items-center justify-center text-lg leading-none",
-                        item.isFavorite ? "text-amber-500" : "text-slate-300 hover:text-amber-400",
-                      )}
-                      aria-label={item.isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
-                    >
-                      ★
-                    </button>
-                    <RowMenu
-                      item={item}
-                      busy={busyId === item.id}
-                      onEdit={() => setDrawer({ mode: "edit", id: item.id })}
-                      onDuplicate={() => void duplicate(item)}
-                      onFavorite={() => void toggleFavorite(item)}
-                      onArchive={() => void archive(item)}
-                      onRestore={() => void restore(item)}
-                      onDelete={() => void remove(item)}
-                    />
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+          {/* Desktop list */}
+          <ul className="hidden divide-y divide-bework-navy/8 overflow-hidden rounded-2xl border border-bework-navy/12 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] shadow-[var(--cc-shadow)] sm:block">
+            {filtered.map((item) => (
+              <WorkItemRow
+                key={item.id}
+                item={item}
+                busy={busyId === item.id}
+                minMarginPercent={minMarginPercent}
+                targetMarginPercent={targetMarginPercent}
+                onEdit={() => setDrawer({ mode: "edit", id: item.id })}
+                onFavorite={() => void toggleFavorite(item)}
+                onDuplicate={() => void duplicate(item)}
+                onArchive={() => void archive(item)}
+                onRestore={() => void restore(item)}
+                onDelete={() => void remove(item)}
+              />
+            ))}
+          </ul>
+
+          {/* Mobile cards */}
+          <ul className="grid gap-3 sm:hidden">
+            {filtered.map((item) => (
+              <WorkItemCard
+                key={item.id}
+                item={item}
+                busy={busyId === item.id}
+                minMarginPercent={minMarginPercent}
+                targetMarginPercent={targetMarginPercent}
+                onEdit={() => setDrawer({ mode: "edit", id: item.id })}
+                onFavorite={() => void toggleFavorite(item)}
+                onDuplicate={() => void duplicate(item)}
+                onArchive={() => void archive(item)}
+                onRestore={() => void restore(item)}
+                onDelete={() => void remove(item)}
+              />
+            ))}
+          </ul>
         </>
       )}
 
@@ -627,25 +697,312 @@ export function LibraryHub({
   );
 }
 
+function WorkItemRow({
+  item,
+  busy,
+  minMarginPercent,
+  targetMarginPercent,
+  onEdit,
+  onFavorite,
+  onDuplicate,
+  onArchive,
+  onRestore,
+  onDelete,
+}: {
+  item: LibraryHubRow;
+  busy: boolean;
+  minMarginPercent?: number | null;
+  targetMarginPercent?: number | null;
+  onEdit: () => void;
+  onFavorite: () => void;
+  onDuplicate: () => void;
+  onArchive: () => void;
+  onRestore: () => void;
+  onDelete: () => void;
+}) {
+  const missingPrice = !(item.unitSellHt > 0);
+  const marge = marqueOf(item);
+  const isComposite = item.kind === "COMPOSITE";
+
+  return (
+    <li>
+      <div className="group flex items-stretch gap-0 transition hover:bg-bework-soft-accent/40">
+        <div
+          className={cn(
+            "w-1 shrink-0 self-stretch",
+            isComposite ? "bg-[var(--cc-intel)]" : "bg-bework-accent",
+          )}
+          aria-hidden
+        />
+        <div className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3.5">
+          <button
+            type="button"
+            onClick={onEdit}
+            className="min-w-0 flex-1 text-left"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="truncate text-[15px] font-semibold text-bework-ink">
+                {item.name}
+              </p>
+              <span
+                className={cn(
+                  "badge-cc",
+                  isComposite ? "badge-cc-intel" : "badge-cc-info",
+                )}
+              >
+                {isComposite ? "Prix calculé" : "Prix direct"}
+              </span>
+              {missingPrice ? (
+                <span className="badge-cc badge-cc-neutral">Prix à renseigner</span>
+              ) : null}
+              {item.needsPriceRecalc ? (
+                <span className="badge-cc badge-cc-watch">À vérifier</span>
+              ) : null}
+              {!item.isActive ? (
+                <span className="badge-cc badge-cc-cyan">Archivé</span>
+              ) : null}
+            </div>
+            <p className="mt-0.5 text-xs text-bework-muted">
+              {[
+                item.family,
+                formatSaleUnit(item.saleUnit),
+                item.reference,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          </button>
+
+          <div className="flex shrink-0 items-center gap-5">
+            <div className="text-right">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-bework-muted/80">
+                Coût
+              </p>
+              <p className="tabular-nums text-sm text-bework-muted">
+                {missingPrice && item.kind === "SIMPLE"
+                  ? "—"
+                  : `${fmt(item.unitCostHt)} €`}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-bework-muted/80">
+                Vente HT
+              </p>
+              <p className="tabular-nums text-sm font-semibold text-bework-ink">
+                {missingPrice ? "—" : `${fmt(item.unitSellHt)} €`}
+              </p>
+            </div>
+            <div className="min-w-[4.5rem] text-right">
+              {missingPrice ? (
+                <span className="badge-cc badge-cc-neutral">—</span>
+              ) : (
+                <span
+                  className={marginBadgeClass(
+                    marge,
+                    missingPrice,
+                    minMarginPercent,
+                    targetMarginPercent,
+                  )}
+                >
+                  {fmt(marge)} %
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={onFavorite}
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-lg transition",
+                item.isFavorite
+                  ? "text-bework-watch"
+                  : "text-slate-300 hover:text-bework-watch",
+              )}
+              aria-label={
+                item.isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"
+              }
+            >
+              <Star
+                className={cn("h-4 w-4", item.isFavorite && "fill-current")}
+              />
+            </button>
+            <RowMenu
+              item={item}
+              busy={busy}
+              onEdit={onEdit}
+              onDuplicate={onDuplicate}
+              onFavorite={onFavorite}
+              onArchive={onArchive}
+              onRestore={onRestore}
+              onDelete={onDelete}
+            />
+          </div>
+        </div>
+      </div>
+    </li>
+  );
+}
+
+function WorkItemCard({
+  item,
+  busy,
+  minMarginPercent,
+  targetMarginPercent,
+  onEdit,
+  onFavorite,
+  onDuplicate,
+  onArchive,
+  onRestore,
+  onDelete,
+}: {
+  item: LibraryHubRow;
+  busy: boolean;
+  minMarginPercent?: number | null;
+  targetMarginPercent?: number | null;
+  onEdit: () => void;
+  onFavorite: () => void;
+  onDuplicate: () => void;
+  onArchive: () => void;
+  onRestore: () => void;
+  onDelete: () => void;
+}) {
+  const missingPrice = !(item.unitSellHt > 0);
+  const marge = marqueOf(item);
+  const isComposite = item.kind === "COMPOSITE";
+
+  return (
+    <li
+      className={cn(
+        "overflow-hidden rounded-2xl border border-bework-navy/12 bg-white shadow-[var(--cc-shadow)]",
+        isComposite ? "bw-surface-tinted-violet" : "bw-surface-tinted-accent",
+      )}
+    >
+      <div className="flex">
+        <div
+          className={cn(
+            "w-1 shrink-0 self-stretch",
+            isComposite ? "bg-[var(--cc-intel)]" : "bg-bework-accent",
+          )}
+          aria-hidden
+        />
+        <div className="min-w-0 flex-1 p-4">
+          <div className="flex items-start justify-between gap-2">
+            <button type="button" onClick={onEdit} className="min-w-0 text-left">
+              <p className="font-semibold text-bework-ink">{item.name}</p>
+              <p className="mt-0.5 text-xs text-bework-muted">
+                {[
+                  item.family,
+                  formatSaleUnit(item.saleUnit),
+                  item.reference,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            </button>
+            <div className="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={onFavorite}
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-lg",
+                  item.isFavorite ? "text-bework-watch" : "text-slate-300",
+                )}
+                aria-label={
+                  item.isFavorite
+                    ? "Retirer des favoris"
+                    : "Ajouter aux favoris"
+                }
+              >
+                <Star
+                  className={cn("h-4 w-4", item.isFavorite && "fill-current")}
+                />
+              </button>
+              <RowMenu
+                item={item}
+                busy={busy}
+                onEdit={onEdit}
+                onDuplicate={onDuplicate}
+                onFavorite={onFavorite}
+                onArchive={onArchive}
+                onRestore={onRestore}
+                onDelete={onDelete}
+              />
+            </div>
+          </div>
+
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <span
+              className={cn(
+                "badge-cc",
+                isComposite ? "badge-cc-intel" : "badge-cc-info",
+              )}
+            >
+              {isComposite ? "Prix calculé" : "Prix direct"}
+            </span>
+            {missingPrice ? (
+              <span className="badge-cc badge-cc-neutral">Prix à renseigner</span>
+            ) : null}
+            {item.needsPriceRecalc ? (
+              <span className="badge-cc badge-cc-watch">À vérifier</span>
+            ) : null}
+            {!item.isActive ? (
+              <span className="badge-cc badge-cc-cyan">Archivé</span>
+            ) : null}
+          </div>
+
+          <div className="mt-3 flex items-end justify-between gap-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-wide text-bework-muted">
+                Coût · Vente
+              </p>
+              <p className="tabular-nums text-sm text-bework-ink">
+                <span className="text-bework-muted">
+                  {missingPrice && item.kind === "SIMPLE"
+                    ? "—"
+                    : `${fmt(item.unitCostHt)} €`}
+                </span>
+                {" · "}
+                <span className="font-semibold">
+                  {missingPrice ? "—" : `${fmt(item.unitSellHt)} €`}
+                </span>
+              </p>
+            </div>
+            {missingPrice ? (
+              <span className="badge-cc badge-cc-neutral">—</span>
+            ) : (
+              <span
+                className={marginBadgeClass(
+                  marge,
+                  missingPrice,
+                  minMarginPercent,
+                  targetMarginPercent,
+                )}
+              >
+                {fmt(marge)} %
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </li>
+  );
+}
+
 function EmptyLibrary({ onCreate }: { onCreate: () => void }) {
   return (
-    <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center">
-      <h2 className="text-lg font-semibold text-slate-900">
+    <div className="rounded-2xl border border-dashed border-bework-navy/15 bw-surface-tinted-navy px-6 py-16 text-center">
+      <Sparkles className="mx-auto h-8 w-8 text-bework-accent" aria-hidden />
+      <h2 className="mt-3 text-lg font-semibold text-bework-navy">
         Votre bibliothèque est vide
       </h2>
-      <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-        Ajoutez votre premier ouvrage pour commencer à chiffrer.
+      <p className="mx-auto mt-2 max-w-md text-sm text-bework-muted">
+        Ajoutez votre premier ouvrage pour chiffrer plus vite et suivre vos
+        marges.
       </p>
-      <button
-        type="button"
-        onClick={onCreate}
-        className="mt-6 rounded-xl bg-[#1e3a5f] px-5 py-2.5 text-sm font-bold text-white"
-      >
+      <button type="button" onClick={onCreate} className="btn-cc-primary mt-6">
         Créer un ouvrage
       </button>
-      <p className="mt-4 text-xs text-slate-400">
-        Importer une bibliothèque — bientôt dans le menu •••
-      </p>
     </div>
   );
 }
@@ -659,26 +1016,53 @@ function RecentStrip({
 }) {
   if (items.length === 0) return null;
   return (
-    <div className="mb-3">
-      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+    <div>
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-bework-muted">
         Récemment mis à jour
       </p>
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {items.map((i) => (
-          <button
-            key={i.id}
-            type="button"
-            onClick={() => onOpen(i.id)}
-            className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left shadow-sm transition hover:border-[#1e3a5f]/25"
-          >
-            <p className="max-w-[160px] truncate text-xs font-semibold text-slate-800">
-              {i.name}
-            </p>
-            <p className="tabular-nums text-[11px] text-slate-500">
-              {i.unitSellHt > 0 ? `${fmt(i.unitSellHt)} € HT` : "Prix à renseigner"}
-            </p>
-          </button>
-        ))}
+      <div className="flex gap-2.5 overflow-x-auto pb-1">
+        {items.map((i) => {
+          const isComposite = i.kind === "COMPOSITE";
+          return (
+            <button
+              key={i.id}
+              type="button"
+              onClick={() => onOpen(i.id)}
+              className={cn(
+                "shrink-0 overflow-hidden rounded-xl border text-left shadow-sm transition hover:shadow-md",
+                isComposite
+                  ? "bw-surface-tinted-violet border-bework-navy/10"
+                  : "bw-surface-tinted-accent border-bework-navy/10",
+              )}
+            >
+              <div className="flex min-w-[180px] max-w-[220px]">
+                <div
+                  className={cn(
+                    "w-1 shrink-0 self-stretch",
+                    isComposite ? "bg-[var(--cc-intel)]" : "bg-bework-accent",
+                  )}
+                  aria-hidden
+                />
+                <div className="px-3 py-2.5">
+                  <p className="truncate text-xs font-semibold text-bework-ink">
+                    {i.name}
+                  </p>
+                  <p className="mt-0.5 text-[10px] font-medium text-bework-muted">
+                    {isComposite ? "Prix calculé" : "Prix direct"}
+                  </p>
+                  <p className="mt-0.5 tabular-nums text-[11px] text-bework-ink">
+                    {i.unitSellHt > 0
+                      ? `${fmt(i.unitSellHt)} € HT`
+                      : "Prix à renseigner"}
+                  </p>
+                  <p className="mt-0.5 text-[10px] text-bework-muted/80">
+                    {relativeUpdated(i.updatedAt)}
+                  </p>
+                </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -705,102 +1089,113 @@ function MaterialsPanel({
 }) {
   if (rows.length === 0) {
     return (
-      <p className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-10 text-center text-sm text-slate-500">
-        Aucun matériau. Gérez-les depuis{" "}
-        <Link href="/dashboard/devis-facturation/prix" className="font-semibold text-[#1d4ed8]">
-          Prix
+      <div className="rounded-2xl border border-dashed border-bework-navy/15 bw-surface-tinted-cyan px-6 py-14 text-center">
+        <Package className="mx-auto h-8 w-8 text-[#0e7490]" aria-hidden />
+        <h2 className="mt-3 text-base font-semibold text-bework-navy">
+          Aucun matériau catalogue
+        </h2>
+        <p className="mx-auto mt-2 max-w-md text-sm text-bework-muted">
+          Les matériaux se créent et se mettent à jour dans Prix. Un catalogue
+          vide est normal au démarrage.
+        </p>
+        <Link
+          href="/dashboard/devis-facturation/prix"
+          className="btn-cc-secondary mt-5 inline-flex"
+        >
+          Ouvrir Prix
         </Link>
-        .
-      </p>
+      </div>
     );
   }
   return (
-    <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+    <ul className="divide-y divide-bework-navy/8 overflow-hidden rounded-2xl border border-bework-navy/12 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] shadow-[var(--cc-shadow)]">
       {rows.map((m) => {
         const supplier = m.preferredSupplierName || m.supplierName;
         const refDate = m.referencePriceUpdatedAt || m.updatedAt;
         return (
           <li key={m.id}>
-            <div className="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50/80">
-              <button
-                type="button"
-                onClick={() => onOpen(m.id)}
-                className="min-w-0 flex-1 text-left"
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-semibold text-slate-900">{m.name}</p>
-                  {m.needsPriceReview ? (
-                    <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-800">
-                      À vérifier
-                    </span>
-                  ) : null}
-                </div>
-                <p className="mt-0.5 text-xs text-slate-500">
-                  {[m.family, m.unit].filter(Boolean).join(" · ")}
+            <div className="flex items-stretch gap-0 transition hover:bg-bework-soft-cyan/40">
+              <div className="w-1 shrink-0 self-stretch bg-bework-cyan" aria-hidden />
+              <div className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3.5">
+                <button
+                  type="button"
+                  onClick={() => onOpen(m.id)}
+                  className="min-w-0 flex-1 text-left"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold text-bework-ink">{m.name}</p>
+                    {m.needsPriceReview ? (
+                      <span className="badge-cc badge-cc-watch">À vérifier</span>
+                    ) : null}
+                  </div>
+                  <p className="mt-0.5 text-xs text-bework-muted">
+                    {[m.family, formatSaleUnit(m.unit)].filter(Boolean).join(" · ")}
+                  </p>
+                  <p className="mt-1 text-[11px] text-bework-muted/80">
+                    {supplier ?? "Fournisseur non défini"} ·{" "}
+                    {relativeUpdated(refDate)}
+                    {m.variationPercent != null &&
+                    Math.abs(m.variationPercent) >= 0.5 ? (
+                      <span
+                        className={
+                          m.variationPercent > 0
+                            ? " text-bework-watch"
+                            : " text-[#047857]"
+                        }
+                      >
+                        {" "}
+                        · {m.variationPercent > 0 ? "+" : ""}
+                        {fmt(m.variationPercent)} %
+                      </span>
+                    ) : null}
+                  </p>
+                </button>
+                <p className="shrink-0 tabular-nums text-sm font-semibold text-bework-ink">
+                  {fmt(m.currentPriceHt)} €/{formatSaleUnit(m.unit)}
                 </p>
-                <p className="mt-1 text-[11px] text-slate-400">
-                  {supplier ?? "Fournisseur non défini"} ·{" "}
-                  {relativeUpdated(refDate)}
-                  {m.variationPercent != null && Math.abs(m.variationPercent) >= 0.5 ? (
-                    <span
-                      className={
-                        m.variationPercent > 0
-                          ? " text-amber-700"
-                          : " text-emerald-700"
-                      }
+                <HeaderDropdown
+                  align="right"
+                  width={220}
+                  zIndex={50}
+                  panelClassName="rounded-xl border border-bework-navy/12 bg-white py-1 shadow-lg"
+                  trigger={({ onClick, expanded, triggerRef }) => (
+                    <button
+                      ref={triggerRef}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onClick();
+                      }}
+                      aria-expanded={expanded}
+                      className="rounded-lg px-2 py-1.5 text-sm font-bold text-bework-muted hover:bg-bework-soft-navy"
                     >
-                      {" "}
-                      · {m.variationPercent > 0 ? "+" : ""}
-                      {fmt(m.variationPercent)} %
-                    </span>
-                  ) : null}
-                </p>
-              </button>
-              <p className="shrink-0 tabular-nums text-sm font-semibold text-slate-800">
-                {fmt(m.currentPriceHt)} €/{m.unit}
-              </p>
-              <HeaderDropdown
-                align="right"
-                width={220}
-                zIndex={50}
-                panelClassName="rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
-                trigger={({ onClick, expanded, triggerRef }) => (
+                      •••
+                    </button>
+                  )}
+                >
                   <button
-                    ref={triggerRef}
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onClick();
-                    }}
-                    aria-expanded={expanded}
-                    className="rounded-lg px-2 py-1.5 text-sm font-bold text-slate-500 hover:bg-slate-100"
+                    className="block w-full px-3 py-2 text-left text-sm hover:bg-bework-soft-navy"
+                    onClick={() => onOpen(m.id)}
                   >
-                    •••
+                    Modifier
                   </button>
-                )}
-              >
-                <button
-                  type="button"
-                  className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50"
-                  onClick={() => onOpen(m.id)}
-                >
-                  Modifier
-                </button>
-                <button
-                  type="button"
-                  className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50"
-                  onClick={() => onOpen(m.id)}
-                >
-                  Ajouter un prix fournisseur
-                </button>
-                <button
-                  type="button"
-                  className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50"
-                  onClick={() => onOpen(m.id)}
-                >
-                  Voir historique
-                </button>
-              </HeaderDropdown>
+                  <button
+                    type="button"
+                    className="block w-full px-3 py-2 text-left text-sm hover:bg-bework-soft-navy"
+                    onClick={() => onOpen(m.id)}
+                  >
+                    Ajouter un prix fournisseur
+                  </button>
+                  <button
+                    type="button"
+                    className="block w-full px-3 py-2 text-left text-sm hover:bg-bework-soft-navy"
+                    onClick={() => onOpen(m.id)}
+                  >
+                    Voir historique
+                  </button>
+                </HeaderDropdown>
+              </div>
             </div>
           </li>
         );
@@ -821,26 +1216,37 @@ function LaborPanel({
 }) {
   if (rows.length === 0) {
     return (
-      <p className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-10 text-center text-sm text-slate-500">
-        Aucune ressource main-d’œuvre. Voir{" "}
-        <Link href="/dashboard/devis-facturation/prix" className="font-semibold text-[#1d4ed8]">
-          Prix
+      <div className="rounded-2xl border border-dashed border-bework-navy/15 bw-surface-tinted-ok px-6 py-14 text-center">
+        <Wrench className="mx-auto h-8 w-8 text-[#047857]" aria-hidden />
+        <h2 className="mt-3 text-base font-semibold text-bework-navy">
+          Aucune ressource MO
+        </h2>
+        <p className="mx-auto mt-2 max-w-md text-sm text-bework-muted">
+          Les ressources main-d’œuvre se gèrent dans Prix. Un catalogue vide est
+          normal au démarrage.
+        </p>
+        <Link
+          href="/dashboard/devis-facturation/prix"
+          className="btn-cc-secondary mt-5 inline-flex"
+        >
+          Ouvrir Prix
         </Link>
-        .
-      </p>
+      </div>
     );
   }
   return (
-    <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+    <ul className="divide-y divide-bework-navy/8 overflow-hidden rounded-2xl border border-bework-navy/12 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] shadow-[var(--cc-shadow)]">
       {rows.map((l) => (
-        <li
-          key={l.id}
-          className="flex items-center justify-between gap-3 px-4 py-3.5"
-        >
-          <p className="font-semibold text-slate-900">{l.name}</p>
-          <p className="tabular-nums text-sm font-semibold">
-            {fmt(l.loadedCostHt ?? l.hourlyCostHt)} € / h
-          </p>
+        <li key={l.id}>
+          <div className="flex items-stretch gap-0">
+            <div className="w-1 shrink-0 self-stretch bg-bework-ok" aria-hidden />
+            <div className="flex min-w-0 flex-1 items-center justify-between gap-3 px-4 py-3.5">
+              <p className="font-semibold text-bework-ink">{l.name}</p>
+              <p className="tabular-nums text-sm font-semibold text-bework-ink">
+                {fmt(l.loadedCostHt ?? l.hourlyCostHt)} € / h
+              </p>
+            </div>
+          </div>
         </li>
       ))}
     </ul>
@@ -871,7 +1277,7 @@ function RowMenu({
       align="right"
       width={200}
       zIndex={50}
-      panelClassName="rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+      panelClassName="rounded-xl border border-bework-navy/12 bg-white py-1 shadow-lg"
       trigger={({ onClick, expanded, triggerRef }) => (
         <button
           ref={triggerRef}
@@ -883,33 +1289,53 @@ function RowMenu({
           disabled={busy}
           aria-expanded={expanded}
           aria-label={`Actions de l’ouvrage ${item.name}`}
-          className="flex h-10 min-w-10 items-center justify-center rounded-lg px-2 text-sm font-bold text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+          className="flex h-10 min-w-10 items-center justify-center rounded-lg px-2 text-sm font-bold text-bework-muted hover:bg-bework-soft-navy disabled:opacity-50"
         >
           •••
         </button>
       )}
     >
-      <button type="button" className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50" onClick={onEdit}>
+      <button
+        type="button"
+        className="block w-full px-3 py-2 text-left text-sm hover:bg-bework-soft-navy"
+        onClick={onEdit}
+      >
         Modifier
       </button>
-      <button type="button" className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50" onClick={onDuplicate}>
+      <button
+        type="button"
+        className="block w-full px-3 py-2 text-left text-sm hover:bg-bework-soft-navy"
+        onClick={onDuplicate}
+      >
         Dupliquer
       </button>
-      <button type="button" className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50" onClick={onFavorite}>
+      <button
+        type="button"
+        className="block w-full px-3 py-2 text-left text-sm hover:bg-bework-soft-navy"
+        onClick={onFavorite}
+      >
         {item.isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
       </button>
       {item.isActive ? (
-        <button type="button" className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50" onClick={onArchive}>
+        <button
+          type="button"
+          className="block w-full px-3 py-2 text-left text-sm hover:bg-bework-soft-navy"
+          onClick={onArchive}
+        >
           Archiver
         </button>
       ) : (
-        <button type="button" className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50" onClick={onRestore}>
+        <button
+          type="button"
+          className="block w-full px-3 py-2 text-left text-sm hover:bg-bework-soft-navy"
+          onClick={onRestore}
+        >
           Restaurer
         </button>
       )}
       <button
         type="button"
-        className="block w-full border-t border-slate-100 px-3 py-2 text-left text-sm font-semibold text-red-600 hover:bg-red-50"
+        className="block w-full border-t border-bework-navy/10 px-3 py-2 text-left text-sm font-semibold text-red-600 hover:bg-red-50"
         onClick={onDelete}
       >
         Supprimer
@@ -933,7 +1359,11 @@ function WorkItemCreateEditDrawer({
 }) {
   const open = Boolean(state);
   const formKey =
-    state?.mode === "edit" ? `edit-${state.id}` : state?.mode === "create" ? "create" : "closed";
+    state?.mode === "edit"
+      ? `edit-${state.id}`
+      : state?.mode === "create"
+        ? "create"
+        : "closed";
 
   return (
     <Drawer

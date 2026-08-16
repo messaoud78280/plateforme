@@ -142,11 +142,13 @@ export function CommercialSidebar({
                           href={l.href}
                           title={l.label}
                           className={cn(
-                            "flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-[background,color] duration-150",
+                            "flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-[background,color,box-shadow] duration-150",
                             collapsed && "justify-center px-2",
-                            active
-                              ? "bw-nav-active"
-                              : "text-slate-600 hover:bg-white/80 hover:text-bework-navy",
+                            active && l.action
+                              ? "bg-bework-accent text-white shadow-sm"
+                              : active && !l.action
+                                ? "bg-bework-soft-navy text-bework-navy ring-1 ring-bework-navy/15"
+                                : "text-slate-600 hover:bg-white/80 hover:text-bework-navy",
                             l.action && !active && "font-semibold text-bework-accent",
                           )}
                           aria-current={active ? "page" : undefined}

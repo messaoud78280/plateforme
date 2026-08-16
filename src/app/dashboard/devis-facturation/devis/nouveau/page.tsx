@@ -1,6 +1,4 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { PageHeader } from "@/components/ui/PageHeader";
 import {
   requireCommercialSession,
   resolveCommercialOrgId,
@@ -26,9 +24,31 @@ export default async function NouveauDevisPage() {
         type: { in: ["CLIENT_EXT", "CLIENT"] },
         status: "ACTIVE",
       },
-      select: { id: true, name: true, tradeName: true },
+      select: {
+        id: true,
+        name: true,
+        tradeName: true,
+        email: true,
+        phone: true,
+        city: true,
+        address: true,
+        zipCode: true,
+        siret: true,
+        contacts: {
+          where: { isPrimary: true },
+          take: 1,
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+            jobTitle: true,
+          },
+        },
+      },
       orderBy: { name: "asc" },
-      take: 100,
+      take: 200,
     }),
     prisma.project.findMany({
       where: { organizationId: orgId },
@@ -48,15 +68,58 @@ export default async function NouveauDevisPage() {
     }),
   ]);
 
-  const clientsFinal =
+  const clientsMapped = (
     clients.length > 0
       ? clients
       : await prisma.externalOrganization.findMany({
           where: { hostOrganizationId: orgId, status: "ACTIVE" },
-          select: { id: true, name: true, tradeName: true },
+          select: {
+            id: true,
+            name: true,
+            tradeName: true,
+            email: true,
+            phone: true,
+            city: true,
+            address: true,
+            zipCode: true,
+            siret: true,
+            contacts: {
+              where: { isPrimary: true },
+              take: 1,
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                phone: true,
+                jobTitle: true,
+              },
+            },
+          },
           orderBy: { name: "asc" },
-          take: 100,
-        });
+          take: 200,
+        })
+  ).map((c) => ({
+    id: c.id,
+    name: c.name,
+    tradeName: c.tradeName,
+    email: c.email,
+    phone: c.phone,
+    city: c.city,
+    address: c.address,
+    zipCode: c.zipCode,
+    siret: c.siret,
+    primaryContact: c.contacts[0]
+      ? {
+          id: c.contacts[0].id,
+          firstName: c.contacts[0].firstName,
+          lastName: c.contacts[0].lastName,
+          email: c.contacts[0].email,
+          phone: c.contacts[0].phone,
+          jobTitle: c.contacts[0].jobTitle,
+        }
+      : null,
+  }));
 
   const linkedByProject = new Map<string, Set<string>>();
   for (const q of quotesWithProjects) {
@@ -71,27 +134,20 @@ export default async function NouveauDevisPage() {
     linkedClientIds: [...(linkedByProject.get(p.id) ?? [])],
   }));
 
+  const preparedByName =
+    [session.user.name].filter(Boolean).join(" ").trim() ||
+    session.user.email ||
+    null;
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <PageHeader
-          eyebrow="Devis & Facturation · Devis commerciaux"
-          title="Nouveau devis"
-          description="Client et chantier optionnels — rattachement possible après acceptation."
-        />
-        <Link
-          href="/dashboard/devis-facturation/devis"
-          className="text-sm font-semibold text-slate-600 underline"
-        >
-          ← Liste des devis
-        </Link>
-      </div>
-      <CreateQuoteForm
-        clients={clientsFinal}
-        projects={projectsWithLinks}
-        defaultValidityDays={settings.defaultValidityDays}
-        defaultVatRate={d(settings.defaultVatRate)}
-      />
-    </div>
+    <CreateQuoteForm
+      clients={clientsMapped}
+      projects={projectsWithLinks}
+      defaultValidityDays={settings.defaultValidityDays}
+      defaultVatRate={d(settings.defaultVatRate)}
+      defaultCurrency={settings.defaultCurrency}
+      defaultPaymentTerms={settings.defaultPaymentTerms}
+      preparedByName={preparedByName}
+    />
   );
 }

@@ -7,7 +7,6 @@ import {
 import {
   daysBetweenDateOnly,
   formatAmountHt,
-  formatShortDateFr,
   startOfDayParis,
   ANNUAL_CONTRACT_STATUS_LABELS,
   ANNUAL_INTERVENTION_STATUS_LABELS,
@@ -265,6 +264,5 @@ export async function loadAnnualContractsBoard(opts: {
         portfolioHt != null ? formatAmountHt(portfolioHt) : null,
     },
     includeFinancials: opts.includeFinancials,
-    shortDate: formatShortDateFr,
   };
 }

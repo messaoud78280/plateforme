@@ -57,7 +57,7 @@ export type VisitListItem = {
   estimatedCrewCount?: number | null;
   estimatedDuration?: string | null;
   lots?: string[];
-  completeness?: { done: number; total: number; label: string };
+  completeness?: { done: number; total: number; label: string; tone?: "ok" | "watch" | "accent" };
   primaryAction?: { kind: string; label: string; href?: string | null };
   agendaHref?: string | null;
   documentsHref?: string | null;
@@ -147,17 +147,7 @@ export function SiteVisitsWorkspace({
   const [lot, setLot] = useState(initialLot);
   const [state, setState] = useState(initialState);
   const [busy, setBusy] = useState(false);
-  const [createOpen, setCreateOpen] = useState(false);
   const [drawer, setDrawer] = useState<VisitListItem | null>(null);
-  const [form, setForm] = useState({
-    clientName: "",
-    siteAddress: "",
-    siteName: "",
-    contactName: "",
-    contactPhone: "",
-    subject: "",
-    scheduledAt: "",
-  });
   const [message, setMessage] = useState<string | null>(null);
 
   function pushUrl(next: {
@@ -281,26 +271,6 @@ export function SiteVisitsWorkspace({
     return { toPlan, tomorrowUnprepared, incomplete, ready };
   }, [kpiState, shown]);
 
-  async function createVisit() {
-    setBusy(true);
-    setMessage(null);
-    try {
-      const res = await fetch("/api/site-visits", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, scheduledAt: form.scheduledAt || null }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Échec");
-      setCreateOpen(false);
-      router.push(`/dashboard/visites-metres/${data.visit.id}`);
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Erreur");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   async function createQuote(visitId: string) {
     setBusy(true);
     try {
@@ -350,40 +320,40 @@ export function SiteVisitsWorkspace({
         title="Visites & métrés"
         description="Du terrain au devis, sans ressaisie."
         actions={
-          <button
-            type="button"
-            onClick={() => setCreateOpen(true)}
+          <Link
+            href="/dashboard/visites-metres/nouveau"
             className="rounded-full bg-[#1e3a5f] px-4 py-2 text-[13px] font-medium text-white"
           >
             + Nouvelle visite
-          </button>
+          </Link>
         }
       />
 
       {(treat.toPlan > 0 || treat.tomorrowUnprepared > 0 || treat.incomplete > 0 || treat.ready > 0) ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-bework-navy/10 bg-white px-3 py-2 text-[13px]">
-          <span className="font-semibold text-bework-navy">À traiter</span>
-          {treat.toPlan > 0 ? (
-            <button type="button" onClick={() => applyStatus("TO_PLAN")} className="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700">
-              {treat.toPlan} visite{treat.toPlan > 1 ? "s" : ""} à planifier
-            </button>
-          ) : null}
-          {treat.tomorrowUnprepared > 0 ? (
-            <span className="rounded-full bg-amber-50 px-2.5 py-1 font-medium text-amber-800">
-              {treat.tomorrowUnprepared} visite{treat.tomorrowUnprepared > 1 ? "s" : ""} demain non préparée
-              {treat.tomorrowUnprepared > 1 ? "s" : ""}
-            </span>
-          ) : null}
-          {treat.incomplete > 0 ? (
-            <button type="button" onClick={() => applyStatus("INCOMPLETE")} className="rounded-full bg-amber-50 px-2.5 py-1 font-medium text-amber-800">
-              {treat.incomplete} relevé{treat.incomplete > 1 ? "s" : ""} incomplet{treat.incomplete > 1 ? "s" : ""}
-            </button>
-          ) : null}
-          {treat.ready > 0 ? (
-            <button type="button" onClick={() => applyStatus("READY_TO_QUOTE")} className="rounded-full bg-emerald-50 px-2.5 py-1 font-medium text-emerald-800">
-              {treat.ready} métré{treat.ready > 1 ? "s" : ""} prêt{treat.ready > 1 ? "s" : ""} à chiffrer
-            </button>
-          ) : null}
+        <div className="rounded-2xl border border-bework-navy/10 bg-white px-4 py-3">
+          <p className="text-[13px] font-semibold text-bework-navy">À traiter</p>
+          <div className="mt-2 flex flex-wrap gap-2 text-[13px]">
+            {treat.tomorrowUnprepared > 0 ? (
+              <button type="button" onClick={() => applyStatus("SCHEDULED")} className="rounded-full bg-amber-50 px-2.5 py-1 font-medium text-amber-800">
+                🟠 {treat.tomorrowUnprepared} visite{treat.tomorrowUnprepared > 1 ? "s" : ""} demain non préparée{treat.tomorrowUnprepared > 1 ? "s" : ""}
+              </button>
+            ) : null}
+            {treat.incomplete > 0 ? (
+              <button type="button" onClick={() => applyStatus("INCOMPLETE")} className="rounded-full bg-amber-50 px-2.5 py-1 font-medium text-amber-800">
+                🟠 {treat.incomplete} relevé{treat.incomplete > 1 ? "s" : ""} incomplet{treat.incomplete > 1 ? "s" : ""}
+              </button>
+            ) : null}
+            {treat.ready > 0 ? (
+              <button type="button" onClick={() => applyStatus("READY_TO_QUOTE")} className="rounded-full bg-emerald-50 px-2.5 py-1 font-medium text-emerald-800">
+                🟢 {treat.ready} métrage{treat.ready > 1 ? "s" : ""} prêt{treat.ready > 1 ? "s" : ""} à chiffrer
+              </button>
+            ) : null}
+            {treat.toPlan > 0 ? (
+              <button type="button" onClick={() => applyStatus("TO_PLAN")} className="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700">
+                {treat.toPlan} à planifier
+              </button>
+            ) : null}
+          </div>
         </div>
       ) : kpiState.toPlan === 0 && kpiState.incomplete === 0 ? (
         <p className="text-[13px] font-medium text-emerald-700">✓ Aucun relevé bloqué</p>
@@ -408,14 +378,20 @@ export function SiteVisitsWorkspace({
                 applyStatus(k.id === "quote" ? "READY_TO_QUOTE" : k.id);
               }}
               className={cn(
-                "rounded-2xl border border-bework-navy/10 bg-white px-3 py-2.5 text-left shadow-[var(--cc-shadow)] transition hover:-translate-y-px",
+                "rounded-2xl border px-3 py-2.5 text-left shadow-[var(--cc-shadow)] transition hover:-translate-y-px",
+                k.tone === "ok" && "border-bework-ok/20 bg-bework-soft-ok/60",
+                k.tone === "watch" && "border-bework-watch/25 bg-bework-soft-watch/70",
+                k.tone === "cyan" && "border-bework-cyan/20 bg-bework-soft-cyan/60",
+                k.tone === "accent" && "border-bework-accent/20 bg-bework-soft-accent/70",
+                k.tone === "violet" && "border-bework-intel/20 bg-bework-soft-violet/70",
+                k.tone === "neutral" && "border-bework-navy/10 bg-bework-soft-navy/50",
                 active && "ring-2 ring-bework-accent/25",
               )}
             >
               <div className="flex items-start justify-between">
                 <p
                   className={cn(
-                    "text-[1.35rem] font-semibold tabular-nums leading-none",
+                    "text-[1.45rem] font-semibold tabular-nums leading-none",
                     k.tone === "ok" && "text-bework-ok",
                     k.tone === "watch" && "text-[#b45309]",
                     k.tone === "cyan" && "text-bework-cyan",
@@ -426,9 +402,33 @@ export function SiteVisitsWorkspace({
                 >
                   {k.value}
                 </p>
-                <Icon className="h-3.5 w-3.5 text-slate-400" strokeWidth={1.75} />
+                <Icon
+                  className={cn(
+                    "h-4 w-4",
+                    k.tone === "ok" && "text-bework-ok",
+                    k.tone === "watch" && "text-bework-watch",
+                    k.tone === "cyan" && "text-bework-cyan",
+                    k.tone === "accent" && "text-bework-accent",
+                    k.tone === "violet" && "text-bework-intel",
+                    k.tone === "neutral" && "text-bework-navy",
+                  )}
+                  strokeWidth={1.75}
+                />
               </div>
-              <p className="mt-1.5 text-[12px] font-medium text-slate-600">{k.label}</p>
+              <p className="mt-1.5 text-[12px] font-medium text-slate-700">{k.label}</p>
+              {k.id === "INCOMPLETE" && kpiState.incomplete > 0 ? (
+                <p className="mt-0.5 text-[11px] text-slate-500">
+                  {shown
+                    .filter((v) => v.status === "INCOMPLETE")
+                    .reduce((n, v) => n + (v.stats.missingOpenCount || 0), 0) || kpiState.incomplete}{" "}
+                  infos manquantes
+                </p>
+              ) : null}
+              {k.id === "READY_TO_QUOTE" && kpiState.ready > 0 ? (
+                <p className="mt-0.5 text-[11px] text-slate-500">
+                  {shown.find((v) => v.status === "READY_TO_QUOTE")?.stats.totalsByUnit?.[0] ?? "Prêt à chiffrer"}
+                </p>
+              ) : null}
             </button>
           );
         })}
@@ -559,7 +559,30 @@ export function SiteVisitsWorkspace({
                     </h2>
                     <ul className="space-y-2">
                       {items.map((v) => (
-                        <li key={v.id} className="rounded-xl border border-bework-navy/10 bg-white p-3">
+                        <li
+                          key={v.id}
+                          className={cn(
+                            "relative overflow-hidden rounded-xl border p-3",
+                            v.status === "INCOMPLETE" && "border-bework-watch/25 bg-bework-soft-watch/50",
+                            v.status === "READY_TO_QUOTE" && "border-bework-ok/20 bg-bework-soft-ok/50",
+                            v.status === "IN_PROGRESS" && "border-bework-cyan/20 bg-bework-soft-cyan/50",
+                            v.status === "TRANSMITTED" && "border-bework-intel/20 bg-bework-soft-violet/50",
+                            !["INCOMPLETE", "READY_TO_QUOTE", "IN_PROGRESS", "TRANSMITTED"].includes(v.status) &&
+                              "border-bework-navy/10 bg-white",
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "absolute inset-y-0 left-0 w-[3px]",
+                              v.status === "INCOMPLETE" && "bg-bework-watch",
+                              v.status === "READY_TO_QUOTE" && "bg-bework-ok",
+                              v.status === "IN_PROGRESS" && "bg-bework-cyan",
+                              v.status === "TRANSMITTED" && "bg-bework-intel",
+                              v.status === "SCHEDULED" && "bg-bework-accent",
+                              v.status === "TO_PLAN" && "bg-slate-300",
+                            )}
+                            aria-hidden
+                          />
                           <button type="button" className="w-full text-left" onClick={() => setDrawer(v)}>
                             <p className="truncate text-[14px] font-semibold text-bework-ink" title={v.siteName || v.clientName}>
                               {v.siteName || v.clientName}
@@ -589,70 +612,116 @@ export function SiteVisitsWorkspace({
               })}
             </div>
           ) : (
-            <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-bework-navy/10 bg-white">
-              {shown.map((v) => (
-                <li key={v.id}>
-                  <div className="group flex flex-col gap-3 px-4 py-3 transition-colors hover:bg-bework-soft-navy/40 lg:flex-row lg:items-center">
+            <ul className="space-y-2">
+              {shown.map((v) => {
+                const barTone =
+                  v.status === "INCOMPLETE"
+                    ? "bg-bework-watch"
+                    : v.status === "READY_TO_QUOTE"
+                      ? "bg-bework-ok"
+                      : v.status === "IN_PROGRESS"
+                        ? "bg-bework-cyan"
+                        : v.status === "TRANSMITTED"
+                          ? "bg-bework-intel"
+                          : v.status === "SCHEDULED"
+                            ? "bg-bework-accent"
+                            : "bg-slate-300";
+                const rowBg =
+                  v.status === "INCOMPLETE"
+                    ? "border-bework-watch/20 bg-bework-soft-watch/40"
+                    : v.status === "READY_TO_QUOTE"
+                      ? "border-bework-ok/20 bg-bework-soft-ok/40"
+                      : v.status === "IN_PROGRESS"
+                        ? "border-bework-cyan/20 bg-bework-soft-cyan/40"
+                        : "border-bework-navy/10 bg-white";
+                const completeTone =
+                  v.status === "INCOMPLETE" || v.completeness?.tone === "watch"
+                    ? "bg-bework-watch"
+                    : v.completeness?.tone === "accent"
+                      ? "bg-bework-accent"
+                      : "bg-bework-ok";
+                return (
+                <li key={v.id} className={cn("relative overflow-hidden rounded-2xl border", rowBg)}>
+                  <span className={cn("absolute inset-y-0 left-0 w-[3px]", barTone)} aria-hidden />
+                  <div className="group flex flex-col gap-3 px-4 py-3 pl-5 lg:flex-row lg:items-center">
                     <button
                       type="button"
-                      className="min-w-0 flex-1 text-left lg:max-w-[28%]"
+                      className="min-w-0 flex-1 text-left lg:max-w-[26%]"
                       onClick={() => setDrawer(v)}
                     >
                       <p className="truncate text-[16px] font-semibold text-bework-ink" title={v.siteName || v.clientName}>
                         {v.siteName || v.clientName}
                       </p>
+                      {v.clientName && v.siteName ? (
+                        <p className="truncate text-[13px] text-slate-600">{v.clientName}</p>
+                      ) : null}
                       <p className="truncate text-[13px] text-slate-600" title={v.siteAddress}>
                         <MapPin className="mr-1 inline h-3 w-3" />
                         {v.siteAddress}
                       </p>
-                      {v.clientName && v.siteName ? (
-                        <p className="truncate text-[13px] text-slate-500">{v.clientName}</p>
-                      ) : null}
-                      <p className="mt-1 text-[12px] text-slate-500">
+                      <p className="mt-1 text-[12px] text-slate-600">
                         {formatWhen(v.scheduledAt)}
                         {v.responsibleName ? ` · ${v.responsibleName}` : ""}
                       </p>
                     </button>
                     <div className="min-w-0 flex-1">
                       {v.stats.totalsByUnit?.length ? (
-                        <p className="text-[16px] font-semibold tabular-nums text-bework-navy">
+                        <p className="text-[17px] font-semibold tabular-nums text-bework-navy">
                           {v.stats.totalsByUnit.join(" · ")}
                         </p>
                       ) : (
                         <p className="text-[13px] text-slate-500">Pas encore de métré</p>
                       )}
                       <div className="mt-1 flex flex-wrap gap-1">
-                        {(v.lots ?? []).slice(0, 3).map((l) => (
-                          <span key={l} className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                        {(v.lots ?? []).slice(0, 4).map((l) => (
+                          <span key={l} className="rounded-full bg-bework-soft-violet px-2 py-0.5 text-[11px] font-medium text-bework-intel">
                             {l}
                           </span>
                         ))}
                       </div>
-                      <p className="mt-1 text-[12px] text-slate-500">
+                      <p className="mt-1 text-[12px] text-slate-600">
                         {[
                           v.stats.zoneCount ? `${v.stats.zoneCount} zone${v.stats.zoneCount > 1 ? "s" : ""}` : null,
-                          v.stats.photoCount ? `${v.stats.photoCount} photo${v.stats.photoCount > 1 ? "s" : ""}` : null,
-                          v.stats.documentCount ? `${v.stats.documentCount} document${v.stats.documentCount > 1 ? "s" : ""}` : null,
                           v.estimatedCrewCount ? `${v.estimatedCrewCount} pers.` : null,
                           v.estimatedDuration ?? null,
-                          v.stats.constraintCount ? `${v.stats.constraintCount} contrainte${v.stats.constraintCount > 1 ? "s" : ""}` : null,
                         ]
                           .filter(Boolean)
                           .join(" · ")}
                       </p>
                     </div>
-                    <div className="flex shrink-0 flex-col items-end gap-1.5 lg:w-[220px]">
+                    <div className="min-w-0 text-[12px] text-slate-600 lg:w-[160px]">
+                      {v.stats.constraintCount ? (
+                        <p>⚠ {v.stats.constraintCount} contrainte{v.stats.constraintCount > 1 ? "s" : ""}</p>
+                      ) : null}
+                      {v.stats.photoCount || v.stats.documentCount ? (
+                        <p>
+                          {[
+                            v.stats.photoCount ? `${v.stats.photoCount} photos` : null,
+                            v.stats.documentCount ? `${v.stats.documentCount} docs` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
+                      ) : null}
+                      {v.stats.missingOpenCount ? (
+                        <p className="font-medium text-amber-800">
+                          {v.stats.missingOpenCount} point{v.stats.missingOpenCount > 1 ? "s" : ""} manquant
+                          {v.stats.missingOpenCount > 1 ? "s" : ""}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1.5 lg:w-[200px]">
                       <span className={visitStatusBadgeClass(v.status)}>{v.statusLabel}</span>
                       {v.completeness ? (
-                        <div className="w-full max-w-[11rem]">
-                          <p className="text-[11px] font-medium text-slate-500">{v.completeness.label}</p>
-                          <div className="mt-0.5 h-1 overflow-hidden rounded-full bg-slate-100">
+                        <Link href={`/dashboard/visites-metres/${v.id}?tab=missing`} className="w-full max-w-[11rem]">
+                          <p className="text-[11px] font-medium text-slate-600">{v.completeness.label}</p>
+                          <div className="mt-0.5 h-1.5 overflow-hidden rounded-full bg-slate-100">
                             <div
-                              className="h-full rounded-full bg-bework-ok"
+                              className={cn("h-full rounded-full", completeTone)}
                               style={{ width: `${Math.round((v.completeness.done / Math.max(1, v.completeness.total)) * 100)}%` }}
                             />
                           </div>
-                        </div>
+                        </Link>
                       ) : null}
                       <div className="flex items-center gap-1.5">
                         <button
@@ -692,7 +761,8 @@ export function SiteVisitsWorkspace({
                     </div>
                   </div>
                 </li>
-              ))}
+                );
+              })}
               {shown.length === 0 ? (
                 <li className="px-4 py-12 text-center text-sm text-slate-500">Aucune visite dans ce filtre.</li>
               ) : null}
@@ -767,57 +837,6 @@ export function SiteVisitsWorkspace({
               </button>
             </div>
           </aside>
-        </div>
-      ) : null}
-
-      {createOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4">
-          <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-white p-5 sm:rounded-2xl">
-            <h2 className="text-lg font-semibold text-[#1e3a5f]">Nouvelle visite</h2>
-            <div className="mt-4 space-y-3">
-              {(
-                [
-                  ["clientName", "Client / prospect *"],
-                  ["siteName", "Site (nom)"],
-                  ["siteAddress", "Adresse *"],
-                  ["contactName", "Contact"],
-                  ["contactPhone", "Téléphone"],
-                  ["subject", "Objet de la visite *"],
-                ] as const
-              ).map(([key, label]) => (
-                <label key={key} className="block text-xs font-semibold text-slate-600">
-                  {label}
-                  <input
-                    value={form[key]}
-                    onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                    className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
-                  />
-                </label>
-              ))}
-              <label className="block text-xs font-semibold text-slate-600">
-                Date / heure
-                <input
-                  type="datetime-local"
-                  value={form.scheduledAt}
-                  onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
-                />
-              </label>
-            </div>
-            <div className="mt-5 flex gap-2">
-              <button type="button" onClick={() => setCreateOpen(false)} className="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-semibold">
-                Annuler
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void createVisit()}
-                className="flex-1 rounded-xl bg-[#1e3a5f] py-3 text-sm font-bold text-white disabled:opacity-50"
-              >
-                Créer
-              </button>
-            </div>
-          </div>
         </div>
       ) : null}
     </div>

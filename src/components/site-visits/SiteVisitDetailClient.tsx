@@ -3,7 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  Camera,
+  NotebookPen,
+  Ruler,
+  ShieldAlert,
+} from "lucide-react";
 import { cn } from "@/lib/cn";
+import {
+  VisitSectionCard,
+  visitFieldClass,
+  visitLabelClass,
+} from "@/components/site-visits/VisitSectionCard";
 import {
   ACCESS_LEVEL_OPTIONS,
   ACCESS_OPTIONS,
@@ -17,9 +28,10 @@ import {
   VISIT_DETAIL_TABS,
   WASTE_OPTIONS,
   type SiteVisitConstraints,
+  type SiteVisitPrep,
   type VisitDetailTabId,
 } from "@/lib/site-visits/types";
-import { computeMeasurement, MEASURE_UNITS, type MeasureDeduction, type MeasureType } from "@/lib/site-visits/measurements";
+import { computeMeasurement, formatMeasureDims, MEASURE_UNITS, type MeasureDeduction, type MeasureType } from "@/lib/site-visits/measurements";
 
 type Visit = {
   id: string;
@@ -40,6 +52,7 @@ type Visit = {
   documentsHref?: string | null;
   lots?: string[];
   zones?: string[];
+  prep?: SiteVisitPrep;
   preparedAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -47,6 +60,7 @@ type Visit = {
     done: number;
     total: number;
     label: string;
+    tone?: "ok" | "watch" | "accent";
     items: Array<{ id: string; label: string; done: boolean; required: boolean }>;
     readyChecks?: Array<{ id: string; label: string; done: boolean }>;
   };
@@ -157,29 +171,41 @@ const emptyMeasureForm = {
 export function SiteVisitDetailClient({
   initial,
   canCreateQuote,
+  initialTab,
 }: {
   initial: Visit;
   canCreateQuote: boolean;
+  initialTab?: string;
 }) {
   const router = useRouter();
   const [visit, setVisit] = useState(initial);
-  const [step, setStep] = useState<VisitDetailTabId>("resume");
+  const [step, setStep] = useState<VisitDetailTabId>(
+    VISIT_DETAIL_TABS.some((t) => t.id === initialTab)
+      ? (initialTab as VisitDetailTabId)
+      : "resume",
+  );
   const [busy, setBusy] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [measureOpen, setMeasureOpen] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [noteDraft, setNoteDraft] = useState("");
   const [finishOpen, setFinishOpen] = useState(false);
   const [missingLabel, setMissingLabel] = useState("");
   const [advanced, setAdvanced] = useState(false);
   const [deductions, setDeductions] = useState<MeasureDeduction[]>([]);
   const [zoneDraft, setZoneDraft] = useState("");
+  const [activeZone, setActiveZone] = useState("");
+  const [workQuery, setWorkQuery] = useState("");
   const [mediaCaption, setMediaCaption] = useState("");
   const [mediaMeasurementId, setMediaMeasurementId] = useState("");
   const [mediaZone, setMediaZone] = useState("");
   const photoRef = useRef<HTMLInputElement>(null);
   const docRef = useRef<HTMLInputElement>(null);
   const [mForm, setMForm] = useState(emptyMeasureForm);
-  const [workItems, setWorkItems] = useState<Array<{ id: string; name: string; saleUnit: string }>>([]);
+  const [workItems, setWorkItems] = useState<
+    Array<{ id: string; name: string; saleUnit: string; family?: string | null; reference?: string | null }>
+  >([]);
 
   const stepIndex = VISIT_DETAIL_TABS.findIndex((s) => s.id === step);
   const preview = computeMeasurement({
@@ -199,21 +225,38 @@ export function SiteVisitDetailClient({
 
   useEffect(() => {
     if (!measureOpen) return;
-    void fetch("/api/commercial/library/work-items?take=80")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!data) return;
-        const items = data.items ?? data.workItems ?? data.rows ?? [];
-        setWorkItems(
-          (items as Array<{ id: string; name: string; saleUnit?: string }>).map((w) => ({
-            id: w.id,
-            name: w.name,
-            saleUnit: w.saleUnit ?? "",
-          })),
-        );
-      })
-      .catch(() => undefined);
-  }, [measureOpen]);
+    const q = workQuery.trim();
+    const url = q
+      ? `/api/commercial/library/work-items?q=${encodeURIComponent(q)}`
+      : "/api/commercial/library/work-items";
+    const t = window.setTimeout(() => {
+      void fetch(url)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (!data) return;
+          const items = data.workItems ?? data.items ?? [];
+          setWorkItems(
+            (
+              items as Array<{
+                id: string;
+                name: string;
+                saleUnit?: string;
+                family?: string | null;
+                reference?: string | null;
+              }>
+            ).map((w) => ({
+              id: w.id,
+              name: w.name,
+              saleUnit: w.saleUnit ?? "",
+              family: w.family ?? null,
+              reference: w.reference ?? null,
+            })),
+          );
+        })
+        .catch(() => undefined);
+    }, q ? 220 : 0);
+    return () => window.clearTimeout(t);
+  }, [measureOpen, workQuery]);
 
   async function patch(data: Record<string, unknown>) {
     setBusy(true);
@@ -396,7 +439,7 @@ export function SiteVisitDetailClient({
   const missingOpen = visit.missingInfos.filter((i) => i.open);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4 px-3 py-4 pb-32 sm:px-4">
+    <div className="mx-auto max-w-[1100px] space-y-4 px-3 py-4 pb-44 sm:px-6 lg:pb-32">
       <div className="flex items-center justify-between gap-2">
         <Link
           href="/dashboard/visites-metres"
@@ -416,7 +459,7 @@ export function SiteVisitDetailClient({
         </div>
       </div>
 
-      <header className="rounded-2xl border border-slate-200/90 bg-white p-4">
+      <header className="rounded-2xl border border-bework-navy/10 bg-bework-soft-navy/50 p-4">
         <h1 className="text-[18px] font-semibold tracking-tight text-[#1e3a5f] sm:text-[20px]">
           {visit.siteName || visit.clientName}
         </h1>
@@ -436,7 +479,14 @@ export function SiteVisitDetailClient({
             <p className="text-[13px] font-medium text-slate-600">{visit.completeness.label}</p>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100">
               <div
-                className="h-full bg-bework-ok"
+                className={cn(
+                  "h-full",
+                  visit.completeness.tone === "watch" || visit.status === "INCOMPLETE"
+                    ? "bg-bework-watch"
+                    : visit.completeness.tone === "accent"
+                      ? "bg-bework-accent"
+                      : "bg-bework-ok",
+                )}
                 style={{
                   width: `${Math.round((visit.completeness.done / Math.max(1, visit.completeness.total)) * 100)}%`,
                 }}
@@ -635,6 +685,30 @@ export function SiteVisitDetailClient({
         </Section>
       ) : null}
 
+      {step === "resume" && visit.prep && (visit.prep.plannedMeasures?.length || visit.prep.zonePlans?.length) ? (
+        <Section tone="cyan" icon={Ruler} title="Préparation" hint="Relevés et zones prévus avant la visite.">
+          {visit.prep.plannedMeasures && visit.prep.plannedMeasures.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {visit.prep.plannedMeasures.map((m) => (
+                <span key={m} className="rounded-full bg-white/80 px-2.5 py-1 text-[12px] font-medium text-slate-700">
+                  {m}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          {visit.prep.zonePlans && visit.prep.zonePlans.length > 0 ? (
+            <ul className="space-y-1 text-[13px] text-slate-700">
+              {visit.prep.zonePlans.map((z) => (
+                <li key={z.name}>
+                  <span className="font-semibold text-bework-navy">{z.name}</span>
+                  {z.measures.length ? ` · ${z.measures.join(", ")}` : ""}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </Section>
+      ) : null}
+
       {step === "resume" && summary ? (
         <Section title="Avant-métré">
           {summary.totalsByUnit.length > 0 ? (
@@ -730,12 +804,20 @@ export function SiteVisitDetailClient({
       ) : null}
 
       {step === "metres" ? (
-        <Section title="Métré">
+        <Section tone="cyan" icon={Ruler} title="Métré" hint="Lot, zone, dimensions et quantité nette.">
           <div className="mb-3 flex flex-wrap gap-2">
             {(visit.zones ?? []).map((z) => (
-              <span key={z} className="rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">
+              <button
+                key={z}
+                type="button"
+                onClick={() => setActiveZone(activeZone === z ? "" : z)}
+                className={cn(
+                  "rounded-full px-2.5 py-1 text-[12px] font-medium",
+                  activeZone === z ? "bg-bework-navy text-white" : "bg-white/80 text-slate-700 ring-1 ring-bework-navy/10",
+                )}
+              >
                 {z}
-              </span>
+              </button>
             ))}
           </div>
           <div className="mb-4 flex gap-2">
@@ -752,13 +834,16 @@ export function SiteVisitDetailClient({
                 if (!z) return;
                 void patch({ zones: [...(visit.zones ?? []), z] });
                 setZoneDraft("");
+                setActiveZone(z);
               }}
               className="shrink-0 rounded-xl bg-[#1e3a5f] px-3 text-[13px] font-semibold text-white"
             >
               + Zone
             </button>
           </div>
-          {(visit.zones?.length ? visit.zones : ["Sans zone"]).map((zone) => {
+          {(visit.zones?.length ? visit.zones : ["Sans zone"])
+            .filter((zone) => !activeZone || zone === activeZone)
+            .map((zone) => {
             const lines = visit.measurements.filter((m) =>
               zone === "Sans zone" ? !m.zone : m.zone === zone,
             );
@@ -773,26 +858,40 @@ export function SiteVisitDetailClient({
                   {lines.length > 0 ? (
                     <span className="ml-2 text-[12px] font-medium text-slate-500">
                       {Object.entries(zoneTotal)
-                        .map(([u, q]) => `${q.toFixed(2).replace(/\.?0+$/, "")} ${u}`)
+                        .map(([u, q]) => `${q.toFixed(2).replace(/\.?0+$/, "").replace(".", ",")} ${u}`)
                         .join(" · ")}
                     </span>
                   ) : null}
                 </p>
                 <ul className="mt-2 space-y-2">
-                  {lines.map((m) => (
-                    <li key={m.id} className="rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-3">
+                  {lines.map((m) => {
+                    const dims = formatMeasureDims(m);
+                    const deduction = (m.deductions ?? []).reduce((sum, d) => {
+                      const area = (d.lengthM ?? 0) * (d.widthM ?? 0);
+                      return sum + (area > 0 ? area : d.lengthM ?? 0) * (d.quantity || 1);
+                    }, 0);
+                    return (
+                    <li key={m.id} className="rounded-xl border border-bework-navy/10 bg-white/80 px-3 py-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="font-semibold text-slate-900">{m.label}</p>
-                          {m.lot ? <p className="text-[12px] text-slate-500">{m.lot}</p> : null}
-                          <p className="mt-1 text-[16px] font-semibold tabular-nums text-[#1e3a5f]">
-                            {m.quantityLabel}
-                          </p>
-                          {m.grossQuantity && m.grossQuantity !== m.computedQuantity ? (
-                            <p className="text-[12px] text-slate-500">
-                              Brut {m.grossQuantity} → net {m.computedQuantity} {m.unit}
+                          {m.lot ? (
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-bework-intel">
+                              {m.lot}
                             </p>
                           ) : null}
+                          <p className="text-[12px] text-slate-500">{m.zone || zone}</p>
+                          <p className="font-semibold text-slate-900">{m.label}</p>
+                          {dims ? (
+                            <p className="mt-0.5 font-mono text-[13px] text-slate-600">{dims}</p>
+                          ) : null}
+                          {deduction > 0 ? (
+                            <p className="text-[12px] text-slate-500">
+                              Déduction : − {deduction.toFixed(2).replace(".", ",")} {m.unit}
+                            </p>
+                          ) : null}
+                          <p className="mt-1 text-[22px] font-semibold tabular-nums leading-none text-[#1e3a5f]">
+                            {m.quantityLabel}
+                          </p>
                         </div>
                         <button
                           type="button"
@@ -803,7 +902,8 @@ export function SiteVisitDetailClient({
                         </button>
                       </div>
                     </li>
-                  ))}
+                    );
+                  })}
                 </ul>
               </div>
             );
@@ -811,7 +911,7 @@ export function SiteVisitDetailClient({
           <button
             type="button"
             onClick={() => setMeasureOpen(true)}
-            className="mt-2 flex h-12 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[15px] font-semibold text-white"
+            className="mt-2 hidden h-12 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[15px] font-semibold text-white lg:flex"
           >
             + Ajouter une mesure
           </button>
@@ -819,7 +919,7 @@ export function SiteVisitDetailClient({
       ) : null}
 
       {step === "terrain" ? (
-        <Section title="État de l’existant">
+        <Section tone="watch" icon={ShieldAlert} title="État de l’existant">
           <p className="mb-2 text-[12px] text-slate-500">État général</p>
           <div className="flex flex-wrap gap-2">
             {SUPPORT_STATE_OPTIONS.map((o) => (
@@ -1222,6 +1322,71 @@ export function SiteVisitDetailClient({
         </Section>
       ) : null}
 
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/95 px-3 py-3 backdrop-blur lg:hidden">
+        <div className="mx-auto grid max-w-lg grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setStep("metres");
+              setMForm((f) => ({ ...f, zone: activeZone || f.zone }));
+              setMeasureOpen(true);
+            }}
+            className="flex h-12 items-center justify-center gap-1.5 rounded-xl bg-[#1e3a5f] text-[14px] font-semibold text-white"
+          >
+            <Ruler className="h-4 w-4" strokeWidth={1.75} />
+            + Mesure
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setStep("medias");
+              window.setTimeout(() => photoRef.current?.click(), 0);
+            }}
+            className="flex h-12 items-center justify-center gap-1.5 rounded-xl bg-[#1e3a5f] text-[14px] font-semibold text-white"
+          >
+            <Camera className="h-4 w-4" strokeWidth={1.75} />
+            + Photo
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setNoteDraft(visit.comments ?? "");
+              setNoteOpen(true);
+            }}
+            className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-slate-200 text-[13px] font-semibold text-slate-700"
+          >
+            <NotebookPen className="h-4 w-4" strokeWidth={1.75} />
+            + Note
+          </button>
+          <button
+            type="button"
+            onClick={() => setStep("terrain")}
+            className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-slate-200 text-[13px] font-semibold text-slate-700"
+          >
+            <ShieldAlert className="h-4 w-4" strokeWidth={1.75} />
+            + Contrainte
+          </button>
+          {(visit.zones ?? []).length > 0 ? (
+            <select
+              value={activeZone}
+              onChange={(e) => {
+                setActiveZone(e.target.value);
+                setMForm({ ...mForm, zone: e.target.value });
+                setStep("metres");
+              }}
+              className="col-span-2 h-11 rounded-xl border border-slate-200 bg-white px-3 text-[13px] font-medium text-slate-700"
+            >
+              <option value="">Changer de zone</option>
+              {(visit.zones ?? []).map((z) => (
+                <option key={z} value={z}>
+                  {z}
+                </option>
+              ))}
+            </select>
+          ) : null}
+        </div>
+      </div>
+      <div className="hidden lg:block">
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/95 px-3 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-lg gap-2">
           <button
@@ -1250,6 +1415,7 @@ export function SiteVisitDetailClient({
             </button>
           )}
         </div>
+      </div>
       </div>
 
       {measureOpen ? (
@@ -1523,8 +1689,14 @@ export function SiteVisitDetailClient({
               </Field>
             </div>
           ) : null}
-          {workItems.length > 0 ? (
-            <Field label="Ouvrage bibliothèque">
+          {workItems.length > 0 || workQuery ? (
+            <Field label="Associer un ouvrage">
+              <input
+                value={workQuery}
+                onChange={(e) => setWorkQuery(e.target.value)}
+                placeholder="🔎 Étanchéité bicouche"
+                className={fieldClass}
+              />
               <select
                 value={mForm.workItemId}
                 onChange={(e) => setMForm({ ...mForm, workItemId: e.target.value })}
@@ -1534,18 +1706,35 @@ export function SiteVisitDetailClient({
                 {workItems.map((w) => (
                   <option key={w.id} value={w.id}>
                     {w.name}
-                    {w.saleUnit ? ` (${w.saleUnit})` : ""}
+                    {w.saleUnit ? ` · ${w.saleUnit}` : ""}
+                    {w.family ? ` · ${w.family}` : ""}
+                    {w.reference ? ` · ${w.reference}` : ""}
                   </option>
                 ))}
               </select>
             </Field>
           ) : null}
-          <p className="mt-3 text-[15px] font-semibold tabular-nums text-[#1e3a5f]">
-            {preview.deductionTotal > 0
-              ? `Brut ${preview.grossQuantity} − ${preview.deductionTotal} → `
-              : null}
-            Net : {preview.computedQuantity} {preview.unit}
-          </p>
+          <div className="mt-4 rounded-2xl border border-bework-cyan/20 bg-bework-soft-cyan/50 p-4">
+            {(mForm.measureType === "SURFACE" || mForm.measureType === "WALL") &&
+            (mForm.lengthM || mForm.widthM || mForm.heightM) ? (
+              <p className="font-mono text-[13px] text-slate-600">
+                {mForm.measureType === "WALL"
+                  ? `${mForm.lengthM || "—"} × ${mForm.heightM || "—"}`
+                  : `${mForm.lengthM || "—"} × ${mForm.widthM || "—"}`}
+              </p>
+            ) : null}
+            {preview.deductionTotal > 0 ? (
+              <p className="mt-1 text-[13px] text-slate-600">
+                Brut {preview.grossQuantity} {preview.unit}
+                <span className="mx-1">−</span>
+                {preview.deductionTotal} {preview.unit}
+              </p>
+            ) : null}
+            <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Net</p>
+            <p className="text-[28px] font-semibold tabular-nums leading-none text-[#1e3a5f]">
+              {preview.computedQuantity} {preview.unit}
+            </p>
+          </div>
           <div className="mt-4 flex flex-col gap-2">
             <button
               type="button"
@@ -1564,6 +1753,32 @@ export function SiteVisitDetailClient({
               + Ajouter une autre mesure
             </button>
           </div>
+        </Modal>
+      ) : null}
+
+      {noteOpen ? (
+        <Modal title="Note de visite" onClose={() => setNoteOpen(false)}>
+          <label className={visitLabelClass}>
+            Observation terrain
+            <textarea
+              rows={5}
+              value={noteDraft}
+              onChange={(e) => setNoteDraft(e.target.value)}
+              className={visitFieldClass}
+              placeholder="Ce qui a été vu, à confirmer, à chiffrer…"
+            />
+          </label>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              void patch({ comments: noteDraft });
+              setNoteOpen(false);
+            }}
+            className="mt-4 h-12 w-full rounded-xl bg-[#1e3a5f] text-[14px] font-semibold text-white"
+          >
+            Enregistrer la note
+          </button>
         </Modal>
       ) : null}
 
@@ -1626,14 +1841,28 @@ function Field({
 
 function Section({
   title,
+  hint,
+  tone = "navy",
+  icon: Icon,
   children,
 }: {
   title: string;
+  hint?: string;
+  tone?: "navy" | "accent" | "cyan" | "violet" | "watch" | "ok";
+  icon?: typeof Ruler;
   children: React.ReactNode;
 }) {
+  if (Icon) {
+    return (
+      <VisitSectionCard tone={tone} icon={Icon} title={title} hint={hint}>
+        {children}
+      </VisitSectionCard>
+    );
+  }
   return (
     <section className="rounded-2xl border border-slate-200/90 bg-white p-4">
       <h2 className="text-[15px] font-semibold text-slate-900">{title}</h2>
+      {hint ? <p className="mt-0.5 text-[13px] text-slate-500">{hint}</p> : null}
       <div className="mt-3">{children}</div>
     </section>
   );

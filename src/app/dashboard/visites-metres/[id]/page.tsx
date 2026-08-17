@@ -13,8 +13,10 @@ export const dynamic = "force-dynamic";
 
 export default async function VisiteDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }) {
   const session = await getCachedServerSession();
   if (!session?.user?.id) {
@@ -32,6 +34,7 @@ export default async function VisiteDetailPage({
   if (!orgId) redirect("/dashboard");
 
   const { id } = await params;
+  const { tab } = await searchParams;
   const visit = await getSiteVisit(orgId, id);
   if (!visit) notFound();
 
@@ -39,6 +42,7 @@ export default async function VisiteDetailPage({
     <SiteVisitDetailClient
       initial={visit}
       canCreateQuote={canCreateQuoteFromVisit(session.user)}
+      initialTab={tab}
     />
   );
 }

@@ -12,6 +12,7 @@ export type VisitCompleteness = {
   done: number;
   total: number;
   label: string;
+  tone: "ok" | "watch" | "accent";
   items: CompletenessItem[];
   missingLabels: string[];
   readyChecks: CompletenessItem[];
@@ -106,10 +107,14 @@ export function buildVisitCompleteness(opts: {
   return {
     done,
     total,
+    tone: (done === total ? "ok" : missingLabels.length >= 3 ? "watch" : "accent") as
+      | "ok"
+      | "watch"
+      | "accent",
     label:
       done === total
-        ? `${done} / ${total} éléments renseignés`
-        : `${total - done} information${total - done > 1 ? "s" : ""} manquante${total - done > 1 ? "s" : ""}`,
+        ? `${done} / ${total} préparé`
+        : `${total - done} élément${total - done > 1 ? "s" : ""} à compléter`,
     items,
     missingLabels,
     readyChecks: items.filter((i) => i.required || i.id === "lots" || i.id === "constraints"),

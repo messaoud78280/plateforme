@@ -99,6 +99,12 @@ export async function POST(req: Request) {
       responsibleId: body.responsibleId ?? null,
       clientNeed: body.clientNeed ?? null,
       comments: body.comments ?? null,
+      lots: Array.isArray(body.lots) ? body.lots : null,
+      zones: Array.isArray(body.zones) ? body.zones : null,
+      constraints: body.constraints ?? null,
+      prep: body.prep ?? null,
+      estimatedDuration: body.estimatedDuration ?? null,
+      missingLabels: Array.isArray(body.missingLabels) ? body.missingLabels : null,
     });
     return NextResponse.json({ visit }, { status: 201 });
   } catch (e) {

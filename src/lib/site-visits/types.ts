@@ -74,21 +74,6 @@ export const SITE_VISIT_STATE_FILTERS = [
   { id: "docs", label: "Avec documents / photos" },
 ] as const;
 
-/** Lots BTP — alignés familles chantier, pas une 2e nomenclature. */
-export const SITE_VISIT_LOTS = [
-  "Maçonnerie",
-  "Étanchéité",
-  "Isolation",
-  "Peinture",
-  "Plomberie",
-  "Électricité",
-  "Menuiserie",
-  "Couverture",
-  "VRD",
-  "Revêtements",
-  "Autre",
-] as const;
-
 export const VISIT_DETAIL_TABS = [
   { id: "resume", label: "Résumé" },
   { id: "metres", label: "Métré" },
@@ -254,3 +239,172 @@ export function normalizeConstraints(raw: unknown): SiteVisitConstraints {
       : [],
   };
 }
+
+export const SITE_VISIT_LOTS = [
+  "Gros œuvre",
+  "Maçonnerie",
+  "Terrassement",
+  "VRD",
+  "Étanchéité",
+  "Couverture",
+  "Charpente",
+  "Isolation",
+  "Plâtrerie",
+  "Peinture",
+  "Carrelage",
+  "Revêtements",
+  "Menuiserie",
+  "Serrurerie",
+  "Plomberie",
+  "Chauffage / CVC",
+  "Électricité",
+  "Façade",
+  "Autre",
+] as const;
+
+export const VISIT_NATURES = [
+  "Relevé avant devis",
+  "Visite technique",
+  "Métré",
+  "Diagnostic",
+  "Préparation travaux",
+  "Réception",
+  "Visite complémentaire",
+  "SAV",
+  "Autre",
+] as const;
+
+export const PLANNED_MEASURES = [
+  "Surfaces",
+  "Linéaires",
+  "Volumes",
+  "Quantités unitaires",
+  "Hauteurs",
+  "Épaisseurs",
+  "Niveaux / altimétrie",
+  "Ouvertures",
+  "Équipements existants",
+  "Photos",
+  "Plans / croquis",
+  "Autres relevés",
+] as const;
+
+export const ZONE_MEASURE_CHIPS = [
+  "Surface",
+  "Relevés périphériques",
+  "Nombre d'évacuations",
+  "Acrotères",
+  "Accès",
+  "Hauteur",
+  "Ouvertures",
+  "Photos",
+] as const;
+
+export const VISIT_DURATIONS = [
+  "30 min",
+  "1 h",
+  "1 h 30",
+  "2 h",
+  "Demi-journée",
+] as const;
+
+export const PREP_CONSTRAINT_GROUPS: { id: string; label: string; items: string[] }[] = [
+  {
+    id: "access",
+    label: "Accès",
+    items: ["Accès difficile", "Badge", "Code", "Gardien", "Accès toiture", "Accès engins"],
+  },
+  {
+    id: "logistics",
+    label: "Logistique",
+    items: ["Stationnement", "Stockage", "Livraison", "Levage", "Nacelle", "Échafaudage"],
+  },
+  {
+    id: "occupation",
+    label: "Chantier occupé",
+    items: ["Logement occupé", "ERP", "Commerce ouvert", "Copropriété", "École", "Site industriel"],
+  },
+  {
+    id: "security",
+    label: "Sécurité",
+    items: ["Hauteur", "Amiante connu", "Zone sensible", "Circulation"],
+  },
+  {
+    id: "waste",
+    label: "Déchets / évacuation",
+    items: ["Benne", "Tri", "Distance d'évacuation", "Accès camion"],
+  },
+];
+
+export const DOCS_TO_REQUEST = [
+  "Plans",
+  "Diagnostic amiante",
+  "Photos",
+  "CCTP",
+  "Règlement copropriété",
+  "Dossier technique",
+] as const;
+
+export type SiteVisitPrep = {
+  nature?: string | null;
+  plannedMeasures?: string[];
+  zonesOnSite?: boolean;
+  zonePlans?: Array<{ name: string; measures: string[] }>;
+  duration?: string | null;
+  contactCompany?: string | null;
+  contactRole?: string | null;
+  contactEmail?: string | null;
+  addressComplement?: string | null;
+  zipCode?: string | null;
+  city?: string | null;
+  access?: {
+    floor?: string | null;
+    building?: string | null;
+    code?: string | null;
+    entrance?: string | null;
+    parking?: string | null;
+    meetingPoint?: string | null;
+    notes?: string | null;
+  };
+  customConstraints?: string[];
+  docsToRequest?: string[];
+  addToAgenda?: boolean;
+};
+
+export function parseVisitPrep(raw: unknown): SiteVisitPrep {
+  if (!raw || typeof raw !== "object") return {};
+  const p = raw as SiteVisitPrep;
+  return {
+    nature: typeof p.nature === "string" ? p.nature : null,
+    plannedMeasures: Array.isArray(p.plannedMeasures)
+      ? p.plannedMeasures.filter((x): x is string => typeof x === "string")
+      : [],
+    zonesOnSite: Boolean(p.zonesOnSite),
+    zonePlans: Array.isArray(p.zonePlans)
+      ? p.zonePlans
+          .filter((z) => z && typeof z === "object" && typeof z.name === "string")
+          .map((z) => ({
+            name: z.name,
+            measures: Array.isArray(z.measures)
+              ? z.measures.filter((m): m is string => typeof m === "string")
+              : [],
+          }))
+      : [],
+    duration: typeof p.duration === "string" ? p.duration : null,
+    contactCompany: typeof p.contactCompany === "string" ? p.contactCompany : null,
+    contactRole: typeof p.contactRole === "string" ? p.contactRole : null,
+    contactEmail: typeof p.contactEmail === "string" ? p.contactEmail : null,
+    addressComplement: typeof p.addressComplement === "string" ? p.addressComplement : null,
+    zipCode: typeof p.zipCode === "string" ? p.zipCode : null,
+    city: typeof p.city === "string" ? p.city : null,
+    access: p.access && typeof p.access === "object" ? p.access : {},
+    customConstraints: Array.isArray(p.customConstraints)
+      ? p.customConstraints.filter((x): x is string => typeof x === "string")
+      : [],
+    docsToRequest: Array.isArray(p.docsToRequest)
+      ? p.docsToRequest.filter((x): x is string => typeof x === "string")
+      : [],
+    addToAgenda: p.addToAgenda !== false,
+  };
+}
+

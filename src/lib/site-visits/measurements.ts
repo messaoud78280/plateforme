@@ -124,6 +124,27 @@ export function normalizeUnit(u: string): string {
   return s;
 }
 
+export function formatMeasureDims(m: {
+  measureType: MeasureType;
+  lengthM?: number | null;
+  widthM?: number | null;
+  heightM?: number | null;
+}): string | null {
+  const fmt = (v: number) =>
+    Number.isInteger(v) ? String(v) : v.toFixed(2).replace(/\.?0+$/, "").replace(".", ",");
+  if (m.measureType === "SURFACE" && m.lengthM && m.widthM) {
+    return `${fmt(m.lengthM)} × ${fmt(m.widthM)}`;
+  }
+  if (m.measureType === "WALL" && m.lengthM && m.heightM) {
+    return `${fmt(m.lengthM)} × ${fmt(m.heightM)}`;
+  }
+  if (m.measureType === "VOLUME" && m.lengthM && m.widthM && m.heightM) {
+    return `${fmt(m.lengthM)} × ${fmt(m.widthM)} × ${fmt(m.heightM)}`;
+  }
+  if (m.measureType === "LENGTH" && m.lengthM) return `${fmt(m.lengthM)} ml`;
+  return null;
+}
+
 export function formatQuantityLabel(qty: number, unit: string): string {
   const q =
     Number.isInteger(qty) || Math.abs(qty - Math.round(qty)) < 1e-9

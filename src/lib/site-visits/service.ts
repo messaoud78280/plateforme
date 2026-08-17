@@ -10,7 +10,7 @@ import {
   type MeasureType,
   type MeasureDeduction,
 } from "@/lib/site-visits/measurements";
-import { SITE_VISIT_STATUS_LABELS, normalizeConstraints, type SiteVisitConstraints } from "@/lib/site-visits/types";
+import { SITE_VISIT_STATUS_LABELS, normalizeConstraints, parseVisitPrep, type SiteVisitConstraints, type SiteVisitPrep } from "@/lib/site-visits/types";
 import { buildVisitSummary } from "@/lib/site-visits/summary";
 import { buildQuoteImpactPoints } from "@/lib/site-visits/impact";
 import { buildVisitCompleteness, hasVisitConstraints } from "@/lib/site-visits/completeness";
@@ -31,6 +31,12 @@ export type CreateSiteVisitInput = {
   responsibleId?: string | null;
   clientNeed?: string | null;
   comments?: string | null;
+  lots?: string[] | null;
+  zones?: string[] | null;
+  constraints?: SiteVisitConstraints | null;
+  prep?: SiteVisitPrep | null;
+  estimatedDuration?: string | null;
+  missingLabels?: string[] | null;
 };
 
 function parseStringList(raw: unknown): string[] {
@@ -64,7 +70,7 @@ function primaryActionFor(status: SiteVisitStatus, quoteHref: string | null): {
     case "SCHEDULED":
       return { kind: "prepare", label: "Préparer" };
     case "IN_PROGRESS":
-      return { kind: "continue", label: "Continuer le relevé" };
+      return { kind: "continue", label: "Continuer" };
     case "INCOMPLETE":
       return { kind: "complete", label: "Compléter" };
     case "READY_TO_QUOTE":
@@ -102,6 +108,7 @@ export function serializeVisit(
     constraintsJson: unknown;
     lotsJson?: unknown;
     zonesJson?: unknown;
+    prepJson?: unknown;
     preparedAt?: Date | null;
     estimatedCrewCount: number | null;
     estimatedDuration: string | null;
@@ -188,6 +195,7 @@ export function serializeVisit(
   const constraints = serializeConstraints(v.constraintsJson);
   const lots = parseStringList(v.lotsJson);
   const zones = parseStringList(v.zonesJson);
+  const prep = parseVisitPrep(v.prepJson);
   const uniqueZones = [
     ...new Set([...zones, ...measurements.map((m) => m.zone?.trim() || "").filter(Boolean)]),
   ];
@@ -259,6 +267,7 @@ export function serializeVisit(
     constraints,
     lots: uniqueLots,
     zones: uniqueZones,
+    prep,
     preparedAt: v.preparedAt?.toISOString() ?? null,
     estimatedCrewCount: v.estimatedCrewCount,
     estimatedDuration: v.estimatedDuration,
@@ -294,7 +303,10 @@ export function serializeVisit(
       createdAt: m.createdAt?.toISOString() ?? null,
     })),
     impactPoints,
-    completeness,
+    completeness: {
+      ...completeness,
+      tone: v.status === "INCOMPLETE" ? "watch" : completeness.tone,
+    },
     primaryAction: primaryActionFor(v.status, quoteHref),
     createdAt: v.createdAt?.toISOString() ?? null,
     updatedAt: v.updatedAt?.toISOString() ?? null,
@@ -344,6 +356,10 @@ export async function createSiteVisit(input: CreateSiteVisitInput) {
   }
 
   const status: SiteVisitStatus = input.scheduledAt ? "SCHEDULED" : "TO_PLAN";
+  const lots = (input.lots ?? []).map((x) => x.trim()).filter(Boolean);
+  const zones = (input.zones ?? []).map((x) => x.trim()).filter(Boolean);
+  const constraints = input.constraints ? normalizeConstraints(input.constraints) : null;
+  const prep = input.prep ? parseVisitPrep(input.prep) : null;
   const visit = await prisma.siteVisit.create({
     data: {
       organizationId: input.organizationId,
@@ -360,12 +376,34 @@ export async function createSiteVisit(input: CreateSiteVisitInput) {
       subject,
       clientNeed: input.clientNeed?.trim() || null,
       comments: input.comments?.trim() || null,
+      estimatedDuration: input.estimatedDuration?.trim() || prep?.duration || null,
+      lotsJson: lots.length ? lots : undefined,
+      zonesJson: zones.length ? zones : undefined,
+      constraintsJson: constraints ? (constraints as Prisma.InputJsonValue) : undefined,
+      prepJson: prep ? (prep as Prisma.InputJsonValue) : undefined,
+      preparedAt: lots.length || zones.length || constraints ? new Date() : null,
       status,
     },
     include: visitInclude,
   });
 
-  if (visit.scheduledAt) {
+  const missingLabels = [
+    ...(input.missingLabels ?? []),
+    ...(prep?.docsToRequest ?? []),
+  ]
+    .map((x) => x.trim())
+    .filter(Boolean);
+  if (missingLabels.length) {
+    await prisma.siteVisitMissingInfo.createMany({
+      data: missingLabels.map((label) => ({
+        visitId: visit.id,
+        organizationId: input.organizationId,
+        label,
+      })),
+    });
+  }
+
+  if (visit.scheduledAt && prep?.addToAgenda !== false) {
     await syncSiteVisitAgenda({
       visitId: visit.id,
       organizationId: input.organizationId,
@@ -568,6 +606,9 @@ export async function updateSiteVisit(opts: {
   }
   if (d0.preparedAt === true) patch.preparedAt = new Date();
   if (d0.preparedAt === false || d0.preparedAt === null) patch.preparedAt = null;
+  if (d0.prep != null && typeof d0.prep === "object") {
+    patch.prepJson = parseVisitPrep(d0.prep) as Prisma.InputJsonValue;
+  }
   if (typeof d0.projectId === "string" || d0.projectId === null) {
     patch.project =
       typeof d0.projectId === "string" && d0.projectId

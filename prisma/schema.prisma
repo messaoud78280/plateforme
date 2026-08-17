@@ -4801,6 +4801,8 @@ model SiteVisit {
   lotsJson             Json?
   /// Zones / pièces / secteurs du relevé (ordre d’affichage).
   zonesJson            Json?
+  /// Préparation visite (nature, relevés prévus, accès, contacts étendus).
+  prepJson             Json?
   preparedAt           DateTime?
   status               SiteVisitStatus @default(TO_PLAN)
   agendaEventId        String?

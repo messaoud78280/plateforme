@@ -165,6 +165,12 @@ export default async function FournisseurDetailPage({
               Voir les commandes
             </Link>
             <Link
+              href={`/dashboard/depenses?supplierId=${encodeURIComponent(supplier.id)}`}
+              className="text-xs font-semibold text-bework-navy hover:underline"
+            >
+              Voir les dépenses
+            </Link>
+            <Link
               href={`/dashboard/commandes/nouvelle?supplierId=${encodeURIComponent(supplier.id)}`}
               className="text-xs font-semibold text-bework-accent hover:underline"
             >

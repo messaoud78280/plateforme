@@ -478,13 +478,21 @@ export function ProjectProfitabilityPanel({
           <h3 className="text-sm font-bold text-[#1e3a5f]">
             Dépenses réelles
           </h3>
-          <button
-            type="button"
-            className="text-xs font-semibold text-[#1d4ed8]"
-            onClick={() => setShowInvoiceForm((v) => !v)}
-          >
-            {showInvoiceForm ? "Fermer" : "Enregistrer une facture"}
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/dashboard/depenses?projectId=${encodeURIComponent(data.projectId)}`}
+              className="text-xs font-semibold text-[#1e3a5f] hover:underline"
+            >
+              Voir les dépenses
+            </Link>
+            <button
+              type="button"
+              className="text-xs font-semibold text-[#1d4ed8]"
+              onClick={() => setShowInvoiceForm((v) => !v)}
+            >
+              {showInvoiceForm ? "Fermer" : "Enregistrer une facture"}
+            </button>
+          </div>
         </div>
         <p className="mt-1 text-xs text-slate-500">
           Facture fournisseur = réel. Réception = réel provisoire tant qu’aucune

@@ -1051,6 +1051,12 @@ export function PurchaseOrdersListClient({
                 </Link>
               ) : null}
               <Link
+                href={`/dashboard/depenses?purchaseOrderId=${encodeURIComponent(drawer.id)}`}
+                className="text-center text-[13px] font-medium text-bework-navy hover:underline"
+              >
+                Voir les dépenses
+              </Link>
+              <Link
                 href={drawer.documentsHref}
                 className="text-center text-[13px] font-medium text-bework-navy hover:underline"
               >

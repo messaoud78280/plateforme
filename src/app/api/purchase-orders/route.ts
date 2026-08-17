@@ -10,7 +10,7 @@ import {
 import { createPurchaseOrder } from "@/lib/purchase-orders/service";
 import { forbiddenUnlessDashboardHref } from "@/lib/equipe-acces/assert-api-dashboard-access";
 
-export async function GET() {
+export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
@@ -25,6 +25,12 @@ export async function GET() {
   if (!orgId) {
     return NextResponse.json({ error: "Organisation introuvable" }, { status: 403 });
   }
+
+  const url = new URL(req.url);
+  const projectId = url.searchParams.get("projectId")?.trim() || null;
+  const supplierId = url.searchParams.get("supplierId")?.trim() || null;
+  const takeRaw = Number(url.searchParams.get("take") ?? 80);
+  const take = Number.isFinite(takeRaw) ? Math.min(Math.max(takeRaw, 1), 120) : 80;
 
   const isSupplier =
     session.user.personType === "SUPPLIER" ||
@@ -50,7 +56,10 @@ export async function GET() {
             sharedWithSupplier: true,
             externalOrganizationId: supplierOrgId!,
           }
-        : {}),
+        : {
+            ...(projectId ? { projectId } : {}),
+            ...(supplierId ? { externalOrganizationId: supplierId } : {}),
+          }),
     },
     select: {
       id: true,
@@ -58,6 +67,9 @@ export async function GET() {
       subject: true,
       status: true,
       amountHt: true,
+      defaultCostCategory: true,
+      projectId: true,
+      externalOrganizationId: true,
       requestedDeliveryAt: true,
       confirmedDeliveryAt: true,
       updatedAt: true,
@@ -66,7 +78,7 @@ export async function GET() {
       responsible: { select: { id: true, name: true } },
     },
     orderBy: { updatedAt: "desc" },
-    take: 80,
+    take,
   });
 
   return NextResponse.json({ orders });

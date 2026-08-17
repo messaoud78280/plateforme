@@ -18,9 +18,11 @@ export const purchaseOrderAttentionSelect = {
   supplierRefuseReason: true,
   responsibleId: true,
   requestedById: true,
+  amountHt: true,
+  defaultCostCategory: true,
   responsible: { select: { id: true, name: true } },
   requestedBy: { select: { id: true, name: true } },
-  externalOrganization: { select: { name: true, tradeName: true } },
+  externalOrganization: { select: { id: true, name: true, tradeName: true } },
   project: { select: { id: true, title: true } },
   lines: {
     orderBy: { sortOrder: "asc" as const },
@@ -30,6 +32,9 @@ export const purchaseOrderAttentionSelect = {
       designation: true,
       unit: true,
       quantity: true,
+      unitPriceHt: true,
+      receivedQty: true,
+      costCategory: true,
     },
   },
   // evaluate filtre déjà cancelledAt — exclure en DB réduit le payload.

@@ -404,4 +404,18 @@ export const purchaseOrderDetailInclude = {
       },
     },
   },
+  supplierInvoices: {
+    where: { status: { not: "CANCELLED" } },
+    orderBy: { invoiceDate: "desc" as const },
+    take: 8,
+    select: {
+      id: true,
+      supplierNumber: true,
+      amountHt: true,
+      amountTtc: true,
+      status: true,
+      cancelledAt: true,
+      invoiceDate: true,
+    },
+  },
 } satisfies Prisma.PurchaseOrderInclude;

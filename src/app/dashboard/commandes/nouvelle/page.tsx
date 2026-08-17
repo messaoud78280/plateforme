@@ -109,8 +109,8 @@ export default async function NouvelleCommandePage({
         title="Nouvelle commande"
         description={
           prefillLines
-            ? "Lignes préremplies depuis les besoins matériaux du chantier."
-            : "Préparez une demande fournisseur en quelques champs — le reste peut attendre."
+            ? "Lignes préremplies depuis les besoins matériaux du chantier — fournisseur, livraison et catégorie budgétaire."
+            : "Fournisseur, chantier, lignes, livraison et catégorie budgétaire — engagement suivi jusqu’à la réception."
         }
       />
       <CreatePurchaseOrderForm

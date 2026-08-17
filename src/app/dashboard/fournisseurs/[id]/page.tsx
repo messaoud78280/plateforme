@@ -155,14 +155,22 @@ export default async function FournisseurDetailPage({
       </section>
 
       <section className="rounded-2xl border border-bework-navy/10 bg-white p-5 shadow-sm">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-semibold text-bework-navy-deep">Commandes</h2>
-          <Link
-            href={`/dashboard/commandes/nouvelle?supplierId=${encodeURIComponent(supplier.id)}`}
-            className="text-xs font-semibold text-bework-accent hover:underline"
-          >
-            Nouvelle commande
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/dashboard/commandes?supplierId=${encodeURIComponent(supplier.id)}`}
+              className="text-xs font-semibold text-bework-navy hover:underline"
+            >
+              Voir les commandes
+            </Link>
+            <Link
+              href={`/dashboard/commandes/nouvelle?supplierId=${encodeURIComponent(supplier.id)}`}
+              className="text-xs font-semibold text-bework-accent hover:underline"
+            >
+              Nouvelle commande
+            </Link>
+          </div>
         </div>
         <ul className="mt-3 divide-y divide-slate-100">
           {supplier.purchaseOrders.map((o) => (

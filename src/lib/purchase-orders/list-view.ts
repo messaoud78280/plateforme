@@ -42,9 +42,17 @@ export type PurchaseOrderListRow = {
   deliveryAt: string | null;
   deliveryKind: PurchaseOrderListDeliveryKind;
   deliveryLabel: string | null;
+  daysUntilDelivery: number | null;
+  daysLateDelivery: number;
   orderedQty: number;
   receivedQty: number;
+  remainingQty: number;
+  receivedPercent: number;
   fullyReceived: boolean;
+  lineCount: number;
+  amountHt: number;
+  defaultCostCategory: string | null;
+  createdAt: string;
   attentionActive: boolean;
   attentionUrgency: UrgencyLevel | null;
   attentionShort: string | null;
@@ -60,6 +68,8 @@ export type PurchaseOrderListRow = {
   updatedAt: string;
   canReceive: boolean;
   canMessage: boolean;
+  documentsHref: string;
+  profitabilityHref: string | null;
 };
 
 export type PurchaseOrderListSummary = {
@@ -71,6 +81,11 @@ export type PurchaseOrderListSummary = {
   /** @deprecated alias toTreat */
   needingAttention: number;
   toConfirm: number;
+  committedHt: number;
+  openCount: number;
+  toReceiveCount: number;
+  partialCount: number;
+  completeCount: number;
 };
 
 function stripProjectFromSubject(subject: string, projectTitle: string | null): string {
@@ -161,6 +176,7 @@ export async function loadPurchaseOrdersListView(opts: {
     select: {
       ...purchaseOrderAttentionSelect,
       updatedAt: true,
+      createdAt: true,
       externalOrganizationId: true,
       externalOrganization: {
         select: { id: true, name: true, tradeName: true },
@@ -180,6 +196,11 @@ export async function loadPurchaseOrdersListView(opts: {
   let toTreat = 0;
   let deliveriesToday = 0;
   let overdue = 0;
+  let committedHt = 0;
+  let openCount = 0;
+  let toReceiveCount = 0;
+  let partialCount = 0;
+  let completeCount = 0;
   const dayStart = new Date(now);
   dayStart.setHours(0, 0, 0, 0);
   const dayEnd = new Date(now);
@@ -285,6 +306,43 @@ export async function loadPurchaseOrdersListView(opts: {
       overdue += 1;
     }
 
+    const amountHt = Number(o.amountHt ?? 0);
+    if (o.status !== "ANNULEE" && o.status !== "REFUSEE") {
+      committedHt += amountHt;
+    }
+    if (
+      !["ANNULEE", "REFUSEE", "CLOTUREE", "RECUE", "BROUILLON"].includes(o.status)
+    ) {
+      openCount += 1;
+    }
+    if (snap.fullyReceived) completeCount += 1;
+    else if (snap.totalReceivedConforming > 0.004) partialCount += 1;
+    else if (
+      ["CONFIRMEE", "LIVRAISON_PROGRAMMEE", "PARTIELLEMENT_RECUE", "A_CONFIRMER"].includes(
+        o.status,
+      )
+    ) {
+      toReceiveCount += 1;
+    }
+
+    const remainingQty = Math.max(0, snap.totalOrdered - snap.totalReceivedConforming);
+    const receivedPercent =
+      snap.totalOrdered > 0.004
+        ? Math.min(100, Math.round((snap.totalReceivedConforming / snap.totalOrdered) * 100))
+        : snap.fullyReceived
+          ? 100
+          : 0;
+
+    let daysUntilDelivery: number | null = null;
+    let daysLateDelivery = 0;
+    if (del.at && !snap.fullyReceived) {
+      const d0 = Date.UTC(del.at.getFullYear(), del.at.getMonth(), del.at.getDate());
+      const n0 = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+      const diff = Math.round((d0 - n0) / 86_400_000);
+      if (diff < 0) daysLateDelivery = -diff;
+      else daysUntilDelivery = diff;
+    }
+
     const attentionWhy = formatPurchaseOrderAttentionWhy(
       {
         attentionReason: reason,
@@ -327,9 +385,17 @@ export async function loadPurchaseOrdersListView(opts: {
       deliveryAt: del.at ? del.at.toISOString() : null,
       deliveryKind: del.kind,
       deliveryLabel: del.label,
+      daysUntilDelivery,
+      daysLateDelivery,
       orderedQty: snap.totalOrdered,
       receivedQty: snap.totalReceivedConforming,
+      remainingQty,
+      receivedPercent,
       fullyReceived: snap.fullyReceived,
+      lineCount: o.lines.length,
+      amountHt,
+      defaultCostCategory: o.defaultCostCategory ?? null,
+      createdAt: o.createdAt.toISOString(),
       attentionActive: active || next.needsUserAction,
       attentionUrgency: urgency,
       attentionShort: attentionShortLabel(urgency, reason),
@@ -344,6 +410,10 @@ export async function loadPurchaseOrdersListView(opts: {
       updatedAt: o.updatedAt.toISOString(),
       canReceive,
       canMessage: Boolean(o.project?.id && o.sharedWithSupplier),
+      documentsHref: `/dashboard/documents?q=${encodeURIComponent(o.number)}`,
+      profitabilityHref: o.project?.id
+        ? `/dashboard/projets/${o.project.id}?tab=rentabilite`
+        : null,
     });
   }
 
@@ -371,6 +441,11 @@ export async function loadPurchaseOrdersListView(opts: {
       deliveriesThisWeek,
       needingAttention: toTreat,
       toConfirm,
+      committedHt: Math.round(committedHt * 100) / 100,
+      openCount,
+      toReceiveCount,
+      partialCount,
+      completeCount,
     },
   };
     }).finally(() => {

@@ -89,7 +89,18 @@ async function SupplierOrdersSimple({
   );
 }
 
-export default async function CommandesPage() {
+export default async function CommandesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    view?: string;
+    q?: string;
+    projectId?: string;
+    supplierId?: string;
+    sort?: string;
+    chip?: string;
+  }>;
+}) {
   const session = await getCachedServerSession();
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/commandes");
   if (!canListPurchaseOrders(session.user)) redirect("/dashboard");
@@ -128,6 +139,13 @@ export default async function CommandesPage() {
     );
   }
 
+  const sp = await searchParams;
+  const view = (
+    ["treat", "orders", "deliveries", "receptions"].includes(String(sp.view))
+      ? sp.view
+      : undefined
+  ) as "treat" | "orders" | "deliveries" | "receptions" | undefined;
+
   const { rows, summary } = await loadPurchaseOrdersListView({
     organizationId: orgId,
   });
@@ -142,6 +160,58 @@ export default async function CommandesPage() {
         session.user.personType,
         session.user.permissionProfile,
       )}
+      initialView={view}
+      initialQ={typeof sp.q === "string" ? sp.q : ""}
+      initialProjectId={sp.projectId?.trim() || ""}
+      initialSupplierId={sp.supplierId?.trim() || ""}
+      initialSort={
+        (
+          [
+            "attention",
+            "delivery",
+            "recent",
+            "oldest",
+            "amount",
+            "supplier",
+            "project",
+            "remaining",
+          ] as const
+        ).includes(sp.sort as "attention")
+          ? (sp.sort as
+              | "attention"
+              | "delivery"
+              | "recent"
+              | "oldest"
+              | "amount"
+              | "supplier"
+              | "project"
+              | "remaining")
+          : "attention"
+      }
+      initialChip={
+        (
+          [
+            "all",
+            "a_confirmer",
+            "confirmee",
+            "partielle",
+            "recue",
+            "week",
+            "late",
+            "to_receive",
+          ] as const
+        ).includes(sp.chip as "all")
+          ? (sp.chip as
+              | "all"
+              | "a_confirmer"
+              | "confirmee"
+              | "partielle"
+              | "recue"
+              | "week"
+              | "late"
+              | "to_receive")
+          : "all"
+      }
     />
   );
 }

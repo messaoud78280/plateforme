@@ -53,6 +53,8 @@ export async function POST(
         organizationId: orgId,
         visitId: id,
         label: String(body.label ?? ""),
+        comment: body.comment ?? null,
+        dueAt: body.dueAt ? new Date(body.dueAt) : null,
       });
       return NextResponse.json({ visit }, { status: 201 });
     }

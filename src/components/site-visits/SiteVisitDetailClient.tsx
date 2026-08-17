@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
@@ -11,14 +11,15 @@ import {
   DIFFICULTY_OPTIONS,
   MEANS_OPTIONS,
   OCCUPATION_OPTIONS,
+  SITE_VISIT_LOTS,
   SUPPORT_OBSERVATION_OPTIONS,
   SUPPORT_STATE_OPTIONS,
-  VISIT_STEPS,
+  VISIT_DETAIL_TABS,
   WASTE_OPTIONS,
   type SiteVisitConstraints,
-  type VisitStepId,
+  type VisitDetailTabId,
 } from "@/lib/site-visits/types";
-import { computeMeasurement, type MeasureType } from "@/lib/site-visits/measurements";
+import { computeMeasurement, MEASURE_UNITS, type MeasureDeduction, type MeasureType } from "@/lib/site-visits/measurements";
 
 type Visit = {
   id: string;
@@ -29,8 +30,26 @@ type Visit = {
   contactPhone: string | null;
   scheduledAt: string | null;
   responsibleName: string | null;
+  responsibleId?: string | null;
   subject: string;
   clientNeed: string | null;
+  projectId?: string | null;
+  projectTitle?: string | null;
+  projectHref?: string | null;
+  agendaHref?: string | null;
+  documentsHref?: string | null;
+  lots?: string[];
+  zones?: string[];
+  preparedAt?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  completeness?: {
+    done: number;
+    total: number;
+    label: string;
+    items: Array<{ id: string; label: string; done: boolean; required: boolean }>;
+    readyChecks?: Array<{ id: string; label: string; done: boolean }>;
+  };
   urgencyNote: string | null;
   timeConstraints: string | null;
   siteOccupied: boolean;
@@ -55,16 +74,31 @@ type Visit = {
     computedQuantity: number;
     quantityLabel: string;
     observation: string | null;
+    lot?: string | null;
+    workItemId?: string | null;
+    grossQuantity?: number | null;
+    multiplier?: number | null;
+    coefficient?: number | null;
+    wastePercent?: number | null;
+    deductions?: MeasureDeduction[];
     modifiedAfterTransmit: boolean;
   }>;
-  missingInfos: Array<{ id: string; label: string; open: boolean }>;
+  missingInfos: Array<{
+    id: string;
+    label: string;
+    open: boolean;
+    comment?: string | null;
+    dueAt?: string | null;
+  }>;
   medias: Array<{
     id: string;
     measurementId: string | null;
+    zone?: string | null;
     kind: string;
     name: string;
     caption: string | null;
     fileUrl: string | null;
+    createdAt?: string | null;
   }>;
   impactPoints?: Array<{ id: string; label: string; severity: "info" | "warn" }>;
   summary?: {
@@ -73,6 +107,7 @@ type Visit = {
     ready: boolean;
     missingOpenCount: number;
     totalsByUnit: { unit: string; total: number; label: string }[];
+    totalsByLot?: { lot: string; totals: { unit: string; total: number; label: string }[] }[];
     measurementLines: string[];
     stateLines: string[];
     logisticsLines: string[];
@@ -92,10 +127,11 @@ type Visit = {
 
 const MEASURE_TYPES: { id: MeasureType; label: string }[] = [
   { id: "SURFACE", label: "Surface" },
-  { id: "LENGTH", label: "Longueur" },
+  { id: "WALL", label: "Mur" },
+  { id: "LENGTH", label: "Linéaire" },
   { id: "VOLUME", label: "Volume" },
-  { id: "QUANTITY", label: "Quantité" },
-  { id: "FREE", label: "Mesure libre" },
+  { id: "QUANTITY", label: "Unités" },
+  { id: "FREE", label: "Libre" },
 ];
 
 const emptyMeasureForm = {
@@ -108,6 +144,14 @@ const emptyMeasureForm = {
   quantityValue: "",
   unit: "",
   observation: "",
+  multiplier: "1",
+  coefficient: "1",
+  wastePercent: "",
+  lot: "",
+  workItemId: "",
+  deductionLabel: "",
+  deductionL: "",
+  deductionW: "",
 };
 
 export function SiteVisitDetailClient({
@@ -119,19 +163,25 @@ export function SiteVisitDetailClient({
 }) {
   const router = useRouter();
   const [visit, setVisit] = useState(initial);
-  const [step, setStep] = useState<VisitStepId>("infos");
+  const [step, setStep] = useState<VisitDetailTabId>("resume");
   const [busy, setBusy] = useState(false);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [measureOpen, setMeasureOpen] = useState(false);
   const [finishOpen, setFinishOpen] = useState(false);
   const [missingLabel, setMissingLabel] = useState("");
+  const [advanced, setAdvanced] = useState(false);
+  const [deductions, setDeductions] = useState<MeasureDeduction[]>([]);
+  const [zoneDraft, setZoneDraft] = useState("");
   const [mediaCaption, setMediaCaption] = useState("");
   const [mediaMeasurementId, setMediaMeasurementId] = useState("");
+  const [mediaZone, setMediaZone] = useState("");
   const photoRef = useRef<HTMLInputElement>(null);
   const docRef = useRef<HTMLInputElement>(null);
   const [mForm, setMForm] = useState(emptyMeasureForm);
+  const [workItems, setWorkItems] = useState<Array<{ id: string; name: string; saleUnit: string }>>([]);
 
-  const stepIndex = VISIT_STEPS.findIndex((s) => s.id === step);
+  const stepIndex = VISIT_DETAIL_TABS.findIndex((s) => s.id === step);
   const preview = computeMeasurement({
     measureType: mForm.measureType,
     lengthM: mForm.lengthM ? Number(mForm.lengthM.replace(",", ".")) : null,
@@ -141,16 +191,33 @@ export function SiteVisitDetailClient({
       ? Number(mForm.quantityValue.replace(",", "."))
       : null,
     unit: mForm.unit || null,
+    multiplier: mForm.multiplier ? Number(mForm.multiplier.replace(",", ".")) : 1,
+    coefficient: mForm.coefficient ? Number(mForm.coefficient.replace(",", ".")) : 1,
+    wastePercent: mForm.wastePercent ? Number(mForm.wastePercent.replace(",", ".")) : null,
+    deductions,
   });
 
-  const surfaceTotal = useMemo(() => {
-    return visit.measurements
-      .filter((m) => m.unit === "m²")
-      .reduce((s, m) => s + m.computedQuantity, 0);
-  }, [visit.measurements]);
+  useEffect(() => {
+    if (!measureOpen) return;
+    void fetch("/api/commercial/library/work-items?take=80")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data) return;
+        const items = data.items ?? data.workItems ?? data.rows ?? [];
+        setWorkItems(
+          (items as Array<{ id: string; name: string; saleUnit?: string }>).map((w) => ({
+            id: w.id,
+            name: w.name,
+            saleUnit: w.saleUnit ?? "",
+          })),
+        );
+      })
+      .catch(() => undefined);
+  }, [measureOpen]);
 
   async function patch(data: Record<string, unknown>) {
     setBusy(true);
+    setSaveState("saving");
     setMessage(null);
     try {
       const res = await fetch(`/api/site-visits/${visit.id}`, {
@@ -161,8 +228,11 @@ export function SiteVisitDetailClient({
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Échec");
       setVisit(json.visit);
+      setSaveState("saved");
+      window.setTimeout(() => setSaveState("idle"), 1600);
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Erreur");
+      setSaveState("idle");
     } finally {
       setBusy(false);
     }
@@ -202,20 +272,31 @@ export function SiteVisitDetailClient({
             : null,
           unit: mForm.unit || null,
           observation: mForm.observation || null,
+          multiplier: mForm.multiplier ? Number(mForm.multiplier.replace(",", ".")) : 1,
+          coefficient: mForm.coefficient ? Number(mForm.coefficient.replace(",", ".")) : 1,
+          wastePercent: mForm.wastePercent
+            ? Number(mForm.wastePercent.replace(",", "."))
+            : null,
+          deductions,
+          lot: mForm.lot || null,
+          workItemId: mForm.workItemId || null,
         }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Échec");
       setVisit(json.visit);
+      setDeductions([]);
       if (keepOpen) {
         setMForm({
           ...emptyMeasureForm,
           measureType: mForm.measureType,
           zone: mForm.zone,
+          lot: mForm.lot,
         });
       } else {
         setMeasureOpen(false);
         setMForm(emptyMeasureForm);
+        setAdvanced(false);
       }
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Erreur");
@@ -272,6 +353,7 @@ export function SiteVisitDetailClient({
       fd.set("kind", kind);
       if (mediaCaption.trim()) fd.set("caption", mediaCaption.trim());
       if (mediaMeasurementId) fd.set("measurementId", mediaMeasurementId);
+      if (mediaZone) fd.set("zone", mediaZone);
       const res = await fetch(`/api/site-visits/${visit.id}/media`, {
         method: "POST",
         body: fd,
@@ -314,7 +396,7 @@ export function SiteVisitDetailClient({
   const missingOpen = visit.missingInfos.filter((i) => i.open);
 
   return (
-    <div className="mx-auto max-w-lg space-y-4 px-3 py-4 pb-32 sm:px-4">
+    <div className="mx-auto max-w-3xl space-y-4 px-3 py-4 pb-32 sm:px-4">
       <div className="flex items-center justify-between gap-2">
         <Link
           href="/dashboard/visites-metres"
@@ -322,95 +404,100 @@ export function SiteVisitDetailClient({
         >
           ← Visites
         </Link>
-        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
-          {visit.statusLabel}
-        </span>
+        <div className="flex items-center gap-2">
+          {saveState === "saving" ? (
+            <span className="text-[12px] text-slate-500">Enregistrement…</span>
+          ) : saveState === "saved" ? (
+            <span className="text-[12px] text-emerald-700">Enregistré</span>
+          ) : null}
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+            {visit.statusLabel}
+          </span>
+        </div>
       </div>
 
       <header className="rounded-2xl border border-slate-200/90 bg-white p-4">
-        <h1 className="text-xl font-semibold tracking-tight text-[#1e3a5f]">
+        <h1 className="text-[18px] font-semibold tracking-tight text-[#1e3a5f] sm:text-[20px]">
           {visit.siteName || visit.clientName}
         </h1>
-        <p className="mt-1 text-sm text-slate-600">{visit.siteAddress}</p>
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-1 text-[14px] text-slate-600">{visit.siteAddress}</p>
+        <p className="mt-1 text-[13px] text-slate-500">
+          {visit.clientName}
+          {visit.projectTitle ? ` · ${visit.projectTitle}` : ""}
+        </p>
+        <p className="mt-2 text-[13px] text-slate-600">
           {visit.scheduledAt
             ? new Date(visit.scheduledAt).toLocaleString("fr-FR")
             : "Date à planifier"}
           {visit.responsibleName ? ` · ${visit.responsibleName}` : ""}
         </p>
-        {summary ? (
-          <p
-            className={cn(
-              "mt-3 text-[13px] font-medium",
-              summary.ready ? "text-emerald-700" : "text-amber-800",
-            )}
-          >
-            {summary.completenessLabel}
-          </p>
+        {visit.completeness ? (
+          <div className="mt-3">
+            <p className="text-[13px] font-medium text-slate-600">{visit.completeness.label}</p>
+            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100">
+              <div
+                className="h-full bg-bework-ok"
+                style={{
+                  width: `${Math.round((visit.completeness.done / Math.max(1, visit.completeness.total)) * 100)}%`,
+                }}
+              />
+            </div>
+          </div>
         ) : null}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {visit.agendaHref ? (
+            <Link href={visit.agendaHref} className="text-[13px] font-medium text-bework-navy hover:underline">
+              Voir dans l’Agenda
+            </Link>
+          ) : null}
+          {visit.projectHref ? (
+            <Link href={visit.projectHref} className="text-[13px] font-medium text-bework-navy hover:underline">
+              Voir le chantier
+            </Link>
+          ) : null}
+          {visit.documentsHref ? (
+            <Link href={visit.documentsHref} className="text-[13px] font-medium text-bework-navy hover:underline">
+              Voir dans Documents
+            </Link>
+          ) : null}
+          {visit.commercialQuoteHref ? (
+            <Link href={visit.commercialQuoteHref} className="text-[13px] font-medium text-bework-navy hover:underline">
+              Voir le devis
+            </Link>
+          ) : null}
+        </div>
       </header>
 
       <nav
-        className="sticky top-0 z-10 -mx-1 overflow-x-auto rounded-xl border border-bework-navy/10 bg-white/95 p-1 backdrop-blur"
-        aria-label="Étapes de la visite"
+        className="sticky top-14 z-10 -mx-1 overflow-x-auto rounded-xl border border-bework-navy/10 bg-white/95 p-1 backdrop-blur"
+        aria-label="Fiche visite"
       >
         <div className="flex gap-0.5">
-          {VISIT_STEPS.map((s, i) => {
-            const stepTone =
-              s.id === "infos"
-                ? "accent"
-                : s.id === "metres"
-                  ? "cyan"
-                  : s.id === "existant"
-                    ? "watch"
-                    : s.id === "logistique"
-                      ? "violet"
-                      : s.id === "medias"
-                        ? "navy"
-                        : "ok";
-            const activeClass =
-              stepTone === "accent"
-                ? "bg-bework-accent text-white"
-                : stepTone === "cyan"
-                  ? "bg-bework-cyan text-white"
-                  : stepTone === "watch"
-                    ? "bg-bework-watch text-white"
-                    : stepTone === "violet"
-                      ? "bg-bework-intel text-white"
-                      : stepTone === "navy"
-                        ? "bg-bework-navy-deep text-white"
-                        : "bg-bework-ok text-white";
-            return (
+          {VISIT_DETAIL_TABS.map((s) => (
             <button
               key={s.id}
               type="button"
               onClick={() => setStep(s.id)}
               className={cn(
-                "shrink-0 rounded-lg px-2.5 py-2 text-left transition-colors duration-150",
-                step === s.id ? activeClass : "text-slate-600 hover:bg-slate-50",
+                "shrink-0 rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors",
+                step === s.id ? "bg-bework-navy text-white" : "text-slate-600 hover:bg-slate-50",
               )}
             >
-              <span className="block text-[10px] font-medium opacity-70">
-                {i + 1}/6
-              </span>
-              <span className="block text-[12px] font-semibold leading-tight">
-                {s.short}
-              </span>
+              {s.label}
             </button>
-            );
-          })}
+          ))}
         </div>
       </nav>
 
       <p className="text-[12px] font-medium text-slate-500">
-        {stepIndex + 1}/6 · {VISIT_STEPS[stepIndex]?.label}
+        {VISIT_DETAIL_TABS[stepIndex]?.label}
       </p>
 
       {message ? (
         <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-800">{message}</p>
       ) : null}
 
-      {step === "infos" ? (
+      {step === "resume" ? (
         <Section title="Informations générales">
           <Field label="Client / prospect">
             <input
@@ -429,6 +516,37 @@ export function SiteVisitDetailClient({
               onBlur={(e) => {
                 if (e.target.value !== visit.siteAddress) {
                   void patch({ siteAddress: e.target.value });
+                }
+              }}
+              className={fieldClass}
+            />
+          </Field>
+          <Field label="Nom du site">
+            <input
+              defaultValue={visit.siteName ?? ""}
+              onBlur={(e) => {
+                if (e.target.value !== (visit.siteName ?? "")) {
+                  void patch({ siteName: e.target.value || null });
+                }
+              }}
+              className={fieldClass}
+            />
+          </Field>
+          <Field label="Date et heure de visite">
+            <input
+              type="datetime-local"
+              defaultValue={
+                visit.scheduledAt
+                  ? new Date(visit.scheduledAt).toISOString().slice(0, 16)
+                  : ""
+              }
+              onBlur={(e) => {
+                const next = e.target.value ? new Date(e.target.value).toISOString() : null;
+                const current = visit.scheduledAt
+                  ? new Date(visit.scheduledAt).toISOString().slice(0, 16)
+                  : "";
+                if (e.target.value !== current) {
+                  void patch({ scheduledAt: next });
                 }
               }}
               className={fieldClass}
@@ -494,61 +612,213 @@ export function SiteVisitDetailClient({
               className={fieldClass}
             />
           </Field>
+          <Field label="Lots concernés">
+            <div className="flex flex-wrap gap-2">
+              {SITE_VISIT_LOTS.map((l) => {
+                const active = (visit.lots ?? []).includes(l);
+                return (
+                  <Chip
+                    key={l}
+                    active={active}
+                    label={l}
+                    onClick={() => {
+                      const next = active
+                        ? (visit.lots ?? []).filter((x) => x !== l)
+                        : [...(visit.lots ?? []), l];
+                      void patch({ lots: next });
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </Field>
+        </Section>
+      ) : null}
+
+      {step === "resume" && summary ? (
+        <Section title="Avant-métré">
+          {summary.totalsByUnit.length > 0 ? (
+            <div className="space-y-1">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                Mesures factuelles
+              </p>
+              <p className="text-[18px] font-semibold tabular-nums text-bework-navy">
+                {summary.totalsByUnit.map((t) => t.label).join(" · ")}
+              </p>
+            </div>
+          ) : (
+            <p className="text-[13px] text-slate-500">Aucun relevé pour le moment.</p>
+          )}
+          {summary.totalsByLot && summary.totalsByLot.length > 0 ? (
+            <ul className="mt-3 space-y-1 text-[13px]">
+              {summary.totalsByLot.map((g) => (
+                <li key={g.lot}>
+                  <span className="font-medium text-slate-700">{g.lot}</span>
+                  {" · "}
+                  <span className="tabular-nums text-bework-navy">
+                    {g.totals.map((t) => t.label).join(" · ")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {(visit.estimatedCrewCount || visit.estimatedDuration) ? (
+            <div className="mt-3">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                Estimations opérationnelles
+              </p>
+              <p className="text-[13px] text-slate-700">
+                {[
+                  visit.estimatedCrewCount ? `${visit.estimatedCrewCount} personnes` : null,
+                  visit.estimatedDuration,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            </div>
+          ) : null}
+          {visit.completeness?.readyChecks ? (
+            <ul className="mt-4 space-y-1 text-[13px]">
+              {visit.completeness.readyChecks.map((c) => (
+                <li key={c.id} className={c.done ? "text-emerald-700" : "text-amber-800"}>
+                  {c.done ? "✓" : "○"} {c.label}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {canCreateQuote && visit.status === "READY_TO_QUOTE" ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void createQuote()}
+              className="mt-4 flex h-12 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[14px] font-semibold text-white"
+            >
+              Créer le devis
+            </button>
+          ) : null}
+        </Section>
+      ) : null}
+
+      {step === "resume" && (visit.status === "TO_PLAN" || visit.status === "SCHEDULED") ? (
+        <Section title="À préparer">
+          <ul className="space-y-1.5 text-[13px]">
+            {[
+              { ok: Boolean(visit.clientName.trim()), label: "Coordonnées client" },
+              { ok: Boolean(visit.siteAddress.trim()), label: "Adresse" },
+              { ok: Boolean(visit.contactName || visit.contactPhone), label: "Contact sur place" },
+              { ok: Boolean(visit.subject.trim()), label: "Objectif de visite" },
+              { ok: (visit.lots ?? []).length > 0, label: "Lots concernés" },
+              { ok: visit.stats.documentCount > 0, label: "Plans / documents" },
+            ].map((item) => (
+              <li key={item.label} className={item.ok ? "text-emerald-700" : "text-amber-800"}>
+                {item.ok ? "✓" : "○"} {item.label}
+              </li>
+            ))}
+          </ul>
+          {visit.preparedAt ? (
+            <p className="mt-3 text-[13px] font-medium text-emerald-700">✓ Visite préparée</p>
+          ) : (
+            <button
+              type="button"
+              onClick={() => void patch({ preparedAt: true })}
+              className="mt-3 text-[13px] font-medium text-bework-navy hover:underline"
+            >
+              Marquer la visite préparée
+            </button>
+          )}
         </Section>
       ) : null}
 
       {step === "metres" ? (
-        <Section title="Métrés">
-          <ul className="space-y-2">
-            {visit.measurements.map((m) => (
-              <li
-                key={m.id}
-                className="rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-3"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="font-semibold text-slate-900">
-                      {m.zone || m.label}
-                    </p>
-                    {m.zone ? (
-                      <p className="text-[12px] text-slate-500">{m.label}</p>
-                    ) : null}
-                    <p className="mt-1 text-[15px] font-medium tabular-nums text-[#1e3a5f]">
-                      {m.quantityLabel}
-                    </p>
-                    {m.modifiedAfterTransmit ? (
-                      <p className="mt-1 text-[11px] text-amber-700">
-                        Relevé modifié après création du devis
-                      </p>
-                    ) : null}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => void deleteMeasurement(m.id)}
-                    className="text-[12px] font-medium text-slate-400 hover:text-red-600"
-                  >
-                    Suppr.
-                  </button>
-                </div>
-              </li>
+        <Section title="Métré">
+          <div className="mb-3 flex flex-wrap gap-2">
+            {(visit.zones ?? []).map((z) => (
+              <span key={z} className="rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700">
+                {z}
+              </span>
             ))}
-          </ul>
-          {surfaceTotal > 0 ? (
-            <p className="mt-3 text-[13px] font-medium text-slate-700">
-              Total surfaces : {surfaceTotal.toFixed(2).replace(/\.?0+$/, "")} m²
-            </p>
-          ) : null}
+          </div>
+          <div className="mb-4 flex gap-2">
+            <input
+              value={zoneDraft}
+              onChange={(e) => setZoneDraft(e.target.value)}
+              placeholder="Nouvelle zone (RDC, toiture…)"
+              className={fieldClass}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                const z = zoneDraft.trim();
+                if (!z) return;
+                void patch({ zones: [...(visit.zones ?? []), z] });
+                setZoneDraft("");
+              }}
+              className="shrink-0 rounded-xl bg-[#1e3a5f] px-3 text-[13px] font-semibold text-white"
+            >
+              + Zone
+            </button>
+          </div>
+          {(visit.zones?.length ? visit.zones : ["Sans zone"]).map((zone) => {
+            const lines = visit.measurements.filter((m) =>
+              zone === "Sans zone" ? !m.zone : m.zone === zone,
+            );
+            const zoneTotal = lines.reduce((acc, m) => {
+              acc[m.unit] = (acc[m.unit] ?? 0) + m.computedQuantity;
+              return acc;
+            }, {} as Record<string, number>);
+            return (
+              <div key={zone} className="mb-4 border-b border-slate-100 pb-3 last:border-0">
+                <p className="text-[14px] font-semibold text-bework-navy">
+                  {zone}
+                  {lines.length > 0 ? (
+                    <span className="ml-2 text-[12px] font-medium text-slate-500">
+                      {Object.entries(zoneTotal)
+                        .map(([u, q]) => `${q.toFixed(2).replace(/\.?0+$/, "")} ${u}`)
+                        .join(" · ")}
+                    </span>
+                  ) : null}
+                </p>
+                <ul className="mt-2 space-y-2">
+                  {lines.map((m) => (
+                    <li key={m.id} className="rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-900">{m.label}</p>
+                          {m.lot ? <p className="text-[12px] text-slate-500">{m.lot}</p> : null}
+                          <p className="mt-1 text-[16px] font-semibold tabular-nums text-[#1e3a5f]">
+                            {m.quantityLabel}
+                          </p>
+                          {m.grossQuantity && m.grossQuantity !== m.computedQuantity ? (
+                            <p className="text-[12px] text-slate-500">
+                              Brut {m.grossQuantity} → net {m.computedQuantity} {m.unit}
+                            </p>
+                          ) : null}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void deleteMeasurement(m.id)}
+                          className="text-[12px] font-medium text-slate-400 hover:text-red-600"
+                        >
+                          Suppr.
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
           <button
             type="button"
             onClick={() => setMeasureOpen(true)}
-            className="mt-4 flex h-12 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[15px] font-semibold text-white"
+            className="mt-2 flex h-12 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[15px] font-semibold text-white"
           >
             + Ajouter une mesure
           </button>
         </Section>
       ) : null}
 
-      {step === "existant" ? (
+      {step === "terrain" ? (
         <Section title="État de l’existant">
           <p className="mb-2 text-[12px] text-slate-500">État général</p>
           <div className="flex flex-wrap gap-2">
@@ -593,7 +863,7 @@ export function SiteVisitDetailClient({
         </Section>
       ) : null}
 
-      {step === "logistique" ? (
+      {step === "terrain" ? (
         <>
           <Section title="Accès chantier">
             <div className="flex flex-wrap gap-2">
@@ -656,6 +926,35 @@ export function SiteVisitDetailClient({
               Ces éléments n’ajoutent aucun prix — à intégrer au chiffrage.
             </p>
           </Section>
+          <Section title="À prendre en compte dans le devis">
+            <p className="mb-2 text-[12px] text-slate-500">
+              Cochez uniquement ce qui doit rester visible au chiffreur.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                ...new Set([
+                  ...(visit.constraints.access ?? []),
+                  ...(visit.constraints.occupation ?? []),
+                  ...(visit.constraints.waste ?? []).filter((w) => w !== "Non concerné"),
+                  ...(visit.constraints.means ?? []),
+                  ...(visit.constraints.quoteImpact ?? []),
+                ]),
+              ].map((label) => (
+                <Chip
+                  key={label}
+                  active={(visit.constraints.quoteImpact ?? []).includes(label)}
+                  onClick={() => {
+                    const current = visit.constraints.quoteImpact ?? [];
+                    const next = current.includes(label)
+                      ? current.filter((x) => x !== label)
+                      : [...current, label];
+                    patchConstraints({ quoteImpact: next });
+                  }}
+                  label={label}
+                />
+              ))}
+            </div>
+          </Section>
           <Section title="Organisation">
             <Field label="Équipe estimée (personnes)">
               <input
@@ -710,7 +1009,23 @@ export function SiteVisitDetailClient({
                 className={fieldClass}
               />
             </Field>
-            <Field label="Lier à une zone / relevé">
+            {(visit.zones ?? []).length > 0 ? (
+              <Field label="Zone">
+                <select
+                  value={mediaZone}
+                  onChange={(e) => setMediaZone(e.target.value)}
+                  className={fieldClass}
+                >
+                  <option value="">Visite entière</option>
+                  {(visit.zones ?? []).map((z) => (
+                    <option key={z} value={z}>
+                      {z}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            ) : null}
+            <Field label="Lier à un relevé">
               <select
                 value={mediaMeasurementId}
                 onChange={(e) => setMediaMeasurementId(e.target.value)}
@@ -764,6 +1079,10 @@ export function SiteVisitDetailClient({
                   )}
                   <p className="truncate px-2 py-1.5 text-[11px] text-slate-600">
                     {p.caption || p.name}
+                    {p.zone ? ` · ${p.zone}` : ""}
+                    {p.createdAt
+                      ? ` · ${new Date(p.createdAt).toLocaleDateString("fr-FR")}`
+                      : ""}
                   </p>
                 </li>
               ))}
@@ -798,34 +1117,46 @@ export function SiteVisitDetailClient({
                 </li>
               ))}
             </ul>
+            {visit.documentsHref ? (
+              <Link href={visit.documentsHref} className="mt-3 inline-block text-[13px] font-medium text-bework-navy hover:underline">
+                Voir dans Documents
+              </Link>
+            ) : null}
           </Section>
-          <Section title="Informations à obtenir">
+        </>
+      ) : null}
+
+      {step === "missing" ? (
+        <Section title="Points à compléter">
             <ul className="space-y-2">
               {visit.missingInfos.map((i) => (
                 <li
                   key={i.id}
-                  className="flex items-center justify-between gap-2 rounded-xl border border-slate-100 px-3 py-2.5"
+                  className="rounded-xl border border-slate-100 px-3 py-2.5"
                 >
-                  <span
-                    className={cn(
-                      "text-[13px]",
-                      i.open ? "text-amber-800" : "text-slate-400 line-through",
-                    )}
-                  >
-                    {i.open ? "⚠ " : "✓ "}
-                    {i.label}
-                  </span>
-                  {i.open ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        void action({ action: "resolve_missing", missingId: i.id })
-                      }
-                      className="text-[12px] font-semibold text-[#1e3a5f]"
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={cn(
+                        "text-[13px]",
+                        i.open ? "text-amber-800" : "text-slate-400 line-through",
+                      )}
                     >
-                      Obtenu
-                    </button>
-                  ) : null}
+                      {i.open ? "⚠ " : "✓ "}
+                      {i.label}
+                    </span>
+                    {i.open ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void action({ action: "resolve_missing", missingId: i.id })
+                        }
+                        className="text-[12px] font-semibold text-[#1e3a5f]"
+                      >
+                        Obtenu
+                      </button>
+                    ) : null}
+                  </div>
+                  {i.comment ? <p className="mt-1 text-[12px] text-slate-500">{i.comment}</p> : null}
                 </li>
               ))}
             </ul>
@@ -833,7 +1164,7 @@ export function SiteVisitDetailClient({
               <input
                 value={missingLabel}
                 onChange={(e) => setMissingLabel(e.target.value)}
-                placeholder="Ex. Diagnostic amiante manquant"
+                placeholder="Ex. Type exact d’isolant"
                 className={cn(fieldClass, "flex-1")}
               />
               <button
@@ -847,123 +1178,47 @@ export function SiteVisitDetailClient({
                 +
               </button>
             </div>
-          </Section>
-        </>
+        </Section>
       ) : null}
 
-      {step === "synthese" ? (
-        <Section title="Synthèse / Prêt à chiffrer">
-          {summary ? (
-            <div className="space-y-4 text-[14px]">
-              <p
-                className={cn(
-                  "rounded-xl px-3 py-2.5 text-[13px] font-semibold",
-                  summary.ready
-                    ? "bg-emerald-50 text-emerald-800"
-                    : "bg-amber-50 text-amber-900",
-                )}
-              >
-                {summary.completenessLabel}
-              </p>
-              {summary.totalsByUnit.length > 0 ? (
-                <Block title="Relevés">
-                  {summary.totalsByUnit.map((t) => (
-                    <p key={t.unit} className="font-medium text-[#1e3a5f]">
-                      {t.label}
-                    </p>
-                  ))}
-                  {summary.measurementLines.map((l) => (
-                    <p key={l} className="text-[13px] text-slate-600">
-                      {l}
-                    </p>
-                  ))}
-                </Block>
-              ) : null}
-              {summary.stateLines.length > 0 ? (
-                <Block title="État">
-                  {summary.stateLines.map((l) => (
-                    <p key={l}>{l}</p>
-                  ))}
-                </Block>
-              ) : null}
-              {summary.logisticsLines.length > 0 ? (
-                <Block title="Logistique">
-                  {summary.logisticsLines.map((l) => (
-                    <p key={l}>{l}</p>
-                  ))}
-                </Block>
-              ) : null}
-              {summary.orgLines.length > 0 ? (
-                <Block title="Organisation">
-                  <p>{summary.orgLines.join(" · ")}</p>
-                </Block>
-              ) : null}
-              {summary.docsLines.length > 0 ? (
-                <Block title="Documents">
-                  <p>{summary.docsLines.join(" · ")}</p>
-                </Block>
-              ) : null}
-              {summary.confirmLines.length > 0 ? (
-                <Block title="À confirmer">
-                  {summary.confirmLines.map((l) => (
-                    <p key={l} className="text-amber-800">
-                      ⚠ {l}
-                    </p>
-                  ))}
-                </Block>
-              ) : null}
-              {(visit.impactPoints ?? []).length > 0 ? (
-                <Block title="Points à intégrer au devis">
-                  {(visit.impactPoints ?? []).map((p) => (
-                    <p
-                      key={p.id}
-                      className={
-                        p.severity === "warn" ? "text-amber-800" : "text-slate-700"
-                      }
-                    >
-                      {p.severity === "warn" ? "⚠ " : "☑ "}
-                      {p.label}
-                    </p>
-                  ))}
-                </Block>
-              ) : null}
-            </div>
-          ) : null}
-
-          {visit.status === "TRANSMITTED" && visit.commercialQuoteHref ? (
-            <div className="mt-5 space-y-2">
-              <p className="text-[13px] text-slate-600">
-                Transmise au devis {visit.commercialQuoteNumber}
-              </p>
-              <Link
-                href={visit.commercialQuoteHref}
-                className="flex h-12 items-center justify-center rounded-xl bg-[#1e3a5f] text-[14px] font-semibold text-white"
-              >
-                Ouvrir le devis
-              </Link>
-            </div>
-          ) : (
-            <div className="mt-5 space-y-2">
+      {step === "historique" ? (
+        <Section title="Historique">
+          <dl className="space-y-2 text-[13px] text-slate-700">
+            {visit.createdAt ? (
+              <div>
+                <dt className="text-[11px] uppercase text-slate-400">Créée</dt>
+                <dd>{new Date(visit.createdAt).toLocaleString("fr-FR")}</dd>
+              </div>
+            ) : null}
+            {visit.updatedAt ? (
+              <div>
+                <dt className="text-[11px] uppercase text-slate-400">Dernière mise à jour</dt>
+                <dd>{new Date(visit.updatedAt).toLocaleString("fr-FR")}</dd>
+              </div>
+            ) : null}
+            {visit.scheduledAt ? (
+              <div>
+                <dt className="text-[11px] uppercase text-slate-400">Rendez-vous</dt>
+                <dd>{new Date(visit.scheduledAt).toLocaleString("fr-FR")}</dd>
+              </div>
+            ) : null}
+            {visit.preparedAt ? (
+              <p className="text-emerald-700">✓ Visite préparée</p>
+            ) : visit.status === "SCHEDULED" ? (
               <button
                 type="button"
-                disabled={busy}
-                onClick={() => setFinishOpen(true)}
-                className="flex h-12 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[14px] font-semibold text-white disabled:opacity-50"
+                onClick={() => void patch({ preparedAt: true })}
+                className="text-[13px] font-medium text-bework-navy hover:underline"
               >
-                Marquer prête à chiffrer
+                Marquer la visite préparée
               </button>
-              {canCreateQuote && visit.status === "READY_TO_QUOTE" ? (
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void createQuote()}
-                  className="flex h-12 w-full items-center justify-center rounded-xl border border-[#1e3a5f] text-[14px] font-semibold text-[#1e3a5f]"
-                >
-                  Créer le devis →
-                </button>
-              ) : null}
-            </div>
-          )}
+            ) : null}
+            {visit.commercialQuoteHref ? (
+              <Link href={visit.commercialQuoteHref} className="font-medium text-bework-navy hover:underline">
+                Issu / lié au devis {visit.commercialQuoteNumber}
+              </Link>
+            ) : null}
+          </dl>
         </Section>
       ) : null}
 
@@ -972,15 +1227,15 @@ export function SiteVisitDetailClient({
           <button
             type="button"
             disabled={stepIndex <= 0}
-            onClick={() => setStep(VISIT_STEPS[stepIndex - 1]!.id)}
+            onClick={() => setStep(VISIT_DETAIL_TABS[stepIndex - 1]!.id)}
             className="h-11 flex-1 rounded-xl border border-slate-200 text-[13px] font-semibold text-slate-700 disabled:opacity-30"
           >
             Précédent
           </button>
-          {stepIndex < VISIT_STEPS.length - 1 ? (
+          {stepIndex < VISIT_DETAIL_TABS.length - 1 ? (
             <button
               type="button"
-              onClick={() => setStep(VISIT_STEPS[stepIndex + 1]!.id)}
+              onClick={() => setStep(VISIT_DETAIL_TABS[stepIndex + 1]!.id)}
               className="h-11 flex-1 rounded-xl bg-[#1e3a5f] text-[13px] font-semibold text-white"
             >
               Suivant
@@ -1010,12 +1265,27 @@ export function SiteVisitDetailClient({
             ))}
           </div>
           <Field label="Zone">
-            <input
-              value={mForm.zone}
-              onChange={(e) => setMForm({ ...mForm, zone: e.target.value })}
-              placeholder="Ex. Terrasse principale"
-              className={fieldClass}
-            />
+            {(visit.zones ?? []).length > 0 ? (
+              <select
+                value={mForm.zone}
+                onChange={(e) => setMForm({ ...mForm, zone: e.target.value })}
+                className={fieldClass}
+              >
+                <option value="">Sans zone</option>
+                {(visit.zones ?? []).map((z) => (
+                  <option key={z} value={z}>
+                    {z}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                value={mForm.zone}
+                onChange={(e) => setMForm({ ...mForm, zone: e.target.value })}
+                placeholder="Ex. Terrasse principale"
+                className={fieldClass}
+              />
+            )}
           </Field>
           <Field label="Libellé">
             <input
@@ -1024,6 +1294,20 @@ export function SiteVisitDetailClient({
               placeholder="Ex. Surface étanchéité"
               className={fieldClass}
             />
+          </Field>
+          <Field label="Lot">
+            <select
+              value={mForm.lot}
+              onChange={(e) => setMForm({ ...mForm, lot: e.target.value })}
+              className={fieldClass}
+            >
+              <option value="">Sans lot</option>
+              {SITE_VISIT_LOTS.map((l) => (
+                <option key={l} value={l}>
+                  {l}
+                </option>
+              ))}
+            </select>
           </Field>
           {mForm.measureType === "SURFACE" || mForm.measureType === "VOLUME" ? (
             <>
@@ -1045,6 +1329,26 @@ export function SiteVisitDetailClient({
               </Field>
             </>
           ) : null}
+          {mForm.measureType === "WALL" ? (
+            <>
+              <Field label="Longueur (m)">
+                <input
+                  inputMode="decimal"
+                  value={mForm.lengthM}
+                  onChange={(e) => setMForm({ ...mForm, lengthM: e.target.value })}
+                  className={fieldClass}
+                />
+              </Field>
+              <Field label="Hauteur (m)">
+                <input
+                  inputMode="decimal"
+                  value={mForm.heightM}
+                  onChange={(e) => setMForm({ ...mForm, heightM: e.target.value })}
+                  className={fieldClass}
+                />
+              </Field>
+            </>
+          ) : null}
           {mForm.measureType === "VOLUME" ? (
             <Field label="Hauteur (m)">
               <input
@@ -1056,14 +1360,25 @@ export function SiteVisitDetailClient({
             </Field>
           ) : null}
           {mForm.measureType === "LENGTH" ? (
-            <Field label="Longueur (m)">
-              <input
-                inputMode="decimal"
-                value={mForm.lengthM}
-                onChange={(e) => setMForm({ ...mForm, lengthM: e.target.value })}
-                className={fieldClass}
-              />
-            </Field>
+            <>
+              <Field label="Longueur (m)">
+                <input
+                  inputMode="decimal"
+                  value={mForm.lengthM}
+                  onChange={(e) => setMForm({ ...mForm, lengthM: e.target.value })}
+                  className={fieldClass}
+                />
+              </Field>
+              <Field label="Quantité (nb)">
+                <input
+                  inputMode="decimal"
+                  value={mForm.quantityValue}
+                  onChange={(e) => setMForm({ ...mForm, quantityValue: e.target.value })}
+                  placeholder="1"
+                  className={fieldClass}
+                />
+              </Field>
+            </>
           ) : null}
           {mForm.measureType === "QUANTITY" || mForm.measureType === "FREE" ? (
             <>
@@ -1078,17 +1393,158 @@ export function SiteVisitDetailClient({
                 />
               </Field>
               <Field label="Unité">
-                <input
+                <select
                   value={mForm.unit}
                   onChange={(e) => setMForm({ ...mForm, unit: e.target.value })}
-                  placeholder="U"
                   className={fieldClass}
-                />
+                >
+                  <option value="">Choisir</option>
+                  {MEASURE_UNITS.map((u) => (
+                    <option key={u} value={u}>
+                      {u}
+                    </option>
+                  ))}
+                </select>
               </Field>
             </>
           ) : null}
+          {mForm.measureType === "SURFACE" || mForm.measureType === "WALL" ? (
+            <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50/80 p-3">
+              <p className="text-[12px] font-medium text-slate-500">Ouvertures / déductions</p>
+              {deductions.length > 0 ? (
+                <ul className="mt-2 space-y-1 text-[13px] text-slate-700">
+                  {deductions.map((d, i) => (
+                    <li key={`${d.label ?? "ouv"}-${i}`} className="flex justify-between gap-2">
+                      <span>
+                        {d.label || "Ouverture"}
+                        {d.lengthM && d.widthM
+                          ? ` · ${d.lengthM} × ${d.widthM}`
+                          : d.lengthM
+                            ? ` · ${d.lengthM}`
+                            : ""}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setDeductions(deductions.filter((_, j) => j !== i))}
+                        className="text-[12px] text-slate-400"
+                      >
+                        Retirer
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                <input
+                  value={mForm.deductionLabel}
+                  onChange={(e) => setMForm({ ...mForm, deductionLabel: e.target.value })}
+                  placeholder="Porte, fenêtre…"
+                  className={cn(fieldClass, "col-span-3 mt-0")}
+                />
+                <input
+                  inputMode="decimal"
+                  value={mForm.deductionL}
+                  onChange={(e) => setMForm({ ...mForm, deductionL: e.target.value })}
+                  placeholder="L"
+                  className={cn(fieldClass, "mt-0")}
+                />
+                <input
+                  inputMode="decimal"
+                  value={mForm.deductionW}
+                  onChange={(e) => setMForm({ ...mForm, deductionW: e.target.value })}
+                  placeholder="l"
+                  className={cn(fieldClass, "mt-0")}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const lengthM = mForm.deductionL
+                      ? Number(mForm.deductionL.replace(",", "."))
+                      : null;
+                    const widthM = mForm.deductionW
+                      ? Number(mForm.deductionW.replace(",", "."))
+                      : null;
+                    if (!lengthM && !widthM) return;
+                    setDeductions([
+                      ...deductions,
+                      {
+                        label: mForm.deductionLabel.trim() || "Ouverture",
+                        lengthM,
+                        widthM,
+                        quantity: 1,
+                      },
+                    ]);
+                    setMForm({
+                      ...mForm,
+                      deductionLabel: "",
+                      deductionL: "",
+                      deductionW: "",
+                    });
+                  }}
+                  className="rounded-xl border border-slate-200 text-[12px] font-semibold text-slate-700"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setAdvanced((v) => !v)}
+            className="mt-3 text-[12px] font-medium text-bework-navy"
+          >
+            {advanced ? "Masquer les options" : "Options avancées"}
+          </button>
+          {advanced ? (
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              <Field label="Multiplicateur">
+                <input
+                  inputMode="decimal"
+                  value={mForm.multiplier}
+                  onChange={(e) => setMForm({ ...mForm, multiplier: e.target.value })}
+                  className={fieldClass}
+                />
+              </Field>
+              <Field label="Coefficient">
+                <input
+                  inputMode="decimal"
+                  value={mForm.coefficient}
+                  onChange={(e) => setMForm({ ...mForm, coefficient: e.target.value })}
+                  className={fieldClass}
+                />
+              </Field>
+              <Field label="Perte %">
+                <input
+                  inputMode="decimal"
+                  value={mForm.wastePercent}
+                  onChange={(e) => setMForm({ ...mForm, wastePercent: e.target.value })}
+                  className={fieldClass}
+                />
+              </Field>
+            </div>
+          ) : null}
+          {workItems.length > 0 ? (
+            <Field label="Ouvrage bibliothèque">
+              <select
+                value={mForm.workItemId}
+                onChange={(e) => setMForm({ ...mForm, workItemId: e.target.value })}
+                className={fieldClass}
+              >
+                <option value="">Aucun</option>
+                {workItems.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.name}
+                    {w.saleUnit ? ` (${w.saleUnit})` : ""}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ) : null}
           <p className="mt-3 text-[15px] font-semibold tabular-nums text-[#1e3a5f]">
-            Résultat : {preview.computedQuantity} {preview.unit}
+            {preview.deductionTotal > 0
+              ? `Brut ${preview.grossQuantity} − ${preview.deductionTotal} → `
+              : null}
+            Net : {preview.computedQuantity} {preview.unit}
           </p>
           <div className="mt-4 flex flex-col gap-2">
             <button
@@ -1180,17 +1636,6 @@ function Section({
       <h2 className="text-[15px] font-semibold text-slate-900">{title}</h2>
       <div className="mt-3">{children}</div>
     </section>
-  );
-}
-
-function Block({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <h3 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-slate-400">
-        {title}
-      </h3>
-      <div className="mt-1.5 space-y-0.5 text-slate-800">{children}</div>
-    </div>
   );
 }
 

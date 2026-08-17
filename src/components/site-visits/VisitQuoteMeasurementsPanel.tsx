@@ -131,7 +131,7 @@ export function VisitQuoteMeasurementsPanel({
           href={visitHref}
           className="inline-flex text-[13px] font-medium text-[#1e3a5f] hover:underline"
         >
-          Voir le relevé terrain →
+          Voir le métrage →
         </a>
       ) : null}
 

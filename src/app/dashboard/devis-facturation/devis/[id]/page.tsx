@@ -38,15 +38,16 @@ export default async function DevisDetailPage({
     ["DRAFT", "TO_VALIDATE", "VALIDATED"].includes(quote.status) &&
     quote.currentVersion?.lockState === "DRAFT";
 
-  const fromVisitId =
-    sp.fromVisit ??
-    (
-      await prisma.siteVisit.findFirst({
-        where: { organizationId: orgId, commercialQuoteId: id },
-        select: { id: true },
-      })
-    )?.id ??
-    null;
+  const fromVisit = await prisma.siteVisit.findFirst({
+    where: {
+      organizationId: orgId,
+      ...(sp.fromVisit
+        ? { OR: [{ id: sp.fromVisit }, { commercialQuoteId: id }] }
+        : { commercialQuoteId: id }),
+    },
+    select: { id: true, scheduledAt: true, siteName: true, clientName: true },
+  });
+  const fromVisitId = fromVisit?.id ?? sp.fromVisit ?? null;
 
   const [summary, invoiceStats, archive, settings] = await Promise.all([
     quote.status === "ACCEPTED" || quote.acceptedAt
@@ -90,11 +91,22 @@ export default async function DevisDetailPage({
         </p>
       ) : null}
       {fromVisitId ? (
-        <VisitQuoteMeasurementsPanel
-          visitId={fromVisitId}
-          quoteId={id}
-          canEdit={canEdit}
-        />
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <p className="text-[13px] font-medium text-bework-navy">
+            Issu de la visite
+            {fromVisit?.scheduledAt
+              ? ` du ${fromVisit.scheduledAt.toLocaleDateString("fr-FR")}`
+              : ""}
+            {fromVisit?.siteName || fromVisit?.clientName
+              ? ` — ${fromVisit.siteName || fromVisit.clientName}`
+              : ""}
+          </p>
+          <VisitQuoteMeasurementsPanel
+            visitId={fromVisitId}
+            quoteId={id}
+            canEdit={canEdit}
+          />
+        </div>
       ) : null}
       <QuoteEditor
         initial={quote as never}

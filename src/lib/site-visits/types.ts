@@ -23,6 +23,83 @@ export const SITE_VISIT_FILTERS = [
   { id: "TRANSMITTED", label: "Transmis au devis" },
 ] as const;
 
+export const SITE_VISIT_DATE_FILTERS = [
+  { id: "", label: "Toutes dates" },
+  { id: "today", label: "Aujourd’hui" },
+  { id: "week", label: "Cette semaine" },
+  { id: "next", label: "Semaine prochaine" },
+  { id: "month", label: "Ce mois" },
+] as const;
+
+export function dateRangeFromPreset(
+  preset: string | null | undefined,
+): { from: Date; to: Date } | null {
+  if (!preset) return null;
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const day = start.getDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const weekStart = new Date(start);
+  weekStart.setDate(weekStart.getDate() + mondayOffset);
+  if (preset === "today") {
+    const to = new Date(start);
+    to.setDate(to.getDate() + 1);
+    return { from: start, to };
+  }
+  if (preset === "week") {
+    const to = new Date(weekStart);
+    to.setDate(to.getDate() + 7);
+    return { from: weekStart, to };
+  }
+  if (preset === "next") {
+    const from = new Date(weekStart);
+    from.setDate(from.getDate() + 7);
+    const to = new Date(from);
+    to.setDate(to.getDate() + 7);
+    return { from, to };
+  }
+  if (preset === "month") {
+    const from = new Date(now.getFullYear(), now.getMonth(), 1);
+    const to = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return { from, to };
+  }
+  return null;
+}
+
+export const SITE_VISIT_STATE_FILTERS = [
+  { id: "missing", label: "Information manquante" },
+  { id: "ready", label: "Prêt à chiffrer" },
+  { id: "quoted", label: "Devis créé" },
+  { id: "constraints", label: "Avec contraintes" },
+  { id: "docs", label: "Avec documents / photos" },
+] as const;
+
+/** Lots BTP — alignés familles chantier, pas une 2e nomenclature. */
+export const SITE_VISIT_LOTS = [
+  "Maçonnerie",
+  "Étanchéité",
+  "Isolation",
+  "Peinture",
+  "Plomberie",
+  "Électricité",
+  "Menuiserie",
+  "Couverture",
+  "VRD",
+  "Revêtements",
+  "Autre",
+] as const;
+
+export const VISIT_DETAIL_TABS = [
+  { id: "resume", label: "Résumé" },
+  { id: "metres", label: "Métré" },
+  { id: "terrain", label: "Terrain" },
+  { id: "medias", label: "Photos & documents" },
+  { id: "missing", label: "Points à compléter" },
+  { id: "historique", label: "Historique" },
+] as const;
+
+export type VisitDetailTabId = (typeof VISIT_DETAIL_TABS)[number]["id"];
+
 export const VISIT_STEPS = [
   { id: "infos", label: "Informations", short: "Infos" },
   { id: "metres", label: "Métrés", short: "Métrés" },
@@ -52,6 +129,8 @@ export type SiteVisitConstraints = {
   /** Simple | Standard | Complexe */
   estimatedDifficulty?: string | null;
   otherComment?: string | null;
+  /** Contraintes cochées « à prendre en compte dans le devis ». */
+  quoteImpact?: string[];
 };
 
 export const ACCESS_LEVEL_OPTIONS = ["Facile", "Moyen", "Difficile"] as const;
@@ -170,5 +249,8 @@ export function normalizeConstraints(raw: unknown): SiteVisitConstraints {
     means: c.means ?? [],
     estimatedDifficulty: c.estimatedDifficulty ?? null,
     otherComment: c.otherComment ?? null,
+    quoteImpact: Array.isArray(c.quoteImpact)
+      ? c.quoteImpact.filter((x): x is string => typeof x === "string")
+      : [],
   };
 }

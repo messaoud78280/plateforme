@@ -53,7 +53,15 @@ export async function createOrOpenQuoteFromVisit(opts: {
   const impactPoints = buildQuoteImpactPoints({
     constraints: visit.constraintsJson,
   });
-  const impactNotes = impactPoints.map((p) => `- ${p.label}`).join("\n");
+  const impactNotes = (visit.constraintsJson &&
+  typeof visit.constraintsJson === "object" &&
+  Array.isArray((visit.constraintsJson as { quoteImpact?: string[] }).quoteImpact) &&
+  (visit.constraintsJson as { quoteImpact?: string[] }).quoteImpact!.length > 0
+    ? (visit.constraintsJson as { quoteImpact: string[] }).quoteImpact
+    : impactPoints.map((p) => p.label)
+  )
+    .map((p) => `- ${p}`)
+    .join("\n");
 
   const clientSnapshotJson: Prisma.InputJsonValue = {
     name: visit.clientName,
@@ -72,7 +80,7 @@ export async function createOrOpenQuoteFromVisit(opts: {
     siteAddressSnapshot: visit.siteAddress,
     clientSnapshotJson,
     internalNotes: [
-      `Origine : visite terrain ${visit.id}`,
+      `Issu de la visite du ${dateLabel}`,
       visit.clientNeed ? `Besoin client : ${visit.clientNeed}` : null,
       visit.comments ? `Notes terrain : ${visit.comments}` : null,
       measureNotes ? `Avant-métré :\n${measureNotes}` : null,
@@ -96,6 +104,20 @@ export async function createOrOpenQuoteFromVisit(opts: {
       status: "TRANSMITTED",
     },
   });
+
+  for (const m of visit.measurements) {
+    if (!m.workItemId) continue;
+    const qty = d(m.computedQuantity);
+    if (qty <= 0) continue;
+    try {
+      await addLineFromWorkItem(opts.organizationId, quote.id, {
+        workItemId: m.workItemId,
+        quantity: qty,
+      });
+    } catch {
+      /* Unité ou ouvrage indisponible : le chiffreur associe manuellement. */
+    }
+  }
 
   return {
     action: "created",

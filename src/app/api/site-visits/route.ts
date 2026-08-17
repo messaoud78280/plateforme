@@ -5,7 +5,8 @@ import {
   canAccessSiteVisits,
   resolveSiteVisitsOrgId,
 } from "@/lib/site-visits/access";
-import { createSiteVisit, listSiteVisits } from "@/lib/site-visits/service";
+import { createSiteVisit, listSiteVisitKpis, listSiteVisits } from "@/lib/site-visits/service";
+import { dateRangeFromPreset } from "@/lib/site-visits/types";
 import type { SiteVisitStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -37,16 +38,27 @@ export async function GET(req: Request) {
   const responsibleId = url.searchParams.get("responsibleId");
   const from = url.searchParams.get("from");
   const to = url.searchParams.get("to");
+  const date = url.searchParams.get("date");
+  const projectId = url.searchParams.get("projectId");
+  const lot = url.searchParams.get("lot");
+  const state = url.searchParams.get("state");
+  const range = dateRangeFromPreset(date);
 
-  const visits = await listSiteVisits({
-    organizationId: orgId,
-    status: status || null,
-    q,
-    responsibleId,
-    from: from ? new Date(from) : null,
-    to: to ? new Date(to) : null,
-  });
-  return NextResponse.json({ visits });
+  const [visits, kpis] = await Promise.all([
+    listSiteVisits({
+      organizationId: orgId,
+      status: status || null,
+      q,
+      responsibleId,
+      from: from ? new Date(from) : range?.from ?? null,
+      to: to ? new Date(to) : range?.to ?? null,
+      projectId,
+      lot,
+      state,
+    }),
+    listSiteVisitKpis(orgId),
+  ]);
+  return NextResponse.json({ visits, kpis });
 }
 
 export async function POST(req: Request) {

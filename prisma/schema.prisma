@@ -4761,6 +4761,7 @@ enum SiteVisitStatus {
 
 enum SiteVisitMeasureType {
   SURFACE
+  WALL
   LENGTH
   VOLUME
   QUANTITY
@@ -4796,6 +4797,11 @@ model SiteVisit {
   constraintsJson      Json?
   estimatedCrewCount   Int?
   estimatedDuration    String?
+  /// Lots BTP concernés (libellés métier, pas une 2e nomenclature).
+  lotsJson             Json?
+  /// Zones / pièces / secteurs du relevé (ordre d’affichage).
+  zonesJson            Json?
+  preparedAt           DateTime?
   status               SiteVisitStatus @default(TO_PLAN)
   agendaEventId        String?
   /// Devis Commercial lié — idempotence « Créer le devis ».
@@ -4836,6 +4842,17 @@ model SiteVisitMeasurement {
   quantityValue     Decimal?             @db.Decimal(14, 4)
   unit              String
   computedQuantity  Decimal              @db.Decimal(14, 4)
+  /// Quantité brute avant déductions (L×l, L×H, etc.).
+  grossQuantity     Decimal?             @db.Decimal(14, 4)
+  multiplier        Decimal?             @db.Decimal(14, 4)
+  coefficient       Decimal?             @db.Decimal(14, 4)
+  wastePercent      Decimal?             @db.Decimal(8, 4)
+  /// Ouvertures / déductions : [{ label, lengthM, widthM, quantity }]
+  deductionsJson    Json?
+  /// Lot métier (aligné familles BTP).
+  lot               String?
+  /// Ouvrage bibliothèque commerciale — pas de copie.
+  workItemId        String?
   observation       String?              @db.Text
   sortOrder         Int                  @default(0)
   /// Si modifié après transmission devis (V1 simple).
@@ -4848,6 +4865,7 @@ model SiteVisitMeasurement {
 
   @@index([visitId, sortOrder])
   @@index([organizationId])
+  @@index([workItemId])
 }
 
 model SiteVisitMissingInfo {
@@ -4855,6 +4873,8 @@ model SiteVisitMissingInfo {
   visitId        String
   organizationId String
   label          String
+  comment        String?
+  dueAt          DateTime?
   resolvedAt     DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -4870,6 +4890,7 @@ model SiteVisitMedia {
   visitId        String
   organizationId String
   measurementId  String?
+  zone           String?
   kind           SiteVisitMediaKind @default(PHOTO)
   name           String
   caption        String?

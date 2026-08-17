@@ -17,6 +17,15 @@ export function buildQuoteImpactPoints(opts: {
   missingOpenLabels?: string[];
 }): QuoteImpactPoint[] {
   const c = normalizeConstraints(opts.constraints);
+  const quoteImpact = c.quoteImpact ?? [];
+  if (quoteImpact.length > 0) {
+    return quoteImpact.map((label, i) => ({
+      id: `qi:${i}:${label.toLowerCase()}`,
+      label,
+      severity: "info" as const,
+    }));
+  }
+
   const out: QuoteImpactPoint[] = [];
   const push = (id: string, label: string, severity: "info" | "warn" = "info") => {
     if (out.some((p) => p.id === id)) return;

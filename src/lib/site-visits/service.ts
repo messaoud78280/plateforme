@@ -8,10 +8,12 @@ import {
   computeMeasurement,
   formatQuantityLabel,
   type MeasureType,
+  type MeasureDeduction,
 } from "@/lib/site-visits/measurements";
 import { SITE_VISIT_STATUS_LABELS, normalizeConstraints, type SiteVisitConstraints } from "@/lib/site-visits/types";
 import { buildVisitSummary } from "@/lib/site-visits/summary";
 import { buildQuoteImpactPoints } from "@/lib/site-visits/impact";
+import { buildVisitCompleteness, hasVisitConstraints } from "@/lib/site-visits/completeness";
 import { syncSiteVisitAgenda } from "@/lib/site-visits/agenda-sync";
 
 export type CreateSiteVisitInput = {
@@ -30,6 +32,49 @@ export type CreateSiteVisitInput = {
   clientNeed?: string | null;
   comments?: string | null;
 };
+
+function parseStringList(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((x): x is string => typeof x === "string" && x.trim().length > 0);
+}
+
+function parseDeductions(raw: unknown): MeasureDeduction[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((x) => x && typeof x === "object")
+    .map((x) => {
+      const o = x as MeasureDeduction;
+      return {
+        label: typeof o.label === "string" ? o.label : null,
+        lengthM: o.lengthM != null ? Number(o.lengthM) : null,
+        widthM: o.widthM != null ? Number(o.widthM) : null,
+        quantity: o.quantity != null ? Number(o.quantity) : null,
+      };
+    });
+}
+
+function primaryActionFor(status: SiteVisitStatus, quoteHref: string | null): {
+  kind: string;
+  label: string;
+  href?: string | null;
+} {
+  switch (status) {
+    case "TO_PLAN":
+      return { kind: "plan", label: "Planifier" };
+    case "SCHEDULED":
+      return { kind: "prepare", label: "Préparer" };
+    case "IN_PROGRESS":
+      return { kind: "continue", label: "Continuer le relevé" };
+    case "INCOMPLETE":
+      return { kind: "complete", label: "Compléter" };
+    case "READY_TO_QUOTE":
+      return { kind: "quote", label: "Créer le devis" };
+    case "TRANSMITTED":
+      return { kind: "open-quote", label: "Voir le devis", href: quoteHref };
+    default:
+      return { kind: "open", label: "Ouvrir" };
+  }
+}
 
 function serializeConstraints(raw: unknown): SiteVisitConstraints {
   return normalizeConstraints(raw);
@@ -55,11 +100,16 @@ export function serializeVisit(
     siteOccupied: boolean;
     comments: string | null;
     constraintsJson: unknown;
+    lotsJson?: unknown;
+    zonesJson?: unknown;
+    preparedAt?: Date | null;
     estimatedCrewCount: number | null;
     estimatedDuration: string | null;
     status: SiteVisitStatus;
     agendaEventId: string | null;
     commercialQuoteId: string | null;
+    createdAt?: Date;
+    updatedAt?: Date;
     measurements?: Array<{
       id: string;
       zone: string | null;
@@ -71,6 +121,13 @@ export function serializeVisit(
       quantityValue: unknown;
       unit: string;
       computedQuantity: unknown;
+      grossQuantity?: unknown;
+      multiplier?: unknown;
+      coefficient?: unknown;
+      wastePercent?: unknown;
+      deductionsJson?: unknown;
+      lot?: string | null;
+      workItemId?: string | null;
       observation: string | null;
       sortOrder: number;
       modifiedAfterTransmit: boolean;
@@ -78,41 +135,65 @@ export function serializeVisit(
     missingInfos?: Array<{
       id: string;
       label: string;
+      comment?: string | null;
+      dueAt?: Date | null;
       resolvedAt: Date | null;
     }>;
     medias?: Array<{
       id: string;
       measurementId: string | null;
+      zone?: string | null;
       kind: string;
       name: string;
       caption: string | null;
       fileUrl: string | null;
       mimeType: string | null;
+      createdAt?: Date;
     }>;
     responsible?: { id: string; name: string | null; email: string } | null;
     commercialQuote?: { id: string; number: string; status: string } | null;
+    project?: { id: string; title: string } | null;
   },
 ) {
-  const measurements = (v.measurements ?? []).map((m) => ({
-    id: m.id,
-    zone: m.zone,
-    label: m.label,
-    measureType: m.measureType,
-    lengthM: m.lengthM != null ? d(m.lengthM) : null,
-    widthM: m.widthM != null ? d(m.widthM) : null,
-    heightM: m.heightM != null ? d(m.heightM) : null,
-    quantityValue: m.quantityValue != null ? d(m.quantityValue) : null,
-    unit: m.unit,
-    computedQuantity: d(m.computedQuantity),
-    quantityLabel: formatQuantityLabel(d(m.computedQuantity), m.unit),
-    observation: m.observation,
-    sortOrder: m.sortOrder,
-    modifiedAfterTransmit: m.modifiedAfterTransmit,
-  }));
+  const measurements = (v.measurements ?? []).map((m) => {
+    const qty = d(m.computedQuantity);
+    const deductions = parseDeductions(m.deductionsJson);
+    return {
+      id: m.id,
+      zone: m.zone,
+      label: m.label,
+      measureType: m.measureType,
+      lengthM: m.lengthM != null ? d(m.lengthM) : null,
+      widthM: m.widthM != null ? d(m.widthM) : null,
+      heightM: m.heightM != null ? d(m.heightM) : null,
+      quantityValue: m.quantityValue != null ? d(m.quantityValue) : null,
+      unit: m.unit,
+      computedQuantity: qty,
+      grossQuantity: m.grossQuantity != null ? d(m.grossQuantity) : qty,
+      multiplier: m.multiplier != null ? d(m.multiplier) : null,
+      coefficient: m.coefficient != null ? d(m.coefficient) : null,
+      wastePercent: m.wastePercent != null ? d(m.wastePercent) : null,
+      deductions,
+      lot: m.lot ?? null,
+      workItemId: m.workItemId ?? null,
+      quantityLabel: formatQuantityLabel(qty, m.unit),
+      observation: m.observation,
+      sortOrder: m.sortOrder,
+      modifiedAfterTransmit: m.modifiedAfterTransmit,
+    };
+  });
   const missingOpen = (v.missingInfos ?? []).filter((i) => !i.resolvedAt);
   const photos = (v.medias ?? []).filter((m) => m.kind === "PHOTO");
   const docs = (v.medias ?? []).filter((m) => m.kind === "DOCUMENT");
   const constraints = serializeConstraints(v.constraintsJson);
+  const lots = parseStringList(v.lotsJson);
+  const zones = parseStringList(v.zonesJson);
+  const uniqueZones = [
+    ...new Set([...zones, ...measurements.map((m) => m.zone?.trim() || "").filter(Boolean)]),
+  ];
+  const uniqueLots = [
+    ...new Set([...lots, ...measurements.map((m) => m.lot?.trim() || "").filter(Boolean)]),
+  ];
   const impactPoints = buildQuoteImpactPoints({
     constraints,
     missingOpenLabels: missingOpen.map((i) => i.label),
@@ -120,6 +201,13 @@ export function serializeVisit(
   const summary = buildVisitSummary({
     siteName: v.siteName,
     clientName: v.clientName,
+    siteAddress: v.siteAddress,
+    projectId: v.projectId,
+    contactName: v.contactName,
+    contactPhone: v.contactPhone,
+    scheduledAt: v.scheduledAt,
+    subject: v.subject,
+    lots,
     constraints,
     measurements,
     missingOpen: missingOpen.map((i) => ({ label: i.label })),
@@ -128,6 +216,26 @@ export function serializeVisit(
     estimatedCrewCount: v.estimatedCrewCount,
     estimatedDuration: v.estimatedDuration,
   });
+  const completeness = buildVisitCompleteness({
+    clientName: v.clientName,
+    siteAddress: v.siteAddress,
+    siteName: v.siteName,
+    projectId: v.projectId,
+    contactName: v.contactName,
+    contactPhone: v.contactPhone,
+    scheduledAt: v.scheduledAt,
+    subject: v.subject,
+    lots,
+    measurementCount: measurements.length,
+    measurementLots: measurements.map((m) => m.lot).filter((x): x is string => Boolean(x)),
+    hasConstraints: hasVisitConstraints(constraints),
+    missingOpenCount: missingOpen.length,
+    photoCount: photos.length,
+    documentCount: docs.length,
+  });
+  const quoteHref = v.commercialQuoteId
+    ? `/dashboard/devis-facturation/devis/${v.commercialQuoteId}?fromVisit=${v.id}`
+    : null;
   return {
     id: v.id,
     clientName: v.clientName,
@@ -137,6 +245,7 @@ export function serializeVisit(
     contactPhone: v.contactPhone,
     clientExternalOrgId: v.clientExternalOrgId,
     projectId: v.projectId,
+    projectTitle: v.project?.title ?? null,
     scheduledAt: v.scheduledAt?.toISOString() ?? null,
     responsibleId: v.responsibleId,
     responsibleName: v.responsible?.name || v.responsible?.email || null,
@@ -148,39 +257,56 @@ export function serializeVisit(
     siteOccupied: v.siteOccupied,
     comments: v.comments,
     constraints,
+    lots: uniqueLots,
+    zones: uniqueZones,
+    preparedAt: v.preparedAt?.toISOString() ?? null,
     estimatedCrewCount: v.estimatedCrewCount,
     estimatedDuration: v.estimatedDuration,
     status: v.status,
     statusLabel: SITE_VISIT_STATUS_LABELS[v.status],
     agendaEventId: v.agendaEventId,
+    agendaHref: v.agendaEventId ? `/dashboard/agenda?event=${v.agendaEventId}` : "/dashboard/agenda",
+    documentsHref: v.projectId
+      ? `/dashboard/documents?projectId=${encodeURIComponent(v.projectId)}`
+      : `/dashboard/documents?q=${encodeURIComponent(v.siteName || v.clientName)}`,
+    projectHref: v.projectId ? `/dashboard/projets/${v.projectId}` : null,
     commercialQuoteId: v.commercialQuoteId,
     commercialQuoteNumber: v.commercialQuote?.number ?? null,
-    commercialQuoteHref: v.commercialQuoteId
-      ? `/dashboard/devis-facturation/devis/${v.commercialQuoteId}?fromVisit=${v.id}`
-      : null,
+    commercialQuoteHref: quoteHref,
     measurements,
     missingInfos: (v.missingInfos ?? []).map((i) => ({
       id: i.id,
       label: i.label,
+      comment: i.comment ?? null,
+      dueAt: i.dueAt?.toISOString() ?? null,
       resolvedAt: i.resolvedAt?.toISOString() ?? null,
       open: !i.resolvedAt,
     })),
     medias: (v.medias ?? []).map((m) => ({
       id: m.id,
       measurementId: m.measurementId,
+      zone: m.zone ?? null,
       kind: m.kind,
       name: m.name,
       caption: m.caption,
       fileUrl: m.fileUrl,
       mimeType: m.mimeType,
+      createdAt: m.createdAt?.toISOString() ?? null,
     })),
     impactPoints,
+    completeness,
+    primaryAction: primaryActionFor(v.status, quoteHref),
+    createdAt: v.createdAt?.toISOString() ?? null,
+    updatedAt: v.updatedAt?.toISOString() ?? null,
     summary,
     stats: {
       measurementCount: measurements.length,
+      zoneCount: uniqueZones.length,
+      lotCount: uniqueLots.length,
       photoCount: photos.length,
       documentCount: docs.length,
       missingOpenCount: missingOpen.length,
+      constraintCount: impactPoints.length,
       quantitySummary: measurements
         .slice(0, 5)
         .map((m) => `${m.label} : ${m.quantityLabel}`),
@@ -199,6 +325,7 @@ const visitInclude = {
   medias: { orderBy: { createdAt: "desc" as const } },
   responsible: { select: { id: true, name: true, email: true } },
   commercialQuote: { select: { id: true, number: true, status: true } },
+  project: { select: { id: true, title: true } },
 } as const;
 
 export async function createSiteVisit(input: CreateSiteVisitInput) {
@@ -260,13 +387,23 @@ export async function listSiteVisits(opts: {
   q?: string | null;
   from?: Date | null;
   to?: Date | null;
+  projectId?: string | null;
+  lot?: string | null;
+  state?: string | null;
+  take?: number;
 }) {
   const q = opts.q?.trim();
   const visits = await prisma.siteVisit.findMany({
     where: {
       organizationId: opts.organizationId,
-      status: opts.status ?? undefined,
+      status:
+        opts.state === "ready"
+          ? "READY_TO_QUOTE"
+          : opts.state === "quoted"
+            ? "TRANSMITTED"
+            : opts.status ?? undefined,
       responsibleId: opts.responsibleId || undefined,
+      projectId: opts.projectId || undefined,
       scheduledAt:
         opts.from || opts.to
           ? {
@@ -274,20 +411,39 @@ export async function listSiteVisits(opts: {
               lte: opts.to ?? undefined,
             }
           : undefined,
-      ...(q
+      ...(opts.lot
         ? {
             OR: [
-              { clientName: { contains: q, mode: "insensitive" } },
-              { siteName: { contains: q, mode: "insensitive" } },
-              { siteAddress: { contains: q, mode: "insensitive" } },
-              { subject: { contains: q, mode: "insensitive" } },
+              { lotsJson: { array_contains: opts.lot } },
+              { measurements: { some: { lot: opts.lot } } },
+            ],
+          }
+        : {}),
+      ...(opts.state === "docs"
+        ? { medias: { some: {} } }
+        : opts.state === "constraints"
+          ? { NOT: { constraintsJson: { equals: Prisma.DbNull } } }
+          : opts.state === "missing"
+            ? { missingInfos: { some: { resolvedAt: null } } }
+            : {}),
+      ...(q
+        ? {
+            AND: [
               {
-                responsible: {
-                  OR: [
-                    { name: { contains: q, mode: "insensitive" } },
-                    { email: { contains: q, mode: "insensitive" } },
-                  ],
-                },
+                OR: [
+                  { clientName: { contains: q, mode: "insensitive" } },
+                  { siteName: { contains: q, mode: "insensitive" } },
+                  { siteAddress: { contains: q, mode: "insensitive" } },
+                  { subject: { contains: q, mode: "insensitive" } },
+                  {
+                    responsible: {
+                      OR: [
+                        { name: { contains: q, mode: "insensitive" } },
+                        { email: { contains: q, mode: "insensitive" } },
+                      ],
+                    },
+                  },
+                ],
               },
             ],
           }
@@ -295,9 +451,52 @@ export async function listSiteVisits(opts: {
     },
     include: visitInclude,
     orderBy: [{ scheduledAt: "asc" }, { updatedAt: "desc" }],
-    take: 200,
+    take: opts.take ?? 120,
   });
   return visits.map(serializeVisit);
+}
+
+export async function listSiteVisitKpis(organizationId: string) {
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfWeek = new Date(startOfDay);
+  const day = startOfWeek.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  startOfWeek.setDate(startOfWeek.getDate() + diff);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+  const [grouped, thisWeek, incompleteOpen] = await Promise.all([
+    prisma.siteVisit.groupBy({
+      by: ["status"],
+      where: { organizationId, status: { not: "CANCELLED" } },
+      _count: { _all: true },
+    }),
+    prisma.siteVisit.count({
+      where: {
+        organizationId,
+        status: { notIn: ["CANCELLED"] },
+        scheduledAt: { gte: startOfWeek, lt: endOfWeek },
+      },
+    }),
+    prisma.siteVisit.count({
+      where: {
+        organizationId,
+        status: { notIn: ["CANCELLED", "TRANSMITTED"] },
+        missingInfos: { some: { resolvedAt: null } },
+      },
+    }),
+  ]);
+  const countOf = (s: SiteVisitStatus) =>
+    grouped.find((g) => g.status === s)?._count._all ?? 0;
+  return {
+    toPlan: countOf("TO_PLAN"),
+    thisWeek,
+    inProgress: countOf("IN_PROGRESS"),
+    incomplete: Math.max(countOf("INCOMPLETE"), incompleteOpen),
+    ready: countOf("READY_TO_QUOTE"),
+    toQuote: countOf("READY_TO_QUOTE"),
+  };
 }
 
 export async function getSiteVisit(organizationId: string, visitId: string) {
@@ -361,6 +560,20 @@ export async function updateSiteVisit(opts: {
       typeof d0.estimatedDuration === "string"
         ? d0.estimatedDuration.trim() || null
         : null;
+  if (Array.isArray(d0.lots)) {
+    patch.lotsJson = parseStringList(d0.lots) as Prisma.InputJsonValue;
+  }
+  if (Array.isArray(d0.zones)) {
+    patch.zonesJson = parseStringList(d0.zones) as Prisma.InputJsonValue;
+  }
+  if (d0.preparedAt === true) patch.preparedAt = new Date();
+  if (d0.preparedAt === false || d0.preparedAt === null) patch.preparedAt = null;
+  if (typeof d0.projectId === "string" || d0.projectId === null) {
+    patch.project =
+      typeof d0.projectId === "string" && d0.projectId
+        ? { connect: { id: d0.projectId } }
+        : { disconnect: true };
+  }
   if (typeof d0.responsibleId === "string" || d0.responsibleId === null)
     patch.responsible =
       typeof d0.responsibleId === "string"
@@ -404,6 +617,12 @@ export async function upsertMeasurement(opts: {
     quantityValue?: number | null;
     unit?: string | null;
     observation?: string | null;
+    multiplier?: number | null;
+    coefficient?: number | null;
+    wastePercent?: number | null;
+    deductions?: MeasureDeduction[] | null;
+    lot?: string | null;
+    workItemId?: string | null;
   };
 }) {
   const visit = await prisma.siteVisit.findFirst({
@@ -415,7 +634,11 @@ export async function upsertMeasurement(opts: {
 
   const label = opts.data.label.trim();
   if (!label) throw new Error("Libellé requis");
-  const calc = computeMeasurement(opts.data);
+  const deductions = opts.data.deductions ?? [];
+  const calc = computeMeasurement({
+    ...opts.data,
+    deductions,
+  });
   if (calc.computedQuantity < 0) throw new Error("Quantité invalide");
 
   const payload = {
@@ -428,6 +651,13 @@ export async function upsertMeasurement(opts: {
     quantityValue: opts.data.quantityValue ?? null,
     unit: calc.unit,
     computedQuantity: calc.computedQuantity,
+    grossQuantity: calc.grossQuantity,
+    multiplier: opts.data.multiplier ?? null,
+    coefficient: opts.data.coefficient ?? null,
+    wastePercent: opts.data.wastePercent ?? null,
+    deductionsJson: deductions.length ? (deductions as Prisma.InputJsonValue) : Prisma.JsonNull,
+    lot: opts.data.lot?.trim() || null,
+    workItemId: opts.data.workItemId?.trim() || null,
     observation: opts.data.observation?.trim() || null,
     modifiedAfterTransmit: visit.status === "TRANSMITTED",
   };
@@ -488,6 +718,8 @@ export async function addMissingInfo(opts: {
   organizationId: string;
   visitId: string;
   label: string;
+  comment?: string | null;
+  dueAt?: Date | null;
 }) {
   const label = opts.label.trim();
   if (!label) throw new Error("Libellé requis");
@@ -500,6 +732,8 @@ export async function addMissingInfo(opts: {
       visitId: visit.id,
       organizationId: opts.organizationId,
       label,
+      comment: opts.comment?.trim() || null,
+      dueAt: opts.dueAt ?? null,
     },
   });
   if (

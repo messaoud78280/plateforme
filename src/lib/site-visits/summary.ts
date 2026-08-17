@@ -7,6 +7,10 @@ import {
   normalizeConstraints,
   type SiteVisitConstraints,
 } from "@/lib/site-visits/types";
+import {
+  buildVisitCompleteness,
+  hasVisitConstraints,
+} from "@/lib/site-visits/completeness";
 
 export type VisitMeasurementLite = {
   zone: string | null;
@@ -14,6 +18,7 @@ export type VisitMeasurementLite = {
   unit: string;
   computedQuantity: number;
   quantityLabel: string;
+  lot?: string | null;
 };
 
 export type VisitSummary = {
@@ -22,6 +27,8 @@ export type VisitSummary = {
   ready: boolean;
   missingOpenCount: number;
   totalsByUnit: { unit: string; total: number; label: string }[];
+  totalsByLot: { lot: string; totals: { unit: string; total: number; label: string }[] }[];
+  totalsByZone: { zone: string; totals: { unit: string; total: number; label: string }[] }[];
   measurementLines: string[];
   stateLines: string[];
   logisticsLines: string[];
@@ -45,9 +52,34 @@ function sumByUnit(
   }));
 }
 
+function groupTotals(
+  measurements: VisitMeasurementLite[],
+  keyOf: (m: VisitMeasurementLite) => string,
+): { key: string; totals: { unit: string; total: number; label: string }[] }[] {
+  const groups = new Map<string, VisitMeasurementLite[]>();
+  for (const m of measurements) {
+    const key = keyOf(m);
+    if (!key) continue;
+    const arr = groups.get(key) ?? [];
+    arr.push(m);
+    groups.set(key, arr);
+  }
+  return [...groups.entries()].map(([key, docs]) => ({
+    key,
+    totals: sumByUnit(docs),
+  }));
+}
+
 export function buildVisitSummary(opts: {
   siteName?: string | null;
   clientName: string;
+  siteAddress?: string | null;
+  projectId?: string | null;
+  contactName?: string | null;
+  contactPhone?: string | null;
+  scheduledAt?: string | Date | null;
+  subject?: string | null;
+  lots?: unknown;
   constraints?: SiteVisitConstraints | unknown | null;
   measurements: VisitMeasurementLite[];
   missingOpen: { label: string }[];
@@ -58,7 +90,24 @@ export function buildVisitSummary(opts: {
 }): VisitSummary {
   const c = normalizeConstraints(opts.constraints);
   const missingOpenCount = opts.missingOpen.length;
-  const ready = missingOpenCount === 0;
+  const completeness = buildVisitCompleteness({
+    clientName: opts.clientName,
+    siteAddress: opts.siteAddress,
+    siteName: opts.siteName,
+    projectId: opts.projectId,
+    contactName: opts.contactName,
+    contactPhone: opts.contactPhone,
+    scheduledAt: opts.scheduledAt,
+    subject: opts.subject,
+    lots: opts.lots,
+    measurementCount: opts.measurements.length,
+    measurementLots: opts.measurements.map((m) => m.lot).filter((x): x is string => Boolean(x)),
+    hasConstraints: hasVisitConstraints(c),
+    missingOpenCount,
+    photoCount: opts.photoCount,
+    documentCount: opts.documentCount,
+  });
+  const ready = completeness.items.filter((i) => i.required).every((i) => i.done);
   const impact = buildQuoteImpactPoints({
     constraints: c,
     missingOpenLabels: opts.missingOpen.map((m) => m.label),
@@ -99,12 +148,18 @@ export function buildVisitSummary(opts: {
 
   return {
     title: opts.siteName?.trim() || opts.clientName,
-    completenessLabel: ready
-      ? "Dossier prêt à chiffrer"
-      : `${missingOpenCount} information${missingOpenCount > 1 ? "s" : ""} manquante${missingOpenCount > 1 ? "s" : ""}`,
+    completenessLabel: completeness.label,
     ready,
     missingOpenCount,
     totalsByUnit: sumByUnit(opts.measurements),
+    totalsByLot: groupTotals(opts.measurements, (m) => m.lot?.trim() || "").map((g) => ({
+      lot: g.key,
+      totals: g.totals,
+    })),
+    totalsByZone: groupTotals(opts.measurements, (m) => m.zone?.trim() || "").map((g) => ({
+      zone: g.key,
+      totals: g.totals,
+    })),
     measurementLines: opts.measurements.map(
       (m) =>
         `${m.zone ? `${m.zone} — ` : ""}${m.label} : ${m.quantityLabel}`,

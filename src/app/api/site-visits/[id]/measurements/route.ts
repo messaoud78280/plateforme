@@ -53,6 +53,12 @@ export async function POST(
         quantityValue: body.quantityValue != null ? Number(body.quantityValue) : null,
         unit: body.unit ?? null,
         observation: body.observation ?? null,
+        multiplier: body.multiplier != null ? Number(body.multiplier) : null,
+        coefficient: body.coefficient != null ? Number(body.coefficient) : null,
+        wastePercent: body.wastePercent != null ? Number(body.wastePercent) : null,
+        deductions: Array.isArray(body.deductions) ? body.deductions : null,
+        lot: body.lot ?? null,
+        workItemId: body.workItemId ?? null,
       },
     });
     return NextResponse.json({ visit }, { status: 201 });

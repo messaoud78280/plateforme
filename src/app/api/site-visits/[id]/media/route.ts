@@ -49,6 +49,7 @@ export async function POST(
       kind,
       caption: String(form.get("caption") ?? "") || null,
       measurementId: String(form.get("measurementId") ?? "") || null,
+      zone: String(form.get("zone") ?? "") || null,
       name: String(form.get("name") ?? "") || null,
     });
     return NextResponse.json({ visit }, { status: 201 });

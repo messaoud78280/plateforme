@@ -19,7 +19,12 @@ ENVIRONMENT="${RAILWAY_ENVIRONMENT:-production}"
 echo "→ Vérification Railway CLI…"
 
 if [[ -n "${RAILWAY_TOKEN:-}" ]]; then
-  if ! $CLI whoami &>/dev/null; then
+  # Un project token n’autorise souvent pas `whoami` (compte), mais déploie bien.
+  if $CLI status --service "$SERVICE" --environment "$ENVIRONMENT" &>/dev/null; then
+    echo "   Token projet (.env.railway) valide."
+  elif $CLI whoami &>/dev/null; then
+    echo "   Token Railway détecté."
+  else
     echo ""
     echo "   Le token dans .env.railway est invalide ou expiré."
     echo "   Railway → projet plateforme → Settings → Tokens → créez un nouveau token."
@@ -27,7 +32,6 @@ if [[ -n "${RAILWAY_TOKEN:-}" ]]; then
     echo ""
     exit 1
   fi
-  echo "   Token projet (.env.railway) détecté."
 elif $CLI whoami &>/dev/null; then
   echo "   Session CLI active ($($CLI whoami 2>/dev/null || echo 'ok'))."
 else

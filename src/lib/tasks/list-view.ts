@@ -15,6 +15,7 @@ export type TaskListStatusBucket = "a_faire" | "en_cours" | "a_valider" | "termi
 export type TaskListRow = {
   id: string;
   title: string;
+  description: string | null;
   status: TaskStatus;
   statusLabel: string;
   statusBucket: TaskListStatusBucket;
@@ -30,6 +31,7 @@ export type TaskListRow = {
   dueLabel: string;
   overdueDays: number | null;
   isOverdue: boolean;
+  isDueToday: boolean;
   sourceLabel: string | null;
   createdAt: string;
   updatedAt: string;
@@ -41,7 +43,12 @@ export type TaskListSummary = {
   aFaire: number;
   enCours: number;
   enRetard: number;
+  /** Retards > 7 jours (ouverte). */
+  enRetardSevere: number;
   aValider: number;
+  /** Validations avec échéance aujourd’hui. */
+  aValiderToday: number;
+  prioritaires: number;
 };
 
 export type TaskListAssigneeOption = { id: string; name: string; roleLabel: string };
@@ -73,13 +80,21 @@ function shortProjectTitle(title: string | null): string | null {
 function dueInfo(
   desiredDate: Date | null,
   status: TaskStatus,
-): { label: string; overdueDays: number | null; isOverdue: boolean } {
-  if (!desiredDate) return { label: "Sans échéance", overdueDays: null, isOverdue: false };
+): {
+  label: string;
+  overdueDays: number | null;
+  isOverdue: boolean;
+  isDueToday: boolean;
+} {
+  if (!desiredDate) {
+    return { label: "Sans échéance", overdueDays: null, isOverdue: false, isDueToday: false };
+  }
   if (status === "COMPLETE") {
     return {
       label: desiredDate.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }),
       overdueDays: null,
       isOverdue: false,
+      isDueToday: false,
     };
   }
   const end = new Date(desiredDate);
@@ -98,21 +113,23 @@ function dueInfo(
       Math.ceil((startToday.getTime() - end.getTime()) / (24 * 60 * 60 * 1000)),
     );
     return {
-      label: `En retard de ${days} jour${days > 1 ? "s" : ""}`,
+      label: `${days} j de retard`,
       overdueDays: days,
       isOverdue: true,
+      isDueToday: false,
     };
   }
   if (desiredDate >= startToday && desiredDate < startTomorrow) {
-    return { label: "Aujourd'hui", overdueDays: null, isOverdue: false };
+    return { label: "Aujourd’hui", overdueDays: null, isOverdue: false, isDueToday: true };
   }
   if (desiredDate >= startTomorrow && desiredDate < startDayAfter) {
-    return { label: "Demain", overdueDays: null, isOverdue: false };
+    return { label: "Demain", overdueDays: null, isOverdue: false, isDueToday: false };
   }
   return {
     label: desiredDate.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }),
     overdueDays: null,
     isOverdue: false,
+    isDueToday: false,
   };
 }
 
@@ -186,6 +203,7 @@ export async function loadTasksListView(opts: LoadTasksListViewOpts): Promise<{
     select: {
       id: true,
       title: true,
+      description: true,
       status: true,
       priority: true,
       desiredDate: true,
@@ -222,16 +240,13 @@ export async function loadTasksListView(opts: LoadTasksListViewOpts): Promise<{
     return {
       id: t.id,
       title: t.title,
+      description: t.description ?? null,
       status: t.status,
       statusLabel: STATUS_LABELS[t.status] ?? t.status,
       statusBucket: statusBucket(t.status),
       priority: prio,
       priorityLabel:
-        prio === "URGENT"
-          ? "Priorité haute"
-          : prio === "PRIORITAIRE"
-            ? "Prioritaire"
-            : "Normale",
+        prio === "URGENT" ? "Haute" : prio === "PRIORITAIRE" ? "Prioritaire" : "Normale",
       projectId: t.project?.id ?? null,
       projectTitle: t.project?.title ?? null,
       projectTitleShort: shortProjectTitle(t.project?.title ?? null),
@@ -242,6 +257,7 @@ export async function loadTasksListView(opts: LoadTasksListViewOpts): Promise<{
       dueLabel: due.label,
       overdueDays: due.overdueDays,
       isOverdue: due.isOverdue,
+      isDueToday: due.isDueToday,
       sourceLabel: sourceLabel(t.sourceMessageKind),
       createdAt: t.createdAt.toISOString(),
       updatedAt: t.updatedAt.toISOString(),
@@ -256,7 +272,11 @@ export async function loadTasksListView(opts: LoadTasksListViewOpts): Promise<{
     aFaire: open.filter((r) => r.statusBucket === "a_faire").length,
     enCours: open.filter((r) => r.statusBucket === "en_cours").length,
     enRetard: open.filter((r) => r.isOverdue).length,
+    enRetardSevere: open.filter((r) => (r.overdueDays ?? 0) > 7).length,
     aValider: open.filter((r) => r.statusBucket === "a_valider").length,
+    aValiderToday: open.filter((r) => r.statusBucket === "a_valider" && r.isDueToday).length,
+    prioritaires: open.filter((r) => r.priority === "PRIORITAIRE" || r.priority === "URGENT")
+      .length,
   };
 
   const projectMap = new Map<string, string>();

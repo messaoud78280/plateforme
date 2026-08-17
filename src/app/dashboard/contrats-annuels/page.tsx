@@ -14,7 +14,11 @@ export const dynamic = "force-dynamic";
 export default async function ContratsAnnuelsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; year?: string; contract?: string }>;
+  searchParams: Promise<{
+    view?: string;
+    year?: string;
+    contract?: string;
+  }>;
 }) {
   const session = await getCachedServerSession();
   if (!session?.user?.id) {
@@ -39,7 +43,11 @@ export default async function ContratsAnnuelsPage({
   const sp = await searchParams;
   const viewRaw = sp.view ?? "piloter";
   const view =
-    viewRaw === "planning" || viewRaw === "portefeuille" ? viewRaw : "piloter";
+    viewRaw === "planning" ||
+    viewRaw === "portefeuille" ||
+    viewRaw === "facturation"
+      ? viewRaw
+      : "piloter";
   const year = sp.year ? Number(sp.year) : undefined;
 
   const board = await loadAnnualContractsBoard({

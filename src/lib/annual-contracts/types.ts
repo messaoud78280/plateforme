@@ -20,13 +20,14 @@ export const ANNUAL_INTERVENTION_STATUS_LABELS: Record<
   CANCELLED: "Annulée",
 };
 
+/** Buckets « À piloter » — facturation séparée de l’intervention. */
 export type AnnualPilotBucket =
-  | "to_prepare"
-  | "to_confirm"
-  | "within_15"
-  | "within_7"
   | "overdue"
-  | "to_bill";
+  | "this_week"
+  | "within_30"
+  | "to_prepare"
+  | "to_bill"
+  | "preparing";
 
 export type AnnualAttentionEval = {
   level: UrgencyLevel;
@@ -36,7 +37,6 @@ export type AnnualAttentionEval = {
 };
 
 export function startOfDayParis(d: Date = new Date()): Date {
-  // Approximation Europe/Paris pour calculs J-N (dates @db.Date sans heure).
   const iso = d.toLocaleDateString("en-CA", { timeZone: "Europe/Paris" });
   return new Date(`${iso}T00:00:00.000Z`);
 }

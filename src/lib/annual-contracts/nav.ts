@@ -5,7 +5,7 @@ import { withReturnTo } from "@/lib/navigation/safe-return-to";
 
 export function annualContractHref(opts: {
   contractId: string;
-  view?: "piloter" | "planning" | "portefeuille";
+  view?: "piloter" | "planning" | "portefeuille" | "facturation";
 }): string {
   const p = new URLSearchParams();
   p.set("view", opts.view ?? "piloter");

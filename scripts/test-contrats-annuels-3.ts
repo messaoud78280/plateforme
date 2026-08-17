@@ -20,12 +20,15 @@ function baseContract(
     history?: SerializedAnnualContract["history"];
   },
 ): SerializedAnnualContract {
+  const history = partial.history ?? [];
+  const open = partial.openIntervention ?? null;
   return {
     id: "c1",
     clientName: "AVCIMMO — FONCIA",
     siteName: null,
     siteAddress: "Adresse",
     contractType: "CE",
+    frequencyLabel: "Annuelle",
     amountHt: 1310,
     amountHtLabel: "1 310 €",
     plannedCrewCount: 2,
@@ -35,9 +38,25 @@ function baseContract(
     statusLabel: "Actif",
     nextPlannedDate: "2026-01-22",
     projectId: null,
-    openIntervention: null,
-    history: [],
+    lastCompletedDate: null,
+    lastCompletedYear: null,
+    openIntervention: open,
+    history,
+    allInterventions: [...(open ? [open] : []), ...history],
     ...partial,
+  };
+}
+
+function enrichIntervention(
+  i: NonNullable<SerializedAnnualContract["openIntervention"]>,
+): NonNullable<SerializedAnnualContract["openIntervention"]> {
+  return {
+    invoiceTotalHt: null,
+    invoiceTotalHtLabel: null,
+    invoiceAmountPaid: null,
+    invoiceAmountDue: null,
+    daysOverdue: null,
+    ...i,
   };
 }
 
@@ -58,7 +77,7 @@ function testAgendaDeepLink() {
 function testPrimaryActions() {
   const toPrepare = resolveAnnualPrimaryAction(
     baseContract({
-      openIntervention: {
+      openIntervention: enrichIntervention({
         id: "i1",
         contractId: "c1",
         plannedDate: "2026-01-22",
@@ -80,7 +99,7 @@ function testPrimaryActions() {
         commercialInvoiceHref: null,
         attentionLevel: null,
         attentionReason: null,
-      },
+      }),
     }),
     { includeFinancials: true },
   );
@@ -89,7 +108,7 @@ function testPrimaryActions() {
   const draft = resolveAnnualPrimaryAction(
     baseContract({
       history: [
-        {
+        enrichIntervention({
           id: "i2",
           contractId: "c1",
           plannedDate: "2026-01-15",
@@ -111,7 +130,7 @@ function testPrimaryActions() {
           commercialInvoiceHref: "/dashboard/devis-facturation/factures/inv1",
           attentionLevel: null,
           attentionReason: null,
-        },
+        }),
       ],
     }),
     { includeFinancials: true },

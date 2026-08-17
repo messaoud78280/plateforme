@@ -7,11 +7,17 @@ import { cn } from "@/lib/cn";
 
 export const SUPPLIER_ACTIVITY_OPTIONS = [
   "Matériaux",
-  "Location",
   "Étanchéité",
+  "Gros œuvre",
+  "Location matériel",
   "Électricité",
   "Plomberie",
+  "Couverture",
+  "Menuiserie",
+  "Peinture",
+  "Sécurité",
   "Transport",
+  "Déchets",
   "Sous-traitance",
   "Autre",
 ] as const;

@@ -1,27 +1,53 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import {
   isInternalPurchaseOrderActor,
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
 import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 import { SuppliersWorkspace } from "@/components/suppliers/SuppliersWorkspace";
+import {
+  loadSuppliersWorkspace,
+  type SuppliersPeriod,
+  type SuppliersSort,
+  type SuppliersView,
+} from "@/lib/suppliers/suppliers-workspace";
 
 export const dynamic = "force-dynamic";
 
-const OPEN_PO = [
-  "A_VALIDER",
-  "VALIDEE",
-  "ENVOYEE_FOURNISSEUR",
-  "A_CONFIRMER",
-  "CONFIRMEE",
-  "LIVRAISON_PROGRAMMEE",
-  "PARTIELLEMENT_RECUE",
-] as const;
+const VIEWS: SuppliersView[] = [
+  "all",
+  "active",
+  "with_orders",
+  "with_deliveries",
+  "awaiting_confirm",
+  "incomplete",
+];
+const SORTS: SuppliersSort[] = [
+  "name",
+  "active",
+  "last_order",
+  "committed",
+  "spent",
+  "confirm",
+  "deliveries",
+  "activity",
+];
+const PERIODS: SuppliersPeriod[] = ["month", "quarter", "year", "last12", "all"];
 
-export default async function FournisseursPage() {
+export default async function FournisseursPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    view?: string;
+    q?: string;
+    sort?: string;
+    period?: string;
+    display?: string;
+    status?: string;
+  }>;
+}) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/fournisseurs");
   if (!isInternalPurchaseOrderActor(session.user)) redirect("/dashboard");
@@ -34,58 +60,28 @@ export default async function FournisseursPage() {
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) redirect("/dashboard");
 
-  const suppliers = await prisma.externalOrganization.findMany({
-    where: { hostOrganizationId: orgId, type: "SUPPLIER" },
-    select: {
-      id: true,
-      name: true,
-      tradeName: true,
-      activity: true,
-      city: true,
-      phone: true,
-      email: true,
-      siret: true,
-      status: true,
-      _count: { select: { contacts: true, purchaseOrders: true } },
-      purchaseOrders: {
-        where: { status: { in: [...OPEN_PO] } },
-        select: {
-          id: true,
-          status: true,
-          confirmedDeliveryAt: true,
-          sharedWithSupplier: true,
-        },
-        take: 20,
-      },
-    },
-    orderBy: { name: "asc" },
-    take: 100,
+  const sp = await searchParams;
+  const view = (VIEWS.includes(sp.view as SuppliersView) ? sp.view : "all") as SuppliersView;
+  const sort = (SORTS.includes(sp.sort as SuppliersSort) ? sp.sort : "name") as SuppliersSort;
+  const period = (
+    PERIODS.includes(sp.period as SuppliersPeriod) ? sp.period : "month"
+  ) as SuppliersPeriod;
+  const display = sp.display === "list" ? "list" : "cards";
+
+  const { rows, summary } = await loadSuppliersWorkspace({
+    organizationId: orgId,
+    period,
   });
 
-  const items = suppliers.map((s) => {
-    const openOrders = s.purchaseOrders.length;
-    const awaitingConfirm = s.purchaseOrders.filter(
-      (o) =>
-        !o.confirmedDeliveryAt &&
-        (o.status === "A_CONFIRMER" ||
-          o.status === "ENVOYEE_FOURNISSEUR" ||
-          o.sharedWithSupplier),
-    ).length;
-    return {
-      id: s.id,
-      name: s.name,
-      tradeName: s.tradeName,
-      activity: s.activity,
-      city: s.city,
-      phone: s.phone,
-      email: s.email,
-      siret: s.siret,
-      status: s.status,
-      contactsCount: s._count.contacts,
-      openOrdersCount: openOrders,
-      awaitingConfirmCount: awaitingConfirm,
-    };
-  });
-
-  return <SuppliersWorkspace initialSuppliers={items} />;
+  return (
+    <SuppliersWorkspace
+      rows={rows}
+      summary={summary}
+      initialView={view}
+      initialQ={typeof sp.q === "string" ? sp.q : ""}
+      initialSort={sort}
+      initialPeriod={period}
+      initialDisplay={display}
+    />
+  );
 }

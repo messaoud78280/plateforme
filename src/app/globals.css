@@ -181,10 +181,12 @@ body {
   --bw-soft-watch: #fff4e6;
   --bw-soft-critical: #fdeceb;
   --bw-soft-violet: #eee9ff;
+  --cc-magenta: #9b5de5;
+  --bw-soft-magenta: #f4eef9;
   --bw-gradient-hero: linear-gradient(135deg, #132f4c 0%, #173b67 48%, #2563eb 140%);
   --bw-gradient-finance: linear-gradient(145deg, #e4ecf6 0%, #dff4f9 100%);
   --bw-gradient-ok: linear-gradient(145deg, #e6f9f1 0%, #dff4f9 100%);
-  --bw-gradient-sidebar: linear-gradient(180deg, #e8eef7 0%, #eef3f9 42%, #f3f6fa 100%);
+  --bw-gradient-sidebar: linear-gradient(180deg, #e6edf6 0%, #eef3f9 38%, #f4f7fb 100%);
   --bw-gradient-card: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
   --bw-gradient-nav-active: linear-gradient(135deg, #132f4c 0%, #1a4570 55%, #1e4d7a 100%);
 }
@@ -993,18 +995,20 @@ body {
 
   .bw-sidebar-shell {
     background: var(--bw-gradient-sidebar);
-    border-right: 1px solid var(--cc-border);
+    border-right: 1px solid color-mix(in srgb, var(--cc-navy) 10%, transparent);
   }
 
   .bw-nav-item {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 0.625rem;
+    min-height: 2.5rem;
     border-radius: var(--cc-radius);
-    padding: 0.5rem 0.625rem;
-    font-size: 0.875rem;
+    padding: 0.45rem 0.625rem 0.45rem 0.7rem;
+    font-size: 0.8125rem;
     font-weight: 500;
-    color: color-mix(in srgb, var(--cc-ink) 72%, transparent);
+    color: color-mix(in srgb, var(--cc-ink) 82%, transparent);
     transition:
       background var(--cc-transition),
       color var(--cc-transition),
@@ -1012,22 +1016,134 @@ body {
       transform var(--cc-transition);
   }
   .bw-nav-item:hover {
-    background: color-mix(in srgb, white 78%, var(--bw-soft-accent));
+    transform: translateX(1px);
     color: var(--cc-navy);
   }
-  .bw-nav-active {
-    background: var(--bw-gradient-nav-active) !important;
-    color: #fff !important;
-    box-shadow:
-      0 1px 2px rgba(19, 47, 76, 0.18),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  .bw-nav-item[data-fam="navy"]:hover {
+    background: color-mix(in srgb, var(--bw-soft-navy) 70%, white);
   }
-  .bw-nav-active svg {
-    color: #93c5fd !important;
+  .bw-nav-item[data-fam="navy"]:hover svg {
+    color: var(--cc-navy);
+  }
+  .bw-nav-item[data-fam="cyan"]:hover {
+    background: color-mix(in srgb, var(--bw-soft-cyan) 62%, white);
+  }
+  .bw-nav-item[data-fam="cyan"]:hover svg {
+    color: var(--cc-cyan);
+  }
+  .bw-nav-item[data-fam="watch"]:hover {
+    background: color-mix(in srgb, var(--bw-soft-watch) 62%, white);
+  }
+  .bw-nav-item[data-fam="watch"]:hover svg {
+    color: var(--cc-watch);
+  }
+  .bw-nav-item[data-fam="violet"]:hover {
+    background: color-mix(in srgb, var(--bw-soft-violet) 62%, white);
+  }
+  .bw-nav-item[data-fam="violet"]:hover svg {
+    color: var(--cc-intel);
+  }
+  .bw-nav-item[data-fam="ok"]:hover {
+    background: color-mix(in srgb, var(--bw-soft-ok) 62%, white);
+  }
+  .bw-nav-item[data-fam="ok"]:hover svg {
+    color: var(--cc-ok);
+  }
+  .bw-nav-item[data-fam="magenta"]:hover {
+    background: color-mix(in srgb, var(--bw-soft-magenta) 62%, white);
+  }
+  .bw-nav-item[data-fam="magenta"]:hover svg {
+    color: var(--cc-magenta);
+  }
+  .bw-nav-item[data-fam="neutral"]:hover {
+    background: color-mix(in srgb, white 78%, var(--bw-soft-navy));
+  }
+  .bw-nav-item svg {
+    color: color-mix(in srgb, var(--cc-ink) 48%, transparent);
+    transition: color var(--cc-transition);
+  }
+  .bw-nav-item.is-emphasis {
+    font-weight: 600;
+  }
+  .bw-nav-item.is-active {
+    color: var(--cc-ink) !important;
+    box-shadow: 0 1px 2px rgba(19, 47, 76, 0.05);
+  }
+  .bw-nav-item.is-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 7px;
+    bottom: 7px;
+    width: 3px;
+    border-radius: 0 2px 2px 0;
+  }
+  .bw-nav-item.is-active[data-fam="navy"] {
+    background: color-mix(in srgb, var(--bw-soft-navy) 82%, white) !important;
+  }
+  .bw-nav-item.is-active[data-fam="navy"]::before {
+    background: var(--cc-navy);
+  }
+  .bw-nav-item.is-active[data-fam="navy"] svg {
+    color: var(--cc-navy) !important;
+  }
+  .bw-nav-item.is-active[data-fam="cyan"] {
+    background: color-mix(in srgb, var(--bw-soft-cyan) 78%, white) !important;
+  }
+  .bw-nav-item.is-active[data-fam="cyan"]::before {
+    background: var(--cc-cyan);
+  }
+  .bw-nav-item.is-active[data-fam="cyan"] svg {
+    color: var(--cc-cyan) !important;
+  }
+  .bw-nav-item.is-active[data-fam="watch"] {
+    background: color-mix(in srgb, var(--bw-soft-watch) 78%, white) !important;
+  }
+  .bw-nav-item.is-active[data-fam="watch"]::before {
+    background: var(--cc-watch);
+  }
+  .bw-nav-item.is-active[data-fam="watch"] svg {
+    color: var(--cc-watch) !important;
+  }
+  .bw-nav-item.is-active[data-fam="violet"] {
+    background: color-mix(in srgb, var(--bw-soft-violet) 78%, white) !important;
+  }
+  .bw-nav-item.is-active[data-fam="violet"]::before {
+    background: var(--cc-intel);
+  }
+  .bw-nav-item.is-active[data-fam="violet"] svg {
+    color: var(--cc-intel) !important;
+  }
+  .bw-nav-item.is-active[data-fam="ok"] {
+    background: color-mix(in srgb, var(--bw-soft-ok) 78%, white) !important;
+  }
+  .bw-nav-item.is-active[data-fam="ok"]::before {
+    background: var(--cc-ok);
+  }
+  .bw-nav-item.is-active[data-fam="ok"] svg {
+    color: var(--cc-ok) !important;
+  }
+  .bw-nav-item.is-active[data-fam="magenta"] {
+    background: color-mix(in srgb, var(--bw-soft-magenta) 78%, white) !important;
+  }
+  .bw-nav-item.is-active[data-fam="magenta"]::before {
+    background: var(--cc-magenta);
+  }
+  .bw-nav-item.is-active[data-fam="magenta"] svg {
+    color: var(--cc-magenta) !important;
+  }
+  .bw-nav-item.is-active[data-fam="neutral"] {
+    background: color-mix(in srgb, var(--bw-soft-navy) 55%, white) !important;
+  }
+  .bw-nav-item.is-active[data-fam="neutral"]::before {
+    background: color-mix(in srgb, var(--cc-navy) 45%, #94a3b8);
   }
   .bw-nav-pending {
-    background: color-mix(in srgb, var(--bw-soft-accent) 85%, white) !important;
+    background: color-mix(in srgb, var(--bw-soft-accent) 70%, white) !important;
     color: var(--cc-navy) !important;
+  }
+  .bw-nav-family {
+    color: var(--fam-color, var(--cc-navy));
   }
 
   .bw-user-card {

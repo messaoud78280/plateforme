@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType } from "react";
+import type { ComponentType, CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -12,6 +12,7 @@ import {
   Building2,
   Calendar,
   CalendarDays,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
@@ -37,154 +38,163 @@ import { isNavHrefAllowedForDemo } from "@/lib/demo-environment/nav-modules";
 import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 import { MessagerieNavBadge } from "@/components/dashboard/MessagerieNavBadge";
 
+type RoleKey = "CLIENT" | "MANAGER" | "AGENT" | "AGENCE";
+type FamTone = "navy" | "cyan" | "watch" | "violet" | "ok" | "magenta" | "neutral";
+
 type NavItem = {
   href: string;
   label: string;
   exact?: boolean;
   icon: ComponentType<{ className?: string }>;
+  roles: RoleKey[];
+  emphasis?: "high" | "low";
 };
 
-type NavSection = { id: string; label: string; items: NavItem[] };
+type NavFamily = {
+  id: string;
+  label: string;
+  tone: FamTone;
+  pinned?: boolean;
+  items: NavItem[];
+};
 
-function buildSections(role: string | null | undefined): NavSection[] {
-  const isClient = role === "CLIENT";
-  const isManager = role === "MANAGER";
-  const isAgent = role === "AGENT" || role === "AGENCE";
+const FAM_OPEN_KEY = "bework-sidebar-families";
 
-  if (isClient) {
-    return [
-      {
-        id: "principal",
-        label: "Principal",
-        items: [
-          { href: "/dashboard", label: "Accueil", exact: true, icon: Home },
-          { href: "/dashboard/a-traiter", label: "À traiter", icon: AlertCircle },
-          { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
-          { href: "/dashboard/projets", label: "Chantiers", icon: FolderKanban },
-          { href: "/dashboard/planning", label: "Planning", icon: CalendarDays },
-          { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
-          { href: "/dashboard/contrats-annuels", label: "Contrats annuels", icon: RefreshCw },
-          { href: "/dashboard/visites-metres", label: "Visites & métrés", icon: Ruler },
-          { href: "/dashboard/fiches-suivi", label: "Fiches suivi", icon: StickyNote },
-          { href: "/dashboard/commandes", label: "Commandes", icon: Briefcase },
-          { href: "/dashboard/depenses", label: "Dépenses", icon: CircleDollarSign },
-          { href: "/dashboard/fournisseurs", label: "Fournisseurs", icon: Building2 },
-          { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList },
-          { href: "/dashboard/documents", label: "Documents", icon: FileText },
-          { href: "/dashboard/livraisons", label: "Livraisons", icon: CalendarDays },
-          { href: "/dashboard/equipe", label: "Équipe & partenaires", icon: Users },
-        ],
-      },
-      {
-        id: "pilotage",
-        label: "Pilotage",
-        items: [
-          { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
-          { href: "/dashboard/rentabilite", label: "Rentabilité", icon: CircleDollarSign },
-          { href: "/dashboard/devis-facturation", label: "Devis & Facturation", icon: Wallet },
-          { href: "/dashboard/facturation", label: "À facturer", icon: Wallet },
-          { href: "/dashboard/rapports", label: "Rapports", icon: Briefcase },
-          { href: "/dashboard/assistant-ia", label: "Assistant IA", icon: Sparkles },
-        ],
-      },
-      {
-        id: "compte",
-        label: "Compte",
-        items: [
-          { href: "/dashboard/abonnement", label: "Abonnement", icon: Wallet },
-          { href: "/dashboard/parametres", label: "Paramètres", icon: Settings },
-        ],
-      },
-    ];
+const ALL: RoleKey[] = ["CLIENT", "MANAGER", "AGENT", "AGENCE"];
+const INTERNAL: RoleKey[] = ["CLIENT", "MANAGER", "AGENT", "AGENCE"];
+const OPS: RoleKey[] = ["MANAGER", "AGENT", "AGENCE"];
+
+function roleKey(role: string | null | undefined): RoleKey | null {
+  if (role === "CLIENT") return "CLIENT";
+  if (role === "MANAGER") return "MANAGER";
+  if (role === "AGENCE") return "AGENCE";
+  if (role === "AGENT") return "AGENT";
+  return null;
+}
+
+function buildFamilies(): NavFamily[] {
+  return [
+    {
+      id: "accueil",
+      label: "Accueil",
+      tone: "navy",
+      pinned: true,
+      items: [
+        { href: "/dashboard", label: "Accueil", exact: true, icon: Home, roles: ALL, emphasis: "high" },
+        { href: "/dashboard/a-traiter", label: "À traiter", icon: AlertCircle, roles: ALL, emphasis: "high" },
+      ],
+    },
+    {
+      id: "terrain",
+      label: "Chantiers & terrain",
+      tone: "cyan",
+      items: [
+        { href: "/dashboard/projets", label: "Chantiers", icon: FolderKanban, roles: ALL, emphasis: "high" },
+        { href: "/dashboard/planning", label: "Planning", icon: CalendarDays, roles: ALL, emphasis: "high" },
+        { href: "/dashboard/agenda", label: "Agenda", icon: Calendar, roles: ALL },
+        { href: "/dashboard/visites-metres", label: "Visites & métrés", icon: Ruler, roles: ALL, emphasis: "high" },
+        { href: "/dashboard/fiches-suivi", label: "Fiches suivi", icon: StickyNote, roles: ["CLIENT", "MANAGER"] },
+        { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList, roles: ALL },
+        { href: "/dashboard/messages", label: "RDV", icon: CalendarDays, roles: OPS },
+      ],
+    },
+    {
+      id: "achats",
+      label: "Achats & fournisseurs",
+      tone: "watch",
+      items: [
+        { href: "/dashboard/commandes", label: "Commandes", icon: Briefcase, roles: ["CLIENT"] },
+        { href: "/dashboard/depenses", label: "Dépenses", icon: CircleDollarSign, roles: ["CLIENT"] },
+        { href: "/dashboard/fournisseurs", label: "Fournisseurs", icon: Building2, roles: ["CLIENT"] },
+        { href: "/dashboard/livraisons", label: "Livraisons", icon: CalendarDays, roles: ["CLIENT"] },
+      ],
+    },
+    {
+      id: "collab",
+      label: "Collaboration & documents",
+      tone: "violet",
+      items: [
+        { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare, roles: ALL },
+        { href: "/dashboard/documents", label: "Documents", icon: FileText, roles: ALL },
+        { href: "/dashboard/equipe", label: "Équipe & partenaires", icon: Users, roles: ALL },
+        { href: "/dashboard/contrats-annuels", label: "Contrats annuels", icon: RefreshCw, roles: INTERNAL },
+        { href: "/dashboard/agents", label: "Agents", icon: Users, roles: ["MANAGER"] },
+      ],
+    },
+    {
+      id: "commercial",
+      label: "Gestion commerciale",
+      tone: "navy",
+      items: [
+        {
+          href: "/dashboard/devis-facturation",
+          label: "Devis & Facturation",
+          icon: Wallet,
+          roles: ALL,
+          emphasis: "high",
+        },
+        { href: "/dashboard/facturation", label: "À facturer", icon: Wallet, roles: ALL },
+        { href: "/dashboard/clients", label: "Clients", icon: Building2, roles: ["MANAGER"] },
+        { href: "/dashboard/devis", label: "Analyses", icon: FileText, roles: OPS },
+      ],
+    },
+    {
+      id: "pilotage",
+      label: "Pilotage",
+      tone: "ok",
+      items: [
+        { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard, roles: ALL },
+        { href: "/dashboard/rentabilite", label: "Rentabilité", icon: CircleDollarSign, roles: ALL },
+        { href: "/dashboard/rapports", label: "Rapports", icon: Briefcase, roles: ["CLIENT", "MANAGER"], emphasis: "low" },
+      ],
+    },
+    {
+      id: "outils",
+      label: "Outils",
+      tone: "magenta",
+      items: [
+        { href: "/dashboard/assistant-ia", label: "Assistant IA", icon: Sparkles, roles: ALL, emphasis: "low" },
+        { href: "/dashboard/demonstrations", label: "Démos", icon: PanelLeft, roles: ["MANAGER", "AGENCE"] },
+      ],
+    },
+    {
+      id: "compte",
+      label: "Compte",
+      tone: "neutral",
+      items: [
+        { href: "/dashboard/abonnement", label: "Abonnement", icon: Wallet, roles: ["CLIENT"] },
+        { href: "/dashboard/parametres", label: "Paramètres", icon: Settings, roles: ALL, emphasis: "low" },
+      ],
+    },
+  ];
+}
+
+const FAM_COLOR: Record<FamTone, string> = {
+  navy: "var(--cc-navy)",
+  cyan: "var(--cc-cyan)",
+  watch: "var(--cc-watch)",
+  violet: "var(--cc-intel)",
+  ok: "var(--cc-ok)",
+  magenta: "var(--cc-magenta)",
+  neutral: "color-mix(in srgb, var(--cc-navy) 45%, #94a3b8)",
+};
+
+function isItemActive(pathname: string, item: NavItem): boolean {
+  return item.exact
+    ? pathname === item.href
+    : pathname === item.href || pathname.startsWith(`${item.href}/`);
+}
+
+function readFamilyOpen(): Record<string, boolean> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(FAM_OPEN_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, boolean>;
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
   }
-
-  if (isManager) {
-    return [
-      {
-        id: "principal",
-        label: "Principal",
-        items: [
-          { href: "/dashboard", label: "Accueil", exact: true, icon: Home },
-          { href: "/dashboard/a-traiter", label: "À traiter", icon: AlertCircle },
-          { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
-          { href: "/dashboard/projets", label: "Chantiers", icon: FolderKanban },
-          { href: "/dashboard/planning", label: "Planning", icon: CalendarDays },
-          { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
-          { href: "/dashboard/contrats-annuels", label: "Contrats annuels", icon: RefreshCw },
-          { href: "/dashboard/visites-metres", label: "Visites & métrés", icon: Ruler },
-          { href: "/dashboard/clients", label: "Clients", icon: Building2 },
-          { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList },
-        ],
-      },
-      {
-        id: "ops",
-        label: "Opérations",
-        items: [
-          { href: "/dashboard/agents", label: "Agents", icon: Users },
-          { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
-          { href: "/dashboard/rentabilite", label: "Rentabilité", icon: CircleDollarSign },
-          { href: "/dashboard/facturation", label: "À facturer", icon: Wallet },
-          { href: "/dashboard/messages", label: "RDV", icon: CalendarDays },
-          { href: "/dashboard/fiches-suivi", label: "Fiches suivi", icon: StickyNote },
-        ],
-      },
-      {
-        id: "outils",
-        label: "Outils",
-        items: [
-          { href: "/dashboard/devis", label: "Analyses", icon: FileText },
-          { href: "/dashboard/devis-facturation", label: "Devis & Facturation", icon: Wallet },
-          { href: "/dashboard/assistant-ia", label: "Assistant IA", icon: Sparkles },
-          { href: "/dashboard/demonstrations", label: "Démos", icon: PanelLeft },
-          { href: "/dashboard/rapports", label: "Rapports", icon: Briefcase },
-        ],
-      },
-      {
-        id: "admin",
-        label: "Administration",
-        items: [{ href: "/dashboard/parametres", label: "Paramètres", icon: Settings }],
-      },
-    ];
-  }
-
-  if (isAgent) {
-    return [
-      {
-        id: "principal",
-        label: "Principal",
-        items: [
-          { href: "/dashboard", label: "Accueil", exact: true, icon: Home },
-          { href: "/dashboard/a-traiter", label: "À traiter", icon: AlertCircle },
-          { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
-          { href: "/dashboard/projets", label: "Chantiers", icon: FolderKanban },
-          { href: "/dashboard/planning", label: "Planning", icon: CalendarDays },
-          { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
-          { href: "/dashboard/contrats-annuels", label: "Contrats annuels", icon: RefreshCw },
-          { href: "/dashboard/visites-metres", label: "Visites & métrés", icon: Ruler },
-          { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList },
-          { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
-          { href: "/dashboard/rentabilite", label: "Rentabilité", icon: CircleDollarSign },
-          { href: "/dashboard/facturation", label: "À facturer", icon: Wallet },
-        ],
-      },
-      {
-        id: "outils",
-        label: "Outils",
-        items: [
-          ...(role === "AGENCE"
-            ? [{ href: "/dashboard/demonstrations", label: "Démos", icon: PanelLeft }]
-            : []),
-          { href: "/dashboard/messages", label: "RDV", icon: CalendarDays },
-          { href: "/dashboard/devis", label: "Analyses", icon: FileText },
-          { href: "/dashboard/devis-facturation", label: "Devis & Facturation", icon: Wallet },
-          { href: "/dashboard/assistant-ia", label: "Assistant IA", icon: Sparkles },
-          { href: "/dashboard/parametres", label: "Paramètres", icon: Settings },
-        ],
-      },
-    ];
-  }
-
-  return [];
 }
 
 export function AppSidebar({
@@ -224,6 +234,11 @@ export function AppSidebar({
   });
   const [mobileOpen, setMobileOpen] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
+  const [familyOpen, setFamilyOpen] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setFamilyOpen(readFamilyOpen());
+  }, []);
 
   useEffect(() => {
     setPendingHref(null);
@@ -241,10 +256,21 @@ export function AppSidebar({
     });
   }
 
-  const sections = buildSections(role)
-    .map((section) => ({
-      ...section,
-      items: section.items.filter((item) => {
+  function persistFamilyOpen(next: Record<string, boolean>) {
+    setFamilyOpen(next);
+    try {
+      localStorage.setItem(FAM_OPEN_KEY, JSON.stringify(next));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const rk = roleKey(role);
+  const families = buildFamilies()
+    .map((family) => ({
+      ...family,
+      items: family.items.filter((item) => {
+        if (!rk || !item.roles.includes(rk)) return false;
         if (isDemo && !isNavHrefAllowedForDemo(item.href, demoModules ?? [])) {
           return false;
         }
@@ -254,7 +280,7 @@ export function AppSidebar({
         return true;
       }),
     }))
-    .filter((s) => s.items.length > 0);
+    .filter((f) => f.items.length > 0);
 
   const initials = (userName ?? "BW")
     .split(" ")
@@ -337,60 +363,114 @@ export function AppSidebar({
         ) : null}
       </div>
 
-      <nav className="flex-1 space-y-5 overflow-y-auto px-2 py-4" aria-label="Navigation principale">
-        {sections.map((section) => (
-          <div key={section.id}>
-            {!collapsed ? (
-              <p className="mb-1.5 px-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-bework-navy/55">
-                {section.label}
-              </p>
-            ) : null}
-            <ul className="space-y-0.5">
-              {section.items.map((item) => {
-                const Icon = item.icon;
-                const active = item.exact
-                  ? pathname === item.href
-                  : pathname === item.href || pathname.startsWith(item.href + "/");
-                const pending = pendingHref === item.href;
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      title={item.label}
-                      onClick={() => {
-                        setMobileOpen(false);
-                        if (!active) setPendingHref(item.href);
-                      }}
-                      prefetch
-                      className={cn(
-                        "bw-nav-item active:scale-[0.98]",
-                        collapsed && "justify-center px-2",
-                        active
-                          ? "bw-nav-active"
-                          : pending
-                            ? "bw-nav-pending"
-                            : undefined,
-                      )}
-                      aria-current={active ? "page" : undefined}
-                      aria-busy={pending || undefined}
-                    >
-                      <Icon
-                        className={cn(
-                          "h-4 w-4 shrink-0 stroke-[1.75]",
-                          active ? "text-sky-300" : "opacity-65",
-                        )}
-                      />
-                      {!collapsed ? <span className="truncate">{item.label}</span> : null}
-                      {!collapsed && item.href === "/dashboard/messagerie" ? (
-                        <MessagerieNavBadge active={active} />
-                      ) : null}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
+      <nav className="flex-1 space-y-3 overflow-y-auto px-2 py-3" aria-label="Navigation principale">
+        {families.map((family) => {
+          const hasActive = family.items.some((item) => isItemActive(pathname, item));
+          const open = family.pinned || hasActive || familyOpen[family.id] !== false;
+          const color = FAM_COLOR[family.tone];
+          return (
+            <div
+              key={family.id}
+              className={cn(
+                !family.pinned && "border-t border-[color:var(--cc-navy)]/[0.07] pt-2.5",
+              )}
+            >
+              {!collapsed && !family.pinned ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (hasActive) return;
+                    persistFamilyOpen({ ...familyOpen, [family.id]: !open });
+                  }}
+                  className="bw-nav-family mb-1 flex w-full items-center gap-1.5 px-2 py-1 text-left"
+                  style={{ "--fam-color": color } as CSSProperties}
+                  aria-expanded={open}
+                >
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 rounded-full"
+                    style={{ background: color }}
+                    aria-hidden
+                  />
+                  <span className="flex-1 text-[11px] font-semibold uppercase tracking-[0.12em]">
+                    {family.label}
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      "h-3.5 w-3.5 shrink-0 opacity-60 transition-transform duration-150",
+                      !open && "-rotate-90",
+                    )}
+                    aria-hidden
+                  />
+                </button>
+              ) : null}
+              {!collapsed && family.pinned ? (
+                <p
+                  className="bw-nav-family mb-1 flex items-center gap-1.5 px-2 py-0.5"
+                  style={{ "--fam-color": color } as CSSProperties}
+                >
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 rounded-full"
+                    style={{ background: color }}
+                    aria-hidden
+                  />
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.12em]">
+                    {family.label}
+                  </span>
+                </p>
+              ) : null}
+              {collapsed || open ? (
+                <ul className="space-y-px">
+                  {family.items.map((item) => {
+                    const Icon = item.icon;
+                    const active = isItemActive(pathname, item);
+                    const pending = pendingHref === item.href;
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          title={collapsed ? item.label : undefined}
+                          onClick={() => {
+                            setMobileOpen(false);
+                            if (!active) setPendingHref(item.href);
+                          }}
+                          prefetch
+                          data-fam={family.tone}
+                          className={cn(
+                            "bw-nav-item active:scale-[0.98]",
+                            collapsed && "justify-center px-2",
+                            item.emphasis === "high" && "is-emphasis",
+                            item.emphasis === "low" && "font-medium text-slate-600",
+                            active && "is-active",
+                            pending && !active && "bw-nav-pending",
+                          )}
+                          aria-current={active ? "page" : undefined}
+                          aria-busy={pending || undefined}
+                        >
+                          <span className="relative inline-flex shrink-0">
+                            <Icon className="h-4 w-4 stroke-[1.75]" />
+                            {collapsed && item.href === "/dashboard/a-traiter" ? (
+                              <ATraiterDot />
+                            ) : null}
+                            {collapsed && item.href === "/dashboard/messagerie" ? (
+                              <MessagerieDot />
+                            ) : null}
+                          </span>
+                          {!collapsed ? <span className="min-w-0 flex-1 truncate">{item.label}</span> : null}
+                          {!collapsed && item.href === "/dashboard/a-traiter" ? (
+                            <ATraiterCountBadge />
+                          ) : null}
+                          {!collapsed && item.href === "/dashboard/messagerie" ? (
+                            <MessagerieNavBadge active={active} />
+                          ) : null}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : null}
+            </div>
+          );
+        })}
       </nav>
 
       <div className={cn("border-t border-[color:var(--cc-border)] p-3", collapsed && "px-2")}>
@@ -448,8 +528,6 @@ export function AppSidebar({
 
   return (
     <>
-      {/* FAB remplacé par barre basse MobileBottomNav (Plus) */}
-
       {mobileOpen ? (
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
@@ -474,4 +552,66 @@ export function AppSidebar({
       </aside>
     </>
   );
+}
+
+function useATraiterCount() {
+  const [total, setTotal] = useState(0);
+  const [capped, setCapped] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch("/api/a-traiter/count", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = (await res.json()) as { total?: number; capped?: boolean };
+        if (!cancelled) {
+          setTotal(typeof data.total === "number" ? data.total : 0);
+          setCapped(Boolean(data.capped));
+        }
+      } catch {
+        /* silencieux */
+      }
+    }
+    void load();
+    const timer = window.setInterval(() => void load(), 45_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  const visible = total > 0 || capped;
+  const label =
+    total <= 0 && !capped
+      ? null
+      : capped
+        ? `${total <= 0 ? "200" : total > 99 ? "99" : total}+`
+        : total > 99
+          ? "99+"
+          : String(total);
+
+  return { visible, label };
+}
+
+function ATraiterCountBadge() {
+  const { visible, label } = useATraiterCount();
+  if (!visible || !label) return null;
+  return (
+    <span className="ml-auto inline-flex min-w-[1.15rem] items-center justify-center rounded-full bg-bework-watch px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+      {label}
+    </span>
+  );
+}
+
+function ATraiterDot() {
+  const { visible } = useATraiterCount();
+  if (!visible) return null;
+  return (
+    <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-bework-watch" aria-hidden />
+  );
+}
+
+function MessagerieDot() {
+  return <MessagerieNavBadge compact />;
 }

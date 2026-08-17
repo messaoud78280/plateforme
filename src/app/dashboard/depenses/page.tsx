@@ -22,7 +22,6 @@ const VIEWS: ExpensesView[] = [
   "with_po",
   "without_po",
   "with_variance",
-  "this_month",
 ];
 const SORTS: ExpensesSort[] = [
   "recent",
@@ -34,7 +33,14 @@ const SORTS: ExpensesSort[] = [
   "variance",
   "created",
 ];
-const PERIODS: ExpensesPeriod[] = ["month", "prev_month", "quarter", "year", "all"];
+const PERIODS: ExpensesPeriod[] = [
+  "month",
+  "this_month",
+  "prev_month",
+  "quarter",
+  "year",
+  "all",
+];
 
 export default async function DepensesPage({
   searchParams,
@@ -66,11 +72,17 @@ export default async function DepensesPage({
   if (!orgId) redirect("/dashboard");
 
   const sp = await searchParams;
-  const view = (VIEWS.includes(sp.view as ExpensesView) ? sp.view : "all") as ExpensesView;
+  // Ancien onglet « Ce mois » → période globale
+  const viewRaw = sp.view === "this_month" ? "all" : sp.view;
+  const view = (VIEWS.includes(viewRaw as ExpensesView) ? viewRaw : "all") as ExpensesView;
   const sort = (SORTS.includes(sp.sort as ExpensesSort) ? sp.sort : "recent") as ExpensesSort;
-  const period = (
-    PERIODS.includes(sp.period as ExpensesPeriod) ? sp.period : "month"
-  ) as ExpensesPeriod;
+  const periodRaw =
+    sp.view === "this_month" && !sp.period
+      ? "month"
+      : PERIODS.includes(sp.period as ExpensesPeriod)
+        ? (sp.period as ExpensesPeriod)
+        : "month";
+  const period = (periodRaw === "this_month" ? "month" : periodRaw) as ExpensesPeriod;
 
   const { rows, summary } = await loadExpensesWorkspace({
     organizationId: orgId,
@@ -92,7 +104,7 @@ export default async function DepensesPage({
       initialView={view}
       initialQ={typeof sp.q === "string" ? sp.q : ""}
       initialSort={sort}
-      initialPeriod={period}
+      initialPeriod={period === "this_month" ? "month" : period}
       initialProjectId={sp.projectId?.trim() || ""}
       initialSupplierId={sp.supplierId?.trim() || ""}
       initialPurchaseOrderId={sp.purchaseOrderId?.trim() || ""}

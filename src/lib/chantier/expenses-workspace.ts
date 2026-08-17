@@ -1,6 +1,6 @@
 /**
- * Dépenses V2 — projection liste + KPI (factures fournisseurs / coût réel).
- * Réutilise SupplierInvoice + PurchaseOrder + réceptions. Pas de double comptage.
+ * Dépenses V2.1 — projection liste + KPI (source unique).
+ * Date de période = date facture fournisseur (invoiceDate).
  */
 import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
@@ -21,8 +21,7 @@ export type ExpensesView =
   | "to_control"
   | "with_po"
   | "without_po"
-  | "with_variance"
-  | "this_month";
+  | "with_variance";
 
 export type ExpensesSort =
   | "recent"
@@ -34,7 +33,13 @@ export type ExpensesSort =
   | "variance"
   | "created";
 
-export type ExpensesPeriod = "month" | "prev_month" | "quarter" | "year" | "all";
+export type ExpensesPeriod =
+  | "month"
+  | "this_month"
+  | "prev_month"
+  | "quarter"
+  | "year"
+  | "all";
 
 export type ExpenseControlStatus =
   | "coherent"
@@ -45,9 +50,17 @@ export type ExpenseControlStatus =
   | "cancelled"
   | "credit";
 
+export type ExpenseControlReason =
+  | "variance"
+  | "missing_receipt"
+  | "partial_receipt"
+  | "without_po"
+  | "unclassified";
+
 export type ExpenseListRow = {
   id: string;
   supplierNumber: string;
+  /** Date métier = date facture (filtre période + affichage). */
   invoiceDate: string;
   createdAt: string;
   kind: SupplierInvoiceKind;
@@ -66,6 +79,7 @@ export type ExpenseListRow = {
   projectId: string;
   projectTitle: string | null;
   projectCity: string | null;
+  projectLocation: string | null;
   purchaseOrderId: string | null;
   purchaseOrderNumber: string | null;
   orderAmountHt: number | null;
@@ -79,43 +93,61 @@ export type ExpenseListRow = {
   blCount: number;
   controlStatus: ExpenseControlStatus;
   controlLabel: string;
+  controlReasons: ExpenseControlReason[];
   needsControl: boolean;
   inProfitability: boolean;
   profitabilityHref: string;
   documentsHref: string;
   purchaseOrderHref: string | null;
+  receiptHref: string | null;
 };
 
 export type ExpensesWorkspaceSummary = {
   periodLabel: string;
+  /** Champ date utilisé pour la période. */
+  periodDateFieldLabel: string;
+  invoiceCount: number;
   spentPeriodHt: number;
+  /** Montant pris en compte rentabilité (RECORDED + catégorisé). */
   actualCostHt: number;
   toControlCount: number;
   toControlHt: number;
+  missingReceiptCount: number;
   withoutPoCount: number;
   varianceCount: number;
-  supplierCount: number;
+  /** Somme des |écarts| — ne masque pas les anomalies. */
+  varianceAbsHt: number;
   unclassifiedCount: number;
-  categoryShares: Array<{ key: SupplierCostCategory; label: string; ht: number; pct: number }>;
+  supplierCount: number;
+  categoryShares: Array<{
+    key: SupplierCostCategory;
+    label: string;
+    ht: number;
+    pct: number;
+  }>;
   topProjects: Array<{ projectId: string; title: string; ht: number }>;
 };
 
-function periodBounds(period: ExpensesPeriod, now = new Date()): {
-  from: Date | null;
-  to: Date | null;
-  label: string;
-} {
+function normalizePeriod(period: ExpensesPeriod): Exclude<ExpensesPeriod, "this_month"> {
+  return period === "this_month" ? "month" : period;
+}
+
+export function periodBounds(
+  period: ExpensesPeriod,
+  now = new Date(),
+): { from: Date | null; to: Date | null; label: string } {
+  const p = normalizePeriod(period);
   const y = now.getFullYear();
   const m = now.getMonth();
-  if (period === "all") return { from: null, to: null, label: "Toutes périodes" };
-  if (period === "month") {
+  if (p === "all") return { from: null, to: null, label: "Toutes périodes" };
+  if (p === "month") {
     return {
       from: new Date(y, m, 1),
       to: new Date(y, m + 1, 1),
       label: now.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }),
     };
   }
-  if (period === "prev_month") {
+  if (p === "prev_month") {
     return {
       from: new Date(y, m - 1, 1),
       to: new Date(y, m, 1),
@@ -125,7 +157,7 @@ function periodBounds(period: ExpensesPeriod, now = new Date()): {
       }),
     };
   }
-  if (period === "quarter") {
+  if (p === "quarter") {
     const q = Math.floor(m / 3) * 3;
     return {
       from: new Date(y, q, 1),
@@ -136,15 +168,32 @@ function periodBounds(period: ExpensesPeriod, now = new Date()): {
   return { from: new Date(y, 0, 1), to: new Date(y + 1, 0, 1), label: String(y) };
 }
 
-function inPeriod(isoDate: string, from: Date | null, to: Date | null): boolean {
-  if (!from && !to) return true;
-  const t = new Date(isoDate + "T12:00:00").getTime();
-  if (from && t < from.getTime()) return false;
-  if (to && t >= to.getTime()) return false;
-  return true;
+function projectLocationLabel(
+  address: string | null | undefined,
+  city: string | null | undefined,
+): string | null {
+  const a = address?.trim() || "";
+  const c = city?.trim() || "";
+  if (a && c) {
+    // Si la ville est déjà dans l’adresse, ne pas dupliquer une ville erronée seule.
+    if (a.toLowerCase().includes(c.toLowerCase())) {
+      const parts = a.split(/[·,]/).map((s) => s.trim()).filter(Boolean);
+      return parts[parts.length - 1] || c;
+    }
+    return c;
+  }
+  if (c) return c;
+  if (a) {
+    const parts = a.split(/[·,]/).map((s) => s.trim()).filter(Boolean);
+    return parts[parts.length - 1] || a;
+  }
+  return null;
 }
 
-function resolveControl(input: {
+/**
+ * Source unique : état de contrôle achat (liste / KPI / drawer).
+ */
+export function getSupplierInvoiceControlState(input: {
   status: SupplierInvoiceStatus;
   kind: SupplierInvoiceKind;
   category: SupplierCostCategory;
@@ -153,38 +202,165 @@ function resolveControl(input: {
   orderedQty: number;
   receivedQty: number;
   hasReceipt: boolean;
-}): { status: ExpenseControlStatus; label: string; needsControl: boolean } {
+}): {
+  status: ExpenseControlStatus;
+  label: string;
+  needsControl: boolean;
+  reasons: ExpenseControlReason[];
+} {
   if (input.status === "CANCELLED") {
-    return { status: "cancelled", label: "Annulée", needsControl: false };
+    return { status: "cancelled", label: "Annulée", needsControl: false, reasons: [] };
   }
   if (input.kind === "CREDIT") {
-    return { status: "credit", label: "Avoir", needsControl: false };
+    return { status: "credit", label: "Avoir", needsControl: false, reasons: [] };
   }
-  if (input.category === "UNCLASSIFIED") {
-    return { status: "unclassified", label: "À classer", needsControl: true };
+
+  const reasons: ExpenseControlReason[] = [];
+  if (input.category === "UNCLASSIFIED") reasons.push("unclassified");
+  if (!input.purchaseOrderId) reasons.push("without_po");
+  if (input.purchaseOrderId && input.orderedQty > 0.004 && !input.hasReceipt) {
+    reasons.push("missing_receipt");
   }
-  if (!input.purchaseOrderId) {
-    return { status: "without_po", label: "Sans commande", needsControl: false };
+  if (
+    input.purchaseOrderId &&
+    input.hasReceipt &&
+    input.orderedQty > 0.004 &&
+    input.receivedQty + 0.004 < input.orderedQty
+  ) {
+    reasons.push("partial_receipt");
   }
-  if (input.orderedQty > 0.004 && !input.hasReceipt) {
+  if (input.varianceHt != null && Math.abs(input.varianceHt) > 0.004) {
+    reasons.push("variance");
+  }
+
+  if (reasons.includes("unclassified")) {
+    return {
+      status: "unclassified",
+      label: "À classer",
+      needsControl: input.status === "RECORDED",
+      reasons,
+    };
+  }
+  if (reasons.includes("without_po")) {
+    return {
+      status: "without_po",
+      label: "Sans commande",
+      needsControl: input.status === "RECORDED",
+      reasons,
+    };
+  }
+  if (reasons.includes("missing_receipt")) {
     return {
       status: "missing_receipt",
       label: "Réception manquante",
-      needsControl: true,
+      needsControl: input.status === "RECORDED",
+      reasons,
     };
   }
-  if (input.varianceHt != null && Math.abs(input.varianceHt) > 0.004) {
-    const sign = input.varianceHt > 0 ? "+" : "";
+  if (reasons.includes("variance")) {
+    const sign = (input.varianceHt ?? 0) > 0 ? "+" : "";
     return {
       status: "to_verify",
-      label: `Écart de ${sign}${Math.round(input.varianceHt).toLocaleString("fr-FR")} €`,
-      needsControl: true,
+      label: `Écart de ${sign}${Math.round(input.varianceHt ?? 0).toLocaleString("fr-FR")} €`,
+      needsControl: input.status === "RECORDED",
+      reasons,
     };
   }
-  if (input.hasReceipt && input.receivedQty + 0.004 < input.orderedQty) {
-    return { status: "to_verify", label: "À vérifier", needsControl: true };
+  if (reasons.includes("partial_receipt")) {
+    return {
+      status: "to_verify",
+      label: "Réception partielle",
+      needsControl: input.status === "RECORDED",
+      reasons,
+    };
   }
-  return { status: "coherent", label: "Conforme", needsControl: false };
+  return { status: "coherent", label: "Conforme", needsControl: false, reasons: [] };
+}
+
+function buildSummary(
+  periodRows: ExpenseListRow[],
+  periodLabel: string,
+): ExpensesWorkspaceSummary {
+  let spentPeriodHt = 0;
+  let actualCostHt = 0;
+  let toControlCount = 0;
+  let toControlHt = 0;
+  let withoutPoCount = 0;
+  let varianceCount = 0;
+  let varianceAbsHt = 0;
+  let unclassifiedCount = 0;
+  let missingReceiptCount = 0;
+  const suppliers = new Set<string>();
+  const byCat = new Map<SupplierCostCategory, number>();
+  const byProject = new Map<string, { title: string; ht: number }>();
+
+  for (const r of periodRows) {
+    if (r.status !== "RECORDED") continue;
+    spentPeriodHt += r.signedHt;
+    suppliers.add(r.supplierId);
+    byCat.set(r.category, (byCat.get(r.category) ?? 0) + r.signedHt);
+    const pt = r.projectTitle ?? "Chantier";
+    const cur = byProject.get(r.projectId) ?? { title: pt, ht: 0 };
+    cur.ht += r.signedHt;
+    byProject.set(r.projectId, cur);
+    if (r.inProfitability) actualCostHt += r.signedHt;
+    if (r.needsControl) {
+      toControlCount += 1;
+      toControlHt += Math.abs(r.signedHt);
+    }
+    if (!r.purchaseOrderId) withoutPoCount += 1;
+    if (r.controlReasons.includes("variance")) {
+      varianceCount += 1;
+      varianceAbsHt += Math.abs(r.varianceHt ?? 0);
+    }
+    if (r.category === "UNCLASSIFIED") unclassifiedCount += 1;
+    if (r.controlReasons.includes("missing_receipt")) missingReceiptCount += 1;
+  }
+
+  const totalAbs = Math.abs(spentPeriodHt) || 1;
+  const categoryShares = (
+    ["MATERIAL", "EQUIPMENT", "SUBCONTRACT", "OTHER", "UNCLASSIFIED"] as const
+  )
+    .map((key) => {
+      const ht = roundMoney(byCat.get(key) ?? 0, 2);
+      return {
+        key,
+        label:
+          key === "UNCLASSIFIED"
+            ? "À classer"
+            : SUPPLIER_INVOICE_CATEGORY_LABELS[key],
+        ht,
+        pct: Math.round((Math.abs(ht) / totalAbs) * 100),
+      };
+    })
+    .filter((c) => Math.abs(c.ht) > 0.004);
+
+  const topProjects = [...byProject.entries()]
+    .map(([projectId, v]) => ({
+      projectId,
+      title: v.title,
+      ht: roundMoney(v.ht, 2),
+    }))
+    .sort((a, b) => Math.abs(b.ht) - Math.abs(a.ht))
+    .slice(0, 5);
+
+  return {
+    periodLabel,
+    periodDateFieldLabel: "Date facture",
+    invoiceCount: periodRows.filter((r) => r.status === "RECORDED").length,
+    spentPeriodHt: roundMoney(spentPeriodHt, 2),
+    actualCostHt: roundMoney(actualCostHt, 2),
+    toControlCount,
+    toControlHt: roundMoney(toControlHt, 2),
+    missingReceiptCount,
+    withoutPoCount,
+    varianceCount,
+    varianceAbsHt: roundMoney(varianceAbsHt, 2),
+    unclassifiedCount,
+    supplierCount: suppliers.size,
+    categoryShares,
+    topProjects,
+  };
 }
 
 export async function loadExpensesWorkspace(opts: {
@@ -196,7 +372,7 @@ export async function loadExpensesWorkspace(opts: {
   purchaseOrderId?: string | null;
   now?: Date;
 }): Promise<{ rows: ExpenseListRow[]; summary: ExpensesWorkspaceSummary }> {
-  const take = opts.take ?? 150;
+  const take = opts.take ?? 300;
   const now = opts.now ?? new Date();
   const period = opts.period ?? "month";
   const bounds = periodBounds(period, now);
@@ -207,6 +383,14 @@ export async function loadExpensesWorkspace(opts: {
       ...(opts.projectId ? { projectId: opts.projectId } : {}),
       ...(opts.supplierId ? { externalOrganizationId: opts.supplierId } : {}),
       ...(opts.purchaseOrderId ? { purchaseOrderId: opts.purchaseOrderId } : {}),
+      ...(bounds.from || bounds.to
+        ? {
+            invoiceDate: {
+              ...(bounds.from ? { gte: bounds.from } : {}),
+              ...(bounds.to ? { lt: bounds.to } : {}),
+            },
+          }
+        : {}),
     },
     select: {
       id: true,
@@ -223,7 +407,9 @@ export async function loadExpensesWorkspace(opts: {
       amountTtc: true,
       notes: true,
       createdAt: true,
-      project: { select: { id: true, title: true, siteCity: true } },
+      project: {
+        select: { id: true, title: true, siteCity: true, siteAddress: true },
+      },
       externalOrganization: { select: { id: true, name: true, tradeName: true } },
       purchaseOrder: {
         select: {
@@ -278,11 +464,13 @@ export async function loadExpensesWorkspace(opts: {
       orderedQty > 0.004 && receivedQty + 0.004 >= orderedQty;
     const varianceHt = variance.varianceHt;
     const variancePercent =
-      variance.orderHt != null && Math.abs(variance.orderHt) > 0.004 && varianceHt != null
+      variance.orderHt != null &&
+      Math.abs(variance.orderHt) > 0.004 &&
+      varianceHt != null
         ? roundMoney((varianceHt / variance.orderHt) * 100, 1)
         : null;
 
-    const control = resolveControl({
+    const control = getSupplierInvoiceControlState({
       status: row.status,
       kind: row.kind,
       category,
@@ -298,6 +486,10 @@ export async function loadExpensesWorkspace(opts: {
       row.externalOrganization.tradeName ||
       row.externalOrganization.name ||
       "Fournisseur";
+    const projectLocation = projectLocationLabel(
+      row.project?.siteAddress,
+      row.project?.siteCity,
+    );
 
     return {
       id: row.id,
@@ -323,6 +515,7 @@ export async function loadExpensesWorkspace(opts: {
       projectId: row.projectId,
       projectTitle: row.project?.title ?? null,
       projectCity: row.project?.siteCity ?? null,
+      projectLocation,
       purchaseOrderId: row.purchaseOrderId,
       purchaseOrderNumber: po?.number ?? null,
       orderAmountHt,
@@ -336,89 +529,23 @@ export async function loadExpensesWorkspace(opts: {
       blCount,
       controlStatus: control.status,
       controlLabel: control.label,
-      needsControl: control.needsControl && row.status === "RECORDED",
+      controlReasons: control.reasons,
+      needsControl: control.needsControl,
       inProfitability: row.status === "RECORDED" && category !== "UNCLASSIFIED",
       profitabilityHref: `/dashboard/projets/${row.projectId}?tab=rentabilite`,
       documentsHref: `/dashboard/documents?q=${encodeURIComponent(row.supplierNumber)}`,
       purchaseOrderHref: row.purchaseOrderId
         ? `/dashboard/commandes/${row.purchaseOrderId}`
         : null,
+      receiptHref: row.purchaseOrderId
+        ? `/dashboard/commandes/${row.purchaseOrderId}?tab=reception`
+        : null,
     };
   });
 
-  // KPI / répartitions sur la période (factures RECORDED)
-  const periodRows = rows.filter(
-    (r) =>
-      r.status === "RECORDED" && inPeriod(r.invoiceDate, bounds.from, bounds.to),
-  );
-  let spentPeriodHt = 0;
-  let toControlCount = 0;
-  let toControlHt = 0;
-  let withoutPoCount = 0;
-  let varianceCount = 0;
-  let unclassifiedCount = 0;
-  const suppliers = new Set<string>();
-  const byCat = new Map<SupplierCostCategory, number>();
-  const byProject = new Map<string, { title: string; ht: number }>();
-
-  for (const r of periodRows) {
-    spentPeriodHt += r.signedHt;
-    suppliers.add(r.supplierId);
-    byCat.set(r.category, (byCat.get(r.category) ?? 0) + r.signedHt);
-    const pt = r.projectTitle ?? "Chantier";
-    const cur = byProject.get(r.projectId) ?? { title: pt, ht: 0 };
-    cur.ht += r.signedHt;
-    byProject.set(r.projectId, cur);
-    if (r.needsControl) {
-      toControlCount += 1;
-      toControlHt += Math.abs(r.signedHt);
-    }
-    if (!r.purchaseOrderId) withoutPoCount += 1;
-    if (r.varianceHt != null && Math.abs(r.varianceHt) > 0.004) varianceCount += 1;
-    if (r.category === "UNCLASSIFIED") unclassifiedCount += 1;
-  }
-
-  const totalAbs = Math.abs(spentPeriodHt) || 1;
-  const categoryShares = (
-    ["MATERIAL", "EQUIPMENT", "SUBCONTRACT", "OTHER", "UNCLASSIFIED"] as const
-  )
-    .map((key) => {
-      const ht = roundMoney(byCat.get(key) ?? 0, 2);
-      return {
-        key,
-        label:
-          key === "UNCLASSIFIED"
-            ? "À classer"
-            : SUPPLIER_INVOICE_CATEGORY_LABELS[key],
-        ht,
-        pct: Math.round((Math.abs(ht) / totalAbs) * 100),
-      };
-    })
-    .filter((c) => Math.abs(c.ht) > 0.004);
-
-  const topProjects = [...byProject.entries()]
-    .map(([projectId, v]) => ({
-      projectId,
-      title: v.title,
-      ht: roundMoney(v.ht, 2),
-    }))
-    .sort((a, b) => Math.abs(b.ht) - Math.abs(a.ht))
-    .slice(0, 5);
-
+  // KPI = mêmes lignes (période déjà filtrée en requête).
   return {
     rows,
-    summary: {
-      periodLabel: bounds.label,
-      spentPeriodHt: roundMoney(spentPeriodHt, 2),
-      actualCostHt: roundMoney(spentPeriodHt, 2),
-      toControlCount,
-      toControlHt: roundMoney(toControlHt, 2),
-      withoutPoCount,
-      varianceCount,
-      supplierCount: suppliers.size,
-      unclassifiedCount,
-      categoryShares,
-      topProjects,
-    },
+    summary: buildSummary(rows, bounds.label),
   };
 }

@@ -59,20 +59,38 @@ function controlTone(row: ExpenseListRow) {
   if (row.controlStatus === "unclassified" || row.controlStatus === "missing_receipt")
     return "text-amber-800";
   if (row.controlStatus === "to_verify") {
-    if (row.varianceHt != null && Math.abs(row.varianceHt) > 500) return "text-red-700";
+    // Rouge uniquement si facture > commande de façon marquée
+    if (row.varianceHt != null && row.varianceHt > 500) return "text-red-700";
     return "text-amber-800";
   }
   return "text-slate-600";
 }
 
-function primaryAction(row: ExpenseListRow): { label: string; href?: string } {
-  if (row.status === "CANCELLED") return { label: "Voir" };
+function controlBarClass(row: ExpenseListRow) {
+  if (row.controlStatus === "coherent") return "bg-emerald-500";
+  if (row.controlStatus === "without_po" || row.controlStatus === "cancelled")
+    return "bg-slate-300";
+  if (row.controlStatus === "unclassified") return "bg-slate-400";
+  if (row.varianceHt != null && row.varianceHt > 500) return "bg-red-500";
+  if (row.needsControl) return "bg-amber-500";
+  return "bg-slate-200";
+}
+
+function varianceTooltip(row: ExpenseListRow): string | undefined {
+  if (row.orderAmountHt == null || row.varianceHt == null) return undefined;
+  const pct =
+    row.variancePercent != null
+      ? ` · ${row.variancePercent > 0 ? "+" : ""}${row.variancePercent} %`
+      : "";
+  return `Commande : ${fmtHt(row.orderAmountHt)} HT\nFacture : ${fmtHt(Math.abs(row.signedHt))} HT\nÉcart : ${row.varianceHt > 0 ? "+" : ""}${fmtHt(row.varianceHt)}${pct}`;
+}
+
+function primaryAction(row: ExpenseListRow): { label: string; openDrawer?: boolean; href?: string } {
+  if (row.status === "CANCELLED") return { label: "Voir", openDrawer: true };
   if (row.category === "UNCLASSIFIED") return { label: "Classer", href: row.profitabilityHref };
-  if (row.needsControl && row.purchaseOrderHref) {
-    return { label: "Contrôler", href: row.purchaseOrderHref };
-  }
-  if (!row.purchaseOrderId) return { label: "Voir" };
-  return { label: "Voir", href: row.purchaseOrderHref ?? undefined };
+  if (row.needsControl) return { label: "Contrôler", openDrawer: true };
+  if (!row.purchaseOrderId) return { label: "Voir", openDrawer: true };
+  return { label: "Voir", openDrawer: true };
 }
 
 type Props = {
@@ -120,6 +138,10 @@ export function ExpensesWorkspace({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [controlChip, setControlChip] = useState<
+    "all" | "variance" | "missing_receipt" | "without_po" | "unclassified"
+  >("all");
+
   useEffect(() => {
     setRows(initialRows);
   }, [initialRows]);
@@ -127,6 +149,10 @@ export function ExpensesWorkspace({
   useEffect(() => {
     setSummary(initialSummary);
   }, [initialSummary]);
+
+  useEffect(() => {
+    setPeriod(initialPeriod);
+  }, [initialPeriod]);
 
   function pushUrl(next: {
     view?: string;
@@ -141,7 +167,7 @@ export function ExpensesWorkspace({
     const v = next.view ?? (view === "all" ? "" : view);
     const qq = next.q !== undefined ? next.q : q;
     const s = next.sort ?? (sort === "recent" ? "" : sort);
-    const per = next.period ?? (period === "month" ? "" : period);
+    const per = next.period !== undefined ? next.period : period === "month" ? "" : period;
     const pi = next.projectId !== undefined ? next.projectId : projectId;
     const si = next.supplierId !== undefined ? next.supplierId : supplierId;
     const cat = next.category !== undefined ? next.category : category;
@@ -189,17 +215,27 @@ export function ExpensesWorkspace({
     if (purchaseOrderId) list = list.filter((r) => r.purchaseOrderId === purchaseOrderId);
     if (category) list = list.filter((r) => r.category === category);
 
-    if (view === "to_control") list = list.filter((r) => r.needsControl);
-    else if (view === "with_po") list = list.filter((r) => Boolean(r.purchaseOrderId));
-    else if (view === "without_po") list = list.filter((r) => !r.purchaseOrderId && r.status !== "CANCELLED");
+    if (view === "to_control") {
+      list = list.filter((r) => r.needsControl);
+      if (controlChip === "variance") {
+        list = list.filter((r) => r.controlReasons.includes("variance"));
+      } else if (controlChip === "missing_receipt") {
+        list = list.filter((r) => r.controlReasons.includes("missing_receipt"));
+      } else if (controlChip === "without_po") {
+        list = list.filter((r) => r.controlReasons.includes("without_po"));
+      } else if (controlChip === "unclassified") {
+        list = list.filter((r) => r.controlReasons.includes("unclassified"));
+      }
+    } else if (view === "with_po") list = list.filter((r) => Boolean(r.purchaseOrderId));
+    else if (view === "without_po")
+      list = list.filter((r) => !r.purchaseOrderId && r.status !== "CANCELLED");
     else if (view === "with_variance") {
-      list = list.filter((r) => r.varianceHt != null && Math.abs(r.varianceHt) > 0.004);
-    } else if (view === "this_month") {
-      const now = new Date();
-      list = list.filter((r) => {
-        const d = new Date(r.invoiceDate + "T12:00:00");
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-      });
+      list = list.filter(
+        (r) =>
+          r.controlReasons.includes("variance") &&
+          r.varianceHt != null &&
+          Math.abs(r.varianceHt) > 0.004,
+      );
     }
 
     list.sort((a, b) => {
@@ -223,7 +259,7 @@ export function ExpensesWorkspace({
       }
     });
     return list;
-  }, [rows, q, view, sort, projectId, supplierId, purchaseOrderId, category]);
+  }, [rows, q, view, sort, projectId, supplierId, purchaseOrderId, category, controlChip]);
 
   async function cancel(id: string) {
     if (!window.confirm("Annuler cette facture fournisseur ? Elle sortira du réel.")) {
@@ -245,6 +281,7 @@ export function ExpensesWorkspace({
                 statusLabel: "Annulée",
                 controlStatus: "cancelled",
                 controlLabel: "Annulée",
+                controlReasons: [],
                 needsControl: false,
                 inProfitability: false,
               }
@@ -262,26 +299,34 @@ export function ExpensesWorkspace({
   const treatBanner =
     summary.toControlCount > 0 ||
     summary.unclassifiedCount > 0 ||
-    summary.varianceCount > 0;
+    summary.varianceCount > 0 ||
+    summary.missingReceiptCount > 0 ||
+    summary.withoutPoCount > 0;
 
   const kpiItems = [
     {
       id: "spent",
       value: fmtHt(summary.spentPeriodHt),
-      label: "Dépenses période",
-      secondary: summary.periodLabel,
+      label: "Dépenses HT",
+      secondary:
+        summary.invoiceCount > 0
+          ? `${summary.invoiceCount} facture${summary.invoiceCount > 1 ? "s" : ""} · ${summary.periodLabel}`
+          : summary.periodLabel,
       tone: "accent" as const,
       icon: CircleDollarSign,
       onClick: () => {
-        setView("this_month");
-        pushUrl({ view: "this_month" });
+        setView("all");
+        pushUrl({ view: "" });
       },
     },
     {
       id: "actual",
       value: fmtHt(summary.actualCostHt),
-      label: "Coût réel chantier",
-      secondary: "rentabilité",
+      label: "Coût réel pris en compte",
+      secondary:
+        summary.actualCostHt === 0 && summary.spentPeriodHt !== 0
+          ? "hors catégories à classer"
+          : "rentabilité chantier",
       tone: "navy" as const,
       icon: Building2,
       onClick: () => {
@@ -293,11 +338,22 @@ export function ExpensesWorkspace({
       id: "control",
       value: String(summary.toControlCount),
       label: "À contrôler",
-      secondary: summary.toControlHt > 0 ? fmtHt(summary.toControlHt) : "—",
+      secondary:
+        summary.toControlCount === 0
+          ? "✓ Aucun contrôle"
+          : [
+              summary.varianceCount > 0 ? `${summary.varianceCount} écart${summary.varianceCount > 1 ? "s" : ""}` : null,
+              summary.missingReceiptCount > 0
+                ? `${summary.missingReceiptCount} réception`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" · ") || fmtHt(summary.toControlHt),
       tone: "watch" as const,
       icon: ClipboardList,
       onClick: () => {
         setView("to_control");
+        setControlChip("all");
         pushUrl({ view: "to_control" });
       },
     },
@@ -305,7 +361,8 @@ export function ExpensesWorkspace({
       id: "nopo",
       value: String(summary.withoutPoCount),
       label: "Sans commande",
-      secondary: "associée",
+      secondary:
+        summary.withoutPoCount === 0 ? "✓ Toutes associées" : "sur la période",
       tone: "violet" as const,
       icon: FileWarning,
       onClick: () => {
@@ -316,8 +373,11 @@ export function ExpensesWorkspace({
     {
       id: "var",
       value: String(summary.varianceCount),
-      label: "Écart commande / facture",
-      secondary: "calculable",
+      label: "Factures avec écart",
+      secondary:
+        summary.varianceCount === 0
+          ? "✓ Aucun écart"
+          : `${fmtHt(summary.varianceAbsHt)} d’écarts absolus`,
       tone: "critical" as const,
       icon: AlertTriangle,
       onClick: () => {
@@ -329,7 +389,7 @@ export function ExpensesWorkspace({
       id: "sup",
       value: String(summary.supplierCount),
       label: "Fournisseurs",
-      secondary: "période",
+      secondary: "sur la période",
       tone: "cyan" as const,
       icon: Users,
       onClick: () => undefined,
@@ -346,17 +406,8 @@ export function ExpensesWorkspace({
         )}
       >
         <div
-          className={cn(
-            "absolute inset-y-0 left-0 w-1",
-            row.needsControl && "bg-amber-500",
-            row.controlStatus === "coherent" && "bg-emerald-500",
-            row.controlStatus === "without_po" && "bg-slate-300",
-            row.category === "UNCLASSIFIED" && "bg-slate-400",
-            row.controlStatus === "to_verify" &&
-              row.varianceHt != null &&
-              Math.abs(row.varianceHt) > 500 &&
-              "bg-red-500",
-          )}
+          className={cn("absolute inset-y-0 left-0 w-1", controlBarClass(row))}
+          title="Couleur = état du contrôle achat"
         />
         {/* Desktop */}
         <div
@@ -392,19 +443,29 @@ export function ExpensesWorkspace({
             >
               {row.projectTitle ?? "—"}
             </Link>
-            {row.projectCity ? (
-              <p className="text-[12px] text-slate-500">{row.projectCity}</p>
+            {row.projectLocation ? (
+              <p className="text-[12px] text-slate-500">{row.projectLocation}</p>
             ) : null}
           </div>
-          <div>
-            <span
+          <div onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              title={
+                row.purchaseOrderNumber
+                  ? `Filtrer · catégorie${row.purchaseOrderNumber ? ` (liée à ${row.purchaseOrderNumber})` : ""}`
+                  : "Filtrer par catégorie"
+              }
+              onClick={() => {
+                setCategory(row.category);
+                pushUrl({ category: row.category });
+              }}
               className={cn(
                 "inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold",
                 categoryBadgeClass(row.category),
               )}
             >
               {row.categoryLabel}
-            </span>
+            </button>
           </div>
           <div>
             {row.purchaseOrderNumber ? (
@@ -416,7 +477,9 @@ export function ExpensesWorkspace({
                   <p className="text-[12px] text-cyan-800">
                     {row.fullyReceived
                       ? "Réception complète"
-                      : `${Math.round(row.receivedQty)} / ${Math.round(row.orderedQty)} reçus`}
+                      : row.hasReceipt
+                        ? `${Math.round(row.receivedQty)} / ${Math.round(row.orderedQty)} reçus`
+                        : "Réception manquante"}
                   </p>
                 ) : null}
               </>
@@ -434,7 +497,10 @@ export function ExpensesWorkspace({
             </p>
           </div>
           <div>
-            <p className={cn("text-[13px] font-semibold", controlTone(row))}>
+            <p
+              className={cn("text-[13px] font-semibold", controlTone(row))}
+              title={varianceTooltip(row)}
+            >
               {row.controlLabel}
             </p>
             {row.inProfitability ? (
@@ -455,7 +521,7 @@ export function ExpensesWorkspace({
               <button
                 type="button"
                 onClick={() => setDrawer(row)}
-                className="rounded-full border border-slate-200 px-3 py-1 text-[12px] font-medium"
+                className="rounded-full bg-[#1e3a5f] px-3 py-1 text-[12px] font-medium text-white"
               >
                 {action.label}
               </button>
@@ -579,20 +645,55 @@ export function ExpensesWorkspace({
       />
 
       {treatBanner ? (
-        <div className="rounded-2xl border border-bework-navy/10 bg-white px-4 py-3">
-          <p className="text-[13px] font-semibold text-bework-navy">À traiter</p>
+        <div className="rounded-2xl border border-amber-200/70 bg-amber-50/40 px-4 py-3">
+          <p className="text-[13px] font-semibold text-bework-navy">À contrôler</p>
+          <p className="mt-0.5 text-[12px] text-slate-600">
+            {summary.toControlCount} facture
+            {summary.toControlCount > 1 ? "s" : ""} nécessite
+            {summary.toControlCount > 1 ? "nt" : ""} une vérification
+            <span className="text-slate-400">
+              {" "}
+              · période {summary.periodLabel} ({summary.periodDateFieldLabel})
+            </span>
+          </p>
           <div className="mt-2 flex flex-wrap gap-2 text-[13px]">
-            {summary.toControlCount > 0 ? (
+            {summary.varianceCount > 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setView("with_variance");
+                  pushUrl({ view: "with_variance" });
+                }}
+                className="rounded-full bg-orange-50 px-2.5 py-1 font-medium text-orange-900"
+              >
+                {summary.varianceCount} écart
+                {summary.varianceCount > 1 ? "s" : ""} commande / facture
+              </button>
+            ) : null}
+            {summary.missingReceiptCount > 0 ? (
               <button
                 type="button"
                 onClick={() => {
                   setView("to_control");
+                  setControlChip("missing_receipt");
                   pushUrl({ view: "to_control" });
                 }}
-                className="rounded-full bg-amber-50 px-2.5 py-1 font-medium text-amber-900"
+                className="rounded-full bg-amber-100 px-2.5 py-1 font-medium text-amber-950"
               >
-                {summary.toControlCount} contrôle
-                {summary.toControlCount > 1 ? "s" : ""} achat
+                {summary.missingReceiptCount} réception manquante
+                {summary.missingReceiptCount > 1 ? "s" : ""}
+              </button>
+            ) : null}
+            {summary.withoutPoCount > 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setView("without_po");
+                  pushUrl({ view: "without_po" });
+                }}
+                className="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700"
+              >
+                {summary.withoutPoCount} sans commande
               </button>
             ) : null}
             {summary.unclassifiedCount > 0 ? (
@@ -608,24 +709,11 @@ export function ExpensesWorkspace({
                 {summary.unclassifiedCount} à classer
               </button>
             ) : null}
-            {summary.varianceCount > 0 ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setView("with_variance");
-                  pushUrl({ view: "with_variance" });
-                }}
-                className="rounded-full bg-red-50 px-2.5 py-1 font-medium text-red-800"
-              >
-                {summary.varianceCount} écart
-                {summary.varianceCount > 1 ? "s" : ""} commande / facture
-              </button>
-            ) : null}
           </div>
         </div>
       ) : (
         <p className="text-[13px] font-medium text-emerald-700">
-          ✓ Aucun écart à contrôler · Toutes les dépenses sont sous contrôle
+          ✓ Aucun contrôle requis · Toutes les dépenses de la période sont sous contrôle
         </p>
       )}
 
@@ -722,7 +810,6 @@ export function ExpensesWorkspace({
               ["with_po", "Avec commande"],
               ["without_po", "Sans commande"],
               ["with_variance", "Avec écart"],
-              ["this_month", "Ce mois"],
             ] as const
           ).map(([id, label]) => (
             <button
@@ -730,6 +817,7 @@ export function ExpensesWorkspace({
               type="button"
               onClick={() => {
                 setView(id);
+                if (id === "to_control") setControlChip("all");
                 pushUrl({ view: id === "all" ? "" : id });
               }}
               className={cn(
@@ -741,11 +829,38 @@ export function ExpensesWorkspace({
             </button>
           ))}
         </div>
+        {view === "to_control" ? (
+          <div className="flex flex-wrap gap-1.5">
+            {(
+              [
+                ["all", "Tous"],
+                ["variance", "Écart montant"],
+                ["missing_receipt", "Réception manquante"],
+                ["without_po", "Sans commande"],
+                ["unclassified", "À classer"],
+              ] as const
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setControlChip(id)}
+                className={cn(
+                  "rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                  controlChip === id
+                    ? "bg-amber-800 text-white"
+                    : "bg-amber-50 text-amber-950",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        ) : null}
         <div className="flex flex-wrap items-center gap-2">
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Rechercher une facture, fournisseur, chantier, commande, référence…"
+            placeholder="Rechercher une facture, fournisseur, chantier, commande…"
             className="min-w-[14rem] flex-1 rounded-full border border-slate-200 bg-white px-4 py-2 text-[13px] outline-none focus:border-bework-accent/40"
           />
           <select
@@ -756,6 +871,7 @@ export function ExpensesWorkspace({
               pushUrl({ period: p === "month" ? "" : p });
               startTransition(() => router.refresh());
             }}
+            title={`Période filtrée sur : ${summary.periodDateFieldLabel}`}
             className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[12px]"
           >
             <option value="month">Ce mois</option>
@@ -865,17 +981,36 @@ export function ExpensesWorkspace({
 
       {rows.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-5 py-12 text-center">
-          <p className="text-sm font-semibold text-slate-900">Aucune dépense pour le moment.</p>
-          <Link
-            href="/dashboard/depenses/nouvelle"
-            className="mt-4 inline-flex rounded-full bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white"
-          >
-            + Enregistrer une dépense
-          </Link>
+          <p className="text-sm font-semibold text-slate-900">
+            Aucune facture sur {summary.periodLabel}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            Filtre période = {summary.periodDateFieldLabel}. Essayez « Toutes périodes » ou
+            changez de mois.
+          </p>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setPeriod("all");
+                pushUrl({ period: "all" });
+                startTransition(() => router.refresh());
+              }}
+              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium"
+            >
+              Toutes périodes
+            </button>
+            <Link
+              href="/dashboard/depenses/nouvelle"
+              className="inline-flex rounded-full bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white"
+            >
+              + Enregistrer une dépense
+            </Link>
+          </div>
         </div>
       ) : filtered.length === 0 ? (
         <p className="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-600">
-          Aucune facture dans ce filtre.
+          Aucune facture dans ce filtre ({summary.periodLabel}).
         </p>
       ) : (
         <ul className="space-y-2">
@@ -933,6 +1068,9 @@ export function ExpensesWorkspace({
                 Chantier
               </p>
               <p className="font-medium text-slate-900">{drawer.projectTitle ?? "—"}</p>
+              {drawer.projectLocation ? (
+                <p className="text-[12px] text-slate-500">{drawer.projectLocation}</p>
+              ) : null}
               <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                 Catégorie
               </p>
@@ -946,8 +1084,11 @@ export function ExpensesWorkspace({
                   <span className="flex items-center gap-1.5 text-slate-600">
                     <ShoppingCart className="h-3.5 w-3.5" /> Commande
                   </span>
-                  <span className="tabular-nums font-medium">
-                    {drawer.orderAmountHt != null ? fmtHt(drawer.orderAmountHt) : "—"}
+                  <span className="text-right font-medium tabular-nums">
+                    {drawer.purchaseOrderNumber ?? "Sans commande"}
+                    {drawer.orderAmountHt != null
+                      ? ` · ${fmtHt(drawer.orderAmountHt)} HT`
+                      : ""}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
@@ -957,18 +1098,18 @@ export function ExpensesWorkspace({
                       ? drawer.fullyReceived
                         ? "Réception complète"
                         : drawer.hasReceipt
-                          ? `${Math.round(drawer.receivedQty)} / ${Math.round(drawer.orderedQty)} reçus`
-                          : "Aucune"
+                          ? `Partielle · ${Math.round(drawer.receivedQty)} / ${Math.round(drawer.orderedQty)}`
+                          : "Manquante"
                       : "—"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-slate-600">Facture</span>
-                  <span className="tabular-nums font-semibold">{fmtHt(drawer.signedHt)}</span>
+                  <span className="tabular-nums font-semibold">{fmtHt(drawer.signedHt)} HT</span>
                 </div>
-                {drawer.varianceHt != null ? (
+                {drawer.varianceHt != null && Math.abs(drawer.varianceHt) > 0.004 ? (
                   <div className="flex items-center justify-between gap-2 border-t border-sky-100 pt-2">
-                    <span className="text-slate-600">Écart</span>
+                    <span className="text-slate-600">Écart financier</span>
                     <span className={cn("tabular-nums font-semibold", controlTone(drawer))}>
                       {drawer.varianceHt > 0 ? "+" : ""}
                       {fmtHt(drawer.varianceHt)}
@@ -978,9 +1119,39 @@ export function ExpensesWorkspace({
                     </span>
                   </div>
                 ) : null}
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-slate-600">Catégorie</span>
+                  <span className="font-medium">{drawer.categoryLabel}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-slate-600">Impact rentabilité</span>
+                  <span className="font-medium">
+                    {drawer.inProfitability ? "Pris en compte" : "Non pris en compte"}
+                  </span>
+                </div>
                 <p className={cn("pt-1 font-semibold", controlTone(drawer))}>
                   {drawer.controlLabel}
                 </p>
+                {drawer.controlReasons.includes("missing_receipt") ? (
+                  <p className="rounded-lg bg-amber-50 px-2.5 py-2 text-[12px] text-amber-950">
+                    Réception manquante — la facture a été enregistrée avant qu’une réception
+                    soit enregistrée.
+                  </p>
+                ) : null}
+                {drawer.controlReasons.includes("variance") &&
+                drawer.controlReasons.includes("partial_receipt") ? (
+                  <p className="rounded-lg bg-orange-50 px-2.5 py-2 text-[12px] text-orange-950">
+                    Écart de montant et réception partielle — vérifier les deux dimensions.
+                  </p>
+                ) : null}
+                {drawer.controlReasons.includes("variance") &&
+                !drawer.controlReasons.includes("partial_receipt") &&
+                drawer.fullyReceived ? (
+                  <p className="rounded-lg bg-slate-50 px-2.5 py-2 text-[12px] text-slate-700">
+                    Réception complète. Un écart de montant n’est pas automatiquement une
+                    anomalie critique.
+                  </p>
+                ) : null}
               </div>
             </div>
 
@@ -997,19 +1168,6 @@ export function ExpensesWorkspace({
               </div>
             ) : null}
 
-            <div className="mt-4 text-[13px]">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                Impact rentabilité
-              </p>
-              {drawer.inProfitability ? (
-                <p className="mt-1 text-emerald-700">
-                  Pris en compte · {drawer.categoryLabel} · {fmtHt(drawer.signedHt)} HT
-                </p>
-              ) : (
-                <p className="mt-1 text-amber-800">Catégorie à définir pour un suivi propre</p>
-              )}
-            </div>
-
             {drawer.hasBl ? (
               <p className="mt-3 text-[12px] text-cyan-800">
                 {drawer.blCount} bon{drawer.blCount > 1 ? "s" : ""} de livraison lié
@@ -1021,9 +1179,17 @@ export function ExpensesWorkspace({
               {drawer.purchaseOrderHref ? (
                 <Link
                   href={drawer.purchaseOrderHref}
-                  className="rounded-full bg-[#1e3a5f] px-4 py-2.5 text-center text-[13px] font-medium text-white"
+                  className="rounded-full border border-slate-200 px-4 py-2.5 text-center text-[13px] font-medium text-slate-800"
                 >
                   Voir la commande
+                </Link>
+              ) : null}
+              {drawer.receiptHref && drawer.controlReasons.includes("missing_receipt") ? (
+                <Link
+                  href={drawer.receiptHref}
+                  className="rounded-full bg-[#1e3a5f] px-4 py-2.5 text-center text-[13px] font-medium text-white"
+                >
+                  Enregistrer la réception
                 </Link>
               ) : null}
               <Link

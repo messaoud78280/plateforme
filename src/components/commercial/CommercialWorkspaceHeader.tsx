@@ -31,6 +31,9 @@ function pageTitle(pathname: string): string {
 
 export function CommercialWorkspaceHeader() {
   const pathname = usePathname() ?? "";
+  if (pathname === "/dashboard/devis-facturation") {
+    return null;
+  }
   const title = pageTitle(pathname);
   const showNewQuote =
     !pathname.includes("/devis/nouveau") &&

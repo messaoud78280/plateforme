@@ -46,6 +46,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     name?: string;
     documentType?: string | null;
     visibility?: string;
+    classificationStatus?: string;
   } = {};
 
   if (body.status !== undefined) {
@@ -71,6 +72,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
   if (body.documentType !== undefined) {
     data.documentType = body.documentType ? String(body.documentType).trim() || null : null;
+    if (data.documentType) {
+      data.classificationStatus = "CLASSE";
+    }
   }
   if (body.visibility !== undefined) {
     const v = String(body.visibility).trim();

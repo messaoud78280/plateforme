@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CHANTIER_FILE_STATUS_LABELS,
@@ -104,7 +105,7 @@ export function ChantierDossierSection({
     hubItems.filter((it) => it.isExpectedMissing).length ||
     folders.reduce((n, f) => n + f.files.filter((file) => file.status === "MANQUANT" || file.status === "A_RELANCER").length, 0);
 
-  const shownViews = visibleHubViews(CHANTIER_VIEWS, classifyCount);
+  const shownViews = visibleHubViews(CHANTIER_VIEWS, classifyCount, missingCount);
 
   const categoryStats = useMemo(
     () =>
@@ -360,6 +361,12 @@ export function ChantierDossierSection({
                   : ""}
               </p>
             ) : null}
+            <Link
+              href={`/dashboard/documents?projectId=${encodeURIComponent(projectId)}`}
+              className="mt-2 inline-flex text-[13px] font-medium text-bework-navy hover:underline"
+            >
+              Documents du chantier
+            </Link>
           </div>
           {canEdit ? (
             <div className="relative">

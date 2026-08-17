@@ -24,7 +24,7 @@ import { toneSurface, type BwTone } from "@/lib/design-system/semantic-colors";
 
 /** Conteneur largeur GED — aligné vue Catégories. */
 export const GED_SHELL_CLASS =
-  "mx-auto w-full max-w-[1200px] space-y-8 px-4 pb-20 pt-8 sm:px-6 lg:px-8";
+  "mx-auto w-full max-w-[1440px] space-y-5 px-4 pb-16 pt-6 sm:px-6 lg:px-8";
 
 const GED_CATEGORY_TONE: Record<HubCategoryId, BwTone> = {
   devis_avenants: "accent",
@@ -197,11 +197,15 @@ export function GedSearchField({
           }
         }}
         placeholder={placeholder}
-        className="h-14 w-full rounded-2xl border border-bework-navy/15 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] pl-12 pr-12 text-[15px] text-slate-900 outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-slate-400 focus:border-bework-accent/40 focus:ring-4 focus:ring-bework-accent/15"
+        className="h-14 w-full rounded-2xl border border-bework-navy/15 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] pl-12 pr-16 text-[15px] text-slate-900 outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-slate-400 focus:border-bework-accent/40 focus:ring-4 focus:ring-bework-accent/15"
         aria-label="Rechercher un document"
         autoComplete="off"
       />
-      {value ? (
+      {!value && !pending ? (
+        <kbd className="pointer-events-none absolute right-4 top-1/2 hidden -translate-y-1/2 rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[11px] font-medium text-slate-400 sm:inline">
+          /
+        </kbd>
+      ) : value ? (
         <button
           type="button"
           onClick={onClear}
@@ -244,7 +248,7 @@ export function GedViewTabs({
   classifyCount = 0,
   onChange,
 }: {
-  views: { id: HubView; label: string }[];
+  views: { id: HubView; label: string; count?: number }[];
   active: HubView;
   classifyCount?: number;
   onChange: (id: HubView) => void;
@@ -281,6 +285,10 @@ export function GedViewTabs({
                 )}
               >
                 {classifyCount}
+              </span>
+            ) : v.count && v.count > 0 ? (
+              <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-bework-watch/15 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums text-[#b45309]">
+                {v.count}
               </span>
             ) : null}
           </button>

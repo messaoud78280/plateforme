@@ -354,9 +354,9 @@ export default async function ProjetDetailPage({
             sort: "recent",
           }).catch((e) => {
             console.error("[ProjetDetail] GED hub:", e);
-            return { items: [], classifyCount: 0, missingCount: 0, companies: [], total: 0, page: 1, pageSize: 50, groups: [] };
+            return { items: [], classifyCount: 0, missingCount: 0, weekCount: 0, totalAll: 0, companies: [], total: 0, page: 1, pageSize: 50, groups: [], projectStats: [] };
           })
-        : Promise.resolve({ items: [], classifyCount: 0, missingCount: 0, companies: [], total: 0, page: 1, pageSize: 50, groups: [] }),
+        : Promise.resolve({ items: [], classifyCount: 0, missingCount: 0, weekCount: 0, totalAll: 0, companies: [], total: 0, page: 1, pageSize: 50, groups: [], projectStats: [] }),
     ]);
 
   const dossierFolders = chantierFolders.map((folder) => ({

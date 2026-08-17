@@ -19,7 +19,25 @@ export type HubView =
   | "classify"
   | "categories";
 
-export type HubSort = "recent" | "oldest" | "name" | "type";
+export type HubSort =
+  | "recent"
+  | "oldest"
+  | "added"
+  | "name"
+  | "name_desc"
+  | "type"
+  | "project"
+  | "company"
+  | "origin";
+
+export type HubGroupBy =
+  | "none"
+  | "project"
+  | "type"
+  | "category"
+  | "company"
+  | "origin"
+  | "month";
 
 export type HubDocSource = "chantier" | "purchase_order" | "legacy";
 
@@ -59,6 +77,8 @@ export type HubDocumentItem = {
   indice?: string | null;
   companyLabel?: string | null;
   chantierFileId?: string | null;
+  fileSize?: number | null;
+  addedAt?: string | null;
 };
 
 const GROUP_DEFS: { id: HubGroup; label: string }[] = [
@@ -178,24 +198,147 @@ export const HUB_ORIGIN_FILTERS: { id: HubOrigin; label: string }[] = [
   { id: "DOE", label: "DOE" },
   { id: "CHANTIER", label: "Chantier" },
   { id: "FOURNISSEUR", label: "Fournisseur" },
-  { id: "UPLOAD", label: "Dépôt manuel" },
+  { id: "UPLOAD", label: "Ajout manuel" },
 ];
 
 export const HUB_DATE_FILTERS: { id: string; label: string }[] = [
   { id: "", label: "Toutes" },
+  { id: "1", label: "Aujourd’hui" },
+  { id: "7", label: "7 derniers jours" },
   { id: "30", label: "30 derniers jours" },
   { id: "year", label: "Cette année" },
 ];
 
+export const HUB_SORT_OPTIONS: { id: HubSort; label: string }[] = [
+  { id: "recent", label: "Plus récents" },
+  { id: "oldest", label: "Plus anciens" },
+  { id: "added", label: "Date d’ajout" },
+  { id: "name", label: "Nom A → Z" },
+  { id: "name_desc", label: "Nom Z → A" },
+  { id: "project", label: "Chantier" },
+  { id: "company", label: "Client / fournisseur" },
+  { id: "type", label: "Type" },
+  { id: "origin", label: "Source" },
+];
+
+export const HUB_GROUP_BY_OPTIONS: { id: HubGroupBy; label: string }[] = [
+  { id: "none", label: "Aucun" },
+  { id: "project", label: "Chantier" },
+  { id: "type", label: "Type" },
+  { id: "category", label: "Catégorie" },
+  { id: "company", label: "Client / fournisseur" },
+  { id: "origin", label: "Source" },
+  { id: "month", label: "Mois" },
+];
+
+export const HUB_CATEGORY_FAMILIES: Array<{
+  id: string;
+  label: string;
+  ids: HubCategoryId[];
+}> = [
+  { id: "commercial", label: "Commercial", ids: ["devis_avenants", "factures_situations"] },
+  { id: "achats", label: "Achats", ids: ["commandes_bl", "fournisseurs"] },
+  { id: "chantier", label: "Chantier", ids: ["plans_techniques", "comptes_rendus", "photos"] },
+  { id: "technique", label: "Technique", ids: ["fiches_techniques"] },
+  { id: "marche", label: "Marché", ids: ["marche_dce"] },
+  { id: "securite", label: "Sécurité / qualité", ids: ["securite_methodes", "qualite_controles"] },
+  { id: "doe", label: "DOE", ids: ["doe"] },
+  { id: "autres", label: "Autres", ids: ["autres"] },
+];
+
+export function originToneClass(origin?: HubOrigin | null): string {
+  switch (origin) {
+    case "DEVIS":
+      return "badge-cc badge-cc-info";
+    case "COMMANDE":
+      return "badge-cc badge-cc-watch";
+    case "MESSAGERIE":
+      return "badge-cc badge-cc-intel";
+    case "DOE":
+      return "badge-cc badge-cc-info";
+    case "FOURNISSEUR":
+      return "badge-cc badge-cc-cyan";
+    case "CHANTIER":
+      return "badge-cc badge-cc-navy";
+    case "UPLOAD":
+      return "badge-cc badge-cc-neutral";
+    case "FICHE_SUIVI":
+      return "badge-cc badge-cc-ok";
+    case "BEWORK":
+      return "badge-cc badge-cc-info";
+    default:
+      return "badge-cc badge-cc-neutral";
+  }
+}
+
+export function fileKindFromItem(
+  it: Pick<HubDocumentItem, "mimeHint" | "title">,
+): "pdf" | "image" | "word" | "excel" | "other" {
+  const mime = (it.mimeHint ?? "").toLowerCase();
+  const name = it.title.toLowerCase();
+  if (mime.includes("pdf") || name.endsWith(".pdf")) return "pdf";
+  if (mime.startsWith("image/") || /\.(png|jpe?g|webp|gif|heic)$/i.test(name)) return "image";
+  if (mime.includes("word") || /\.docx?$/.test(name)) return "word";
+  if (mime.includes("excel") || mime.includes("spreadsheet") || /\.xlsx?$/.test(name)) {
+    return "excel";
+  }
+  return "other";
+}
+
+export function formatFileSize(bytes?: number | null): string | null {
+  if (bytes == null || bytes <= 0) return null;
+  if (bytes < 1024) return `${bytes} o`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`;
+  return `${(bytes / (1024 * 1024)).toFixed(1).replace(".", ",")} Mo`;
+}
+
+export function groupHubDocuments(
+  items: HubDocumentItem[],
+  groupBy: HubGroupBy,
+): Array<{ key: string; label: string; items: HubDocumentItem[] }> {
+  if (groupBy === "none") return [{ key: "all", label: "", items }];
+  const map = new Map<string, HubDocumentItem[]>();
+  for (const it of items) {
+    let key = "—";
+    if (groupBy === "project") key = it.projectTitle?.trim() || "Sans chantier";
+    else if (groupBy === "type") key = it.typeLabel || "Document";
+    else if (groupBy === "category") key = hubCategoryLabel(it.group);
+    else if (groupBy === "company") key = it.companyLabel?.trim() || "Sans entreprise";
+    else if (groupBy === "origin") {
+      key = it.originLabel || sourceLineForDocument(it) || "Autre source";
+    } else if (groupBy === "month") {
+      const d = new Date(it.createdAt);
+      key = Number.isNaN(d.getTime())
+        ? "Sans date"
+        : d.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+    }
+    const arr = map.get(key) ?? [];
+    arr.push(it);
+    map.set(key, arr);
+  }
+  return [...map.entries()].map(([label, docs]) => ({
+    key: label,
+    label: `${label} — ${docs.length} document${docs.length > 1 ? "s" : ""}`,
+    items: docs,
+  }));
+}
+
 export function visibleHubViews(
   views: { id: HubView; label: string }[],
   classifyCount: number,
-): { id: HubView; label: string }[] {
+  missingCount = 0,
+): { id: HubView; label: string; count?: number }[] {
   return views
     .filter((v) => v.id !== "classify" || classifyCount > 0)
-    .map((v) =>
-      v.id === "classify" ? { ...v, label: `À classer · ${classifyCount}` } : v,
-    );
+    .map((v) => {
+      if (v.id === "classify") {
+        return { ...v, label: "À classer", count: classifyCount };
+      }
+      if (v.id === "missing") {
+        return { ...v, label: "À récupérer", count: missingCount };
+      }
+      return v;
+    });
 }
 
 export function hubItemMatchesQuery(it: HubDocumentItem, query: string): boolean {
@@ -332,7 +475,7 @@ export function sourceLineForDocument(it: {
   if (it.origin === "DEVIS") return "Devis & Facturation";
   if (it.origin === "DOE") return "DOE";
   if (it.origin === "FOURNISSEUR") return "Fournisseur";
-  if (it.origin === "UPLOAD") return "Dépôt manuel";
+  if (it.origin === "UPLOAD") return "Ajout manuel";
   if (it.origin === "FICHE_SUIVI") return "Fiche suivi";
   if (it.origin === "CHANTIER") return "Ajouté depuis le chantier";
   return it.originLabel || "";

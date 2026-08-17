@@ -48,13 +48,73 @@ export type HubListResult = {
   groups: { id: HubGroup; label: string; count?: number }[];
   classifyCount: number;
   missingCount: number;
+  weekCount: number;
+  totalAll: number;
   companies: string[];
   categoryStats?: HubCategoryStat[];
+  projectStats: Array<{
+    id: string;
+    title: string;
+    count: number;
+    missingCount: number;
+  }>;
 };
 
 const PAGE_SIZE = 50;
 const CATEGORY_SCAN_LIMIT = 2500;
 const PROJECT_HUB_LIMIT = 500;
+
+async function loadHubSideStats(baseScope: object, projectWhere: object) {
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const recentProjects = await prisma.project.findMany({
+    where: projectWhere,
+    select: { id: true, title: true },
+    orderBy: { updatedAt: "desc" },
+    take: 8,
+  });
+  const ids = recentProjects.map((p) => p.id);
+  const [totalAll, weekCount, fileCounts, missingCounts] = await Promise.all([
+    prisma.chantierFile.count({ where: baseScope }),
+    prisma.chantierFile.count({
+      where: { ...baseScope, createdAt: { gte: weekAgo } },
+    }),
+    ids.length
+      ? prisma.chantierFile.groupBy({
+          by: ["projectId"],
+          where: { ...baseScope, projectId: { in: ids } },
+          _count: { _all: true },
+        })
+      : Promise.resolve([]),
+    ids.length
+      ? prisma.chantierFile.groupBy({
+          by: ["projectId"],
+          where: {
+            ...baseScope,
+            projectId: { in: ids },
+            OR: [
+              { status: { in: ["MANQUANT", "A_RELANCER"] } },
+              { fileUrl: null },
+              { fileUrl: "" },
+            ],
+          },
+          _count: { _all: true },
+        })
+      : Promise.resolve([]),
+  ]);
+  const countMap = new Map(fileCounts.map((r) => [r.projectId, r._count._all]));
+  const missMap = new Map(missingCounts.map((r) => [r.projectId, r._count._all]));
+  return {
+    totalAll,
+    weekCount,
+    projectStats: recentProjects.map((p) => ({
+      id: p.id,
+      title: p.title,
+      count: countMap.get(p.id) ?? 0,
+      missingCount: missMap.get(p.id) ?? 0,
+    })),
+  };
+}
 
 function inferGroup(opts: {
   category?: string | null;
@@ -410,15 +470,17 @@ export async function loadDocumentHub(opts: {
         ],
       });
     }
-    if (since === "30" || since === "year") {
+    if (since === "1" || since === "7" || since === "30" || since === "year") {
       const from =
         since === "year"
           ? new Date(new Date().getFullYear(), 0, 1)
-          : (() => {
-              const d = new Date();
-              d.setDate(d.getDate() - 30);
-              return d;
-            })();
+          : since === "1"
+            ? new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
+            : (() => {
+                const d = new Date();
+                d.setDate(d.getDate() - Number(since));
+                return d;
+              })();
       viewAnd.push({
         OR: [
           { documentDate: { gte: from } },
@@ -461,14 +523,18 @@ export async function loadDocumentHub(opts: {
             { documentDate: { sort: "asc" as const, nulls: "last" as const } },
             { createdAt: "asc" as const },
           ]
-        : sort === "name"
-          ? { name: "asc" as const }
-          : sort === "type"
-            ? { documentType: "asc" as const }
-            : [
-                { documentDate: { sort: "desc" as const, nulls: "last" as const } },
-                { createdAt: "desc" as const },
-              ];
+        : sort === "added"
+          ? { createdAt: "desc" as const }
+          : sort === "name"
+            ? { name: "asc" as const }
+            : sort === "name_desc"
+              ? { name: "desc" as const }
+              : sort === "type"
+                ? { documentType: "asc" as const }
+                : [
+                    { documentDate: { sort: "desc" as const, nulls: "last" as const } },
+                    { createdAt: "desc" as const },
+                  ];
 
     const baseScope = {
       deletedAt: null,
@@ -524,7 +590,7 @@ export async function loadDocumentHub(opts: {
         }),
       );
 
-      const [classifyCountOv, missingCountOv, companyRowsOv] = await Promise.all([
+      const [classifyCountOv, missingCountOv, companyRowsOv, sideOv] = await Promise.all([
         prisma.chantierFile.count({
           where: {
             ...baseScope,
@@ -548,6 +614,7 @@ export async function loadDocumentHub(opts: {
           distinct: ["emitterName"],
           take: 40,
         }),
+        loadHubSideStats(baseScope, projectWhere),
       ]);
 
       return {
@@ -558,11 +625,14 @@ export async function loadDocumentHub(opts: {
         groups: hubGroupsForPersona(opts.user.personType, opts.user.permissionProfile),
         classifyCount: classifyCountOv,
         missingCount: missingCountOv,
+        weekCount: sideOv.weekCount,
+        totalAll: sideOv.totalAll,
         companies: companyRowsOv
           .map((r) => r.emitterName?.trim() ?? "")
           .filter(Boolean)
           .slice(0, 40),
         categoryStats,
+        projectStats: sideOv.projectStats,
       };
     }
 
@@ -583,6 +653,7 @@ export async function loadDocumentHub(opts: {
           createdAt: true,
           documentDate: true,
           mimeType: true,
+          fileSize: true,
           fileUrl: true,
           isCurrentVersion: true,
           projectId: true,
@@ -609,7 +680,7 @@ export async function loadDocumentHub(opts: {
       prisma.chantierFile.count({ where: chantierWhere }),
     ]);
 
-    const [classifyCount, missingCount, companyRows] = await Promise.all([
+    const [classifyCount, missingCount, companyRows, side] = await Promise.all([
       prisma.chantierFile.count({
         where: {
           ...baseScope,
@@ -633,6 +704,7 @@ export async function loadDocumentHub(opts: {
         distinct: ["emitterName"],
         take: 40,
       }),
+      loadHubSideStats(baseScope, projectWhere),
     ]);
 
     const items: HubDocumentItem[] = chantierFiles.map((f) => {
@@ -709,6 +781,8 @@ export async function loadDocumentHub(opts: {
         indice: f.indice,
         companyLabel: supplierLink?.entityLabel ?? f.emitterName ?? null,
         chantierFileId: f.id,
+        fileSize: f.fileSize,
+        addedAt: f.createdAt.toISOString(),
       };
     });
 
@@ -878,7 +952,20 @@ export async function loadDocumentHub(opts: {
     });
     merged.sort((a, b) => {
       if (sort === "name") return a.title.localeCompare(b.title, "fr");
+      if (sort === "name_desc") return b.title.localeCompare(a.title, "fr");
+      if (sort === "added") {
+        return (b.addedAt ?? b.createdAt).localeCompare(a.addedAt ?? a.createdAt);
+      }
       if (sort === "type") return a.typeLabel.localeCompare(b.typeLabel, "fr");
+      if (sort === "project") {
+        return (a.projectTitle ?? "\uffff").localeCompare(b.projectTitle ?? "\uffff", "fr");
+      }
+      if (sort === "company") {
+        return (a.companyLabel ?? "\uffff").localeCompare(b.companyLabel ?? "\uffff", "fr");
+      }
+      if (sort === "origin") {
+        return (a.originLabel ?? "").localeCompare(b.originLabel ?? "", "fr");
+      }
       if (sort === "oldest") return a.createdAt.localeCompare(b.createdAt);
       return b.createdAt.localeCompare(a.createdAt);
     });
@@ -891,11 +978,14 @@ export async function loadDocumentHub(opts: {
       groups: hubGroupsForPersona(opts.user.personType, opts.user.permissionProfile),
       classifyCount,
       missingCount,
+      weekCount: side.weekCount,
+      totalAll: side.totalAll,
       companies: companyRows
         .map((r) => r.emitterName?.trim() ?? "")
         .filter(Boolean)
         .slice(0, 40),
       categoryStats,
+      projectStats: side.projectStats,
     };
   });
 }

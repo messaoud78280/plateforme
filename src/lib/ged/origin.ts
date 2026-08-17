@@ -19,7 +19,7 @@ export const GED_ORIGIN_LABELS: Record<GedOrigin, string> = {
   DEVIS: "Devis & Facturation",
   DOE: "DOE",
   FICHE_SUIVI: "Fiche suivi",
-  UPLOAD: "Dépôt manuel",
+  UPLOAD: "Ajout manuel",
   BEWORK: "BeWork",
 };
 

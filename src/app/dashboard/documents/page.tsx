@@ -37,7 +37,17 @@ const HUB_GROUPS = new Set<HubGroup>([
   "autres",
 ]);
 
-const HUB_SORTS = new Set<HubSort>(["recent", "oldest", "name", "type"]);
+const HUB_SORTS = new Set<HubSort>([
+  "recent",
+  "oldest",
+  "added",
+  "name",
+  "name_desc",
+  "type",
+  "project",
+  "company",
+  "origin",
+]);
 const HUB_VIEWS = new Set<HubView>([
   "all",
   "recent",
@@ -169,6 +179,10 @@ export default async function DocumentsPage({
         projects={projects}
         companies={hub.companies}
         classifyCount={hub.classifyCount}
+        missingCount={hub.missingCount}
+        weekCount={hub.weekCount}
+        totalAll={hub.totalAll}
+        projectStats={hub.projectStats}
         categoryStats={hub.categoryStats}
         canUploadChantier={!external}
         personType={dbUser?.personType}

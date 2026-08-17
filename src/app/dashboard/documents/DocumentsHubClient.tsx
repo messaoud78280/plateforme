@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { LayoutGrid, LayoutList, Menu, Plus } from "lucide-react";
 import { DocumentPreviewModal, type DocumentPreviewItem } from "@/components/documents/DocumentPreviewModal";
+import { DocumentCenterKpis } from "@/components/ged/DocumentCenterKpis";
+import { DocumentCenterNav } from "@/components/ged/DocumentCenterNav";
+import { DocumentPreviewPanel } from "@/components/ged/DocumentPreviewPanel";
+import { DocumentSelectionBar } from "@/components/ged/DocumentSelectionBar";
+import { DocumentUploadDropzone } from "@/components/ged/DocumentUploadDropzone";
 import { GedDocumentRow } from "@/components/ged/GedDocumentRow";
 import {
   GED_SHELL_CLASS,
@@ -15,12 +21,12 @@ import {
   GedPrimaryButton,
   GedSearchField,
   GedSecondaryButton,
-  GedViewTabs,
 } from "@/components/ged/GedUi";
 import type {
   HubCategoryStat,
   HubDocumentItem,
   HubGroup,
+  HubGroupBy,
   HubSort,
   HubView,
 } from "@/lib/ged/document-hub-ui";
@@ -28,12 +34,13 @@ import {
   HUB_CATEGORY_DEFS,
   HUB_DATE_FILTERS,
   HUB_DOC_TYPES,
+  HUB_GROUP_BY_OPTIONS,
   HUB_ORIGIN_FILTERS,
-  formatGedShortDate,
+  HUB_SORT_OPTIONS,
+  groupHubDocuments,
   hubCategoryLabel,
   hubEmptyCopy,
   recentDayLabel,
-  visibleHubViews,
 } from "@/lib/ged/document-hub-ui";
 import {
   CATEGORY_TO_DOCUMENT_TYPE,
@@ -41,13 +48,12 @@ import {
 } from "@/lib/ged/hub-categories";
 import { cn } from "@/lib/cn";
 
-const SORT_OPTIONS: { id: HubSort; label: string }[] = [
-  { id: "recent", label: "Plus récents" },
-  { id: "oldest", label: "Plus anciens" },
-  { id: "name", label: "Nom A–Z" },
-];
-
+const LAYOUT_KEY = "bework.ged.layout";
+const GROUP_KEY = "bework.ged.groupBy";
+const SORT_KEY = "bework.ged.sort";
 const RECENT_Q_KEY = "bework.ged.recentSearches";
+const MAX_BULK_RETRIEVE = 20;
+const MAX_BULK_DOWNLOAD = 10;
 
 function loadRecentSearches(): string[] {
   try {
@@ -70,6 +76,16 @@ function saveRecentSearch(q: string) {
   }
 }
 
+function readPref<T extends string>(key: string, allowed: T[], fallback: T): T {
+  try {
+    const v = sessionStorage.getItem(key);
+    if (v && (allowed as string[]).includes(v)) return v as T;
+  } catch {
+    /* ignore */
+  }
+  return fallback;
+}
+
 export function DocumentsHubClient({
   items,
   total,
@@ -88,6 +104,10 @@ export function DocumentsHubClient({
   projects,
   companies,
   classifyCount,
+  missingCount = 0,
+  weekCount = 0,
+  totalAll = 0,
+  projectStats = [],
   categoryStats,
   canUploadChantier,
   personType,
@@ -114,6 +134,15 @@ export function DocumentsHubClient({
   projects: { id: string; title: string }[];
   companies: string[];
   classifyCount: number;
+  missingCount?: number;
+  weekCount?: number;
+  totalAll?: number;
+  projectStats?: Array<{
+    id: string;
+    title: string;
+    count: number;
+    missingCount: number;
+  }>;
   categoryStats?: HubCategoryStat[];
   canUploadChantier: boolean;
   personType?: string | null;
@@ -126,13 +155,20 @@ export function DocumentsHubClient({
   const [pending, startTransition] = useTransition();
   const [q, setQ] = useState(search);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [recentOpen, setRecentOpen] = useState(false);
   const [recentQs, setRecentQs] = useState<string[]>([]);
   const [drawer, setDrawer] = useState<HubDocumentItem | null>(null);
+  const [selected, setSelected] = useState<HubDocumentItem | null>(null);
   const [preview, setPreview] = useState<DocumentPreviewItem | null>(null);
   const [favBusy, setFavBusy] = useState<string | null>(null);
   const [catBusy, setCatBusy] = useState(false);
+  const [layout, setLayout] = useState<"list" | "cards">("list");
+  const [groupBy, setGroupBy] = useState<HubGroupBy>("none");
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [selectMode, setSelectMode] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -142,9 +178,10 @@ export function DocumentsHubClient({
     personType === "CLIENT_EXT" || permissionProfile === "CLIENT";
   const external = isSupplier || isClient;
   const hideProject = Boolean(hideProjectFilter);
+  const showChecks = selectMode || view === "missing" || picked.size > 0;
 
   const showCategoryCards =
-    view === "categories" && group === "all" && !search.trim() && (categoryStats?.length ?? 0) >= 0;
+    view === "categories" && group === "all" && !search.trim();
   const inCategory = view === "categories" && group !== "all";
 
   const hasFilters = Boolean(
@@ -159,7 +196,22 @@ export function DocumentsHubClient({
     search,
     hasFilters,
   });
-  const shownViews = visibleHubViews(views, classifyCount);
+
+  useEffect(() => {
+    setLayout(readPref<"list" | "cards">(LAYOUT_KEY, ["list", "cards"], "list"));
+    setGroupBy(
+      readPref<HubGroupBy>(
+        GROUP_KEY,
+        HUB_GROUP_BY_OPTIONS.map((o) => o.id),
+        "none",
+      ),
+    );
+  }, []);
+
+  useEffect(() => {
+    setPicked(new Set());
+    setSelected(null);
+  }, [view, group, projectId, origin, docType, company, since, search, page]);
 
   useEffect(() => {
     if (document.activeElement === searchRef.current) return;
@@ -178,6 +230,12 @@ export function DocumentsHubClient({
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (e.key === "/" && tag !== "INPUT" && tag !== "TEXTAREA") {
+        e.preventDefault();
+        searchRef.current?.focus();
+        return;
+      }
       if (e.key !== "Escape") return;
       if (preview) {
         setPreview(null);
@@ -187,13 +245,15 @@ export function DocumentsHubClient({
         setDrawer(null);
         return;
       }
-      if (recentOpen) setRecentOpen(false);
       if (addOpen) setAddOpen(false);
+      if (navOpen) setNavOpen(false);
       if (filtersOpen) setFiltersOpen(false);
+      if (recentOpen) setRecentOpen(false);
+      setSelected(null);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [drawer, preview, recentOpen, addOpen, filtersOpen]);
+  }, [drawer, preview, recentOpen, addOpen, filtersOpen, navOpen]);
 
   function go(updates: Record<string, string>) {
     const p = new URLSearchParams();
@@ -221,10 +281,16 @@ export function DocumentsHubClient({
     if (nextCompany) p.set("company", nextCompany);
     if (nextSince) p.set("since", nextSince);
     if (nextPage !== "1") p.set("page", nextPage);
+    try {
+      sessionStorage.setItem(SORT_KEY, nextSort);
+    } catch {
+      /* ignore */
+    }
     const qs = p.toString();
     startTransition(() => {
       router.replace(qs ? `/dashboard/documents?${qs}` : "/dashboard/documents");
     });
+    setNavOpen(false);
   }
 
   async function changeCategory(it: HubDocumentItem, next: HubCategoryId) {
@@ -255,7 +321,9 @@ export function DocumentsHubClient({
       });
     }
     if (projectId && !hideProject) {
-      const t = projects.find((p) => p.id === projectId)?.title ?? "Chantier";
+      const t = projects.find((p) => p.id === projectId)?.title
+        ?? projectStats.find((p) => p.id === projectId)?.title
+        ?? "Chantier";
       out.push({ key: "project", label: t, clear: { projectId: "", page: "1" } });
     }
     if (origin) {
@@ -273,11 +341,20 @@ export function DocumentsHubClient({
       const dl = HUB_DATE_FILTERS.find((d) => d.id === since)?.label ?? since;
       out.push({ key: "since", label: dl, clear: { since: "", page: "1" } });
     }
+    if (view === "favorites") {
+      out.push({ key: "fav", label: "Favoris", clear: { view: "all", page: "1" } });
+    }
+    if (view === "missing") {
+      out.push({ key: "missing", label: "À récupérer", clear: { view: "all", page: "1" } });
+    }
+    if (view === "classify") {
+      out.push({ key: "classify", label: "À classer", clear: { view: "all", page: "1" } });
+    }
     return out;
-  }, [projectId, origin, docType, company, since, projects, hideProject, inCategory, group]);
+  }, [projectId, origin, docType, company, since, projects, projectStats, hideProject, inCategory, group, view]);
 
   const groupedRecent = useMemo(() => {
-    if (view !== "recent") return null;
+    if (view !== "recent" || groupBy !== "none") return null;
     const map = new Map<string, HubDocumentItem[]>();
     for (const it of items) {
       const label = recentDayLabel(it.createdAt);
@@ -286,7 +363,9 @@ export function DocumentsHubClient({
       map.set(label, arr);
     }
     return [...map.entries()];
-  }, [items, view]);
+  }, [items, view, groupBy]);
+
+  const grouped = useMemo(() => groupHubDocuments(items, groupBy), [items, groupBy]);
 
   async function toggleFavorite(it: HubDocumentItem) {
     if (!it.chantierFileId || it.isExpectedMissing) return;
@@ -303,7 +382,9 @@ export function DocumentsHubClient({
 
   function openFile(it: HubDocumentItem) {
     if (it.isExpectedMissing) {
-      window.location.href = it.href;
+      window.location.href = it.projectId
+        ? `/dashboard/projets/${it.projectId}#dossier-chantier`
+        : it.href;
       return;
     }
     if (it.chantierFileId) {
@@ -312,26 +393,116 @@ export function DocumentsHubClient({
         url: it.href.startsWith("/api/") ? it.href : null,
         chantierFileId: it.chantierFileId,
         mimeType: it.mimeHint,
-        createdAtLabel: formatGedShortDate(it.createdAt),
+        createdAtLabel: it.createdAt,
       });
       return;
     }
     window.open(it.href, "_blank", "noopener,noreferrer");
   }
 
+  function selectRow(it: HubDocumentItem) {
+    setSelected(it);
+    if (typeof window !== "undefined" && window.innerWidth < 1280) {
+      setDrawer(it);
+    }
+  }
+
+  const selectedItems = items.filter((it) => picked.has(it.id));
+
+  async function bulkFavorite() {
+    const ids = selectedItems.filter((it) => it.chantierFileId && !it.isExpectedMissing);
+    await Promise.all(
+      ids.map((it) =>
+        fetch(`/api/chantier/files/${it.chantierFileId}/favorite`, { method: "POST" }),
+      ),
+    );
+    setPicked(new Set());
+    router.refresh();
+  }
+
+  async function bulkCategorize(categoryId: string) {
+    const next = categoryId as HubCategoryId;
+    const type = CATEGORY_TO_DOCUMENT_TYPE[next];
+    if (!type) return;
+    setCatBusy(true);
+    try {
+      await Promise.all(
+        selectedItems
+          .filter((it) => it.chantierFileId && !it.isExpectedMissing)
+          .map((it) =>
+            fetch(`/api/chantier/files/${it.chantierFileId}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ documentType: type }),
+            }),
+          ),
+      );
+      setPicked(new Set());
+      router.refresh();
+    } finally {
+      setCatBusy(false);
+    }
+  }
+
+  function bulkDownload() {
+    const files = selectedItems
+      .filter((it) => it.chantierFileId && !it.isExpectedMissing)
+      .slice(0, MAX_BULK_DOWNLOAD);
+    files.forEach((it, i) => {
+      window.setTimeout(() => {
+        const a = document.createElement("a");
+        a.href = `/api/chantier/files/${it.chantierFileId}/preview?download=original`;
+        a.rel = "noopener";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }, i * 250);
+    });
+  }
+
+  function bulkRetrieve() {
+    const miss = (picked.size ? selectedItems : items).filter((it) => it.isExpectedMissing);
+    const limited = miss.slice(0, MAX_BULK_RETRIEVE);
+    const projectIds = [...new Set(limited.map((it) => it.projectId).filter(Boolean))];
+    if (projectIds.length === 0) return;
+    window.location.href = `/dashboard/projets/${projectIds[0]}#dossier-chantier`;
+  }
+
+  function persistLayout(next: "list" | "cards") {
+    setLayout(next);
+    try {
+      sessionStorage.setItem(LAYOUT_KEY, next);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function persistGroupBy(next: HubGroupBy) {
+    setGroupBy(next);
+    setCollapsed(new Set());
+    try {
+      sessionStorage.setItem(GROUP_KEY, next);
+    } catch {
+      /* ignore */
+    }
+  }
+
   const addTarget = projectId || projects[0]?.id;
   const projectTitle =
     lockedProjectTitle ||
-    (projectId ? projects.find((p) => p.id === projectId)?.title ?? null : null);
+    (projectId
+      ? projects.find((p) => p.id === projectId)?.title
+        ?? projectStats.find((p) => p.id === projectId)?.title
+        ?? null
+      : null);
 
   const pageTitle = (() => {
     if (external) return "Documents partagés";
     if (inCategory) return hubCategoryLabel(group);
-    if (view === "missing") return "Documents à récupérer";
-    if (view === "classify") return "Documents à classer";
+    if (view === "missing") return "À récupérer";
+    if (view === "classify") return "À classer";
     if (view === "favorites") return "Favoris";
     if (view === "recent") return "Récents";
-    if (hideProject && lockedProjectTitle) return "Documents";
     return "Documents";
   })();
 
@@ -341,69 +512,190 @@ export function DocumentsHubClient({
         ? `Documents échangés avec ${hostCompany?.trim() || "votre client"}.`
         : `Documents que ${hostCompany?.trim() || "votre entreprise"} partage avec vous.`;
     }
-    if (inCategory) {
-      const avail = items.filter((i) => !i.isExpectedMissing).length;
-      const miss = items.filter((i) => i.isExpectedMissing).length;
-      const parts = [
-        `${total} document${total !== 1 ? "s" : ""}`,
-        miss > 0 ? `${miss} à récupérer` : null,
-      ].filter(Boolean);
-      return parts.join(" · ");
-    }
-    if (view === "missing") {
-      return "Les pièces attendues qui n’ont pas encore été ajoutées.";
-    }
-    if (view === "classify") {
-      return "Ces documents ont besoin d’une catégorie.";
-    }
-    if (hideProject && lockedProjectTitle) {
-      return `Tous les documents de ${lockedProjectTitle}`;
-    }
-    if (projectTitle && !hideProject) {
-      return `Documents filtrés sur ${projectTitle}.`;
-    }
-    return "Retrouvez tous les documents de votre entreprise.";
+    if (inCategory) return `${total} document${total !== 1 ? "s" : ""} dans cette catégorie.`;
+    if (view === "missing") return "Pièces détectées qui ne sont pas encore dans BeWork.";
+    if (view === "classify") return "Quelques champs suffisent — BeWork connaît déjà le reste.";
+    if (hideProject && lockedProjectTitle) return `Tous les documents de ${lockedProjectTitle}`;
+    if (projectTitle && !hideProject) return `Documents filtrés sur ${projectTitle}.`;
+    return "Retrouvez, classez et partagez tous les documents de votre entreprise.";
   })();
 
   const searchPlaceholder = lockedProjectTitle
     ? `Rechercher dans ${lockedProjectTitle}…`
-    : "Rechercher un document, chantier, fournisseur, référence…";
+    : "Rechercher un document, chantier, client, fournisseur, référence…";
 
-  const addMenu =
-    canUploadChantier && addTarget ? (
-      <div className="relative">
-        <GedPrimaryButton
-          onClick={() => setAddOpen((o) => !o)}
-          aria-haspopup="menu"
-          aria-expanded={addOpen}
-        >
-          Ajouter
-        </GedPrimaryButton>
-        {addOpen ? (
-          <div
-            role="menu"
-            className="absolute right-0 z-20 mt-1.5 w-56 rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
-          >
-            <Link
-              href={`/dashboard/projets/${addTarget}#tab-documents`}
-              role="menuitem"
-              className="block px-3 py-2 text-[13px] text-slate-700 hover:bg-slate-50"
-              onClick={() => setAddOpen(false)}
-            >
-              Ajouter un document
-            </Link>
-            <Link
-              href={`/dashboard/projets/${addTarget}#tab-documents`}
-              role="menuitem"
-              className="block px-3 py-2 text-[13px] text-slate-700 hover:bg-slate-50"
-              onClick={() => setAddOpen(false)}
-            >
-              Ajouter une pièce à récupérer
-            </Link>
-          </div>
-        ) : null}
-      </div>
-    ) : null;
+  const nav = (
+    <DocumentCenterNav
+      view={view}
+      group={group}
+      projectId={projectId}
+      origin={origin}
+      since={since}
+      classifyCount={classifyCount}
+      missingCount={missingCount}
+      categoryStats={categoryStats}
+      projectStats={projectStats}
+      projects={projects}
+      hideProject={hideProject}
+      allowedViews={views.map((v) => v.id)}
+      onGo={go}
+    />
+  );
+
+  function renderRow(it: HubDocumentItem) {
+    return (
+      <GedDocumentRow
+        key={it.id}
+        it={it}
+        hideProject={hideProject}
+        layout={layout}
+        selected={picked.has(it.id)}
+        onToggleSelect={
+          showChecks
+            ? () =>
+                setPicked((prev) => {
+                  const next = new Set(prev);
+                  if (next.has(it.id)) next.delete(it.id);
+                  else next.add(it.id);
+                  return next;
+                })
+            : undefined
+        }
+        onSelectRow={() => selectRow(it)}
+        onOpenDetails={() => {
+          setSelected(it);
+          setDrawer(it);
+        }}
+        onOpenFile={() => openFile(it)}
+        onFavorite={() => void toggleFavorite(it)}
+        favBusy={favBusy === it.id}
+        classifySlot={
+          view === "classify" && it.chantierFileId ? (
+            <ClassifyInbox
+              it={it}
+              busy={catBusy}
+              onValidate={(cat) => void changeCategory(it, cat)}
+            />
+          ) : null
+        }
+      />
+    );
+  }
+
+  function renderList() {
+    if (items.length === 0) {
+      return (
+        <GedEmptyState
+          title={empty.title}
+          body={empty.body}
+          action={
+            empty.action === "clear-search" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setQ("");
+                  go({ q: "", page: "1" });
+                }}
+                className="text-[13px] font-medium text-[#1e3a5f] hover:underline"
+              >
+                Effacer la recherche
+              </button>
+            ) : empty.action === "clear-filters" ? (
+              <button
+                type="button"
+                onClick={() =>
+                  go({
+                    projectId: hideProject ? projectId : "",
+                    origin: "",
+                    docType: "",
+                    company: "",
+                    since: "",
+                    group: "all",
+                    view: "all",
+                    page: "1",
+                  })
+                }
+                className="text-[13px] font-medium text-[#1e3a5f] hover:underline"
+              >
+                Effacer les filtres
+              </button>
+            ) : empty.action === "add" && canUploadChantier && addTarget ? (
+              <button
+                type="button"
+                onClick={() => setAddOpen(true)}
+                className="inline-flex rounded-full bg-[#1e3a5f] px-4 py-2 text-[13px] font-medium text-white"
+              >
+                Ajouter
+              </button>
+            ) : null
+          }
+        />
+      );
+    }
+
+    const listClass =
+      layout === "cards"
+        ? "grid grid-cols-1 gap-3 sm:grid-cols-2"
+        : "divide-y divide-slate-100 overflow-hidden rounded-2xl border border-bework-navy/10 bg-white px-1 shadow-[var(--cc-shadow)] sm:px-2";
+
+    if (groupedRecent) {
+      return (
+        <div className="space-y-7">
+          {groupedRecent.map(([day, docs]) => (
+            <section key={day}>
+              <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                {day}
+              </h2>
+              <ul className={listClass}>{docs.map(renderRow)}</ul>
+            </section>
+          ))}
+        </div>
+      );
+    }
+
+    if (groupBy !== "none") {
+      return (
+        <div className="space-y-4">
+          {grouped.map((g) => {
+            const closed = collapsed.has(g.key);
+            return (
+              <section key={g.key} className="rounded-2xl border border-bework-navy/10 bg-white">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCollapsed((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(g.key)) next.delete(g.key);
+                      else next.add(g.key);
+                      return next;
+                    })
+                  }
+                  className="flex w-full items-center justify-between px-4 py-3 text-left"
+                >
+                  <h2 className="text-[14px] font-semibold text-bework-navy">{g.label}</h2>
+                  <span className="text-slate-400">{closed ? "▸" : "▾"}</span>
+                </button>
+                {closed ? null : (
+                  <ul className={cn(layout === "cards" ? "grid grid-cols-1 gap-3 p-3 sm:grid-cols-2" : "divide-y divide-slate-100 px-1 sm:px-2")}>
+                    {g.items.map(renderRow)}
+                  </ul>
+                )}
+              </section>
+            );
+          })}
+        </div>
+      );
+    }
+
+    return <ul className={listClass}>{items.map(renderRow)}</ul>;
+  }
+
+  const addButton = canUploadChantier && addTarget ? (
+    <GedPrimaryButton onClick={() => setAddOpen(true)} className="inline-flex items-center gap-1.5">
+      <Plus className="h-4 w-4" strokeWidth={2} />
+      Ajouter
+    </GedPrimaryButton>
+  ) : null;
 
   return (
     <div className={GED_SHELL_CLASS}>
@@ -412,13 +704,21 @@ export function DocumentsHubClient({
         onClose={() => setPreview(null)}
         item={preview}
       />
+      <DocumentUploadDropzone
+        open={addOpen}
+        onClose={() => {
+          setAddOpen(false);
+          router.refresh();
+        }}
+        projects={projects}
+        defaultProjectId={addTarget}
+        canUpload={canUploadChantier}
+        onUploaded={() => router.refresh()}
+      />
 
       <div className="space-y-3">
         {hideProject && lockedProjectTitle ? (
-          <GedBackLink
-            href={`/dashboard/projets/${projectId}`}
-            label={lockedProjectTitle}
-          />
+          <GedBackLink href={`/dashboard/projets/${projectId}`} label={lockedProjectTitle} />
         ) : null}
         {inCategory ? (
           <GedBackLink
@@ -427,28 +727,66 @@ export function DocumentsHubClient({
           />
         ) : null}
         {!inCategory && !hideProject && projectId && projectTitle ? (
-          <GedBackLink
-            href={`/dashboard/projets/${projectId}`}
-            label={projectTitle}
-          />
+          <GedBackLink href={`/dashboard/projets/${projectId}`} label={projectTitle} />
         ) : null}
         {inCategory ? (
           <GedBreadcrumb
             items={[
-              {
-                label: "Documents",
-                onClick: () => go({ view: "all", group: "all", page: "1" }),
-              },
-              {
-                label: "Catégories",
-                onClick: () => go({ view: "categories", group: "all", page: "1" }),
-              },
+              { label: "Documents", onClick: () => go({ view: "all", group: "all", page: "1" }) },
+              { label: "Catégories", onClick: () => go({ view: "categories", group: "all", page: "1" }) },
               { label: hubCategoryLabel(group) },
             ]}
           />
         ) : null}
-        <GedPageHeader title={pageTitle} subtitle={pageSubtitle} action={addMenu} />
+        <GedPageHeader title={pageTitle} subtitle={pageSubtitle} action={addButton} />
       </div>
+
+      {external ? null : (
+        <DocumentCenterKpis
+          items={[
+            {
+              id: "all",
+              value: totalAll,
+              label: "Documents",
+              tone: "navy",
+              active: view === "all" && !since && !origin,
+              onClick: () =>
+                go({
+                  view: "all",
+                  group: "all",
+                  since: "",
+                  origin: "",
+                  projectId: hideProject ? projectId : "",
+                  page: "1",
+                }),
+            },
+            {
+              id: "week",
+              value: weekCount,
+              label: "Cette semaine",
+              tone: "accent",
+              active: since === "7",
+              onClick: () => go({ view: "all", since: "7", page: "1" }),
+            },
+            {
+              id: "missing",
+              value: missingCount,
+              label: "À récupérer",
+              tone: "watch",
+              active: view === "missing",
+              onClick: () => go({ view: "missing", group: "all", page: "1" }),
+            },
+            {
+              id: "classify",
+              value: classifyCount,
+              label: "À classer",
+              tone: "ok",
+              active: view === "classify",
+              onClick: () => go({ view: "classify", group: "all", page: "1" }),
+            },
+          ]}
+        />
+      )}
 
       <GedSearchField
         value={q}
@@ -481,193 +819,230 @@ export function DocumentsHubClient({
         }}
       />
 
-      <GedViewTabs
-        views={shownViews}
-        active={view}
-        classifyCount={classifyCount}
-        onChange={(id) =>
-          go({
-            view: id,
-            page: "1",
-            group: "all",
-            ...(id === "recent" ? { sort: "recent" } : {}),
-          })
-        }
-      />
+      <div className="flex gap-5 xl:gap-6">
+        <aside className="hidden w-[240px] shrink-0 lg:block">
+          <div className="sticky top-4 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-2xl border border-bework-navy/10 bg-[linear-gradient(180deg,#f7f9fc_0%,#ffffff_48%)] p-3">
+            {nav}
+          </div>
+        </aside>
 
-      {showCategoryCards ? null : (
-      <div className="flex flex-wrap items-center gap-2">
-        <GedSecondaryButton
-          onClick={() => setFiltersOpen((o) => !o)}
-          aria-expanded={filtersOpen}
-        >
-          Filtres
-        </GedSecondaryButton>
-        <label className="ml-auto inline-flex items-center gap-2 text-[13px] text-slate-500">
-          <span className="sr-only">Trier</span>
-          <select
-            value={sort}
-            onChange={(e) => go({ sort: e.target.value, page: "1" })}
-            className="rounded-full border border-slate-200/80 bg-white px-3 py-1.5 text-[13px] font-medium text-slate-600 outline-none transition-colors focus:border-[#1e3a5f]/25"
-            aria-label="Trier les documents"
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      )}
-
-      {showCategoryCards ? (
-        <div className="pt-1" aria-busy={pending}>
-          <GedCategoryGrid
-            stats={categoryStats ?? []}
-            onOpen={(id) => go({ view: "categories", group: id, page: "1" })}
-            empty={<GedEmptyState title={empty.title} body={empty.body} />}
-          />
-        </div>
-      ) : (
-        <>
-      {filtersOpen ? (
-        <div className="grid gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-4 sm:grid-cols-2 lg:grid-cols-3">
-          {hideProject ? null : (
-            <label className="block text-[12px] font-medium text-slate-500">
-              Chantier
-              <select
-                value={projectId}
-                onChange={(e) => go({ projectId: e.target.value, page: "1" })}
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
-              >
-                <option value="">Tous</option>
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <label className="block text-[12px] font-medium text-slate-500">
-            Type
-            <select
-              value={docType}
-              onChange={(e) => go({ docType: e.target.value, page: "1" })}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
+        <div className="min-w-0 flex-1 space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <GedSecondaryButton
+              className="lg:hidden"
+              onClick={() => setNavOpen(true)}
+              aria-expanded={navOpen}
             >
-              {HUB_DOC_TYPES.map((t) => (
-                <option key={t.id || "all"} value={t.id}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block text-[12px] font-medium text-slate-500">
-            Source
-            <select
-              value={origin}
-              onChange={(e) => go({ origin: e.target.value, page: "1" })}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
-            >
-              <option value="">Toutes</option>
-              {HUB_ORIGIN_FILTERS.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          {companies.length > 0 ? (
-            <label className="block text-[12px] font-medium text-slate-500">
-              Entreprise
-              <select
-                value={company}
-                onChange={(e) => go({ company: e.target.value, page: "1" })}
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
-              >
-                <option value="">Toutes</option>
-                {companies.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : null}
-          <label className="block text-[12px] font-medium text-slate-500">
-            Date
-            <select
-              value={since}
-              onChange={(e) => go({ since: e.target.value, page: "1" })}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
-            >
-              {HUB_DATE_FILTERS.map((d) => (
-                <option key={d.id || "all"} value={d.id}>
-                  {d.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      ) : null}
-
-      {chips.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-1.5">
-          {chips.map((c) => (
-            <button
-              key={c.key}
-              type="button"
-              onClick={() => go(c.clear)}
-              className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-700 hover:bg-slate-200"
-            >
-              {c.label}
-              <span aria-hidden className="text-slate-400">
-                ×
+              <span className="inline-flex items-center gap-1.5">
+                <Menu className="h-3.5 w-3.5" />
+                Parcourir
               </span>
-            </button>
-          ))}
-          {chips.length > 1 ? (
-            <button
-              type="button"
-              onClick={() =>
-                go({
-                  projectId: hideProject ? projectId : "",
-                  origin: "",
-                  docType: "",
-                  company: "",
-                  since: "",
-                  group: "all",
-                  page: "1",
-                })
-              }
-              className="px-2 py-1 text-[12px] font-medium text-[#1e3a5f] hover:underline"
-            >
-              Effacer les filtres
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-
-      <div aria-busy={pending} className={cn(pending ? "opacity-70" : "")}>
-        {items.length === 0 ? (
-          <GedEmptyState
-            title={empty.title}
-            body={empty.body}
-            action={
-              empty.action === "clear-search" ? (
-                <button
-                  type="button"
+            </GedSecondaryButton>
+            {showCategoryCards ? null : (
+              <>
+                <GedSecondaryButton onClick={() => setFiltersOpen((o) => !o)} aria-expanded={filtersOpen}>
+                  Filtres
+                </GedSecondaryButton>
+                <label className="inline-flex items-center gap-2 text-[13px] text-slate-500">
+                  <span className="sr-only">Trier</span>
+                  <select
+                    value={sort}
+                    onChange={(e) => go({ sort: e.target.value, page: "1" })}
+                    className="rounded-full border border-slate-200/80 bg-white px-3 py-1.5 text-[13px] font-medium text-slate-600 outline-none focus:border-[#1e3a5f]/25"
+                    aria-label="Trier les documents"
+                  >
+                    {HUB_SORT_OPTIONS.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="inline-flex items-center gap-2 text-[13px] text-slate-500">
+                  <span className="hidden sm:inline">Regrouper</span>
+                  <select
+                    value={groupBy}
+                    onChange={(e) => persistGroupBy(e.target.value as HubGroupBy)}
+                    className="rounded-full border border-slate-200/80 bg-white px-3 py-1.5 text-[13px] font-medium text-slate-600 outline-none focus:border-[#1e3a5f]/25"
+                    aria-label="Regrouper par"
+                  >
+                    {HUB_GROUP_BY_OPTIONS.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="ml-auto flex items-center gap-1 rounded-full border border-slate-200 bg-white p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => persistLayout("list")}
+                    className={cn(
+                      "rounded-full p-1.5",
+                      layout === "list" ? "bg-bework-soft-navy text-bework-navy" : "text-slate-400",
+                    )}
+                    aria-label="Vue liste"
+                    aria-pressed={layout === "list"}
+                  >
+                    <LayoutList className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => persistLayout("cards")}
+                    className={cn(
+                      "rounded-full p-1.5",
+                      layout === "cards" ? "bg-bework-soft-navy text-bework-navy" : "text-slate-400",
+                    )}
+                    aria-label="Vue cartes"
+                    aria-pressed={layout === "cards"}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </button>
+                </div>
+                <GedSecondaryButton
                   onClick={() => {
-                    setQ("");
-                    go({ q: "", page: "1" });
+                    setSelectMode((v) => !v);
+                    if (selectMode) setPicked(new Set());
                   }}
-                  className="text-[13px] font-medium text-[#1e3a5f] hover:underline"
                 >
-                  Effacer la recherche
+                  {selectMode || picked.size > 0 ? "OK" : "Sélectionner"}
+                </GedSecondaryButton>
+              </>
+            )}
+          </div>
+
+          {filtersOpen && !showCategoryCards ? (
+            <div className="grid gap-3 rounded-2xl border border-bework-navy/10 bg-bework-soft-navy/40 p-4 sm:grid-cols-2 lg:grid-cols-3">
+              {hideProject ? null : (
+                <label className="block text-[12px] font-medium text-slate-600">
+                  Chantier
+                  <select
+                    value={projectId}
+                    onChange={(e) => go({ projectId: e.target.value, page: "1" })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
+                  >
+                    <option value="">Tous</option>
+                    {projects.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <label className="block text-[12px] font-medium text-slate-600">
+                Type de document
+                <select
+                  value={docType}
+                  onChange={(e) => go({ docType: e.target.value, page: "1" })}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
+                >
+                  {HUB_DOC_TYPES.map((t) => (
+                    <option key={t.id || "all"} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-[12px] font-medium text-slate-600">
+                Catégorie
+                <select
+                  value={inCategory ? group : ""}
+                  onChange={(e) =>
+                    go({
+                      view: e.target.value ? "categories" : "all",
+                      group: e.target.value || "all",
+                      page: "1",
+                    })
+                  }
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
+                >
+                  <option value="">Toutes</option>
+                  {HUB_CATEGORY_DEFS.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-[12px] font-medium text-slate-600">
+                Source
+                <select
+                  value={origin}
+                  onChange={(e) => go({ origin: e.target.value, page: "1" })}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
+                >
+                  <option value="">Toutes</option>
+                  {HUB_ORIGIN_FILTERS.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {companies.length > 0 ? (
+                <label className="block text-[12px] font-medium text-slate-600">
+                  Client / fournisseur
+                  <select
+                    value={company}
+                    onChange={(e) => go({ company: e.target.value, page: "1" })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
+                  >
+                    <option value="">Tous</option>
+                    {companies.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              <label className="block text-[12px] font-medium text-slate-600">
+                Date
+                <select
+                  value={since}
+                  onChange={(e) => go({ since: e.target.value, page: "1" })}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
+                >
+                  {HUB_DATE_FILTERS.map((d) => (
+                    <option key={d.id || "all"} value={d.id}>
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-[12px] font-medium text-slate-600">
+                Statut
+                <select
+                  value={view === "missing" || view === "classify" || view === "favorites" ? view : ""}
+                  onChange={(e) =>
+                    go({ view: (e.target.value || "all") as HubView, page: "1" })
+                  }
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
+                >
+                  <option value="">Tous</option>
+                  <option value="missing">À récupérer</option>
+                  <option value="classify">À classer</option>
+                  <option value="favorites">Favoris</option>
+                </select>
+              </label>
+            </div>
+          ) : null}
+
+          {chips.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {chips.map((c) => (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => go(c.clear)}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-bework-soft-navy px-2.5 py-1 text-[12px] font-medium text-slate-700 hover:bg-slate-200"
+                >
+                  {c.label}
+                  <span aria-hidden className="text-slate-400">×</span>
                 </button>
-              ) : empty.action === "clear-filters" ? (
+              ))}
+              {chips.length > 0 ? (
                 <button
                   type="button"
                   onClick={() =>
@@ -678,219 +1053,219 @@ export function DocumentsHubClient({
                       company: "",
                       since: "",
                       group: "all",
+                      view: "all",
                       page: "1",
                     })
                   }
-                  className="text-[13px] font-medium text-[#1e3a5f] hover:underline"
+                  className="px-2 py-1 text-[12px] font-medium text-[#1e3a5f] hover:underline"
                 >
                   Effacer les filtres
                 </button>
-              ) : empty.action === "add" && canUploadChantier && addTarget ? (
-                <Link
-                  href={`/dashboard/projets/${addTarget}#tab-documents`}
-                  className="inline-flex rounded-full bg-[#1e3a5f] px-4 py-2 text-[13px] font-medium text-white"
-                >
-                  Ajouter
-                </Link>
-              ) : null
-            }
-          />
-        ) : groupedRecent ? (
-          <div className="space-y-7">
-            {groupedRecent.map(([day, docs]) => (
-              <section key={day}>
-                <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                  {day}
-                </h2>
-                <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200/90 bg-white px-1 sm:px-2">
-                  {docs.map((it) => (
-                    <GedDocumentRow
-                      key={it.id}
-                      it={it}
-                      hideProject={hideProject}
-                      onOpenDetails={() => setDrawer(it)}
-                      onOpenFile={() => openFile(it)}
-                      onFavorite={() => void toggleFavorite(it)}
-                      favBusy={favBusy === it.id}
-                    />
-                  ))}
-                </ul>
-              </section>
-            ))}
-          </div>
-        ) : (
-          <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200/90 bg-white px-1 sm:px-2">
-            {items.map((it) => (
-              <GedDocumentRow
-                key={it.id}
-                it={it}
-                hideProject={hideProject}
-                onOpenDetails={() => setDrawer(it)}
-                onOpenFile={() => openFile(it)}
-                onFavorite={() => void toggleFavorite(it)}
-                favBusy={favBusy === it.id}
-                classifySlot={
-                  view === "classify" && it.chantierFileId ? (
-                    <select
-                      disabled={catBusy}
-                      defaultValue=""
-                      onChange={(e) => {
-                        const next = e.target.value as HubCategoryId;
-                        if (next) void changeCategory(it, next);
-                      }}
-                      className="max-w-[9rem] rounded-full border border-slate-200 bg-white px-2 py-1 text-[12px] text-slate-700"
-                      aria-label="Classer"
-                    >
-                      <option value="">Classer</option>
-                      {HUB_CATEGORY_DEFS.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </select>
-                  ) : null
-                }
+              ) : null}
+            </div>
+          ) : null}
+
+          {showCategoryCards ? null : (
+            <DocumentSelectionBar
+              count={picked.size}
+              totalOnPage={items.length}
+              missingView={view === "missing"}
+              canCategorize={!external}
+              onSelectAll={() =>
+                setPicked(
+                  picked.size === items.length ? new Set() : new Set(items.map((it) => it.id)),
+                )
+              }
+              onClear={() => setPicked(new Set())}
+              onFavorite={external ? undefined : () => void bulkFavorite()}
+              onCategorize={external ? undefined : (id) => void bulkCategorize(id)}
+              onDownload={() => bulkDownload()}
+              onRetrieve={view === "missing" ? bulkRetrieve : undefined}
+              retrieveDisabled={picked.size === 0}
+            />
+          )}
+
+          {view === "missing" && items.length > 0 && items.length <= MAX_BULK_RETRIEVE ? (
+            <button
+              type="button"
+              onClick={bulkRetrieve}
+              className="text-[12px] font-medium text-[#b45309] hover:underline"
+            >
+              Tout récupérer
+            </button>
+          ) : null}
+
+          {showCategoryCards ? (
+            <div className="pt-1" aria-busy={pending}>
+              <GedCategoryGrid
+                stats={categoryStats ?? []}
+                onOpen={(id) => go({ view: "categories", group: id, page: "1" })}
+                empty={<GedEmptyState title={empty.title} body={empty.body} />}
               />
-            ))}
-          </ul>
-        )}
+            </div>
+          ) : (
+            <div aria-busy={pending} className={cn(pending ? "opacity-70" : "")}>
+              {renderList()}
+            </div>
+          )}
+
+          {totalPages > 1 && !showCategoryCards ? (
+            <div className="flex items-center justify-center gap-3 pt-2 text-[13px] text-slate-500">
+              <button type="button" disabled={page <= 1} onClick={() => go({ page: String(page - 1) })} className="disabled:opacity-30">
+                Précédent
+              </button>
+              <span>
+                {page} / {totalPages}
+              </span>
+              <button
+                type="button"
+                disabled={page >= totalPages}
+                onClick={() => go({ page: String(page + 1) })}
+                className="disabled:opacity-30"
+              >
+                Suivant
+              </button>
+            </div>
+          ) : null}
+        </div>
+
+        {selected && !showCategoryCards ? (
+          <div className="hidden w-[320px] shrink-0 xl:block">
+            <div className="sticky top-4 h-[calc(100vh-6rem)]">
+              <DocumentPreviewPanel
+                item={selected}
+                hideProject={hideProject}
+                onOpen={() => openFile(selected)}
+                onFavorite={() => void toggleFavorite(selected)}
+                onRetrieve={() => openFile(selected)}
+                onCategorize={
+                  external || !selected.chantierFileId
+                    ? undefined
+                    : (next) => void changeCategory(selected, next as HubCategoryId)
+                }
+                categorizeOptions={HUB_CATEGORY_DEFS}
+                catBusy={catBusy}
+                onClose={() => setSelected(null)}
+              />
+            </div>
+          </div>
+        ) : null}
       </div>
 
-      {totalPages > 1 ? (
-        <div className="flex items-center justify-center gap-3 pt-2 text-[13px] text-slate-500">
-          <button type="button" disabled={page <= 1} onClick={() => go({ page: String(page - 1) })} className="disabled:opacity-30">
-            Précédent
-          </button>
-          <span>
-            {page} / {totalPages}
-          </span>
-          <button
-            type="button"
-            disabled={page >= totalPages}
-            onClick={() => go({ page: String(page + 1) })}
-            className="disabled:opacity-30"
-          >
-            Suivant
-          </button>
-        </div>
-      ) : null}
-        </>
-      )}
-
-      {drawer ? (
-        <div
-          className="fixed inset-0 z-50 flex justify-end bg-slate-900/20"
-          onClick={() => setDrawer(null)}
-        >
+      {navOpen ? (
+        <div className="fixed inset-0 z-40 bg-slate-900/25 lg:hidden" onClick={() => setNavOpen(false)}>
           <aside
-            className="flex h-full w-full max-w-md flex-col bg-white shadow-2xl"
+            className="h-full w-[min(100%,20rem)] overflow-y-auto bg-white p-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-label={drawer.title}
           >
-            <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-6 py-5">
-              <div>
-                <h2 className="text-lg font-semibold leading-snug text-slate-900">{drawer.title}</h2>
-                <p className="mt-1 text-[13px] text-slate-500">{drawer.typeLabel}</p>
-              </div>
-              <button type="button" onClick={() => setDrawer(null)} className="text-slate-400 hover:text-slate-700" aria-label="Fermer">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[15px] font-semibold text-bework-navy">Parcourir</p>
+              <button type="button" onClick={() => setNavOpen(false)} aria-label="Fermer">
                 ×
               </button>
             </div>
-            <dl className="flex-1 space-y-4 overflow-y-auto px-6 py-5 text-[14px]">
-              {hideProject ? null : <Info label="Chantier" value={drawer.projectTitle} />}
-              <Info label="Entreprise" value={drawer.companyLabel} />
-              <Info label="Date" value={formatGedShortDate(drawer.createdAt)} />
-              <Info label="Source" value={drawer.originLabel} />
-              <Info label="Catégorie" value={hubCategoryLabel(drawer.group)} />
-              <Info label="État" value={drawer.isExpectedMissing ? "À récupérer" : "Disponible"} />
-              <Info label="Référence" value={drawer.contextLabel} />
-              {drawer.indice || drawer.versionLabel ? (
-                <Info
-                  label="Version"
-                  value={[drawer.indice, drawer.isCurrentVersion ? "Actuelle" : drawer.versionLabel]
-                    .filter(Boolean)
-                    .join(" — ")}
-                />
-              ) : null}
-              {drawer.chantierFileId && !external ? (
-                <div>
-                  <dt className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-400">
-                    Changer de catégorie
-                  </dt>
-                  <dd className="mt-1.5">
-                    <select
-                      disabled={catBusy}
-                      defaultValue={drawer.group === "all" ? "autres" : drawer.group}
-                      onChange={(e) => {
-                        const next = e.target.value as HubCategoryId;
-                        void changeCategory(drawer, next);
-                      }}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
-                      aria-label="Changer de catégorie"
-                    >
-                      {HUB_CATEGORY_DEFS.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="mt-1 text-[11px] text-slate-400">
-                      Modifie uniquement le classement — le fichier n’est pas déplacé.
-                    </p>
-                  </dd>
-                </div>
-              ) : null}
-            </dl>
-            <div className="flex flex-wrap gap-2 border-t border-slate-100 px-6 py-4">
-              {drawer.isExpectedMissing ? (
-                <Link
-                  href={drawer.href}
-                  className="rounded-full bg-[#1e3a5f] px-4 py-2 text-[13px] font-medium text-white"
-                >
-                  Ajouter le document
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => openFile(drawer)}
-                  className="rounded-full bg-[#1e3a5f] px-4 py-2 text-[13px] font-medium text-white"
-                >
-                  Ouvrir
-                </button>
-              )}
-              {drawer.originHref && drawer.originActionLabel ? (
-                <Link
-                  href={drawer.originHref}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-700"
-                >
-                  {drawer.originActionLabel}
-                </Link>
-              ) : null}
-              {drawer.chantierFileId && !drawer.isExpectedMissing ? (
-                <button
-                  type="button"
-                  onClick={() => void toggleFavorite(drawer)}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-700"
-                >
-                  {drawer.isFavorite ? "Retirer des favoris" : "Favori"}
-                </button>
-              ) : null}
-            </div>
+            {nav}
           </aside>
+        </div>
+      ) : null}
+
+      {drawer ? (
+        <div
+          className="fixed inset-0 z-50 flex justify-end bg-slate-900/20 xl:hidden"
+          onClick={() => setDrawer(null)}
+        >
+          <div className="h-full w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <DocumentPreviewPanel
+              variant="drawer"
+              item={drawer}
+              hideProject={hideProject}
+              onOpen={() => openFile(drawer)}
+              onFavorite={() => void toggleFavorite(drawer)}
+              onRetrieve={() => openFile(drawer)}
+              onCategorize={
+                external || !drawer.chantierFileId
+                  ? undefined
+                  : (next) => void changeCategory(drawer, next as HubCategoryId)
+              }
+              categorizeOptions={HUB_CATEGORY_DEFS}
+              catBusy={catBusy}
+              onClose={() => setDrawer(null)}
+              extraActions={
+                drawer.chantierFileId && !drawer.isExpectedMissing && !external ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = window.prompt("Nouveau nom", drawer.title);
+                      if (!next?.trim() || next.trim() === drawer.title) return;
+                      void fetch(`/api/chantier/files/${drawer.chantierFileId}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name: next.trim() }),
+                      }).then((res) => {
+                        if (res.ok) {
+                          setDrawer(null);
+                          router.refresh();
+                        }
+                      });
+                    }}
+                    className="rounded-full border border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-700"
+                  >
+                    Renommer
+                  </button>
+                ) : null
+              }
+            />
+          </div>
         </div>
       ) : null}
     </div>
   );
 }
 
-function Info({ label, value }: { label: string; value?: string | null }) {
-  if (!value) return null;
+function ClassifyInbox({
+  it,
+  busy,
+  onValidate,
+}: {
+  it: HubDocumentItem;
+  busy: boolean;
+  onValidate: (cat: HubCategoryId) => void;
+}) {
+  const [cat, setCat] = useState<HubCategoryId | "">(it.group === "all" || it.group === "autres" ? "" : it.group);
   return (
-    <div>
-      <dt className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-400">{label}</dt>
-      <dd className="mt-0.5 text-slate-800">{value}</dd>
+    <div className="flex flex-wrap items-center gap-1.5">
+      {it.projectTitle ? (
+        <span className="hidden max-w-[8rem] truncate text-[11px] text-slate-500 sm:inline">
+          {it.projectTitle}
+        </span>
+      ) : null}
+      {it.companyLabel ? (
+        <span className="hidden max-w-[7rem] truncate text-[11px] text-slate-500 lg:inline">
+          {it.companyLabel}
+        </span>
+      ) : null}
+      <select
+        disabled={busy}
+        value={cat}
+        onChange={(e) => setCat(e.target.value as HubCategoryId)}
+        className="max-w-[9rem] rounded-full border border-slate-200 bg-white px-2 py-1 text-[12px] text-slate-700"
+        aria-label="Type"
+      >
+        <option value="">Type</option>
+        {HUB_CATEGORY_DEFS.filter((c) => c.id !== "autres").map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.label}
+          </option>
+        ))}
+      </select>
+      <button
+        type="button"
+        disabled={busy || !cat}
+        onClick={() => cat && onValidate(cat)}
+        className="rounded-full bg-[#1e3a5f] px-2.5 py-1 text-[12px] font-medium text-white disabled:opacity-40"
+      >
+        Valider
+      </button>
     </div>
   );
 }

@@ -1,114 +1,103 @@
-import Link from "next/link";
-import { PageHeader } from "@/components/ui/PageHeader";
 import {
   requireCommercialSession,
   resolveCommercialOrgId,
 } from "@/lib/commercial/access";
-import { listInvoices } from "@/lib/commercial/invoices";
+import { refreshCommercialOverdueStatuses } from "@/lib/commercial/collections";
 import {
-  COMMERCIAL_INVOICE_STATUS_LABELS,
-  COMMERCIAL_INVOICE_TYPE_LABELS,
-  roundMoney,
-} from "@/lib/commercial/money";
-import {
-  badgeClassForTone,
-  FACTURE_STATUS_TONE,
-} from "@/lib/design-system/semantic-colors";
-import { cn } from "@/lib/cn";
+  listInvoicesWorkspace,
+  loadInvoicesWorkspaceKpis,
+  type InvoicesSort,
+  type InvoicesViewFilter,
+} from "@/lib/commercial/invoices-workspace";
+import { InvoicesWorkspace } from "@/components/commercial/InvoicesWorkspace";
+import type { CommercialInvoiceType } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
+
+const VIEWS: InvoicesViewFilter[] = [
+  "all",
+  "drafts",
+  "to_issue",
+  "issued",
+  "partial",
+  "paid",
+  "overdue",
+  "open",
+];
+
+const SORTS: InvoicesSort[] = [
+  "recent",
+  "oldest",
+  "due_asc",
+  "amount_desc",
+  "amount_asc",
+  "due_amount_desc",
+  "client_az",
+];
 
 export default async function FacturesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ quoteId?: string }>;
+  searchParams: Promise<{
+    quoteId?: string;
+    projectId?: string;
+    clientId?: string;
+    view?: string;
+    q?: string;
+    sort?: string;
+    payment?: string;
+    type?: string;
+  }>;
 }) {
   const session = await requireCommercialSession("/dashboard/devis-facturation/factures");
   const orgId = await resolveCommercialOrgId(session.user);
   if (!orgId) return null;
+
   const sp = await searchParams;
-  const quoteFilter = sp.quoteId?.trim() || null;
-  const invoices = await listInvoices(orgId);
-  const filtered = quoteFilter
-    ? invoices.filter((inv) => inv.quote?.id === quoteFilter)
-    : invoices;
+  const view = (VIEWS.includes(sp.view as InvoicesViewFilter) ? sp.view : "all") as InvoicesViewFilter;
+  const sort = (SORTS.includes(sp.sort as InvoicesSort) ? sp.sort : "recent") as InvoicesSort;
+  const q = typeof sp.q === "string" ? sp.q : "";
+  const quoteId = sp.quoteId?.trim() || "";
+  const projectId = sp.projectId?.trim() || "";
+  const clientId = sp.clientId?.trim() || "";
+  const payment = sp.payment?.trim() || "";
+  const type = sp.type?.trim() || "";
+
+  await refreshCommercialOverdueStatuses({ orgId, notify: false });
+
+  const [invoices, kpis] = await Promise.all([
+    listInvoicesWorkspace(orgId, {
+      view,
+      q,
+      sort,
+      quoteId: quoteId || null,
+      projectId: projectId || null,
+      clientId: clientId || null,
+      payment:
+        payment === "unpaid" ||
+        payment === "partial" ||
+        payment === "paid" ||
+        payment === "open"
+          ? payment
+          : null,
+      type: type
+        ? (type as CommercialInvoiceType)
+        : null,
+    }),
+    loadInvoicesWorkspaceKpis(orgId),
+  ]);
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Devis & Facturation"
-        title="Factures"
-        description={
-          quoteFilter
-            ? "Factures liées au devis sélectionné."
-            : "Factures clients BTP — hors abonnement SaaS."
-        }
-      />
-      {quoteFilter ? (
-        <p className="text-xs text-slate-500">
-          Filtre devis actif ·{" "}
-          <Link href="/dashboard/devis-facturation/factures" className="font-semibold text-[#1d4ed8]">
-            Voir toutes
-          </Link>
-        </p>
-      ) : null}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-        {filtered.length === 0 ? (
-          <p className="p-6 text-sm text-slate-500">Aucune facture.</p>
-        ) : (
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-[10px] font-bold uppercase text-slate-500">
-              <tr>
-                <th className="px-4 py-2">N°</th>
-                <th className="px-4 py-2">Type</th>
-                <th className="px-4 py-2">Client</th>
-                <th className="px-4 py-2">TTC</th>
-                <th className="px-4 py-2">Reste</th>
-                <th className="px-4 py-2">Statut</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filtered.map((inv) => (
-                <tr key={inv.id}>
-                  <td className="px-4 py-2.5">
-                    <Link
-                      href={`/dashboard/devis-facturation/factures/${inv.id}`}
-                      className="font-semibold text-[#1d4ed8]"
-                    >
-                      {inv.number}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-2.5">
-                    {COMMERCIAL_INVOICE_TYPE_LABELS[inv.type] ?? inv.type}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    {inv.clientExternalOrg?.tradeName ||
-                      inv.clientExternalOrg?.name ||
-                      "—"}
-                  </td>
-                  <td className="px-4 py-2.5 tabular-nums">
-                    {roundMoney(inv.totalTtc, 2).toLocaleString("fr-FR")} €
-                  </td>
-                  <td className="px-4 py-2.5 tabular-nums">
-                    {roundMoney(inv.amountDue, 2).toLocaleString("fr-FR")} €
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span
-                      className={cn(
-                        badgeClassForTone(
-                          FACTURE_STATUS_TONE[inv.status] ?? "neutral",
-                        ),
-                      )}
-                    >
-                      {COMMERCIAL_INVOICE_STATUS_LABELS[inv.status] ?? inv.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
+    <InvoicesWorkspace
+      initialInvoices={invoices}
+      kpis={kpis}
+      initialView={view}
+      initialQ={q}
+      initialSort={sort}
+      initialQuoteId={quoteId}
+      initialProjectId={projectId}
+      initialClientId={clientId}
+      initialPayment={payment}
+    />
   );
 }

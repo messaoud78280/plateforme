@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { CommercialInvoiceType } from "@prisma/client";
 import { requireCommercialApiSession } from "@/lib/commercial/access";
 import {
   createDepositInvoice,
@@ -7,14 +8,59 @@ import {
   issueInvoice,
   listInvoices,
 } from "@/lib/commercial/invoices";
+import {
+  listInvoicesWorkspace,
+  loadInvoicesWorkspaceKpis,
+  type InvoicesSort,
+  type InvoicesViewFilter,
+} from "@/lib/commercial/invoices-workspace";
 
-export async function GET() {
+export async function GET(req: Request) {
   const auth = await requireCommercialApiSession();
   if (auth.error || !auth.session) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
-  const invoices = await listInvoices(auth.orgId);
-  return NextResponse.json({ invoices });
+  const url = new URL(req.url);
+  const hasWorkspaceParams =
+    url.searchParams.has("view") ||
+    url.searchParams.has("q") ||
+    url.searchParams.has("sort") ||
+    url.searchParams.has("payment") ||
+    url.searchParams.has("type") ||
+    url.searchParams.has("quoteId") ||
+    url.searchParams.has("projectId") ||
+    url.searchParams.has("clientId") ||
+    url.searchParams.get("workspace") === "1";
+
+  if (!hasWorkspaceParams) {
+    const invoices = await listInvoices(auth.orgId);
+    return NextResponse.json({ invoices });
+  }
+
+  const view = (url.searchParams.get("view") || "all") as InvoicesViewFilter;
+  const sort = (url.searchParams.get("sort") || "recent") as InvoicesSort;
+  const payment = url.searchParams.get("payment");
+  const type = url.searchParams.get("type");
+  const [invoices, kpis] = await Promise.all([
+    listInvoicesWorkspace(auth.orgId, {
+      view,
+      sort,
+      q: url.searchParams.get("q"),
+      quoteId: url.searchParams.get("quoteId"),
+      projectId: url.searchParams.get("projectId"),
+      clientId: url.searchParams.get("clientId"),
+      payment:
+        payment === "unpaid" ||
+        payment === "partial" ||
+        payment === "paid" ||
+        payment === "open"
+          ? payment
+          : null,
+      type: type ? (type as CommercialInvoiceType) : null,
+    }),
+    loadInvoicesWorkspaceKpis(auth.orgId),
+  ]);
+  return NextResponse.json({ invoices, kpis });
 }
 
 export async function POST(req: Request) {

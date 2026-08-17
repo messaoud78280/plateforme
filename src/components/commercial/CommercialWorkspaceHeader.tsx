@@ -35,7 +35,15 @@ export function CommercialWorkspaceHeader() {
     return null;
   }
   const title = pageTitle(pathname);
+  const isFacturesArea =
+    pathname.endsWith("/factures") ||
+    pathname.includes("/factures/preparer") ||
+    pathname.includes("/encaissements") ||
+    pathname.includes("/suivi/impayes");
+  const showPrepareInvoice =
+    pathname.endsWith("/factures") || pathname.includes("/encaissements");
   const showNewQuote =
+    !isFacturesArea &&
     !pathname.includes("/devis/nouveau") &&
     !pathname.match(/\/devis\/[^/]+$/);
 
@@ -46,6 +54,14 @@ export function CommercialWorkspaceHeader() {
           {title}
         </h1>
         <div className="flex shrink-0 items-center gap-2">
+          {showPrepareInvoice ? (
+            <Link
+              href="/dashboard/devis-facturation/factures/preparer"
+              className="btn-cc-primary rounded-lg px-3 py-1.5 text-[13px]"
+            >
+              + Préparer une facture
+            </Link>
+          ) : null}
           {showNewQuote ? (
             <Link
               href="/dashboard/devis-facturation/devis/nouveau"

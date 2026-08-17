@@ -100,7 +100,7 @@ export function buildCommercialNav(opts: {
         { href: `${BASE}/prix`, label: "Prix" },
         { href: `${BASE}/parametres`, label: "Textes & conditions" },
         {
-          href: "/dashboard/documents?view=categories&group=factures_situations",
+          href: "/dashboard/documents?origin=DEVIS",
           label: "Documents commerciaux",
           external: true,
         },

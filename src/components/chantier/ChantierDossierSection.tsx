@@ -367,6 +367,14 @@ export function ChantierDossierSection({
             >
               Documents du chantier
             </Link>
+            {missingCount > 0 ? (
+              <Link
+                href={`/dashboard/documents?projectId=${encodeURIComponent(projectId)}&view=missing`}
+                className="ml-3 mt-2 inline-flex text-[13px] font-medium text-[#b45309] hover:underline"
+              >
+                {missingCount} à récupérer
+              </Link>
+            ) : null}
           </div>
           {canEdit ? (
             <div className="relative">

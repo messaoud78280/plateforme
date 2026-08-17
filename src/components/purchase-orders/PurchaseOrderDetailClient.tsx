@@ -994,7 +994,15 @@ export function PurchaseOrderDetailClient({
           id="po-focus-documents"
           className={`rounded-2xl border border-slate-200 bg-white p-5 ${focusRing("po-focus-documents")}`}
         >
-          <h2 className="text-sm font-bold text-slate-900">Documents</h2>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-sm font-bold text-slate-900">Documents</h2>
+            <Link
+              href={`/dashboard/documents?origin=COMMANDE&q=${encodeURIComponent(order.number)}`}
+              className="text-xs font-medium text-[#1e3a5f] hover:underline"
+            >
+              Voir dans Documents
+            </Link>
+          </div>
           {order.documents.length === 0 ? (
             <p className="mt-2 text-sm text-slate-500">Aucun document pour l’instant.</p>
           ) : (

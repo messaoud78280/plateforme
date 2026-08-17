@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { LayoutGrid, LayoutList, Menu, Plus } from "lucide-react";
+import { LayoutGrid, LayoutList, Menu, Plus, BookmarkPlus } from "lucide-react";
 import { DocumentPreviewModal, type DocumentPreviewItem } from "@/components/documents/DocumentPreviewModal";
 import { DocumentCenterKpis } from "@/components/ged/DocumentCenterKpis";
 import { DocumentCenterNav } from "@/components/ged/DocumentCenterNav";
@@ -51,9 +51,47 @@ import { cn } from "@/lib/cn";
 const LAYOUT_KEY = "bework.ged.layout";
 const GROUP_KEY = "bework.ged.groupBy";
 const SORT_KEY = "bework.ged.sort";
+const DENSITY_KEY = "bework.ged.density";
+const SAVED_VIEWS_KEY = "bework.ged.savedViews";
 const RECENT_Q_KEY = "bework.ged.recentSearches";
 const MAX_BULK_RETRIEVE = 20;
 const MAX_BULK_DOWNLOAD = 10;
+
+type DensityPref = "comfort" | "compact";
+
+type SavedHubView = {
+  id: string;
+  name: string;
+  view: HubView;
+  group: string;
+  q: string;
+  sort: HubSort;
+  groupBy: HubGroupBy;
+  projectId: string;
+  origin: string;
+  docType: string;
+  company: string;
+  since: string;
+};
+
+function loadSavedViews(): SavedHubView[] {
+  try {
+    const raw = localStorage.getItem(SAVED_VIEWS_KEY);
+    const parsed = raw ? (JSON.parse(raw) as unknown) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((v) => v && typeof v === "object" && typeof (v as SavedHubView).id === "string" && typeof (v as SavedHubView).name === "string") as SavedHubView[];
+  } catch {
+    return [];
+  }
+}
+
+function persistSavedViews(views: SavedHubView[]) {
+  try {
+    localStorage.setItem(SAVED_VIEWS_KEY, JSON.stringify(views.slice(0, 12)));
+  } catch {
+    /* ignore */
+  }
+}
 
 function loadRecentSearches(): string[] {
   try {
@@ -160,15 +198,19 @@ export function DocumentsHubClient({
   const [recentOpen, setRecentOpen] = useState(false);
   const [recentQs, setRecentQs] = useState<string[]>([]);
   const [drawer, setDrawer] = useState<HubDocumentItem | null>(null);
-  const [selected, setSelected] = useState<HubDocumentItem | null>(null);
   const [preview, setPreview] = useState<DocumentPreviewItem | null>(null);
   const [favBusy, setFavBusy] = useState<string | null>(null);
   const [catBusy, setCatBusy] = useState(false);
   const [layout, setLayout] = useState<"list" | "cards">("list");
+  const [density, setDensity] = useState<DensityPref>("comfort");
   const [groupBy, setGroupBy] = useState<HubGroupBy>("none");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [selectMode, setSelectMode] = useState(false);
+  const [savedViews, setSavedViews] = useState<SavedHubView[]>([]);
+  const [activeSavedViewId, setActiveSavedViewId] = useState<string | null>(null);
+  const [saveViewOpen, setSaveViewOpen] = useState(false);
+  const [saveViewName, setSaveViewName] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -199,6 +241,7 @@ export function DocumentsHubClient({
 
   useEffect(() => {
     setLayout(readPref<"list" | "cards">(LAYOUT_KEY, ["list", "cards"], "list"));
+    setDensity(readPref<DensityPref>(DENSITY_KEY, ["comfort", "compact"], "comfort"));
     setGroupBy(
       readPref<HubGroupBy>(
         GROUP_KEY,
@@ -206,11 +249,12 @@ export function DocumentsHubClient({
         "none",
       ),
     );
+    setSavedViews(loadSavedViews());
   }, []);
 
   useEffect(() => {
     setPicked(new Set());
-    setSelected(null);
+    setDrawer(null);
   }, [view, group, projectId, origin, docType, company, since, search, page]);
 
   useEffect(() => {
@@ -249,7 +293,6 @@ export function DocumentsHubClient({
       if (navOpen) setNavOpen(false);
       if (filtersOpen) setFiltersOpen(false);
       if (recentOpen) setRecentOpen(false);
-      setSelected(null);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -291,6 +334,7 @@ export function DocumentsHubClient({
       router.replace(qs ? `/dashboard/documents?${qs}` : "/dashboard/documents");
     });
     setNavOpen(false);
+    if (!updates._keepSavedView) setActiveSavedViewId(null);
   }
 
   async function changeCategory(it: HubDocumentItem, next: HubCategoryId) {
@@ -401,10 +445,7 @@ export function DocumentsHubClient({
   }
 
   function selectRow(it: HubDocumentItem) {
-    setSelected(it);
-    if (typeof window !== "undefined" && window.innerWidth < 1280) {
-      setDrawer(it);
-    }
+    setDrawer(it);
   }
 
   const selectedItems = items.filter((it) => picked.has(it.id));
@@ -487,6 +528,66 @@ export function DocumentsHubClient({
     }
   }
 
+  function persistDensity(next: DensityPref) {
+    setDensity(next);
+    try {
+      sessionStorage.setItem(DENSITY_KEY, next);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function applySavedView(sv: SavedHubView) {
+    setActiveSavedViewId(sv.id);
+    persistGroupBy(sv.groupBy);
+    go({
+      view: sv.view,
+      group: sv.group,
+      q: sv.q,
+      sort: sv.sort,
+      projectId: hideProject ? projectId : sv.projectId,
+      origin: sv.origin,
+      docType: sv.docType,
+      company: sv.company,
+      since: sv.since,
+      page: "1",
+      _keepSavedView: "1",
+    });
+    setActiveSavedViewId(sv.id);
+  }
+
+  function saveCurrentView() {
+    const name = saveViewName.trim();
+    if (name.length < 2) return;
+    const sv: SavedHubView = {
+      id: `${Date.now()}`,
+      name,
+      view,
+      group,
+      q: search,
+      sort,
+      groupBy,
+      projectId: hideProject ? "" : projectId,
+      origin,
+      docType,
+      company,
+      since,
+    };
+    const next = [sv, ...savedViews.filter((v) => v.name.toLowerCase() !== name.toLowerCase())];
+    setSavedViews(next);
+    persistSavedViews(next);
+    setActiveSavedViewId(sv.id);
+    setSaveViewOpen(false);
+    setSaveViewName("");
+  }
+
+  function deleteSavedView(id: string) {
+    const next = savedViews.filter((v) => v.id !== id);
+    setSavedViews(next);
+    persistSavedViews(next);
+    if (activeSavedViewId === id) setActiveSavedViewId(null);
+  }
+
   const addTarget = projectId || projects[0]?.id;
   const projectTitle =
     lockedProjectTitle ||
@@ -503,7 +604,7 @@ export function DocumentsHubClient({
     if (view === "classify") return "À classer";
     if (view === "favorites") return "Favoris";
     if (view === "recent") return "Récents";
-    return "Documents";
+    return "Bibliothèque";
   })();
 
   const pageSubtitle = (() => {
@@ -513,11 +614,13 @@ export function DocumentsHubClient({
         : `Documents que ${hostCompany?.trim() || "votre entreprise"} partage avec vous.`;
     }
     if (inCategory) return `${total} document${total !== 1 ? "s" : ""} dans cette catégorie.`;
-    if (view === "missing") return "Pièces détectées qui ne sont pas encore dans BeWork.";
-    if (view === "classify") return "Quelques champs suffisent — BeWork connaît déjà le reste.";
+    if (view === "missing") {
+      return `${missingCount} document${missingCount !== 1 ? "s" : ""} détecté${missingCount !== 1 ? "s" : ""} dans BeWork`;
+    }
+    if (view === "classify") return "Classez en une ou deux actions — BeWork propose déjà le type, le chantier et l’entreprise.";
     if (hideProject && lockedProjectTitle) return `Tous les documents de ${lockedProjectTitle}`;
     if (projectTitle && !hideProject) return `Documents filtrés sur ${projectTitle}.`;
-    return "Retrouvez, classez et partagez tous les documents de votre entreprise.";
+    return "Ce qui est rangé, ce qui attend une action, et où retrouver chaque pièce.";
   })();
 
   const searchPlaceholder = lockedProjectTitle
@@ -538,6 +641,13 @@ export function DocumentsHubClient({
       projects={projects}
       hideProject={hideProject}
       allowedViews={views.map((v) => v.id)}
+      savedViews={savedViews}
+      activeSavedViewId={activeSavedViewId}
+      onOpenSavedView={(id) => {
+        const sv = savedViews.find((v) => v.id === id);
+        if (sv) applySavedView(sv);
+      }}
+      onDeleteSavedView={deleteSavedView}
       onGo={go}
     />
   );
@@ -549,6 +659,8 @@ export function DocumentsHubClient({
         it={it}
         hideProject={hideProject}
         layout={layout}
+        density={density}
+        retrieveEmphasis={view === "missing"}
         selected={picked.has(it.id)}
         onToggleSelect={
           showChecks
@@ -563,7 +675,6 @@ export function DocumentsHubClient({
         }
         onSelectRow={() => selectRow(it)}
         onOpenDetails={() => {
-          setSelected(it);
           setDrawer(it);
         }}
         onOpenFile={() => openFile(it)}
@@ -655,11 +766,12 @@ export function DocumentsHubClient({
 
     if (groupBy !== "none") {
       return (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {grouped.map((g) => {
             const closed = collapsed.has(g.key);
+            const n = g.items.length;
             return (
-              <section key={g.key} className="rounded-2xl border border-bework-navy/10 bg-white">
+              <section key={g.key} className="border-b border-slate-200/80 pb-3 last:border-b-0">
                 <button
                   type="button"
                   onClick={() =>
@@ -670,13 +782,25 @@ export function DocumentsHubClient({
                       return next;
                     })
                   }
-                  className="flex w-full items-center justify-between px-4 py-3 text-left"
+                  className="flex w-full items-baseline justify-between gap-3 py-2 text-left"
                 >
-                  <h2 className="text-[14px] font-semibold text-bework-navy">{g.label}</h2>
-                  <span className="text-slate-400">{closed ? "▸" : "▾"}</span>
+                  <h2 className="min-w-0 truncate text-[15px] font-semibold text-bework-navy" title={g.label}>
+                    {closed ? `${g.label} · ${n} document${n > 1 ? "s" : ""}` : g.label}
+                  </h2>
+                  {closed ? null : (
+                    <span className="shrink-0 text-[12px] font-medium text-slate-400">
+                      {n} document{n > 1 ? "s" : ""}
+                    </span>
+                  )}
                 </button>
                 {closed ? null : (
-                  <ul className={cn(layout === "cards" ? "grid grid-cols-1 gap-3 p-3 sm:grid-cols-2" : "divide-y divide-slate-100 px-1 sm:px-2")}>
+                  <ul
+                    className={cn(
+                      layout === "cards"
+                        ? "grid grid-cols-1 gap-3 sm:grid-cols-2"
+                        : "divide-y divide-slate-100 overflow-hidden rounded-2xl border border-bework-navy/8 bg-white px-1 sm:px-2",
+                    )}
+                  >
                     {g.items.map(renderRow)}
                   </ul>
                 )}
@@ -747,8 +871,8 @@ export function DocumentsHubClient({
             {
               id: "all",
               value: totalAll,
-              label: "Documents",
-              tone: "navy",
+              label: "Disponibles",
+              tone: "ok",
               active: view === "all" && !since && !origin,
               onClick: () =>
                 go({
@@ -763,7 +887,7 @@ export function DocumentsHubClient({
             {
               id: "week",
               value: weekCount,
-              label: "Cette semaine",
+              label: "Ajoutés cette semaine",
               tone: "accent",
               active: since === "7",
               onClick: () => go({ view: "all", since: "7", page: "1" }),
@@ -780,7 +904,7 @@ export function DocumentsHubClient({
               id: "classify",
               value: classifyCount,
               label: "À classer",
-              tone: "ok",
+              tone: "amber",
               active: view === "classify",
               onClick: () => go({ view: "classify", group: "all", page: "1" }),
             },
@@ -818,15 +942,34 @@ export function DocumentsHubClient({
           setRecentOpen(false);
         }}
       />
+      {search.trim() ? (
+        <div className="flex flex-wrap items-center gap-2 text-[13px] text-slate-600">
+          <p>
+            <span className="font-semibold tabular-nums text-bework-navy">{total}</span>
+            {` résultat${total !== 1 ? "s" : ""} pour « ${search.trim()} »`}
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setQ("");
+              go({ q: "", page: "1" });
+            }}
+            className="font-medium text-bework-navy hover:underline"
+          >
+            Retirer la recherche
+          </button>
+        </div>
+      ) : null}
 
       <div className="flex gap-5 xl:gap-6">
-        <aside className="hidden w-[240px] shrink-0 lg:block">
-          <div className="sticky top-4 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-2xl border border-bework-navy/10 bg-[linear-gradient(180deg,#f7f9fc_0%,#ffffff_48%)] p-3">
+        <aside className="hidden w-[272px] shrink-0 lg:block">
+          <div className="sticky top-14 max-h-[calc(100vh-5.5rem)] overflow-y-auto rounded-2xl border border-bework-navy/10 bg-[linear-gradient(180deg,#f7f9fc_0%,#ffffff_48%)] p-3">
             {nav}
           </div>
         </aside>
 
         <div className="min-w-0 flex-1 space-y-3">
+          <div className="sticky top-14 z-20 -mx-1 space-y-2 bg-[linear-gradient(180deg,#f8fafc_70%,rgba(248,250,252,0.85)_100%)] px-1 py-2 backdrop-blur-[2px]">
           <div className="flex flex-wrap items-center gap-2">
             <GedSecondaryButton
               className="lg:hidden"
@@ -899,6 +1042,30 @@ export function DocumentsHubClient({
                     <LayoutGrid className="h-4 w-4" />
                   </button>
                 </div>
+                <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-white p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => persistDensity("comfort")}
+                    className={cn(
+                      "rounded-full px-2.5 py-1 text-[11px] font-medium",
+                      density === "comfort" ? "bg-bework-soft-navy text-bework-navy" : "text-slate-400",
+                    )}
+                    aria-pressed={density === "comfort"}
+                  >
+                    Confort
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => persistDensity("compact")}
+                    className={cn(
+                      "rounded-full px-2.5 py-1 text-[11px] font-medium",
+                      density === "compact" ? "bg-bework-soft-navy text-bework-navy" : "text-slate-400",
+                    )}
+                    aria-pressed={density === "compact"}
+                  >
+                    Compact
+                  </button>
+                </div>
                 <GedSecondaryButton
                   onClick={() => {
                     setSelectMode((v) => !v);
@@ -907,9 +1074,48 @@ export function DocumentsHubClient({
                 >
                   {selectMode || picked.size > 0 ? "OK" : "Sélectionner"}
                 </GedSecondaryButton>
+                <GedSecondaryButton
+                  onClick={() => {
+                    setSaveViewOpen((o) => !o);
+                    if (!saveViewName) {
+                      setSaveViewName(
+                        [docType && HUB_DOC_TYPES.find((t) => t.id === docType)?.label, company, projectTitle]
+                          .filter(Boolean)
+                          .join(" ") || "Ma vue",
+                      );
+                    }
+                  }}
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    <BookmarkPlus className="h-3.5 w-3.5" />
+                    Enregistrer
+                  </span>
+                </GedSecondaryButton>
               </>
             )}
           </div>
+
+          {saveViewOpen ? (
+            <form
+              className="flex flex-wrap items-center gap-2 rounded-2xl border border-bework-navy/10 bg-white px-3 py-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                saveCurrentView();
+              }}
+            >
+              <input
+                value={saveViewName}
+                onChange={(e) => setSaveViewName(e.target.value)}
+                placeholder="Ex. Factures Point.P"
+                className="min-w-[12rem] flex-1 rounded-xl border border-slate-200 px-3 py-1.5 text-[13px] outline-none focus:border-bework-accent/40"
+                aria-label="Nom de la vue"
+              />
+              <GedPrimaryButton type="submit">Enregistrer la vue</GedPrimaryButton>
+              <button type="button" onClick={() => setSaveViewOpen(false)} className="text-[12px] text-slate-500">
+                Annuler
+              </button>
+            </form>
+          ) : null}
 
           {filtersOpen && !showCategoryCards ? (
             <div className="grid gap-3 rounded-2xl border border-bework-navy/10 bg-bework-soft-navy/40 p-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -1064,6 +1270,77 @@ export function DocumentsHubClient({
               ) : null}
             </div>
           ) : null}
+          </div>
+
+          {view === "missing" && items.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-bework-watch/20 bg-amber-50/40 px-3 py-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setPicked(
+                    picked.size === items.length ? new Set() : new Set(items.map((it) => it.id)),
+                  )
+                }
+                className="rounded-full bg-white px-3 py-1 text-[12px] font-medium text-slate-700 shadow-sm"
+              >
+                {picked.size === items.length ? "Tout désélectionner" : "Tout sélectionner"}
+              </button>
+              <button
+                type="button"
+                onClick={bulkRetrieve}
+                disabled={picked.size === 0}
+                className="rounded-full bg-bework-watch px-3 py-1 text-[12px] font-medium text-white disabled:opacity-40"
+              >
+                Récupérer la sélection
+              </button>
+              {[...new Map(items.filter((it) => it.projectId).map((it) => [it.projectId, it.projectTitle || "Chantier"]))].map(
+                ([id, title]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    title={title}
+                    onClick={() =>
+                      setPicked(
+                        new Set(items.filter((it) => it.projectId === id).map((it) => it.id)),
+                      )
+                    }
+                    className="max-w-[14rem] truncate rounded-full border border-bework-watch/25 bg-white px-3 py-1 text-[12px] font-medium text-[#b45309]"
+                  >
+                    Tout sélectionner pour {title}
+                  </button>
+                ),
+              )}
+              <label className="inline-flex items-center gap-1 text-[12px] text-slate-600">
+                Source
+                <select
+                  value={origin}
+                  onChange={(e) => go({ origin: e.target.value, page: "1" })}
+                  className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[12px]"
+                >
+                  <option value="">Toutes</option>
+                  {HUB_ORIGIN_FILTERS.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="inline-flex items-center gap-1 text-[12px] text-slate-600">
+                Type
+                <select
+                  value={docType}
+                  onChange={(e) => go({ docType: e.target.value, page: "1" })}
+                  className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[12px]"
+                >
+                  {HUB_DOC_TYPES.map((t) => (
+                    <option key={t.id || "all"} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          ) : null}
 
           {showCategoryCards ? null : (
             <DocumentSelectionBar
@@ -1084,16 +1361,6 @@ export function DocumentsHubClient({
               retrieveDisabled={picked.size === 0}
             />
           )}
-
-          {view === "missing" && items.length > 0 && items.length <= MAX_BULK_RETRIEVE ? (
-            <button
-              type="button"
-              onClick={bulkRetrieve}
-              className="text-[12px] font-medium text-[#b45309] hover:underline"
-            >
-              Tout récupérer
-            </button>
-          ) : null}
 
           {showCategoryCards ? (
             <div className="pt-1" aria-busy={pending}>
@@ -1128,28 +1395,6 @@ export function DocumentsHubClient({
             </div>
           ) : null}
         </div>
-
-        {selected && !showCategoryCards ? (
-          <div className="hidden w-[320px] shrink-0 xl:block">
-            <div className="sticky top-4 h-[calc(100vh-6rem)]">
-              <DocumentPreviewPanel
-                item={selected}
-                hideProject={hideProject}
-                onOpen={() => openFile(selected)}
-                onFavorite={() => void toggleFavorite(selected)}
-                onRetrieve={() => openFile(selected)}
-                onCategorize={
-                  external || !selected.chantierFileId
-                    ? undefined
-                    : (next) => void changeCategory(selected, next as HubCategoryId)
-                }
-                categorizeOptions={HUB_CATEGORY_DEFS}
-                catBusy={catBusy}
-                onClose={() => setSelected(null)}
-              />
-            </div>
-          </div>
-        ) : null}
       </div>
 
       {navOpen ? (
@@ -1171,8 +1416,10 @@ export function DocumentsHubClient({
 
       {drawer ? (
         <div
-          className="fixed inset-0 z-50 flex justify-end bg-slate-900/20 xl:hidden"
-          onClick={() => setDrawer(null)}
+          className="fixed inset-0 z-50 flex justify-end bg-slate-900/20"
+          onClick={() => {
+            setDrawer(null);
+          }}
         >
           <div className="h-full w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <DocumentPreviewPanel
@@ -1191,28 +1438,30 @@ export function DocumentsHubClient({
               catBusy={catBusy}
               onClose={() => setDrawer(null)}
               extraActions={
-                drawer.chantierFileId && !drawer.isExpectedMissing && !external ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const next = window.prompt("Nouveau nom", drawer.title);
-                      if (!next?.trim() || next.trim() === drawer.title) return;
-                      void fetch(`/api/chantier/files/${drawer.chantierFileId}`, {
-                        method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ name: next.trim() }),
-                      }).then((res) => {
-                        if (res.ok) {
-                          setDrawer(null);
-                          router.refresh();
-                        }
-                      });
-                    }}
-                    className="rounded-full border border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-700"
-                  >
-                    Renommer
-                  </button>
-                ) : null
+                <>
+                  {drawer.chantierFileId && !drawer.isExpectedMissing && !external ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = window.prompt("Nouveau nom", drawer.title);
+                        if (!next?.trim() || next.trim() === drawer.title) return;
+                        void fetch(`/api/chantier/files/${drawer.chantierFileId}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ name: next.trim() }),
+                        }).then((res) => {
+                          if (res.ok) {
+                            setDrawer(null);
+                            router.refresh();
+                          }
+                        });
+                      }}
+                      className="rounded-full border border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-700"
+                    >
+                      Renommer
+                    </button>
+                  ) : null}
+                </>
               }
             />
           </div>
@@ -1232,40 +1481,66 @@ function ClassifyInbox({
   onValidate: (cat: HubCategoryId) => void;
 }) {
   const [cat, setCat] = useState<HubCategoryId | "">(it.group === "all" || it.group === "autres" ? "" : it.group);
+  const [edit, setEdit] = useState(false);
+  const suggested = cat || (it.group !== "all" && it.group !== "autres" ? it.group : "");
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      {it.projectTitle ? (
-        <span className="hidden max-w-[8rem] truncate text-[11px] text-slate-500 sm:inline">
-          {it.projectTitle}
-        </span>
-      ) : null}
-      {it.companyLabel ? (
-        <span className="hidden max-w-[7rem] truncate text-[11px] text-slate-500 lg:inline">
-          {it.companyLabel}
-        </span>
-      ) : null}
-      <select
-        disabled={busy}
-        value={cat}
-        onChange={(e) => setCat(e.target.value as HubCategoryId)}
-        className="max-w-[9rem] rounded-full border border-slate-200 bg-white px-2 py-1 text-[12px] text-slate-700"
-        aria-label="Type"
-      >
-        <option value="">Type</option>
-        {HUB_CATEGORY_DEFS.filter((c) => c.id !== "autres").map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.label}
-          </option>
-        ))}
-      </select>
-      <button
-        type="button"
-        disabled={busy || !cat}
-        onClick={() => cat && onValidate(cat)}
-        className="rounded-full bg-[#1e3a5f] px-2.5 py-1 text-[12px] font-medium text-white disabled:opacity-40"
-      >
-        Valider
-      </button>
+    <div className="min-w-[12rem] rounded-xl border border-slate-200/80 bg-white px-2.5 py-2">
+      <dl className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[11px]">
+        <dt className="text-slate-400">Type</dt>
+        <dd className="truncate font-medium text-slate-700" title={it.typeLabel}>
+          {edit ? (
+            <select
+              disabled={busy}
+              value={cat}
+              onChange={(e) => setCat(e.target.value as HubCategoryId)}
+              className="w-full rounded-md border border-slate-200 bg-white px-1 py-0.5 text-[11px]"
+              aria-label="Type"
+            >
+              <option value="">Choisir…</option>
+              {HUB_CATEGORY_DEFS.filter((c) => c.id !== "autres").map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            it.typeLabel
+          )}
+        </dd>
+        {it.projectTitle ? (
+          <>
+            <dt className="text-slate-400">Chantier</dt>
+            <dd className="truncate text-slate-700" title={it.projectTitle}>
+              {it.projectTitle}
+            </dd>
+          </>
+        ) : null}
+        {it.companyLabel ? (
+          <>
+            <dt className="text-slate-400">Entreprise</dt>
+            <dd className="truncate text-slate-700" title={it.companyLabel}>
+              {it.companyLabel}
+            </dd>
+          </>
+        ) : null}
+      </dl>
+      <div className="mt-1.5 flex items-center justify-end gap-1.5">
+        <button
+          type="button"
+          onClick={() => setEdit((v) => !v)}
+          className="rounded-full px-2 py-0.5 text-[11px] font-medium text-slate-500 hover:bg-slate-100"
+        >
+          {edit ? "OK" : "Modifier"}
+        </button>
+        <button
+          type="button"
+          disabled={busy || !suggested}
+          onClick={() => suggested && onValidate(suggested as HubCategoryId)}
+          className="rounded-full bg-[#1e3a5f] px-2.5 py-0.5 text-[11px] font-medium text-white disabled:opacity-40"
+        >
+          Valider
+        </button>
+      </div>
     </div>
   );
 }

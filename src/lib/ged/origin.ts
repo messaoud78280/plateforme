@@ -175,3 +175,102 @@ export function originHref(opts: {
 export function folderDisplayLabel(label: string, _code?: string | null): string {
   return label.replace(/^\d{2}\s+/, "").trim() || label;
 }
+
+export type ProvenanceEntry = {
+  key: string;
+  label: string;
+  href: string | null;
+  actionLabel: string | null;
+};
+
+/** Toutes les provenances réelles d’un fichier canonique — pas de copies. */
+export function provenanceEntries(opts: {
+  links: GedLinkLite[];
+  projectId: string | null;
+  projectTitle?: string | null;
+}): ProvenanceEntry[] {
+  const out: ProvenanceEntry[] = [];
+  const seen = new Set<string>();
+  const push = (entry: ProvenanceEntry) => {
+    if (!entry.key || seen.has(entry.key)) return;
+    seen.add(entry.key);
+    out.push(entry);
+  };
+
+  for (const l of opts.links ?? []) {
+    const id = l.entityId ?? "";
+    if (l.entityType === "message_attachment") {
+      push({
+        key: `msg:${id}`,
+        label: l.entityLabel && l.entityLabel !== "Messagerie" ? l.entityLabel : "Messagerie",
+        href: opts.projectId
+          ? `/dashboard/messagerie?view=chantiers&project=${opts.projectId}`
+          : "/dashboard/messagerie?view=contacts",
+        actionLabel: "Voir la conversation",
+      });
+    } else if (l.entityType === "purchase_order" && id) {
+      push({
+        key: `po:${id}`,
+        label: l.entityLabel ? `Commande ${l.entityLabel}` : "Commande",
+        href: `/dashboard/commandes/${id}?focus=documents`,
+        actionLabel: "Voir la commande",
+      });
+    } else if (l.entityType === "commercial_invoice" && id) {
+      push({
+        key: `inv:${id}`,
+        label: l.entityLabel ?? "Facture",
+        href: `/dashboard/devis-facturation/factures/${id}`,
+        actionLabel: "Voir la facture",
+      });
+    } else if (l.entityType === "commercial_progress" && id) {
+      push({
+        key: `st:${id}`,
+        label: l.entityLabel ?? "Situation",
+        href: `/dashboard/devis-facturation/situations/${id}`,
+        actionLabel: "Voir la situation",
+      });
+    } else if (
+      (l.entityType === "commercial_quote" || l.entityType === "commercial_quote_snapshot") &&
+      id
+    ) {
+      push({
+        key: `q:${id}`,
+        label: l.entityLabel ?? "Devis",
+        href: `/dashboard/devis-facturation/devis/${id}`,
+        actionLabel: "Voir le devis",
+      });
+    } else if (l.entityType === "follow_up_sheet" && id) {
+      push({
+        key: `fu:${id}`,
+        label: l.entityLabel ?? "Fiche suivi",
+        href: `/dashboard/fiches-suivi/${id}`,
+        actionLabel: "Voir la fiche",
+      });
+    } else if (l.entityType === "doe_item") {
+      push({
+        key: `doe:${id || opts.projectId || "x"}`,
+        label: l.entityLabel ?? "DOE",
+        href: opts.projectId ? `/dashboard/projets/${opts.projectId}#tab-documents` : null,
+        actionLabel: "Voir le DOE",
+      });
+    } else if (l.entityType === "supplier" && l.entityLabel) {
+      push({
+        key: `sup:${id || l.entityLabel}`,
+        label: l.entityLabel,
+        href: "/dashboard/fournisseurs",
+        actionLabel: "Voir le fournisseur",
+      });
+    }
+  }
+
+  if (opts.projectId) {
+    push({
+      key: `prj:${opts.projectId}`,
+      label: opts.projectTitle ? `Chantier ${opts.projectTitle}` : "Chantier",
+      href: `/dashboard/projets/${opts.projectId}`,
+      actionLabel: "Voir le chantier",
+    });
+  }
+
+  return out;
+}

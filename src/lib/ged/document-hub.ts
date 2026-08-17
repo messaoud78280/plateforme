@@ -35,7 +35,7 @@ import {
   isExpectedMissingDocument,
   stripMissingTitleSuffix,
 } from "@/lib/ged/classify-document";
-import { originFromLinks, originHref, type GedLinkLite } from "@/lib/ged/origin";
+import { originFromLinks, originHref, provenanceEntries, type GedLinkLite } from "@/lib/ged/origin";
 
 export type { HubGroup, HubSort, HubView, HubDocumentItem } from "@/lib/ged/document-hub-ui";
 export { hubGroupsForPersona, hubEmptyCopy, hubViewsForPersona } from "@/lib/ged/document-hub-ui";
@@ -64,6 +64,54 @@ const PAGE_SIZE = 50;
 const CATEGORY_SCAN_LIMIT = 2500;
 const PROJECT_HUB_LIMIT = 500;
 
+const LIBRARY_FILE_AND = [
+  { status: { notIn: ["MANQUANT", "A_RELANCER"] } },
+  { fileUrl: { not: null } },
+  { NOT: { fileUrl: "" } },
+];
+
+/** Une ligne par fichier physique (checksum). Jamais par nom seul. */
+function collapseCanonicalDocuments(items: HubDocumentItem[]): HubDocumentItem[] {
+  const byChecksum = new Map<string, HubDocumentItem[]>();
+  const rest: HubDocumentItem[] = [];
+  for (const it of items) {
+    const cs = it.checksum?.trim();
+    if (!cs) {
+      rest.push(it);
+      continue;
+    }
+    const arr = byChecksum.get(cs) ?? [];
+    arr.push(it);
+    byChecksum.set(cs, arr);
+  }
+  const collapsed: HubDocumentItem[] = [];
+  for (const group of byChecksum.values()) {
+    if (group.length === 1) {
+      collapsed.push(group[0]);
+      continue;
+    }
+    const primary =
+      group.find((g) => g.isCurrentVersion) ??
+      group.find((g) => Boolean(g.chantierFileId)) ??
+      group[0];
+    const provenances: NonNullable<HubDocumentItem["provenances"]> = [];
+    const seen = new Set<string>();
+    for (const g of group) {
+      for (const p of g.provenances ?? []) {
+        if (seen.has(p.key)) continue;
+        seen.add(p.key);
+        provenances.push(p);
+      }
+    }
+    collapsed.push({
+      ...primary,
+      provenances: provenances.length > 0 ? provenances : primary.provenances,
+      sourceCount: Math.max(provenances.length, group.length, primary.sourceCount ?? 1),
+    });
+  }
+  return [...collapsed, ...rest];
+}
+
 async function loadHubSideStats(baseScope: object, projectWhere: object) {
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
@@ -71,18 +119,20 @@ async function loadHubSideStats(baseScope: object, projectWhere: object) {
     where: projectWhere,
     select: { id: true, title: true },
     orderBy: { updatedAt: "desc" },
-    take: 8,
+    take: 5,
   });
   const ids = recentProjects.map((p) => p.id);
+  const baseAnd = (baseScope as { AND?: object[] }).AND ?? [];
+  const availableScope = { ...baseScope, AND: [...baseAnd, ...LIBRARY_FILE_AND] };
   const [totalAll, weekCount, fileCounts, missingCounts] = await Promise.all([
-    prisma.chantierFile.count({ where: baseScope }),
+    prisma.chantierFile.count({ where: availableScope }),
     prisma.chantierFile.count({
-      where: { ...baseScope, createdAt: { gte: weekAgo } },
+      where: { ...availableScope, createdAt: { gte: weekAgo } },
     }),
     ids.length
       ? prisma.chantierFile.groupBy({
           by: ["projectId"],
-          where: { ...baseScope, projectId: { in: ids } },
+          where: { ...availableScope, projectId: { in: ids } },
           _count: { _all: true },
         })
       : Promise.resolve([]),
@@ -432,6 +482,8 @@ export async function loadDocumentHub(opts: {
           { fileUrl: "" },
         ],
       });
+    } else {
+      viewAnd.push(...LIBRARY_FILE_AND);
     }
     if (view === "classify") {
       viewAnd.push({
@@ -671,8 +723,24 @@ export async function loadDocumentHub(opts: {
             select: { id: true },
             take: 1,
           },
+          checksum: true,
+          replacesFileId: true,
+          replacesFile: {
+            select: { id: true, versionLabel: true, indice: true, createdAt: true, documentDate: true },
+          },
+          replacedByFiles: {
+            take: 6,
+            select: {
+              id: true,
+              versionLabel: true,
+              indice: true,
+              createdAt: true,
+              documentDate: true,
+              isCurrentVersion: true,
+            },
+          },
           links: {
-            take: 8,
+            take: 16,
             select: { entityType: true, entityLabel: true, entityId: true },
           },
         },
@@ -751,6 +819,35 @@ export async function loadDocumentHub(opts: {
             : f.fileUrl?.startsWith("/api/")
               ? f.fileUrl
               : chantierHref;
+      const provenances = provenanceEntries({
+        links: f.links as GedLinkLite[],
+        projectId: f.projectId,
+        projectTitle: f.project?.title ?? null,
+      });
+      const versions: HubDocumentItem["versions"] = [];
+      const verDate = (d: Date) => d.toISOString();
+      if (f.replacesFile) {
+        versions.push({
+          id: f.replacesFile.id,
+          label: [f.replacesFile.indice, f.replacesFile.versionLabel].filter(Boolean).join(" · ") || "Version précédente",
+          date: verDate(f.replacesFile.documentDate ?? f.replacesFile.createdAt),
+        });
+      }
+      versions.push({
+        id: f.id,
+        label: [f.indice, f.versionLabel, f.isCurrentVersion ? "Actuelle" : null].filter(Boolean).join(" · ") || "Version actuelle",
+        date: verDate(displayDate),
+      });
+      for (const v of f.replacedByFiles) {
+        versions.push({
+          id: v.id,
+          label: [v.indice, v.versionLabel, v.isCurrentVersion ? "Actuelle" : null].filter(Boolean).join(" · ") || "Version",
+          date: verDate(v.documentDate ?? v.createdAt),
+        });
+      }
+      const uniqueVersions = versions.filter(
+        (v, i, arr) => arr.findIndex((x) => x.id === v.id) === i,
+      );
       return {
         id: `cf:${f.id}`,
         source: "chantier" as const,
@@ -783,6 +880,11 @@ export async function loadDocumentHub(opts: {
         chantierFileId: f.id,
         fileSize: f.fileSize,
         addedAt: f.createdAt.toISOString(),
+        checksum: f.checksum,
+        sourceCount: provenances.length,
+        versionCount: uniqueVersions.length > 1 ? uniqueVersions.length : 1,
+        provenances,
+        versions: uniqueVersions.length > 1 ? uniqueVersions : undefined,
       };
     });
 
@@ -940,16 +1042,20 @@ export async function loadDocumentHub(opts: {
         });
     }
 
-    const merged = [...items, ...orphanPo, ...legacy].filter((it) => {
-      if (group !== "all" && it.group !== group) return false;
-      if (originFilter && it.origin && it.origin !== originFilter) return false;
-      if (docType && !documentTypeMatches(it, docType)) return false;
-      if (company) {
-        const blob = `${it.companyLabel ?? ""} ${it.contextLabel ?? ""}`.toLowerCase();
-        if (!blob.includes(company.toLowerCase())) return false;
-      }
-      return true;
-    });
+    const merged = collapseCanonicalDocuments(
+      [...items, ...orphanPo, ...legacy].filter((it) => {
+        if (view !== "missing" && it.isExpectedMissing) return false;
+        if (view === "missing" && !it.isExpectedMissing) return false;
+        if (group !== "all" && it.group !== group) return false;
+        if (originFilter && it.origin && it.origin !== originFilter) return false;
+        if (docType && !documentTypeMatches(it, docType)) return false;
+        if (company) {
+          const blob = `${it.companyLabel ?? ""} ${it.contextLabel ?? ""}`.toLowerCase();
+          if (!blob.includes(company.toLowerCase())) return false;
+        }
+        return true;
+      }),
+    );
     merged.sort((a, b) => {
       if (sort === "name") return a.title.localeCompare(b.title, "fr");
       if (sort === "name_desc") return b.title.localeCompare(a.title, "fr");

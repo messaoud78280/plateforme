@@ -9,6 +9,7 @@ import {
   hubCategoryLabel,
   originToneClass,
   sourceLineForDocument,
+  typeToneClass,
 } from "@/lib/ged/document-hub-ui";
 import { cn } from "@/lib/cn";
 
@@ -17,7 +18,9 @@ function Info({ label, value }: { label: string; value?: string | null }) {
   return (
     <div>
       <dt className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-500">{label}</dt>
-      <dd className="mt-0.5 text-[13px] text-slate-800">{value}</dd>
+      <dd className="mt-0.5 break-words text-[13px] text-slate-800" title={value}>
+        {value}
+      </dd>
     </div>
   );
 }
@@ -52,6 +55,8 @@ export function DocumentPreviewPanel({
   const canPreview =
     Boolean(item.chantierFileId) && !missing && (kind === "pdf" || kind === "image");
   const source = sourceLineForDocument(item);
+  const provenances = item.provenances?.filter((p) => p.label) ?? [];
+  const versions = item.versions ?? [];
 
   return (
     <aside
@@ -59,17 +64,20 @@ export function DocumentPreviewPanel({
         "flex h-full min-h-0 flex-col bg-white",
         variant === "side" &&
           "rounded-2xl border border-bework-navy/10 shadow-[var(--cc-shadow)]",
+        variant === "drawer" && "shadow-[-8px_0_32px_rgba(15,23,42,0.12)]",
       )}
       aria-label={`Aperçu ${item.title}`}
     >
       <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
         <div className="min-w-0">
-          <p className="truncate text-[15px] font-semibold text-bework-ink">{item.title}</p>
+          <p className="truncate text-[15px] font-semibold text-bework-ink" title={item.title}>
+            {item.title}
+          </p>
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {missing ? (
               <span className="badge-cc badge-cc-watch">À récupérer</span>
             ) : (
-              <span className="badge-cc badge-cc-info">{item.typeLabel}</span>
+              <span className={typeToneClass(item.typeLabel)}>{item.typeLabel}</span>
             )}
             {source ? <span className={originToneClass(item.origin)}>{source}</span> : null}
           </div>
@@ -78,7 +86,7 @@ export function DocumentPreviewPanel({
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700"
+            className="rounded-lg px-2 py-1 text-[18px] leading-none text-slate-400 hover:bg-slate-100 hover:text-slate-700"
             aria-label="Fermer"
           >
             ×
@@ -94,13 +102,13 @@ export function DocumentPreviewPanel({
               <img
                 src={`/api/chantier/files/${item.chantierFileId}/preview`}
                 alt=""
-                className="max-h-56 w-full object-contain"
+                className="max-h-64 w-full object-contain"
               />
             ) : (
               <iframe
                 title={`Aperçu ${item.title}`}
                 src={`/api/chantier/files/${item.chantierFileId}/preview`}
-                className="h-56 w-full border-0"
+                className="h-64 w-full border-0"
               />
             )}
           </div>
@@ -117,51 +125,79 @@ export function DocumentPreviewPanel({
         )}
 
         <dl className="space-y-3 px-5 py-4">
-          <Info label="Catégorie" value={hubCategoryLabel(item.group)} />
+          <Info label="Nom" value={item.title} />
           <Info label="Type" value={item.typeLabel} />
+          <Info label="Catégorie" value={hubCategoryLabel(item.group)} />
           {hideProject ? null : <Info label="Chantier" value={item.projectTitle} />}
           <Info label="Client / fournisseur" value={item.companyLabel} />
           <Info label="Source" value={source || item.originLabel} />
           <Info label="Date du document" value={formatGedShortDate(item.createdAt)} />
-          {item.addedAt && item.addedAt !== item.createdAt ? (
+          {item.addedAt ? (
             <Info label="Date d’ajout" value={formatGedShortDate(item.addedAt)} />
           ) : null}
           <Info label="Taille" value={formatFileSize(item.fileSize)} />
-          <Info label="Référence" value={item.contextLabel} />
-          {item.indice || item.versionLabel ? (
-            <Info
-              label="Version"
-              value={[item.indice, item.isCurrentVersion ? "Actuelle" : item.versionLabel]
-                .filter(Boolean)
-                .join(" — ")}
-            />
-          ) : null}
         </dl>
 
-        {item.contextLabel || item.originHref ? (
-          <div className="px-5 pb-3">
-            <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-500">Liens</p>
-            {item.contextLabel ? (
-              <p className="mt-1 text-[13px] text-slate-700">
-                Provenant de {item.contextLabel}
-              </p>
-            ) : null}
-            {item.originHref ? (
-              <Link
-                href={item.originHref}
-                className="mt-1 inline-block text-[13px] font-medium text-bework-navy hover:underline"
-              >
-                {item.originActionLabel || "Ouvrir la source"}
-              </Link>
-            ) : null}
-            {!hideProject && item.projectId ? (
-              <Link
-                href={`/dashboard/projets/${item.projectId}`}
-                className="mt-1 block text-[13px] font-medium text-bework-navy hover:underline"
-              >
-                Voir le chantier
-              </Link>
-            ) : null}
+        {provenances.length > 0 ? (
+          <div className="px-5 pb-4">
+            <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-500">
+              Présent dans
+            </p>
+            <ul className="mt-1.5 space-y-1">
+              {provenances.map((p) => (
+                <li key={p.key}>
+                  {p.href ? (
+                    <Link
+                      href={p.href}
+                      className="text-[13px] font-medium text-bework-navy hover:underline"
+                    >
+                      {p.label}
+                    </Link>
+                  ) : (
+                    <span className="text-[13px] text-slate-700">{p.label}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : item.originHref || item.projectId ? (
+          <div className="px-5 pb-4">
+            <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-500">
+              Présent dans
+            </p>
+            <div className="mt-1.5 space-y-1">
+              {item.originHref ? (
+                <Link
+                  href={item.originHref}
+                  className="block text-[13px] font-medium text-bework-navy hover:underline"
+                >
+                  {item.originActionLabel || "Voir la source"}
+                </Link>
+              ) : null}
+              {!hideProject && item.projectId ? (
+                <Link
+                  href={`/dashboard/projets/${item.projectId}`}
+                  className="block text-[13px] font-medium text-bework-navy hover:underline"
+                >
+                  Voir le chantier
+                </Link>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {versions.length > 1 ? (
+          <div className="px-5 pb-4">
+            <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-500">
+              Versions
+            </p>
+            <ul className="mt-1.5 space-y-1">
+              {versions.map((v) => (
+                <li key={v.id} className="text-[13px] text-slate-700">
+                  {v.label} — {formatGedShortDate(v.date)}
+                </li>
+              ))}
+            </ul>
           </div>
         ) : null}
 

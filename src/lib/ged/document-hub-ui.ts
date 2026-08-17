@@ -52,6 +52,19 @@ export type HubOrigin =
   | "UPLOAD"
   | "BEWORK";
 
+export type HubProvenance = {
+  key: string;
+  label: string;
+  href: string | null;
+  actionLabel: string | null;
+};
+
+export type HubVersion = {
+  id: string;
+  label: string;
+  date: string;
+};
+
 export type HubDocumentItem = {
   id: string;
   source: HubDocSource;
@@ -79,6 +92,11 @@ export type HubDocumentItem = {
   chantierFileId?: string | null;
   fileSize?: number | null;
   addedAt?: string | null;
+  checksum?: string | null;
+  sourceCount?: number;
+  versionCount?: number;
+  provenances?: HubProvenance[];
+  versions?: HubVersion[];
 };
 
 const GROUP_DEFS: { id: HubGroup; label: string }[] = [
@@ -87,7 +105,7 @@ const GROUP_DEFS: { id: HubGroup; label: string }[] = [
 ];
 
 export const HUB_VIEWS: { id: HubView; label: string }[] = [
-  { id: "all", label: "Tous" },
+  { id: "all", label: "Bibliothèque" },
   { id: "recent", label: "Récents" },
   { id: "favorites", label: "Favoris" },
   { id: "missing", label: "À récupérer" },
@@ -246,29 +264,22 @@ export const HUB_CATEGORY_FAMILIES: Array<{
   { id: "autres", label: "Autres", ids: ["autres"] },
 ];
 
-export function originToneClass(origin?: HubOrigin | null): string {
-  switch (origin) {
-    case "DEVIS":
-      return "badge-cc badge-cc-info";
-    case "COMMANDE":
-      return "badge-cc badge-cc-watch";
-    case "MESSAGERIE":
-      return "badge-cc badge-cc-intel";
-    case "DOE":
-      return "badge-cc badge-cc-info";
-    case "FOURNISSEUR":
-      return "badge-cc badge-cc-cyan";
-    case "CHANTIER":
-      return "badge-cc badge-cc-navy";
-    case "UPLOAD":
-      return "badge-cc badge-cc-neutral";
-    case "FICHE_SUIVI":
-      return "badge-cc badge-cc-ok";
-    case "BEWORK":
-      return "badge-cc badge-cc-info";
-    default:
-      return "badge-cc badge-cc-neutral";
-  }
+export function originToneClass(_origin?: HubOrigin | null): string {
+  return "inline-flex items-center gap-1 text-[11px] font-medium text-slate-500";
+}
+
+export function typeToneClass(typeLabel: string): string {
+  const t = typeLabel.toLowerCase();
+  if (/à récupérer|a recuperer/.test(t)) return "badge-cc badge-cc-watch";
+  if (/facture|situation|avoir/.test(t)) return "badge-cc badge-cc-ok";
+  if (/devis|avenant/.test(t)) return "badge-cc badge-cc-info";
+  if (/livraison|\bbl\b|commande|\bbc\b/.test(t)) return "badge-cc badge-cc-watch";
+  if (/fiche technique|notice|fdes/.test(t)) return "badge-cc badge-cc-cyan";
+  if (/\bdoe\b/.test(t)) return "badge-cc badge-cc-navy";
+  if (/photo/.test(t)) return "badge-cc badge-cc-intel";
+  if (/attestation|assurance|ppsps|sécurité|securite/.test(t)) return "badge-cc badge-cc-neutral";
+  if (/plan|cctp|ccap|dpgf|marché|marche/.test(t)) return "badge-cc badge-cc-intel";
+  return "badge-cc badge-cc-navy";
 }
 
 export function fileKindFromItem(
@@ -318,7 +329,7 @@ export function groupHubDocuments(
   }
   return [...map.entries()].map(([label, docs]) => ({
     key: label,
-    label: `${label} — ${docs.length} document${docs.length > 1 ? "s" : ""}`,
+    label,
     items: docs,
   }));
 }
@@ -419,14 +430,14 @@ export function hubEmptyCopy(opts: {
   }
   if (opts.view === "missing") {
     return {
-      title: "Aucun document à récupérer",
-      body: "Tous les documents attendus sont disponibles.",
+      title: "✓ Tout est récupéré",
+      body: "Aucun document détecté n’attend d’être intégré à la bibliothèque.",
     };
   }
   if (opts.view === "classify") {
     return {
-      title: "Rien à classer",
-      body: "Ces documents ont besoin d’une catégorie — aucun pour l’instant.",
+      title: "✓ Tous les documents sont classés",
+      body: "Rien n’attend une catégorie pour le moment.",
     };
   }
   if (opts.view === "categories" && opts.group === "all") {
@@ -450,8 +461,8 @@ export function hubEmptyCopy(opts: {
   }
 
   return {
-    title: "Aucun document",
-    body: "Ajoutez votre premier document.",
+    title: "Aucun document dans votre bibliothèque.",
+    body: "Ajoutez votre premier document, ou récupérez les pièces déjà détectées.",
     action: "add",
   };
 }

@@ -6,27 +6,15 @@ import { useRouter } from "next/navigation";
 import type { FollowUpUrgency } from "@prisma/client";
 import { POSTIT_COLORS, URGENCY_LABELS, URGENCY_STYLES } from "@/lib/follow-up/types";
 import {
-  formatDaysInStepLabel,
   formatKanbanDueLabel,
   initialsFromName,
   urgencyRank,
 } from "@/lib/follow-up/urgency";
 import type { FollowUpCardData } from "@/components/follow-up/FollowUpPostItCard";
 import type { SerializedAttention } from "@/lib/follow-up/attention";
-import { isPhaseStart, phaseForStatus } from "@/lib/follow-up/phases";
+import { FOLLOW_UP_PHASES, isPhaseStart, phaseForStatus } from "@/lib/follow-up/phases";
 import { isFollowUpUrgentLevel } from "@/lib/follow-up/kpi";
 import { cn } from "@/lib/cn";
-
-/** Sous-processus visibles discrètement (pas un 2e statut). */
-const SUBPROCESS_CHIP: Partial<Record<string, string>> = {
-  COMMANDE_FOURNISSEUR: "Commande",
-  COMMANDE_PASSEE: "Commande",
-  ATTENTE_FOURNISSEUR: "Fournisseur",
-  AVENANT: "Avenant",
-  A_FACTURER: "Facturation",
-  FACTURE: "Facturation",
-  ATTENTE_REGLEMENT: "Règlement",
-};
 
 export type KanbanColumn = {
   statusKey: string;
@@ -53,6 +41,8 @@ type Props = {
   sheets: KanbanSheet[];
   canEdit?: boolean;
   currentUserId?: string | null;
+  /** Mode allégé (moins de badges / colonnes plus étroites). */
+  compact?: boolean;
 };
 
 const URGENCY_SORT: FollowUpUrgency[] = [
@@ -124,21 +114,17 @@ function KanbanCard({
   columns,
   onMove,
   dragging,
+  compact,
 }: {
   sheet: KanbanSheet;
   canEdit: boolean;
   columns: KanbanColumn[];
   onMove: (sheetId: string, toStatus: string, source: "kanban" | "menu") => void;
   dragging: boolean;
+  compact?: boolean;
 }) {
-  const border = POSTIT_COLORS[sheet.colorKey]?.border ?? "border-slate-200";
   const urgencyKey = (sheet.attention?.effectiveUrgency ?? sheet.urgency) as FollowUpUrgency;
   const urgency = URGENCY_STYLES[urgencyKey] ?? URGENCY_STYLES.NORMAL;
-  const primaryReason = sheet.attention?.primaryReason ?? null;
-  const urgencyLabel =
-    sheet.attention != null
-      ? (URGENCY_LABELS[urgencyKey] ?? sheet.urgencyLabel)
-      : sheet.urgencyLabel;
   const ref = sheet.osNumber
     ? `OS-${sheet.osNumber}`
     : sheet.orderNumber
@@ -146,14 +132,15 @@ function KanbanCard({
       : null;
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const daysInStep = formatDaysInStepLabel(
-    sheet.statusEnteredAt ? new Date(sheet.statusEnteredAt) : null,
-  );
   const dueLabel = formatKanbanDueLabel(
     sheet.nextActionAt ? new Date(sheet.nextActionAt) : null,
   );
   const initials = initialsFromName(sheet.assignee?.name);
   const shortName = sheet.assignee?.name?.trim().split(/\s+/)[0] ?? null;
+  const showUrgencyBadge =
+    urgencyKey === "CRITIQUE" ||
+    (urgencyKey === "URGENT" && !dueLabel?.startsWith("En retard")) ||
+    (urgencyKey === "IMPORTANT" && !dueLabel?.startsWith("En retard"));
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -183,8 +170,7 @@ function KanbanCard({
         e.dataTransfer.effectAllowed = "move";
       }}
       className={cn(
-        "relative rounded-xl border border-bework-navy/10 bg-[linear-gradient(180deg,#ffffff_0%,#f7f9fc_100%)] px-2.5 py-2 shadow-sm transition",
-        border,
+        "relative rounded-xl border border-slate-200/90 bg-white px-2.5 py-2 shadow-sm transition",
         canEdit ? "cursor-grab active:cursor-grabbing" : "",
         dragging ? "opacity-40 ring-2 ring-[#1e3a5f]/40" : "hover:border-slate-300 hover:shadow",
       )}
@@ -193,12 +179,13 @@ function KanbanCard({
       <div className="mt-0.5 flex items-start justify-between gap-1">
         <Link
           href={`/dashboard/fiches-suivi/${sheet.id}`}
-          className="min-w-0 flex-1 text-[13px] font-bold leading-snug text-slate-900 line-clamp-2 hover:underline"
+          className="min-w-0 flex-1 text-[13px] font-semibold leading-snug text-slate-900 line-clamp-2 hover:underline"
           onClick={(e) => {
             if (dragging) e.preventDefault();
           }}
         >
           {sheet.title}
+          {ref ? <span className="font-medium text-slate-500"> — {ref}</span> : null}
         </Link>
         {canEdit ? (
           <div className="relative shrink-0" ref={menuRef}>
@@ -212,7 +199,7 @@ function KanbanCard({
               }}
               className="rounded px-1 py-0.5 text-xs font-bold text-slate-500 hover:bg-slate-100"
             >
-              ···
+              …
             </button>
             {menuOpen ? (
               <div
@@ -252,24 +239,9 @@ function KanbanCard({
         ) : null}
       </div>
 
-      {(ref || sheet.workObject || sheet.clientName) && (
-        <p className="mt-0.5 text-[11px] text-slate-500 line-clamp-1">
-          {[sheet.clientName, ref, sheet.workObject].filter(Boolean).join(" · ")}
-        </p>
-      )}
-
-      {SUBPROCESS_CHIP[sheet.status] ? (
-        <p className="mt-1 text-[10px] font-medium text-slate-400">
-          {SUBPROCESS_CHIP[sheet.status]}
-        </p>
-      ) : null}
-
       {sheet.nextAction ? (
-        <p className="mt-1.5 text-xs leading-snug text-slate-800">
-          <span className="block text-[10px] font-bold uppercase tracking-wide text-slate-400">
-            Prochaine action
-          </span>
-          <span className="font-semibold line-clamp-2">{sheet.nextAction}</span>
+        <p className="mt-1.5 text-[12px] font-semibold leading-snug text-slate-800 line-clamp-2">
+          {sheet.nextAction}
         </p>
       ) : null}
 
@@ -286,29 +258,28 @@ function KanbanCard({
           <span
             className={cn(
               "font-semibold",
-              dueLabel.startsWith("En retard") ? "text-red-700" : "text-slate-700",
+              dueLabel.startsWith("En retard") ? "text-orange-800" : "text-slate-700",
             )}
           >
-            {dueLabel}
+            {dueLabel.startsWith("En retard")
+              ? dueLabel.replace(/^En retard de\s+/i, "").replace(/jours?/i, "j") + " retard"
+              : dueLabel}
           </span>
         ) : null}
-        {daysInStep ? <span className="text-slate-500">{daysInStep}</span> : null}
-        <span
-          className={cn(
-            "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-semibold uppercase tracking-wide",
-            urgencyKey === "NORMAL"
-              ? "bg-slate-50 text-[10px] text-slate-500"
-              : cn("text-[10px]", urgency.badge),
-          )}
-          title="Urgence BeWork (distincte de l’étape)"
-        >
-          <span className={cn("h-1.5 w-1.5 rounded-full", urgency.dot)} aria-hidden />
-          {urgencyLabel}
-        </span>
+        {showUrgencyBadge && !compact ? (
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
+              urgency.badge,
+            )}
+          >
+            {URGENCY_LABELS[urgencyKey]}
+          </span>
+        ) : null}
+        {showUrgencyBadge && compact && urgencyKey === "CRITIQUE" ? (
+          <span className="h-2 w-2 rounded-full bg-red-500" title="Critique" aria-label="Critique" />
+        ) : null}
       </div>
-      {primaryReason && urgencyKey !== "NORMAL" ? (
-        <p className="mt-1 text-[11px] leading-snug text-slate-600 line-clamp-2">{primaryReason}</p>
-      ) : null}
     </div>
   );
 }
@@ -318,6 +289,7 @@ export function FollowUpKanban({
   sheets,
   canEdit = false,
   currentUserId = null,
+  compact = false,
 }: Props) {
   const router = useRouter();
   const [localSheets, setLocalSheets] = useState<KanbanSheet[]>(sheets);
@@ -331,7 +303,9 @@ export function FollowUpKanban({
   const [filterClient, setFilterClient] = useState<string>("all");
   const [mineOnly, setMineOnly] = useState(false);
   const [hideEmpty, setHideEmpty] = useState(true);
+  const [forceShowEmpty, setForceShowEmpty] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const colWidth = compact ? "w-[200px] sm:w-[210px]" : "w-[260px]";
 
   const sheetsKey = sheets.map((s) => `${s.id}:${s.status}:${s.nextAction ?? ""}`).join("|");
 
@@ -425,7 +399,8 @@ export function FollowUpKanban({
   const cols = useMemo(() => {
     const occupied = new Set(filtered.map((s) => s.status));
     let base = columns;
-    if (hideEmpty && dragId === null) {
+    const masking = hideEmpty && !forceShowEmpty && dragId === null;
+    if (masking) {
       base = columns.filter(
         (c) => occupied.has(c.statusKey) || c.statusKey === "__AUTRES__",
       );
@@ -436,7 +411,30 @@ export function FollowUpKanban({
       ...base,
       { statusKey: "__AUTRES__", label: "Autres", colorKey: "jaune", sortOrder: 9999 },
     ];
-  }, [columns, filtered, hideEmpty, dragId]);
+  }, [columns, filtered, hideEmpty, forceShowEmpty, dragId]);
+
+  const hiddenEmptyCount = useMemo(() => {
+    if (!hideEmpty || forceShowEmpty || dragId !== null) return 0;
+    const occupied = new Set(filtered.map((s) => s.status));
+    return columns.filter(
+      (c) => !occupied.has(c.statusKey) && c.statusKey !== "__AUTRES__",
+    ).length;
+  }, [columns, filtered, hideEmpty, forceShowEmpty, dragId]);
+
+  function scrollByCols(dir: -1 | 1) {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * (compact ? 220 : 280), behavior: "smooth" });
+  }
+
+  function scrollToStatus(statusKey: string) {
+    const el = scrollRef.current;
+    if (!el) return;
+    const target = el.querySelector(`[data-status-col="${statusKey}"]`);
+    if (target instanceof HTMLElement) {
+      target.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }
 
   const colKeys = useMemo(() => cols.map((c) => c.statusKey), [cols]);
 
@@ -526,106 +524,185 @@ export function FollowUpKanban({
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-white p-3">
-        <label className="min-w-[160px] flex-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-          Recherche
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Chantier, OS, client…"
-            className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-normal text-slate-800"
-          />
-        </label>
-        <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-          Responsable
-          <select
-            value={filterAssignee}
-            onChange={(e) => setFilterAssignee(e.target.value)}
-            className="mt-1 block rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-normal text-slate-800"
-          >
-            <option value="all">Tous</option>
-            {assignees.map(([id, name]) => (
-              <option key={id} value={id}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-          Urgence
-          <select
-            value={filterUrgency}
-            onChange={(e) => setFilterUrgency(e.target.value)}
-            className="mt-1 block rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-normal text-slate-800"
-          >
-            <option value="all">Toutes</option>
-            {URGENCY_SORT.map((u) => (
-              <option key={u} value={u}>
-                {URGENCY_LABELS[u]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-          Client
-          <select
-            value={filterClient}
-            onChange={(e) => setFilterClient(e.target.value)}
-            className="mt-1 block max-w-[160px] rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-normal text-slate-800"
-          >
-            <option value="all">Tous</option>
-            {clients.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex items-center gap-1.5 pb-1.5 text-xs font-medium text-slate-700">
-          <input
-            type="checkbox"
-            checked={mineOnly}
-            onChange={(e) => setMineOnly(e.target.checked)}
-            className="rounded border-slate-300"
-          />
-          Mes fiches
-        </label>
-        <label className="flex items-center gap-1.5 pb-1.5 text-xs font-medium text-slate-700">
-          <input
-            type="checkbox"
-            checked={hideEmpty}
-            onChange={(e) => setHideEmpty(e.target.checked)}
-            className="rounded border-slate-300"
-          />
-          Masquer les étapes vides
-        </label>
-        <p className="ml-auto pb-1.5 text-xs text-slate-600">
-          <span className="font-bold text-slate-900">{summary.total}</span> dossiers
-          {summary.urgent > 0 ? (
-            <>
-              {" · "}
-              <span className="font-semibold text-red-700">{summary.urgent} urgents</span>
-            </>
-          ) : null}
-          {summary.aFacturer > 0 ? (
-            <>
-              {" · "}
-              <span className="font-semibold text-slate-800">{summary.aFacturer} à facturer</span>
-            </>
-          ) : null}
-        </p>
-      </div>
-
-      {!canEdit ? (
-        <p className="text-xs text-slate-500">
-          Lecture seule — vous n’avez pas le droit de déplacer les fiches.
-        </p>
+      {!compact ? (
+        <div className="flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-white p-3">
+          <label className="min-w-[160px] flex-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+            Recherche
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Chantier, OS, client…"
+              className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-normal text-slate-800"
+            />
+          </label>
+          <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+            Responsable
+            <select
+              value={filterAssignee}
+              onChange={(e) => setFilterAssignee(e.target.value)}
+              className="mt-1 block rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-normal text-slate-800"
+            >
+              <option value="all">Tous</option>
+              {assignees.map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+            Urgence
+            <select
+              value={filterUrgency}
+              onChange={(e) => setFilterUrgency(e.target.value)}
+              className="mt-1 block rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-normal text-slate-800"
+            >
+              <option value="all">Toutes</option>
+              {URGENCY_SORT.map((u) => (
+                <option key={u} value={u}>
+                  {URGENCY_LABELS[u]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+            Client
+            <select
+              value={filterClient}
+              onChange={(e) => setFilterClient(e.target.value)}
+              className="mt-1 block max-w-[160px] rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-normal text-slate-800"
+            >
+              <option value="all">Tous</option>
+              {clients.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex items-center gap-1.5 pb-1.5 text-xs font-medium text-slate-700">
+            <input
+              type="checkbox"
+              checked={mineOnly}
+              onChange={(e) => setMineOnly(e.target.checked)}
+              className="rounded border-slate-300"
+            />
+            Mes fiches
+          </label>
+          <label className="flex items-center gap-1.5 pb-1.5 text-xs font-medium text-slate-700">
+            <input
+              type="checkbox"
+              checked={hideEmpty}
+              onChange={(e) => {
+                setHideEmpty(e.target.checked);
+                setForceShowEmpty(false);
+              }}
+              className="rounded border-slate-300"
+            />
+            Masquer les étapes vides
+          </label>
+          <p className="ml-auto pb-1.5 text-xs text-slate-600">
+            <span className="font-bold text-slate-900">{summary.total}</span> dossiers
+            {summary.urgent > 0 ? (
+              <>
+                {" · "}
+                <span className="font-semibold text-orange-800">{summary.urgent} urgents</span>
+              </>
+            ) : null}
+            {summary.aFacturer > 0 ? (
+              <>
+                {" · "}
+                <span className="font-semibold text-slate-800">{summary.aFacturer} à facturer</span>
+              </>
+            ) : null}
+          </p>
+        </div>
       ) : (
-        <p className="text-xs text-slate-500">
-          Glissez une fiche vers une autre colonne, ou utilisez ··· → Changer d’étape.
-          {hideEmpty ? " Pendant un glisser-déposer, toutes les étapes réapparaissent." : null}
-        </p>
+        <div className="flex flex-wrap items-center gap-2 text-[12px]">
+          <label className="flex items-center gap-1.5 font-medium text-slate-700">
+            <input
+              type="checkbox"
+              checked={hideEmpty}
+              onChange={(e) => {
+                setHideEmpty(e.target.checked);
+                setForceShowEmpty(false);
+              }}
+              className="rounded border-slate-300"
+            />
+            Masquer étapes vides
+          </label>
+          {hiddenEmptyCount > 0 ? (
+            <button
+              type="button"
+              onClick={() => setForceShowEmpty(true)}
+              className="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700 hover:bg-slate-200"
+            >
+              + {hiddenEmptyCount} étape{hiddenEmptyCount > 1 ? "s" : ""} masquée
+              {hiddenEmptyCount > 1 ? "s" : ""}
+            </button>
+          ) : null}
+          <p className="ml-auto text-slate-600">
+            <span className="font-semibold text-slate-900">{summary.total}</span> dossiers
+          </p>
+        </div>
       )}
+
+      {compact ? (
+        <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-0.5 text-[11px]">
+          {columns.map((c, i) => {
+            const n = filtered.filter((s) => s.status === c.statusKey).length;
+            return (
+              <button
+                key={c.statusKey}
+                type="button"
+                onClick={() => scrollToStatus(c.statusKey)}
+                className={cn(
+                  "shrink-0 rounded-full px-2 py-0.5 font-medium",
+                  n > 0 ? "bg-slate-100 text-slate-800" : "text-slate-400",
+                )}
+                title={c.label}
+              >
+                {i > 0 ? <span className="mr-1 text-slate-300">→</span> : null}
+                {c.label}
+                {n > 0 ? <span className="ml-1 tabular-nums text-slate-500">{n}</span> : null}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        {!canEdit ? (
+          <p className="text-xs text-slate-500">
+            Lecture seule — vous n’avez pas le droit de déplacer les fiches.
+          </p>
+        ) : (
+          <p className="text-xs text-slate-500">
+            Glissez une fiche, ou utilisez ··· / Changer d’étape.
+          </p>
+        )}
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => scrollByCols(-1)}
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            aria-label="Étapes précédentes"
+          >
+            ←
+          </button>
+          <span className="hidden text-[11px] text-slate-500 sm:inline">
+            {FOLLOW_UP_PHASES.map((p) => p.label).join(" · ")}
+          </span>
+          <button
+            type="button"
+            onClick={() => scrollByCols(1)}
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            aria-label="Étapes suivantes"
+          >
+            →
+          </button>
+        </div>
+      </div>
 
       <div className="relative">
         <div
@@ -636,7 +713,7 @@ export function FollowUpKanban({
             scrollbarColor: "#94a3b8 #e2e8f0",
           }}
         >
-          <div className="flex min-w-max gap-3 pt-5">
+          <div className="flex min-w-max gap-2.5 pt-5">
             {cols.map((col) => {
               const items = byStatus.get(col.statusKey) ?? [];
               const accent = POSTIT_COLORS[col.colorKey] ?? POSTIT_COLORS.jaune;
@@ -646,8 +723,10 @@ export function FollowUpKanban({
               return (
                 <section
                   key={col.statusKey}
+                  data-status-col={col.statusKey}
                   className={cn(
-                    "relative flex w-[260px] shrink-0 flex-col rounded-2xl border border-bework-navy/12 bg-bework-soft-navy/35 transition",
+                    "relative flex shrink-0 flex-col rounded-2xl border border-bework-navy/12 bg-bework-soft-navy/35 transition",
+                    colWidth,
                     isOver
                       ? "border-[#1e3a5f] bg-[#1e3a5f]/5 ring-2 ring-[#1e3a5f]/20"
                       : "border-slate-200",
@@ -676,11 +755,11 @@ export function FollowUpKanban({
                       {phase.label}
                     </span>
                   ) : null}
-                  <header className={cn("rounded-t-2xl border-b px-3 py-2", accent.bg, accent.border)}>
+                  <header className={cn("rounded-t-2xl border-b px-2.5 py-1.5", accent.bg, accent.border)}>
                     <div className="flex items-center justify-between gap-2">
                       <h3
                         className={cn(
-                          "flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide",
+                          "flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide",
                           accent.text,
                         )}
                       >
@@ -703,7 +782,7 @@ export function FollowUpKanban({
                         />
                         {col.label}
                       </h3>
-                      <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-bold tabular-nums text-slate-700">
+                      <span className="rounded-full bg-white/80 px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-slate-700">
                         {items.length}
                       </span>
                     </div>
@@ -734,6 +813,7 @@ export function FollowUpKanban({
                             columns={columns}
                             onMove={moveSheet}
                             dragging={dragId === s.id}
+                            compact={compact}
                           />
                         </li>
                       ))
@@ -742,21 +822,8 @@ export function FollowUpKanban({
                 </section>
               );
             })}
-            {/* Indicateur de suite horizontale */}
-            <div
-              className="flex w-8 shrink-0 items-center justify-center self-stretch text-slate-300"
-              aria-hidden
-            >
-              <span className="text-lg font-light">›</span>
-            </div>
           </div>
         </div>
-        <p className="mt-1 text-center text-[10px] text-slate-400 sm:hidden">
-          Faites glisser horizontalement pour voir les autres étapes
-        </p>
-        <p className="mt-1 hidden text-center text-[10px] text-slate-400 sm:block">
-          Défilement horizontal · trackpad · Shift + molette
-        </p>
       </div>
     </div>
   );

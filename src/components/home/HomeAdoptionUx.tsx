@@ -1,45 +1,44 @@
 import { HomeSectionHeader } from "@/components/home/HomeSectionHeader";
 import { HOME_BG_SOFT, HOME_SECTION } from "@/components/home/homeSectionStyles";
 
-const FLOW = ["Concevoir", "Déployer", "Former", "Adopter"] as const;
+const ROLES = [
+  { label: "Direction", desc: "Vue globale — chantiers, finances, alertes." },
+  { label: "Conducteur de travaux", desc: "Suivi chantier, documents, équipes, commandes." },
+  { label: "Chargé d'affaires", desc: "Devis, marchés, situations, relations client." },
+  { label: "Administratif", desc: "Facturation, fournisseurs, contrôles, paiements." },
+] as const;
 
-/** Simplicité d'usage + adoption — section courte. */
+/** Simplicité d'usage + adoption — puissante derrière, simple devant. */
 export function HomeAdoptionUx() {
   return (
     <section id="adoption" className={`${HOME_SECTION} ${HOME_BG_SOFT}`} aria-labelledby="adoption-heading">
       <div className="container-site">
         <HomeSectionHeader
           id="adoption-heading"
-          title="Pensée pour être utilisée."
-          lead="Une solution IA n'est utile que si vos équipes l'adoptent."
+          title={
+            <>
+              Puissante derrière.
+              <span className="mt-2 block text-slate-500">Simple devant.</span>
+            </>
+          }
+          lead="Chacun voit principalement ce qui lui est utile. La complexité reste invisible."
         />
 
-        <p className="mx-auto mt-8 max-w-2xl text-center text-base leading-relaxed text-slate-600 sm:text-lg">
-          Nous concevons des outils simples et intuitifs, puis accompagnons vos collaborateurs jusqu&apos;à leur
-          utilisation réelle au quotidien.
-        </p>
-
-        <p className="mx-auto mt-6 max-w-xl text-center text-sm font-medium text-slate-500">
-          Puissante derrière. Simple devant.
-        </p>
-
-        <ol className="mx-auto mt-12 flex max-w-2xl flex-wrap items-center justify-center gap-2 sm:gap-3">
-          {FLOW.map((step, i) => (
-            <li key={step} className="flex items-center gap-2 sm:gap-3">
-              <span className="font-display text-base font-extrabold tracking-tight text-[#0a0a0a] sm:text-lg">
-                {step}
-              </span>
-              {i < FLOW.length - 1 ? (
-                <span className="text-slate-300" aria-hidden>
-                  →
-                </span>
-              ) : null}
-            </li>
+        <div className="mt-12 grid gap-4 sm:mt-14 sm:grid-cols-2 lg:grid-cols-4">
+          {ROLES.map((role) => (
+            <div
+              key={role.label}
+              className="rounded-2xl border border-slate-200/80 bg-white px-5 py-5 shadow-[0_1px_3px_rgba(15,23,42,0.05)]"
+            >
+              <p className="text-sm font-bold text-[#0a0a0a]">{role.label}</p>
+              <p className="mt-2 text-xs leading-relaxed text-slate-500">{role.desc}</p>
+            </div>
           ))}
-        </ol>
+        </div>
 
         <p className="mx-auto mt-10 max-w-xl text-center text-sm leading-relaxed text-slate-500">
-          La technologie s&apos;adapte aux équipes, pas l&apos;inverse. Vos usages évoluent. Votre solution aussi.
+          Nous concevons des interfaces simples et accompagnons vos collaborateurs jusqu&apos;à leur
+          utilisation réelle au quotidien. La plateforme évolue avec vos usages.
         </p>
       </div>
     </section>

@@ -738,7 +738,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   try {
     const demoRow = await prisma.demoEnvironment.findFirst({
       where: { rootUserId: clientId },
-      select: { id: true, name: true },
+      select: { id: true },
     });
     if (demoRow) {
       const { purgeDemoLegacyInbox } = await import("./cleanup-legacy-inbox");
@@ -1011,7 +1011,7 @@ export async function enrichDemoTaskThreads(opts: {
           { email: { endsWith: "+julie@demo.bework.local" } },
         ],
       },
-      select: { id: true },
+      select: { id: true, name: true },
     }),
   ]);
   /** Jamais CLIENT_EXT Sophie Martin ; staff Lefèvre uniquement en fallback messagerie SETRIM. */

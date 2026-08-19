@@ -151,7 +151,7 @@ export function HomeAutomations() {
 
             {/* Déclencheur */}
             <div
-              className="flex flex-col items-center justify-center rounded-2xl border p-5 text-center shadow-sm sm:flex-col"
+              className="bework-sheen flex flex-col items-center justify-center rounded-2xl border p-5 text-center shadow-sm sm:flex-col"
               style={{ borderColor: current.colorBorder, background: current.colorLight }}
             >
               {/* Icône éclair */}
@@ -160,7 +160,9 @@ export function HomeAutomations() {
                 style={{ background: current.color }}
                 aria-hidden
               >
-                ⚡
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
               </span>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: current.color }}>
                 Déclencheur
@@ -212,13 +214,28 @@ export function HomeAutomations() {
                         style={isActive ? { background: current.color, boxShadow: isCurrent ? `0 0 0 3px ${current.color}30` : undefined } : undefined}
                         aria-hidden
                       >
-                        {isActive ? "✓" : i + 1}
+                        {isActive ? (
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-4 w-4"
+                            aria-hidden
+                          >
+                            <path d="M20 6L9 17l-5-5" />
+                          </svg>
+                        ) : (
+                          i + 1
+                        )}
                       </div>
 
                       {/* Carte contenu */}
                       <div
                         className={cn(
-                          "min-w-0 flex-1 rounded-xl border px-4 py-3 transition-all duration-300",
+                          "bework-sheen min-w-0 flex-1 rounded-xl border px-4 py-3 transition-all duration-300",
                           isActive
                             ? "border-slate-200 bg-white shadow-[0_2px_8px_rgba(15,23,42,0.07)]"
                             : "border-slate-100 bg-slate-50/50",
@@ -259,7 +276,7 @@ export function HomeAutomations() {
         </div>
 
         {/* Message sur-mesure */}
-        <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-[#fed7aa] bg-gradient-to-r from-[#fff7ed] to-[#fffbeb] px-6 py-6 text-center sm:mt-12">
+        <div className="bework-sheen mx-auto mt-10 max-w-3xl rounded-2xl border border-[#fed7aa] bg-gradient-to-r from-[#fff7ed] to-[#fffbeb] px-6 py-6 text-center sm:mt-12">
           <p className="text-base font-semibold text-[#0a0a0a]">
             Chaque entreprise fonctionne différemment.
           </p>

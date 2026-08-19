@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import {
   HOME_BTN_GROUP,
   HOME_BTN_PRIMARY,
@@ -39,6 +40,72 @@ const BEWORK_MODULES = [
 ];
 
 export function HomePlatformHero() {
+  const stageRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+
+    const reduce =
+      typeof window !== "undefined" &&
+      !!window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+
+    // Valeurs initiales (dégradés / grille / parallax)
+    el.style.setProperty("--spot-x", "50%");
+    el.style.setProperty("--spot-y", "50%");
+    el.style.setProperty("--spot-opacity", "0.0");
+    el.style.setProperty("--grid-opacity", "0.06");
+    el.style.setProperty("--hero-parallax", "0px");
+
+    let raf = 0;
+    let lastX = 0;
+    let lastY = 0;
+
+    const applyPointer = () => {
+      raf = 0;
+      const rect = el.getBoundingClientRect();
+      const x = ((lastX - rect.left) / rect.width) * 100;
+      const y = ((lastY - rect.top) / rect.height) * 100;
+      const clampedX = Math.max(0, Math.min(100, x));
+      const clampedY = Math.max(0, Math.min(100, y));
+
+      el.style.setProperty("--spot-x", `${clampedX.toFixed(2)}%`);
+      el.style.setProperty("--spot-y", `${clampedY.toFixed(2)}%`);
+      el.style.setProperty("--spot-opacity", "0.95");
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      lastX = e.clientX;
+      lastY = e.clientY;
+      if (raf) return;
+      raf = window.requestAnimationFrame(applyPointer);
+    };
+
+    const onPointerLeave = () => {
+      el.style.setProperty("--spot-opacity", "0.18");
+    };
+
+    const onScroll = () => {
+      const t = Math.max(0, Math.min(1, window.scrollY / 900));
+      el.style.setProperty("--grid-opacity", (0.03 + t * 0.08).toFixed(3));
+      el.style.setProperty("--hero-parallax", `${(-t * 10).toFixed(2)}px`);
+    };
+
+    el.addEventListener("pointermove", onPointerMove);
+    el.addEventListener("pointerleave", onPointerLeave);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    return () => {
+      el.removeEventListener("pointermove", onPointerMove);
+      el.removeEventListener("pointerleave", onPointerLeave);
+      window.removeEventListener("scroll", onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
     <section
       id="hero"
@@ -62,10 +129,22 @@ export function HomePlatformHero() {
           {PILLARS.map((p) => (
             <span
               key={p.label}
-              className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-bold tracking-[0.14em]"
-              style={{ background: p.bg, borderColor: p.border, color: p.color }}
+              className="bework-pill-holo bework-sheen inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-bold tracking-[0.14em] backdrop-blur-[10px] shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-transform duration-200 hover:-translate-y-px"
+              style={{
+                ["--pill-color" as any]: p.color,
+                background: `linear-gradient(180deg, rgba(255,255,255,0.78) 0%, ${p.bg} 155%)`,
+                color: p.color,
+                boxShadow: `0 10px 24px ${p.color}10, inset 0 1px 0 rgba(255,255,255,0.62)`,
+              }}
             >
-              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: p.color }} aria-hidden />
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{
+                  backgroundColor: p.color,
+                  boxShadow: `0 0 0 3px ${p.color}16, 0 0 12px ${p.color}40`,
+                }}
+                aria-hidden
+              />
               {p.label}
             </span>
           ))}
@@ -121,6 +200,7 @@ export function HomePlatformHero() {
 
         {/* ── Diagramme écosystème ── */}
         <div
+          ref={stageRef}
           className={`relative mx-auto mt-14 max-w-5xl overflow-hidden rounded-3xl sm:mt-18 md:mt-22 ${HOME_REVEAL}`}
           style={{ animationDelay: "350ms" }}
           aria-hidden
@@ -135,13 +215,42 @@ export function HomePlatformHero() {
                 "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(37,99,235,0.18) 0%, transparent 70%)",
             }}
           />
+          {/* Spotlight au curseur */}
+          <div
+            className="pointer-events-none absolute inset-0 rounded-3xl"
+            aria-hidden
+            style={{
+              opacity: "var(--spot-opacity)",
+              mixBlendMode: "screen",
+              background:
+                "radial-gradient(520px circle at var(--spot-x) var(--spot-y), rgba(37,99,235,0.35) 0%, transparent 60%)",
+              transform: "translate3d(0,var(--hero-parallax),0)",
+            }}
+          />
           {/* Grille subtile */}
           <div
-            className="pointer-events-none absolute inset-0 rounded-3xl opacity-[0.06]"
+            className="pointer-events-none absolute inset-0 rounded-3xl"
             style={{
+              opacity: "var(--grid-opacity)",
               backgroundImage:
                 "linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)",
               backgroundSize: "48px 48px",
+              transform: "translate3d(0,var(--hero-parallax),0)",
+            }}
+          />
+          {/* Scanlines + micro-noise (localisé sur le stage) */}
+          <div
+            className="pointer-events-none absolute inset-0 rounded-3xl"
+            aria-hidden
+            style={{
+              opacity: "0.08",
+              mixBlendMode: "overlay",
+              transform: "translate3d(0,var(--hero-parallax),0)",
+              backgroundImage:
+                "repeating-linear-gradient(to bottom, rgba(255,255,255,0.10) 0px, rgba(255,255,255,0.10) 1px, transparent 1px, transparent 4px), radial-gradient(rgba(255,255,255,0.12) 0.55px, transparent 0.65px)",
+              backgroundSize: "100% 6px, 3px 3px",
+              backgroundPosition: "0 0, 0 0",
+              filter: "blur(0.1px)",
             }}
           />
 

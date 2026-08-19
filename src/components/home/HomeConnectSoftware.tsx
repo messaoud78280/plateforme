@@ -1,31 +1,30 @@
 import { HOME_SECTION } from "@/components/home/homeSectionStyles";
 
 const SOFTWARES = [
-  { name: "Onaya / Orisha", cat: "Gestion BTP" },
-  { name: "Sage", cat: "Comptabilité" },
-  { name: "Agicap", cat: "Trésorerie" },
-  { name: "Outlook / Microsoft 365", cat: "Messagerie" },
-  { name: "Google Workspace", cat: "Collaboration" },
-  { name: "Drive / SharePoint", cat: "Documents" },
-  { name: "Logiciels de planning", cat: "Planning" },
-  { name: "Logiciels comptables", cat: "Finance" },
+  { name: "Onaya / Orisha", cat: "Gestion BTP", color: "#2563eb" },
+  { name: "Sage", cat: "Comptabilité", color: "#4f46e5" },
+  { name: "Agicap", cat: "Trésorerie", color: "#7c3aed" },
+  { name: "Microsoft 365", cat: "Messagerie", color: "#0d9488" },
+  { name: "Google Workspace", cat: "Collaboration", color: "#059669" },
+  { name: "Drive / SharePoint", cat: "Documents", color: "#ea580c" },
+  { name: "Planning logiciel", cat: "Planning", color: "#d97706" },
+  { name: "Logiciel comptable", cat: "Finance", color: "#9333ea" },
 ] as const;
 
 const FLOW_STEPS = [
-  { icon: "📤", text: "Votre logiciel transmet une information à BeWork." },
-  { icon: "🔍", text: "BeWork récupère l'information utile." },
-  { icon: "🔄", text: "La plateforme se met à jour." },
-  { icon: "🔔", text: "L'équipe concernée est prévenue." },
+  { n: "01", text: "Votre logiciel transmet une information à BeWork.", color: "#2563eb" },
+  { n: "02", text: "BeWork récupère et centralise la donnée utile.", color: "#7c3aed" },
+  { n: "03", text: "La plateforme met à jour les dossiers concernés.", color: "#ea580c" },
+  { n: "04", text: "L'équipe concernée est notifiée automatiquement.", color: "#059669" },
 ] as const;
 
-/** Section connexion logiciels — diagramme et explication sans jargon. */
 export function HomeConnectSoftware() {
   return (
-    <section id="connexions" className={`${HOME_SECTION} bg-[#fafafa]`} aria-labelledby="connect-heading">
+    <section id="connexions" className={`${HOME_SECTION} bg-[#f8fafc]`} aria-labelledby="connect-heading">
       <div className="container-site">
         {/* Header */}
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7c3aed]">
             Connexions
           </p>
           <h2
@@ -38,88 +37,132 @@ export function HomeConnectSoftware() {
             BeWork peut les faire travailler ensemble.
           </p>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
-            Vous utilisez déjà un logiciel de devis, de comptabilité, de trésorerie, de planning, une messagerie ou un
-            espace documentaire ?{" "}
-            <strong className="font-semibold text-[#0a0a0a]">Notre objectif n&apos;est pas de tout remplacer.</strong>
-          </p>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-500">
-            Nous étudions les possibilités de connexion entre vos outils et votre plateforme BeWork afin d&apos;éviter
-            les doubles saisies et de faire circuler les informations{" "}
-            <em>lorsque les interfaces disponibles le permettent</em>.
+            Notre objectif n&apos;est pas de tout remplacer.{" "}
+            <strong className="font-semibold text-[#0a0a0a]">Nous étudions comment connecter ce que vous utilisez déjà.</strong>
           </p>
         </div>
 
-        {/* Diagramme */}
-        <div className="mt-12 sm:mt-14 md:mt-16">
-          <div className="mx-auto max-w-4xl">
-            <div className="grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:gap-0 sm:items-stretch">
-              {/* Outils existants */}
-              <div className="rounded-2xl border border-[#ddd6fe] bg-[#f5f3ff] p-5 sm:p-6">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7c3aed] mb-3">
-                  Vos logiciels existants
-                </p>
-                <ul className="space-y-2">
-                  {SOFTWARES.map((s) => (
-                    <li
-                      key={s.name}
-                      className="flex items-center justify-between gap-2 rounded-lg border border-[#ddd6fe] bg-white px-3 py-2"
-                    >
+        {/* Diagramme hub/spoke */}
+        <div className="mx-auto mt-12 max-w-5xl sm:mt-14">
+          <div className="grid gap-6 md:grid-cols-[1fr_auto_1fr] md:gap-0 md:items-stretch">
+
+            {/* Colonne gauche — logiciels */}
+            <div className="bework-sheen rounded-2xl border border-[#ddd6fe] bg-white p-5 shadow-[0_2px_8px_rgba(15,23,42,0.06)] sm:p-6">
+              <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.16em] text-[#7c3aed]">
+                Vos logiciels existants
+              </p>
+              <ul className="space-y-2">
+                {SOFTWARES.map((s) => (
+                  <li
+                    key={s.name}
+                    className="bework-sheen flex items-center justify-between gap-2 rounded-xl border border-slate-100 px-3 py-2.5 transition-shadow hover:shadow-[0_1px_4px_rgba(15,23,42,0.08)]"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className="h-2 w-2 shrink-0 rounded-full"
+                        style={{ backgroundColor: s.color }}
+                        aria-hidden
+                      />
                       <span className="text-xs font-semibold text-slate-800">{s.name}</span>
-                      <span className="shrink-0 rounded-full bg-[#f5f3ff] px-2 py-0.5 text-[10px] font-medium text-[#7c3aed]">
-                        {s.cat}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                    </div>
+                    <span
+                      className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                      style={{ background: `${s.color}12`, color: s.color }}
+                    >
+                      {s.cat}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-              {/* Flèches */}
-              <div className="flex flex-row items-center justify-center gap-3 sm:flex-col sm:gap-0 sm:px-6">
-                <div className="flex items-center gap-1">
-                  <span className="text-sm text-slate-300" aria-hidden>→</span>
-                </div>
-                <div className="hidden sm:block h-px sm:h-auto sm:w-px flex-1 border-t sm:border-t-0 sm:border-l border-dashed border-slate-300" />
-                <div className="flex items-center gap-1">
-                  <span className="text-sm text-slate-300" aria-hidden>←</span>
-                </div>
+            {/* Connecteur central SVG */}
+            <div className="flex items-center justify-center py-4 md:px-8 md:py-0">
+              <svg
+                viewBox="0 0 60 120"
+                aria-hidden
+                className="hidden h-full w-16 md:block"
+                preserveAspectRatio="none"
+              >
+                {/* Flèches de gauche vers centre, puis centre vers droite */}
+                <defs>
+                  <marker id="arrow-r" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L6,3 z" fill="#c4b5fd" />
+                  </marker>
+                  <marker id="arrow-l" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                    <path d="M6,0 L6,6 L0,3 z" fill="#bfdbfe" />
+                  </marker>
+                </defs>
+                {/* Lignes pointillées */}
+                <line x1="0" y1="60" x2="55" y2="60" stroke="#c4b5fd" strokeWidth="1.5" strokeDasharray="4 3" markerEnd="url(#arrow-r)" />
+                <line x1="60" y1="60" x2="5" y2="60" stroke="#bfdbfe" strokeWidth="1.5" strokeDasharray="4 3" markerEnd="url(#arrow-l)" />
+              </svg>
+              {/* Séparateur mobile */}
+              <div className="flex items-center gap-3 md:hidden">
+                <div className="h-px w-12 border-t border-dashed border-slate-300" />
+                <span className="text-xs font-semibold text-[#7c3aed]">↔</span>
+                <div className="h-px w-12 border-t border-dashed border-slate-300" />
               </div>
+            </div>
 
-              {/* BeWork */}
-              <div className="rounded-2xl border border-[#bfdbfe] bg-gradient-to-b from-[#eff6ff] to-[#eef2ff] p-5 sm:p-6">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#2563eb] mb-3">
-                  Votre plateforme BeWork
+            {/* Colonne droite — BeWork + flow */}
+            <div className="space-y-4">
+              {/* Hub BeWork */}
+              <div className="bework-sheen relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#eff6ff] to-[#f5f3ff] border border-[#c7d2fe] p-5 shadow-[0_2px_8px_rgba(15,23,42,0.06)] sm:p-6">
+                <div
+                  className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-full opacity-30"
+                  style={{ background: "radial-gradient(circle, #7c3aed 0%, transparent 70%)", transform: "translate(40%, -40%)" }}
+                  aria-hidden
+                />
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#2563eb]">
+                  Votre plateforme centrale
                 </p>
-                <div className="rounded-xl border border-[#bfdbfe] bg-white p-4">
-                  <p className="font-display text-xl font-extrabold tracking-tight text-[#0f1e3a]">BeWork</p>
-                  <p className="mt-1 text-xs text-slate-500">Plateforme métier centrale</p>
-                  <div className="mt-3 space-y-1.5">
-                    <p className="text-xs font-medium text-slate-700">✓ Données centralisées</p>
-                    <p className="text-xs font-medium text-slate-700">✓ Équipes informées</p>
-                    <p className="text-xs font-medium text-slate-700">✓ Double saisie évitée</p>
-                    <p className="text-xs font-medium text-slate-700">✓ Processus automatisés</p>
-                  </div>
-                </div>
-
-                {/* Flow */}
-                <div className="mt-4 space-y-2">
-                  {FLOW_STEPS.map((step, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="shrink-0 text-sm" aria-hidden>
-                        {step.icon}
-                      </span>
-                      <p className="text-xs leading-relaxed text-slate-600">{step.text}</p>
+                <p className="font-display mt-2 text-2xl font-extrabold tracking-tight text-[#0f1e3a]">BeWork</p>
+                <div className="mt-3 space-y-1.5">
+                  {[
+                    "Données centralisées",
+                    "Équipes informées en temps réel",
+                    "Double saisie éliminée",
+                    "Processus automatisés",
+                  ].map((item) => (
+                    <div key={item} className="flex items-center gap-2">
+                      <svg aria-hidden className="h-3.5 w-3.5 shrink-0 text-[#059669]" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z" />
+                      </svg>
+                      <span className="text-xs font-medium text-slate-700">{item}</span>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
 
-            {/* Note responsable */}
-            <p className="mt-6 text-center text-sm text-slate-500">
-              Nous étudions les possibilités de connexion avec vos logiciels existants.{" "}
-              <em>Toutes les intégrations ne sont pas systématiquement disponibles.</em>
-            </p>
+              {/* Flow numéroté */}
+              <div className="bework-sheen rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_1px_4px_rgba(15,23,42,0.05)] sm:p-6">
+                <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                  Comment ça fonctionne
+                </p>
+                <ol className="space-y-3">
+                  {FLOW_STEPS.map((step) => (
+                    <li key={step.n} className="bework-sheen flex items-start gap-3">
+                      <span
+                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-extrabold text-white"
+                        style={{ backgroundColor: step.color }}
+                        aria-hidden
+                      >
+                        {step.n}
+                      </span>
+                      <p className="text-xs leading-relaxed text-slate-600">{step.text}</p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
           </div>
+
+          {/* Note responsable */}
+          <p className="mt-6 text-center text-xs text-slate-400">
+            Nous étudions les possibilités de connexion avec vos logiciels existants.{" "}
+            <em>Toutes les intégrations ne sont pas systématiquement disponibles.</em>
+          </p>
         </div>
       </div>
     </section>

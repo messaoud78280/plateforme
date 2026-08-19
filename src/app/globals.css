@@ -528,6 +528,15 @@ body {
     }
   }
 
+  @keyframes connector-flow {
+    from {
+      stroke-dashoffset: 0;
+    }
+    to {
+      stroke-dashoffset: -60;
+    }
+  }
+
   @keyframes home-converge {
     from {
       opacity: 0.35;

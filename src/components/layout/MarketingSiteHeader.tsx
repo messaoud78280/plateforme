@@ -103,10 +103,10 @@ const RESOURCE_MENU_ENTRIES: {
 ];
 
 const REASSURANCE = [
-  "Solutions IA sur mesure",
-  "Expertise BTP",
-  "Plateforme métier",
-  "Accompagnement à l’adoption",
+  "Plateforme BTP sur mesure",
+  "Connexion logiciels existants",
+  "Automatisations métier",
+  "Accompagnement et formation",
 ];
 
 const NAV_LINK =
@@ -281,7 +281,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   setResourcesOpen(false);
                 }}
               >
-                <span className="whitespace-nowrap">Solutions</span>
+                <span className="whitespace-nowrap">Offre</span>
                 <ChevronDown accent={solutionsOpen} className={solutionsOpen ? "rotate-180" : ""} />
               </button>
 
@@ -334,9 +334,6 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               ) : null}
             </div>
 
-            <Link href="/#plateforme" className={`${NAV_LINK} whitespace-nowrap`}>
-              Plateforme
-            </Link>
             <Link href="/#plateforme" className={`${NAV_LINK} whitespace-nowrap`}>
               Plateforme
             </Link>
@@ -481,7 +478,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             </div>
 
             <nav className="flex flex-col gap-2" aria-label="Navigation mobile">
-              <MarketingDisclosure title="Solutions">
+              <MarketingDisclosure title="Plateforme">
                 <ul className="divide-y divide-slate-100">
                   {SOLUTION_MENU_ENTRIES.map((item) => (
                     <li key={item.href}>
@@ -517,13 +514,6 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 </div>
               </MarketingDisclosure>
 
-              <Link
-                href="/#plateforme"
-                className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
-                onClick={() => setMobileOpen(false)}
-              >
-                Plateforme
-              </Link>
               <Link
                 href="/#plateforme"
                 className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"

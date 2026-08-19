@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { HOME_BTN_GROUP, HOME_BTN_PRIMARY, HOME_BTN_SECONDARY } from "@/components/home/homeSectionStyles";
+import {
+  HOME_BTN_GROUP,
+  HOME_BTN_PRIMARY,
+  HOME_BTN_SECONDARY,
+  HOME_REVEAL,
+} from "@/components/home/homeSectionStyles";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 
 const PILLARS = [
@@ -11,17 +16,17 @@ const PILLARS = [
 ] as const;
 
 const ECO_NODES_LEFT = [
-  { label: "Devis / Facturation", icon: "💼" },
-  { label: "Comptabilité", icon: "📊" },
-  { label: "Trésorerie", icon: "💳" },
-  { label: "Messagerie", icon: "✉️" },
+  { label: "Devis / Facturation", color: "#2563eb" },
+  { label: "Comptabilité", color: "#4f46e5" },
+  { label: "Trésorerie", color: "#0d9488" },
+  { label: "Messagerie", color: "#7c3aed" },
 ];
 
 const ECO_NODES_RIGHT = [
-  { label: "Planning", icon: "📅" },
-  { label: "Documents", icon: "📁" },
-  { label: "Fournisseurs", icon: "🏭" },
-  { label: "Outils métier", icon: "🔧" },
+  { label: "Planning", color: "#059669" },
+  { label: "Documents", color: "#4f46e5" },
+  { label: "Fournisseurs", color: "#d97706" },
+  { label: "Outils métier", color: "#0d9488" },
 ];
 
 const BEWORK_MODULES = ["Chantiers", "Planning", "GED", "Commandes", "Finance", "Équipes"];
@@ -97,8 +102,14 @@ export function HomePlatformHero() {
           <div className="relative flex items-center justify-center gap-0">
             {/* Colonne gauche */}
             <div className="hidden flex-col gap-3 sm:flex">
-              {ECO_NODES_LEFT.map((node) => (
-                <EcoNode key={node.label} label={node.label} icon={node.icon} side="left" />
+              {ECO_NODES_LEFT.map((node, i) => (
+                <EcoNode
+                  key={node.label}
+                  label={node.label}
+                  color={node.color}
+                  side="left"
+                  delayMs={180 + i * 70}
+                />
               ))}
             </div>
 
@@ -143,20 +154,32 @@ export function HomePlatformHero() {
 
             {/* Colonne droite */}
             <div className="hidden flex-col gap-3 sm:flex">
-              {ECO_NODES_RIGHT.map((node) => (
-                <EcoNode key={node.label} label={node.label} icon={node.icon} side="right" />
+              {ECO_NODES_RIGHT.map((node, i) => (
+                <EcoNode
+                  key={node.label}
+                  label={node.label}
+                  color={node.color}
+                  side="right"
+                  delayMs={230 + i * 70}
+                />
               ))}
             </div>
           </div>
 
           {/* Version mobile simplifiée */}
           <div className="mt-6 flex flex-wrap justify-center gap-2 sm:hidden">
-            {[...ECO_NODES_LEFT, ...ECO_NODES_RIGHT].map((node) => (
+            {[...ECO_NODES_LEFT, ...ECO_NODES_RIGHT].map((node, i) => (
               <span
                 key={node.label}
-                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm"
+                className={`rounded-full border bg-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors ${HOME_REVEAL}`}
+                style={{
+                  borderColor: `${node.color}40`,
+                  color: node.color,
+                  animationDelay: `${100 + i * 70}ms`,
+                }}
               >
-                {node.icon} {node.label}
+                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: node.color }} aria-hidden />
+                {node.label}
               </span>
             ))}
           </div>
@@ -171,15 +194,31 @@ export function HomePlatformHero() {
   );
 }
 
-function EcoNode({ label, icon, side }: { label: string; icon: string; side: "left" | "right" }) {
+function EcoNode({
+  label,
+  color,
+  side,
+  delayMs,
+}: {
+  label: string;
+  color: string;
+  side: "left" | "right";
+  delayMs: number;
+}) {
   return (
     <div
       className={`flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-[0_1px_4px_rgba(15,23,42,0.06)] transition-shadow hover:shadow-[0_2px_8px_rgba(15,23,42,0.1)] ${
         side === "right" ? "flex-row-reverse" : ""
-      }`}
+      } ${HOME_REVEAL}`}
+      style={{
+        borderColor: `${color}30`,
+        animationDelay: `${delayMs}ms`,
+      }}
     >
-      <span className="text-base">{icon}</span>
-      <span className="whitespace-nowrap text-xs font-semibold text-slate-700">{label}</span>
+      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} aria-hidden />
+      <span className="whitespace-nowrap text-xs font-semibold" style={{ color }}>
+        {label}
+      </span>
     </div>
   );
 }
@@ -189,6 +228,7 @@ function ConnectorLines({ count, side }: { count: number; side: "left" | "right"
   const height = count * 52;
   const cx = side === "left" ? width : 0;
   const midY = height / 2;
+  const stroke = side === "left" ? "#93c5fd" : "#c4b5fd";
 
   return (
     <svg
@@ -207,9 +247,12 @@ function ConnectorLines({ count, side }: { count: number; side: "left" | "right"
           <path
             key={i}
             d={`M${x0},${y} C${x0 + (side === "left" ? 32 : -32)},${y} ${x1 + (side === "left" ? -32 : 32)},${midY} ${x1},${midY}`}
-            stroke="#e2e8f0"
+            stroke={stroke}
             strokeWidth="1.5"
-            strokeDasharray="4 3"
+            strokeLinecap="round"
+            strokeDasharray="6 5"
+            strokeDashoffset="0"
+            className="motion-safe:animate-[connector-flow_1.9s_linear_infinite]"
           />
         );
       })}

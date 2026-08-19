@@ -10,9 +10,9 @@ import {
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 
 const PILLARS = [
-  { label: "CONSTRUIRE", color: "text-[#2563eb]", bg: "bg-[#eff6ff] border-[#bfdbfe]", dot: "bg-[#2563eb]" },
-  { label: "CONNECTER", color: "text-[#7c3aed]", bg: "bg-[#f5f3ff] border-[#ddd6fe]", dot: "bg-[#7c3aed]" },
-  { label: "AUTOMATISER", color: "text-[#ea580c]", bg: "bg-[#fff7ed] border-[#fed7aa]", dot: "bg-[#ea580c]" },
+  { label: "CONSTRUIRE", color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
+  { label: "CONNECTER", color: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe" },
+  { label: "AUTOMATISER", color: "#ea580c", bg: "#fff7ed", border: "#fed7aa" },
 ] as const;
 
 const ECO_NODES_LEFT = [
@@ -24,38 +24,48 @@ const ECO_NODES_LEFT = [
 
 const ECO_NODES_RIGHT = [
   { label: "Planning", color: "#059669" },
-  { label: "Documents", color: "#4f46e5" },
+  { label: "Documents", color: "#6366f1" },
   { label: "Fournisseurs", color: "#d97706" },
   { label: "Outils métier", color: "#0d9488" },
 ];
 
-const BEWORK_MODULES = ["Chantiers", "Planning", "GED", "Commandes", "Finance", "Équipes"];
+const BEWORK_MODULES = [
+  { label: "Chantiers", color: "#60a5fa" },
+  { label: "Planning", color: "#34d399" },
+  { label: "GED", color: "#a78bfa" },
+  { label: "Commandes", color: "#fbbf24" },
+  { label: "Finance", color: "#f87171" },
+  { label: "Équipes", color: "#38bdf8" },
+];
 
 export function HomePlatformHero() {
   return (
     <section
       id="hero"
-      className="relative overflow-x-clip bg-white pb-16 pt-10 sm:pb-20 sm:pt-14 md:pb-24 md:pt-16 lg:pb-28 lg:pt-20"
+      className="relative overflow-x-clip bg-white pb-16 pt-10 sm:pb-20 sm:pt-14 md:pb-28 md:pt-18 lg:pb-32 lg:pt-20"
     >
-      {/* Halos de fond */}
+      {/* Halos de fond — bleu + violet */}
       <div
-        className="pointer-events-none absolute left-1/4 top-0 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.06)_0%,transparent_70%)]"
+        className="pointer-events-none absolute left-1/4 top-0 h-[600px] w-[600px] -translate-x-1/2 rounded-full"
+        style={{ background: "radial-gradient(ellipse at center, rgba(37,99,235,0.07) 0%, transparent 68%)" }}
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute right-1/4 top-20 h-[400px] w-[400px] translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(124,58,237,0.05)_0%,transparent_70%)]"
+        className="pointer-events-none absolute right-1/4 top-10 h-[500px] w-[500px] translate-x-1/2 rounded-full"
+        style={{ background: "radial-gradient(ellipse at center, rgba(124,58,237,0.06) 0%, transparent 68%)" }}
         aria-hidden
       />
 
       <div className="container-site">
         {/* Eyebrow piliers */}
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+        <div className={`flex flex-wrap items-center justify-center gap-2 sm:gap-3 ${HOME_REVEAL}`}>
           {PILLARS.map((p) => (
             <span
               key={p.label}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-bold tracking-[0.14em] ${p.bg} ${p.color}`}
+              className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-bold tracking-[0.14em]"
+              style={{ background: p.bg, borderColor: p.border, color: p.color }}
             >
-              <span className={`h-1.5 w-1.5 rounded-full ${p.dot}`} aria-hidden />
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: p.color }} aria-hidden />
               {p.label}
             </span>
           ))}
@@ -63,23 +73,35 @@ export function HomePlatformHero() {
 
         {/* Titre principal */}
         <div className="mx-auto mt-6 max-w-4xl text-center sm:mt-8">
-          <h1 className="font-display text-balance text-[2.125rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0a0a0a] sm:text-[3.25rem] md:text-[3.75rem] lg:text-[4.1rem]">
+          <h1
+            className={`font-display text-balance text-[2.125rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0a0a0a] sm:text-[3.25rem] md:text-[3.75rem] lg:text-[4.1rem] ${HOME_REVEAL}`}
+            style={{ animationDelay: "80ms" }}
+          >
             <span className="block">La plateforme construite</span>
             <span className="block">autour de votre entreprise BTP.</span>
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-[1rem] leading-relaxed text-slate-600 sm:mt-8 sm:text-lg">
+          <p
+            className={`mx-auto mt-6 max-w-2xl text-[1rem] leading-relaxed text-slate-600 sm:mt-8 sm:text-lg ${HOME_REVEAL}`}
+            style={{ animationDelay: "160ms" }}
+          >
             Centralisez vos chantiers, vos équipes, vos documents et votre gestion dans un environnement
-            conçu pour votre organisation. BeWork peut également connecter vos logiciels existants et automatiser vos
-            processus.
+            conçu pour votre organisation. BeWork peut également connecter vos logiciels existants et
+            automatiser vos processus.
           </p>
 
-          <p className="mx-auto mt-5 max-w-2xl text-sm font-medium leading-relaxed text-slate-500 sm:mt-6 sm:text-base">
+          <p
+            className={`mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-500 sm:mt-5 sm:text-base ${HOME_REVEAL}`}
+            style={{ animationDelay: "220ms" }}
+          >
             <span className="font-semibold text-[#0a0a0a]">Vous gardez ce qui fonctionne.</span>{" "}
             Nous construisons ce qui manque et faisons travailler l&apos;ensemble ensemble.
           </p>
 
-          <div className={`mx-auto mt-8 max-w-md sm:mt-10 sm:max-w-none ${HOME_BTN_GROUP} sm:justify-center`}>
+          <div
+            className={`mx-auto mt-8 max-w-md sm:mt-10 sm:max-w-none ${HOME_BTN_GROUP} sm:justify-center ${HOME_REVEAL}`}
+            style={{ animationDelay: "280ms" }}
+          >
             <Link
               href="#besoin"
               className={HOME_BTN_PRIMARY}
@@ -88,111 +110,163 @@ export function HomePlatformHero() {
               Découvrir BeWork
             </Link>
             <Link
-              href="#besoin"
+              href="#plateforme"
               className={HOME_BTN_SECONDARY}
-              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-parler")}
+              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-plateforme")}
             >
-              Parler de mon entreprise
+              Voir la plateforme
             </Link>
           </div>
         </div>
 
-        {/* Diagramme écosystème */}
-        <div className="mx-auto mt-16 max-w-5xl sm:mt-20 md:mt-24" aria-hidden>
-          <div className="relative flex items-center justify-center gap-0">
-            {/* Colonne gauche */}
-            <div className="hidden flex-col gap-3 sm:flex">
-              {ECO_NODES_LEFT.map((node, i) => (
-                <EcoNode
-                  key={node.label}
-                  label={node.label}
-                  color={node.color}
-                  side="left"
-                  delayMs={180 + i * 70}
-                />
-              ))}
-            </div>
+        {/* ── Diagramme écosystème ── */}
+        <div
+          className={`relative mx-auto mt-14 max-w-5xl overflow-hidden rounded-3xl sm:mt-18 md:mt-22 ${HOME_REVEAL}`}
+          style={{ animationDelay: "350ms" }}
+          aria-hidden
+        >
+          {/* Fond "stage" sombre */}
+          <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-[#0b1526] via-[#0f1e3a] to-[#111827]" />
+          {/* Halo central bleu */}
+          <div
+            className="pointer-events-none absolute inset-0 rounded-3xl"
+            style={{
+              background:
+                "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(37,99,235,0.18) 0%, transparent 70%)",
+            }}
+          />
+          {/* Grille subtile */}
+          <div
+            className="pointer-events-none absolute inset-0 rounded-3xl opacity-[0.06]"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)",
+              backgroundSize: "48px 48px",
+            }}
+          />
 
-            {/* Lignes gauche → centre */}
-            <div className="hidden sm:block">
-              <ConnectorLines count={ECO_NODES_LEFT.length} side="left" />
-            </div>
+          <div className="relative px-6 py-8 sm:px-10 sm:py-10">
+            <div className="flex items-center justify-center gap-0">
+              {/* Colonne gauche */}
+              <div className="hidden flex-col gap-3 sm:flex">
+                {ECO_NODES_LEFT.map((node, i) => (
+                  <EcoNode key={node.label} label={node.label} color={node.color} side="left" delayMs={400 + i * 60} />
+                ))}
+              </div>
 
-            {/* Centre BeWork */}
-            <div className="relative z-10 flex-shrink-0">
-              <div className="relative rounded-2xl border border-[#1e3a5f]/20 bg-gradient-to-b from-[#0f1e3a] to-[#1e3a5f] px-8 py-7 text-center shadow-[0_8px_32px_rgba(30,58,95,0.35)] sm:px-12 sm:py-9">
-                {/* Halo glow */}
-                <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_at_top,rgba(37,99,235,0.2)_0%,transparent_60%)]" />
-                <div className="relative">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-300/70">Votre plateforme</p>
-                  <p className="font-display mt-1 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-                    BeWork
-                  </p>
-                  {/* Modules internes */}
-                  <div className="mt-4 flex flex-wrap justify-center gap-1.5">
-                    {BEWORK_MODULES.map((mod) => (
-                      <span
-                        key={mod}
-                        className="rounded-md border border-white/10 bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-white/80"
-                      >
-                        {mod}
-                      </span>
-                    ))}
+              {/* Lignes gauche → centre */}
+              <div className="hidden sm:block">
+                <ConnectorLines nodes={ECO_NODES_LEFT} side="left" />
+              </div>
+
+              {/* Centre BeWork */}
+              <div className="relative z-10 flex-shrink-0">
+                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-[#1a2e52] to-[#0f1e3a] px-7 py-6 text-center shadow-[0_0_40px_rgba(37,99,235,0.25),0_8px_32px_rgba(0,0,0,0.5)] sm:px-10 sm:py-8">
+                  {/* Halo intérieur */}
+                  <div
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                      background:
+                        "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(96,165,250,0.18) 0%, transparent 70%)",
+                    }}
+                  />
+                  <div className="relative">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-blue-300/60">
+                      Votre plateforme
+                    </p>
+                    <p className="font-display mt-1 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+                      BeWork
+                    </p>
+                    {/* Modules internes */}
+                    <div className="mt-4 flex flex-wrap justify-center gap-1.5">
+                      {BEWORK_MODULES.map((mod) => (
+                        <span
+                          key={mod.label}
+                          className="group rounded-md border px-2 py-0.5 text-[10px] font-semibold transition-all duration-200 hover:scale-105"
+                          style={{
+                            borderColor: `${mod.color}30`,
+                            background: `${mod.color}12`,
+                            color: mod.color,
+                          }}
+                        >
+                          {mod.label}
+                        </span>
+                      ))}
+                    </div>
                   </div>
+                  {/* Points lumineux de coin */}
+                  <AnimatedPulse
+                    className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full"
+                    color="#60a5fa"
+                    delay={0}
+                  />
+                  <AnimatedPulse
+                    className="absolute -bottom-1 -left-1 h-2 w-2 rounded-full"
+                    color="#c4b5fd"
+                    delay={700}
+                  />
+                  <AnimatedPulse
+                    className="absolute -left-1 top-1/2 h-1.5 w-1.5 rounded-full"
+                    color="#fb923c"
+                    delay={1400}
+                  />
+                  <AnimatedPulse
+                    className="absolute -right-1 bottom-1/3 h-1.5 w-1.5 rounded-full"
+                    color="#34d399"
+                    delay={2100}
+                  />
                 </div>
-                {/* Points lumineux animés */}
-                <AnimatedPulse className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-blue-400" delay={0} />
-                <AnimatedPulse className="absolute -bottom-1 -left-1 h-2 w-2 rounded-full bg-purple-400" delay={600} />
-                <AnimatedPulse className="absolute -left-1 top-1/2 h-1.5 w-1.5 rounded-full bg-orange-400" delay={1200} />
+              </div>
+
+              {/* Lignes centre → droite */}
+              <div className="hidden sm:block">
+                <ConnectorLines nodes={ECO_NODES_RIGHT} side="right" />
+              </div>
+
+              {/* Colonne droite */}
+              <div className="hidden flex-col gap-3 sm:flex">
+                {ECO_NODES_RIGHT.map((node, i) => (
+                  <EcoNode key={node.label} label={node.label} color={node.color} side="right" delayMs={420 + i * 60} />
+                ))}
               </div>
             </div>
 
-            {/* Lignes centre → droite */}
-            <div className="hidden sm:block">
-              <ConnectorLines count={ECO_NODES_RIGHT.length} side="right" />
-            </div>
-
-            {/* Colonne droite */}
-            <div className="hidden flex-col gap-3 sm:flex">
-              {ECO_NODES_RIGHT.map((node, i) => (
-                <EcoNode
+            {/* Version mobile — pills colorées */}
+            <div className="mt-6 flex flex-wrap justify-center gap-2 sm:hidden">
+              {[...ECO_NODES_LEFT, ...ECO_NODES_RIGHT].map((node, i) => (
+                <span
                   key={node.label}
-                  label={node.label}
-                  color={node.color}
-                  side="right"
-                  delayMs={230 + i * 70}
-                />
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${HOME_REVEAL}`}
+                  style={{
+                    borderColor: `${node.color}50`,
+                    background: `${node.color}12`,
+                    color: node.color,
+                    animationDelay: `${400 + i * 55}ms`,
+                  }}
+                >
+                  <span
+                    className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: node.color }}
+                    aria-hidden
+                  />
+                  {node.label}
+                </span>
               ))}
             </div>
-          </div>
 
-          {/* Version mobile simplifiée */}
-          <div className="mt-6 flex flex-wrap justify-center gap-2 sm:hidden">
-            {[...ECO_NODES_LEFT, ...ECO_NODES_RIGHT].map((node, i) => (
-              <span
-                key={node.label}
-                className={`rounded-full border bg-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors ${HOME_REVEAL}`}
-                style={{
-                  borderColor: `${node.color}40`,
-                  color: node.color,
-                  animationDelay: `${100 + i * 70}ms`,
-                }}
-              >
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: node.color }} aria-hidden />
-                {node.label}
-              </span>
-            ))}
+            <p className="mt-6 text-center text-sm font-medium text-white/50">
+              <span className="font-semibold text-white/80">Une plateforme centrale.</span> Vos outils
+              autour.{" "}
+              <span className="font-semibold text-white/80">Des informations qui circulent.</span>
+            </p>
           </div>
-
-          <p className="mt-6 text-center text-sm font-medium text-slate-500">
-            <span className="font-semibold text-[#0a0a0a]">Une plateforme centrale.</span> Vos outils autour.{" "}
-            <span className="font-semibold text-[#0a0a0a]">Des informations qui circulent.</span>
-          </p>
         </div>
       </div>
     </section>
   );
 }
+
+/* ── Composants utilitaires ── */
 
 function EcoNode({
   label,
@@ -207,15 +281,20 @@ function EcoNode({
 }) {
   return (
     <div
-      className={`flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-[0_1px_4px_rgba(15,23,42,0.06)] transition-shadow hover:shadow-[0_2px_8px_rgba(15,23,42,0.1)] ${
+      className={`flex cursor-default items-center gap-2 rounded-xl border px-3 py-2 backdrop-blur-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md ${
         side === "right" ? "flex-row-reverse" : ""
       } ${HOME_REVEAL}`}
       style={{
-        borderColor: `${color}30`,
+        borderColor: `${color}40`,
+        background: `${color}10`,
         animationDelay: `${delayMs}ms`,
       }}
     >
-      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} aria-hidden />
+      <span
+        className="h-2 w-2 shrink-0 rounded-full shadow-[0_0_6px_currentColor]"
+        style={{ backgroundColor: color, color }}
+        aria-hidden
+      />
       <span className="whitespace-nowrap text-xs font-semibold" style={{ color }}>
         {label}
       </span>
@@ -223,12 +302,12 @@ function EcoNode({
   );
 }
 
-function ConnectorLines({ count, side }: { count: number; side: "left" | "right" }) {
-  const width = 64;
-  const height = count * 52;
-  const cx = side === "left" ? width : 0;
+function ConnectorLines({ nodes, side }: { nodes: { color: string }[]; side: "left" | "right" }) {
+  const count = nodes.length;
+  const width = 72;
+  const itemH = 44; // même que gap-3 (12px) + EcoNode (32px)
+  const height = count * (itemH + 12);
   const midY = height / 2;
-  const stroke = side === "left" ? "#93c5fd" : "#c4b5fd";
 
   return (
     <svg
@@ -239,32 +318,51 @@ function ConnectorLines({ count, side }: { count: number; side: "left" | "right"
       xmlns="http://www.w3.org/2000/svg"
       className="shrink-0"
     >
-      {Array.from({ length: count }).map((_, i) => {
-        const y = 26 + i * 52;
+      {nodes.map((node, i) => {
+        const y = itemH / 2 + i * (itemH + 12);
         const x0 = side === "left" ? 0 : width;
         const x1 = side === "left" ? width : 0;
+        const ctrl = side === "left" ? 36 : -36;
+        const d = `M${x0},${y} C${x0 + ctrl},${y} ${x1 - ctrl},${midY} ${x1},${midY}`;
         return (
-          <path
-            key={i}
-            d={`M${x0},${y} C${x0 + (side === "left" ? 32 : -32)},${y} ${x1 + (side === "left" ? -32 : 32)},${midY} ${x1},${midY}`}
-            stroke={stroke}
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeDasharray="6 5"
-            strokeDashoffset="0"
-            className="motion-safe:animate-[connector-flow_1.9s_linear_infinite]"
-          />
+          <g key={i}>
+            {/* Base line — très atténuée */}
+            <path d={d} stroke={node.color} strokeWidth="1" strokeOpacity="0.2" strokeLinecap="round" />
+            {/* Ligne animée — flux coloré */}
+            <path
+              d={d}
+              stroke={node.color}
+              strokeWidth="1.5"
+              strokeOpacity="0.7"
+              strokeLinecap="round"
+              strokeDasharray="8 18"
+              className="motion-safe:animate-[connector-flow_2.2s_linear_infinite]"
+              style={{ animationDelay: `${i * 280}ms` }}
+            />
+          </g>
         );
       })}
     </svg>
   );
 }
 
-function AnimatedPulse({ className, delay }: { className: string; delay: number }) {
+function AnimatedPulse({
+  className,
+  color,
+  delay,
+}: {
+  className: string;
+  color: string;
+  delay: number;
+}) {
   return (
     <span
-      className={`motion-safe:animate-[hero-pulse_2s_ease-in-out_infinite] ${className}`}
-      style={{ animationDelay: `${delay}ms` }}
+      className={`motion-safe:animate-[hero-pulse_2.4s_ease-in-out_infinite] ${className}`}
+      style={{
+        backgroundColor: color,
+        boxShadow: `0 0 8px 2px ${color}80`,
+        animationDelay: `${delay}ms`,
+      }}
     />
   );
 }

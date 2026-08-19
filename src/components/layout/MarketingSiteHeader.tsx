@@ -30,36 +30,42 @@ const SOLUTION_MENU_ENTRIES: {
   title: string;
   description: string;
   icon: SolutionMenuIconId;
+  accentColor: string;
 }[] = [
   {
     href: '/#plateforme',
     title: 'Plateforme BeWork',
-    description: 'Centralisez chantiers, équipes, documents et gestion.',
+    description: 'Chantiers, documents, planning, gestion — tout au même endroit.',
     icon: 'folder',
+    accentColor: '#2563eb',
   },
   {
     href: '/#connexions',
     title: 'Connexions logiciels',
-    description: 'Faire travailler ensemble vos outils existants.',
+    description: 'Vos outils existants reliés à votre plateforme, sans double saisie.',
     icon: 'devis',
+    accentColor: '#7c3aed',
   },
   {
     href: '/#automatisations',
     title: 'Automatisations',
-    description: 'Automatiser les actions répétitives de vos équipes.',
+    description: "Ce que vos équipes répètent — automatisé autour de vos processus.",
     icon: 'calendar',
+    accentColor: '#ea580c',
   },
   {
     href: '/#solutions-avancees',
     title: 'Solutions sur mesure',
-    description: 'Outils métier spécifiques et solutions IA lorsque nécessaire.',
+    description: "Outils métier spécifiques, applications et IA lorsque nécessaire.",
     icon: 'document',
+    accentColor: '#7c3aed',
   },
   {
-    href: '/#besoin',
-    title: 'Parler de mon entreprise',
-    description: 'Expliquez comment vous travaillez — nous étudions la solution.',
-    icon: 'cart',
+    href: '/notre-facon-de-travailler',
+    title: 'Notre méthode',
+    description: 'Comprendre, concevoir, connecter, construire, former, faire évoluer.',
+    icon: 'invoice',
+    accentColor: '#0d9488',
   },
 ];
 
@@ -294,39 +300,45 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   <p className="px-5 pb-3 text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]/95">
                     Découvrir BeWork
                   </p>
-                  <ul className="flex flex-col gap-3 px-3">
+                  <ul className="flex flex-col gap-1.5 px-3">
                     {SOLUTION_MENU_ENTRIES.map((item) => (
                       <li key={item.href} role="none">
                         <Link
                           href={item.href}
                           role="menuitem"
-                          className="flex items-start gap-3 rounded-lg px-2 py-2.5 transition-colors duration-150 hover:bg-[#eff6ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35"
+                          className="group flex items-start gap-3 rounded-lg px-2 py-2.5 transition-all duration-150 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35"
                           onClick={() => setSolutionsOpen(false)}
                         >
                           <span
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#eff6ff] text-[#1d4ed8]"
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors"
+                            style={{
+                              background: `${item.accentColor}15`,
+                              color: item.accentColor,
+                            }}
                             aria-hidden
                           >
                             <SolutionNavIcon id={item.icon} className="h-[17px] w-[17px]" />
                           </span>
                           <div className="min-w-0 flex-1 pt-px">
-                            <span className="block text-base font-semibold leading-tight tracking-tight text-slate-900">
+                            <span
+                              className="block text-sm font-semibold leading-tight tracking-tight text-slate-900 transition-colors group-hover:text-slate-900"
+                            >
                               {item.title}
                             </span>
-                            <span className="mt-1 block truncate text-sm leading-snug text-slate-600">{item.description}</span>
+                            <span className="mt-0.5 block text-xs leading-snug text-slate-500">{item.description}</span>
                           </div>
-                          <ChevronRightThin className="mt-1 h-4 w-4 shrink-0 self-start text-slate-400" />
+                          <ChevronRightThin className="mt-1 h-4 w-4 shrink-0 self-start text-slate-300 transition-colors group-hover:text-slate-500" />
                         </Link>
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-3 border-t border-slate-200/80 px-5 pt-3">
+                  <div className="mt-2 border-t border-slate-100 px-5 pt-3">
                     <Link
-                      href="/#solutions"
-                      className="inline-flex items-center gap-1 text-base font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
+                      href="/#besoin"
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
                       onClick={() => setSolutionsOpen(false)}
                     >
-                      Voir les solutions
+                      Parler de mon entreprise
                       <span aria-hidden>→</span>
                     </Link>
                   </div>
@@ -340,8 +352,11 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             <Link href="/#connexions" className={`${NAV_LINK} whitespace-nowrap`}>
               Connexions
             </Link>
+            <Link href="/#automatisations" className={`${NAV_LINK} whitespace-nowrap`}>
+              Automatisations
+            </Link>
             <Link href="/notre-facon-de-travailler" className={`${NAV_LINK} whitespace-nowrap`}>
-              Notre approche
+              Méthode
             </Link>
 
             <div
@@ -526,7 +541,14 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
                 onClick={() => setMobileOpen(false)}
               >
-                Connexions
+                Connexions & Automatisations
+              </Link>
+              <Link
+                href="/#solutions-avancees"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
+                onClick={() => setMobileOpen(false)}
+              >
+                Solutions sur mesure
               </Link>
               <Link
                 href="/notre-facon-de-travailler"

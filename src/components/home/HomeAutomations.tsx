@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HOME_SECTION } from "@/components/home/homeSectionStyles";
 import { cn } from "@/lib/cn";
 
@@ -52,9 +52,52 @@ const SCENARIOS = [
   },
 ] as const;
 
+const STEP_DELAY_MS = 600;
+const STEP_PAUSE_MS = 3000;
+
 export function HomeAutomations() {
   const [active, setActive] = useState<(typeof SCENARIOS)[number]["id"]>("devis");
+  const [activeStep, setActiveStep] = useState(-1);
+  const [running, setRunning] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const current = SCENARIOS.find((s) => s.id === active) ?? SCENARIOS[0]!;
+
+  function clearTimer() {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }
+
+  function runSequence(stepIndex: number, steps: typeof current.steps) {
+    if (stepIndex >= steps.length) {
+      // Pause puis recommence
+      timerRef.current = setTimeout(() => {
+        setActiveStep(-1);
+        timerRef.current = setTimeout(() => runSequence(0, steps), 400);
+      }, STEP_PAUSE_MS);
+      return;
+    }
+    setActiveStep(stepIndex);
+    timerRef.current = setTimeout(() => runSequence(stepIndex + 1, steps), STEP_DELAY_MS);
+  }
+
+  useEffect(() => {
+    clearTimer();
+    setActiveStep(-1);
+    setRunning(true);
+    timerRef.current = setTimeout(() => runSequence(0, current.steps), 500);
+    return clearTimer;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+
+  function switchScenario(id: (typeof SCENARIOS)[number]["id"]) {
+    clearTimer();
+    setRunning(false);
+    setActiveStep(-1);
+    setActive(id);
+  }
 
   return (
     <section id="automatisations" className={`${HOME_SECTION} bg-white`} aria-labelledby="auto-heading">
@@ -77,25 +120,23 @@ export function HomeAutomations() {
         </div>
 
         {/* Selector */}
-        <div className="mt-10 flex flex-wrap justify-center gap-2 sm:mt-12">
+        <div className="mt-10 flex flex-wrap justify-center gap-2 sm:mt-12" role="tablist">
           {SCENARIOS.map((s) => (
             <button
               key={s.id}
               type="button"
-              onClick={() => setActive(s.id)}
+              role="tab"
+              aria-selected={active === s.id}
+              onClick={() => switchScenario(s.id)}
               className={cn(
-                "rounded-lg border px-4 py-2 text-sm font-semibold transition-all duration-200",
+                "rounded-xl border px-5 py-2.5 text-sm font-semibold transition-all duration-200",
                 active === s.id
-                  ? "shadow-sm"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300",
+                  ? "shadow-sm scale-[1.02]"
+                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-800",
               )}
               style={
                 active === s.id
-                  ? {
-                      background: s.colorLight,
-                      borderColor: s.colorBorder,
-                      color: s.color,
-                    }
+                  ? { background: s.colorLight, borderColor: s.colorBorder, color: s.color }
                   : undefined
               }
             >
@@ -104,70 +145,127 @@ export function HomeAutomations() {
           ))}
         </div>
 
-        {/* Workflow visuel */}
-        <div className="mx-auto mt-8 max-w-2xl" key={current.id} aria-live="polite">
-          {/* Déclencheur */}
-          <div
-            className="rounded-xl border p-4 text-center shadow-sm"
-            style={{ borderColor: current.colorBorder, background: current.colorLight }}
-          >
-            <p
-              className="text-[11px] font-bold uppercase tracking-[0.16em]"
-              style={{ color: current.color }}
-            >
-              Déclencheur
-            </p>
-            <p className="font-display mt-1 text-lg font-extrabold tracking-tight text-[#0a0a0a]">
-              {current.trigger}
-            </p>
-          </div>
+        {/* Layout : Déclencheur + Workflow côte à côte sur desktop */}
+        <div className="mx-auto mt-8 max-w-3xl sm:mt-10" key={current.id} aria-live="polite">
+          <div className="grid gap-4 sm:grid-cols-[200px_1fr] sm:gap-6">
 
-          {/* Flèche et étapes */}
-          <div className="relative mt-1">
-            {/* Ligne verticale */}
+            {/* Déclencheur */}
             <div
-              className="absolute left-6 top-0 bottom-0 w-px"
-              style={{ background: `linear-gradient(to bottom, ${current.color}40, ${current.color}10)` }}
-              aria-hidden
-            />
+              className="flex flex-col items-center justify-center rounded-2xl border p-5 text-center shadow-sm sm:flex-col"
+              style={{ borderColor: current.colorBorder, background: current.colorLight }}
+            >
+              {/* Icône éclair */}
+              <span
+                className="mb-3 flex h-10 w-10 items-center justify-center rounded-full text-white text-lg shadow-sm"
+                style={{ background: current.color }}
+                aria-hidden
+              >
+                ⚡
+              </span>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: current.color }}>
+                Déclencheur
+              </p>
+              <p className="font-display mt-1.5 text-sm font-extrabold leading-snug tracking-tight text-[#0a0a0a] sm:text-base">
+                {current.trigger}
+              </p>
+              {/* Token de départ */}
+              <div
+                className="mt-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-bold"
+                style={{ borderColor: `${current.color}40`, background: `${current.color}10`, color: current.color }}
+              >
+                <span
+                  className="h-1.5 w-1.5 rounded-full motion-safe:animate-[hero-pulse_1.5s_ease-in-out_infinite]"
+                  style={{ backgroundColor: current.color }}
+                  aria-hidden
+                />
+                En cours
+              </div>
+            </div>
 
-            <ol className="space-y-1 pt-2">
-              {current.steps.map((step, i) => (
-                <li key={step.label} className="flex items-start gap-4 pl-1">
-                  {/* Connecteur */}
-                  <div className="relative flex flex-col items-center" aria-hidden>
-                    <div
-                      className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white text-sm font-bold shadow-sm"
-                      style={{ background: current.color }}
+            {/* Étapes animées */}
+            <div className="relative">
+              {/* Ligne verticale de fond */}
+              <div
+                className="absolute left-[19px] top-4 bottom-4 w-0.5 rounded-full"
+                style={{ background: `linear-gradient(to bottom, ${current.color}30, ${current.color}08)` }}
+                aria-hidden
+              />
+
+              <ol className="space-y-2">
+                {current.steps.map((step, i) => {
+                  const isActive = activeStep >= i;
+                  const isCurrent = activeStep === i;
+                  return (
+                    <li
+                      key={step.label}
+                      className={cn(
+                        "flex items-start gap-3 transition-all duration-500",
+                        isActive ? "opacity-100 translate-y-0" : "opacity-30 translate-y-1",
+                      )}
                     >
-                      {i + 1}
-                    </div>
-                    {i < current.steps.length - 1 && (
+                      {/* Cercle numéroté */}
                       <div
-                        className="mt-1 h-1 w-px flex-1"
-                        style={{ background: `${current.color}30` }}
-                      />
-                    )}
-                  </div>
+                        className={cn(
+                          "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all duration-300",
+                          isActive ? "text-white shadow-md" : "bg-slate-100 text-slate-400",
+                        )}
+                        style={isActive ? { background: current.color, boxShadow: isCurrent ? `0 0 0 3px ${current.color}30` : undefined } : undefined}
+                        aria-hidden
+                      >
+                        {isActive ? "✓" : i + 1}
+                      </div>
 
-                  {/* Contenu */}
-                  <div className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-[0_1px_3px_rgba(15,23,42,0.05)]">
-                    <p className="text-sm font-bold text-[#0a0a0a]">↓ {step.label}</p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{step.desc}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
+                      {/* Carte contenu */}
+                      <div
+                        className={cn(
+                          "min-w-0 flex-1 rounded-xl border px-4 py-3 transition-all duration-300",
+                          isActive
+                            ? "border-slate-200 bg-white shadow-[0_2px_8px_rgba(15,23,42,0.07)]"
+                            : "border-slate-100 bg-slate-50/50",
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <p
+                            className={cn(
+                              "text-sm font-bold transition-colors",
+                              isActive ? "text-[#0a0a0a]" : "text-slate-400",
+                            )}
+                          >
+                            {step.label}
+                          </p>
+                          {isCurrent && (
+                            <span
+                              className="h-1.5 w-1.5 rounded-full motion-safe:animate-[hero-pulse_1s_ease-in-out_infinite]"
+                              style={{ backgroundColor: current.color }}
+                              aria-hidden
+                            />
+                          )}
+                        </div>
+                        <p
+                          className={cn(
+                            "mt-0.5 text-xs leading-relaxed transition-colors",
+                            isActive ? "text-slate-500" : "text-slate-300",
+                          )}
+                        >
+                          {step.desc}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
           </div>
         </div>
 
         {/* Message sur-mesure */}
-        <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-[#fed7aa] bg-[#fff7ed] px-6 py-6 text-center sm:mt-12">
+        <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-[#fed7aa] bg-gradient-to-r from-[#fff7ed] to-[#fffbeb] px-6 py-6 text-center sm:mt-12">
           <p className="text-base font-semibold text-[#0a0a0a]">
             Chaque entreprise fonctionne différemment.
           </p>
           <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            Nous construisons les automatisations autour de <strong>vos propres processus</strong>, pas autour d&apos;un
+            Nous construisons les automatisations autour de{" "}
+            <strong className="font-semibold text-[#0a0a0a]">vos propres processus</strong>, pas autour d&apos;un
             modèle générique.
           </p>
         </div>

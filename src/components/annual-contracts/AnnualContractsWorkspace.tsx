@@ -778,7 +778,7 @@ function PilotRow({
         aria-hidden
       />
       {/* Desktop dense */}
-      <div className="hidden gap-3 py-2.5 pl-4 pr-3 lg:grid lg:grid-cols-[28%_17%_20%_15%_20%] lg:items-center">
+      <div className="hidden gap-3 py-2.5 pl-4 pr-3 lg:grid lg:grid-cols-[minmax(0,28%)_minmax(0,16%)_minmax(0,18%)_minmax(0,12%)_minmax(200px,1fr)] lg:items-center">
         <div className="min-w-0">
           <p className="truncate text-[14px] font-semibold text-slate-900">
             {item.contract.clientName}
@@ -835,7 +835,7 @@ function PilotRow({
           )}
         </div>
         <div
-          className="flex flex-wrap items-center justify-end gap-1.5"
+          className="flex flex-wrap items-center justify-start gap-1.5 xl:justify-end"
           onClick={(e) => e.stopPropagation()}
         >
           <ActionButton
@@ -851,7 +851,7 @@ function PilotRow({
           secondary.interventionId !== primary.interventionId ? (
             <button
               type="button"
-              className="rounded-full border border-slate-200 px-2.5 py-1 text-[11px] font-medium text-slate-600"
+              className="shrink-0 whitespace-nowrap rounded-full border border-slate-200 px-2.5 py-1 text-[11px] font-medium text-slate-600"
               onClick={() => onOpen(item.contract)}
               title={secondary.label}
             >
@@ -913,7 +913,7 @@ function ActionButton({
       <button
         type="button"
         onClick={onOpen}
-        className="rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[11px] font-medium text-white"
+        className="shrink-0 whitespace-nowrap rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[11px] font-medium text-white"
       >
         Voir
       </button>
@@ -927,7 +927,7 @@ function ActionButton({
         href={annualInvoiceHref({ invoiceId: invId, contractId })}
         target="_blank"
         rel="noreferrer"
-        className="rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[11px] font-medium text-white"
+        className="shrink-0 whitespace-nowrap rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[11px] font-medium text-white"
       >
         {action.label}
       </a>
@@ -941,7 +941,7 @@ function ActionButton({
         onClick={() =>
           action.interventionId && onPrepareInvoice(action.interventionId)
         }
-        className="rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[11px] font-medium text-white disabled:opacity-40"
+        className="shrink-0 whitespace-nowrap rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[11px] font-medium text-white disabled:opacity-40"
       >
         {action.label}
       </button>
@@ -953,7 +953,7 @@ function ActionButton({
         type="button"
         disabled={busy || !action.interventionId}
         onClick={onOpen}
-        className="rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[11px] font-medium text-white disabled:opacity-40"
+        className="shrink-0 whitespace-nowrap rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[11px] font-medium text-white disabled:opacity-40"
       >
         {action.label}
       </button>
@@ -963,7 +963,7 @@ function ActionButton({
     <button
       type="button"
       onClick={onOpen}
-      className="rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[11px] font-medium text-white"
+      className="shrink-0 whitespace-nowrap rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[11px] font-medium text-white"
     >
       {action.label}
     </button>

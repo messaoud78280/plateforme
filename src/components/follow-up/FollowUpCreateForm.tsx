@@ -258,7 +258,7 @@ export function FollowUpCreateForm({
           onChange={(e) => setTitle(e.target.value)}
           placeholder={
             noProject
-              ? "Ex. OS étanchéité — Les Lilas"
+              ? "Ex. OS étanchéité — Résidence Horizon"
               : "Laissez vide pour utiliser le chantier"
           }
           className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"

@@ -81,7 +81,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               Agenda
             </NavLink>
             <NavLink href="/dashboard/messages" pathname={pathname} activeClass={active}>
-              RDV
+              RDV & contact
             </NavLink>
             <NavLink href="/dashboard/documents" pathname={pathname} activeClass={active}>
               Documents
@@ -138,7 +138,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               Agenda
             </NavLink>
             <NavLink href="/dashboard/messages" pathname={pathname} activeClass={active}>
-              RDV
+              RDV & contact
             </NavLink>
             <NavLink href="/dashboard/rapports" pathname={pathname} activeClass={active}>
               Rapports
@@ -173,7 +173,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               Agenda
             </NavLink>
             <NavLink href="/dashboard/messages" pathname={pathname} activeClass={active}>
-              RDV
+              RDV & contact
             </NavLink>
             <NavLink href="/dashboard/taches?statut=COMPLETE" pathname={pathname} activeClass={active}>
               Historique

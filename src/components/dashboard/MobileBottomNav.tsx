@@ -25,21 +25,21 @@ type Tab = {
 const INTERNAL_TABS: Tab[] = [
   { href: "/dashboard", label: "Accueil", icon: Home, exact: true },
   { href: "/dashboard/a-traiter", label: "À traiter", icon: AlertCircle },
-  { href: "/dashboard/messagerie", label: "Messages", icon: MessageSquare },
+  { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
   { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
 ];
 
 const SUPPLIER_TABS: Tab[] = [
   { href: "/dashboard", label: "Accueil", icon: Home, exact: true },
   { href: "/dashboard/commandes", label: "Commandes", icon: Briefcase },
-  { href: "/dashboard/messagerie", label: "Messages", icon: MessageSquare },
+  { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
   { href: "/dashboard/documents", label: "Docs", icon: FileText },
 ];
 
 const CLIENT_TABS: Tab[] = [
   { href: "/dashboard", label: "Accueil", icon: Home, exact: true },
   { href: "/dashboard/projets", label: "Chantiers", icon: Briefcase },
-  { href: "/dashboard/messagerie", label: "Messages", icon: MessageSquare },
+  { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
   { href: "/dashboard/documents", label: "Docs", icon: FileText },
 ];
 
@@ -118,7 +118,7 @@ export function MobileBottomNav({
             aria-current={active ? "page" : undefined}
             aria-label={
               isMsg && msgBadge > 0
-                ? `Messages, ${msgBadge} non lus`
+                ? `Messagerie, ${msgBadge} non lus`
                 : tab.label
             }
           >

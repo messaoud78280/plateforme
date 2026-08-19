@@ -975,26 +975,26 @@ export default async function DashboardPage({
         />
       )}
 
-      {/* Section RDV */}
+      {/* Section RDV & contact */}
       <section
         id="messages"
         className="scroll-mt-24 space-y-8"
-        aria-label="RDV"
+        aria-label="RDV et contact"
       >
-        {/* Demandes de RDV — clients/agents : leurs demandes ; gérante : lien vers page complète */}
+        {/* Demandes de contact / RDV — clients/agents : leurs demandes ; gérante : lien vers page complète */}
         {isManager ? (
           <div className="rounded-2xl surface-metallic-light p-4">
             <Link
               href="/dashboard/messages"
               className="flex items-center justify-between text-slate-700 hover:text-blue-600"
             >
-              <span className="font-medium">Demandes de contact et RDV</span>
+              <span className="font-medium">Rendez-vous & contact</span>
               <span className="text-sm text-blue-600">Voir tout →</span>
             </Link>
           </div>
         ) : (
           <div className="rounded-2xl surface-metallic-light p-6">
-            <h3 className="text-lg font-semibold text-slate-800">Mes demandes de RDV</h3>
+            <h3 className="text-lg font-semibold text-slate-800">Mes rendez-vous et demandes</h3>
             <p className="mt-1 text-sm text-slate-600">Demandes envoyées depuis la page Contact.</p>
             {contactRequestsClient.length === 0 ? (
               <p className="mt-4 text-sm text-slate-500">
@@ -1039,7 +1039,7 @@ export default async function DashboardPage({
                   href="/dashboard/messages"
                   className="mt-4 inline-block text-sm font-medium text-blue-600 hover:underline"
                 >
-                  Voir toutes mes demandes →
+                  Voir RDV & contact →
                 </Link>
               </>
             )}
@@ -1102,7 +1102,7 @@ export default async function DashboardPage({
           href="/dashboard/messages"
           className="rounded-xl surface-metallic-light px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
         >
-          RDV
+          RDV & contact
         </Link>
         {isClient && (
           <Link

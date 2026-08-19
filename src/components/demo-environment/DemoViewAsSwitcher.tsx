@@ -8,6 +8,19 @@ type PersonaOpt = { key: string; label: string; name: string };
 
 const PERSONA_CHANGED = "bework:persona-changed";
 
+function formatPersonaOptionLabel(persona: PersonaOpt): string {
+  const firstName = persona.name.trim().split(/\s+/)[0] ?? "";
+  const normalizedLabel = persona.label.trim().toLowerCase();
+  const normalizedFirstName = firstName.trim().toLowerCase();
+  if (!firstName || normalizedFirstName === normalizedLabel) {
+    return persona.label;
+  }
+  if (normalizedLabel.includes(normalizedFirstName) || normalizedFirstName.includes(normalizedLabel)) {
+    return persona.label;
+  }
+  return `${persona.label} — ${firstName}`;
+}
+
 export function DemoViewAsSwitcher() {
   const router = useRouter();
   const pathname = usePathname();
@@ -98,11 +111,7 @@ export function DemoViewAsSwitcher() {
         >
           {personas.map((p) => (
             <option key={p.key} value={p.key}>
-              {p.key === "conducteur"
-                ? `Conducteur — ${p.name.split(" ")[0]}`
-                : p.key === "administratif"
-                  ? `Administratif — ${p.name.split(" ")[0]}`
-                  : `${p.label} — ${p.name.split(" ")[0]}`}
+              {formatPersonaOptionLabel(p)}
             </option>
           ))}
         </select>

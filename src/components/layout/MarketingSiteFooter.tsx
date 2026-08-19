@@ -132,7 +132,7 @@ export function MarketingSiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/#modules" className={COL_LINK}>
+                <Link href="/#socle" className={COL_LINK}>
                   Composez votre plateforme
                 </Link>
               </li>
@@ -252,7 +252,7 @@ export function MarketingSiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/#process-bework" className={COL_LINK}>
+                <Link href="/#approche" className={COL_LINK}>
                   Process BeWork
                 </Link>
               </li>

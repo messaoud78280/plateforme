@@ -87,7 +87,7 @@ export function HomeProductPreview({ large = false }: { large?: boolean }) {
               <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">Assistant intégré</p>
               <p className="mt-2 text-xs font-semibold text-[#0a0a0a]">Analyse CCTP</p>
               <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
-                Délai pénalités relevé · 2 pièces DOE manquantes · action proposée à Karim Benali.
+                Délai pénalités relevé · 2 pièces DOE manquantes · action proposée au conducteur de travaux.
               </p>
               <p className="mt-2 text-[10px] font-medium text-slate-500">À valider par vos équipes</p>
             </div>

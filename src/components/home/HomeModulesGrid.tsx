@@ -25,7 +25,7 @@ const MODULES = [
     label: "Messagerie",
     title: "Messagerie chantier",
     desc: "Échanges internes et externes rattachés à l'affaire — plus de fils WhatsApp orphelins.",
-    preview: ["Canal Point.P", "Équipe chantier", "2 non lus"],
+    preview: ["Canal fournisseur", "Équipe chantier", "2 non lus"],
   },
   {
     id: "planning",
@@ -46,7 +46,7 @@ const MODULES = [
     label: "Achats",
     title: "Achats et fournisseurs",
     desc: "Commandes, livraisons et suivi fournisseur reliés au chantier.",
-    preview: ["BC membrane", "Livraison 11/08", "Point.P"],
+    preview: ["BC membrane", "Livraison 11/08", "Fournisseur"],
   },
   {
     id: "ia",

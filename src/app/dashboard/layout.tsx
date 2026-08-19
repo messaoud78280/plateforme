@@ -209,6 +209,10 @@ export default async function DashboardLayout({
               userRole={session.user?.role ?? null}
               roleLabel={userRoleLabel}
               userCompany={companyName ?? dbCompany ?? null}
+              personType={personType}
+              permissionProfile={permissionProfile}
+              isDemo={isDemo}
+              demoModules={session.user.demoModules ?? null}
             />
           </div>
         </header>

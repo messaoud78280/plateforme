@@ -82,8 +82,8 @@ export default async function MessagesPage() {
         title="Rendez-vous & contact"
         description={
           isAgence
-            ? "Ancienne vue RDV — prochains créneaux et demandes de contact. Le Planning opérationnel et l’Agenda sont des modules séparés."
-            : "Vos rendez-vous à venir et l’historique de vos demandes de contact. Pour Qui / Où / Quand → Planning. Pour le calendrier → Agenda."
+            ? "Centralisez ici les prochains créneaux et les demandes de contact. Le Planning opérationnel et l’Agenda restent des modules séparés."
+            : "Vos rendez-vous à venir et l’historique de vos demandes de contact. Pour Qui / Où / Quand : Planning. Pour le calendrier : Agenda."
         }
       />
       <div className="flex flex-wrap gap-2">

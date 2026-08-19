@@ -85,12 +85,44 @@ export function granularityForRange(
   from: Date,
   toExclusive: Date,
 ): DashboardGranularity {
-  const days = Math.max(
+  const days = rangeDays(from, toExclusive);
+  if (days <= 45) return "day";
+  if (days <= 180) return "week";
+  return "month";
+}
+
+function rangeDays(from: Date, toExclusive: Date): number {
+  return Math.max(
     1,
     Math.round((toExclusive.getTime() - from.getTime()) / 86_400_000),
   );
-  if (days <= 45) return "day";
-  if (days <= 180) return "week";
+}
+
+/**
+ * Granularité selon la durée et la densité réelle d’activité.
+ * Évite un graphique quotidien vide avec un seul pic.
+ */
+export function adaptiveGranularity(
+  from: Date,
+  toExclusive: Date,
+  activityDates: Date[],
+): DashboardGranularity {
+  const days = rangeDays(from, toExclusive);
+  const uniqueDays = new Set(
+    activityDates
+      .filter((d) => !Number.isNaN(d.getTime()))
+      .map((d) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`),
+  ).size;
+
+  if (days <= 14) return "day";
+  if (days <= 45) {
+    if (uniqueDays > 0 && uniqueDays <= 5 && days >= 20) return "week";
+    return "day";
+  }
+  if (days <= 130) {
+    if (uniqueDays <= 8) return "month";
+    return "week";
+  }
   return "month";
 }
 
@@ -215,7 +247,7 @@ export function trendChange(current: number, previous: number): TrendChange {
     return { pct: null, kind: "na", label: "—" };
   }
   if (prev === 0 && cur !== 0) {
-    return { pct: null, kind: "new", label: "Nouveau" };
+    return { pct: null, kind: "new", label: "Première période" };
   }
   const pct = ((cur - prev) / Math.abs(prev)) * 100;
   if (!Number.isFinite(pct)) {

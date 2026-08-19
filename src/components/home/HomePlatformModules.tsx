@@ -100,7 +100,7 @@ const MODULES = [
       { value: "1", label: "Livraison en retard" },
     ],
     preview: [
-      { label: "BC membrane Point.P", status: "Confirmé", pct: 100, color: "#d97706" },
+      { label: "BC membrane fournisseur", status: "Confirmé", pct: 100, color: "#d97706" },
       { label: "Livraison prévue 11/08", status: "En attente", pct: 50, color: "#d97706" },
       { label: "Facture fournisseur", status: "À contrôler", pct: 0, color: "#ea580c" },
     ],

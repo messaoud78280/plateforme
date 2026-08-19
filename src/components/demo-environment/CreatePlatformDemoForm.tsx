@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { DEMO_BRAND } from "@/lib/demo-environment/brand";
 import {
   DEMO_MODULE_KEYS,
   DEMO_MODULE_LABELS,
@@ -57,18 +56,18 @@ export function CreatePlatformDemoForm() {
             <input
               name="companyName"
               required
-              defaultValue={DEMO_BRAND.companyName}
+              defaultValue=""
               className="w-full rounded-lg border border-slate-200 px-3 py-2"
-              placeholder={DEMO_BRAND.companyName}
+              placeholder="Ex. BatiNord, Horizon Copro, Entreprise Martin"
             />
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-semibold">Nom interne de la démonstration</span>
             <input
               name="internalName"
-              defaultValue={`Démo — ${DEMO_BRAND.companyName}`}
+              defaultValue=""
               className="w-full rounded-lg border border-slate-200 px-3 py-2"
-              placeholder={`Démo — ${DEMO_BRAND.companyName}`}
+              placeholder="Ex. Démo — BatiNord"
             />
           </label>
           <label className="block text-sm">
@@ -90,9 +89,9 @@ export function CreatePlatformDemoForm() {
             <input
               name="logoUrl"
               type="text"
-              defaultValue={DEMO_BRAND.logoPath ?? ""}
+              defaultValue=""
               className="w-full rounded-lg border border-slate-200 px-3 py-2"
-              placeholder={DEMO_BRAND.logoPath ?? "/brands/…"}
+              placeholder="/brands/mon-logo.svg"
             />
           </label>
           <label className="block text-sm">
@@ -121,7 +120,18 @@ export function CreatePlatformDemoForm() {
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block text-sm">
             <span className="mb-1 block font-semibold">Identifiant (vide = auto)</span>
-            <input name="loginIdentifier" className="w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="setrim" />
+            <input
+              name="loginIdentifier"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2"
+              placeholder="ex. batinord-demo"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-semibold">Aide</span>
+            <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+              Les champs entreprise, nom interne et logo restent neutres par défaut pour
+              éviter de contaminer une nouvelle démo avec un scénario précédent.
+            </p>
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-semibold">Mot de passe (vide = auto sécurisé)</span>

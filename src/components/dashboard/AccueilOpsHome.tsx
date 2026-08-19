@@ -33,7 +33,7 @@ function buildHeaderLine(ops: AccueilOpsSummary) {
   const parts: string[] = [];
   if (ops.attentionTotal > 0) {
     parts.push(
-      `${ops.attentionTotal} à traiter`,
+      `${ops.attentionTotal} sujet${ops.attentionTotal > 1 ? "s" : ""} à suivre`,
     );
   }
   const todayDeliveries = ops.orders.filter((o) =>
@@ -117,6 +117,16 @@ export function AccueilOpsHome({
     personType,
     permissionProfile,
   );
+  const showSiteVisits = canAccessDashboardHref(
+    "/dashboard/visites-metres",
+    personType,
+    permissionProfile,
+  );
+  const showSuppliers = canAccessDashboardHref(
+    "/dashboard/fournisseurs",
+    personType,
+    permissionProfile,
+  );
   const visibleCategories = ops.attentionCategories;
   const todayAgenda =
     ops.agendaTitle === "Aujourd’hui" ? ops.agenda.slice(0, 3) : [];
@@ -127,6 +137,7 @@ export function AccueilOpsHome({
   const watchChantiers = ops.chantiers.slice(0, 3);
   const hasToday =
     todayAgenda.length > 0 || todayOrders.length > 0 || todayTasks.length > 0;
+  const currentPanelTitle = "En ce moment";
   const dateLabel =
     ops.dateLabel.charAt(0).toUpperCase() + ops.dateLabel.slice(1);
   const seeAllLabel =
@@ -220,7 +231,7 @@ export function AccueilOpsHome({
           >
             <div className="flex items-start justify-between gap-3">
               <h2 className="text-[15px] font-bold tracking-tight text-[#1e3a5f]">
-                Aujourd’hui
+                {currentPanelTitle}
               </h2>
               <Link
                 href={ops.links.agenda}
@@ -348,6 +359,37 @@ export function AccueilOpsHome({
             </section>
           ) : null}
 
+          {showSiteVisits || showSuppliers ? (
+            <section className="rounded-2xl border border-bework-navy/10 bg-white px-5 py-4 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-[13px] font-semibold text-slate-500">Accès utiles</p>
+                  <p className="mt-0.5 text-[14px] font-bold text-[#1e3a5f]">
+                    Retrouver rapidement les modules qui font avancer le chantier.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {showSiteVisits ? (
+                    <Link
+                      href="/dashboard/visites-metres"
+                      className="rounded-full border border-bework-cyan/20 bg-bework-soft-cyan/60 px-3 py-1.5 text-[13px] font-medium text-bework-navy transition-colors hover:bg-bework-soft-cyan"
+                    >
+                      Visites & métrés
+                    </Link>
+                  ) : null}
+                  {showSuppliers ? (
+                    <Link
+                      href="/dashboard/fournisseurs"
+                      className="rounded-full border border-bework-watch/20 bg-bework-soft-watch/60 px-3 py-1.5 text-[13px] font-medium text-bework-navy transition-colors hover:bg-bework-soft-watch"
+                    >
+                      Fournisseurs
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
+            </section>
+          ) : null}
+
           <MessagesHomeBanner variant="card" />
 
           {watchChantiers.length > 0 ? (
@@ -369,6 +411,10 @@ export function AccueilOpsHome({
                       ? `${c.attentionCount} à traiter`
                       : null,
                   ].filter(Boolean);
+                  const linkedSignals = [
+                    c.nextEventLabel ? `Agenda · ${c.nextEventLabel}` : null,
+                    c.nextDeliveryLabel ? `Livraison · ${c.nextDeliveryLabel}` : null,
+                  ].filter(Boolean);
                   return (
                     <li key={c.id}>
                       <Link
@@ -382,6 +428,11 @@ export function AccueilOpsHome({
                           {signals.length > 0 ? (
                             <span className="mt-0.5 block text-[13px] text-slate-600">
                               {signals.join(" · ")}
+                            </span>
+                          ) : null}
+                          {linkedSignals.length > 0 ? (
+                            <span className="mt-1 block text-[12px] text-slate-500">
+                              {linkedSignals.join(" · ")}
                             </span>
                           ) : null}
                         </span>

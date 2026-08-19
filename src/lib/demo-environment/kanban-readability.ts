@@ -182,7 +182,7 @@ async function ensureJardinsDemoTasks(opts: {
       {
         title: "Préparer le dossier de démarrage",
         description:
-          "Réunir OS, plans et accès chantier avant démarrage — Responsable : Julie Martin.",
+          "Réunir OS, plans et accès chantier avant démarrage — Responsable : administratif.",
         status: TaskStatus.EN_ATTENTE,
         priority: "PRIORITAIRE",
         clientId: opts.clientId,
@@ -195,7 +195,7 @@ async function ensureJardinsDemoTasks(opts: {
       {
         title: "Vérifier les plans avant intervention",
         description:
-          "Contrôle plans toiture-terrasse / relevés — Responsable : Karim Benali.",
+          "Contrôle plans toiture-terrasse / relevés — Responsable : conducteur travaux.",
         status: TaskStatus.EN_COURS,
         priority: "STANDARD",
         clientId: opts.clientId,
@@ -208,7 +208,7 @@ async function ensureJardinsDemoTasks(opts: {
       {
         title: "Confirmer la date d’intervention",
         description:
-          "Valider créneau avec le syndic avant pose — Responsable : Karim Benali.",
+          "Valider créneau avec le client avant pose — Responsable : conducteur travaux.",
         status: TaskStatus.EN_ATTENTE,
         priority: "STANDARD",
         clientId: opts.clientId,
@@ -284,11 +284,11 @@ export async function ensureKanbanReadabilityDemo(opts: {
         sheetId: victorOs.id,
         authorId: opts.rootUserId,
         status: "ATTENTE_FOURNISSEUR",
-        nextAction: "Attendre confirmation livraison Point.P",
+        nextAction: `Attendre confirmation livraison ${DEMO_SCENARIO.supplierName}`,
         nextActionAt: new Date(2026, 7, 11, 7, 30, 0),
         assigneeId: karimId,
         urgencyOverride: null,
-        title: "Résidence Les Lilas — OS-4587",
+        title: `${DEMO_SCENARIO.projects.primary.title} — OS-${DEMO_SCENARIO.osNumber}`,
         workObject: "OS-4587 — Réfection étanchéité terrasse inaccessible",
         clientName: DEMO_SCENARIO.client.name,
         daysInStep: 2,
@@ -299,7 +299,7 @@ export async function ensureKanbanReadabilityDemo(opts: {
       await prisma.followUpSheet.update({
         where: { id: victorOs.id },
         data: {
-          title: "Résidence Les Lilas — OS-4587",
+          title: `${DEMO_SCENARIO.projects.primary.title} — OS-${DEMO_SCENARIO.osNumber}`,
           workObject: "OS-4587 — Réfection étanchéité terrasse inaccessible",
           clientName: DEMO_SCENARIO.client.name,
           osNumber: "4587",
@@ -319,7 +319,7 @@ export async function ensureKanbanReadabilityDemo(opts: {
       nextActionAt: new Date(2026, 7, 25, 12, 0, 0),
       urgencyOverride: null,
       assigneeId: opts.rootUserId,
-      title: "Avenant n°02 — Les Lilas",
+      title: `Avenant n°02 — ${DEMO_SCENARIO.projects.primary.title}`,
       workObject: "20 m² terrasse côté cour",
       clientName: DEMO_SCENARIO.client.name,
       // ~6 j > delayHours 120 → attention calculée (pas d’urgence forcée)
@@ -338,7 +338,7 @@ export async function ensureKanbanReadabilityDemo(opts: {
       nextActionAt: daysAgo(-5),
       urgencyOverride: null,
       assigneeId: karimId,
-      title: "Chantier République",
+      title: DEMO_SCENARIO.projects.waiting.title,
       workObject: "Travaux terminés récemment",
       clientName: DEMO_SCENARIO.client.name,
       daysInStep: 1,
@@ -369,7 +369,7 @@ export async function ensureKanbanReadabilityDemo(opts: {
     // Chronologie lisible pour la démo anti-oubli (idempotente via labels)
     const alphaStory = [
       { label: "Travaux terminés", detail: "Karim — intervention clôturée", days: 5, kind: "statut" },
-      { label: "Dossier passé à facturer", detail: "Responsable : Julie Martin", days: 5, kind: "statut" },
+      { label: "Dossier passé à facturer", detail: "Responsable : administratif", days: 5, kind: "statut" },
       { label: "Rappel facturation", detail: "Toujours non facturé — rappel à Julie", days: 2, kind: "alerte" },
     ];
     for (const ev of alphaStory) {

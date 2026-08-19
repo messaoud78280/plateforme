@@ -10,7 +10,6 @@ import {
   DEMO_STAFF_CONTACTS,
   isDemoStaffHiddenFromMessaging,
 } from "@/lib/demo-environment/demo-staff-names";
-import { DEMO_PERSONAS } from "@/lib/demo-environment/personas";
 import {
   evaluateDirectMessageAcl,
   isMessagingAccessActive,
@@ -20,12 +19,20 @@ import { withPerfLog, timedBranch, runWithPerfContext } from "@/lib/perf/server-
 
 function sortMessagerieRecipients(list: MessagerieRecipient[]): MessagerieRecipient[] {
   const priority = new Map<string, number>([
-    [DEMO_PERSONAS.administratif.name, 0],
-    [DEMO_PERSONAS.conducteur.name, 1],
+    ["ADMINISTRATIF", 0],
+    ["CONDUCTEUR", 1],
   ]);
   return [...list].sort((a, b) => {
-    const pa = priority.has(a.name) ? (priority.get(a.name) as number) : a.partyType === "INTERNAL" ? 10 : 20;
-    const pb = priority.has(b.name) ? (priority.get(b.name) as number) : b.partyType === "INTERNAL" ? 10 : 20;
+    const pa = priority.has(a.permissionProfile ?? "")
+      ? (priority.get(a.permissionProfile ?? "") as number)
+      : a.partyType === "INTERNAL"
+        ? 10
+        : 20;
+    const pb = priority.has(b.permissionProfile ?? "")
+      ? (priority.get(b.permissionProfile ?? "") as number)
+      : b.partyType === "INTERNAL"
+        ? 10
+        : 20;
     if (pa !== pb) return pa - pb;
     return a.name.localeCompare(b.name, "fr");
   });

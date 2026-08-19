@@ -80,7 +80,6 @@ import {
   withReturnTo,
 } from "@/lib/navigation/safe-return-to";
 import { ContextBackButton } from "@/components/ui/ContextBackButton";
-import { DEMO_PERSONAS } from "@/lib/demo-environment/personas";
 
 const MessageBeworkActions = dynamic(
   () =>
@@ -2384,15 +2383,12 @@ export function MessagerieMissionsView({
                     type="search"
                     value={recipientSearch}
                     onChange={(e) => setRecipientSearch(e.target.value)}
-                    placeholder="Rechercher Karim, Point.P, un client, un chantier…"
+                    placeholder="Rechercher un contact, un fournisseur, un client, un chantier…"
                     autoFocus
                     className="mb-3 w-full rounded-xl border border-[#d1d7db] px-4 py-3 text-sm text-[#111b21] focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/15"
                   />
                   {(() => {
-                    const priorityNames = new Set([
-                      DEMO_PERSONAS.administratif.name,
-                      DEMO_PERSONAS.conducteur.name,
-                    ]);
+                    const priorityProfiles = new Set(["ADMINISTRATIF", "CONDUCTEUR"]);
                     const q = recipientSearch.trim().toLowerCase();
                     const filtered = recipients
                       .filter((r) => r.id !== sessionUserId)
@@ -2410,12 +2406,15 @@ export function MessagerieMissionsView({
                         if (!q) {
                           const ta = partyForRecipient(a).partyType;
                           const tb = partyForRecipient(b).partyType;
-                          const pa = priorityNames.has(a.name) ? 0 : ta === "INTERNAL" ? 1 : 2;
-                          const pb = priorityNames.has(b.name) ? 0 : tb === "INTERNAL" ? 1 : 2;
+                          const pa = priorityProfiles.has(a.permissionProfile ?? "") ? 0 : ta === "INTERNAL" ? 1 : 2;
+                          const pb = priorityProfiles.has(b.permissionProfile ?? "") ? 0 : tb === "INTERNAL" ? 1 : 2;
                           if (pa !== pb) return pa - pb;
-                          if (priorityNames.has(a.name) && priorityNames.has(b.name)) {
-                            if (a.name === DEMO_PERSONAS.administratif.name) return -1;
-                            if (b.name === DEMO_PERSONAS.administratif.name) return 1;
+                          if (
+                            priorityProfiles.has(a.permissionProfile ?? "") &&
+                            priorityProfiles.has(b.permissionProfile ?? "")
+                          ) {
+                            if (a.permissionProfile === "ADMINISTRATIF") return -1;
+                            if (b.permissionProfile === "ADMINISTRATIF") return 1;
                           }
                         }
                         return a.name.localeCompare(b.name, "fr");

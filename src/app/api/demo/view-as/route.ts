@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { isDemoEmail } from "@/lib/demo-environment/constants";
 import {
   DEMO_PERSONA_KEYS,
-  DEMO_PERSONAS,
+  getDemoPersonasForPlatform,
   isDemoPersonaKey,
   type DemoPersonaKey,
 } from "@/lib/demo-environment/personas";
@@ -16,6 +16,7 @@ import {
   getNextAuthSessionCookieName,
   nextAuthSessionCookieOptions,
 } from "@/lib/auth-session-cookie";
+import { getPlatformConfigForOrganization } from "@/lib/platform/config";
 
 async function loadDemoForSession(userId: string, demoRootUserId?: string | null) {
   return prisma.demoEnvironment.findFirst({
@@ -75,6 +76,8 @@ export async function POST(request: NextRequest) {
   let personas = await listDemoPersonaUsers({
     rootUserId: demoRootUserId,
     loginIdentifier: demo.loginIdentifier,
+    companyName: demo.companyName,
+    organizationId: demo.organizationId,
   });
   if (personas.length < DEMO_PERSONA_KEYS.length) {
     await seedDemoPersonaUsers({
@@ -86,7 +89,20 @@ export async function POST(request: NextRequest) {
     personas = await listDemoPersonaUsers({
       rootUserId: demoRootUserId,
       loginIdentifier: demo.loginIdentifier,
+      companyName: demo.companyName,
+      organizationId: demo.organizationId,
     });
+  }
+
+  const platform = getPlatformConfigForOrganization({
+    organizationId: demo.organizationId,
+    isDemo: true,
+    loginIdentifier: demo.loginIdentifier,
+    companyName: demo.companyName,
+  });
+  const personaDefs = getDemoPersonasForPlatform(platform.key, demo.companyName);
+  if (!personaDefs) {
+    return NextResponse.json({ error: "Personas démo indisponibles" }, { status: 404 });
   }
 
   // Pas de cohérence Victor Hugo / Kanban ici : trop lourd sur le hot path « Voir comme ».
@@ -147,7 +163,7 @@ export async function POST(request: NextRequest) {
   const res = NextResponse.json({
     ok: true,
     persona: targetKey,
-    label: DEMO_PERSONAS[targetKey].label,
+    label: personaDefs[targetKey].label,
     user: { id: dbUser.id, name: dbUser.name, email: dbUser.email },
   });
   res.cookies.set(cookieName, jwt, nextAuthSessionCookieOptions(secure));
@@ -176,6 +192,8 @@ export async function GET(request: NextRequest) {
   let personas = await listDemoPersonaUsers({
     rootUserId: demo.rootUserId,
     loginIdentifier: demo.loginIdentifier,
+    companyName: demo.companyName,
+    organizationId: demo.organizationId,
   });
   if (personas.length < DEMO_PERSONA_KEYS.length) {
     await seedDemoPersonaUsers({
@@ -187,7 +205,20 @@ export async function GET(request: NextRequest) {
     personas = await listDemoPersonaUsers({
       rootUserId: demo.rootUserId,
       loginIdentifier: demo.loginIdentifier,
+      companyName: demo.companyName,
+      organizationId: demo.organizationId,
     });
+  }
+
+  const platform = getPlatformConfigForOrganization({
+    organizationId: demo.organizationId,
+    isDemo: true,
+    loginIdentifier: demo.loginIdentifier,
+    companyName: demo.companyName,
+  });
+  const personaDefs = getDemoPersonasForPlatform(platform.key, demo.companyName);
+  if (!personaDefs) {
+    return NextResponse.json({ personas: [], current: null, companyName: demo.companyName });
   }
 
   // GET : lecture seule — pas de réécriture métier (évite conflits Kanban / statuts)
@@ -202,7 +233,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     personas: personas.map((p) => ({
       key: p.key,
-      label: DEMO_PERSONAS[p.key].label,
+      label: personaDefs[p.key].label,
       name: p.name,
       email: p.email,
       id: p.id,

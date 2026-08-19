@@ -60,7 +60,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       organizationId,
       siteAddress: primary.siteAddress,
       siteCity: primary.siteCity,
-      internalManager: "Karim Benali",
+      internalManager: "Conducteur travaux",
       urgency: ProjectUrgency.HAUTE,
       plannedStartDate: daysFromNow(-20),
       plannedEndDate: daysFromNow(45),
@@ -78,7 +78,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       organizationId,
       siteAddress: waiting.siteAddress,
       siteCity: waiting.siteCity,
-      internalManager: "Karim Benali",
+      internalManager: "Conducteur travaux",
       urgency: ProjectUrgency.MOYENNE,
       plannedStartDate: daysFromNow(-5),
       plannedEndDate: daysFromNow(60),
@@ -96,7 +96,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       organizationId,
       siteAddress: study.siteAddress,
       siteCity: study.siteCity,
-      internalManager: "Julie Martin",
+      internalManager: "Administratif",
       urgency: ProjectUrgency.BASSE,
       plannedStartDate: daysFromNow(10),
       plannedEndDate: daysFromNow(90),
@@ -107,9 +107,9 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   await prisma.task.createMany({
     data: [
       {
-        title: "Relancer Point.P — confirmation livraison membrane",
+        title: `Relancer ${DEMO_SCENARIO.supplierName} — confirmation livraison membrane`,
         description:
-          "Responsable : Karim Benali — priorité haute. BC membrane bitume Les Lilas sans confirmation fournisseur.",
+          `Responsable : conducteur travaux — priorité haute. BC membrane bitume ${primary.title} sans confirmation fournisseur.`,
         status: TaskStatus.EN_COURS,
         priority: "URGENT",
         clientId,
@@ -145,7 +145,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       {
         title: "BC-2026-029 — Accessoires relevés / solins",
         description:
-          "Commande secondaire accessoires (seed). Scénario livraison Point.P principal = BC-2026-043.",
+          `Commande secondaire accessoires (seed). Scénario livraison principal = ${DEMO_SCENARIO.orderNumber}.`,
         status: TaskStatus.EN_ATTENTE_INFO,
         priority: "URGENT",
         clientId,
@@ -167,7 +167,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         suppliersJson: [{ name: `${DEMO_SCENARIO.supplierName} (fictif)`, contact: "livraisons@pointp.demo" }],
       },
       {
-        title: "Valider accès livraison — Parking République",
+        title: `Valider accès livraison — ${waiting.title}`,
         description: "Demande administrative — créneau camion / zone livraison parking à confirmer.",
         status: TaskStatus.A_VALIDER,
         priority: "PRIORITAIRE",
@@ -178,7 +178,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         desiredDate: daysFromNow(3),
       },
       {
-        title: "Rédiger le compte rendu de visite Les Lilas",
+        title: `Rédiger le compte rendu de visite ${primary.title}`,
         description: "CR visite terrasse / relevés — à compléter avant pose membrane.",
         status: TaskStatus.EN_ATTENTE,
         priority: "PRIORITAIRE",
@@ -201,7 +201,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       },
       {
         title: "Planifier diagnostic recherche de fuites",
-        description: "Parking République — test fumigène / mise en eau à caler (données fictives).",
+        description: `${waiting.title} — test fumigène / mise en eau à caler (données fictives).`,
         status: TaskStatus.NOUVEAU,
         priority: "STANDARD",
         clientId,
@@ -247,7 +247,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   await prisma.document.createMany({
     data: [
       {
-        name: "Devis étanchéité Les Lilas (fictif).pdf",
+        name: `Devis étanchéité ${primary.title} (fictif).pdf`,
         category: DocumentCategory.CONTRAT,
         fileUrl: "/demo-assets/placeholder-document.pdf",
         fileSize: 120_000,
@@ -282,7 +282,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   await prisma.appointment.createMany({
     data: [
       {
-        title: "Réunion de chantier — Les Lilas",
+        title: `Réunion de chantier — ${primary.title}`,
         startAt: daysFromNow(1),
         endAt: new Date(daysFromNow(1).getTime() + 60 * 60 * 1000),
         organizerId: clientId,
@@ -291,7 +291,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         notes: "Données fictives de démonstration",
       },
       {
-        title: "Livraison isolant — Les Lilas",
+        title: `Livraison isolant — ${primary.title}`,
         startAt: daysFromNow(2),
         endAt: new Date(daysFromNow(2).getTime() + 2 * 60 * 60 * 1000),
         organizerId: clientId,
@@ -299,7 +299,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         projectId: projectVictor.id,
       },
       {
-        title: "Visite contrôle Parking République",
+        title: `Visite contrôle ${waiting.title}`,
         startAt: daysFromNow(5),
         endAt: new Date(daysFromNow(5).getTime() + 90 * 60 * 1000),
         organizerId: clientId,
@@ -335,7 +335,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         createdById: clientId,
         organizationId: org?.id ?? null,
         projectId: projectVictor.id,
-        location: "Résidence Les Lilas — aire livraison",
+        location: `${primary.title} — ${DEMO_SCENARIO.delivery.locationHint}`,
         description: "Données fictives de démonstration BeWork",
       },
       {
@@ -347,20 +347,20 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         createdById: clientId,
         organizationId: org?.id ?? null,
         projectId: projectVictor.id,
-        location: "Base vie Les Lilas",
+        location: `${primary.title} — base vie`,
       },
       {
-        title: "Rendez-vous fournisseur Point.P",
+        title: `Rendez-vous fournisseur ${DEMO_SCENARIO.supplierName}`,
         type: "RDV_FOURNISSEUR",
         startAt: atHour(today, 11),
         endAt: atHour(today, 12),
         ownerUserId: clientId,
         createdById: clientId,
         organizationId: org?.id ?? null,
-        location: "Point.P",
+        location: DEMO_SCENARIO.supplierName,
       },
       {
-        title: "Visite Parking République",
+        title: `Visite ${waiting.title}`,
         type: "VISITE_CHANTIER",
         startAt: atHour(today, 14),
         endAt: atHour(today, 15, 30),
@@ -391,7 +391,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         projectId: projectVictor.id,
       },
       {
-        title: "Réunion de chantier — Les Lilas",
+        title: `Réunion de chantier — ${primary.title}`,
         type: "REUNION_CHANTIER",
         startAt: atHour(tomorrow, 9),
         endAt: atHour(tomorrow, 10),
@@ -402,7 +402,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         recurrence: "WEEKLY",
       },
       {
-        title: "Contrôle étanchéité Parking République",
+        title: `Contrôle étanchéité ${waiting.title}`,
         type: "CONTROLE",
         startAt: atHour(inTwo, 10),
         endAt: atHour(inTwo, 12),
@@ -434,16 +434,16 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       assigneeId: clientId,
       organizationId,
       projectId: projectVictor.id,
-      title: "Résidence Les Lilas — OS-4587",
-      clientName: "Syndic Horizon Copro",
-      siteAddress: "18 rue des Lilas, Aubervilliers",
+      title: `${primary.title} — OS-${DEMO_SCENARIO.osNumber}`,
+      clientName: DEMO_SCENARIO.client.name,
+      siteAddress: `${primary.siteAddress}, ${primary.siteCity}`,
       workObject: "Réfection étanchéité terrasse inaccessible",
       osNumber: "4587",
       orderNumber: "BC-2026-043",
       receivedAt: daysFromNow(-4),
       status: "ATTENTE_FOURNISSEUR",
       colorKey: "orange",
-      nextAction: "Attendre confirmation livraison Point.P",
+      nextAction: `Attendre confirmation livraison ${DEMO_SCENARIO.supplierName}`,
       nextActionAt: daysFromNow(3),
       nextActionDone: false,
       reminderOffsets: [168, 72, 24, 2],
@@ -457,21 +457,21 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         authorId: clientId,
         kind: "creation",
         label: "OS-4587 reçu",
-        detail: "Syndic Horizon Copro — Réfection étanchéité terrasse inaccessible",
+        detail: `${DEMO_SCENARIO.client.name} — ${primary.workObject}`,
         occurredAt: daysFromNow(-4),
       },
       {
         sheetId: ficheVictor.id,
         authorId: clientId,
         kind: "action",
-        label: "Intervention planifiée — 17 août 08:00 (Karim Benali)",
+        label: "Intervention planifiée — 17 août 08:00 (conducteur travaux)",
         occurredAt: daysFromNow(-2),
       },
       {
         sheetId: ficheVictor.id,
         authorId: clientId,
         kind: "action",
-        label: "BC-2026-043 envoyé à Point.P — livraison 11 août 07:30",
+        label: `${DEMO_SCENARIO.orderNumber} envoyé à ${DEMO_SCENARIO.supplierName} — livraison 11 août 07:30`,
         occurredAt: daysFromNow(-1),
       },
     ],
@@ -484,8 +484,8 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       assigneeId: clientId,
       organizationId,
       projectId: projectRepublique.id,
-      title: "Parking République",
-      clientName: "Parking République",
+      title: waiting.title,
+      clientName: waiting.title,
       workObject: "Avenant n°2 — validation client",
       orderNumber: "AV-2026-02",
       receivedAt: daysFromNow(-12),
@@ -530,7 +530,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   // Lier un événement agenda à la fiche Les Lilas
   await prisma.agendaEvent.create({
     data: {
-      title: "Intervention étanchéité — Les Lilas",
+      title: `Intervention étanchéité — ${primary.title}`,
       type: "INTERVENTION",
       startAt: (() => {
         const d = daysFromNow(2);
@@ -587,7 +587,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   const taskCr = await prisma.task.findFirst({
     where: {
       clientId,
-      title: { contains: "compte rendu de visite Les Lilas" },
+      title: { contains: `compte rendu de visite ${DEMO_SCENARIO.projects.primary.title}` },
     },
     select: { id: true },
   });
@@ -597,8 +597,8 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       where: { id: taskBc043.id },
       data: {
         assignedToId: staffId,
-        title: "POINT.P — Résidence Les Lilas (BC-2026-043)",
-        suppliersJson: [{ name: "Point.P (fictif)", contact: "livraisons@pointp.demo" }],
+        title: `${DEMO_SCENARIO.supplierName} — ${DEMO_SCENARIO.projects.primary.title} (${DEMO_SCENARIO.orderNumber})`,
+        suppliersJson: [{ name: `${DEMO_SCENARIO.supplierName} (fictif)`, contact: "livraisons@pointp.demo" }],
       },
     });
     await prisma.taskMessage.createMany({
@@ -617,7 +617,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
           senderId: clientId,
           receiverId: staffId,
           content:
-            "Créneau demandé : mardi 7h30, aire livraison Les Lilas (côté rue). En attente de confirmation Point.P.",
+            `Créneau demandé : ${DEMO_SCENARIO.delivery.requestedLabel}, ${DEMO_SCENARIO.projects.primary.title} (${DEMO_SCENARIO.delivery.locationHint}). En attente de confirmation ${DEMO_SCENARIO.supplierName}.`,
           kind: "USER",
           createdAt: daysFromNow(-1),
         },
@@ -738,7 +738,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   try {
     const demoRow = await prisma.demoEnvironment.findFirst({
       where: { rootUserId: clientId },
-      select: { id: true },
+      select: { id: true, name: true },
     });
     if (demoRow) {
       const { purgeDemoLegacyInbox } = await import("./cleanup-legacy-inbox");
@@ -785,7 +785,12 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   // —— W2-C : répartition lisible du tableau de suivi ——
   try {
     const { listDemoPersonaUsers } = await import("./seed-personas");
-    const personas = await listDemoPersonaUsers({ rootUserId: clientId, loginIdentifier });
+    const personas = await listDemoPersonaUsers({
+      rootUserId: clientId,
+      loginIdentifier,
+      companyName,
+      organizationId,
+    });
     const karim = personas.find((p) => p.key === "conducteur");
     const { ensureKanbanReadabilityDemo } = await import("./kanban-readability");
     await ensureKanbanReadabilityDemo({
@@ -872,6 +877,17 @@ export async function seedDemoDirectConversations(opts: {
 }) {
   const { clientId, sophieId, karimId, lauraId } = opts;
 
+  const [sophieUser, karimUser, lauraUser] = await Promise.all([
+    prisma.user.findUnique({ where: { id: sophieId }, select: { name: true } }),
+    prisma.user.findUnique({ where: { id: karimId }, select: { name: true } }),
+    prisma.user.findUnique({ where: { id: lauraId }, select: { name: true } }),
+  ]);
+
+  const sophieName = sophieUser?.name?.trim() || "Contact";
+  const karimName = karimUser?.name?.trim() || "Conducteur";
+  const lauraName = lauraUser?.name?.trim() || "Support admin";
+  const karimFirstName = karimName.split(/\s+/)[0] ?? karimName;
+
   // Évite les doublons si on ré-enrichit sans clear complet
   const existing = await prisma.directMessage.count({
     where: {
@@ -895,7 +911,7 @@ export async function seedDemoDirectConversations(opts: {
         senderId: sophieId,
         receiverId: clientId,
         content:
-          `Bonjour ${demoBrandContactFirstName()} 👋 Sophie Lefèvre (agence BeWork). On peut suivre la terrasse Les Lilas ici — photos et PDF bienvenus.`,
+          `Bonjour ${demoBrandContactFirstName()} 👋 ${sophieName}. On peut suivre la terrasse ${DEMO_SCENARIO.projects.primary.title} ici — photos et PDF bienvenus.`,
         read: false,
         createdAt: hoursAgo(26),
       },
@@ -903,14 +919,14 @@ export async function seedDemoDirectConversations(opts: {
         senderId: clientId,
         receiverId: sophieId,
         content:
-          "Parfait Sophie Lefèvre. Je vous envoie les plans / fiches dès que Point.P confirme.",
+          `Parfait ${sophieName}. Je vous envoie les plans / fiches dès que ${DEMO_SCENARIO.supplierName} confirme.`,
         read: true,
         createdAt: hoursAgo(24),
       },
       {
         senderId: sophieId,
         receiverId: clientId,
-        content: "Reçu. Je relance Point.P cet après-midi et je vous confirme la date de pose.",
+        content: `Reçu. Je relance ${DEMO_SCENARIO.supplierName} cet après-midi et je vous confirme la date de pose.`,
         read: false,
         createdAt: hoursAgo(5),
       },
@@ -918,14 +934,14 @@ export async function seedDemoDirectConversations(opts: {
         senderId: karimId,
         receiverId: clientId,
         content:
-          "Karim Adjaili — Parking République : accès camion OK jeudi. Vous validez le créneau livraison ?",
+          `${karimName} — ${DEMO_SCENARIO.projects.waiting.title} : accès camion OK jeudi. Vous validez le créneau livraison ?`,
         read: false,
         createdAt: hoursAgo(8),
       },
       {
         senderId: clientId,
         receiverId: karimId,
-        content: "Accès validé côté cour, 7h–16h. Merci Karim Adjaili.",
+        content: `Accès validé côté cour, 7h–16h. Merci ${karimFirstName}.`,
         read: true,
         createdAt: hoursAgo(6),
       },
@@ -933,7 +949,7 @@ export async function seedDemoDirectConversations(opts: {
         senderId: lauraId,
         receiverId: clientId,
         content:
-          "Laura Bernard (support BeWork legacy) — BC membrane et isolant prêts. Julie côté SETRIM peut aussi suivre.",
+          `${lauraName} — BC membrane et isolant prêts. D'autres profils internes peuvent aussi suivre.`,
         read: false,
         createdAt: hoursAgo(3),
       },
@@ -982,7 +998,7 @@ export async function enrichDemoTaskThreads(opts: {
           { email: { endsWith: "+karim@demo.bework.local" } },
         ],
       },
-      select: { id: true },
+      select: { id: true, name: true },
     }),
     prisma.user.findFirst({
       where: {
@@ -1002,6 +1018,13 @@ export async function enrichDemoTaskThreads(opts: {
   const karimPersonaId = personaKarim?.id ?? karimId;
   /** Jamais staff Sophie Lefèvre en fallback — persona Julie ou Karim. */
   const juliePersonaId = personaJulie?.id ?? karimPersonaId;
+
+  const [sophieStaff, karimStaff] = await Promise.all([
+    prisma.user.findUnique({ where: { id: sophieId }, select: { name: true } }),
+    prisma.user.findUnique({ where: { id: karimId }, select: { name: true } }),
+  ]);
+  const sophieStaffName = sophieStaff?.name?.trim() || "Contact";
+  const karimStaffName = karimStaff?.name?.trim() || "Conducteur travaux";
 
   const tasks = await prisma.task.findMany({
     where: { clientId },
@@ -1039,13 +1062,13 @@ export async function enrichDemoTaskThreads(opts: {
           content: coherentOpener(
             t.title,
             assignee === karimPersonaId
-              ? "Karim Benali"
+              ? (personaKarim?.name ?? "Conducteur travaux")
               : assignee === juliePersonaId
-                ? "Julie Martin"
+                ? (personaJulie?.name ?? "Administratif")
                 : assignee === sophieId
-                  ? "Sophie Lefèvre"
+                  ? sophieStaffName
                   : assignee === karimId
-                    ? "Karim Adjaili"
+                    ? karimStaffName
                     : "Équipe BeWork",
           ),
           kind: "USER",
@@ -1067,7 +1090,7 @@ export async function enrichDemoTaskThreads(opts: {
 
 function coherentOpener(title: string, who: string): string {
   if (title.includes("membrane") || title.includes("POINT.P") || title.includes("BC-2026-043")) {
-    return `Bonjour ${demoBrandContactFirstName()}, ${who} ici. Votre commande membrane bitume est prête.\nLivraison possible mardi 7h30 sur Les Lilas — vous validez ?`;
+    return `Bonjour ${demoBrandContactFirstName()}, ${who} ici. Votre commande membrane bitume est prête.\nLivraison possible ${DEMO_SCENARIO.delivery.requestedLabel} sur ${DEMO_SCENARIO.projects.primary.title} — vous validez ?`;
   }
   if (title.includes("Isolant") || title.includes("038")) {
     return `Hello, livraison isolant prévue sous 48h. Je vous confirme le créneau dès réception du BL.`;
@@ -1076,20 +1099,20 @@ function coherentOpener(title: string, who: string): string {
     return `Petit point : accessoires relevés en retard côté fournisseur. Je propose un report — OK pour vous ?`;
   }
   if (title.includes("Parking") || title.includes("nacelle") || title.includes("République")) {
-    return `Accès livraison Parking République : devis reçu. Besoin de votre validation accès cour pour jeudi.`;
+    return `Accès livraison ${DEMO_SCENARIO.projects.waiting.title} : devis reçu. Besoin de votre validation accès cour pour jeudi.`;
   }
   if (title.includes("compte rendu") || title.includes("visite")) {
-    return `CR visite Les Lilas prêt. Vous pouvez le valider dès que vous avez 2 minutes.`;
+    return `CR visite ${DEMO_SCENARIO.projects.primary.title} prêt. Vous pouvez le valider dès que vous avez 2 minutes.`;
   }
   if (title.includes("Relancer") || title.includes("confirmation livraison")) {
-    return `Je relance Point.P pour la confirmation livraison membrane bitume Les Lilas. Vous avez une date limite côté chantier ?`;
+    return `Je relance ${DEMO_SCENARIO.supplierName} pour la confirmation livraison membrane bitume ${DEMO_SCENARIO.projects.primary.title}. Vous avez une date limite côté chantier ?`;
   }
   return `Bonjour, je prends en charge « ${title} ». Écrivez-moi ici pour toute précision (texte, photo, PDF).`;
 }
 
 function coherentClientReply(title: string): string {
   if (title.includes("membrane") || title.includes("POINT.P") || title.includes("043")) {
-    return `Oui, mardi 7h30 sur Les Lilas — aire livraison côté rue. Merci !`;
+    return `Oui, ${DEMO_SCENARIO.delivery.requestedLabel} sur ${DEMO_SCENARIO.projects.primary.title} — ${DEMO_SCENARIO.delivery.locationHint}. Merci !`;
   }
   if (title.includes("Parking") || title.includes("nacelle") || title.includes("République")) {
     return `Accès cour OK 7h–16h. Merci.`;
@@ -1169,6 +1192,12 @@ export async function rewriteDemoTaskConversations(opts: {
   lauraId: string;
 }) {
   const { clientId, sophieId, karimId, lauraId } = opts;
+
+  const staff = await prisma.user.findMany({
+    where: { id: { in: [sophieId, karimId, lauraId] } },
+    select: { id: true, name: true },
+  });
+  const staffNameById = new Map(staff.map((u) => [u.id, u.name ?? "Contact"]));
   const tasks = await prisma.task.findMany({
     where: { clientId },
     select: { id: true, title: true, assignedToId: true },
@@ -1190,11 +1219,11 @@ export async function rewriteDemoTaskConversations(opts: {
 
     const who =
       assignee === sophieId
-        ? "Sophie Lefèvre"
+        ? staffNameById.get(sophieId) ?? "Contact"
         : assignee === karimId
-          ? "Karim Adjaili"
+          ? staffNameById.get(karimId) ?? "Conducteur travaux"
           : assignee === lauraId
-            ? "Laura Bernard"
+            ? staffNameById.get(lauraId) ?? "Support"
             : "Équipe BeWork";
 
     const thread = demoThreadForTitle(t.title, who);
@@ -1224,7 +1253,7 @@ function demoThreadForTitle(
       },
       {
         fromClient: false,
-        content: `Livraison possible mardi 7h30 sur Les Lilas — aire livraison.\nVous validez ?`,
+        content: `Livraison possible ${DEMO_SCENARIO.delivery.requestedLabel} sur ${DEMO_SCENARIO.projects.primary.title} — ${DEMO_SCENARIO.delivery.locationHint}.\nVous validez ?`,
       },
       {
         fromClient: true,
@@ -1239,7 +1268,7 @@ function demoThreadForTitle(
   if (title.includes("Isolant") || title.includes("038")) {
     return [
       { fromClient: false, content: `Isolant thermique : départ usine aujourd’hui.` },
-      { fromClient: false, content: `Livraison sous 48h sur Les Lilas. Je vous confirme le créneau demain matin.` },
+      { fromClient: false, content: `Livraison sous 48h sur ${DEMO_SCENARIO.projects.primary.title}. Je vous confirme le créneau demain matin.` },
       { fromClient: true, content: `OK merci. Prévenez-moi dès que le BL est dispo.` },
     ];
   }
@@ -1252,22 +1281,22 @@ function demoThreadForTitle(
   }
   if (title.includes("Parking") || title.includes("nacelle") || title.includes("République")) {
     return [
-      { fromClient: false, content: `Accès livraison Parking République : devis reçu, dispo jeudi.` },
+      { fromClient: false, content: `Accès livraison ${DEMO_SCENARIO.projects.waiting.title} : devis reçu, dispo jeudi.` },
       { fromClient: false, content: `Besoin de votre validation accès cour (7h–16h).` },
-      { fromClient: true, content: `Accès cour validé 7h–16h. Merci Karim.` },
+      { fromClient: true, content: `Accès cour validé 7h–16h. Merci.` },
       { fromClient: false, content: `Top, je bloque la réservation ✅` },
     ];
   }
   if (title.includes("compte rendu") || title.includes("visite")) {
     return [
-      { fromClient: false, content: `CR visite Les Lilas prêt.` },
+      { fromClient: false, content: `CR visite ${DEMO_SCENARIO.projects.primary.title} prêt.` },
       { fromClient: false, content: `Vous pouvez le valider quand vous avez 2 minutes — onglet Documents.` },
-      { fromClient: true, content: `Je regarde ça cet après-midi. Merci Sophie.` },
+      { fromClient: true, content: `Je regarde ça cet après-midi. Merci.` },
     ];
   }
   if (title.includes("Relancer") || title.includes("confirmation livraison")) {
     return [
-      { fromClient: false, content: `Je relance Point.P pour la confirmation livraison membrane bitume Les Lilas.` },
+      { fromClient: false, content: `Je relance ${DEMO_SCENARIO.supplierName} pour la confirmation livraison membrane bitume ${DEMO_SCENARIO.projects.primary.title}.` },
       { fromClient: false, content: `Vous avez une date limite côté chantier ?` },
       { fromClient: true, content: `Idéalement avant la semaine prochaine — sinon on bloque la pose.` },
       { fromClient: false, content: `Compris. Je relance aujourd’hui et je vous joins le mail fournisseur.` },

@@ -12,6 +12,7 @@ import {
   quoteNextActionLabel,
 } from "@/lib/commercial/dashboard-kpis";
 import {
+  adaptiveGranularity,
   bucketKey,
   bucketLabel,
   enumerateBuckets,
@@ -51,10 +52,10 @@ export type DashboardAgingKey =
 
 export const DASHBOARD_AGING_LABELS: Record<DashboardAgingKey, string> = {
   not_due: "Non échu",
-  d1_30: "Retard 1–30 j",
-  d31_60: "Retard 31–60 j",
-  d61_90: "Retard 61–90 j",
-  d90_plus: "Retard +90 j",
+  d1_30: "1–30 j",
+  d31_60: "31–60 j",
+  d61_90: "61–90 j",
+  d90_plus: "+90 j",
 };
 
 export type DashboardAlertPriority = "critical" | "urgent" | "watch" | "info";
@@ -73,6 +74,8 @@ export type DashboardAlert = {
   client: string | null;
   reason: string;
   amountLabel: string | null;
+  amountValue: number | null;
+  amountBasis: "HT" | "TTC" | null;
   href: string;
   actionLabel: string;
 };
@@ -131,15 +134,21 @@ export type CommercialDashboardMetrics = {
   summary: {
     billedHt: number;
     billedHtTrend: TrendChange;
+    billedCount: number;
     collectedTtc: number;
     collectedTtcTrend: TrendChange;
+    collectedCount: number;
     outstandingTtc: number;
+    outstandingCount: number;
     overdueTtc: number;
     overdueCount: number;
     conversionRate: number | null;
     conversionTrend: TrendChange | null;
+    conversionAccepted: number;
+    conversionDecided: number;
     pipelineHt: number;
     pipelineCount: number;
+    wonHt: number;
     billedSpark: number[];
     collectedSpark: number[];
   };
@@ -163,11 +172,17 @@ export type CommercialDashboardMetrics = {
   recentInvoices: DashboardDocRow[];
   salesPerformance: {
     conversionRate: number | null;
+    conversionAccepted: number;
+    conversionDecided: number;
+    conversionTrend: TrendChange | null;
     avgQuoteBasketHt: number | null;
     avgInvoiceBasketHt: number | null;
+    invoiceBasketTrend: TrendChange | null;
     avgAcceptanceDays: number | null;
     avgCollectionDays: number | null;
     paidOnTimeRate: number | null;
+    paidOnTimeCount: number;
+    paidOnTimeTotal: number;
   };
   vat: {
     billedVat: number;
@@ -292,6 +307,7 @@ export async function getCommercialDashboardMetrics(
         type: { not: "CREDIT" },
       }),
       _sum: { totalSellHt: true },
+      _count: true,
     }),
     prisma.commercialInvoice.aggregate({
       where: issuedWhere(orgId, period.from, period.toExclusive, {
@@ -315,6 +331,7 @@ export async function getCommercialDashboardMetrics(
         invoice: { type: { not: "CREDIT" }, ...extra },
       },
       _sum: { amount: true },
+      _count: true,
     }),
     prisma.commercialPayment.aggregate({
       where: {
@@ -612,6 +629,8 @@ export async function getCommercialDashboardMetrics(
   );
   const collectedTtc = roundMoney(d(collectedNow._sum.amount), 2);
   const collectedTtcPrevious = roundMoney(d(collectedPrev._sum.amount), 2);
+  const billedCount = billedNow._count;
+  const collectedCount = collectedNow._count;
   const billedVat = roundMoney(
     d(billedVatNow._sum.totalVat) - d(creditVatNow._sum.totalVat),
     2,
@@ -701,26 +720,34 @@ export async function getCommercialDashboardMetrics(
   const convNow = conversionOf(decidedNow);
   const convPrev = conversionOf(decidedPrev);
 
-  const keys = enumerateBuckets(period.from, period.toExclusive, period.granularity);
+  const granularity = adaptiveGranularity(period.from, period.toExclusive, [
+    ...seriesInvoices.map((i) => i.issueDate),
+    ...seriesPayments.map((p) => p.paidAt),
+    ...seriesAccepted
+      .map((q) => q.acceptedAt)
+      .filter((d): d is Date => Boolean(d)),
+  ]);
+
+  const keys = enumerateBuckets(period.from, period.toExclusive, granularity);
   const billedMap = new Map<string, number>();
   const collectedMap = new Map<string, number>();
   const acceptedMap = new Map<string, number>();
   for (const inv of seriesInvoices) {
-    const key = bucketKey(inv.issueDate, period.granularity);
+    const key = bucketKey(inv.issueDate, granularity);
     billedMap.set(key, (billedMap.get(key) ?? 0) + d(inv.totalSellHt));
   }
   for (const pay of seriesPayments) {
-    const key = bucketKey(pay.paidAt, period.granularity);
+    const key = bucketKey(pay.paidAt, granularity);
     collectedMap.set(key, (collectedMap.get(key) ?? 0) + d(pay.amount));
   }
   for (const q of seriesAccepted) {
     if (!q.acceptedAt) continue;
-    const key = bucketKey(q.acceptedAt, period.granularity);
+    const key = bucketKey(q.acceptedAt, granularity);
     acceptedMap.set(key, (acceptedMap.get(key) ?? 0) + d(q.totalSellHt));
   }
   const revenueSeries: DashboardSeriesPoint[] = keys.map((key) => ({
     key,
-    label: bucketLabel(key, period.granularity),
+    label: bucketLabel(key, granularity),
     billedHt: roundMoney(billedMap.get(key) ?? 0, 2),
     collectedTtc: roundMoney(collectedMap.get(key) ?? 0, 2),
     acceptedHt: roundMoney(acceptedMap.get(key) ?? 0, 2),
@@ -795,6 +822,8 @@ export async function getCommercialDashboardMetrics(
         client: clientName(inv.clientExternalOrg),
         reason: `${days} j de retard`,
         amountLabel: `${money0(d(inv.amountDue))} TTC`,
+        amountValue: roundMoney(d(inv.amountDue), 2),
+        amountBasis: "TTC",
         href: `/dashboard/devis-facturation/factures/${inv.id}`,
         actionLabel: "Voir",
       });
@@ -813,6 +842,8 @@ export async function getCommercialDashboardMetrics(
       client: clientName(q.clientExternalOrg),
       reason: `Envoyé depuis ${days} j`,
       amountLabel: `${money0(d(q.totalSellHt))} HT`,
+      amountValue: roundMoney(d(q.totalSellHt), 2),
+      amountBasis: "HT",
       href: `/dashboard/devis-facturation/devis/${q.id}`,
       actionLabel: "Relancer",
     });
@@ -827,6 +858,8 @@ export async function getCommercialDashboardMetrics(
       client: clientName(inv.clientExternalOrg),
       reason: "Brouillon — à émettre",
       amountLabel: `${money0(d(inv.totalTtc))} TTC`,
+      amountValue: roundMoney(d(inv.totalTtc), 2),
+      amountBasis: "TTC",
       href: `/dashboard/devis-facturation/factures/${inv.id}`,
       actionLabel: "Continuer",
     });
@@ -841,6 +874,8 @@ export async function getCommercialDashboardMetrics(
       client: clientName(inv.clientExternalOrg),
       reason: `Payé ${money0(d(inv.amountPaid))} · reste ${money0(d(inv.amountDue))}`,
       amountLabel: `${money0(d(inv.amountDue))} TTC`,
+      amountValue: roundMoney(d(inv.amountDue), 2),
+      amountBasis: "TTC",
       href: `/dashboard/devis-facturation/factures/${inv.id}`,
       actionLabel: "Voir",
     });
@@ -855,20 +890,54 @@ export async function getCommercialDashboardMetrics(
       client: clientName(s.quote.clientExternalOrg),
       reason: `${s.label} · ${s.quote.number}`,
       amountLabel: `${money0(d(s.periodSellHt))} HT`,
+      amountValue: roundMoney(d(s.periodSellHt), 2),
+      amountBasis: "HT",
       href: `/dashboard/devis-facturation/situations/${s.id}`,
       actionLabel: "Continuer",
     });
   }
+  const kindRank: Record<DashboardAlert["kind"], number> = {
+    invoice_overdue: 0,
+    invoice_partial: 1,
+    invoice_draft: 2,
+    to_invoice: 3,
+    quote_relance: 4,
+  };
   const priorityRank: Record<DashboardAlertPriority, number> = {
     critical: 0,
     urgent: 1,
     watch: 2,
     info: 3,
   };
-  alerts.sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority]);
+  alerts.sort((a, b) => {
+    const k = kindRank[a.kind] - kindRank[b.kind];
+    if (k !== 0) return k;
+    return priorityRank[a.priority] - priorityRank[b.priority];
+  });
 
   const vatMethod =
-    "TVA collectée sur les factures clients émises de la période, moins la TVA enregistrée sur les factures fournisseurs (si accessible). Estimation uniquement : le régime d’exigibilité (débits / encaissements) et la déductibilité réelle ne sont pas déterminés.";
+    "TVA facturée sur les factures clients émises de la période, moins la TVA enregistrée sur les factures fournisseurs (si accessible). Estimation : le régime d’exigibilité (débits / encaissements) n’est pas déterminé.";
+
+  const wonHt = roundMoney(
+    seriesAccepted.reduce((s, q) => s + d(q.totalSellHt), 0),
+    2,
+  );
+  const avgInvoiceBasketHtPrev =
+    billedPrev._count > 0
+      ? roundMoney(d(billedPrev._sum.totalSellHt) / billedPrev._count, 2)
+      : null;
+  const invoiceBasketTrend =
+    avgInvoiceBasketHt != null && avgInvoiceBasketHtPrev != null
+      ? trendChange(avgInvoiceBasketHt, avgInvoiceBasketHtPrev)
+      : avgInvoiceBasketHt != null && billedPrev._count === 0
+        ? trendChange(avgInvoiceBasketHt, 0)
+        : null;
+  const conversionTrend =
+    convNow.rate != null && convPrev.rate != null
+      ? trendChange(convNow.rate, convPrev.rate)
+      : convNow.rate != null
+        ? trendChange(convNow.rate, 0)
+        : null;
 
   return {
     period: {
@@ -877,26 +946,27 @@ export async function getCommercialDashboardMetrics(
       toExclusive: period.toExclusive.toISOString(),
       label: period.label,
       previousLabel: period.previousLabel,
-      granularity: period.granularity,
+      granularity,
     },
     empty,
     summary: {
       billedHt,
       billedHtTrend: trendChange(billedHt, billedHtPrevious),
+      billedCount,
       collectedTtc,
       collectedTtcTrend: trendChange(collectedTtc, collectedTtcPrevious),
+      collectedCount,
       outstandingTtc,
+      outstandingCount: openInvoices.length,
       overdueTtc,
       overdueCount,
       conversionRate: convNow.rate,
-      conversionTrend:
-        convNow.rate != null && convPrev.rate != null
-          ? trendChange(convNow.rate, convPrev.rate)
-          : convNow.rate != null
-            ? { pct: null, kind: "new", label: "Nouveau" }
-            : null,
+      conversionTrend,
+      conversionAccepted: convNow.accepted,
+      conversionDecided: convNow.decided,
       pipelineHt: counts.pipelineDevisHt,
       pipelineCount: counts.enPreparation + counts.envoyes,
+      wonHt,
       billedSpark: revenueSeries.map((p) => p.billedHt),
       collectedSpark: revenueSeries.map((p) => p.collectedTtc),
     },
@@ -922,7 +992,7 @@ export async function getCommercialDashboardMetrics(
         }),
       ),
     },
-    alerts: alerts.slice(0, 8),
+    alerts: alerts.slice(0, 5),
     recentQuotes: recentQuotes.map((q) => ({
       id: q.id,
       href: `/dashboard/devis-facturation/devis/${q.id}`,
@@ -966,11 +1036,17 @@ export async function getCommercialDashboardMetrics(
     }),
     salesPerformance: {
       conversionRate: convNow.rate,
+      conversionAccepted: convNow.accepted,
+      conversionDecided: convNow.decided,
+      conversionTrend,
       avgQuoteBasketHt,
       avgInvoiceBasketHt,
+      invoiceBasketTrend,
       avgAcceptanceDays,
       avgCollectionDays,
       paidOnTimeRate,
+      paidOnTimeCount: onTime,
+      paidOnTimeTotal: timed,
     },
     vat: {
       billedVat,

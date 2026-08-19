@@ -1088,7 +1088,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Point.P, BC, chantier…"
+                  placeholder="Fournisseur, BC, chantier…"
                   className="w-44 rounded-lg border border-slate-200 py-1 pl-7 pr-2 text-xs outline-none"
                 />
               </div>

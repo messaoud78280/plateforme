@@ -24,8 +24,23 @@ import type { DemoPersonaKey } from "@/lib/demo-environment/personas";
 import { OPEN_DEMO_TOUR_EVENT } from "@/lib/demo-environment/open-demo-tour-event";
 
 type Phase = "idle" | "choose" | "tour" | "busy";
+type PersonaOpt = { key: string; label: string; name: string };
 
 export { OPEN_DEMO_TOUR_EVENT };
+
+function formatPersonaLabel(persona: PersonaOpt | undefined, fallbackKey: string): string {
+  if (!persona) return fallbackKey;
+  const firstName = persona.name.trim().split(/\s+/)[0] ?? "";
+  const normalizedLabel = persona.label.trim().toLowerCase();
+  const normalizedFirstName = firstName.trim().toLowerCase();
+  if (!firstName || normalizedFirstName === normalizedLabel) {
+    return persona.label;
+  }
+  if (normalizedLabel.includes(normalizedFirstName) || normalizedFirstName.includes(normalizedLabel)) {
+    return persona.label;
+  }
+  return `${persona.label} — ${firstName}`;
+}
 
 function openGlobalSearch() {
   window.dispatchEvent(new CustomEvent("bework:open-global-search"));
@@ -53,6 +68,7 @@ export function DemoCommercialTour() {
   const [resetConfirm, setResetConfirm] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [desktop, setDesktop] = useState(true);
+  const [personaOptions, setPersonaOptions] = useState<PersonaOpt[]>([]);
 
   const persist = useCallback((next: DemoTourPersistedState) => {
     writeTourState(next);
@@ -82,6 +98,26 @@ export function DemoCommercialTour() {
     }
     window.addEventListener(OPEN_DEMO_TOUR_EVENT, onOpenTour);
     return () => window.removeEventListener(OPEN_DEMO_TOUR_EVENT, onOpenTour);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadPersonaOptions() {
+      try {
+        const res = await fetch("/api/demo/view-as", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = (await res.json()) as { personas?: PersonaOpt[] };
+        if (!cancelled) {
+          setPersonaOptions(Array.isArray(data.personas) ? data.personas : []);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    void loadPersonaOptions();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -156,14 +192,8 @@ export function DemoCommercialTour() {
         const current = await fetchCurrentDemoPersona();
         if (current !== needPersona) {
           setPhase("busy");
-          const labels: Record<string, string> = {
-            direction: "Direction — Denis",
-            conducteur: "Conducteur — Karim",
-            administratif: "Administratif — Julie",
-            client: "Client — Sophie",
-            fournisseur: "Fournisseur — Thomas",
-          };
-          setBusyMsg(`Basculement vers ${labels[needPersona] ?? needPersona}…`);
+          const persona = personaOptions.find((item) => item.key === needPersona);
+          setBusyMsg(`Basculement vers ${formatPersonaLabel(persona, needPersona)}…`);
           const sw = await switchDemoPersona(needPersona);
           if (!sw.ok) {
             setBusyMsg(sw.error ?? "Impossible de changer de persona");
@@ -321,7 +351,9 @@ export function DemoCommercialTour() {
                 className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left transition hover:border-[#1e3a5f]/40 hover:bg-white"
               >
                 <span className="block text-sm font-bold text-slate-900">Démo express</span>
-                <span className="text-xs text-slate-500">~5 min · Denis → problème → Point.P → Thomas</span>
+                <span className="text-xs text-slate-500">
+                  ~5 min · direction → alerte → fournisseur → validation
+                </span>
               </button>
               <button
                 type="button"
@@ -352,7 +384,8 @@ export function DemoCommercialTour() {
               <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-950">
                 <p className="font-semibold">Confirmer la réinitialisation ?</p>
                 <p className="mt-1">
-                  Recrée le seed v4 (personas + BC-2026-043). Ne change pas le persona courant.
+                  Recrée le scénario de démonstration (personas + commande fournisseur). Ne
+                  change pas le persona courant.
                 </p>
                 <div className="mt-2 flex gap-2">
                   <button

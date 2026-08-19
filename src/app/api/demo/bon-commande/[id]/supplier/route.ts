@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
-import { DEMO_BRAND } from "@/lib/demo-environment/brand";
 import { isBonDeCommandeCategory } from "@/lib/demo-environment/bon-commande";
 import { applySupplierDeliveryConfirm } from "@/lib/demo-environment/coherence-victor-hugo";
 
@@ -27,6 +26,8 @@ export async function POST(request: Request, context: Ctx) {
   const action = body.action === "propose" ? "propose" : "confirm";
   const proposedTime =
     typeof body.proposedTime === "string" ? body.proposedTime.trim() : "09:00";
+  const supplierLabel = session.user.name?.trim() || "Fournisseur";
+  const demoCompany = session.user.demoCompanyName?.trim() || "la démo";
 
   const rootId = session.user.demoRootUserId ?? session.user.id;
   const task = await prisma.task.findFirst({
@@ -51,7 +52,7 @@ export async function POST(request: Request, context: Ctx) {
         rootUserId: rootId,
         taskId: task.id,
         actorUserId: session.user.id,
-        actorName: session.user.name ?? "Thomas Bernard",
+        actorName: supplierLabel,
       });
 
       const sheetUrl = result?.sheetId
@@ -60,7 +61,7 @@ export async function POST(request: Request, context: Ctx) {
 
       await prisma.alert.create({
         data: {
-          title: "Point.P a confirmé la livraison",
+          title: `${supplierLabel} a confirmé la livraison`,
           message: `${task.title} — créneau 11/08 07:30 confirmé. Une seule livraison en agenda.`,
           level: "INFO",
           clientId: rootId,
@@ -72,7 +73,7 @@ export async function POST(request: Request, context: Ctx) {
         userId: rootId,
         type: "MESSAGE_RECEIVED",
         title: "Livraison confirmée",
-        message: `Point.P a confirmé : ${task.title}`,
+        message: `${supplierLabel} a confirmé : ${task.title}`,
         actionUrl: sheetUrl,
       });
 
@@ -84,7 +85,7 @@ export async function POST(request: Request, context: Ctx) {
         await createNotification({
           userId: conducteur.id,
           type: "DELIVERY_CHECK",
-          title: "Livraison Point.P confirmée",
+          title: `Livraison ${supplierLabel} confirmée`,
           message: task.title,
           actionUrl: sheetUrl,
         });
@@ -102,7 +103,7 @@ export async function POST(request: Request, context: Ctx) {
     await prisma.task.update({
       where: { id: task.id },
       data: {
-        description: `${task.description ?? ""}\n\n[Démo] Point.P propose ${proposedTime} au lieu de 07:30 — en attente validation ${DEMO_BRAND.companyName}.`.trim(),
+        description: `${task.description ?? ""}\n\n[Démo] ${supplierLabel} propose ${proposedTime} au lieu de 07:30 — en attente validation ${demoCompany}.`.trim(),
       },
     });
 
@@ -120,7 +121,7 @@ export async function POST(request: Request, context: Ctx) {
     await prisma.alert.create({
       data: {
         title: "Modification livraison à valider",
-        message: `Point.P propose ${proposedTime} au lieu de 07:30 pour ${task.title}.`,
+        message: `${supplierLabel} propose ${proposedTime} au lieu de 07:30 pour ${task.title}.`,
         level: "WARNING",
         clientId: rootId,
         actionUrl: task.followUpSheetId
@@ -132,7 +133,7 @@ export async function POST(request: Request, context: Ctx) {
       userId: rootId,
       type: "MESSAGE_RECEIVED",
       title: "Proposition de créneau fournisseur",
-      message: `Point.P propose ${proposedTime} — à accepter ou refuser.`,
+      message: `${supplierLabel} propose ${proposedTime} — à accepter ou refuser.`,
       actionUrl: "/dashboard/commandes",
     });
 

@@ -95,7 +95,7 @@ function buildFamilies(): NavFamily[] {
         { href: "/dashboard/visites-metres", label: "Visites & métrés", icon: Ruler, roles: ALL, emphasis: "high" },
         { href: "/dashboard/fiches-suivi", label: "Fiches suivi", icon: StickyNote, roles: ["CLIENT", "MANAGER"] },
         { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList, roles: ALL },
-        { href: "/dashboard/messages", label: "RDV", icon: CalendarDays, roles: OPS },
+        { href: "/dashboard/messages", label: "RDV & contact", icon: CalendarDays, roles: OPS },
       ],
     },
     {

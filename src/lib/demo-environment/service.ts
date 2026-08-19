@@ -23,8 +23,8 @@ import {
   demoBrandDefaultLogoUrl,
   resolveDemoCompanyName,
 } from "./brand";
-import { DEMO_PERSONAS } from "./personas";
-import { getPlatformConfigForOrganization } from "@/lib/platform/config";
+import { DEMO_PERSONAS, getDemoPersonasForPlatform } from "./personas";
+import { getPlatformConfigForOrganization, type PlatformKey } from "@/lib/platform/config";
 
 export type CreateDemoEnvironmentInput = {
   companyName: string;
@@ -57,13 +57,25 @@ export type CreateDemoEnvironmentResult =
     }
   | { ok: false; error: string };
 
-const DEFAULT_FICTIONAL_ROLES = [
-  { name: DEMO_PERSONAS.direction.name, roleLabel: DEMO_PERSONAS.direction.label },
-  { name: DEMO_PERSONAS.conducteur.name, roleLabel: DEMO_PERSONAS.conducteur.label },
-  { name: DEMO_PERSONAS.administratif.name, roleLabel: DEMO_PERSONAS.administratif.label },
-  { name: DEMO_PERSONAS.client.name, roleLabel: `Client — ${DEMO_PERSONAS.client.company}` },
-  { name: DEMO_PERSONAS.fournisseur.name, roleLabel: `Fournisseur — ${DEMO_PERSONAS.fournisseur.company}` },
-];
+function buildDefaultFictionalRoles(companyName: string, platformKey?: PlatformKey | null) {
+  const personas =
+    getDemoPersonasForPlatform(
+      getPlatformConfigForOrganization({
+        isDemo: true,
+        companyName,
+        ...(platformKey ? { platformKey } : {}),
+      }).key,
+      companyName,
+    ) ?? DEMO_PERSONAS;
+
+  return [
+    { name: personas.direction.name, roleLabel: personas.direction.label },
+    { name: personas.conducteur.name, roleLabel: personas.conducteur.label },
+    { name: personas.administratif.name, roleLabel: personas.administratif.label },
+    { name: personas.client.name, roleLabel: `Client — ${personas.client.company}` },
+    { name: personas.fournisseur.name, roleLabel: `Fournisseur — ${personas.fournisseur.company}` },
+  ];
+}
 
 function resolveModules(templateKey: DemoTemplateKey, modules?: string[]): DemoModuleKey[] {
   if (modules && modules.length > 0) {
@@ -118,6 +130,7 @@ export async function createDemoEnvironment(
   });
   const rootDisplayName =
     platformAtCreate.key === "setrim" ? demoBrandContactFullName() : "Direction";
+  const rolesConfig = buildDefaultFictionalRoles(companyName, platformAtCreate.key);
   const rootRoleLabel =
     platformAtCreate.key === "setrim" ? DEMO_BRAND.contactRoleLabel : "Direction";
 
@@ -163,7 +176,7 @@ export async function createDemoEnvironment(
           logoUrl: demoBrandDefaultLogoUrl(input.logoUrl, companyName),
           templateKey,
           modulesEnabled,
-          rolesConfig: DEFAULT_FICTIONAL_ROLES,
+          rolesConfig,
           meetingAt,
           startsAt,
           expiresAt,
@@ -362,6 +375,8 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
   const personas = await listDemoPersonaUsers({
     rootUserId: demo.rootUserId,
     loginIdentifier: demo.loginIdentifier,
+    companyName,
+    organizationId: demo.organizationId,
   });
   const karim = personas.find((p) => p.key === "conducteur");
   const { ensureKanbanReadabilityDemo } = await import("./kanban-readability");

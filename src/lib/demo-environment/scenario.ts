@@ -4,7 +4,7 @@
  * Séparé de DEMO_BRAND (identité / logo / Denis).
  * Activités inspirées du site setrim.fr (vérifiable) — clients / adresses / BC fictifs.
  *
- * Pipeline technique inchangé : BC-2026-043 · Point.P · OS-4587 · Attention · Agenda.
+ * Pipeline technique inchangé : BC-2026-043 · fournisseur · OS-4587 · Attention · Agenda.
  */
 
 export type DemoScenarioProjectKey = "primary" | "waiting" | "study" | "calm";
@@ -75,10 +75,10 @@ export const DEMO_SCENARIO: DemoScenarioConfig = {
   verifiedClientTypes: ["architectes", "syndics d'immeubles", "entreprises", "collectivités"],
   orderNumber: DEMO_SCENARIO_ORDER_NUMBER,
   osNumber: "4587",
-  supplierName: "Point.P",
+  supplierName: "ProMat IDF",
   client: {
-    name: "Syndic Horizon Copro",
-    shortLabel: "Horizon Copro",
+    name: "Copropriete Horizon",
+    shortLabel: "Horizon",
   },
   materials: {
     subject: "40 rouleaux membrane bitume autoprotégée",
@@ -93,32 +93,32 @@ export const DEMO_SCENARIO: DemoScenarioConfig = {
   projects: {
     primary: {
       key: "primary",
-      title: "Résidence Les Lilas",
-      matchToken: "Les Lilas",
-      legacyMatchTokens: ["Victor Hugo"],
+      title: "Residence Horizon",
+      matchToken: "Horizon",
+      legacyMatchTokens: ["Les Lilas", "Victor Hugo"],
       description:
         "Réfection étanchéité terrasse inaccessible (bitume) et points singuliers — données fictives de démonstration.",
       workObject: "Réfection étanchéité terrasse inaccessible",
-      siteAddress: "18 rue des Lilas",
+      siteAddress: "18 rue du Chantier",
       siteCity: "Aubervilliers",
       role: "Scénario principal — commande fournisseur / livraison",
     },
     waiting: {
       key: "waiting",
-      title: "Parking République",
-      matchToken: "République",
-      legacyMatchTokens: [],
+      title: "Parking Centre-ville",
+      matchToken: "Centre-ville",
+      legacyMatchTokens: ["République"],
       description: "Étanchéité parking sous enrobé — accès / validation en attente — données fictives.",
       workObject: "Étanchéité parking",
-      siteAddress: "8 place de la République",
+      siteAddress: "8 place du Centre",
       siteCity: "Pantin",
       role: "En attente — tâche / validation bloquée",
     },
     study: {
       key: "study",
-      title: "Balcons Alpha — Résine",
-      matchToken: "Alpha",
-      legacyMatchTokens: [],
+      title: "Balcons Rivage — Résine",
+      matchToken: "Rivage",
+      legacyMatchTokens: ["Alpha"],
       description: "Étude résine sur balcons — phase étude calme — données fictives.",
       workObject: "Résine étanchéité balcons",
       siteAddress: "22 avenue de la République",

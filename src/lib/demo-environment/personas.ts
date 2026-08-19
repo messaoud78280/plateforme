@@ -120,8 +120,18 @@ export function getDemoPersonasForPlatform(
       name: "Administratif",
       company: host,
     },
-    client: { ...DEMO_PERSONAS.client },
-    fournisseur: { ...DEMO_PERSONAS.fournisseur },
+    client: {
+      ...DEMO_PERSONAS.client,
+      name: "Client",
+      company: `${host} — client`,
+      jobTitle: "Maîtrise d’ouvrage",
+    },
+    fournisseur: {
+      ...DEMO_PERSONAS.fournisseur,
+      name: "Fournisseur",
+      company: `${host} — fournisseur`,
+      jobTitle: "Fournisseur chantier",
+    },
   };
 }
 
@@ -159,10 +169,10 @@ export function personaRightsSummary(key: DemoPersonaKey): {
           section: "Terrain",
           items: [
             { label: "Chantiers affectés", allowed: true },
-            { label: "Messagerie INTERNE + CLIENT", allowed: true },
+            { label: "Messagerie chantier", allowed: true },
             { label: "Documents chantier", allowed: true },
-            { label: "Équipe & partenaires", allowed: false },
-            { label: "Finances / marges", allowed: false },
+            { label: "Commandes, livraisons et facturation chantier", allowed: true },
+            { label: "Pilotage global entreprise / marge consolidée", allowed: false },
           ],
         },
       ];
@@ -173,9 +183,9 @@ export function personaRightsSummary(key: DemoPersonaKey): {
           items: [
             { label: "Documents / BL / facturation", allowed: true },
             { label: "Commandes & relances admin", allowed: true },
-            { label: "Messagerie INTERNE", allowed: true },
+            { label: "Messagerie chantier et échanges fournisseurs", allowed: true },
             { label: "Équipe & partenaires", allowed: true },
-            { label: "Pilotage terrain (conducteur)", allowed: false },
+            { label: "Pilotage terrain (conducteur)", allowed: true },
           ],
         },
       ];
@@ -184,7 +194,7 @@ export function personaRightsSummary(key: DemoPersonaKey): {
         {
           section: "Partagé uniquement",
           items: [
-            { label: "Chantiers partagés (ex. Résidence Les Lilas)", allowed: true },
+            { label: "Chantiers partagés", allowed: true },
             { label: "Conversation CLIENT", allowed: true },
             { label: "Documents partagés", allowed: true },
             { label: "Fil INTERNE / fournisseurs", allowed: false },
@@ -197,7 +207,7 @@ export function personaRightsSummary(key: DemoPersonaKey): {
         {
           section: "Commandes & livraisons",
           items: [
-            { label: "Voir / confirmer commandes Point.P", allowed: true },
+            { label: "Voir / confirmer commandes fournisseur", allowed: true },
             { label: "Proposer une autre date", allowed: true },
             { label: "Documents partagés / BL", allowed: true },
             { label: "Conversation FOURNISSEUR", allowed: true },

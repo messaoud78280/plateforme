@@ -31,7 +31,7 @@ export async function POST() {
 
   if (!isInternalDirection && !isRoot) {
     return NextResponse.json(
-      { error: "Réinitialisation réservée à Direction — Denis." },
+      { error: "Réinitialisation réservée au profil Direction de la démo." },
       { status: 403 },
     );
   }
@@ -59,5 +59,5 @@ export async function POST() {
     return NextResponse.json({ error: result.error }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, seedVersion: "v4-demo-cleanup" });
+  return NextResponse.json({ ok: true, reset: "scenario" });
 }

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { HeaderDropdown } from "@/components/ui/HeaderDropdown";
+import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
+import { isNavHrefAllowedForDemo } from "@/lib/demo-environment/nav-modules";
 
 function getInitials(name: string | null | undefined): string {
   if (!name || !name.trim()) return "?";
@@ -16,13 +18,9 @@ function getInitials(name: string | null | undefined): string {
 const baseMenuItems = [
   { label: "Mon profil", href: "/dashboard/parametres", icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
   { label: "Préférences d’affichage", href: "/dashboard/parametres/preferences", icon: "M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" },
-  { label: "Contrat", href: "/contract", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
+  { label: "Abonnement", href: "/dashboard/abonnement", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
   { label: "Coordonnées de l'entreprise", href: "/dashboard/parametres", icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" },
-  { label: "Facturation et paiements", href: "#", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
-  { label: "Produits et services", href: "/dashboard/projets", icon: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0v.5a2.5 2.5 0 004.065 2.065M12 12a2 2 0 104 0 2 2 0 00-4 0z" },
   { label: "Documents", href: "/dashboard/documents", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
-  { label: "Appareils du réseau", href: "#", icon: "M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" },
-  { label: "Faites une demande", href: "/contact", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" },
 ];
 
 const staffDesignSystemItem = {
@@ -38,6 +36,10 @@ interface UserAccountDropdownProps {
   /** Libellé métier affiché (permissionProfile) — source unique côté layout */
   roleLabel?: string | null;
   userCompany?: string | null;
+  personType?: string | null;
+  permissionProfile?: string | null;
+  isDemo?: boolean;
+  demoModules?: string[] | null;
 }
 
 export function UserAccountDropdown({
@@ -45,6 +47,10 @@ export function UserAccountDropdown({
   userRole,
   roleLabel: roleLabelProp,
   userCompany,
+  personType,
+  permissionProfile,
+  isDemo = false,
+  demoModules,
 }: UserAccountDropdownProps) {
   const roleLabel =
     roleLabelProp?.trim() ||
@@ -57,6 +63,15 @@ export function UserAccountDropdown({
     userRole === "MANAGER" || userRole === "AGENCE"
       ? [staffDesignSystemItem, ...baseMenuItems]
       : baseMenuItems;
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (!canAccessDashboardHref(item.href, personType, permissionProfile)) {
+      return false;
+    }
+    if (isDemo && !isNavHrefAllowedForDemo(item.href, demoModules ?? [])) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <HeaderDropdown
@@ -101,13 +116,10 @@ export function UserAccountDropdown({
         </div>
       </div>
       <ul className="max-h-[min(70vh,24rem)] overflow-y-auto py-1">
-        {menuItems.map((item) => (
+        {visibleMenuItems.map((item) => (
           <li key={item.label} className="border-b border-[#e5e7eb] last:border-b-0">
             <Link
               href={item.href}
-              onClick={(e) => {
-                if (item.href === "#") e.preventDefault();
-              }}
               className="flex items-center gap-3 px-4 py-3 text-sm text-[#374151] transition-colors hover:bg-[#fafafa]"
               role="menuitem"
             >

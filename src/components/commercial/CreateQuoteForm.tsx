@@ -420,7 +420,7 @@ export function CreateQuoteForm({
               <input
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                placeholder="Réfection de l’étanchéité terrasse — Résidence Les Lilas"
+                placeholder="Réfection de l’étanchéité terrasse — Résidence Horizon"
                 className={inputClass}
                 autoFocus
               />

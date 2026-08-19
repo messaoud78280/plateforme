@@ -12,7 +12,7 @@ const FINDINGS = [
   { label: "Délai détecté", value: "Pénalités de retard — article 12" },
   { label: "Obligation particulière", value: "Interface lots étanchéité / couverture" },
   { label: "Document manquant", value: "2 notices DOE à demander" },
-  { label: "Action proposée", value: "Créer une tâche · attribuer à Karim Benali" },
+  { label: "Action proposée", value: "Créer une tâche · attribuer au conducteur de travaux" },
 ] as const;
 
 /** IA intégrée au workflow — pas un chatbot. */

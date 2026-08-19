@@ -7,9 +7,11 @@ import {
   DEMO_PERSONA_KEYS,
   DEMO_PERSONAS,
   demoPersonaEmail,
+  getDemoPersonasForPlatform,
   type DemoPersonaKey,
 } from "./personas";
-import { matchesDemoProjectTitle } from "./scenario";
+import { DEMO_SCENARIO, matchesDemoProjectTitle } from "./scenario";
+import { getPlatformConfigForOrganization } from "@/lib/platform/config";
 
 export type SeedPersonasResult = {
   users: Record<DemoPersonaKey, { id: string; email: string; name: string }>;
@@ -41,13 +43,21 @@ export async function seedDemoPersonaUsers(opts: {
     root.password ||
     (await bcrypt.hash(opts.plainPasswordFallback || "BeWorkDemo2026!", 12));
 
+  const platform = getPlatformConfigForOrganization({
+    organizationId: opts.organizationId,
+    isDemo: true,
+    loginIdentifier: opts.loginIdentifier,
+    companyName: opts.companyName,
+  });
+  const personas = getDemoPersonasForPlatform(platform.key, opts.companyName) ?? DEMO_PERSONAS;
+
   // Direction = root
   await prisma.user.update({
     where: { id: root.id },
     data: {
-      name: DEMO_PERSONAS.direction.name,
+      name: personas.direction.name,
       company: opts.companyName,
-      jobTitle: DEMO_PERSONAS.direction.jobTitle,
+      jobTitle: personas.direction.jobTitle,
       personType: "INTERNAL",
       permissionProfile: "DIRECTION",
       accessStatus: "ACTIVE",
@@ -65,10 +75,10 @@ export async function seedDemoPersonaUsers(opts: {
   const jardins = projects.find((p) => matchesDemoProjectTitle(p.title, "calm"));
 
   const users = {} as SeedPersonasResult["users"];
-  users.direction = { id: root.id, email: root.email, name: DEMO_PERSONAS.direction.name };
+  users.direction = { id: root.id, email: root.email, name: personas.direction.name };
 
   for (const key of NON_ROOT_KEYS) {
-    const def = DEMO_PERSONAS[key];
+    const def = personas[key];
     const email = demoPersonaEmail(opts.loginIdentifier, def.emailSuffix);
     let externalOrganizationId: string | null = null;
     if (def.externalOrgType) {
@@ -209,12 +219,12 @@ export async function seedDemoPersonaUsers(opts: {
     await prisma.task.update({
       where: { id: bc.id },
       data: {
-        title: "POINT.P — Résidence Les Lilas (BC-2026-043)",
+        title: `${DEMO_SCENARIO.supplierName} — ${DEMO_SCENARIO.projects.primary.title} (${DEMO_SCENARIO.orderNumber})`,
         description:
-          "Fournisseur Point.P — 40 rouleaux membrane bitume autoprotégée. Livraison demandée 11 août 2026 07:30. Montant indicatif 4 260 € HT. Contact : Thomas Bernard.",
+          `Fournisseur ${DEMO_SCENARIO.supplierName} — ${DEMO_SCENARIO.materials.subject}. Livraison demandée 11 août 2026 07:30. Montant indicatif 4 260 € HT. Contact : service logistique.`,
         suppliersJson: [
           {
-            name: "Point.P",
+            name: DEMO_SCENARIO.supplierName,
             contact: users.fournisseur.email,
             contactUserId: users.fournisseur.id,
           },
@@ -269,10 +279,19 @@ export async function seedDemoPersonaUsers(opts: {
 export async function listDemoPersonaUsers(opts: {
   rootUserId: string;
   loginIdentifier: string;
+  companyName?: string | null;
+  organizationId?: string | null;
 }): Promise<{ key: DemoPersonaKey; id: string; name: string; email: string }[]> {
+  const platform = getPlatformConfigForOrganization({
+    organizationId: opts.organizationId ?? null,
+    isDemo: true,
+    loginIdentifier: opts.loginIdentifier,
+    companyName: opts.companyName ?? null,
+  });
+  const personas = getDemoPersonasForPlatform(platform.key, opts.companyName) ?? DEMO_PERSONAS;
   const out: { key: DemoPersonaKey; id: string; name: string; email: string }[] = [];
   for (const key of DEMO_PERSONA_KEYS) {
-    const def = DEMO_PERSONAS[key];
+    const def = personas[key];
     const row =
       key === "direction"
         ? await prisma.user.findUnique({

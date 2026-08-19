@@ -69,7 +69,7 @@ export async function ensureVictorHugoCoherence(opts: {
       where: { id: project.id },
       data: {
         assignedToId: karim.id,
-        internalManager: karim.name ?? "Karim Benali",
+        internalManager: karim.name ?? "Conducteur travaux",
       },
     });
   } else {
@@ -85,7 +85,7 @@ export async function ensureVictorHugoCoherence(opts: {
         where: { id: project.id },
         data: {
           assignedToId: null,
-          internalManager: karim?.name ?? "Karim Benali",
+          internalManager: karim?.name ?? "Conducteur travaux",
         },
       });
     }
@@ -188,7 +188,7 @@ export async function ensureVictorHugoCoherence(opts: {
     },
     {
       label: "Commande fournisseur créée",
-      detail: "BC-2026-043 — Point.P · 40 rouleaux membrane bitume autoprotégée",
+      detail: `${DEMO_SCENARIO.orderNumber} — ${DEMO_SCENARIO.supplierName} · ${DEMO_SCENARIO.materials.subject}`,
       at: new Date(2026, 7, 10, 10, 0, 0),
       kind: "commande",
     },
@@ -215,7 +215,11 @@ export async function ensureVictorHugoCoherence(opts: {
     where: {
       clientId: opts.rootUserId,
       projectId: project.id,
-      OR: [{ title: { contains: "BC-2026-043" } }, { title: { contains: "POINT.P" } }],
+      OR: [
+        { title: { contains: DEMO_SCENARIO.orderNumber } },
+        { title: { contains: DEMO_SCENARIO.supplierName } },
+        { title: { contains: "POINT.P" } },
+      ],
     },
     orderBy: { createdAt: "asc" },
   });
@@ -223,9 +227,9 @@ export async function ensureVictorHugoCoherence(opts: {
   if (!bc) {
     bc = await prisma.task.create({
       data: {
-        title: "POINT.P — Résidence Les Lilas (BC-2026-043)",
+        title: `${DEMO_SCENARIO.supplierName} — ${DEMO_SCENARIO.projects.primary.title} (${DEMO_SCENARIO.orderNumber})`,
         description:
-          "Fournisseur Point.P — 40 rouleaux membrane bitume autoprotégée. Livraison demandée 11 août 2026 07:30. Montant indicatif 4 260 € HT. Contact : Thomas Bernard.",
+          `Fournisseur ${DEMO_SCENARIO.supplierName} — ${DEMO_SCENARIO.materials.subject}. Livraison demandée 11 août 2026 07:30. Montant indicatif 4 260 € HT. Contact : service logistique.`,
         status: "EN_ATTENTE_INFO",
         priority: "PRIORITAIRE",
         clientId: opts.rootUserId,
@@ -234,23 +238,23 @@ export async function ensureVictorHugoCoherence(opts: {
         followUpSheetId: sheet.id,
         category: "Bon de commande",
         desiredDate: DELIVERY_AT,
-        suppliersJson: [{ name: "Point.P", contact: "Thomas Bernard" }],
+        suppliersJson: [{ name: DEMO_SCENARIO.supplierName, contact: "service logistique" }],
       },
     });
   } else {
     bc = await prisma.task.update({
       where: { id: bc.id },
       data: {
-        title: "POINT.P — Résidence Les Lilas (BC-2026-043)",
+        title: `${DEMO_SCENARIO.supplierName} — ${DEMO_SCENARIO.projects.primary.title} (${DEMO_SCENARIO.orderNumber})`,
         followUpSheetId: sheet.id,
         projectId: project.id,
         category: "Bon de commande",
         desiredDate: DELIVERY_AT,
-        suppliersJson: [{ name: "Point.P", contact: "Thomas Bernard" }],
+        suppliersJson: [{ name: DEMO_SCENARIO.supplierName, contact: "service logistique" }],
         description:
           bc.description?.includes("40 rouleaux")
             ? bc.description
-            : "Fournisseur Point.P — 40 rouleaux membrane bitume autoprotégée. Livraison demandée 11 août 2026 07:30. Montant indicatif 4 260 € HT. Contact : Thomas Bernard.",
+            : `Fournisseur ${DEMO_SCENARIO.supplierName} — ${DEMO_SCENARIO.materials.subject}. Livraison demandée 11 août 2026 07:30. Montant indicatif 4 260 € HT. Contact : service logistique.`,
       },
     });
   }
@@ -261,7 +265,11 @@ export async function ensureVictorHugoCoherence(opts: {
       clientId: opts.rootUserId,
       projectId: project.id,
       id: { not: bc.id },
-      OR: [{ title: { contains: "BC-2026-043" } }, { title: { contains: "POINT.P — Résidence" } }],
+      OR: [
+        { title: { contains: DEMO_SCENARIO.orderNumber } },
+        { title: { contains: `${DEMO_SCENARIO.supplierName} — ${DEMO_SCENARIO.projects.primary.title}` } },
+        { title: { contains: "POINT.P — Résidence" } },
+      ],
     },
     select: { id: true },
   });
@@ -286,6 +294,8 @@ export async function ensureVictorHugoCoherence(opts: {
         hostOrganizationId: opts.organizationId,
         type: "SUPPLIER",
         OR: [
+          { name: { contains: DEMO_SCENARIO.supplierName, mode: "insensitive" } },
+          { tradeName: { contains: DEMO_SCENARIO.supplierName, mode: "insensitive" } },
           { name: { contains: "Point.P", mode: "insensitive" } },
           { tradeName: { contains: "Point.P", mode: "insensitive" } },
         ],
@@ -298,8 +308,8 @@ export async function ensureVictorHugoCoherence(opts: {
     const created = await prisma.externalOrganization.create({
       data: {
         hostOrganizationId: opts.organizationId,
-        name: "POINT.P",
-        tradeName: "POINT.P",
+        name: DEMO_SCENARIO.supplierName,
+        tradeName: DEMO_SCENARIO.supplierName,
         type: "SUPPLIER",
         activity: "Fournitures bâtiment",
         status: "ACTIVE",
@@ -311,7 +321,7 @@ export async function ensureVictorHugoCoherence(opts: {
     await prisma.externalOrganization.update({
       where: { id: pointPId },
       data: {
-        tradeName: "POINT.P",
+        tradeName: DEMO_SCENARIO.supplierName,
         activity: "Fournitures bâtiment",
         status: "ACTIVE",
       },
@@ -360,7 +370,7 @@ export async function ensureVictorHugoCoherence(opts: {
         organizationId: opts.organizationId,
         number: "BC-2026-043",
         status: "A_CONFIRMER",
-        subject: "40 rouleaux membrane bitume autoprotégée — Résidence Les Lilas",
+        subject: `${DEMO_SCENARIO.materials.subject} — ${DEMO_SCENARIO.projects.primary.title}`,
         projectId: project.id,
         followUpSheetId: sheet.id,
         externalOrganizationId: pointPId,
@@ -401,7 +411,7 @@ export async function ensureVictorHugoCoherence(opts: {
             {
               kind: "shared",
               label: "Commande partagée fournisseur",
-              detail: "POINT.P — Thomas Bernard",
+              detail: `${DEMO_SCENARIO.supplierName} — service logistique`,
               actorUserId: opts.rootUserId,
             },
           ],
@@ -431,7 +441,7 @@ export async function ensureVictorHugoCoherence(opts: {
       data: {
         number: "BC-2026-043",
         ...(preserveSupplierProgress ? {} : { status: "A_CONFIRMER" as const }),
-        subject: "40 rouleaux membrane bitume autoprotégée — Résidence Les Lilas",
+        subject: `${DEMO_SCENARIO.materials.subject} — ${DEMO_SCENARIO.projects.primary.title}`,
         projectId: project.id,
         followUpSheetId: sheet.id,
         externalOrganizationId: pointPId,
@@ -506,12 +516,12 @@ export async function ensureVictorHugoCoherence(opts: {
     // Garde-fou : événement minimal si sync noop (ne devrait pas arriver avec DELIVERY_AT)
     delivery = await prisma.agendaEvent.create({
       data: {
-        title: "Livraison POINT.P (BC-2026-043)",
+        title: `Livraison ${DEMO_SCENARIO.supplierName} (${DEMO_SCENARIO.orderNumber})`,
         type: "LIVRAISON",
         status: "PLANIFIE",
         startAt: DELIVERY_AT,
         endAt: DELIVERY_END,
-        location: "Résidence Les Lilas — aire livraison",
+        location: `${DEMO_SCENARIO.projects.primary.title} — ${DEMO_SCENARIO.delivery.locationHint}`,
         ownerUserId: opts.rootUserId,
         createdById: opts.rootUserId,
         organizationId: opts.organizationId,
@@ -538,19 +548,19 @@ export async function ensureVictorHugoCoherence(opts: {
   if (!intervention) {
     intervention = await prisma.agendaEvent.create({
       data: {
-        title: "Intervention étanchéité — Les Lilas",
+        title: `Intervention étanchéité — ${DEMO_SCENARIO.projects.primary.title}`,
         type: "INTERVENTION",
         status: "PLANIFIE",
         startAt: INTERVENTION_AT,
         endAt: INTERVENTION_END,
-        location: "Résidence Les Lilas — terrasse",
+        location: `${DEMO_SCENARIO.projects.primary.title} — terrasse`,
         ownerUserId: opts.rootUserId,
         createdById: opts.rootUserId,
         organizationId: opts.organizationId,
         projectId: project.id,
         followUpSheetId: sheet.id,
         responsibleId: assigneeId,
-        description: "Responsable : Karim Benali",
+        description: "Responsable : conducteur travaux",
       },
     });
   } else if (intervention.status !== "TERMINE") {
@@ -561,7 +571,7 @@ export async function ensureVictorHugoCoherence(opts: {
         endAt: INTERVENTION_END,
         followUpSheetId: sheet.id,
         responsibleId: assigneeId,
-        title: "Intervention étanchéité — Les Lilas",
+        title: `Intervention étanchéité — ${DEMO_SCENARIO.projects.primary.title}`,
       },
     });
   }
@@ -584,12 +594,12 @@ export async function ensureVictorHugoCoherence(opts: {
   if (!reunion) {
     reunion = await prisma.agendaEvent.create({
       data: {
-        title: "Réunion chantier — Les Lilas",
+        title: `Réunion chantier — ${DEMO_SCENARIO.projects.primary.title}`,
         type: "REUNION_CHANTIER",
         status: "CONFIRME",
         startAt: REUNION_AT,
         endAt: REUNION_END,
-        location: "Résidence Les Lilas — baraque de chantier",
+        location: `${DEMO_SCENARIO.projects.primary.title} — base chantier`,
         ownerUserId: opts.rootUserId,
         createdById: opts.rootUserId,
         organizationId: opts.organizationId,
@@ -627,8 +637,8 @@ export async function ensureVictorHugoCoherence(opts: {
         assigneeId: opts.rootUserId,
         organizationId: opts.organizationId,
         projectId: project.id,
-        title: "Avenant n°02 — Les Lilas",
-        clientName: "Syndic Horizon Copro",
+        title: `Avenant n°02 — ${DEMO_SCENARIO.projects.primary.title}`,
+        clientName: DEMO_SCENARIO.client.name,
         workObject: "20 m² terrasse côté cour",
         orderNumber: "AV-2026-02",
         osNumber: "4587",
@@ -637,7 +647,7 @@ export async function ensureVictorHugoCoherence(opts: {
         nextAction: "Chiffrer l’avenant n°02",
         nextActionAt: new Date(2026, 7, 20),
         nextActionDone: false,
-        notes: "Source : message client Sophie Martin — à chiffrer.",
+        notes: "Source : message client démo — à chiffrer.",
         sourceMessageKind: sophie ? "PROJECT" : null,
         sourceMessageId: null,
       },
@@ -768,7 +778,7 @@ export async function ensureVictorHugoCoherence(opts: {
             channel: "INTERNE",
             channelId: internalCh.id,
             content:
-              "Point interne — membrane Point.P : on valide les détails avant de répondre au syndic.",
+              `Point interne — membrane ${DEMO_SCENARIO.supplierName} : on valide les détails avant de répondre au client.`,
           },
         });
       }
@@ -909,7 +919,7 @@ export async function applySupplierDeliveryConfirm(opts: {
       orderId: linkedPo.id,
       actorUserId: opts.actorUserId,
       postSystemMessage: true,
-      systemMessage: `✓ Livraison confirmée — 11 août 07:30\nBC-2026-043 · Point.P\n[Voir la commande](/dashboard/commandes/${linkedPo.id})`,
+      systemMessage: `✓ Livraison confirmée — 11 août 07:30\n${DEMO_SCENARIO.orderNumber} · ${DEMO_SCENARIO.supplierName}\n[Voir la commande](/dashboard/commandes/${linkedPo.id})`,
     });
     delivery = synced.eventId ? { id: synced.eventId } : null;
   }
@@ -955,7 +965,7 @@ export async function applySupplierDeliveryConfirm(opts: {
       sheetId,
       authorId: opts.actorUserId,
       kind: "fournisseur",
-      label: "Livraison Point.P confirmée",
+      label: `Livraison ${DEMO_SCENARIO.supplierName} confirmée`,
       detail: "BC-2026-043 — créneau 11/08 07:30 — une seule livraison en agenda.",
     });
   }
@@ -976,7 +986,7 @@ export async function applySupplierDeliveryConfirm(opts: {
         taskId: task.id,
         senderId: opts.actorUserId,
         receiverId: opts.rootUserId,
-        content: `✅ Livraison confirmée pour le 11/08/2026 à 07:30 — ${opts.actorName} (Point.P).`,
+        content: `✅ Livraison confirmée pour le 11/08/2026 à 07:30 — ${opts.actorName} (${DEMO_SCENARIO.supplierName}).`,
         kind: "SYSTEM",
       },
     });

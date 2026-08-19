@@ -371,7 +371,7 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
       {/* En-tête avec onglets */}
       <div className="border-b border-slate-200">
         <h2 className="px-6 pt-4 text-lg font-semibold text-slate-800">
-          {variant === "messagerie" ? "Messagerie" : "RDV"}
+          {variant === "messagerie" ? "Messagerie" : "RDV & contact"}
         </h2>
         <div className="mt-3 flex gap-1 px-4">
           {tabs.map((tab) => (
@@ -632,7 +632,10 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
             href="/dashboard/messages"
             className="text-sm font-medium text-blue-600 hover:underline"
           >
-            {variant === "messagerie" ? "Demandes de contact et messages" : "Demandes de contact et RDV"} →
+            {variant === "messagerie"
+              ? "Ouvrir RDV & contact"
+              : "Voir toutes les demandes de contact"}{" "}
+            →
           </Link>
         </div>
       )}

@@ -34,7 +34,7 @@ export function UpcomingRdvSection({
             href="/dashboard/messages"
             className="text-xs font-semibold text-[#1e3a5f] hover:underline"
           >
-            Voir les demandes →
+            Voir RDV & contact →
           </Link>
         </div>
       </section>
@@ -88,7 +88,7 @@ export function UpcomingRdvSection({
             href="/dashboard/messages"
             className="inline-flex items-center rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#152a45]"
           >
-            Agenda RDV →
+            RDV & contact →
           </Link>
         </div>
       </div>

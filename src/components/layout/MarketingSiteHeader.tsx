@@ -32,34 +32,34 @@ const SOLUTION_MENU_ENTRIES: {
   icon: SolutionMenuIconId;
 }[] = [
   {
-    href: "/#solutions",
-    title: "Solutions IA",
-    description: "Applications, automatisations, analyse documentaire, intégrations.",
-    icon: "document",
+    href: '/#plateforme',
+    title: 'Plateforme BeWork',
+    description: 'Centralisez chantiers, équipes, documents et gestion.',
+    icon: 'folder',
   },
   {
-    href: "/#plateforme",
-    title: "Plateforme BeWork",
-    description: "Environnement métier complet — preuve de notre savoir-faire.",
-    icon: "folder",
+    href: '/#connexions',
+    title: 'Connexions logiciels',
+    description: 'Faire travailler ensemble vos outils existants.',
+    icon: 'devis',
   },
   {
-    href: "/#cas-usage",
-    title: "Cas d’usage",
-    description: "Situations concrètes à étudier avec vos équipes.",
-    icon: "calendar",
+    href: '/#automatisations',
+    title: 'Automatisations',
+    description: 'Automatiser les actions répétitives de vos équipes.',
+    icon: 'calendar',
   },
   {
-    href: "/notre-facon-de-travailler",
-    title: "Notre approche",
-    description: "Comprendre, concevoir, déployer, former, faire évoluer.",
-    icon: "devis",
+    href: '/#solutions-avancees',
+    title: 'Solutions sur mesure',
+    description: 'Outils métier spécifiques et solutions IA lorsque nécessaire.',
+    icon: 'document',
   },
   {
-    href: "/#besoin",
-    title: "Parler d’un besoin",
-    description: "Expliquez votre idée — nous étudions la solution.",
-    icon: "cart",
+    href: '/#besoin',
+    title: 'Parler de mon entreprise',
+    description: 'Expliquez comment vous travaillez — nous étudions la solution.',
+    icon: 'cart',
   },
 ];
 
@@ -334,14 +334,14 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               ) : null}
             </div>
 
-            <Link href="/#solutions" className={`${NAV_LINK} whitespace-nowrap`}>
-              Solutions IA
+            <Link href="/#plateforme" className={`${NAV_LINK} whitespace-nowrap`}>
+              Plateforme
             </Link>
             <Link href="/#plateforme" className={`${NAV_LINK} whitespace-nowrap`}>
               Plateforme
             </Link>
-            <Link href="/#cas-usage" className={`${NAV_LINK} whitespace-nowrap`}>
-              Cas d&apos;usage
+            <Link href="/#connexions" className={`${NAV_LINK} whitespace-nowrap`}>
+              Connexions
             </Link>
             <Link href="/notre-facon-de-travailler" className={`${NAV_LINK} whitespace-nowrap`}>
               Notre approche
@@ -518,11 +518,11 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               </MarketingDisclosure>
 
               <Link
-                href="/#solutions"
+                href="/#plateforme"
                 className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
                 onClick={() => setMobileOpen(false)}
               >
-                Solutions IA
+                Plateforme
               </Link>
               <Link
                 href="/#plateforme"
@@ -532,11 +532,11 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 Plateforme
               </Link>
               <Link
-                href="/#cas-usage"
+                href="/#connexions"
                 className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
                 onClick={() => setMobileOpen(false)}
               >
-                Cas d&apos;usage
+                Connexions
               </Link>
               <Link
                 href="/notre-facon-de-travailler"

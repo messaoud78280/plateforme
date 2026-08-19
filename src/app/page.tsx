@@ -3,20 +3,17 @@ import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { HomeAdoptionUx } from "@/components/home/HomeAdoptionUx";
-import { HomeCatalogOpen } from "@/components/home/HomeCatalogOpen";
+import { HomeAiAdvanced } from "@/components/home/HomeAiAdvanced";
+import { HomeAutomations } from "@/components/home/HomeAutomations";
+import { HomeConnectSoftware } from "@/components/home/HomeConnectSoftware";
 import { HomeCoreAdaptation } from "@/components/home/HomeCoreAdaptation";
 import { HomeDemoClose } from "@/components/home/HomeDemoClose";
-import { HomeDifference } from "@/components/home/HomeDifference";
 import { HomeMethodFlow } from "@/components/home/HomeMethodFlow";
-import { HomeModulesGrid } from "@/components/home/HomeModulesGrid";
-import { HomeNeedSignature } from "@/components/home/HomeNeedSignature";
-import { HomePlatformEvolution } from "@/components/home/HomePlatformEvolution";
 import { HomePlatformHero } from "@/components/home/HomePlatformHero";
-import { HomePlatformProof } from "@/components/home/HomePlatformProof";
+import { HomePlatformModules } from "@/components/home/HomePlatformModules";
+import { HomeProblemsRecognition } from "@/components/home/HomeProblemsRecognition";
 import { HomeSectionHeader } from "@/components/home/HomeSectionHeader";
-import { HomeSolutionFamilies } from "@/components/home/HomeSolutionFamilies";
 import { HomeTrustBand } from "@/components/home/HomeTrustBand";
-import { HomeUseCases } from "@/components/home/HomeUseCases";
 import { HOME_SECTION } from "@/components/home/homeSectionStyles";
 import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
 import { jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
@@ -30,21 +27,21 @@ import { SITE_URL } from "@/lib/site";
 
 const HOME_META_TITLE = SEO_SITE_TITLE_DEFAULT;
 const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
-  "BeWork conçoit des solutions IA sur mesure et des plateformes métier pour le BTP — autour de vos processus, documents, données et outils",
+  "BeWork construit la plateforme de votre entreprise BTP, connecte vos logiciels et automatise vos processus — une solution sur mesure adaptée à votre organisation",
 );
 
 const HOME_FAQ_ITEMS = [
   {
-    q: "Dois-je adopter toute la plateforme BeWork ?",
-    a: "Non. Vous pouvez venir avec un besoin précis : automatisation, analyse documentaire, outil métier, intégration IA à vos logiciels, ou plateforme complète. Nous étudions la solution adaptée.",
+    q: "Est-ce que BeWork remplace mes logiciels actuels ?",
+    a: "Pas forcément. BeWork peut devenir votre plateforme centrale tout en connectant les logiciels que vous utilisez déjà, lorsque les interfaces disponibles le permettent. Nous étudions votre situation avant de proposer quoi que ce soit.",
   },
   {
-    q: "Faut-il connaître les technologies IA pour nous contacter ?",
-    a: "Non. Expliquez ce que vous voulez améliorer ou créer. BeWork étudie la faisabilité, les données, la sécurité, les intégrations et l’architecture appropriée.",
+    q: "Faut-il connaître les technologies pour nous contacter ?",
+    a: "Non. Expliquez-nous comment vous travaillez aujourd'hui, vos outils et ce que vous aimeriez améliorer. BeWork étudie la faisabilité, les intégrations et l'architecture adaptée.",
   },
   {
-    q: "Comment se passe l’accompagnement ?",
-    a: "Nous concevons, déployons, formons vos équipes et accompagnons l’adoption jusqu’à l’usage quotidien, puis faisons évoluer la solution selon vos retours.",
+    q: "Comment se passe l'accompagnement ?",
+    a: "Nous concevons, déployons, formons vos équipes et accompagnons l'adoption jusqu'à l'usage quotidien, puis faisons évoluer la solution selon vos retours.",
   },
 ] as const;
 
@@ -65,11 +62,16 @@ export const metadata: Metadata = {
   keywords: [
     ...SEO_KEYWORDS_HOME,
     BEWORK_BRAND_SIGNATURE,
-    "solutions IA sur mesure BTP",
-    "conception solution IA entreprise BTP",
-    "automatisation chantier BTP",
-    "analyse documentaire BTP",
-    "plateforme métier BTP",
+    "plateforme BTP sur mesure",
+    "logiciel BTP sur mesure",
+    "automatisation BTP",
+    "automatisation entreprise BTP",
+    "logiciel gestion chantier",
+    "plateforme gestion chantier",
+    "connexion logiciels BTP",
+    "digitalisation entreprise BTP",
+    "développement logiciel BTP",
+    "outil métier BTP",
   ],
   alternates: { canonical: SITE_URL, languages: hreflangFrancophonieLanguages("/") },
   openGraph: {
@@ -85,7 +87,7 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "BeWork — solutions IA sur mesure pour le BTP",
+        alt: "BeWork — plateforme BTP sur mesure, connexion logiciels et automatisation",
       },
     ],
   },
@@ -108,10 +110,11 @@ const homeJsonLd = {
       description: HOME_META_DESCRIPTION,
       isPartOf: { "@id": `${SITE_URL}/#website` },
       about: [
-        { "@type": "Thing", name: "Solutions IA sur mesure BTP" },
-        { "@type": "Thing", name: "Conception d'outils métier BTP" },
-        { "@type": "Thing", name: "Plateforme métier BeWork" },
-        { "@type": "Thing", name: "Automatisation et analyse documentaire BTP" },
+        { "@type": "Thing", name: "Plateforme BTP sur mesure" },
+        { "@type": "Thing", name: "Connexion logiciels BTP" },
+        { "@type": "Thing", name: "Automatisation processus BTP" },
+        { "@type": "Thing", name: "Logiciel gestion chantier" },
+        { "@type": "Thing", name: "Développement logiciel BTP" },
       ],
       speakable: {
         "@type": "SpeakableSpecification",
@@ -121,7 +124,7 @@ const homeJsonLd = {
     {
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#service`,
-      name: "BeWork — solutions IA et plateformes métier pour le BTP",
+      name: "BeWork — plateforme métier BTP sur mesure",
       description: SEO_VALUE_PROPOSITION,
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),
@@ -134,14 +137,13 @@ const homeJsonLd = {
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
       description:
-        "Environnement de travail BeWork pour centraliser équipes, chantiers, documents et processus — une offre majeure et une démonstration du savoir-faire BeWork.",
+        "Plateforme métier sur mesure pour les entreprises du BTP — centralisation des chantiers, documents, équipes, planning, gestion commerciale, achats et pilotage financier.",
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),
       offers: {
         "@type": "Offer",
         priceCurrency: "EUR",
-        description:
-          "Projet IA sur mesure ou plateforme BeWork — mise en place et accompagnement sur étude.",
+        description: "Plateforme BeWork sur mesure — mise en place et accompagnement sur étude.",
         url: `${SITE_URL}/contact`,
       },
     },
@@ -167,21 +169,40 @@ export default function HomePage() {
       <MarketingSiteHeader plainBg />
 
       <main className="pt-0">
+        {/* 1. Hero — construire / connecter / automatiser */}
         <HomePlatformHero />
-        <HomeNeedSignature />
-        <HomeCatalogOpen />
-        <HomeSolutionFamilies />
-        <HomeUseCases />
-        <HomeDifference />
-        <HomePlatformProof />
+
+        {/* 2. Reconnaissance — problèmes concrets BTP */}
+        <HomeProblemsRecognition />
+
+        {/* 3. Plateforme — modules métier */}
+        <HomePlatformModules />
+
+        {/* 4. Connexions logiciels */}
+        <HomeConnectSoftware />
+
+        {/* 5. Automatisations — workflows visuels */}
+        <HomeAutomations />
+
+        {/* 6. Adaptation — pas votre entreprise qui s'adapte */}
         <HomeCoreAdaptation />
-        <HomeModulesGrid />
-        <HomeMethodFlow />
+
+        {/* 7. UX adoption — puissante derrière, simple devant */}
         <HomeAdoptionUx />
+
+        {/* 8. Solutions IA avancées — repositionnées plus bas */}
+        <HomeAiAdvanced />
+
+        {/* 9. Méthode */}
+        <HomeMethodFlow />
+
+        {/* 10. Trust */}
         <HomeTrustBand />
-        <HomePlatformEvolution />
+
+        {/* 11. CTA final */}
         <HomeDemoClose />
 
+        {/* FAQ */}
         <section id="faq" className={`${HOME_SECTION} bg-white`} aria-labelledby="faq-heading">
           <div className="container-site">
             <HomeSectionHeader
@@ -219,7 +240,7 @@ export default function HomePage() {
               </Link>
               {" · "}
               Ressources :{" "}
-              <Link href="/ressources" className="font-semibold text-[#0a0a0] underline-offset-2 hover:underline">
+              <Link href="/ressources" className="font-semibold text-[#0a0a0a] underline-offset-2 hover:underline">
                 centre de ressources
               </Link>
             </p>

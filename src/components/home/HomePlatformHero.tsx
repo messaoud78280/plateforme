@@ -87,10 +87,15 @@ export function HomePlatformHero() {
       el.style.setProperty("--spot-opacity", "0.18");
     };
 
+    let scrollRaf = 0;
     const onScroll = () => {
-      const t = Math.max(0, Math.min(1, window.scrollY / 900));
-      el.style.setProperty("--grid-opacity", (0.03 + t * 0.08).toFixed(3));
-      el.style.setProperty("--hero-parallax", `${(-t * 10).toFixed(2)}px`);
+      if (scrollRaf) return;
+      scrollRaf = window.requestAnimationFrame(() => {
+        scrollRaf = 0;
+        const t = Math.max(0, Math.min(1, window.scrollY / 900));
+        el.style.setProperty("--grid-opacity", (0.03 + t * 0.08).toFixed(3));
+        el.style.setProperty("--hero-parallax", `${(-t * 10).toFixed(2)}px`);
+      });
     };
 
     el.addEventListener("pointermove", onPointerMove);
@@ -103,6 +108,7 @@ export function HomePlatformHero() {
       el.removeEventListener("pointerleave", onPointerLeave);
       window.removeEventListener("scroll", onScroll);
       if (raf) window.cancelAnimationFrame(raf);
+      if (scrollRaf) window.cancelAnimationFrame(scrollRaf);
     };
   }, []);
 

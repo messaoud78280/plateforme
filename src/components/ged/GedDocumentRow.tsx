@@ -110,9 +110,17 @@ export function GedDocumentRow({
         </span>
       ) : null}
       {sources > 0 ? (
-        <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenDetails();
+          }}
+          className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 hover:bg-slate-200"
+          title={(it.provenances ?? []).map((p) => p.label).join(" · ") || "Voir les sources"}
+        >
           {sources} sources
-        </span>
+        </button>
       ) : null}
       {versions > 0 ? (
         <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">

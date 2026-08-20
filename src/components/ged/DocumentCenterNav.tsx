@@ -161,15 +161,15 @@ export function DocumentCenterNav({
 }) {
   const [allProjects, setAllProjects] = useState(false);
   const [projectQ, setProjectQ] = useState("");
-  const [catsOpen, setCatsOpen] = useState(true);
+  const [catsOpen, setCatsOpen] = useState(false);
   const [familiesOpen, setFamiliesOpen] = useState<Record<string, boolean>>({});
   const can = (id: HubView) => !allowedViews || allowedViews.includes(id);
 
   useEffect(() => {
-    setCatsOpen(readOpen(NAV_CAT_KEY, true));
+    setCatsOpen(readOpen(NAV_CAT_KEY, false));
     const next: Record<string, boolean> = {};
     for (const fam of HUB_CATEGORY_FAMILIES) {
-      next[fam.id] = readOpen(`${NAV_FAM_KEY}.${fam.id}`, fam.id === "commercial" || fam.id === "chantier");
+      next[fam.id] = readOpen(`${NAV_FAM_KEY}.${fam.id}`, false);
     }
     setFamiliesOpen(next);
   }, []);

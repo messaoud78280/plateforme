@@ -706,6 +706,17 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     console.error("[demo-seed] personas:", e);
   }
 
+  // —— Bibliothèque commerciale (ouvrages & prix) ——
+  try {
+    const { seedDemoCommercialLibrary } = await import("./seed-library");
+    await seedDemoCommercialLibrary({
+      organizationId,
+      createdById: clientId,
+    });
+  } catch (e) {
+    console.error("[demo-seed] commercial library:", e);
+  }
+
   // Après personas : assignations scopées org (toutes plateformes, sans staff global)
   if (!allowSharedBeworkStaff) {
     try {

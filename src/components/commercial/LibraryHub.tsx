@@ -38,7 +38,7 @@ export type LibraryHubStats = {
   favorites: number;
 };
 
-type Tab = "ouvrages" | "materiaux" | "maindoeuvre" | "favoris";
+type Tab = "tous" | "ouvrages" | "materiaux" | "maindoeuvre" | "materiel" | "favoris";
 type Chip = "all" | "simple" | "compose" | "verify" | "archived";
 type MarginFilter = "all" | "below_min" | "above_target";
 
@@ -98,8 +98,12 @@ export function LibraryHub({
   stats,
   materialsPreview,
   laborPreview,
+  equipmentPreview = [],
   minMarginPercent = null,
   targetMarginPercent = null,
+  embedded = false,
+  initialCreateOpen = false,
+  initialCreateKind,
 }: {
   initialItems: LibraryHubRow[];
   stats: LibraryHubStats;
@@ -122,11 +126,23 @@ export function LibraryHub({
     hourlyCostHt: number;
     loadedCostHt: number | null;
   }>;
+  equipmentPreview?: Array<{
+    id: string;
+    name: string;
+    unit: string;
+    kind: string;
+    hourlyCostHt: number | null;
+    dailyCostHt: number | null;
+  }>;
   minMarginPercent?: number | null;
   targetMarginPercent?: number | null;
+  /** Intégré dans /dashboard/documents — pas de second titre « Bibliothèque ». */
+  embedded?: boolean;
+  initialCreateOpen?: boolean;
+  initialCreateKind?: "SIMPLE" | "COMPOSITE";
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("ouvrages");
+  const [tab, setTab] = useState<Tab>(embedded ? "tous" : "ouvrages");
   const [chip, setChip] = useState<Chip>("all");
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
@@ -136,7 +152,7 @@ export function LibraryHub({
   const [toast, setToast] = useState<string | null>(null);
   const [drawer, setDrawer] = useState<
     null | { mode: "create" } | { mode: "edit"; id: string }
-  >(null);
+  >(initialCreateOpen ? { mode: "create" } : null);
   const [materialDrawerId, setMaterialDrawerId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -217,6 +233,20 @@ export function LibraryHub({
     minMarginPercent,
     targetMarginPercent,
   ]);
+
+  const recentPriceChanges = useMemo(() => {
+    const weekAgo = Date.now() - 7 * 86_400_000;
+    return (
+      materialsPreview.filter((m) => {
+        const t = new Date(m.referencePriceUpdatedAt || m.updatedAt).getTime();
+        return !Number.isNaN(t) && t >= weekAgo;
+      }).length +
+      items.filter((i) => {
+        const t = updatedAtMs(i.updatedAt);
+        return i.isActive && t >= weekAgo;
+      }).length
+    );
+  }, [materialsPreview, items]);
 
   const recentItems = useMemo(() => {
     return items
@@ -376,6 +406,12 @@ export function LibraryHub({
 
   const tabs: { id: Tab; label: string; count: number; activeClass: string }[] = [
     {
+      id: "tous",
+      label: "Tous",
+      count: stats.ouvrages,
+      activeClass: "border-bework-navy text-bework-navy",
+    },
+    {
       id: "ouvrages",
       label: "Ouvrages",
       count: stats.ouvrages,
@@ -392,6 +428,12 @@ export function LibraryHub({
       label: "Main-d’œuvre",
       count: stats.mainOeuvre,
       activeClass: "border-bework-ok text-[#047857]",
+    },
+    {
+      id: "materiel",
+      label: "Matériel",
+      count: equipmentPreview.length,
+      activeClass: "border-violet-500 text-violet-700",
     },
     {
       id: "favoris",
@@ -414,13 +456,73 @@ export function LibraryHub({
       ? "Rechercher un ouvrage, référence, famille…"
       : "Rechercher un ouvrage, référence…";
 
-  const showOuvrageFilters = tab === "ouvrages" || tab === "favoris";
+  const showOuvrageFilters = tab === "ouvrages" || tab === "tous" || tab === "favoris";
   const showExtraFilters =
     showOuvrageFilters &&
     (families.length > 0 || hasMarginSettings);
 
+  const resourcesCount = stats.materiaux + stats.mainOeuvre + equipmentPreview.length;
+
   return (
-    <div className="mx-auto w-full max-w-[1320px] space-y-5">
+    <div className={cn("w-full space-y-5", !embedded && "mx-auto max-w-[1320px]")}>
+      {embedded ? (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {[
+            {
+              id: "ouv",
+              label: "Ouvrages",
+              value: stats.ouvrages,
+              onClick: () => {
+                setTab("ouvrages");
+                setChip("all");
+              },
+              active: tab === "ouvrages" || tab === "tous",
+              tone: "text-bework-navy bg-bework-soft-navy/80",
+            },
+            {
+              id: "res",
+              label: "Ressources",
+              value: resourcesCount,
+              onClick: () => setTab("materiaux"),
+              active: tab === "materiaux" || tab === "maindoeuvre" || tab === "materiel",
+              tone: "text-[#0e7490] bg-bework-soft-cyan/70",
+            },
+            {
+              id: "recent",
+              label: "Prix modifiés récemment",
+              value: recentPriceChanges,
+              onClick: () => {
+                setTab("ouvrages");
+                setChip("verify");
+              },
+              active: chip === "verify",
+              tone: "text-bework-accent bg-bework-soft-accent/70",
+            },
+            {
+              id: "fav",
+              label: "Favoris",
+              value: stats.favorites,
+              onClick: () => setTab("favoris"),
+              active: tab === "favoris",
+              tone: "text-[#b45309] bg-amber-50",
+            },
+          ].map((k) => (
+            <button
+              key={k.id}
+              type="button"
+              onClick={k.onClick}
+              className={cn(
+                "rounded-2xl border border-bework-navy/10 px-3 py-2.5 text-left shadow-[var(--cc-shadow)] transition hover:-translate-y-px",
+                k.tone,
+                k.active && "ring-2 ring-bework-accent/20",
+              )}
+            >
+              <p className="text-[1.35rem] font-semibold tabular-nums leading-none">{k.value}</p>
+              <p className="mt-1.5 text-[12px] font-medium text-slate-600">{k.label}</p>
+            </button>
+          ))}
+        </div>
+      ) : (
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 max-w-2xl">
           <h1 className="text-2xl font-semibold tracking-tight text-bework-navy sm:text-3xl">
@@ -504,6 +606,22 @@ export function LibraryHub({
           </button>
         </div>
       </header>
+      )}
+
+      {embedded ? (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm text-bework-muted">
+            Référentiel de chiffrage — compositions, ressources et prix de vente.
+          </p>
+          <button
+            type="button"
+            onClick={() => setDrawer({ mode: "create" })}
+            className="btn-cc-primary"
+          >
+            + Nouvel ouvrage
+          </button>
+        </div>
+      ) : null}
 
       <div className="relative">
         <Search
@@ -608,6 +726,8 @@ export function LibraryHub({
         />
       ) : tab === "maindoeuvre" ? (
         <LaborPanel rows={laborPreview} />
+      ) : tab === "materiel" ? (
+        <EquipmentPanel rows={equipmentPreview} />
       ) : filtered.length === 0 &&
         items.filter((i) => i.isActive).length === 0 &&
         chip === "all" &&
@@ -623,7 +743,7 @@ export function LibraryHub({
         <>
           {!debouncedQ &&
           chip === "all" &&
-          tab === "ouvrages" &&
+          (tab === "ouvrages" || tab === "tous") &&
           !familyFilter &&
           marginFilter === "all" ? (
             <RecentStrip
@@ -1249,6 +1369,72 @@ function LaborPanel({
           </div>
         </li>
       ))}
+    </ul>
+  );
+}
+
+function EquipmentPanel({
+  rows,
+}: {
+  rows: Array<{
+    id: string;
+    name: string;
+    unit: string;
+    kind: string;
+    hourlyCostHt: number | null;
+    dailyCostHt: number | null;
+  }>;
+}) {
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/50 px-6 py-14 text-center">
+        <Wrench className="mx-auto h-8 w-8 text-violet-600" aria-hidden />
+        <h2 className="mt-3 text-base font-semibold text-bework-navy">
+          Aucun matériel
+        </h2>
+        <p className="mx-auto mt-2 max-w-md text-sm text-bework-muted">
+          Mini-pelles, nacelles, outils — créez-les dans Prix pour les réutiliser
+          dans les ouvrages COMPOSITE.
+        </p>
+        <Link
+          href="/dashboard/devis-facturation/prix"
+          className="btn-cc-secondary mt-5 inline-flex"
+        >
+          Ouvrir Prix
+        </Link>
+      </div>
+    );
+  }
+  return (
+    <ul className="divide-y divide-bework-navy/8 overflow-hidden rounded-2xl border border-bework-navy/12 bg-[linear-gradient(180deg,#ffffff_0%,#f5f8fc_100%)] shadow-[var(--cc-shadow)]">
+      {rows.map((e) => {
+        const price =
+          e.dailyCostHt != null
+            ? `${fmt(e.dailyCostHt)} € / j`
+            : e.hourlyCostHt != null
+              ? `${fmt(e.hourlyCostHt)} € / h`
+              : "—";
+        return (
+          <li key={e.id}>
+            <div className="flex items-stretch gap-0">
+              <div className="w-1 shrink-0 self-stretch bg-violet-500" aria-hidden />
+              <div className="flex min-w-0 flex-1 items-center justify-between gap-3 px-4 py-3.5">
+                <div className="min-w-0">
+                  <p className="font-semibold text-bework-ink">{e.name}</p>
+                  <p className="mt-0.5 text-xs text-bework-muted">
+                    {[e.kind === "RENTAL" ? "Location" : "Interne", e.unit]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                </div>
+                <p className="shrink-0 tabular-nums text-sm font-semibold text-bework-ink">
+                  {price}
+                </p>
+              </div>
+            </div>
+          </li>
+        );
+      })}
     </ul>
   );
 }

@@ -58,18 +58,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Formulaire invalide" }, { status: 400 });
   }
 
-  const projectId = String(formData.get("projectId") ?? "").trim();
+  const projectIdRaw = String(formData.get("projectId") ?? "").trim();
+  const organizationOnly =
+    String(formData.get("organizationOnly") ?? "") === "1" ||
+    String(formData.get("organizationOnly") ?? "") === "true" ||
+    projectIdRaw === "" ||
+    projectIdRaw === "__none__";
   let folderId = String(formData.get("folderId") ?? "").trim();
-  if (!projectId) {
-    return NextResponse.json({ error: "Chantier requis." }, { status: 400 });
-  }
-
-  const access = await canAccessChantierProject(session.user, projectId);
-  if (!access.ok || !access.project) {
-    return NextResponse.json({ error: "Chantier non autorisé" }, { status: 403 });
-  }
-
-  await ensureChantierFolders(projectId);
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
@@ -102,6 +97,129 @@ export async function POST(request: Request) {
   const linkEntityId = String(formData.get("linkEntityId") ?? "").trim() || null;
   const linkEntityLabel = String(formData.get("linkEntityLabel") ?? "").trim() || null;
   const taskIdRaw = String(formData.get("taskId") ?? "").trim() || null;
+
+  // —— Document entreprise sans chantier ——
+  if (organizationOnly && !projectIdRaw) {
+    const { resolveCommercialOrgId } = await import("@/lib/commercial/access");
+    const orgId = await resolveCommercialOrgId({
+      id: session.user.id,
+      role: session.user.role,
+      personType: session.user.personType,
+      permissionProfile: session.user.permissionProfile,
+      isDemo: session.user.isDemo,
+      demoRootUserId: session.user.demoRootUserId,
+    });
+    if (!orgId) {
+      return NextResponse.json(
+        { error: "Organisation introuvable pour un document sans chantier." },
+        { status: 403 },
+      );
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const checksum = createHash("sha256").update(buffer).digest("hex");
+    const duplicate = await prisma.chantierFile.findFirst({
+      where: { organizationId: orgId, projectId: null, checksum, deletedAt: null },
+      select: { id: true, name: true, fileUrl: true },
+    });
+    if (duplicate && !replacesFileId) {
+      return NextResponse.json({
+        id: duplicate.id,
+        fileUrl: duplicate.fileUrl,
+        duplicateOf: { id: duplicate.id, name: duplicate.name },
+        classificationStatus: "CLASSE",
+      });
+    }
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const storagePath = `org/${orgId}/library/${Date.now()}-${safeName}`;
+    const { error: uploadError } = await supabase.storage
+      .from("documents")
+      .upload(storagePath, buffer, {
+        contentType: file.type || "application/octet-stream",
+        upsert: false,
+      });
+    if (uploadError) {
+      console.error("Upload org GED:", uploadError.message);
+      return NextResponse.json({ error: "Échec de l'envoi du fichier" }, { status: 500 });
+    }
+
+    const storedRef = buildDocumentsStorageRef(storagePath);
+    const previewMode = resolveGedPreviewMode(displayName, file.type || null);
+    const classificationStatus =
+      classifyLater || !category ? "A_CLASSER" : "CLASSE";
+
+    const ownerId =
+      session.user.isDemo && session.user.demoRootUserId
+        ? session.user.demoRootUserId
+        : session.user.id;
+
+    try {
+      const created = await prisma.chantierFile.create({
+        data: {
+          projectId: null,
+          organizationId: orgId,
+          folderId: null,
+          clientId: ownerId,
+          name: displayName,
+          fileUrl: storedRef,
+          fileSize: file.size,
+          mimeType: file.type || null,
+          documentType,
+          comment,
+          status: "RECU",
+          addedById: session.user.id,
+          category: classifyLater || !category ? "À classer" : category,
+          subcategory,
+          indice,
+          versionLabel,
+          visibility,
+          isCurrentVersion: true,
+          replacesFileId,
+          checksum,
+          classificationStatus,
+          storagePath,
+          previewStatus: previewModeLabel(previewMode),
+          emitterName,
+        },
+      });
+
+      if (linkEntityType) {
+        await prisma.chantierFileLink.create({
+          data: {
+            fileId: created.id,
+            entityType: linkEntityType,
+            entityId: linkEntityId,
+            entityLabel: linkEntityLabel,
+            pilotageId,
+            createdById: session.user.id,
+          },
+        });
+      }
+
+      return NextResponse.json({
+        id: created.id,
+        fileUrl: created.fileUrl,
+        classificationStatus,
+        previewStatus: created.previewStatus,
+      });
+    } catch (error) {
+      console.error("DB org GED file:", error);
+      return NextResponse.json({ error: "Erreur enregistrement" }, { status: 500 });
+    }
+  }
+
+  const projectId = projectIdRaw;
+  if (!projectId) {
+    return NextResponse.json({ error: "Chantier requis." }, { status: 400 });
+  }
+
+  const access = await canAccessChantierProject(session.user, projectId);
+  if (!access.ok || !access.project) {
+    return NextResponse.json({ error: "Chantier non autorisé" }, { status: 403 });
+  }
+
+  await ensureChantierFolders(projectId);
 
   let taskIdValid: string | null = null;
   if (taskIdRaw) {

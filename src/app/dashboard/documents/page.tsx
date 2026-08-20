@@ -13,8 +13,23 @@ import {
   type HubSort,
   type HubView,
 } from "@/lib/ged/document-hub-ui";
+import {
+  canAccessCommercialModule,
+  resolveCommercialOrgId,
+} from "@/lib/commercial/access";
+import {
+  getLibraryHubStats,
+  listEquipmentResources,
+  listLaborResources,
+  listMaterials,
+  listWorkItems,
+} from "@/lib/commercial/library";
+import { ensureCommercialOrgSettings } from "@/lib/commercial/settings";
+import { d } from "@/lib/commercial/decimal";
+import type { LibraryHubRow } from "@/components/commercial/LibraryHub";
 import { DocumentsHubClient } from "./DocumentsHubClient";
 import { DocumentsPageClient } from "./DocumentsPageClient";
+import { OuvragesPrixUniverse } from "./OuvragesPrixUniverse";
 
 const LEGACY_PER_PAGE = 20;
 const CATEGORIES = ["FACTURE", "CONTRAT", "RH", "FISCAL", "AUTRE"] as const;
@@ -77,6 +92,8 @@ export default async function DocumentsPage({
     since?: string;
     legacy?: string;
     hub?: string;
+    universe?: string;
+    create?: string;
   }>;
 }) {
   const session = await getServerSession(authOptions);
@@ -96,6 +113,111 @@ export default async function DocumentsPage({
     personType: dbUser?.personType,
     permissionProfile: dbUser?.permissionProfile,
   });
+
+  const commercialUser = {
+    id: session.user.id,
+    role,
+    personType: dbUser?.personType ?? session.user.personType,
+    permissionProfile: dbUser?.permissionProfile ?? session.user.permissionProfile,
+    isDemo: session.user.isDemo,
+    demoRootUserId: session.user.demoRootUserId,
+  };
+  const canOuvrages = canAccessCommercialModule(commercialUser) && !external;
+  const universeParam = (params.universe ?? "documents").toLowerCase();
+  const universe =
+    universeParam === "ouvrages" || universeParam === "prix" ? "ouvrages" : "documents";
+
+  if (universe === "ouvrages" && canOuvrages) {
+    const orgId = await resolveCommercialOrgId(commercialUser);
+    if (orgId) {
+      try {
+        if (session.user.isDemo) {
+          const { seedDemoCommercialLibrary } = await import(
+            "@/lib/demo-environment/seed-library"
+          );
+          await seedDemoCommercialLibrary({
+            organizationId: orgId,
+            createdById: session.user.id,
+          });
+        }
+      } catch (e) {
+        console.error("[documents] seed library:", e);
+      }
+
+      const [activeItems, archivedItems, stats, materials, labor, equipment, settings] =
+        await Promise.all([
+          listWorkItems(orgId, { take: 300, active: true }),
+          listWorkItems(orgId, { take: 100, active: false }),
+          getLibraryHubStats(orgId),
+          listMaterials(orgId, { take: 80 }),
+          listLaborResources(orgId),
+          listEquipmentResources(orgId),
+          ensureCommercialOrgSettings(orgId),
+        ]);
+
+      const rows: LibraryHubRow[] = [...activeItems, ...archivedItems].map((w) => ({
+        id: w.id,
+        name: w.name,
+        reference: w.reference,
+        family: w.family,
+        subFamily: w.subFamily,
+        saleUnit: w.saleUnit,
+        unitCostHt: w.unitCostHt,
+        unitSellHt: w.unitSellHt,
+        marginPercent: w.marginPercent,
+        kind: w.kind,
+        isActive: w.isActive,
+        isFavorite: Boolean((w as { isFavorite?: boolean }).isFavorite),
+        needsPriceRecalc: w.needsPriceRecalc,
+        quoteLineCount: w.quoteLineCount,
+        updatedAt: w.updatedAt,
+        description: w.description,
+      }));
+
+      return (
+        <OuvragesPrixUniverse
+          canAccessOuvrages
+          initialItems={rows}
+          stats={stats}
+          materialsPreview={materials.map((m) => ({
+            id: m.id,
+            name: m.name,
+            unit: m.unit,
+            family: m.family,
+            currentPriceHt: m.currentPriceHt,
+            supplierName: m.supplierName,
+            preferredSupplierName: m.preferredSupplierName ?? m.supplierName,
+            variationPercent: m.variationPercent ?? null,
+            needsPriceReview: Boolean(m.needsPriceReview),
+            updatedAt: m.updatedAt,
+            referencePriceUpdatedAt: m.referencePriceUpdatedAt ?? null,
+          }))}
+          laborPreview={labor.slice(0, 80).map((l) => ({
+            id: l.id,
+            name: l.name,
+            hourlyCostHt: l.hourlyCostHt,
+            loadedCostHt: l.loadedCostHt,
+          }))}
+          equipmentPreview={equipment.slice(0, 80).map((e) => ({
+            id: e.id,
+            name: e.name,
+            unit: e.unit,
+            kind: e.kind,
+            hourlyCostHt: e.hourlyCostHt,
+            dailyCostHt: e.dailyCostHt,
+          }))}
+          minMarginPercent={
+            settings.minMarginPercent != null ? d(settings.minMarginPercent) : null
+          }
+          targetMarginPercent={
+            settings.targetMarginPercent != null
+              ? d(settings.targetMarginPercent)
+              : null
+          }
+        />
+      );
+    }
+  }
 
   const useHub =
     params.hub !== "0" &&
@@ -185,6 +307,7 @@ export default async function DocumentsPage({
         projectStats={hub.projectStats}
         categoryStats={hub.categoryStats}
         canUploadChantier={!external}
+        canAccessOuvrages={canOuvrages}
         personType={dbUser?.personType}
         permissionProfile={dbUser?.permissionProfile}
         hostCompany={hostCompany}

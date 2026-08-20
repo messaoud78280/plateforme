@@ -93,6 +93,8 @@ export type HubDocumentItem = {
   fileSize?: number | null;
   addedAt?: string | null;
   checksum?: string | null;
+  /** Référence fichier physique (storage / URL) — pour dédup, pas affichée seule. */
+  fileUrl?: string | null;
   sourceCount?: number;
   versionCount?: number;
   provenances?: HubProvenance[];

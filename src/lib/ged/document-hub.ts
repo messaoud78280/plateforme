@@ -70,44 +70,79 @@ const LIBRARY_FILE_AND = [
   { NOT: { fileUrl: "" } },
 ];
 
-/** Une ligne par fichier physique (checksum). Jamais par nom seul. */
+function normalizeFileCanonicalKey(fileUrl: string | null | undefined): string | null {
+  const raw = fileUrl?.trim();
+  if (!raw) return null;
+  // Même objet storage → même clé, indépendamment du préfixe storage://
+  const withoutScheme = raw.replace(/^storage:\/\//i, "").replace(/^\/+/, "");
+  if (!withoutScheme) return null;
+  return withoutScheme.toLowerCase();
+}
+
+function mergeDocumentGroup(group: HubDocumentItem[]): HubDocumentItem {
+  const primary =
+    group.find((g) => g.isCurrentVersion) ??
+    group.find((g) => Boolean(g.chantierFileId)) ??
+    group[0];
+  const provenances: NonNullable<HubDocumentItem["provenances"]> = [];
+  const seen = new Set<string>();
+  for (const g of group) {
+    for (const p of g.provenances ?? []) {
+      if (seen.has(p.key)) continue;
+      seen.add(p.key);
+      provenances.push(p);
+    }
+    // Origine module sans lien explicite → source agrégée
+    if (g.originLabel) {
+      const key = `origin:${g.origin ?? g.originLabel}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        provenances.push({
+          key,
+          label: g.originLabel,
+          href: g.originHref ?? g.href,
+          actionLabel: g.originActionLabel ?? "Voir la source",
+        });
+      }
+    }
+  }
+  return {
+    ...primary,
+    provenances: provenances.length > 0 ? provenances : primary.provenances,
+    sourceCount: Math.max(provenances.length, group.length, primary.sourceCount ?? 1),
+  };
+}
+
+/**
+ * Une ligne par fichier physique (checksum ou même fileUrl/storage).
+ * Jamais par nom seul — deux PDF homonymes restent distincts.
+ */
 function collapseCanonicalDocuments(items: HubDocumentItem[]): HubDocumentItem[] {
-  const byChecksum = new Map<string, HubDocumentItem[]>();
+  const byKey = new Map<string, HubDocumentItem[]>();
   const rest: HubDocumentItem[] = [];
+
   for (const it of items) {
     const cs = it.checksum?.trim();
-    if (!cs) {
+    const fileKey = normalizeFileCanonicalKey(it.fileUrl);
+    const key = cs
+      ? `cs:${cs}`
+      : fileKey
+        ? `fu:${fileKey}`
+        : it.chantierFileId
+          ? `cf:${it.chantierFileId}`
+          : null;
+    if (!key) {
       rest.push(it);
       continue;
     }
-    const arr = byChecksum.get(cs) ?? [];
+    const arr = byKey.get(key) ?? [];
     arr.push(it);
-    byChecksum.set(cs, arr);
+    byKey.set(key, arr);
   }
+
   const collapsed: HubDocumentItem[] = [];
-  for (const group of byChecksum.values()) {
-    if (group.length === 1) {
-      collapsed.push(group[0]);
-      continue;
-    }
-    const primary =
-      group.find((g) => g.isCurrentVersion) ??
-      group.find((g) => Boolean(g.chantierFileId)) ??
-      group[0];
-    const provenances: NonNullable<HubDocumentItem["provenances"]> = [];
-    const seen = new Set<string>();
-    for (const g of group) {
-      for (const p of g.provenances ?? []) {
-        if (seen.has(p.key)) continue;
-        seen.add(p.key);
-        provenances.push(p);
-      }
-    }
-    collapsed.push({
-      ...primary,
-      provenances: provenances.length > 0 ? provenances : primary.provenances,
-      sourceCount: Math.max(provenances.length, group.length, primary.sourceCount ?? 1),
-    });
+  for (const group of byKey.values()) {
+    collapsed.push(group.length === 1 ? group[0] : mergeDocumentGroup(group));
   }
   return [...collapsed, ...rest];
 }
@@ -881,6 +916,7 @@ export async function loadDocumentHub(opts: {
         fileSize: f.fileSize,
         addedAt: f.createdAt.toISOString(),
         checksum: f.checksum,
+        fileUrl: f.fileUrl,
         sourceCount: provenances.length,
         versionCount: uniqueVersions.length > 1 ? uniqueVersions.length : 1,
         provenances,
@@ -978,6 +1014,16 @@ export async function loadDocumentHub(opts: {
             originActionLabel: "Voir la commande",
             companyLabel: supplier,
             chantierFileId: null,
+            fileUrl: d.fileUrl,
+            provenances: [
+              {
+                key: `commande:${d.order.id}`,
+                label: "Commandes",
+                href: `/dashboard/commandes/${d.order.id}?focus=documents`,
+                actionLabel: "Voir la commande",
+              },
+            ],
+            sourceCount: 1,
           };
         });
     }

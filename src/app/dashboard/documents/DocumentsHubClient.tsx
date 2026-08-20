@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { LayoutGrid, LayoutList, Menu, Plus, BookmarkPlus } from "lucide-react";
+import { Boxes, FileUp, LayoutGrid, LayoutList, Menu, Package, Plus, BookmarkPlus } from "lucide-react";
 import { DocumentPreviewModal, type DocumentPreviewItem } from "@/components/documents/DocumentPreviewModal";
+import { BibliothequeUniverseSwitcher } from "@/components/ged/BibliothequeUniverseSwitcher";
 import { DocumentCenterKpis } from "@/components/ged/DocumentCenterKpis";
 import { DocumentCenterNav } from "@/components/ged/DocumentCenterNav";
 import { DocumentPreviewPanel } from "@/components/ged/DocumentPreviewPanel";
@@ -22,6 +23,7 @@ import {
   GedSearchField,
   GedSecondaryButton,
 } from "@/components/ged/GedUi";
+import { HeaderDropdown } from "@/components/ui/HeaderDropdown";
 import type {
   HubCategoryStat,
   HubDocumentItem,
@@ -148,6 +150,7 @@ export function DocumentsHubClient({
   projectStats = [],
   categoryStats,
   canUploadChantier,
+  canAccessOuvrages = false,
   personType,
   permissionProfile,
   hostCompany,
@@ -183,6 +186,7 @@ export function DocumentsHubClient({
   }>;
   categoryStats?: HubCategoryStat[];
   canUploadChantier: boolean;
+  canAccessOuvrages?: boolean;
   personType?: string | null;
   permissionProfile?: string | null;
   hostCompany?: string | null;
@@ -588,7 +592,7 @@ export function DocumentsHubClient({
     if (activeSavedViewId === id) setActiveSavedViewId(null);
   }
 
-  const addTarget = projectId || projects[0]?.id;
+  const addTarget = projectId || projects[0]?.id || "";
   const projectTitle =
     lockedProjectTitle ||
     (projectId
@@ -613,11 +617,15 @@ export function DocumentsHubClient({
         ? `Documents échangés avec ${hostCompany?.trim() || "votre client"}.`
         : `Documents que ${hostCompany?.trim() || "votre entreprise"} partage avec vous.`;
     }
-    if (inCategory) return `${total} document${total !== 1 ? "s" : ""} dans cette catégorie.`;
     if (view === "missing") {
-      return `${missingCount} document${missingCount !== 1 ? "s" : ""} détecté${missingCount !== 1 ? "s" : ""} dans BeWork`;
+      return "Pièces détectées dans BeWork mais absentes de la GED — récupérez-les pour sécuriser le dossier.";
     }
-    if (view === "classify") return "Classez en une ou deux actions — BeWork propose déjà le type, le chantier et l’entreprise.";
+    if (view === "classify") {
+      return "Documents reçus sans chantier, client ou catégorie assez précis — classez-les en quelques clics.";
+    }
+    if (inCategory) return `Documents de la catégorie ${hubCategoryLabel(group)}.`;
+    if (view === "favorites") return "Vos documents épinglés pour un accès immédiat.";
+    if (view === "recent") return "Les dernières pièces ajoutées ou mises à jour.";
     if (hideProject && lockedProjectTitle) return `Tous les documents de ${lockedProjectTitle}`;
     if (projectTitle && !hideProject) return `Documents filtrés sur ${projectTitle}.`;
     return "Ce qui est rangé, ce qui attend une action, et où retrouver chaque pièce.";
@@ -730,7 +738,7 @@ export function DocumentsHubClient({
               >
                 Effacer les filtres
               </button>
-            ) : empty.action === "add" && canUploadChantier && addTarget ? (
+            ) : empty.action === "add" && canUploadChantier ? (
               <button
                 type="button"
                 onClick={() => setAddOpen(true)}
@@ -814,12 +822,88 @@ export function DocumentsHubClient({
     return <ul className={listClass}>{items.map(renderRow)}</ul>;
   }
 
-  const addButton = canUploadChantier && addTarget ? (
-    <GedPrimaryButton onClick={() => setAddOpen(true)} className="inline-flex items-center gap-1.5">
-      <Plus className="h-4 w-4" strokeWidth={2} />
-      Ajouter
-    </GedPrimaryButton>
-  ) : null;
+  const addButton =
+    canUploadChantier || canAccessOuvrages ? (
+      <HeaderDropdown
+        align="right"
+        width={300}
+        zIndex={60}
+        panelClassName="rounded-2xl border border-bework-navy/12 bg-white p-1.5 shadow-xl"
+        trigger={({ onClick, expanded, triggerRef }) => (
+          <button
+            ref={triggerRef}
+            type="button"
+            onClick={onClick}
+            aria-expanded={expanded}
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#1e3a5f] px-3.5 py-1.5 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-[#16304f]"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2} />
+            Ajouter
+          </button>
+        )}
+      >
+        <p className="px-3 pb-1.5 pt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+          Ajouter à la bibliothèque
+        </p>
+        {canUploadChantier ? (
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => setAddOpen(true)}
+            className="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-bework-soft-accent/60"
+          >
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-bework-soft-accent text-bework-accent">
+              <FileUp className="h-4 w-4" strokeWidth={1.75} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[13px] font-semibold text-bework-navy">Document</span>
+              <span className="mt-0.5 block text-[12px] text-slate-500">
+                Importer un ou plusieurs fichiers.
+              </span>
+            </span>
+          </button>
+        ) : null}
+        {canAccessOuvrages ? (
+          <>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() =>
+                router.push("/dashboard/documents?universe=ouvrages&create=ouvrage")
+              }
+              className="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-violet-50"
+            >
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-700">
+                <Boxes className="h-4 w-4" strokeWidth={1.75} />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[13px] font-semibold text-bework-navy">
+                  Ouvrage / article
+                </span>
+                <span className="mt-0.5 block text-[12px] text-slate-500">
+                  Créer un article SIMPLE ou COMPOSITE.
+                </span>
+              </span>
+            </button>
+            <a
+              href="/dashboard/devis-facturation/prix"
+              role="menuitem"
+              className="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-bework-soft-cyan/50"
+            >
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-bework-soft-cyan text-[#0e7490]">
+                <Package className="h-4 w-4" strokeWidth={1.75} />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[13px] font-semibold text-bework-navy">Ressource</span>
+                <span className="mt-0.5 block text-[12px] text-slate-500">
+                  Matériau, main-d’œuvre, matériel ou sous-traitance.
+                </span>
+              </span>
+            </a>
+          </>
+        ) : null}
+      </HeaderDropdown>
+    ) : null;
 
   return (
     <div className={GED_SHELL_CLASS}>
@@ -835,7 +919,8 @@ export function DocumentsHubClient({
           router.refresh();
         }}
         projects={projects}
-        defaultProjectId={addTarget}
+        defaultProjectId={addTarget || undefined}
+        allowWithoutProject
         canUpload={canUploadChantier}
         onUploaded={() => router.refresh()}
       />
@@ -863,6 +948,17 @@ export function DocumentsHubClient({
           />
         ) : null}
         <GedPageHeader title={pageTitle} subtitle={pageSubtitle} action={addButton} />
+        {!hideProject ? (
+          <BibliothequeUniverseSwitcher
+            value="documents"
+            showOuvrages={canAccessOuvrages}
+            onChange={(u) => {
+              if (u === "ouvrages") {
+                router.push("/dashboard/documents?universe=ouvrages");
+              }
+            }}
+          />
+        ) : null}
       </div>
 
       {external ? null : (
@@ -871,7 +967,7 @@ export function DocumentsHubClient({
             {
               id: "all",
               value: totalAll,
-              label: "Disponibles",
+              label: "Documents",
               tone: "ok",
               active: view === "all" && !since && !origin,
               onClick: () =>

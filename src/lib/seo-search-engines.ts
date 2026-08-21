@@ -13,6 +13,7 @@ export const SEO_DISALLOW_PATHS = [
   "/demo/",
   "/connexion",
   "/inscription",
+  "/essayer",
   "/connexion/gerente",
   "/connexion/agents",
   "/connexion/clients",

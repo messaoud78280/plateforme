@@ -217,10 +217,10 @@ function ConnexionChoice() {
                 Retour à l&apos;accueil
               </Link>
               <Link
-                href="/inscription"
+                href="/essayer"
                 className="flex items-center justify-center rounded-xl border border-[#2563eb]/70 bg-gradient-to-b from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] px-5 py-3 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(29,78,216,0.3)] transition hover:border-[#3b82f6] hover:from-[#2563eb] hover:via-[#1d4ed8] hover:to-[#1e40af] active:translate-y-px"
               >
-                Créer un compte (clients)
+                Essayer BeWork (14 jours)
               </Link>
             </div>
 

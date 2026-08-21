@@ -33,6 +33,8 @@ import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import { projectWhereForClientUser } from "@/lib/organization/access";
 import { loadAccueilOps } from "@/lib/accueil/load-accueil-ops";
 import { AccueilOpsHome } from "@/components/dashboard/AccueilOpsHome";
+import { SaasActivationHomeBlock } from "@/components/saas/SaasActivationHomeBlock";
+import { Suspense } from "react";
 export default async function DashboardPage({
   searchParams,
 }: {
@@ -94,6 +96,9 @@ export default async function DashboardPage({
     });
     return (
       <div className="mx-auto w-full max-w-[1400px] space-y-4 px-1 sm:px-2 xl:max-w-[1520px]">
+        <Suspense fallback={null}>
+          <SaasActivationHomeBlock user={session.user} />
+        </Suspense>
         <AccueilOpsHome
           ops={ops}
           personType={portalUser?.personType ?? session.user.personType ?? null}

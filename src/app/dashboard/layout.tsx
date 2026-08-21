@@ -18,6 +18,11 @@ import { getCachedClientGate, getCachedDemoExpiry } from "@/lib/auth/cached-dash
 import { SkipLink } from "@/components/ui/SkipLink";
 import { EnvironmentBanner } from "@/components/system/EnvironmentBanner";
 import { DemoTenantBanner } from "@/components/demo-environment/DemoTenantBanner";
+import {
+  SaasTrialBanner,
+  SaasTrialExpiredBanner,
+} from "@/components/saas/SaasTrialBanner";
+import { getSaasBannerState } from "@/lib/organization/saas-banner";
 import { DemoViewAsSwitcher } from "@/components/demo-environment/DemoViewAsSwitcher";
 import { DemoCommercialTourLazy } from "@/components/demo-environment/DemoCommercialTourLazy";
 import { RoleOnboarding } from "@/components/onboarding/RoleOnboarding";
@@ -116,6 +121,8 @@ export default async function DashboardLayout({
     loginIdentifier: demoLoginIdentifier,
   });
 
+  const saasBanner = await getSaasBannerState(session.user);
+
   const pathname = (await headers()).get("x-dashboard-pathname");
   if (pathname) {
     assertDashboardHrefAllowed({
@@ -132,6 +139,13 @@ export default async function DashboardLayout({
         <EnvironmentBanner environment={env} />
         {isDemo ? (
           <DemoTenantBanner companyName={companyName} expiresAt={demoExpiresIso} />
+        ) : saasBanner.kind === "trial" ? (
+          <SaasTrialBanner
+            daysRemaining={saasBanner.daysRemaining}
+            companyName={saasBanner.companyName}
+          />
+        ) : saasBanner.kind === "trial_expired" ? (
+          <SaasTrialExpiredBanner />
         ) : null}
         <UiPreferencesProvider userId={session.user.id}>
           <CommercialWorkspaceShell
@@ -168,6 +182,13 @@ export default async function DashboardLayout({
         <EnvironmentBanner environment={env} />
         {isDemo ? (
           <DemoTenantBanner companyName={companyName} expiresAt={demoExpiresIso} />
+        ) : saasBanner.kind === "trial" ? (
+          <SaasTrialBanner
+            daysRemaining={saasBanner.daysRemaining}
+            companyName={saasBanner.companyName}
+          />
+        ) : saasBanner.kind === "trial_expired" ? (
+          <SaasTrialExpiredBanner />
         ) : null}
         <header className="cc-header sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 px-3 sm:px-5">
           <div className="min-w-0">

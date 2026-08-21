@@ -232,10 +232,10 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
                       ·
                     </span>
                     <Link
-                      href="/inscription"
+                      href="/essayer"
                       className="font-semibold text-[#1d4ed8] underline-offset-2 hover:underline"
                     >
-                      Créer un compte
+                      Essayer BeWork (14 jours)
                     </Link>
                   </>
                 ) : null}

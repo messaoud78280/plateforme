@@ -1,7 +1,6 @@
 /**
- * Création atomique d’un espace entreprise SaaS (Phase 2 — inscription publique).
- * Exposé dès Phase 1 pour préparer l’onboarding — ne pas brancher sur une route publique
- * tant que l’isolation multi-tenant n’est pas validée.
+ * Création atomique d’un espace entreprise SaaS (inscription publique Phase 2).
+ * Workspace vide : aucun chantier / client / devis de démo.
  */
 
 import bcrypt from "bcryptjs";

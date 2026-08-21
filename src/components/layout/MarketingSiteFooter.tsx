@@ -242,8 +242,13 @@ export function MarketingSiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/essayer" className={COL_LINK}>
+                  Essayer BeWork (14 jours)
+                </Link>
+              </li>
+              <li>
                 <Link href="/inscription" className={COL_LINK}>
-                  Créer un compte
+                  Accès client (sur validation)
                 </Link>
               </li>
               <li>

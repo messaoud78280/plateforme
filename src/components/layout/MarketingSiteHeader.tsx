@@ -256,11 +256,11 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               <span className="whitespace-nowrap">Connexion</span>
             </Link>
             <Link
-              href="/#besoin"
+              href="/essayer"
               className={HEADER_BTN_PRIMARY}
-              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-desktop-besoin")}
+              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-desktop-essayer")}
             >
-              <span className="whitespace-nowrap">Parler de mon besoin</span>
+              <span className="whitespace-nowrap">Essayer 14 jours</span>
             </Link>
           </div>
 
@@ -619,12 +619,12 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 Connexion
               </Link>
               <Link
-                href="/#besoin"
+                href="/essayer"
                 className={`${HEADER_BTN_PRIMARY} w-full`}
                 onClick={() => setMobileOpen(false)}
-                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-mobile-footer-besoin")}
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-mobile-footer-essayer")}
               >
-                Parler de mon besoin
+                Essayer 14 jours
               </Link>
             </div>
           </div>

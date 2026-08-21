@@ -15,6 +15,7 @@ function AdminLoginForm() {
     if (err === "forbidden") return "Accès réservé aux administrateurs BeWork.";
     return "";
   });
+  const resetOk = searchParams.get("reset") === "ok";
   const [loading, setLoading] = useState(false);
   const callbackUrl = searchParams.get("callbackUrl") || "/admin";
 
@@ -54,6 +55,11 @@ function AdminLoginForm() {
         <p className="mt-2 text-[14px] text-slate-600">
           Compte éditeur plateforme — distinct des espaces entreprises clientes.
         </p>
+        {resetOk ? (
+          <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+            Mot de passe mis à jour. Connectez-vous.
+          </p>
+        ) : null}
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <label className="block">
             <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">
@@ -94,6 +100,14 @@ function AdminLoginForm() {
             {loading ? "Connexion…" : "Entrer dans l’admin"}
           </button>
         </form>
+        <p className="mt-4 text-center text-[13px]">
+          <Link
+            href="/admin/mot-de-passe-oublie"
+            className="font-semibold text-bework-accent hover:underline"
+          >
+            Mot de passe oublié ?
+          </Link>
+        </p>
         <p className="mt-5 text-center text-[12px] text-slate-500">
           <Link href="/" className="font-medium text-bework-accent hover:underline">
             Retour au site

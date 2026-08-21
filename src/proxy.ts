@@ -79,10 +79,20 @@ async function applyPersonaGate(
   }
 
   // Administration BeWork — auth + platformRole (défense en profondeur ; layout revalide en DB)
+  const isAdminPublic =
+    pathname === "/admin/connexion" ||
+    pathname.startsWith("/admin/connexion/") ||
+    pathname === "/admin/mot-de-passe-oublie" ||
+    pathname.startsWith("/admin/mot-de-passe-oublie/") ||
+    pathname === "/admin/reinitialiser-mot-de-passe" ||
+    pathname.startsWith("/admin/reinitialiser-mot-de-passe/");
   const isAdminUi =
-    pathname === "/admin" ||
-    (pathname.startsWith("/admin/") && !pathname.startsWith("/admin/connexion"));
-  const isAdminApi = pathname.startsWith("/api/platform-admin");
+    (pathname === "/admin" || pathname.startsWith("/admin/")) && !isAdminPublic;
+  const isAdminApiPublic =
+    pathname === "/api/platform-admin/forgot-password" ||
+    pathname === "/api/platform-admin/reset-password";
+  const isAdminApi =
+    pathname.startsWith("/api/platform-admin") && !isAdminApiPublic;
   if (isAdminUi || isAdminApi) {
     const token = await getToken({ req: request, secret });
     const authenticated = Boolean(token?.id || token?.sub);

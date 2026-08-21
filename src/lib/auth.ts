@@ -11,6 +11,7 @@ import { gateAllows, parseTeamLoginGate } from "@/lib/auth-team-login";
 import { canonicalRequestOrigin } from "@/lib/site";
 import { resolveDemoAccessForUser } from "@/lib/demo-environment/access";
 import { isDemoEmail, toDemoEmail } from "@/lib/demo-environment/constants";
+import { isPlatformAdminRole } from "@/lib/platform-admin/authz";
 
 function resolveCredentialsEmail(raw: string, gate: string | null): string {
   const trimmed = raw.trim().toLowerCase();
@@ -213,6 +214,10 @@ export const authOptions: NextAuthOptions = {
       }
 
       if (dbUser?.mustChangePassword) {
+        // Platform Admin : définir MDP via flux admin dédié, pas le dashboard client
+        if (gate === "admin" || isPlatformAdminRole(dbUser.platformRole)) {
+          return true;
+        }
         return "/dashboard/parametres/securite?mustChangePassword=1";
       }
 

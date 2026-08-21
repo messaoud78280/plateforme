@@ -52,3 +52,6 @@ next-env.d.ts
 /public/ressources/pdf/Guide_CDT*
 /public/ressources/pdf/Tuto_Skill*
 /public/ressources/pdf/article-guide-conducteur-de-travaux-ia (1).pdf
+.admin-setup.local.json
+
+.admin-setup-url.local

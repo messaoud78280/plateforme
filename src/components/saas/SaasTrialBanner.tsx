@@ -5,30 +5,43 @@ import { cn } from "@/lib/cn";
 export function SaasTrialBanner({
   daysRemaining,
   companyName,
+  activationPercent,
 }: {
   daysRemaining: number;
   companyName?: string | null;
+  activationPercent?: number | null;
 }) {
   const urgent = daysRemaining <= 3;
+  const dayLabel =
+    daysRemaining <= 0
+      ? "terminé"
+      : `${daysRemaining} jour${daysRemaining !== 1 ? "s" : ""} restant${daysRemaining !== 1 ? "s" : ""}`;
+
   return (
     <div
       role="status"
       className={cn(
-        "border-b px-3 py-1.5 text-center text-[11px] font-semibold tracking-wide",
+        "flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b px-3 py-1.5 text-[11px] font-semibold tracking-wide sm:justify-between",
         urgent
           ? "border-amber-300/90 bg-amber-50 text-amber-950"
-          : "border-bework-accent/20 bg-bework-soft-accent/60 text-bework-navy",
+          : "border-bework-accent/20 bg-bework-soft-accent/50 text-bework-navy",
       )}
     >
-      Essai BeWork
-      {companyName ? ` — ${companyName}` : ""}
-      {" · "}
-      {daysRemaining <= 0
-        ? "terminé"
-        : `${daysRemaining} jour${daysRemaining !== 1 ? "s" : ""} restant${daysRemaining !== 1 ? "s" : ""}`}
-      {" · "}
-      <Link href="/dashboard/bienvenue" className="underline underline-offset-2 hover:opacity-80">
-        Bien démarrer
+      <p className="text-center sm:text-left">
+        Essai BeWork
+        {companyName ? (
+          <span className="font-medium opacity-80"> · {companyName}</span>
+        ) : null}
+        {" · "}
+        {dayLabel}
+      </p>
+      <Link
+        href="/dashboard/bienvenue"
+        className="underline-offset-2 hover:underline"
+      >
+        {typeof activationPercent === "number"
+          ? `Configuration ${activationPercent} % →`
+          : "Découvrir les étapes →"}
       </Link>
     </div>
   );

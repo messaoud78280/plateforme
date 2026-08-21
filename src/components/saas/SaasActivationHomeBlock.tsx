@@ -1,11 +1,14 @@
-import { getOrganizationActivationSnapshot } from "@/lib/organization/activation";
+import {
+  getOrganizationActivationSnapshot,
+} from "@/lib/organization/activation";
 import {
   requireOrganizationContext,
   TenantAccessError,
 } from "@/lib/organization/tenant";
 import { ActivationChecklistCard } from "@/components/saas/ActivationChecklistCard";
+import { SpaceReadyBanner } from "@/components/saas/SpaceReadyBanner";
 
-/** Checklist d’activation sur l’accueil — uniquement trial / onboarding incomplet. */
+/** Checklist d’activation sur l’accueil — hiérarchie selon maturité. */
 export async function SaasActivationHomeBlock({
   user,
 }: {
@@ -29,25 +32,28 @@ export async function SaasActivationHomeBlock({
   }
 
   if (ctx.organization.kind === "DEMO") return null;
-  if (ctx.organization.onboardingCompletedAt) return null;
 
   const snapshot = await getOrganizationActivationSnapshot(ctx.organizationId);
-  if (snapshot.percent >= 100) return null;
 
-  // Afficher surtout en trial ou si onboarding démarré / incomplet
+  if (snapshot.percent >= 100) {
+    return <SpaceReadyBanner organizationId={ctx.organizationId} />;
+  }
+
+  // Onboarding marqué terminé manuellement → plus de checklist sur l’accueil
+  if (ctx.organization.onboardingCompletedAt) return null;
+
   const show =
     ctx.effectiveStatus === "TRIAL" ||
     ctx.organization.onboardingStep != null ||
-    snapshot.percent < 50;
+    snapshot.percent < 100;
   if (!show) return null;
 
   return (
     <ActivationChecklistCard
-      compact
       percent={snapshot.percent}
       items={snapshot.items}
-      trialDaysRemaining={ctx.trialDaysRemaining}
       companyName={ctx.organization.name}
+      maturity={snapshot.maturity}
     />
   );
 }

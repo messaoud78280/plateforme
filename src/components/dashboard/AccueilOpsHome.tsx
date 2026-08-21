@@ -33,7 +33,7 @@ function buildHeaderLine(ops: AccueilOpsSummary) {
   const parts: string[] = [];
   if (ops.attentionTotal > 0) {
     parts.push(
-      `${ops.attentionTotal} sujet${ops.attentionTotal > 1 ? "s" : ""} à suivre`,
+      `${ops.attentionTotal} élément${ops.attentionTotal > 1 ? "s" : ""} nécessitent votre attention aujourd’hui`,
     );
   }
   const todayDeliveries = ops.orders.filter((o) =>
@@ -45,6 +45,9 @@ function buildHeaderLine(ops: AccueilOpsSummary) {
     );
   }
   if (parts.length > 0) return parts.join(" · ");
+  if (!ops.hasProjects) {
+    return "Commencez par configurer votre espace — BeWork vous guide.";
+  }
   return "Rien d’urgent à traiter aujourd’hui.";
 }
 
@@ -200,7 +203,15 @@ export function AccueilOpsHome({
           action={{ href: ops.links.aTraiter, label: seeAllLabel }}
         >
           {visibleCategories.length === 0 ? (
-            <p className="py-1 text-[14px] text-slate-500">Rien à traiter pour le moment.</p>
+            <div className="space-y-1 py-1">
+              <p className="text-[14px] leading-snug text-slate-600">
+                Vos actions importantes apparaîtront ici : relances, échéances,
+                validations et alertes.
+              </p>
+              <p className="text-[13px] text-slate-500">
+                Aucune action pour le moment.
+              </p>
+            </div>
           ) : (
             <ul
               className={cn(
@@ -326,7 +337,16 @@ export function AccueilOpsHome({
                 Voir Agenda
               </Link>
             </div>
-            <p className="mt-2 text-[13px] text-slate-500">Rien de prévu aujourd’hui.</p>
+            <p className="mt-2 text-[13px] leading-snug text-slate-500">
+              Ajoutez vos rendez-vous, visites, livraisons et échéances pour les
+              retrouver ici.
+            </p>
+            <Link
+              href={ops.links.nouvelEvenement}
+              className="mt-3 inline-block text-[13px] font-semibold text-[#1d4ed8] hover:underline"
+            >
+              Ajouter un événement
+            </Link>
           </aside>
         )}
 
@@ -341,18 +361,38 @@ export function AccueilOpsHome({
                 ) : null}
                 {showRentabilite ? (
                   <div className="min-w-0 flex-1 sm:pl-6">
-                    <Link
-                      href="/dashboard/rentabilite"
-                      className="block rounded-xl py-1 transition-colors duration-150 hover:bg-slate-50/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
-                    >
-                      <p className="text-[13px] font-semibold text-slate-500">Rentabilité</p>
-                      <p className="mt-1 text-[15px] font-bold text-[#1e3a5f]">
-                        Voir la marge
-                      </p>
-                      <p className="mt-0.5 text-[12px] text-slate-500">
-                        Prévisionnel, engagé et encaissé
-                      </p>
-                    </Link>
+                    {!ops.hasProjects ? (
+                      <div className="rounded-xl py-1">
+                        <p className="text-[13px] font-semibold text-slate-500">
+                          Rentabilité chantier
+                        </p>
+                        <p className="mt-1 text-[14px] leading-snug text-slate-600">
+                          Suivez votre marge dès votre premier chantier :
+                          prévisionnel, engagé, réel et encaissé.
+                        </p>
+                        <Link
+                          href="/dashboard/projets"
+                          className="mt-2 inline-block text-[13px] font-semibold text-[#1d4ed8] hover:underline"
+                        >
+                          Créer mon premier chantier
+                        </Link>
+                      </div>
+                    ) : (
+                      <Link
+                        href="/dashboard/rentabilite"
+                        className="block rounded-xl py-1 transition-colors duration-150 hover:bg-slate-50/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
+                      >
+                        <p className="text-[13px] font-semibold text-slate-500">
+                          Rentabilité
+                        </p>
+                        <p className="mt-1 text-[15px] font-bold text-[#1e3a5f]">
+                          Voir la marge
+                        </p>
+                        <p className="mt-0.5 text-[12px] text-slate-500">
+                          Prévisionnel, engagé et encaissé
+                        </p>
+                      </Link>
+                    )}
                   </div>
                 ) : null}
               </div>

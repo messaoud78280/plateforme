@@ -4,10 +4,16 @@ import {
   effectiveSaasStatus,
 } from "@/lib/organization/lifecycle";
 import { resolveActiveOrganizationId } from "@/lib/organization/tenant";
+import { getOrganizationActivationSnapshot } from "@/lib/organization/activation";
 
 export type SaasBannerState =
   | { kind: "none" }
-  | { kind: "trial"; daysRemaining: number; companyName: string }
+  | {
+      kind: "trial";
+      daysRemaining: number;
+      companyName: string;
+      activationPercent: number;
+    }
   | { kind: "trial_expired"; companyName: string };
 
 export async function getSaasBannerState(user: {
@@ -38,7 +44,13 @@ export async function getSaasBannerState(user: {
   const status = effectiveSaasStatus(org);
   if (status === "TRIAL") {
     const days = daysRemainingInTrial(org) ?? 0;
-    return { kind: "trial", daysRemaining: days, companyName: org.name };
+    const snap = await getOrganizationActivationSnapshot(organizationId);
+    return {
+      kind: "trial",
+      daysRemaining: days,
+      companyName: org.name,
+      activationPercent: snap.percent,
+    };
   }
   if (status === "TRIAL_EXPIRED") {
     return { kind: "trial_expired", companyName: org.name };

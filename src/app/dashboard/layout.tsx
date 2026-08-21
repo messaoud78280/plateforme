@@ -22,6 +22,7 @@ import {
   SaasTrialBanner,
   SaasTrialExpiredBanner,
 } from "@/components/saas/SaasTrialBanner";
+import { ContextualHeaderCta } from "@/components/saas/ContextualHeaderCta";
 import { getSaasBannerState } from "@/lib/organization/saas-banner";
 import { DemoViewAsSwitcher } from "@/components/demo-environment/DemoViewAsSwitcher";
 import { DemoCommercialTourLazy } from "@/components/demo-environment/DemoCommercialTourLazy";
@@ -208,6 +209,7 @@ export default async function DashboardLayout({
           <SaasTrialBanner
             daysRemaining={saasBanner.daysRemaining}
             companyName={saasBanner.companyName}
+            activationPercent={saasBanner.activationPercent}
           />
         ) : saasBanner.kind === "trial_expired" ? (
           <SaasTrialExpiredBanner />
@@ -228,9 +230,18 @@ export default async function DashboardLayout({
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             {isDemo && platform.features.demoViewAs ? <DemoViewAsSwitcher /> : null}
             {session.user?.role === "CLIENT" && !isDemo && !external ? (
-              <Link href="/dashboard/nouvelle-demande" className="btn-cc-primary !text-xs sm:!text-sm">
-                + Nouvelle tâche
-              </Link>
+              <Suspense
+                fallback={
+                  <Link
+                    href="/dashboard/taches?nouvelle=1"
+                    className="btn-cc-primary !text-xs sm:!text-sm"
+                  >
+                    + Nouvelle tâche
+                  </Link>
+                }
+              >
+                <ContextualHeaderCta user={session.user} />
+              </Suspense>
             ) : null}
             <GlobalSearchTrigger />
             <div

@@ -15,6 +15,7 @@ export async function GET() {
       id: session.user.id,
       role: session.user.role,
       personType: session.user.personType ?? null,
+      permissionProfile: session.user.permissionProfile ?? null,
     });
     return NextResponse.json({ total, capped });
   } catch (e) {

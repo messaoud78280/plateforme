@@ -107,6 +107,8 @@ export type AccueilOpsSummary = {
   attention: AccueilAttentionItem[];
   /** ATTENTION-UI-2 — synthèses par famille (max 4, sans carte vide). */
   attentionCategories: AttentionDisplayCategorySummary[];
+  /** True si l’org a au moins un chantier (empty states Accueil). */
+  hasProjects: boolean;
   agendaTitle: "Aujourd’hui" | "Prochainement";
   agenda: AccueilAgendaItem[];
   chantiers: AccueilChantierWatch[];
@@ -597,6 +599,7 @@ export async function loadAccueilOps(opts: {
       attentionTotal: attentionSnap.total,
       attentionCapped: Boolean(attentionSnap.attentionCapped),
       attention: mapAttention(attentionSnap.attentionCards),
+      hasProjects: projects.length > 0,
       attentionCategories: buildAttentionDisplayCategories(attentionSnap.attentionCards, {
         limit: 4,
         baseHref: "/dashboard/a-traiter",

@@ -821,24 +821,49 @@ export const A_TRAITER_SECTION_LABELS: Record<ATraiterSection, string> = {
   relance: "À anticiper",
 };
 
+/** Même règle de scope que l’Accueil Ops (Moi vs Équipe). */
+export function resolveATraiterMineOnlyDefault(user: {
+  role?: string | null;
+  permissionProfile?: string | null;
+}): boolean {
+  const profile = user.permissionProfile ?? null;
+  const isDirection =
+    profile === "DIRECTION" ||
+    user.role === "MANAGER" ||
+    user.role === "AGENCE";
+  const isConducteur =
+    profile === "CONDUCTEUR" ||
+    profile === "CHEF_CHANTIER" ||
+    (user.role === "AGENT" && !isDirection);
+  if (isConducteur) return true;
+  if (isDirection || profile === "ADMINISTRATIF") return false;
+  return true;
+}
+
 /**
- * Badge nav : URGENT + CRITIQUE + hot items.
- * COUNT léger (countOnly). Si l’échantillon attention est plafonné → capped=true
- * (le UI doit afficher N+ , jamais un sous-compte présenté comme exact).
+ * Badge nav « À traiter » — même moteur / même total que la section Accueil.
+ * (Évite badge 15 vs Accueil « rien à traiter ».)
+ * Si l’échantillon est plafonné → capped=true (UI : N+).
  */
 export async function countATraiter(user: {
   id: string;
   role?: string | null;
   personType?: string | null;
+  permissionProfile?: string | null;
 }): Promise<{ total: number; capped: boolean }> {
-  const key = `a-traiter-count:${user.id}`;
+  const mineOnly = resolveATraiterMineOnlyDefault(user);
+  const key = `a-traiter-count:${user.id}:${mineOnly ? "mine" : "team"}`;
   const cached = ttlGet<{ total: number; capped: boolean }>(key);
   if (cached && typeof cached.total === "number") return cached;
 
-  const snapshot = await collectATraiter(user, { light: true, countOnly: true });
-  const otherHot = snapshot.counts.bloquant + snapshot.counts.urgent;
-  const total = snapshot.hotCount + otherHot;
-  const payload = { total, capped: Boolean(snapshot.attentionCapped) };
+  const snapshot = await collectATraiter(user, {
+    homePreview: true,
+    mineOnly,
+  });
+  const payload = {
+    total: snapshot.total,
+    capped: Boolean(snapshot.attentionCapped),
+  };
   ttlSet(key, payload, 30_000);
   return payload;
 }
@@ -848,8 +873,10 @@ export async function summarizeATraiter(user: {
   id: string;
   role?: string | null;
   personType?: string | null;
+  permissionProfile?: string | null;
 }) {
-  const key = `a-traiter-summary:${user.id}`;
+  const mineOnly = resolveATraiterMineOnlyDefault(user);
+  const key = `a-traiter-summary:${user.id}:${mineOnly ? "mine" : "team"}`;
   const cached = ttlGet<{
     total: number;
     hotCount: number;
@@ -857,7 +884,7 @@ export async function summarizeATraiter(user: {
   }>(key);
   if (cached) return cached;
 
-  const snapshot = await collectATraiter(user, { homePreview: true });
+  const snapshot = await collectATraiter(user, { homePreview: true, mineOnly });
   const summary = {
     total: snapshot.total,
     hotCount: snapshot.hotCount,
@@ -865,9 +892,9 @@ export async function summarizeATraiter(user: {
   };
   ttlSet(key, summary, 30_000);
   ttlSet(
-    `a-traiter-count:${user.id}`,
+    `a-traiter-count:${user.id}:${mineOnly ? "mine" : "team"}`,
     {
-      total: snapshot.hotCount,
+      total: snapshot.total,
       capped: Boolean(snapshot.attentionCapped),
     },
     30_000,

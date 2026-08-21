@@ -59,8 +59,8 @@ export default async function BienvenuePage() {
       <ActivationChecklistCard
         percent={snapshot.percent}
         items={snapshot.items}
-        trialDaysRemaining={ctx.trialDaysRemaining}
         companyName={ctx.organization.name}
+        maturity="new"
       />
 
       <div className="grid gap-3 sm:grid-cols-3">

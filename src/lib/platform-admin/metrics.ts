@@ -7,6 +7,10 @@ import {
   daysRemainingInTrial,
   effectiveSaasStatus,
 } from "@/lib/organization/lifecycle";
+import {
+  ACTIVATION_WEIGHTS,
+  getOrganizationActivationSnapshot,
+} from "@/lib/organization/activation";
 
 export type ActivationBand =
   | "faible"
@@ -34,15 +38,7 @@ export function activationBandLabel(band: ActivationBand): string {
   }
 }
 
-const WEIGHTS = {
-  company: 15,
-  client: 10,
-  project: 20,
-  quote: 20,
-  member: 15,
-  document: 10,
-  multiDay: 10,
-} as const;
+const WEIGHTS = ACTIVATION_WEIGHTS;
 
 export type OrgActivationScore = {
   percent: number;
@@ -69,96 +65,32 @@ export type OrgActivationScore = {
   };
 };
 
+/** Même source que le dashboard client (`getOrganizationActivationSnapshot`). */
 export async function scoreOrganizationActivation(
   organizationId: string,
 ): Promise<OrgActivationScore> {
-  const [
-    org,
-    clientExtCount,
-    projectCount,
-    quoteCount,
-    documentCount,
-    memberCount,
-    poCount,
-    distinctLoginDays,
-  ] = await Promise.all([
-    prisma.organization.findUnique({
-      where: { id: organizationId },
-      select: {
-        name: true,
-        siret: true,
-        onboardingCompletedAt: true,
-        commercialOrgSettings: { select: { id: true } },
-        owner: { select: { lastLoginAt: true, createdAt: true } },
-      },
-    }),
-    prisma.externalOrganization.count({
-      where: { hostOrganizationId: organizationId, type: "CLIENT_EXT" },
-    }),
-    prisma.project.count({ where: { organizationId } }),
-    prisma.commercialQuote.count({ where: { organizationId } }),
-    prisma.chantierFile.count({
-      where: {
-        deletedAt: null,
-        OR: [{ organizationId }, { project: { organizationId } }],
-      },
-    }),
-    prisma.organizationMember.count({
-      where: { organizationId, status: "ACTIVE" },
-    }),
-    prisma.purchaseOrder.count({ where: { organizationId } }),
-    // Approximation « plusieurs jours » via lastLogin owner vs createdAt (léger)
-    Promise.resolve(0),
-  ]);
-
-  const company = Boolean(
-    org?.onboardingCompletedAt ||
-      org?.siret ||
-      org?.commercialOrgSettings?.id ||
-      (org?.name && org.name.trim().length > 2),
-  );
-  const client = clientExtCount > 0 || projectCount > 0;
-  const project = projectCount > 0;
-  const quote = quoteCount > 0;
-  const member = memberCount > 1;
-  const document = documentCount > 0;
-
-  const ownerCreated = org?.owner?.createdAt?.getTime() ?? 0;
-  const ownerLogin = org?.owner?.lastLoginAt?.getTime() ?? 0;
-  const multiDay =
-    ownerLogin > 0 &&
-    ownerCreated > 0 &&
-    ownerLogin - ownerCreated > 20 * 60 * 60 * 1000;
-
-  void distinctLoginDays;
-
-  const flags = { company, client, project, quote, member, document, multiDay };
-  let points = 0;
-  if (company) points += WEIGHTS.company;
-  if (client) points += WEIGHTS.client;
-  if (project) points += WEIGHTS.project;
-  if (quote) points += WEIGHTS.quote;
-  if (member) points += WEIGHTS.member;
-  if (document) points += WEIGHTS.document;
-  if (multiDay) points += WEIGHTS.multiDay;
+  const snap = await getOrganizationActivationSnapshot(organizationId);
   const maxPoints = Object.values(WEIGHTS).reduce((a, b) => a + b, 0);
-  const percent = Math.round((points / maxPoints) * 100);
-  const band = activationBand(percent);
+  let points = 0;
+  (Object.keys(WEIGHTS) as (keyof typeof WEIGHTS)[]).forEach((k) => {
+    if (snap.flags[k]) points += WEIGHTS[k];
+  });
+  const band = activationBand(snap.percent);
 
   return {
-    percent,
+    percent: snap.percent,
     band,
     bandLabel: activationBandLabel(band),
     points,
     maxPoints,
-    flags,
+    flags: snap.flags,
     counts: {
-      members: memberCount,
-      clients: clientExtCount,
-      projects: projectCount,
-      quotes: quoteCount,
-      documents: documentCount,
-      purchaseOrders: poCount,
+      members: snap.counts.members,
+      clients: snap.counts.clients,
+      projects: snap.counts.projects,
+      quotes: snap.counts.quotes,
+      documents: snap.counts.documents,
+      purchaseOrders: snap.counts.purchaseOrders,
     },
   };
 }

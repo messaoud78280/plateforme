@@ -78,6 +78,36 @@ async function applyPersonaGate(
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
+  // Administration BeWork — auth + platformRole (défense en profondeur ; layout revalide en DB)
+  const isAdminUi =
+    pathname === "/admin" ||
+    (pathname.startsWith("/admin/") && !pathname.startsWith("/admin/connexion"));
+  const isAdminApi = pathname.startsWith("/api/platform-admin");
+  if (isAdminUi || isAdminApi) {
+    const token = await getToken({ req: request, secret });
+    const authenticated = Boolean(token?.id || token?.sub);
+    const platformRole = (token?.platformRole as string | null | undefined) ?? null;
+    if (!authenticated) {
+      if (isAdminApi) {
+        return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+      }
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin/connexion";
+      url.search = `?callbackUrl=${encodeURIComponent(pathname)}`;
+      return NextResponse.redirect(url);
+    }
+    if (platformRole !== "PLATFORM_ADMIN") {
+      if (isAdminApi) {
+        return NextResponse.json({ error: "Accès interdit" }, { status: 403 });
+      }
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin/connexion";
+      url.search = "?error=forbidden";
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
   const mappedApi = requiredHrefForApiPath(pathname);
   const isDashboard = pathname.startsWith("/dashboard");
   if (!isDashboard && !mappedApi) return null;
@@ -87,6 +117,7 @@ async function applyPersonaGate(
   const { personType, permissionProfile } = token
     ? tokenPersona(token)
     : { personType: null, permissionProfile: null };
+  const platformRole = (token?.platformRole as string | null | undefined) ?? null;
 
   if (isDashboard) {
     if (!authenticated) {
@@ -95,7 +126,16 @@ async function applyPersonaGate(
       url.search = `?callbackUrl=${encodeURIComponent(pathname)}`;
       return NextResponse.redirect(url);
     }
+    // Platform Admin hors support → console admin (pas le dashboard client)
+    if (platformRole === "PLATFORM_ADMIN") {
+      // Le layout dashboard vérifie la SupportSession ; on laisse passer ici
+      // pour permettre le mode support. Sans cookie support, layout redirige.
+    }
     if (!canAccessDashboardHref(pathname, personType, permissionProfile)) {
+      // Platform admin en support : personType peut être null → autoriser /dashboard*
+      if (platformRole === "PLATFORM_ADMIN") {
+        return NextResponse.next({ request: { headers: requestHeaders } });
+      }
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
       url.search = "";
@@ -108,6 +148,9 @@ async function applyPersonaGate(
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
   if (!canAccessDashboardApi(pathname, personType, permissionProfile)) {
+    if (platformRole === "PLATFORM_ADMIN") {
+      return NextResponse.next({ request: { headers: requestHeaders } });
+    }
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
   return NextResponse.next({ request: { headers: requestHeaders } });

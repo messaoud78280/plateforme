@@ -55,6 +55,11 @@ model User {
   jobTitle            String?   // Fonction affichée
   mustChangePassword  Boolean   @default(false)
   lastLoginAt         DateTime?
+  /// Rôle éditeur BeWork (admin SaaS) — indépendant de UserRole / membership org.
+  /// null = aucun accès /admin. Ne jamais déduire depuis l’email.
+  platformRole        PlatformRole?
+  /// Réservé MFA admin plateforme (Phase MFA) — pas de faux 2FA artisanal.
+  platformMfaEnabled  Boolean   @default(false)
   externalOrganizationId String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -73,6 +78,8 @@ model User {
   projectAccessesGranted ProjectAccess[] @relation("ProjectAccessGrantedBy")
   accessAuditsAsActor AccessAuditLog[] @relation("AccessAuditActor")
   accessAuditsAsTarget AccessAuditLog[] @relation("AccessAuditTarget")
+  platformAdminAuditEvents PlatformAdminAuditEvent[] @relation("PlatformAdminAuditActor")
+  platformSupportSessions  PlatformSupportSession[]  @relation("PlatformSupportAdmin")
   approvedBy          User?     @relation("ApprovedClients", fields: [approvedById], references: [id], onDelete: SetNull)
   clientsApproved     User[]    @relation("ApprovedClients")
   invitationsSent     Invitation[]
@@ -669,6 +676,8 @@ model Organization {
   chantierFiles                 ChantierFile[]
   annualServiceContracts        AnnualServiceContract[]
   siteVisits                    SiteVisit[]
+  platformAdminAuditEvents      PlatformAdminAuditEvent[]
+  platformSupportSessions       PlatformSupportSession[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -813,6 +822,56 @@ enum UserRole {
   AGENCE  // Agent agence (opérationnel)
   MANAGER // Gérant de l'agence
   AGENT   // Assistante virtuelle (exécution des tâches)
+}
+
+/// Admin éditeur BeWork (SaaS) — distinct de UserRole et des rôles org (OWNER, DIRECTION…).
+enum PlatformRole {
+  PLATFORM_ADMIN
+}
+
+enum PlatformSupportMode {
+  READ_ONLY
+  INTERVENTION
+}
+
+/// Journal des actions sensibles Administration BeWork.
+model PlatformAdminAuditEvent {
+  id             String   @id @default(cuid())
+  actorUserId    String
+  organizationId String?
+  action         String
+  context        String?  @db.Text
+  createdAt      DateTime @default(now())
+
+  actor        User          @relation("PlatformAdminAuditActor", fields: [actorUserId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([organizationId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([action, createdAt])
+}
+
+/// Session support temporaire (admin → tenant). Jamais un impersonate silencieux.
+model PlatformSupportSession {
+  id             String               @id @default(cuid())
+  adminUserId    String
+  organizationId String
+  mode           PlatformSupportMode
+  reason         String               @db.Text
+  startedAt      DateTime             @default(now())
+  endsAt         DateTime
+  endedAt        DateTime?
+  endedByUserId  String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  admin        User         @relation("PlatformSupportAdmin", fields: [adminUserId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId, endedAt])
+  @@index([organizationId, endedAt])
+  @@index([endsAt])
 }
 
 enum ClientAccountStatus {

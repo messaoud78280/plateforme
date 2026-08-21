@@ -16,6 +16,7 @@
     "postbuild": "npm run --silent seo:ping-indexnow || true",
     "start": "bash scripts/start-production.sh",
     "lint": "eslint",
+    "db:bootstrap-platform-admin": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/bootstrap-platform-admin.ts",
     "db:seed": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx prisma/seed.ts",
     "db:seed:equipe": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx prisma/seed-equipe-bework.ts",
     "db:reset-equipe": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/reset-bework-team-access.ts",

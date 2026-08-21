@@ -100,6 +100,9 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
+          const platformRole =
+            (user as { platformRole?: string | null }).platformRole ?? null;
+
           if (gate === "demo") {
             const access = await resolveDemoAccessForUser(user.id);
             if (!access.ok) return null;
@@ -128,6 +131,7 @@ export const authOptions: NextAuthOptions = {
             mustChangePassword: Boolean(
               (user as { mustChangePassword?: boolean }).mustChangePassword
             ),
+            platformRole,
           };
         } catch (err) {
           console.error("[Auth] Erreur base de données:", err);
@@ -141,12 +145,30 @@ export const authOptions: NextAuthOptions = {
       const role = (user as { role?: string }).role;
       const email = (user as { email?: string }).email;
       const gate = parseTeamLoginGate(credentials?.gate);
-      if (gate && role && !gateAllows(role, gate, email)) {
+      const userId = (user as { id?: string }).id;
+
+      let platformRole =
+        (user as { platformRole?: string | null }).platformRole ?? null;
+      if (userId && platformRole === null) {
+        const pr = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { platformRole: true },
+        });
+        platformRole = pr?.platformRole ?? null;
+      }
+
+      if (gate && role && !gateAllows(role, gate, email, platformRole)) {
+        if (gate === "admin") {
+          return `/admin/connexion?error=forbidden`;
+        }
         return `/connexion/${gate}?error=wrong_gate`;
       }
 
-      const userId = (user as { id?: string }).id;
       if (!userId) return true;
+
+      if (gate === "admin") {
+        return true;
+      }
 
       if (gate === "demo" || isDemoEmail(email)) {
         const access = await resolveDemoAccessForUser(userId);
@@ -170,7 +192,13 @@ export const authOptions: NextAuthOptions = {
 
       const dbUser = await prisma.user.findUnique({
         where: { id: userId },
-        select: { role: true, accountStatus: true, accessStatus: true, mustChangePassword: true },
+        select: {
+          role: true,
+          accountStatus: true,
+          accessStatus: true,
+          mustChangePassword: true,
+          platformRole: true,
+        },
       });
 
       if (dbUser?.accessStatus === "SUSPENDED" || dbUser?.accessStatus === "DISABLED") {
@@ -207,18 +235,27 @@ export const authOptions: NextAuthOptions = {
           typeof u.permissionProfile === "string" || u.permissionProfile === null
             ? (u.permissionProfile as string | null)
             : undefined;
+        token.platformRole =
+          typeof u.platformRole === "string" || u.platformRole === null
+            ? (u.platformRole as string | null)
+            : undefined;
         // Enrichir depuis la DB si absents (magic link)
-        if (token.personType === undefined || token.permissionProfile === undefined) {
+        if (
+          token.personType === undefined ||
+          token.permissionProfile === undefined ||
+          token.platformRole === undefined
+        ) {
           const dbUser = await prisma.user.findUnique({
             where: { id: user.id },
-            select: { personType: true, permissionProfile: true },
+            select: { personType: true, permissionProfile: true, platformRole: true },
           });
           if (dbUser) {
             token.personType = dbUser.personType;
             token.permissionProfile = dbUser.permissionProfile;
+            token.platformRole = dbUser.platformRole;
           }
         }
-      } else if (token.id && (!token.role || token.personType === undefined)) {
+      } else if (token.id && (!token.role || token.personType === undefined || token.platformRole === undefined)) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: {
@@ -229,6 +266,7 @@ export const authOptions: NextAuthOptions = {
             mustChangePassword: true,
             personType: true,
             permissionProfile: true,
+            platformRole: true,
           },
         });
         if (dbUser) {
@@ -239,6 +277,7 @@ export const authOptions: NextAuthOptions = {
           token.mustChangePassword = dbUser.mustChangePassword;
           token.personType = dbUser.personType;
           token.permissionProfile = dbUser.permissionProfile;
+          token.platformRole = dbUser.platformRole;
         }
       }
 
@@ -291,6 +330,8 @@ export const authOptions: NextAuthOptions = {
         session.user.personType = (token.personType as string | null | undefined) ?? null;
         session.user.permissionProfile =
           (token.permissionProfile as string | null | undefined) ?? null;
+        session.user.platformRole =
+          (token.platformRole as string | null | undefined) ?? null;
         session.user.isDemo = Boolean(token.isDemo);
         session.user.demoEnvironmentId = token.demoEnvironmentId as string | undefined;
         session.user.demoCompanyName = token.demoCompanyName as string | undefined;

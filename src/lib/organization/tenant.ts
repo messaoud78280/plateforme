@@ -3,7 +3,12 @@
  * Ne jamais se fier uniquement à un organizationId envoyé par le client.
  */
 
-import type { OrganizationMemberRole, OrganizationSaasStatus, OrganizationKind } from "@prisma/client";
+import type {
+  OrganizationMemberRole,
+  OrganizationSaasStatus,
+  OrganizationKind,
+  PlatformSupportMode,
+} from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   ensureOrganizationForOwner,
@@ -15,12 +20,15 @@ import {
   effectiveSaasStatus,
   type OrgWriteAccess,
 } from "@/lib/organization/lifecycle";
+import { isPlatformAdminRole } from "@/lib/platform-admin/authz";
+import { getActiveSupportSessionForAdmin } from "@/lib/platform-admin/support";
 
 export type TenantUserRef = {
   id: string;
   role?: string | null;
   personType?: string | null;
   permissionProfile?: string | null;
+  platformRole?: string | null;
   isDemo?: boolean;
   demoRootUserId?: string | null;
 };
@@ -48,6 +56,12 @@ export type OrganizationTenantContext = {
   effectiveStatus: OrganizationSaasStatus;
   writeAccess: OrgWriteAccess;
   trialDaysRemaining: number | null;
+  /** Présent uniquement pendant une SupportSession Platform Admin. */
+  support?: {
+    sessionId: string;
+    mode: PlatformSupportMode;
+    reason: string;
+  } | null;
 };
 
 export class TenantAccessError extends Error {
@@ -65,10 +79,16 @@ export class TenantAccessError extends Error {
 /**
  * Résout l’organisation active de l’utilisateur (membership ou ownership).
  * Pour la démo : org du root démo si view-as / isDemo.
+ * Platform Admin hors support → null (pas de tenant client implicite).
  */
 export async function resolveActiveOrganizationId(
   user: TenantUserRef,
 ): Promise<string | null> {
+  if (isPlatformAdminRole(user.platformRole)) {
+    const support = await getActiveSupportSessionForAdmin(user.id);
+    return support?.organizationId ?? null;
+  }
+
   const effectiveUserId =
     user.isDemo && user.demoRootUserId ? user.demoRootUserId : user.id;
 
@@ -92,7 +112,12 @@ export async function resolveActiveOrganizationId(
 export async function requireOrganizationContext(
   user: TenantUserRef,
 ): Promise<OrganizationTenantContext> {
-  const organizationId = await resolveActiveOrganizationId(user);
+  const support = isPlatformAdminRole(user.platformRole)
+    ? await getActiveSupportSessionForAdmin(user.id)
+    : null;
+
+  const organizationId =
+    support?.organizationId ?? (await resolveActiveOrganizationId(user));
   if (!organizationId) {
     throw new TenantAccessError(
       "NO_ORG",
@@ -126,12 +151,17 @@ export async function requireOrganizationContext(
     select: { role: true, status: true },
   });
 
-  const isOwner = organization.ownerUserId === user.id
-    || organization.ownerUserId === user.demoRootUserId
-    || membership?.role === "OWNER";
+  const isOwner =
+    organization.ownerUserId === user.id ||
+    organization.ownerUserId === user.demoRootUserId ||
+    membership?.role === "OWNER";
 
-  // Membre non listé et pas owner → interdit (sauf staff BeWork hors périmètre SaaS client)
-  if (!membership && !isOwner && user.role === "CLIENT") {
+  // Support Platform Admin : accès explicite sans membership
+  if (support) {
+    if (support.organizationId !== organizationId) {
+      throw new TenantAccessError("FORBIDDEN", "Session support invalide.", 403);
+    }
+  } else if (!membership && !isOwner && user.role === "CLIENT") {
     throw new TenantAccessError(
       "FORBIDDEN",
       "Vous n’êtes pas membre de cette entreprise.",
@@ -148,7 +178,15 @@ export async function requireOrganizationContext(
   }
 
   const effectiveStatus = effectiveSaasStatus(organization);
-  const writeAccess = computeOrgWriteAccess(organization);
+  let writeAccess = computeOrgWriteAccess(organization);
+  if (support?.mode === "READ_ONLY") {
+    writeAccess = {
+      canWrite: false,
+      canRead: true,
+      reason:
+        "Mode support BeWork — lecture seule. Passez en intervention pour modifier.",
+    };
+  }
 
   return {
     userId: user.id,
@@ -158,11 +196,20 @@ export async function requireOrganizationContext(
       ? { role: membership.role, status: membership.status }
       : isOwner
         ? { role: "OWNER", status: "ACTIVE" }
-        : null,
-    isOwner,
+        : support
+          ? { role: "VIEWER", status: "ACTIVE" }
+          : null,
+    isOwner: support ? false : isOwner,
     effectiveStatus,
     writeAccess,
     trialDaysRemaining: daysRemainingInTrial(organization),
+    support: support
+      ? {
+          sessionId: support.sessionId,
+          mode: support.mode,
+          reason: support.reason,
+        }
+      : null,
   };
 }
 
@@ -198,5 +245,5 @@ export function assertSameOrganization(
 
 /** Préfixe storage recommandé pour les nouveaux fichiers tenant. */
 export function organizationStoragePrefix(organizationId: string): string {
-  return `organizations/${organizationId}`;
+  return `org/${organizationId}`;
 }

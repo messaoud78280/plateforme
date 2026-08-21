@@ -46,6 +46,9 @@ import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-
 import { isCommercialWorkspacePath } from "@/lib/commercial/workspace";
 import { CommercialWorkspaceShell } from "@/components/commercial/CommercialWorkspaceShell";
 import { CommercialLaunchLink } from "@/components/dashboard/CommercialLaunchLink";
+import { isPlatformAdminRole, getPlatformRoleForUserId } from "@/lib/platform-admin/authz";
+import { getActiveSupportSessionForAdmin } from "@/lib/platform-admin/support";
+import { PlatformSupportBanner } from "@/components/platform-admin/PlatformSupportBanner";
 
 export const metadata: Metadata = {
   robots: SEO_NOINDEX_ROBOTS,
@@ -60,6 +63,17 @@ export default async function DashboardLayout({
 
   if (!session) {
     redirect("/connexion?callbackUrl=/dashboard");
+  }
+
+  // Platform Admin : uniquement via SupportSession (sinon console /admin)
+  const platformRoleDb = await getPlatformRoleForUserId(session.user.id);
+  const platformRole = platformRoleDb ?? session.user.platformRole ?? null;
+  let supportSession: Awaited<ReturnType<typeof getActiveSupportSessionForAdmin>> = null;
+  if (isPlatformAdminRole(platformRole)) {
+    supportSession = await getActiveSupportSessionForAdmin(session.user.id);
+    if (!supportSession) {
+      redirect("/admin");
+    }
   }
 
   if (session.user?.demoExpired || (session.user?.isDemo && session.user.demoExpired)) {
@@ -137,15 +151,15 @@ export default async function DashboardLayout({
       <div className="flex min-h-dvh flex-col bg-[color:var(--cc-surface-muted)]">
         <SkipLink />
         <EnvironmentBanner environment={env} />
+        {supportSession ? (
+          <PlatformSupportBanner
+            organizationName={supportSession.organizationName}
+            mode={supportSession.mode}
+            organizationId={supportSession.organizationId}
+          />
+        ) : null}
         {isDemo ? (
           <DemoTenantBanner companyName={companyName} expiresAt={demoExpiresIso} />
-        ) : saasBanner.kind === "trial" ? (
-          <SaasTrialBanner
-            daysRemaining={saasBanner.daysRemaining}
-            companyName={saasBanner.companyName}
-          />
-        ) : saasBanner.kind === "trial_expired" ? (
-          <SaasTrialExpiredBanner />
         ) : null}
         <UiPreferencesProvider userId={session.user.id}>
           <CommercialWorkspaceShell
@@ -180,6 +194,13 @@ export default async function DashboardLayout({
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <EnvironmentBanner environment={env} />
+        {supportSession ? (
+          <PlatformSupportBanner
+            organizationName={supportSession.organizationName}
+            mode={supportSession.mode}
+            organizationId={supportSession.organizationId}
+          />
+        ) : null}
         {isDemo ? (
           <DemoTenantBanner companyName={companyName} expiresAt={demoExpiresIso} />
         ) : saasBanner.kind === "trial" ? (

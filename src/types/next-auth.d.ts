@@ -11,6 +11,8 @@ declare module "next-auth" {
       accountStatus?: string;
       personType?: string | null;
       permissionProfile?: string | null;
+      /** Admin éditeur BeWork — null si non applicable. */
+      platformRole?: string | null;
       image?: string | null;
       isDemo?: boolean;
       demoEnvironmentId?: string;
@@ -32,6 +34,7 @@ declare module "next-auth/jwt" {
     accountStatus?: string;
     personType?: string | null;
     permissionProfile?: string | null;
+    platformRole?: string | null;
     mustChangePassword?: boolean;
     email?: string;
     isDemo?: boolean;

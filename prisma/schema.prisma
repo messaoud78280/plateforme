@@ -205,6 +205,8 @@ model Invitation {
   email       String
   role        String   // ADMIN | USER | SUPERVISEUR (legacy org member)
   invitedById String
+  /// Tenant cible — l’invité rejoint cette org (jamais une nouvelle entreprise).
+  organizationId String?
   token       String   @unique
   status      InvitationStatus @default(PENDING)
   expiresAt   DateTime
@@ -220,9 +222,11 @@ model Invitation {
   projectIdsJson     Json?
   externalOrganizationId String?
 
-  invitedBy   User     @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+  invitedBy    User          @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([invitedById])
+  @@index([organizationId])
   @@index([email, status])
 }
 
@@ -620,8 +624,22 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  /// SaaS — cycle de vie plateforme (≠ rôles métier Direction/Conducteur).
+  /// STANDARD = client réel · DEMO = environnement de démonstration (ex. SETRIM).
+  kind              OrganizationKind   @default(STANDARD)
+  /// TRIAL | ACTIVE | TRIAL_EXPIRED | PAST_DUE | SUSPENDED | CANCELED | DELETION_PENDING
+  saasStatus        OrganizationSaasStatus @default(ACTIVE)
+  trialStartedAt    DateTime?
+  trialEndsAt       DateTime?
+  /// Onboarding produit (Phase 2+) — progression 0–n, null = non démarré.
+  onboardingStep         Int?
+  onboardingCompletedAt  DateTime?
+  /// JSON checklist / métadonnées onboarding (clés stables côté app).
+  onboardingStateJson    Json?
+
   owner            User                 @relation("OrganizationOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
   members          OrganizationMember[]
+  invitations      Invitation[]
   projects         Project[]
   tasks            Task[]
   demoEnvironment  DemoEnvironment?
@@ -654,6 +672,9 @@ model Organization {
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
+  @@index([saasStatus])
+  @@index([kind, saasStatus])
+  @@index([trialEndsAt])
 }
 
 model OrganizationMember {
@@ -661,6 +682,8 @@ model OrganizationMember {
   organizationId String
   userId         String
   role           OrganizationMemberRole @default(MEMBER)
+  /// ACTIVE | SUSPENDED — révocation soft sans supprimer l’historique.
+  status         OrganizationMemberStatus @default(ACTIVE)
   createdAt      DateTime               @default(now())
   updatedAt      DateTime               @updatedAt
 
@@ -670,6 +693,7 @@ model OrganizationMember {
   @@unique([organizationId, userId])
   @@index([userId])
   @@index([organizationId])
+  @@index([organizationId, status])
 }
 
 enum OrganizationMemberRole {
@@ -677,6 +701,26 @@ enum OrganizationMemberRole {
   ADMIN
   MEMBER
   VIEWER
+}
+
+enum OrganizationMemberStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum OrganizationKind {
+  STANDARD
+  DEMO
+}
+
+enum OrganizationSaasStatus {
+  TRIAL
+  ACTIVE
+  TRIAL_EXPIRED
+  PAST_DUE
+  SUSPENDED
+  CANCELED
+  DELETION_PENDING
 }
 
 // Formule / abonnement client (historique et état)

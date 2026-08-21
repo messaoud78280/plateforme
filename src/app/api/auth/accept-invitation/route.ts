@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     if (!token || !name?.trim() || !password || password.length < 8) {
       return NextResponse.json(
         { error: "Token, nom et mot de passe (8 caractères min.) requis." },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const inv = await prisma.invitation.findUnique({
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     if (!inv || inv.status !== "PENDING" || inv.expiresAt < new Date()) {
       return NextResponse.json(
         { error: "Invitation expirée ou déjà utilisée." },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const existing = await prisma.user.findUnique({
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     if (existing) {
       return NextResponse.json(
         { error: "Un compte existe déjà avec cet email." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -62,7 +62,6 @@ export async function POST(request: Request) {
         accessStatus: "ACTIVE",
         mustChangePassword: false,
         externalOrganizationId: inv.externalOrganizationId,
-        // Pas de crédits propres — rattachement à l’entreprise invitante
         subscriptionPlan: null,
         monthlyActionsTotal: 0,
         monthlyActionsUsed: 0,
@@ -75,17 +74,30 @@ export async function POST(request: Request) {
     });
 
     try {
-      await addMemberToOwnerOrganization(inv.invitedById, user.id, inv.role);
-      const organizationId = await ensureOrganizationForOwner(inv.invitedById);
+      const organizationId =
+        inv.organizationId ?? (await ensureOrganizationForOwner(inv.invitedById));
+      const orgRole = mapProfileToOrgRole(permissionProfile, personType);
+
       if (organizationId) {
-        const orgRole = mapProfileToOrgRole(permissionProfile, personType);
-        await prisma.organizationMember.update({
+        await prisma.organizationMember.upsert({
           where: {
             organizationId_userId: { organizationId, userId: user.id },
           },
-          data: { role: orgRole },
+          create: {
+            organizationId,
+            userId: user.id,
+            role: orgRole,
+            status: "ACTIVE",
+          },
+          update: { role: orgRole, status: "ACTIVE" },
         });
+      } else {
+        await addMemberToOwnerOrganization(inv.invitedById, user.id, inv.role);
+      }
 
+      const resolvedOrgId =
+        organizationId ?? (await ensureOrganizationForOwner(inv.invitedById));
+      if (resolvedOrgId) {
         const projectIds = Array.isArray(inv.projectIdsJson)
           ? (inv.projectIdsJson as unknown[]).filter((x): x is string => typeof x === "string")
           : [];
@@ -95,12 +107,12 @@ export async function POST(request: Request) {
             projectIds,
             grantedById: inv.invitedById,
             permissionProfile,
-            organizationId,
+            organizationId: resolvedOrgId,
           });
         }
 
         await logAccessAction({
-          organizationId,
+          organizationId: resolvedOrgId,
           actorUserId: user.id,
           targetUserId: user.id,
           action: "INVITE_ACCEPTED",
@@ -114,9 +126,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error("Accept invitation:", e);
-    return NextResponse.json(
-      { error: "Erreur lors de l'acceptation de l'invitation." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }

@@ -46,6 +46,7 @@ export async function ensureOrganizationForOwner(ownerUserId: string): Promise<s
           organizationId: existing.id,
           userId: ownerUserId,
           role: "OWNER",
+          status: "ACTIVE",
         },
       });
     }
@@ -56,8 +57,10 @@ export async function ensureOrganizationForOwner(ownerUserId: string): Promise<s
     data: {
       name: owner.company?.trim() || owner.name || "Entreprise",
       ownerUserId,
+      kind: "STANDARD",
+      saasStatus: "ACTIVE",
       members: {
-        create: { userId: ownerUserId, role: "OWNER" },
+        create: { userId: ownerUserId, role: "OWNER", status: "ACTIVE" },
       },
     },
     select: { id: true },
@@ -65,11 +68,11 @@ export async function ensureOrganizationForOwner(ownerUserId: string): Promise<s
   return org.id;
 }
 
-/** Organisations dont l’utilisateur est membre. */
+/** Organisations dont l’utilisateur est membre actif. */
 export async function getUserOrganizationIds(userId: string): Promise<string[]> {
   if (!isFeatureEnabled("organizationMultiUser")) return [];
   const rows = await prisma.organizationMember.findMany({
-    where: { userId },
+    where: { userId, status: "ACTIVE" },
     select: { organizationId: true },
   });
   return rows.map((r) => r.organizationId);

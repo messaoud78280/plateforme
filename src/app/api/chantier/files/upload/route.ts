@@ -132,7 +132,8 @@ export async function POST(request: Request) {
     }
 
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const storagePath = `org/${orgId}/library/${Date.now()}-${safeName}`;
+    const { organizationStoragePrefix } = await import("@/lib/organization/tenant");
+    const storagePath = `${organizationStoragePrefix(orgId)}/library/${Date.now()}-${safeName}`;
     const { error: uploadError } = await supabase.storage
       .from("documents")
       .upload(storagePath, buffer, {

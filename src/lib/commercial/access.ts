@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
+import { getServerSession, type Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ensureOrganizationForOwner } from "@/lib/organization/access";
@@ -33,14 +33,14 @@ export async function resolveCommercialOrgId(
   }
 
   const membership = await prisma.organizationMember.findFirst({
-    where: { userId: ownerId },
+    where: { userId: ownerId, status: "ACTIVE" },
     select: { organizationId: true },
   });
   if (membership?.organizationId) return membership.organizationId;
 
   if (ownerId !== user.id) {
     const own = await prisma.organizationMember.findFirst({
-      where: { userId: user.id },
+      where: { userId: user.id, status: "ACTIVE" },
       select: { organizationId: true },
     });
     return own?.organizationId ?? null;
@@ -81,32 +81,77 @@ export async function requireCommercialSession(
   return session;
 }
 
+export type CommercialApiAuth =
+  | { error: null; status: 200; session: Session; orgId: string }
+  | {
+      error: string;
+      status: 401 | 402 | 403;
+      session: null;
+      orgId?: undefined;
+      code?: string;
+    };
+
+/**
+ * Session API commerciale + orgId.
+ * - string arg : requiredHref (compat historique)
+ * - object : { requiredHref?, requireWrite? }
+ */
 export async function requireCommercialApiSession(
-  requiredHref = "/dashboard/devis-facturation",
-) {
+  requiredHrefOrOpts:
+    | string
+    | { requiredHref?: string; requireWrite?: boolean } = "/dashboard/devis-facturation",
+): Promise<CommercialApiAuth> {
+  const opts =
+    typeof requiredHrefOrOpts === "string"
+      ? { requiredHref: requiredHrefOrOpts, requireWrite: false }
+      : {
+          requiredHref: requiredHrefOrOpts.requiredHref ?? "/dashboard/devis-facturation",
+          requireWrite: Boolean(requiredHrefOrOpts.requireWrite),
+        };
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
-    return { error: "Non authentifié" as const, status: 401 as const, session: null };
+    return { error: "Non authentifié", status: 401, session: null };
   }
   if (!canAccessCommercialModule(session.user)) {
-    return { error: "Non autorisé" as const, status: 403 as const, session: null };
+    return { error: "Non autorisé", status: 403, session: null };
   }
   if (
     !canAccessDashboardHref(
-      requiredHref,
+      opts.requiredHref,
       session.user.personType,
       session.user.permissionProfile,
     )
   ) {
-    return { error: "Non autorisé" as const, status: 403 as const, session: null };
+    return { error: "Non autorisé", status: 403, session: null };
   }
   const orgId = await resolveCommercialOrgId(session.user);
   if (!orgId) {
-    return {
-      error: "Organisation introuvable" as const,
-      status: 403 as const,
-      session: null,
-    };
+    return { error: "Organisation introuvable", status: 403, session: null };
   }
-  return { error: null, status: 200 as const, session, orgId };
+
+  if (opts.requireWrite) {
+    try {
+      const { requireOrganizationContext, assertOrgWritable, TenantAccessError } =
+        await import("@/lib/organization/tenant");
+      const ctx = await requireOrganizationContext(session.user);
+      if (ctx.organizationId !== orgId) {
+        return { error: "Organisation non autorisée", status: 403, session: null };
+      }
+      assertOrgWritable(ctx);
+    } catch (e) {
+      const { TenantAccessError } = await import("@/lib/organization/tenant");
+      if (e instanceof TenantAccessError) {
+        return {
+          error: e.message,
+          status: (e.status === 402 ? 402 : 403) as 402 | 403,
+          session: null,
+          code: e.code,
+        };
+      }
+      throw e;
+    }
+  }
+
+  return { error: null, status: 200, session, orgId };
 }

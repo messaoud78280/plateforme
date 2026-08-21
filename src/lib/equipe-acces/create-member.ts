@@ -115,6 +115,7 @@ export async function addEquipeMember(
         email,
         role: legacyRole,
         invitedById: ctx.ownerUserId,
+        organizationId: ctx.organizationId,
         token,
         status: "PENDING",
         expiresAt,

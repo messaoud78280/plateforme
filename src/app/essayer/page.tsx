@@ -4,9 +4,9 @@ import { EssayerBeWorkForm } from "@/components/saas/EssayerBeWorkForm";
 import { SAAS_TRIAL_DAYS } from "@/lib/organization/lifecycle";
 
 export const metadata: Metadata = {
-  title: "Essayer BeWork — 14 jours gratuits",
+  title: `Demander un essai BeWork — ${SAAS_TRIAL_DAYS} jours`,
   description:
-    "Créez votre espace BeWork en quelques secondes. 14 jours d’essai gratuit, sans carte bancaire.",
+    "Demandez l’accès à BeWork. Essai 14 jours après validation de votre dossier entreprise.",
 };
 
 export default function EssayerPage() {
@@ -29,24 +29,24 @@ export default function EssayerPage() {
             ← Accueil BeWork
           </Link>
           <span className="rounded-full bg-white/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 shadow-sm ring-1 ring-slate-200/80">
-            Essai {SAAS_TRIAL_DAYS} jours
+            Validation requise
           </span>
         </div>
 
         <div className="rounded-[1.75rem] border border-white/80 bg-white/95 p-6 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.35)] sm:p-8">
           <h1 className="text-2xl font-semibold tracking-tight text-bework-navy sm:text-[1.65rem]">
-            Créer mon espace BeWork
+            Demander mon essai BeWork
           </h1>
           <p className="mt-2 text-[15px] leading-relaxed text-slate-600">
-            Votre entreprise, vos données, votre équipe — opérationnel en moins d’une minute.
-            Aucune carte bancaire.
+            Remplissez le dossier entreprise. L’équipe BeWork valide l’accès — puis votre essai{" "}
+            {SAAS_TRIAL_DAYS} jours démarre (email de confirmation).
           </p>
 
           <ul className="mt-5 space-y-2 text-[13px] text-slate-600">
             {[
-              "Espace privé multi-utilisateurs",
-              "Chantiers, devis, documents, commandes",
-              `${SAAS_TRIAL_DAYS} jours pour tester sans engagement`,
+              "SIRET et coordonnées entreprise obligatoires",
+              "Accès uniquement après validation BeWork",
+              `${SAAS_TRIAL_DAYS} jours d’essai une fois le compte activé`,
             ].map((t) => (
               <li key={t} className="flex items-start gap-2">
                 <span className="mt-0.5 text-bework-ok" aria-hidden>

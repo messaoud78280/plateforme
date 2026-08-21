@@ -260,7 +260,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               className={HEADER_BTN_PRIMARY}
               {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-desktop-essayer")}
             >
-              <span className="whitespace-nowrap">Essayer 14 jours</span>
+              <span className="whitespace-nowrap">Demander un essai</span>
             </Link>
           </div>
 
@@ -624,7 +624,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 onClick={() => setMobileOpen(false)}
                 {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-mobile-footer-essayer")}
               >
-                Essayer 14 jours
+                Essayer BeWork
               </Link>
             </div>
           </div>

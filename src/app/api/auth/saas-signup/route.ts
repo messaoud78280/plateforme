@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { createSaasWorkspace } from "@/lib/organization/create-workspace";
+import { createClientApprovalToken } from "@/lib/client-account-approval";
+import {
+  sendAdminSaasTrialRequestNotification,
+  sendSaasTrialRequestReceivedEmail,
+} from "@/lib/email";
+import { prisma } from "@/lib/prisma";
 
 /**
  * POST /api/auth/saas-signup
- * Inscription publique SaaS — crée User + Organization TRIAL 14 j (espace vide).
+ * Demande d’essai SaaS — compte PENDING jusqu’à validation BeWork (email / dashboard clients).
  * Désactivable : SAAS_PUBLIC_SIGNUP=0
  */
 export async function POST(request: Request) {
@@ -21,18 +27,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
   }
 
-  const email = typeof body.email === "string" ? body.email : "";
-  const password = typeof body.password === "string" ? body.password : "";
-  const firstName = typeof body.firstName === "string" ? body.firstName : "";
-  const lastName = typeof body.lastName === "string" ? body.lastName : "";
-  const companyName = typeof body.companyName === "string" ? body.companyName : "";
+  const str = (k: string) => (typeof body[k] === "string" ? (body[k] as string) : "");
 
   const result = await createSaasWorkspace({
-    email,
-    password,
-    firstName,
-    lastName,
-    companyName,
+    email: str("email"),
+    password: str("password"),
+    firstName: str("firstName"),
+    lastName: str("lastName"),
+    companyName: str("companyName"),
+    siret: str("siret"),
+    phone: str("phone"),
+    addressLine1: str("addressLine1"),
+    addressLine2: str("addressLine2") || undefined,
+    postalCode: str("postalCode"),
+    city: str("city"),
+    companySize: str("companySize"),
+    corpsMetier: str("corpsMetier"),
   });
 
   if (!result.ok) {
@@ -41,10 +51,71 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error, code: result.code }, { status });
   }
 
+  const baseUrl = new URL(request.url).origin;
+  let approveUrl: string | null = null;
+  try {
+    const token = createClientApprovalToken(result.userId);
+    approveUrl = `${baseUrl}/api/clients/approve-by-token?token=${encodeURIComponent(token)}`;
+  } catch (e) {
+    console.error("[saas-signup] Token approbation non généré:", e);
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: result.userId },
+    select: {
+      name: true,
+      email: true,
+      phone: true,
+      company: true,
+      createdAt: true,
+      billingAddressLine1: true,
+      billingAddressLine2: true,
+      billingPostalCode: true,
+      billingCity: true,
+      secteurActivite: true,
+      service: true,
+    },
+  });
+  const org = await prisma.organization.findUnique({
+    where: { id: result.organizationId },
+    select: { siret: true },
+  });
+
+  const address = [
+    user?.billingAddressLine1,
+    user?.billingAddressLine2,
+    [user?.billingPostalCode, user?.billingCity].filter(Boolean).join(" "),
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  sendAdminSaasTrialRequestNotification(
+    {
+      name: user?.name,
+      email: user?.email,
+      phone: user?.phone,
+      company: user?.company,
+      siret: org?.siret,
+      address,
+      companySize: user?.service,
+      corpsMetier: user?.secteurActivite,
+      createdAt: user?.createdAt,
+    },
+    { approveUrl },
+  ).catch((e) => console.error("sendAdminSaasTrialRequestNotification:", e));
+
+  if (user?.email) {
+    sendSaasTrialRequestReceivedEmail({
+      email: user.email,
+      name: user.name,
+      company: user.company,
+    }).catch((e) => console.error("sendSaasTrialRequestReceivedEmail:", e));
+  }
+
   return NextResponse.json({
     ok: true,
+    pendingApproval: true,
     organizationId: result.organizationId,
-    trialEndsAt: result.trialEndsAt?.toISOString() ?? null,
     trialDays: result.trialDays,
   });
 }

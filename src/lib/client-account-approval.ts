@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { ClientAccountStatus, Prisma, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { sendClientAccountApprovedEmail, sendWelcomeEmail } from "@/lib/email";
+import { computeTrialWindow } from "@/lib/organization/lifecycle";
 
 const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -79,14 +80,45 @@ export async function approveClientAccount(
     return { ok: false, status: 400, error: "Cette inscription a été refusée." };
   }
 
+  const saasOrg = await prisma.organization.findFirst({
+    where: { ownerUserId: clientId, kind: "STANDARD", saasStatus: "TRIAL" },
+    select: { id: true, trialStartedAt: true, onboardingStateJson: true },
+  });
+  const isSaasTrial = Boolean(saasOrg);
+
   try {
-    await prisma.user.update({
-      where: { id: clientId },
-      data: {
-        accountStatus: ClientAccountStatus.APPROVED,
-        approvedAt: new Date(),
-        approvedById: approvedById ?? undefined,
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: clientId },
+        data: {
+          accountStatus: ClientAccountStatus.APPROVED,
+          approvedAt: new Date(),
+          approvedById: approvedById ?? undefined,
+        },
+      });
+
+      // Essai SaaS : démarrer le trial 14 j au moment de la validation BeWork
+      if (saasOrg && !saasOrg.trialStartedAt) {
+        const trial = computeTrialWindow();
+        const prev =
+          saasOrg.onboardingStateJson &&
+          typeof saasOrg.onboardingStateJson === "object" &&
+          !Array.isArray(saasOrg.onboardingStateJson)
+            ? (saasOrg.onboardingStateJson as Record<string, unknown>)
+            : {};
+        await tx.organization.update({
+          where: { id: saasOrg.id },
+          data: {
+            trialStartedAt: trial.trialStartedAt,
+            trialEndsAt: trial.trialEndsAt,
+            onboardingStateJson: {
+              ...prev,
+              pendingSaasTrial: false,
+              approvedAt: new Date().toISOString(),
+            },
+          },
+        });
+      }
     });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -97,10 +129,11 @@ export async function approveClientAccount(
 
   const baseUrl = options?.baseUrl;
   if (baseUrl) {
-    sendClientAccountApprovedEmail({ email: client.email, name: client.name }, { baseUrl }).catch(
-      (err) => console.error("sendClientAccountApprovedEmail:", err)
-    );
-    if (options?.notifyWelcome !== false) {
+    sendClientAccountApprovedEmail(
+      { email: client.email, name: client.name },
+      { baseUrl, kind: isSaasTrial ? "saas-trial" : "client" },
+    ).catch((err) => console.error("sendClientAccountApprovedEmail:", err));
+    if (!isSaasTrial && options?.notifyWelcome !== false) {
       sendWelcomeEmail({ email: client.email, name: client.name }, { baseUrl }).catch((err) =>
         console.error("sendWelcomeEmail after approve:", err)
       );

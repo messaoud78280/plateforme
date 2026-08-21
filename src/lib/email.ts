@@ -369,7 +369,7 @@ function formatDateTimeFr(d: Date): string {
 
 export async function sendClientAccountApprovedEmail(
   user: { email: string; name?: string | null },
-  opts?: { baseUrl?: string }
+  opts?: { baseUrl?: string; kind?: "client" | "saas-trial" }
 ): Promise<SendWelcomeEmailResult> {
   if (!isValidEmail(user.email) || !hasBrevoApiKey()) {
     return { ok: false, reason: "no_mail_provider" };
@@ -378,16 +378,24 @@ export async function sendClientAccountApprovedEmail(
   const origin = canonicalRequestOrigin(opts?.baseUrl);
   const loginUrl = `${origin}/connexion/clients`;
   const firstName = (user.name ?? "").trim().split(/\s+/)[0] || "Bonjour";
+  const isSaas = opts?.kind === "saas-trial";
 
-  const subject = "BeWork — votre compte est validé";
+  const subject = isSaas
+    ? "BeWork — votre essai 14 jours est activé"
+    : "BeWork — votre compte est validé";
   const html = `
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
 <body style="font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.55; color: #0f172a; padding: 24px;">
-  <h1 style="margin:0 0 12px 0; font-size:20px;">Compte validé</h1>
+  <h1 style="margin:0 0 12px 0; font-size:20px;">${isSaas ? "Essai activé" : "Compte validé"}</h1>
   <p style="margin:0 0 16px 0; color:#334155; font-size:14px;">
-    Bonjour ${escapeHtml(firstName)}, l'équipe BeWork a validé votre inscription. Vous pouvez vous connecter à la plateforme.
+    Bonjour ${escapeHtml(firstName)}, l'équipe BeWork a validé votre ${isSaas ? "demande d’essai" : "inscription"}.
+    ${
+      isSaas
+        ? "Votre espace entreprise est prêt — l’essai de 14 jours commence maintenant."
+        : "Vous pouvez vous connecter à la plateforme."
+    }
   </p>
   <p style="margin:18px 0;">
     <a href="${loginUrl}" style="display:inline-block; background:#1d4ed8; color:#fff; text-decoration:none; padding:10px 14px; border-radius:10px; font-weight:700;">
@@ -395,7 +403,11 @@ export async function sendClientAccountApprovedEmail(
     </a>
   </p>
   <p style="margin:18px 0 0 0; font-size:12px; color:#64748b;">
-    Prochaine étape : signature du contrat et souscription à un forfait depuis votre espace client.
+    ${
+      isSaas
+        ? "Aucune carte bancaire requise pendant l’essai. Vos données restent privées à votre entreprise."
+        : "Prochaine étape : signature du contrat et souscription à un forfait depuis votre espace client."
+    }
   </p>
 </body>
 </html>
@@ -479,6 +491,114 @@ export async function sendAdminNewUserNotification(
     await sendEmail({ to, subject, html });
   } catch (e) {
     console.error("sendAdminNewUserNotification error:", e);
+  }
+}
+
+/** Demande d’essai SaaS 14 jours — notification admin avec lien de validation. */
+export async function sendAdminSaasTrialRequestNotification(
+  payload: {
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    company?: string | null;
+    siret?: string | null;
+    address?: string | null;
+    companySize?: string | null;
+    corpsMetier?: string | null;
+    createdAt?: Date | string | null;
+  },
+  opts?: { approveUrl?: string | null }
+) {
+  const to = getAdminRecipients();
+  if (to.length === 0) return;
+  if (!hasBrevoApiKey()) return;
+
+  const created =
+    payload.createdAt instanceof Date
+      ? payload.createdAt
+      : payload.createdAt
+        ? new Date(payload.createdAt)
+        : new Date();
+
+  const { firstName, lastName } = splitName(payload.name);
+  const subject = "BeWork — demande d’essai SaaS 14 jours";
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0; padding:0; background:#ffffff;">
+  <div style="width:100%; background:#ffffff; padding:20px 16px;">
+    <div style="max-width:680px; margin:0 auto; font-family: ui-sans-serif, system-ui, sans-serif; color:#0f172a; line-height:1.55;">
+      <h1 style="margin:0 0 12px 0; font-size:20px;">Demande d’essai 14 jours</h1>
+      <p style="margin:0 0 14px 0; color:#334155; font-size:14px;">
+        Une entreprise demande l’accès à BeWork. Aucun accès n’est ouvert tant que vous n’avez pas validé.
+      </p>
+      <div style="border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px; background:#f8fafc;">
+        <p style="margin:0 0 8px 0; font-size:14px;"><strong>Contact :</strong> ${formatValue(firstName)} ${formatValue(lastName || payload.name)}</p>
+        <p style="margin:0 0 8px 0; font-size:14px;"><strong>Email :</strong> ${formatValue(payload.email)}</p>
+        <p style="margin:0 0 8px 0; font-size:14px;"><strong>Téléphone :</strong> ${formatValue(payload.phone)}</p>
+        <p style="margin:0 0 8px 0; font-size:14px;"><strong>Entreprise :</strong> ${formatValue(payload.company)}</p>
+        <p style="margin:0 0 8px 0; font-size:14px;"><strong>SIRET :</strong> ${formatValue(payload.siret)}</p>
+        <p style="margin:0 0 8px 0; font-size:14px;"><strong>Adresse :</strong> ${formatValue(payload.address)}</p>
+        <p style="margin:0 0 8px 0; font-size:14px;"><strong>Taille :</strong> ${formatValue(payload.companySize)}</p>
+        <p style="margin:0 0 8px 0; font-size:14px;"><strong>Corps de métier :</strong> ${formatValue(payload.corpsMetier)}</p>
+        <p style="margin:0; font-size:14px;"><strong>Date :</strong> ${escapeHtml(formatDateTimeFr(created))}</p>
+      </div>
+      <p style="margin:14px 0 0 0; color:#334155; font-size:14px;">
+        <strong>Action :</strong> valider pour démarrer l’essai 14 jours et envoyer l’email d’accès.
+      </p>
+      ${
+        opts?.approveUrl
+          ? `<p style="margin:16px 0 0 0;">
+        <a href="${escapeHtml(opts.approveUrl)}" style="display:inline-block; background:#16a34a; color:#fff; text-decoration:none; padding:10px 14px; border-radius:10px; font-weight:700;">
+          Valider l’essai BeWork
+        </a>
+      </p>
+      <p style="margin:10px 0 0 0; font-size:12px; color:#64748b;">Lien valable 7 jours — ou validez depuis /dashboard/clients.</p>`
+          : `<p style="margin:14px 0 0 0; font-size:13px; color:#64748b;">Validez depuis /dashboard/clients (inscriptions en attente).</p>`
+      }
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  try {
+    await sendEmail({ to, subject, html });
+  } catch (e) {
+    console.error("sendAdminSaasTrialRequestNotification error:", e);
+  }
+}
+
+/** Accusé de réception candidat essai SaaS. */
+export async function sendSaasTrialRequestReceivedEmail(
+  user: { email: string; name?: string | null; company?: string | null }
+): Promise<void> {
+  if (!isValidEmail(user.email) || !hasBrevoApiKey()) return;
+  const firstName = (user.name ?? "").trim().split(/\s+/)[0] || "Bonjour";
+  const subject = "BeWork — demande d’essai bien reçue";
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: ui-sans-serif, system-ui, sans-serif; line-height:1.55; color:#0f172a; padding:24px;">
+  <h1 style="margin:0 0 12px 0; font-size:20px;">Demande enregistrée</h1>
+  <p style="margin:0 0 12px 0; color:#334155; font-size:14px;">
+    Bonjour ${escapeHtml(firstName)},
+    nous avons bien reçu la demande d’essai BeWork
+    ${user.company ? `pour <strong>${escapeHtml(user.company)}</strong>` : ""}.
+  </p>
+  <p style="margin:0 0 12px 0; color:#334155; font-size:14px;">
+    L’équipe BeWork doit valider votre accès avant connexion. Vous recevrez un email dès que votre espace 14 jours sera activé.
+  </p>
+  <p style="margin:0; font-size:12px; color:#64748b;">Aucune action de votre côté pour le moment.</p>
+</body>
+</html>
+  `.trim();
+  try {
+    await sendEmail({ to: user.email.trim().toLowerCase(), subject, html });
+  } catch (e) {
+    console.error("sendSaasTrialRequestReceivedEmail:", e);
   }
 }
 

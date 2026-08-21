@@ -1,19 +1,11 @@
-/**
- * Autorisation Administration BeWork (éditeur SaaS).
- * Source de vérité : User.platformRole en base — jamais une whitelist email runtime.
- */
-
 import { PlatformRole } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isPlatformAdminRole } from "@/lib/platform-admin/role";
 
-export function isPlatformAdminRole(
-  role: string | PlatformRole | null | undefined,
-): boolean {
-  return role === PlatformRole.PLATFORM_ADMIN || role === "PLATFORM_ADMIN";
-}
+export { isPlatformAdminRole } from "@/lib/platform-admin/role";
 
 export async function getPlatformRoleForUserId(
   userId: string,

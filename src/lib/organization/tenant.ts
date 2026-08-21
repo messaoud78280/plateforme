@@ -20,7 +20,7 @@ import {
   effectiveSaasStatus,
   type OrgWriteAccess,
 } from "@/lib/organization/lifecycle";
-import { isPlatformAdminRole } from "@/lib/platform-admin/authz";
+import { isPlatformAdminRole } from "@/lib/platform-admin/role";
 import { getActiveSupportSessionForAdmin } from "@/lib/platform-admin/support";
 
 export type TenantUserRef = {

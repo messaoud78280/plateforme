@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { canonicalRequestOrigin } from "@/lib/site";
-import { isPlatformAdminRole } from "@/lib/platform-admin/authz";
+import { isPlatformAdminRole } from "@/lib/platform-admin/role";
 import { logPlatformAdminAction } from "@/lib/platform-admin/audit";
 
 const RESET_TTL_MS = 24 * 60 * 60 * 1000;

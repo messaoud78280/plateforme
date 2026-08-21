@@ -46,7 +46,8 @@ import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-
 import { isCommercialWorkspacePath } from "@/lib/commercial/workspace";
 import { CommercialWorkspaceShell } from "@/components/commercial/CommercialWorkspaceShell";
 import { CommercialLaunchLink } from "@/components/dashboard/CommercialLaunchLink";
-import { isPlatformAdminRole, getPlatformRoleForUserId } from "@/lib/platform-admin/authz";
+import { getPlatformRoleForUserId } from "@/lib/platform-admin/authz";
+import { isPlatformAdminRole } from "@/lib/platform-admin/role";
 import { getActiveSupportSessionForAdmin } from "@/lib/platform-admin/support";
 import { PlatformSupportBanner } from "@/components/platform-admin/PlatformSupportBanner";
 

@@ -8,7 +8,7 @@ import { cookies } from "next/headers";
 import { PlatformSupportMode } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { logPlatformAdminAction } from "@/lib/platform-admin/audit";
-import { isPlatformAdminRole } from "@/lib/platform-admin/authz";
+import { isPlatformAdminRole } from "@/lib/platform-admin/role";
 
 export const SUPPORT_COOKIE = "bework_platform_support";
 export const SUPPORT_DEFAULT_TTL_MS = 2 * 60 * 60 * 1000; // 2 h

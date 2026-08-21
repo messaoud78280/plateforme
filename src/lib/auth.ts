@@ -11,7 +11,7 @@ import { gateAllows, parseTeamLoginGate } from "@/lib/auth-team-login";
 import { canonicalRequestOrigin } from "@/lib/site";
 import { resolveDemoAccessForUser } from "@/lib/demo-environment/access";
 import { isDemoEmail, toDemoEmail } from "@/lib/demo-environment/constants";
-import { isPlatformAdminRole } from "@/lib/platform-admin/authz";
+import { isPlatformAdminRole } from "@/lib/platform-admin/role";
 
 function resolveCredentialsEmail(raw: string, gate: string | null): string {
   const trimmed = raw.trim().toLowerCase();

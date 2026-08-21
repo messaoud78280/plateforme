@@ -1,6 +1,6 @@
 import { isClient, isAgentRole, isManager } from "@/types";
 import { isDemoEmail } from "@/lib/demo-environment/constants";
-import { isPlatformAdminRole } from "@/lib/platform-admin/authz";
+import { isPlatformAdminRole } from "@/lib/platform-admin/role";
 
 export type TeamLoginGate = "gerante" | "agents" | "clients" | "demo" | "admin";
 

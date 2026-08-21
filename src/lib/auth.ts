@@ -214,8 +214,8 @@ export const authOptions: NextAuthOptions = {
       }
 
       if (dbUser?.mustChangePassword) {
-        // Platform Admin : définir MDP via flux admin dédié, pas le dashboard client
-        if (gate === "admin" || isPlatformAdminRole(dbUser.platformRole)) {
+        // Platform Admin : pas de redirection vers le dashboard client
+        if (isPlatformAdminRole(dbUser.platformRole)) {
           return true;
         }
         return "/dashboard/parametres/securite?mustChangePassword=1";

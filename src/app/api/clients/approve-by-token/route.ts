@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { approveClientAccount, verifyClientApprovalToken } from "@/lib/client-account-approval";
+import { publicAppOriginForEmails } from "@/lib/site";
 
 /**
  * GET /api/clients/approve-by-token?token=...
@@ -8,7 +9,8 @@ import { approveClientAccount, verifyClientApprovalToken } from "@/lib/client-ac
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const token = (url.searchParams.get("token") ?? "").trim();
-  const baseUrl = url.origin;
+  // Redirections post-validation vers le domaine public (pas localhost même si l’URL d’appel l’était).
+  const baseUrl = publicAppOriginForEmails(url.origin);
 
   if (!token) {
     return NextResponse.redirect(new URL("/dashboard/clients?approve=invalid", baseUrl));

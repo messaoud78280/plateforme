@@ -86,7 +86,8 @@ export async function POST(request: Request) {
       },
     });
 
-    const baseUrl = new URL(request.url).origin;
+    const { publicAppOriginForEmails } = await import("@/lib/site");
+    const baseUrl = publicAppOriginForEmails(new URL(request.url).origin);
     let approveUrl: string | null = null;
     try {
       const token = createClientApprovalToken(user.id);

@@ -34,25 +34,61 @@ function isUsableRequestOrigin(origin: string): boolean {
   }
 }
 
-export function canonicalRequestOrigin(preferredFromRequest?: string): string {
-  const tryOrigin = (raw: string | undefined) => {
-    if (!raw?.trim()) return null;
-    const u = raw.trim().replace(/\/$/, "");
-    if (!/^https?:\/\//i.test(u)) return null;
-    try {
-      const origin = new URL(u).origin;
-      return isUsableRequestOrigin(origin) ? origin : null;
-    } catch {
-      return null;
-    }
-  };
+function isLocalHostname(hostname: string): boolean {
+  const h = hostname.toLowerCase();
   return (
-    tryOrigin(process.env.NEXTAUTH_URL) ??
-    tryOrigin(process.env.NEXT_PUBLIC_SITE_URL) ??
-    tryOrigin(preferredFromRequest) ??
-    tryOrigin(SITE_URL) ??
+    h === "localhost" ||
+    h === "127.0.0.1" ||
+    h === "0.0.0.0" ||
+    h === "[::1]" ||
+    h === "::1" ||
+    h.endsWith(".local")
+  );
+}
+
+function tryParseOrigin(raw: string | undefined): string | null {
+  if (!raw?.trim()) return null;
+  const u = raw.trim().replace(/\/$/, "");
+  if (!/^https?:\/\//i.test(u)) return null;
+  try {
+    const origin = new URL(u).origin;
+    return isUsableRequestOrigin(origin) ? origin : null;
+  } catch {
+    return null;
+  }
+}
+
+export function canonicalRequestOrigin(preferredFromRequest?: string): string {
+  return (
+    tryParseOrigin(process.env.NEXTAUTH_URL) ??
+    tryParseOrigin(process.env.NEXT_PUBLIC_SITE_URL) ??
+    tryParseOrigin(preferredFromRequest) ??
+    tryParseOrigin(SITE_URL) ??
     "http://127.0.0.1:3000"
   );
+}
+
+/**
+ * Origine pour liens dans les emails (validation, reset, magic link).
+ * Ne renvoie jamais localhost / 127.0.0.1 — sinon le destinataire obtient ERR_CONNECTION_REFUSED.
+ * Ordre : SITE_URL public → NEXTAUTH_URL non-local → NEXT_PUBLIC_SITE_URL → fallback bework.fr.
+ */
+export function publicAppOriginForEmails(preferredFromRequest?: string): string {
+  const candidates = [
+    tryParseOrigin(process.env.NEXT_PUBLIC_SITE_URL),
+    tryParseOrigin(SITE_URL),
+    tryParseOrigin(process.env.NEXTAUTH_URL),
+    tryParseOrigin(preferredFromRequest),
+  ];
+  for (const origin of candidates) {
+    if (!origin) continue;
+    try {
+      if (!isLocalHostname(new URL(origin).hostname)) return origin;
+    } catch {
+      /* ignore */
+    }
+  }
+  return "https://www.bework.fr";
 }
 
 /**

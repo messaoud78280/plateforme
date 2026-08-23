@@ -6,6 +6,7 @@ import {
   sendSaasTrialRequestReceivedEmail,
 } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { publicAppOriginForEmails } from "@/lib/site";
 
 /**
  * POST /api/auth/saas-signup
@@ -51,7 +52,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error, code: result.code }, { status });
   }
 
-  const baseUrl = new URL(request.url).origin;
+  // Jamais localhost dans les emails (sinon ERR_CONNECTION_REFUSED chez le destinataire).
+  const baseUrl = publicAppOriginForEmails(new URL(request.url).origin);
   let approveUrl: string | null = null;
   try {
     const token = createClientApprovalToken(result.userId);

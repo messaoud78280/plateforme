@@ -20,6 +20,7 @@ export function OrgAdminActions({
   const [supportMode, setSupportMode] = useState<"READ_ONLY" | "INTERVENTION">("READ_ONLY");
   const [reason, setReason] = useState("");
   const pendingApproval = ownerAccountStatus === "PENDING_APPROVAL";
+  const approved = ownerAccountStatus === "APPROVED";
 
   async function post(path: string, body?: Record<string, unknown>) {
     setBusy(true);
@@ -46,7 +47,7 @@ export function OrgAdminActions({
       router.refresh();
       setMsg(
         data.email
-          ? `Essai validé — accès envoyé à ${data.email}`
+          ? `Email envoyé à ${data.email}`
           : "OK",
       );
     } catch {
@@ -84,6 +85,33 @@ export function OrgAdminActions({
             }}
           >
             Valider l’essai BeWork
+          </button>
+        </div>
+      ) : null}
+
+      {approved ? (
+        <div className="rounded-xl border border-bework-navy/10 bg-slate-50 px-3 py-3">
+          <p className="text-[13px] font-semibold text-bework-navy">
+            Email d’accès client
+          </p>
+          <p className="mt-1 text-[12px] text-slate-600">
+            Renvoie le mail avec le lien de connexion vers bework.fr (jamais localhost).
+          </p>
+          <button
+            type="button"
+            disabled={busy}
+            className="mt-3 rounded-full border border-bework-navy/20 bg-white px-4 py-2 text-[13px] font-semibold text-bework-navy hover:bg-white disabled:opacity-50"
+            onClick={() => {
+              if (
+                confirm(
+                  `Renvoyer l’email d’accès à l’owner de ${organizationName} ?`,
+                )
+              ) {
+                void post("/api/platform-admin/orgs/resend-access-email");
+              }
+            }}
+          >
+            Renvoyer l’email d’accès
           </button>
         </div>
       ) : null}

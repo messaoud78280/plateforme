@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { nextAuthEmailVerificationTokenHash } from "@/lib/nextauth-verification-hash";
-import { absoluteUrl, canonicalRequestOrigin } from "@/lib/site";
+import { absoluteUrl, publicAppOriginForEmails } from "@/lib/site";
 
 function escapeHtml(s: string): string {
   return s
@@ -192,8 +192,8 @@ export async function sendWelcomeEmail(
   });
   const to = (existing?.email ?? user.email).trim().toLowerCase();
 
-  // Toujours le même domaine dans le mail (sinon localhost vs 127.0.0.1 casse cookie + hash secret).
-  const origin = canonicalRequestOrigin(opts?.baseUrl);
+  // Toujours le même domaine public dans le mail (jamais localhost).
+  const origin = publicAppOriginForEmails(opts?.baseUrl);
 
   if (!(process.env.NEXTAUTH_SECRET ?? "").trim()) {
     console.warn("[sendWelcomeEmail] NEXTAUTH_SECRET manquant : le bouton « Accéder à mon espace » échouera côté NextAuth.");
@@ -375,7 +375,7 @@ export async function sendClientAccountApprovedEmail(
     return { ok: false, reason: "no_mail_provider" };
   }
 
-  const origin = canonicalRequestOrigin(opts?.baseUrl);
+  const origin = publicAppOriginForEmails(opts?.baseUrl);
   const loginUrl = `${origin}/connexion/clients`;
   const firstName = (user.name ?? "").trim().split(/\s+/)[0] || "Bonjour";
   const isSaas = opts?.kind === "saas-trial";

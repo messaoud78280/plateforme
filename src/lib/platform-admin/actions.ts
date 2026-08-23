@@ -166,4 +166,63 @@ export async function adminApproveSaasTrial(input: {
   return { ok: true as const, alreadyApproved: false as const, email: result.email };
 }
 
+export async function adminResendTrialAccessEmail(input: {
+  actorUserId: string;
+  organizationId: string;
+  baseUrl?: string;
+}) {
+  const org = await prisma.organization.findUnique({
+    where: { id: input.organizationId },
+    select: {
+      id: true,
+      name: true,
+      kind: true,
+      saasStatus: true,
+      owner: {
+        select: {
+          email: true,
+          name: true,
+          accountStatus: true,
+        },
+      },
+    },
+  });
+  if (!org || org.kind === "DEMO") {
+    return { ok: false as const, error: "Organisation non éligible." };
+  }
+  if (org.owner.accountStatus !== "APPROVED") {
+    return {
+      ok: false as const,
+      error: "Validez d’abord l’essai avant de renvoyer l’email d’accès.",
+    };
+  }
+
+  const { sendClientAccountApprovedEmail } = await import("@/lib/email");
+  const sent = await sendClientAccountApprovedEmail(
+    { email: org.owner.email, name: org.owner.name },
+    {
+      baseUrl: input.baseUrl,
+      kind: org.saasStatus === "TRIAL" ? "saas-trial" : "client",
+    },
+  );
+  if (!sent.ok) {
+    return {
+      ok: false as const,
+      error:
+        sent.reason === "no_mail_provider"
+          ? "Envoi email indisponible (clé Brevo manquante)."
+          : "Échec d’envoi de l’email.",
+    };
+  }
+
+  await logPlatformAdminAction({
+    actorUserId: input.actorUserId,
+    organizationId: org.id,
+    action: "SAAS_ACCESS_EMAIL_RESENT",
+    context: `name=${org.name} email=${org.owner.email}`,
+  });
+
+  return { ok: true as const, email: org.owner.email };
+}
+
 export { effectiveSaasStatus };

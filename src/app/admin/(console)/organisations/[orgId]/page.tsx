@@ -105,11 +105,18 @@ export default async function AdminOrgDetailPage({
             label: "Fin essai",
             value: org.trialEndsAt
               ? org.trialEndsAt.toLocaleDateString("fr-FR")
-              : "—",
+              : org.owner.accountStatus === "PENDING_APPROVAL"
+                ? "À démarrer à la validation"
+                : "—",
           },
           {
             label: "Jours restants",
-            value: days != null ? String(days) : "—",
+            value:
+              days != null
+                ? String(days)
+                : org.owner.accountStatus === "PENDING_APPROVAL"
+                  ? "En attente"
+                  : "—",
           },
         ].map((k) => (
           <div key={k.label} className="rounded-2xl border border-bework-navy/10 bg-white p-4">
@@ -180,6 +187,7 @@ export default async function AdminOrgDetailPage({
           organizationId={org.id}
           organizationName={org.name}
           status={status}
+          ownerAccountStatus={org.owner.accountStatus}
         />
       </div>
 

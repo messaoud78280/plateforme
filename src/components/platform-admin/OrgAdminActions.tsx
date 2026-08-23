@@ -7,16 +7,19 @@ export function OrgAdminActions({
   organizationId,
   organizationName,
   status,
+  ownerAccountStatus,
 }: {
   organizationId: string;
   organizationName: string;
   status: string;
+  ownerAccountStatus?: string | null;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [supportMode, setSupportMode] = useState<"READ_ONLY" | "INTERVENTION">("READ_ONLY");
   const [reason, setReason] = useState("");
+  const pendingApproval = ownerAccountStatus === "PENDING_APPROVAL";
 
   async function post(path: string, body?: Record<string, unknown>) {
     setBusy(true);
@@ -30,6 +33,7 @@ export function OrgAdminActions({
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
         redirectTo?: string;
+        email?: string;
       };
       if (!res.ok) {
         setMsg(data.error ?? "Échec");
@@ -40,7 +44,11 @@ export function OrgAdminActions({
         return;
       }
       router.refresh();
-      setMsg("OK");
+      setMsg(
+        data.email
+          ? `Essai validé — accès envoyé à ${data.email}`
+          : "OK",
+      );
     } catch {
       setMsg("Erreur réseau");
     } finally {
@@ -51,6 +59,34 @@ export function OrgAdminActions({
   return (
     <div className="space-y-4 rounded-2xl border border-bework-navy/10 bg-white p-5 shadow-sm">
       <h3 className="text-[15px] font-semibold text-bework-navy">Actions admin</h3>
+
+      {pendingApproval ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3">
+          <p className="text-[13px] font-semibold text-amber-950">
+            Compte owner en attente de validation
+          </p>
+          <p className="mt-1 text-[12px] text-amber-900/90">
+            Aucun accès client tant que l’essai n’est pas validé. Cela démarre aussi
+            les 14 jours.
+          </p>
+          <button
+            type="button"
+            disabled={busy}
+            className="mt-3 rounded-full bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+            onClick={() => {
+              if (
+                confirm(
+                  `Valider l’essai BeWork pour ${organizationName} ?\n\nLe compte owner pourra se connecter et l’essai 14 jours démarre.`,
+                )
+              ) {
+                void post("/api/platform-admin/orgs/approve-trial");
+              }
+            }}
+          >
+            Valider l’essai BeWork
+          </button>
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         <button

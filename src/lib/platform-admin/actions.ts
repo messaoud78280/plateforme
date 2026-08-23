@@ -126,4 +126,44 @@ export async function adminReactivateOrganization(input: {
   return { ok: true as const, saasStatus: nextStatus };
 }
 
+export async function adminApproveSaasTrial(input: {
+  actorUserId: string;
+  organizationId: string;
+  baseUrl?: string;
+}) {
+  const org = await prisma.organization.findUnique({
+    where: { id: input.organizationId },
+    select: {
+      id: true,
+      name: true,
+      kind: true,
+      ownerUserId: true,
+      owner: { select: { accountStatus: true, email: true } },
+    },
+  });
+  if (!org || org.kind === "DEMO") {
+    return { ok: false as const, error: "Organisation non éligible." };
+  }
+  if (org.owner.accountStatus === "APPROVED") {
+    return { ok: true as const, alreadyApproved: true as const, email: org.owner.email };
+  }
+
+  const { approveClientAccount } = await import("@/lib/client-account-approval");
+  const result = await approveClientAccount(org.ownerUserId, input.actorUserId, {
+    baseUrl: input.baseUrl,
+  });
+  if (!result.ok) {
+    return { ok: false as const, error: result.error };
+  }
+
+  await logPlatformAdminAction({
+    actorUserId: input.actorUserId,
+    organizationId: org.id,
+    action: "SAAS_TRIAL_APPROVED",
+    context: `name=${org.name} email=${result.email}`,
+  });
+
+  return { ok: true as const, alreadyApproved: false as const, email: result.email };
+}
+
 export { effectiveSaasStatus };

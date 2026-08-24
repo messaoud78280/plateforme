@@ -200,7 +200,7 @@ export const NEUTRAL_CLIENT_CONFIG: PlatformConfig = {
     displayName: "Organisation",
     shortName: "Org",
     logo: null,
-    productSecondaryLabel: "Plateforme BeWork",
+    productSecondaryLabel: "Propulsé par BeWork",
     contactRoleLabel: "",
   },
   demoMode: false,

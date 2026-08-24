@@ -202,28 +202,11 @@ export async function getOrganizationActivationSnapshot(
   };
 }
 
-/** CTA header contextuel selon la prochaine étape d’activation. */
+/** CTA header contextuel — conservé pour compat ; préférer GlobalCreateMenu (+ Créer). */
 export function contextualPrimaryCta(snapshot: ActivationSnapshot | null): {
   href: string;
   label: string;
 } {
-  if (!snapshot || snapshot.maturity === "ready" || snapshot.percent >= 75) {
-    return { href: "/dashboard/taches?nouvelle=1", label: "+ Nouvelle tâche" };
-  }
-  const next = snapshot.nextIncomplete;
-  if (!next?.href) {
-    return { href: "/dashboard/bienvenue", label: "Bien démarrer" };
-  }
-  const labels: Record<string, string> = {
-    company: "+ Configurer l’entreprise",
-    client: "+ Créer mon premier client",
-    project: "+ Créer mon premier chantier",
-    quote: "+ Créer mon premier devis",
-    member: "+ Inviter un collaborateur",
-    document: "+ Ajouter un document",
-  };
-  return {
-    href: next.href,
-    label: labels[next.id] ?? `+ ${next.ctaLabel}`,
-  };
+  void snapshot;
+  return { href: "/dashboard/taches?nouvelle=1", label: "+ Créer" };
 }

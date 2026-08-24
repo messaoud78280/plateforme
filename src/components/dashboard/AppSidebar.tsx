@@ -133,8 +133,15 @@ function buildFamilies(): NavFamily[] {
           roles: ALL,
           emphasis: "high",
         },
+        {
+          href: "/dashboard/devis-facturation/bibliotheque",
+          label: "Bibliothèque",
+          icon: FileText,
+          roles: ["CLIENT", "MANAGER"],
+          emphasis: "high",
+        },
         { href: "/dashboard/facturation", label: "À facturer", icon: Wallet, roles: ALL },
-        { href: "/dashboard/clients", label: "Clients", icon: Building2, roles: ["MANAGER"] },
+        { href: "/dashboard/clients", label: "Clients", icon: Building2, roles: ["CLIENT", "MANAGER"] },
         { href: "/dashboard/devis", label: "Analyses", icon: FileText, roles: OPS },
       ],
     },
@@ -291,8 +298,18 @@ export function AppSidebar({
 
   const demoCompanyLabel = companyName?.trim() || (isDemo ? "Démonstration" : "BeWork");
   const brandLogo = isDemo ? demoLogoUrl || null : null;
-  const companyInitial = (demoCompanyLabel[0] || "D").toUpperCase();
-  const secondaryLabel = productSecondaryLabel?.trim() || (isDemo ? "Démonstration BeWork" : "BeWork");
+  const workspaceLabel =
+    companyName?.trim() || (isDemo ? demoCompanyLabel : "Espace de travail");
+  const companyInitials = workspaceLabel
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "BW";
+  const secondaryLabel =
+    productSecondaryLabel?.trim() ||
+    (isDemo ? "Démonstration BeWork" : "Propulsé par BeWork");
   const roleFallback = contactRoleFallback?.trim() || "";
 
   const navBody = (
@@ -304,50 +321,34 @@ export function AppSidebar({
         )}
       >
         <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5" onClick={() => setMobileOpen(false)}>
-          {isDemo ? (
-            brandLogo && !collapsed ? (
-              <span className="relative flex h-9 w-[7.5rem] shrink-0 items-center overflow-hidden rounded-[var(--cc-radius)] bg-white ring-1 ring-[color:var(--cc-border)]">
-                <Image
-                  src={brandLogo}
-                  alt={demoCompanyLabel}
-                  width={120}
-                  height={36}
-                  className="h-8 w-auto max-w-[7.25rem] object-contain object-left px-1.5"
-                  priority
-                />
-              </span>
-            ) : (
-              <span
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--cc-radius)] bg-bework-navy text-[11px] font-bold tracking-wide text-white"
-                title={brandLogo ? demoCompanyLabel : "Logo officiel à fournir"}
-              >
-                {companyInitial}
-              </span>
-            )
+          {isDemo && brandLogo && !collapsed ? (
+            <span className="relative flex h-9 w-[7.5rem] shrink-0 items-center overflow-hidden rounded-[var(--cc-radius)] bg-white ring-1 ring-[color:var(--cc-border)]">
+              <Image
+                src={brandLogo}
+                alt={workspaceLabel}
+                width={120}
+                height={36}
+                className="h-8 w-auto max-w-[7.25rem] object-contain object-left px-1.5"
+                priority
+              />
+            </span>
           ) : (
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--cc-radius)] bg-bework-navy text-[11px] font-bold tracking-wide text-white">
-              BW
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--cc-radius)] bg-bework-navy text-[11px] font-bold tracking-wide text-white"
+              title={workspaceLabel}
+              aria-hidden
+            >
+              {companyInitials}
             </span>
           )}
           {!collapsed ? (
             <span className="min-w-0">
-              {isDemo ? (
-                <>
-                  <span className="block truncate text-sm font-semibold tracking-tight text-bework-navy">
-                    {demoCompanyLabel}
-                  </span>
-                  <span className="block truncate text-[12px] font-medium text-bework-muted">
-                    {secondaryLabel}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="block truncate text-sm font-semibold tracking-tight text-bework-navy">BeWork</span>
-                  <span className="block truncate text-[12px] font-medium text-bework-muted">
-                    {companyName ?? "Plateforme interne"}
-                  </span>
-                </>
-              )}
+              <span className="block truncate text-[15px] font-semibold tracking-tight text-bework-navy">
+                {workspaceLabel}
+              </span>
+              <span className="block truncate text-[11px] font-medium text-bework-muted">
+                {secondaryLabel}
+              </span>
             </span>
           ) : null}
         </Link>

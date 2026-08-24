@@ -47,12 +47,12 @@ export default async function BienvenuePage() {
           Bienvenue
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-bework-navy sm:text-3xl">
-          Votre espace {ctx.organization.name} est prêt
+          Votre espace {ctx.organization.name}
         </h1>
         <p className="mt-2 text-[15px] leading-relaxed text-slate-600">
           {ctx.effectiveStatus === "TRIAL"
-            ? `${SAAS_TRIAL_DAYS} jours pour structurer votre activité BTP — sans carte bancaire, sans données imposées.`
-            : "Configurez progressivement votre entreprise. Vous pouvez passer les étapes et y revenir plus tard."}
+            ? `${SAAS_TRIAL_DAYS} jours pour explorer toute la plateforme — sans carte bancaire. Ce guide est facultatif.`
+            : "Explorez librement vos modules. Ce guide reste disponible si vous souhaitez structurer le démarrage."}
         </p>
       </div>
 
@@ -61,6 +61,7 @@ export default async function BienvenuePage() {
         items={snapshot.items}
         companyName={ctx.organization.name}
         maturity="new"
+        organizationId={ctx.organizationId}
       />
 
       <div className="grid gap-3 sm:grid-cols-3">

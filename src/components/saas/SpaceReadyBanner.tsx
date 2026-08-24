@@ -30,17 +30,17 @@ export function SpaceReadyBanner({ organizationId }: { organizationId: string })
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[14px] font-semibold text-bework-navy">
-            Votre espace BeWork est prêt.
+            Votre espace de travail est prêt.
           </p>
           <p className="mt-0.5 text-[12px] text-slate-600">
-            Vous pouvez piloter vos chantiers depuis ce tableau de bord.
+            Explorez librement vos modules — le guide reste disponible si besoin.
           </p>
         </div>
         <Link
-          href="/dashboard/parametres"
+          href="/dashboard/bienvenue"
           className="text-[12px] font-semibold text-bework-accent hover:underline"
         >
-          Configuration de votre espace
+          Bien démarrer
         </Link>
       </div>
     </section>

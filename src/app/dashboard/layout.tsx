@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { getCachedServerSession } from "@/lib/auth/cached-session";
 import { SEO_NOINDEX_ROBOTS } from "@/lib/seo-search-engines";
@@ -22,8 +21,9 @@ import {
   SaasTrialBanner,
   SaasTrialExpiredBanner,
 } from "@/components/saas/SaasTrialBanner";
-import { ContextualHeaderCta } from "@/components/saas/ContextualHeaderCta";
+import { GlobalCreateMenu } from "@/components/saas/GlobalCreateMenu";
 import { getSaasBannerState } from "@/lib/organization/saas-banner";
+import { resolveActiveOrganizationId } from "@/lib/organization/tenant";
 import { DemoViewAsSwitcher } from "@/components/demo-environment/DemoViewAsSwitcher";
 import { DemoCommercialTourLazy } from "@/components/demo-environment/DemoCommercialTourLazy";
 import { RoleOnboarding } from "@/components/onboarding/RoleOnboarding";
@@ -51,10 +51,29 @@ import { getPlatformRoleForUserId } from "@/lib/platform-admin/authz";
 import { isPlatformAdminRole } from "@/lib/platform-admin/role";
 import { getActiveSupportSessionForAdmin } from "@/lib/platform-admin/support";
 import { PlatformSupportBanner } from "@/components/platform-admin/PlatformSupportBanner";
+import { prisma } from "@/lib/prisma";
 
-export const metadata: Metadata = {
-  robots: SEO_NOINDEX_ROBOTS,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const session = await getCachedServerSession();
+  let company =
+    session?.user?.demoCompanyName?.trim() ||
+    null;
+  if (!company && session?.user?.id && session.user.role === "CLIENT") {
+    const u = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { company: true },
+    });
+    company = u?.company?.trim() || null;
+  }
+  const label = company || "Espace de travail";
+  return {
+    robots: SEO_NOINDEX_ROBOTS,
+    title: {
+      default: `${label} — BeWork`,
+      template: `%s — ${label} | BeWork`,
+    },
+  };
+}
 
 export default async function DashboardLayout({
   children,
@@ -129,10 +148,17 @@ export default async function DashboardLayout({
     demoLoginIdentifier = demo?.loginIdentifier ?? null;
   }
 
+  const workspaceCompanyName = companyName ?? dbCompany;
+  let saasOrganizationId: string | null = demoOrganizationId;
+  if (!isDemo && !external && session.user.role === UserRole.CLIENT) {
+    saasOrganizationId =
+      (await resolveActiveOrganizationId(session.user)) ?? null;
+  }
+
   const platform = getCurrentPlatformConfig({
-    organizationId: demoOrganizationId,
+    organizationId: saasOrganizationId,
     isDemo,
-    companyName,
+    companyName: workspaceCompanyName,
     logoUrl: demoLogoUrl,
     loginIdentifier: demoLoginIdentifier,
   });
@@ -167,7 +193,7 @@ export default async function DashboardLayout({
           <CommercialWorkspaceShell
             personType={personType}
             permissionProfile={permissionProfile}
-            orgLabel={companyName ?? dbCompany}
+            orgLabel={workspaceCompanyName}
           >
             {children}
           </CommercialWorkspaceShell>
@@ -183,13 +209,19 @@ export default async function DashboardLayout({
         role={session.user?.role ?? null}
         userName={session.user?.name ?? null}
         userRoleLabel={userRoleLabel}
-        companyName={companyName ?? dbCompany}
+        companyName={workspaceCompanyName}
         isDemo={isDemo}
         demoModules={session.user.demoModules ?? null}
         personType={personType}
         permissionProfile={permissionProfile}
         demoLogoUrl={isDemo ? platform.branding.logo : null}
-        productSecondaryLabel={platform.branding.productSecondaryLabel}
+        productSecondaryLabel={
+          isDemo
+            ? platform.branding.productSecondaryLabel
+            : workspaceCompanyName
+              ? "Propulsé par BeWork"
+              : platform.branding.productSecondaryLabel
+        }
         contactRoleFallback={
           isDemo ? platform.branding.contactRoleLabel || null : null
         }
@@ -208,7 +240,6 @@ export default async function DashboardLayout({
         ) : saasBanner.kind === "trial" ? (
           <SaasTrialBanner
             daysRemaining={saasBanner.daysRemaining}
-            companyName={saasBanner.companyName}
             activationPercent={saasBanner.activationPercent}
           />
         ) : saasBanner.kind === "trial_expired" ? (
@@ -217,31 +248,25 @@ export default async function DashboardLayout({
         <header className="cc-header sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 px-3 sm:px-5">
           <div className="min-w-0">
             <p className="truncate text-[0.9375rem] font-semibold tracking-tight text-bework-ink">
-              {isDemo && companyName
-                ? companyName
-                : external
-                  ? personaHomeLabel(personType, permissionProfile)
-                  : "Espace de travail"}
+              {external
+                ? personaHomeLabel(personType, permissionProfile)
+                : workspaceCompanyName || "Espace de travail"}
             </p>
             <p className="truncate text-[12px] font-medium text-bework-muted">
-              {platform.branding.productSecondaryLabel}
+              {external
+                ? platform.branding.productSecondaryLabel
+                : workspaceCompanyName
+                  ? "Espace de travail"
+                  : platform.branding.productSecondaryLabel}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             {isDemo && platform.features.demoViewAs ? <DemoViewAsSwitcher /> : null}
             {session.user?.role === "CLIENT" && !isDemo && !external ? (
-              <Suspense
-                fallback={
-                  <Link
-                    href="/dashboard/taches?nouvelle=1"
-                    className="btn-cc-primary !text-xs sm:!text-sm"
-                  >
-                    + Nouvelle tâche
-                  </Link>
-                }
-              >
-                <ContextualHeaderCta user={session.user} />
-              </Suspense>
+              <GlobalCreateMenu
+                personType={personType}
+                permissionProfile={permissionProfile}
+              />
             ) : null}
             <GlobalSearchTrigger />
             <div
@@ -262,7 +287,7 @@ export default async function DashboardLayout({
               userName={session.user?.name ?? null}
               userRole={session.user?.role ?? null}
               roleLabel={userRoleLabel}
-              userCompany={companyName ?? dbCompany ?? null}
+              userCompany={workspaceCompanyName ?? null}
               personType={personType}
               permissionProfile={permissionProfile}
               isDemo={isDemo}

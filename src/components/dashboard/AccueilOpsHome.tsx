@@ -46,7 +46,7 @@ function buildHeaderLine(ops: AccueilOpsSummary) {
   }
   if (parts.length > 0) return parts.join(" · ");
   if (!ops.hasProjects) {
-    return "Commencez par configurer votre espace — BeWork vous guide.";
+    return "Votre espace est prêt — explorez les modules librement.";
   }
   return "Rien d’urgent à traiter aujourd’hui.";
 }

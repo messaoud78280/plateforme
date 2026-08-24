@@ -8,7 +8,7 @@ import {
 import { ActivationChecklistCard } from "@/components/saas/ActivationChecklistCard";
 import { SpaceReadyBanner } from "@/components/saas/SpaceReadyBanner";
 
-/** Checklist d’activation sur l’accueil — hiérarchie selon maturité. */
+/** Guide d’activation facultatif sur l’accueil — n’autorise / n’interdit aucune fonction. */
 export async function SaasActivationHomeBlock({
   user,
 }: {
@@ -39,7 +39,6 @@ export async function SaasActivationHomeBlock({
     return <SpaceReadyBanner organizationId={ctx.organizationId} />;
   }
 
-  // Onboarding marqué terminé manuellement → plus de checklist sur l’accueil
   if (ctx.organization.onboardingCompletedAt) return null;
 
   const show =
@@ -54,6 +53,7 @@ export async function SaasActivationHomeBlock({
       items={snapshot.items}
       companyName={ctx.organization.name}
       maturity={snapshot.maturity}
+      organizationId={ctx.organizationId}
     />
   );
 }

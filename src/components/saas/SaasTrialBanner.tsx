@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
-/** Bandeau discret — essai SaaS en cours. */
+/** Bandeau discret — essai SaaS (sans répéter le nom d’entreprise). */
 export function SaasTrialBanner({
   daysRemaining,
-  companyName,
   activationPercent,
 }: {
   daysRemaining: number;
@@ -28,12 +27,7 @@ export function SaasTrialBanner({
       )}
     >
       <p className="text-center sm:text-left">
-        Essai BeWork
-        {companyName ? (
-          <span className="font-medium opacity-80"> · {companyName}</span>
-        ) : null}
-        {" · "}
-        {dayLabel}
+        Essai BeWork · {dayLabel}
       </p>
       <Link
         href="/dashboard/bienvenue"
@@ -41,7 +35,7 @@ export function SaasTrialBanner({
       >
         {typeof activationPercent === "number"
           ? `Configuration ${activationPercent} % →`
-          : "Découvrir les étapes →"}
+          : "Bien démarrer →"}
       </Link>
     </div>
   );

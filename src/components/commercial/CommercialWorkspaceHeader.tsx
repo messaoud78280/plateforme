@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 function pageTitle(pathname: string): string {
   if (pathname.endsWith("/devis/nouveau")) return "Nouveau devis";
+  if (pathname.includes("/devis/import")) return "Importer un devis";
   if (pathname.includes("/devis/") && pathname !== "/dashboard/devis-facturation/devis") {
     return "Devis";
   }
@@ -45,6 +46,7 @@ export function CommercialWorkspaceHeader() {
   const showNewQuote =
     !isFacturesArea &&
     !pathname.includes("/devis/nouveau") &&
+    !pathname.includes("/devis/import") &&
     !pathname.match(/\/devis\/[^/]+$/);
 
   return (
@@ -63,12 +65,20 @@ export function CommercialWorkspaceHeader() {
             </Link>
           ) : null}
           {showNewQuote ? (
-            <Link
-              href="/dashboard/devis-facturation/devis/nouveau"
-              className="btn-cc-primary rounded-lg px-3 py-1.5 text-[13px]"
-            >
-              + Nouveau devis
-            </Link>
+            <>
+              <Link
+                href="/dashboard/devis-facturation/devis/import"
+                className="rounded-lg border border-bework-navy/20 bg-white px-3 py-1.5 text-[13px] font-semibold text-bework-navy"
+              >
+                ↑ Importer
+              </Link>
+              <Link
+                href="/dashboard/devis-facturation/devis/nouveau"
+                className="btn-cc-primary rounded-lg px-3 py-1.5 text-[13px]"
+              >
+                + Nouveau devis
+              </Link>
+            </>
           ) : null}
         </div>
       </div>

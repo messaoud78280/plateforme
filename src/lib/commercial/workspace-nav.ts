@@ -55,6 +55,11 @@ export function buildCommercialNav(opts: {
           action: true,
         },
         {
+          href: `${BASE}/devis/import`,
+          label: "Importer un devis",
+          action: true,
+        },
+        {
           href: `${BASE}/factures/preparer`,
           label: "Préparer une facture",
           action: true,

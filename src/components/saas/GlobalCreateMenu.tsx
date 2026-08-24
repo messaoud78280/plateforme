@@ -16,6 +16,7 @@ const CREATE_ACTIONS: CreateAction[] = [
   { label: "Client", href: "/dashboard/clients", accessHref: "/dashboard/clients" },
   { label: "Chantier", href: "/dashboard/projets", accessHref: "/dashboard/projets" },
   { label: "Devis", href: "/dashboard/devis-facturation", accessHref: "/dashboard/devis-facturation" },
+  { label: "Importer un devis", href: "/dashboard/devis-facturation/devis/import", accessHref: "/dashboard/devis-facturation" },
   { label: "Tâche", href: "/dashboard/taches?nouvelle=1", accessHref: "/dashboard/taches" },
   { label: "Document", href: "/dashboard/documents", accessHref: "/dashboard/documents" },
   { label: "Commande", href: "/dashboard/commandes", accessHref: "/dashboard/commandes" },

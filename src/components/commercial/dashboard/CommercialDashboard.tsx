@@ -451,6 +451,12 @@ export function CommercialDashboard({
               Créer un devis
             </Link>
             <Link
+              href="/dashboard/devis-facturation/devis/import"
+              className="block px-3 py-2 text-sm hover:bg-bework-soft-navy"
+            >
+              Importer un devis
+            </Link>
+            <Link
               href="/dashboard/devis-facturation/factures/preparer"
               className="block px-3 py-2 text-sm hover:bg-bework-soft-navy"
             >

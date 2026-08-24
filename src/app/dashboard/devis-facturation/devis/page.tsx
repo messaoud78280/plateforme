@@ -88,12 +88,20 @@ export default async function DevisListPage({
           title="Devis commerciaux"
           description="Source de vérité financière — distincte de la bibliothèque Analyses."
         />
-        <Link
-          href="/dashboard/devis-facturation/devis/nouveau"
-          className="rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-bold text-white"
-        >
-          + Nouveau devis
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/dashboard/devis-facturation/devis/import"
+            className="rounded-xl border border-bework-navy/20 bg-white px-4 py-2.5 text-sm font-bold text-bework-navy hover:bg-slate-50"
+          >
+            ↑ Importer un devis
+          </Link>
+          <Link
+            href="/dashboard/devis-facturation/devis/nouveau"
+            className="rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-bold text-white"
+          >
+            + Nouveau devis
+          </Link>
+        </div>
       </div>
 
       <form

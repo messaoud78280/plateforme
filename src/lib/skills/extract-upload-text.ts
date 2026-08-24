@@ -4,6 +4,7 @@ import {
   getCctpFileCategory,
   isCctpFileAccepted,
 } from "@/lib/skills/cctp-upload-config";
+import { extractPdfText } from "@/lib/pdf/extract-pdf-text";
 
 export {
   CCTP_UPLOAD_MAX_BYTES,
@@ -83,11 +84,7 @@ export async function extractTextFromBuffer(
 
   if (lower === "application/pdf" || name.endsWith(".pdf")) {
     try {
-      const { PDFParse } = await import("pdf-parse");
-      const parser = new PDFParse({ data: buffer });
-      const parsed = await parser.getText();
-      await parser.destroy().catch(() => undefined);
-      const text = (parsed.text ?? "").trim();
+      const text = await extractPdfText(buffer);
       if (!text) {
         return {
           text: metadataOnlyBlock(
@@ -100,9 +97,16 @@ export async function extractTextFromBuffer(
         };
       }
       return { text: truncateExtract(text) };
-    } catch {
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      console.error("[extract-upload] lecture PDF échouée:", fileName, detail);
       return {
-        text: metadataOnlyBlock(fileName, mimeType, buffer.length, "Échec lecture PDF — fichier bien reçu."),
+        text: metadataOnlyBlock(
+          fileName,
+          mimeType,
+          buffer.length,
+          "Échec lecture PDF — fichier bien reçu.",
+        ),
         warning: `${fileName} : impossible d'extraire le PDF.`,
       };
     }

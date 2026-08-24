@@ -10,6 +10,7 @@ import type {
   ImportedQuoteDraft,
   ImportedSection,
 } from "@/lib/commercial/import/types";
+import { extractPdfText } from "@/lib/pdf/extract-pdf-text";
 
 function uid(): string {
   return randomBytes(6).toString("hex");
@@ -461,14 +462,22 @@ export async function extractQuoteFileText(
 
   if (lower === "application/pdf" || name.endsWith(".pdf")) {
     try {
-      const { PDFParse } = await import("pdf-parse");
-      const parser = new PDFParse({ data: buffer });
-      const parsed = await parser.getText();
-      await parser.destroy().catch(() => undefined);
-      const text = (parsed.text ?? "").trim();
-      return { text, format: "pdf", warning: text ? undefined : "PDF sans texte extractible" };
-    } catch {
-      return { text: "", format: "pdf", warning: "Impossible de lire le PDF" };
+      const text = await extractPdfText(buffer);
+      return {
+        text,
+        format: "pdf",
+        warning: text
+          ? undefined
+          : "PDF sans texte extractible (scanné ou image) — essayez Excel/CSV ou ressaisie",
+      };
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      console.error("[import-quote] lecture PDF échouée:", detail);
+      return {
+        text: "",
+        format: "pdf",
+        warning: "Impossible de lire le PDF — fichier corrompu ou format non supporté",
+      };
     }
   }
 

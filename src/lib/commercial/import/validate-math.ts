@@ -45,9 +45,11 @@ export function validateImportedLineMath(line: ImportedLine): ImportedLine {
         });
         if (moneyClose(withDisc.lineSellHt, line.lineSellHt)) {
           discountPercent = inferred;
-          warnings.push(
-            `Remise déduite ${inferred} % (montant HT ≠ quantité × PU) — à confirmer`,
-          );
+          if (!warnings.some((w) => /remise|taux\s*\/\s*remise/i.test(w))) {
+            warnings.push(
+              `⚠ taux / remise ligne à confirmer (${inferred} % — montant HT ≠ quantité × PU)`,
+            );
+          }
           confidence = "warn";
         } else {
           warnings.push("Montant HT incohérent avec quantité × PU — à vérifier");

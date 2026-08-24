@@ -183,6 +183,33 @@ export function ImportQuoteWizard() {
   if (!draft) return null;
 
   const lineCount = draft.sections.reduce((n, s) => n + s.lines.filter((l) => l.kind === "WORK").length, 0);
+  const canCreate =
+    !busy &&
+    !draft.source.scannedPdf &&
+    lineCount > 0 &&
+    !(Boolean(duplicate) && true);
+
+  async function commitWithGuards(force = false) {
+    if (!draft) return;
+    if (lineCount === 0) {
+      setError(
+        "Aucune ligne commerciale fiable — corrigez l’import ou créez le devis manuellement. Une clause juridique ne peut pas devenir un ouvrage.",
+      );
+      return;
+    }
+    if (!draft.flags.mathOk) {
+      const ok = window.confirm(
+        "La somme des lignes HT ne correspond pas au total HT du document. Créer quand même le brouillon pour correction manuelle ?",
+      );
+      if (!ok) return;
+    } else if (draft.flags.discountAmbiguity) {
+      const ok = window.confirm(
+        "Des taux / remises ligne restent à confirmer. Créer le brouillon quand même ?",
+      );
+      if (!ok) return;
+    }
+    await commit(force);
+  }
 
   return (
     <div className="space-y-5">
@@ -235,8 +262,8 @@ export function ImportQuoteWizard() {
             </Link>
             <button
               type="button"
-              disabled={busy || draft.source.scannedPdf}
-              onClick={() => void commit(true)}
+              disabled={busy || draft.source.scannedPdf || lineCount === 0}
+              onClick={() => void commitWithGuards(true)}
               className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-[12px] font-semibold text-white disabled:opacity-50"
             >
               Importer quand même
@@ -245,21 +272,87 @@ export function ImportQuoteWizard() {
         </div>
       ) : null}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {[
-          ["Document", draft.source.fileName],
-          ["Référence", draft.reference ?? "—"],
-          ["Date", draft.issueDate ?? "—"],
-          ["Lignes", String(lineCount)],
-          ["Total HT", formatMoneyFr(draft.totals.totalHt)],
-          ["Total TTC", formatMoneyFr(draft.totals.totalTtc)],
-        ].map(([k, v]) => (
-          <div key={k} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{k}</p>
-            <p className="mt-0.5 text-[14px] font-semibold text-bework-ink">{v}</p>
-          </div>
-        ))}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 sm:col-span-2 lg:col-span-1">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Document</p>
+          <p className="mt-0.5 truncate text-[13px] font-semibold text-bework-ink">{draft.source.fileName}</p>
+        </div>
+        <label className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Référence</span>
+          <input
+            className="mt-0.5 w-full rounded border border-transparent px-1 text-[14px] font-semibold text-bework-ink hover:border-slate-200 focus:border-bework-accent"
+            value={draft.reference ?? ""}
+            onChange={(e) =>
+              setDraft((d) => (d ? { ...d, reference: e.target.value || null } : d))
+            }
+          />
+        </label>
+        <label className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Date</span>
+          <input
+            type="date"
+            className="mt-0.5 w-full rounded border border-transparent px-1 text-[14px] font-semibold text-bework-ink hover:border-slate-200 focus:border-bework-accent"
+            value={draft.issueDate ?? ""}
+            onChange={(e) =>
+              setDraft((d) => (d ? { ...d, issueDate: e.target.value || null } : d))
+            }
+          />
+        </label>
+        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Lignes</p>
+          <p className="mt-0.5 text-[14px] font-semibold text-bework-ink">{lineCount}</p>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Total HT</p>
+          <p className="mt-0.5 text-[14px] font-semibold text-bework-ink">
+            {formatMoneyFr(draft.totals.totalHt)}
+          </p>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">TVA</p>
+          <p className="mt-0.5 text-[14px] font-semibold text-bework-ink">
+            {formatMoneyFr(draft.totals.totalVat)}
+            {draft.totals.vatRateGuess != null ? (
+              <span className="ml-1 text-[11px] font-medium text-slate-500">
+                ({draft.totals.vatRateGuess} %)
+              </span>
+            ) : null}
+          </p>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Total TTC</p>
+          <p className="mt-0.5 text-[14px] font-semibold text-bework-ink">
+            {formatMoneyFr(draft.totals.totalTtc)}
+          </p>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Échéancier</p>
+          <p className="mt-0.5 text-[14px] font-semibold text-bework-ink">
+            {draft.paymentSchedule?.percents.map((p) => `${p} %`).join(" · ") || "—"}
+          </p>
+        </div>
       </div>
+
+      <label className="block rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+        <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Objet</span>
+        <input
+          className="mt-0.5 w-full rounded border border-transparent px-1 text-[14px] text-bework-ink hover:border-slate-200 focus:border-bework-accent"
+          value={draft.subject ?? ""}
+          onChange={(e) =>
+            setDraft((d) => (d ? { ...d, subject: e.target.value || null } : d))
+          }
+        />
+      </label>
+
+      {!draft.flags.mathOk ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-950">
+          <p className="font-semibold">Écart financier détecté</p>
+          <p className="mt-1">
+            La somme des lignes ne colle pas aux totaux du document. Corrigez avant création, ou
+            confirmez explicitement.
+          </p>
+        </div>
+      ) : null}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -310,13 +403,8 @@ export function ImportQuoteWizard() {
         </div>
       </section>
 
-      {draft.paymentSchedule ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 text-[13px]">
-          <h3 className="font-semibold text-bework-navy">Échéancier détecté</h3>
-          <p className="mt-1 text-slate-600">
-            {draft.paymentSchedule.percents.map((p) => `${p} %`).join(" · ")}
-          </p>
-        </section>
+      {draft.issuer.note ? (
+        <p className="text-[12px] text-slate-500">{draft.issuer.note}</p>
       ) : null}
 
       {draft.warnings.length > 0 ? (
@@ -345,7 +433,22 @@ export function ImportQuoteWizard() {
               <Fragment key={sec.id}>
                 <tr className="bg-slate-50/80">
                   <td colSpan={7} className="px-3 py-2 text-[12px] font-bold text-bework-navy">
-                    {sec.title}
+                    <input
+                      className="w-full rounded border border-transparent bg-transparent px-1 font-bold hover:border-slate-200 focus:border-bework-accent"
+                      value={sec.title}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setDraft((d) => {
+                          if (!d) return d;
+                          return {
+                            ...d,
+                            sections: d.sections.map((s) =>
+                              s.id !== sec.id ? s : { ...s, title: v },
+                            ),
+                          };
+                        });
+                      }}
+                    />
                   </td>
                 </tr>
                 {sec.lines.map((line, idx) => (
@@ -455,10 +558,58 @@ export function ImportQuoteWizard() {
                       />
                     </td>
                     <td className="px-3 py-2 tabular-nums">
-                      {line.discountPercent != null ? `${line.discountPercent} %` : "—"}
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="w-16 rounded border border-transparent px-1"
+                        value={line.discountPercent ?? ""}
+                        onChange={(e) => {
+                          const v = e.target.value === "" ? null : Number(e.target.value);
+                          setDraft((d) => {
+                            if (!d) return d;
+                            return {
+                              ...d,
+                              sections: d.sections.map((s) =>
+                                s.id !== sec.id
+                                  ? s
+                                  : {
+                                      ...s,
+                                      lines: s.lines.map((l, i) =>
+                                        i === idx ? { ...l, discountPercent: v } : l,
+                                      ),
+                                    },
+                              ),
+                            };
+                          });
+                        }}
+                      />
                     </td>
                     <td className="px-3 py-2 tabular-nums">
-                      {formatMoneyFr(line.lineSellHt)}
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="w-24 rounded border border-transparent px-1"
+                        value={line.lineSellHt ?? ""}
+                        onChange={(e) => {
+                          const v = e.target.value === "" ? null : Number(e.target.value);
+                          setDraft((d) => {
+                            if (!d) return d;
+                            return {
+                              ...d,
+                              sections: d.sections.map((s) =>
+                                s.id !== sec.id
+                                  ? s
+                                  : {
+                                      ...s,
+                                      lines: s.lines.map((l, i) =>
+                                        i === idx ? { ...l, lineSellHt: v } : l,
+                                      ),
+                                    },
+                              ),
+                            };
+                          });
+                        }}
+                      />
                     </td>
                     <td className="px-3 py-2">
                       <ConfidenceDot c={line.confidence} />
@@ -487,13 +638,18 @@ export function ImportQuoteWizard() {
         </Link>
         <button
           type="button"
-          disabled={busy || draft.source.scannedPdf || (Boolean(duplicate) && true)}
-          onClick={() => void commit(Boolean(duplicate))}
+          disabled={!canCreate || Boolean(duplicate)}
+          onClick={() => void commitWithGuards(false)}
           className="rounded-xl bg-[#1e3a5f] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50"
         >
           Créer le devis dans BeWork
         </button>
       </div>
+      {lineCount === 0 ? (
+        <p className="text-right text-[12px] text-amber-800">
+          Création bloquée : aucune ligne commerciale détectée.
+        </p>
+      ) : null}
       {duplicate ? (
         <p className="text-right text-[12px] text-slate-500">
           Un doublon a été détecté — utilisez « Importer quand même » ci-dessus.

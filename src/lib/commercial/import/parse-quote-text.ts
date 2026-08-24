@@ -4,13 +4,15 @@
  */
 import { createHash, randomBytes } from "crypto";
 import { parseFrenchNumber } from "@/lib/commercial/import/french-number";
+import { extractWorkSectionsFromQuoteText, normalizeUnit } from "@/lib/commercial/import/parse-quote-lines";
+import { stripLegalBlocks, stripSignatureZone } from "@/lib/commercial/import/parse-zones";
 import { validateImportedDraftMath } from "@/lib/commercial/import/validate-math";
 import type {
   ImportedLine,
   ImportedQuoteDraft,
   ImportedSection,
 } from "@/lib/commercial/import/types";
-import { extractPdfText } from "@/lib/pdf/extract-pdf-text";
+import { extractPdfDocument } from "@/lib/pdf/extract-pdf-text";
 
 function uid(): string {
   return randomBytes(6).toString("hex");
@@ -41,7 +43,6 @@ const MONTHS_FR: Record<string, number> = {
 export function detectScannedPdf(text: string, pageHint?: number): boolean {
   const cleaned = text.replace(/\s+/g, " ").trim();
   if (cleaned.length < 80) return true;
-  // Texte quasi vide hors métadonnées « PDF scanné »
   if (/PDF scanné|texte non extractible/i.test(text) && cleaned.length < 400) {
     return true;
   }
@@ -51,19 +52,9 @@ export function detectScannedPdf(text: string, pageHint?: number): boolean {
   return false;
 }
 
-function parseFrenchDate(text: string): string | null {
-  const iso = text.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);
-  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
-
-  const dmy = text.match(/\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](20\d{2})\b/);
-  if (dmy) {
-    const d = dmy[1]!.padStart(2, "0");
-    const m = dmy[2]!.padStart(2, "0");
-    return `${dmy[3]}-${m}-${d}`;
-  }
-
+function parseLongFrenchDate(text: string): string | null {
   const long = text.match(
-    /\b(\d{1,2})\s+(janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre)\s+(20\d{2})\b/i,
+    /\b(?:le\s+)?(?:lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)?\s*(\d{1,2})\s+(janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre)\s+(20\d{2})\b/i,
   );
   if (long) {
     const month = MONTHS_FR[long[2]!.toLowerCase()];
@@ -74,105 +65,193 @@ function parseFrenchDate(text: string): string | null {
   return null;
 }
 
-function extractReference(text: string): string | null {
-  const patterns = [
-    /(?:n[°ºo]|num[eé]ro|r[eé]f(?:[eé]rence)?|devis)\s*[:\s]*([A-Z0-9][A-Z0-9\-\/]{2,24})/i,
-    /\b(I-\d{2}-\d{2}-\d+)\b/i,
-    /\b(DEV[- ]?\d{4}[- ]?\d+)\b/i,
-  ];
-  for (const p of patterns) {
-    const m = text.match(p);
-    if (m?.[1]) return m[1].trim();
+function parseNumericDate(text: string): string | null {
+  const iso = text.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+
+  const dmy = text.match(/\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](20\d{2})\b/);
+  if (dmy) {
+    const d = dmy[1]!.padStart(2, "0");
+    const m = dmy[2]!.padStart(2, "0");
+    return `${dmy[3]}-${m}-${d}`;
   }
   return null;
 }
 
-function extractTotals(text: string): ImportedQuoteDraft["totals"] {
-  const ht =
-    parseFrenchNumber(
-      text.match(/total\s*(?:h\.?\s*t\.?|ht)\s*[:\s]*([0-9\s\u00a0\u202f.,]+)\s*€?/i)?.[1],
-    ) ??
-    parseFrenchNumber(
-      text.match(/montant\s*(?:h\.?\s*t\.?|ht)\s*[:\s]*([0-9\s\u00a0\u202f.,]+)\s*€?/i)?.[1],
+/** Date d’émission : priorité en-tête / près de DEVIS N°, jamais signature. */
+export function extractIssueDate(text: string): string | null {
+  const withoutSig = stripSignatureZone(text);
+  const headerZone =
+    withoutSig.match(/DEVIS\s+N[°ºo][\s\S]{0,120}/i)?.[0] ??
+    withoutSig.slice(0, 2500);
+
+  return (
+    parseLongFrenchDate(headerZone) ??
+    parseLongFrenchDate(withoutSig) ??
+    parseNumericDate(headerZone) ??
+    null
+  );
+}
+
+export function extractReference(text: string): string | null {
+  const devisNum =
+    text.match(/DEVIS\s+N[°ºo]\s*[\t :]*\s*([A-Z0-9][A-Z0-9\-\/]{2,24})/i) ??
+    text.match(
+      /(?:n[°ºo]\s*devis|r[eé]f(?:[eé]rence)?\s*devis|devis\s*n[°ºo]?)\s*[:\s]*([A-Z0-9][A-Z0-9\-\/]{2,24})/i,
     );
+  if (devisNum?.[1]) {
+    const v = devisNum[1].trim();
+    if (!/^(TVA|HT|TTC|SIRET|NAF|IMAGE)$/i.test(v)) return v;
+  }
+  const coded = text.match(/\b(I-\d{2}-\d{2}-\d+)\b/i) ?? text.match(/\b(DEV[- ]?\d{4}[- ]?\d+)\b/i);
+  if (coded?.[1]) return coded[1].trim();
+  return null;
+}
 
-  const vat =
-    parseFrenchNumber(
-      text.match(/(?:montant\s*)?t\.?\s*v\.?\s*a\.?\s*(?:\([^)]*\))?\s*[:\s]*([0-9\s\u00a0\u202f.,]+)\s*€?/i)?.[1],
-    ) ?? null;
+export function extractTotals(text: string): ImportedQuoteDraft["totals"] {
+  // Bloc labels puis montants (souvent sur lignes séparées)
+  const block = text.match(
+    /Total\s*H\.?\s*T\.?[\s\S]{0,40}?T\.?\s*V\.?\s*A\.?[\s\S]{0,40}?Total\s*T\.?\s*T\.?\s*C\.?[\s\S]{0,80}?([0-9\s\u00a0\u202f]+[.,]\d{2})\s*€[\s\S]{0,40}?([0-9\s\u00a0\u202f]+[.,]\d{2})\s*€[\s\S]{0,40}?([0-9\s\u00a0\u202f]+[.,]\d{2})\s*€/i,
+  );
 
-  const ttc =
-    parseFrenchNumber(
-      text.match(/total\s*(?:t\.?\s*t\.?\s*c\.?|ttc)\s*[:\s]*([0-9\s\u00a0\u202f.,]+)\s*€?/i)?.[1],
-    ) ?? null;
+  let ht: number | null = null;
+  let vat: number | null = null;
+  let ttc: number | null = null;
+
+  if (block) {
+    ht = parseFrenchNumber(block[1]);
+    vat = parseFrenchNumber(block[2]);
+    ttc = parseFrenchNumber(block[3]);
+  } else {
+    ht =
+      parseFrenchNumber(
+        text.match(/total\s*(?:h\.?\s*t\.?|ht)\s*[:\s]*([0-9\s\u00a0\u202f.,]+)\s*€?/i)?.[1],
+      ) ?? null;
+    vat =
+      parseFrenchNumber(
+        text.match(
+          /(?:^|\n)\s*t\.?\s*v\.?\s*a\.?\s*(?:\([^)]*\))?\s*[:\s]*([0-9\s\u00a0\u202f.,]+)\s*€?/im,
+        )?.[1],
+      ) ?? null;
+    ttc =
+      parseFrenchNumber(
+        text.match(/total\s*(?:t\.?\s*t\.?\s*c\.?|ttc)\s*[:\s]*([0-9\s\u00a0\u202f.,]+)\s*€?/i)?.[1],
+      ) ?? null;
+  }
 
   let vatRateGuess: number | null = null;
-  const vatRateM = text.match(/t\.?\s*v\.?\s*a\.?\s*(?:à\s*)?(\d{1,2}(?:[.,]\d+)?)\s*%/i);
+  const vatRateM = text.match(/t\.?\s*v\.?\s*a\.?\s*\(\s*(\d{1,2}(?:[.,]\d+)?)\s*%\s*\)/i);
   if (vatRateM) vatRateGuess = parseFrenchNumber(vatRateM[1]);
+  if (vatRateGuess == null) {
+    const alt = text.match(/t\.?\s*v\.?\s*a\.?\s*(?:à\s*)?(\d{1,2}(?:[.,]\d+)?)\s*%/i);
+    if (alt) vatRateGuess = parseFrenchNumber(alt[1]);
+  }
 
   if (ht != null && vat != null && ht > 0 && vatRateGuess == null) {
     const r = Math.round((vat / ht) * 1000) / 10;
     if (r > 0 && r < 30) vatRateGuess = r;
   }
 
+  // Garde-fou : ne pas permuter HT/TTC
+  if (ht != null && ttc != null && ht > ttc) {
+    const swap = ht;
+    ht = ttc;
+    ttc = swap;
+  }
+
   const confidence =
-    ht != null || ttc != null ? ("ok" as const) : ("missing" as const);
+    ht != null && ttc != null ? ("ok" as const) : ht != null || ttc != null ? ("warn" as const) : ("missing" as const);
 
   return { totalHt: ht, totalVat: vat, totalTtc: ttc, vatRateGuess, confidence };
 }
 
-function extractPaymentSchedule(
+export function extractPaymentSchedule(
   text: string,
 ): ImportedQuoteDraft["paymentSchedule"] {
-  const pcts = [...text.matchAll(/\b(\d{1,2})\s*%/g)]
-    .map((m) => parseFrenchNumber(m[1]))
-    .filter((n): n is number => n != null && n > 0 && n < 100);
+  const zone =
+    text.match(/Conditions\s+de\s+paiement\s*:?[\s\S]{0,500}/i)?.[0] ??
+    text.match(
+      /(?:r[eé]glement|paiement|acompte|situation|solde|[eé]ch[eé]ancier)[\s\S]{0,400}/i,
+    )?.[0] ??
+    "";
 
-  // Chercher un trio type 30/40/30 dans une zone « règlement / échéance / acompte »
-  const zone = text.match(
-    /(?:r[eé]glement|paiement|acompte|situation|solde|[eé]ch[eé]ancier)[\s\S]{0,400}/i,
-  );
-  const zoneText = zone?.[0] ?? text;
-  const zonePcts = [...zoneText.matchAll(/\b(\d{1,2})\s*%/g)]
+  const fromBullets = [...zone.matchAll(/(\d+(?:[.,]\d+)?)\s*%\s*(?:soit\s+[0-9\s.,]+\s*€\s*)?:?\s*(Acompte|Paiement\s+solde|Solde)?/gi)]
     .map((m) => parseFrenchNumber(m[1]))
     .filter((n): n is number => n != null && n > 0 && n <= 100);
 
-  const candidates = zonePcts.length >= 2 ? zonePcts : pcts;
-  // Prendre une séquence qui somme ~100
-  for (let i = 0; i < candidates.length; i++) {
-    for (let len = 2; len <= 4 && i + len <= candidates.length; len++) {
-      const slice = candidates.slice(i, i + len);
+  const zonePcts =
+    fromBullets.length >= 2
+      ? fromBullets
+      : [...zone.matchAll(/\b(\d{1,2}(?:[.,]\d+)?)\s*%/g)]
+          .map((m) => parseFrenchNumber(m[1]))
+          .filter((n): n is number => n != null && n > 0 && n <= 100);
+
+  for (let i = 0; i < zonePcts.length; i++) {
+    for (let len = 2; len <= 5 && i + len <= zonePcts.length; len++) {
+      const slice = zonePcts.slice(i, i + len);
       const sum = slice.reduce((a, b) => a + b, 0);
       if (Math.abs(sum - 100) <= 1) {
-        return { percents: slice, confidence: "ok" };
+        return { percents: slice.map((n) => Math.round(n)), confidence: "ok" };
       }
     }
   }
   return null;
 }
 
-function extractCustomer(text: string): ImportedQuoteDraft["customer"] {
-  const warnings: string[] = [];
-  void warnings;
+export function extractCustomer(text: string): ImportedQuoteDraft["customer"] {
+  const cleaned = stripLegalBlocks(text);
+
   let name: string | null = null;
   const civil =
-    text.match(
-      /(?:client|destinataire|adress[eé]\s*[àa]|factur[eé]\s*[àa])\s*[:\s]*(?:m(?:onsieur|me|lle)?\.?\s+)?([A-ZÀ-Ÿ][A-Za-zÀ-ÿ'’\-]+(?:\s+[A-ZÀ-Ÿ][A-Za-zÀ-ÿ'’\-]+){0,4})/i,
-    ) ??
-    text.match(
+    cleaned.match(
       /\b(?:Monsieur|Madame|M\.|Mme)\s+([A-ZÀ-Ÿ][A-Za-zÀ-ÿ'’\-]+(?:\s+[A-ZÀ-Ÿ][A-Za-zÀ-ÿ'’\-]+){1,3})\b/,
+    ) ??
+    cleaned.match(
+      /(?:client|destinataire|adress[eé]\s*[àa]|factur[eé]\s*[àa])\s*[:\s]*(?:m(?:onsieur|me|lle)?\.?\s+)?([A-ZÀ-Ÿ][A-Za-zÀ-ÿ'’\-]+(?:\s+[A-ZÀ-Ÿ][A-Za-zÀ-ÿ'’\-]+){0,4})/i,
     );
   if (civil?.[1]) name = civil[1].trim();
 
-  const email = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)?.[0] ?? null;
-  const phone =
-    text.match(/(?:t[eé]l(?:[eé]phone)?|portable)\s*[:\s]*([0-9.\s]{8,18})/i)?.[1]?.replace(/\s+/g, " ").trim() ??
-    text.match(/\b(0[1-9](?:[\s.]?\d{2}){4})\b/)?.[1]?.replace(/\s+/g, " ").trim() ??
+  const email =
+    cleaned.match(
+      /(?:e-?mail)\s*[:\s]*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i,
+    )?.[1] ??
+    cleaned.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)?.[0] ??
     null;
 
-  const addr = text.match(
-    /(\d{1,4}\s+(?:avenue|av\.|rue|boulevard|bd\.|chemin|impasse|place|all[eé]e|route)[^\n,]{3,60})[,\s]+(\d{5})\s+([A-ZÀ-Ÿ][A-Za-zÀ-ÿ'’\-\s]{2,40})/i,
-  );
+  // Port. / Tél — ne pas coller « Port » dans la ville
+  const phone =
+    cleaned
+      .match(
+        /(?:Port\.?|T[eé]l(?:[eé]phone)?|portable)\s*[:\s]*(\+?\d[\d.\s]{8,20})/i,
+      )?.[1]
+      ?.replace(/\s+/g, " ")
+      .trim() ??
+    cleaned.match(/\b(\+33\s*[1-9](?:[\s.]?\d{2}){4})\b/)?.[1]?.replace(/\s+/g, " ").trim() ??
+    cleaned.match(/\b(0[1-9](?:[\s.]?\d{2}){4})\b/)?.[1]?.replace(/\s+/g, " ").trim() ??
+    null;
+
+  const addrLine = cleaned.match(
+    /(\d{1,4}\s+(?:avenue|av\.|rue|boulevard|bd\.|chemin|impasse|place|all[eé]e|route)[^\n,]{3,60})/i,
+  )?.[1]?.trim() ?? null;
+
+  const cityBlock = cleaned.match(/\b(\d{5})\s+([A-ZÀ-Ÿ][A-Za-zÀ-ÿ'’\-]+(?:\s+[A-ZÀ-Ÿ][A-Za-zÀ-ÿ'’\-]+)?)\b/);
+  let postalCode = cityBlock?.[1] ?? null;
+  let city = cityBlock?.[2]?.trim() ?? null;
+  if (city && /^(Port|Tel|Tél|Email)$/i.test(city)) city = null;
+
+  // Préférer le bloc client (avant émetteur) si plusieurs CP
+  if (name) {
+    const clientSlice = cleaned.match(
+      new RegExp(
+        `${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[\\s\\S]{0,220}?(\\d{5})\\s+([A-ZÀ-Ÿ][A-Za-zÀ-ÿ'’\\-]+)`,
+        "i",
+      ),
+    );
+    if (clientSlice) {
+      postalCode = clientSlice[1] ?? postalCode;
+      city = clientSlice[2]?.trim() ?? city;
+    }
+  }
 
   const confidence: ImportedQuoteDraft["customer"]["confidence"] = name
     ? "ok"
@@ -182,21 +261,19 @@ function extractCustomer(text: string): ImportedQuoteDraft["customer"] {
 
   return {
     name,
-    addressLine1: addr?.[1]?.trim() ?? null,
-    postalCode: addr?.[2]?.trim() ?? null,
-    city: addr?.[3]?.trim() ?? null,
+    addressLine1: addrLine,
+    postalCode,
+    city,
     email,
     phone,
     confidence,
   };
 }
 
-function extractIssuer(text: string): ImportedQuoteDraft["issuer"] {
-  const head = text.slice(0, 800);
-  // Éviter de prendre le client pour l’émetteur
-  const m = head.match(
-    /^[\s\S]{0,200}?([A-ZÀ-Ÿ][A-ZÀ-Ÿ0-9 &'\-]{2,40}(?:\s+BTP|\s+SARL|\s+SAS|\s+SA)?)/m,
-  );
+export function extractIssuer(text: string): ImportedQuoteDraft["issuer"] {
+  const m =
+    text.match(/\b([A-ZÀ-Ÿ][A-ZÀ-Ÿ0-9 &'\-]{1,40}\s+BTP)\b/) ??
+    text.match(/\b([A-ZÀ-Ÿ][A-ZÀ-Ÿ0-9 &'\-]{2,40}(?:\s+SARL|\s+SAS|\s+SA))\b/);
   const name = m?.[1]?.trim() ?? null;
   return {
     name,
@@ -206,18 +283,24 @@ function extractIssuer(text: string): ImportedQuoteDraft["issuer"] {
   };
 }
 
-function extractSubject(text: string): string | null {
+function extractSubject(text: string, hint: string | null): string | null {
+  if (hint && hint.length >= 8) return hint;
   const m =
-    text.match(/(?:objet|désignation\s+des\s+travaux|travaux)\s*[:\-]\s*([^\n]{8,120})/i) ??
-    text.match(/devis\s+(?:pour|relatif\s+[àa])\s+([^\n]{8,120})/i);
-  return m?.[1]?.trim() ?? null;
+    text.match(/(?:objet|désignation\s+des\s+travaux|travaux)\s*[:\-]\s*([^\n]{8,160})/i) ??
+    text.match(/R[eé]alisation\s+de\s+travaux[\s\S]{0,120}?eaux\s+pluviales\.?/i);
+  return m?.[0]?.replace(/\s+/g, " ").trim() ?? m?.[1]?.trim() ?? null;
 }
 
-/** Détection lignes : blocs se terminant par montants monétaires. */
+/** Détection lignes legacy (texte non tabulaire). */
 function extractLinesFromText(
   text: string,
   defaultVat: number | null,
 ): ImportedSection[] {
+  const { sections } = extractWorkSectionsFromQuoteText(text, defaultVat);
+  const count = sections.reduce((n, s) => n + s.lines.length, 0);
+  if (count > 0) return sections;
+
+  // Fallback très prudent : ne jamais créer de ligne depuis une clause juridique
   const lines: ImportedLine[] = [];
   const rawLines = text
     .split(/\n+/)
@@ -233,7 +316,7 @@ function extractLinesFromText(
   sectionMap.set(currentSection, []);
 
   for (const row of rawLines) {
-    // Titre de section probable : majuscules, sans prix
+    if (/CLAUSE|Pénalité|Escompte|Indemnité|Fait avec|Page\s+\d+/i.test(row)) continue;
     if (
       /^[A-ZÀ-Ÿ0-9][A-ZÀ-Ÿ0-9\s\-']{6,80}$/.test(row) &&
       !/€|\d+[.,]\d{2}/.test(row) &&
@@ -246,16 +329,12 @@ function extractLinesFromText(
 
     const monies = [...row.matchAll(moneyRe)].map((m) => parseFrenchNumber(m[1]));
     const amounts = monies.filter((n): n is number => n != null && n > 0);
-    if (amounts.length === 0) continue;
-    if (/total|t\.?\s*v\.?\s*a|ttc|acompte|solde/i.test(row) && amounts.length <= 2) {
-      continue;
-    }
+    if (amounts.length < 2) continue;
+    if (/total|t\.?\s*v\.?\s*a|ttc|acompte|solde/i.test(row)) continue;
 
     const qtyM = row.match(qtyUnitRe);
     let quantity: number | null = qtyM ? parseFrenchNumber(qtyM[1]) : null;
-    let unit: string | null = qtyM?.[2] ? normalizeUnit(qtyM[2]) : null;
-
-    // Dernier montant = HT ligne ; avant-dernier = PU si 2+
+    let unit: string | null = qtyM?.[2] ? normalizeUnit(qtyM[2]) : "U";
     let lineSellHt: number | null = amounts[amounts.length - 1] ?? null;
     let unitSellHt: number | null =
       amounts.length >= 2 ? amounts[amounts.length - 2]! : null;
@@ -265,27 +344,17 @@ function extractLinesFromText(
       if (q > 0 && q < 10000) quantity = q;
     }
     if (quantity == null) quantity = 1;
-    if (unitSellHt == null && lineSellHt != null) {
-      unitSellHt = lineSellHt;
-    }
+    if (unitSellHt == null && lineSellHt != null) unitSellHt = lineSellHt;
 
     let designation = row
       .replace(moneyRe, " ")
       .replace(qtyUnitRe, " ")
       .replace(/\s+/g, " ")
       .trim();
-    if (designation.length < 4) continue;
+    if (designation.length < 8) continue;
     if (designation.length > 500) designation = designation.slice(0, 500);
 
-    const warnings: string[] = [];
-    let confidence: ImportedLine["confidence"] = "ok";
-    if (!unit) {
-      unit = "U";
-      warnings.push("Unité non détectée — U par défaut");
-      confidence = "warn";
-    }
-
-    const line: ImportedLine = {
+    sectionMap.get(currentSection)!.push({
       id: uid(),
       kind: "WORK",
       designation,
@@ -296,39 +365,20 @@ function extractLinesFromText(
       discountPercent: null,
       vatRate: defaultVat,
       lineSellHt,
-      confidence,
-      warnings,
-    };
-    sectionMap.get(currentSection)!.push(line);
+      confidence: "warn",
+      warnings: ["Ligne extraite en mode dégradé — à vérifier"],
+    });
   }
 
-  const sections: ImportedSection[] = [];
+  const out: ImportedSection[] = [];
   for (const [title, ls] of sectionMap) {
-    if (ls.length === 0 && title === "Ouvrages") continue;
     if (ls.length === 0) continue;
-    sections.push({ id: uid(), title, lines: ls });
+    out.push({ id: uid(), title, lines: ls });
   }
-  if (sections.length === 0) {
-    sections.push({ id: uid(), title: "Ouvrages", lines: [] });
-  }
-  return sections;
+  if (out.length === 0) out.push({ id: uid(), title: "Ouvrages", lines: [] });
+  return out;
 }
 
-function normalizeUnit(u: string): string {
-  const x = u.toLowerCase();
-  if (x === "m2" || x === "m²") return "M²";
-  if (x === "m3" || x === "m³") return "M³";
-  if (x === "ml") return "ML";
-  if (x === "ft" || x === "forfait") return "Forfait";
-  if (x === "u" || x === "unité" || x === "unite") return "U";
-  if (x === "h" || x === "heure") return "H";
-  if (x === "j" || x === "jour") return "J";
-  if (x === "t" || x === "tonne") return "T";
-  if (x === "ens" || x === "ensemble") return "Ens";
-  return u.toUpperCase();
-}
-
-/** Parse CSV/TSV tableur déjà extrait en texte. */
 function extractLinesFromTabular(
   text: string,
   defaultVat: number | null,
@@ -354,13 +404,11 @@ function extractLinesFromTabular(
   for (const row of rows.slice(1)) {
     const designation = row[idx.designation] ?? "";
     if (!designation || designation.length < 2) continue;
-    const quantity =
-      idx.qty >= 0 ? parseFrenchNumber(row[idx.qty] ?? "") : 1;
+    if (/CLAUSE|Pénalité|réserve de propriété/i.test(designation)) continue;
+    const quantity = idx.qty >= 0 ? parseFrenchNumber(row[idx.qty] ?? "") : 1;
     const unit = idx.unit >= 0 ? normalizeUnit(row[idx.unit] || "U") : "U";
-    const unitSellHt =
-      idx.pu >= 0 ? parseFrenchNumber(row[idx.pu] ?? "") : null;
-    const lineSellHt =
-      idx.ht >= 0 ? parseFrenchNumber(row[idx.ht] ?? "") : null;
+    const unitSellHt = idx.pu >= 0 ? parseFrenchNumber(row[idx.pu] ?? "") : null;
+    const lineSellHt = idx.ht >= 0 ? parseFrenchNumber(row[idx.ht] ?? "") : null;
     const discountPercent =
       idx.discount >= 0 ? parseFrenchNumber(row[idx.discount] ?? "") : null;
     lines.push({
@@ -397,12 +445,13 @@ export function buildDraftFromExtractedText(opts: {
     );
   }
 
+  const workingText = stripSignatureZone(stripLegalBlocks(opts.text));
+
   const totals = extractTotals(opts.text);
   const customer = extractCustomer(opts.text);
   const issuer = extractIssuer(opts.text);
   const reference = extractReference(opts.text);
-  const issueDate = parseFrenchDate(opts.text);
-  const subject = extractSubject(opts.text);
+  const issueDate = extractIssueDate(opts.text);
   const paymentSchedule = extractPaymentSchedule(opts.text);
   const bonPourAccordMention = /bon\s+pour\s+accord|signature/i.test(opts.text);
 
@@ -410,15 +459,29 @@ export function buildDraftFromExtractedText(opts: {
   if (!issueDate) warnings.push("Date non détectée");
   if (customer.confidence === "missing") warnings.push("Client non détecté");
 
-  const sections =
-    opts.format === "xlsx" || opts.format === "csv"
-      ? extractLinesFromTabular(opts.text, totals.vatRateGuess)
-      : extractLinesFromText(opts.text, totals.vatRateGuess);
+  let sections: ImportedSection[];
+  let subjectHint: string | null = null;
 
-  const lineCount = sections.reduce((n, s) => n + s.lines.length, 0);
+  if (opts.format === "xlsx" || opts.format === "csv") {
+    sections = extractLinesFromTabular(workingText, totals.vatRateGuess);
+  } else {
+    const extracted = extractWorkSectionsFromQuoteText(workingText, totals.vatRateGuess);
+    sections = extracted.sections;
+    subjectHint = extracted.subjectHint;
+    if (sections.every((s) => s.lines.length === 0)) {
+      sections = extractLinesFromText(workingText, totals.vatRateGuess);
+    }
+  }
+
+  const subject = extractSubject(opts.text, subjectHint);
+
+  const lineCount = sections.reduce(
+    (n, s) => n + s.lines.filter((l) => l.kind === "WORK").length,
+    0,
+  );
   if (!scanned && lineCount === 0) {
     warnings.push(
-      "Aucune ligne chiffrée identifiée automatiquement — vérifiez le document ou saisissez manuellement.",
+      "Aucune ligne chiffrée fiable identifiée — création bloquée tant que des ouvrages ne sont pas détectés ou saisis.",
     );
   }
 
@@ -462,7 +525,8 @@ export async function extractQuoteFileText(
 
   if (lower === "application/pdf" || name.endsWith(".pdf")) {
     try {
-      const text = await extractPdfText(buffer);
+      const doc = await extractPdfDocument(buffer);
+      const text = doc.text;
       return {
         text,
         format: "pdf",

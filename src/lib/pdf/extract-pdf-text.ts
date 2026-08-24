@@ -1,9 +1,6 @@
 /**
- * Extraction texte PDF côté serveur (Node).
- * pdf-parse v2 exige un worker + (souvent) CanvasFactory hors navigateur ;
- * Next/webpack casse facilement la résolution sans serverExternalPackages.
+ * Extraction PDF structurée pour import devis (texte + séparateurs de cellules).
  */
-
 type PdfWorkerModule = {
   CanvasFactory?: unknown;
   getData?: () => string;
@@ -18,7 +15,6 @@ async function ensurePdfWorker(): Promise<PdfWorkerModule> {
       const worker = (await import("pdf-parse/worker")) as PdfWorkerModule;
       const { PDFParse } = await import("pdf-parse");
 
-      // getData() = worker inline (data URL) — plus fiable en serverless / bundle.
       if (typeof worker.getData === "function") {
         PDFParse.setWorker(worker.getData());
       } else if (typeof worker.getPath === "function") {
@@ -37,21 +33,50 @@ async function ensurePdfWorker(): Promise<PdfWorkerModule> {
   return workerReady;
 }
 
-/** Extrait le texte brut d’un PDF. Lève en cas d’échec de lecture. */
-export async function extractPdfText(buffer: Buffer): Promise<string> {
+export type ExtractedPdfDocument = {
+  text: string;
+  pages: Array<{ num: number; text: string }>;
+};
+
+async function createParser(buffer: Buffer) {
   const worker = await ensurePdfWorker();
   const { PDFParse } = await import("pdf-parse");
-  // Copie explicite : Buffer Node ≠ toujours un Uint8Array isolé pour pdf.js
   const data = Uint8Array.from(buffer);
-  const parser = new PDFParse({
+  return new PDFParse({
     data,
     ...(worker.CanvasFactory
       ? { CanvasFactory: worker.CanvasFactory as never }
       : {}),
   });
+}
+
+/** Texte brut (compat skills / usages simples). */
+export async function extractPdfText(buffer: Buffer): Promise<string> {
+  const doc = await extractPdfDocument(buffer);
+  return doc.text;
+}
+
+/**
+ * Texte avec séparateurs de colonnes (tab) et marqueurs de page —
+ * adapté aux devis tabulaires multipages (Henrri, etc.).
+ */
+export async function extractPdfDocument(
+  buffer: Buffer,
+): Promise<ExtractedPdfDocument> {
+  const parser = await createParser(buffer);
   try {
-    const parsed = await parser.getText();
-    return (parsed.text ?? "").trim();
+    const parsed = await parser.getText({
+      lineEnforce: true,
+      cellSeparator: "\t",
+      cellThreshold: 6,
+      pageJoiner: "\n<<<PAGE>>>\n",
+    });
+    const pages = (parsed.pages ?? []).map((p) => ({
+      num: p.num,
+      text: (p.text ?? "").trim(),
+    }));
+    const text = (parsed.text ?? "").trim();
+    return { text, pages };
   } finally {
     await parser.destroy().catch(() => undefined);
   }

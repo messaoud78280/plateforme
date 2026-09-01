@@ -65,8 +65,14 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>
               Tâches
             </NavLink>
+            <NavLink href="/dashboard/leads" pathname={pathname} activeClass={active}>
+              Leads
+            </NavLink>
             <NavLink href="/dashboard/projets" pathname={pathname} activeClass={activeClassClient}>
               Chantiers
+            </NavLink>
+            <NavLink href="/dashboard/devis-facturation" pathname={pathname} activeClass={active}>
+              Devis & Facturation
             </NavLink>
             <NavLink href="/dashboard/pilotage-travaux" pathname={pathname} activeClass={active}>
               Pilotage
@@ -80,9 +86,6 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/agenda" pathname={pathname} activeClass={active}>
               Agenda
             </NavLink>
-            <NavLink href="/dashboard/messages" pathname={pathname} activeClass={active}>
-              RDV & contact
-            </NavLink>
             <NavLink href="/dashboard/documents" pathname={pathname} activeClass={active}>
               Documents
             </NavLink>
@@ -91,9 +94,6 @@ export function DashboardNav({ role }: { role?: string | null }) {
             </NavLink>
             <NavLink href="/dashboard/equipe" pathname={pathname} activeClass={active}>
               Équipe & partenaires
-            </NavLink>
-            <NavLink href="/dashboard/abonnement" pathname={pathname} activeClass={active}>
-              Abonnement
             </NavLink>
             <NavLink href="/dashboard/parametres" pathname={pathname} activeClass={active}>
               Paramètres

@@ -127,6 +127,13 @@ function buildFamilies(): NavFamily[] {
       tone: "navy",
       items: [
         {
+          href: "/dashboard/leads",
+          label: "Leads",
+          icon: Users,
+          roles: ["CLIENT", "MANAGER"],
+          emphasis: "high",
+        },
+        {
           href: "/dashboard/devis-facturation",
           label: "Devis & Facturation",
           icon: Wallet,
@@ -141,7 +148,12 @@ function buildFamilies(): NavFamily[] {
           emphasis: "high",
         },
         { href: "/dashboard/facturation", label: "À facturer", icon: Wallet, roles: ALL },
-        { href: "/dashboard/clients", label: "Clients", icon: Building2, roles: ["CLIENT", "MANAGER"] },
+        {
+          href: "/dashboard/devis-facturation/clients",
+          label: "Clients",
+          icon: Building2,
+          roles: ["CLIENT", "MANAGER"],
+        },
         { href: "/dashboard/devis", label: "Analyses", icon: FileText, roles: OPS },
       ],
     },

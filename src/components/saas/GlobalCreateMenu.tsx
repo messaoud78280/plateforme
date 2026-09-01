@@ -13,7 +13,12 @@ type CreateAction = {
 };
 
 const CREATE_ACTIONS: CreateAction[] = [
-  { label: "Client", href: "/dashboard/clients", accessHref: "/dashboard/clients" },
+  { label: "Lead", href: "/dashboard/leads", accessHref: "/dashboard/leads" },
+  {
+    label: "Client",
+    href: "/dashboard/devis-facturation/clients",
+    accessHref: "/dashboard/devis-facturation",
+  },
   { label: "Chantier", href: "/dashboard/projets", accessHref: "/dashboard/projets" },
   { label: "Devis", href: "/dashboard/devis-facturation", accessHref: "/dashboard/devis-facturation" },
   { label: "Importer un devis", href: "/dashboard/devis-facturation/devis/import", accessHref: "/dashboard/devis-facturation" },

@@ -33,6 +33,9 @@ export async function SaasActivationHomeBlock({
 
   if (ctx.organization.kind === "DEMO") return null;
 
+  // Espace production ACTIVE : pas de checklist d’essai / onboarding bloquant.
+  if (ctx.effectiveStatus === "ACTIVE") return null;
+
   const snapshot = await getOrganizationActivationSnapshot(ctx.organizationId);
 
   if (snapshot.percent >= 100) {

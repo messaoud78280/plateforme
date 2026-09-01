@@ -46,7 +46,7 @@ function buildHeaderLine(ops: AccueilOpsSummary) {
   }
   if (parts.length > 0) return parts.join(" · ");
   if (!ops.hasProjects) {
-    return "Votre espace est prêt — explorez les modules librement.";
+    return "Priorité du jour : capturer vos leads, planifier les RDV, préparer les devis.";
   }
   return "Rien d’urgent à traiter aujourd’hui.";
 }
@@ -64,6 +64,7 @@ function QuickActionMenu({ links }: { links: AccueilOpsSummary["links"] }) {
   }, [open]);
 
   const items = [
+    { label: "Nouveau lead", href: "/dashboard/leads" },
     { label: "Créer une tâche", href: links.nouvelleTache },
     { label: "Créer un événement", href: links.nouvelEvenement },
     { label: "Créer une commande", href: links.nouvelleCommande },
@@ -188,6 +189,30 @@ export function AccueilOpsHome({
           <QuickActionMenu links={ops.links} />
         </div>
       </header>
+
+      {!ops.hasProjects ? (
+        <section className="grid gap-2 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { href: "/dashboard/leads", title: "Nouveau lead", sub: "Prospect & demande" },
+            { href: "/dashboard/agenda?new=1", title: "Planifier un RDV", sub: "Agenda" },
+            {
+              href: "/dashboard/devis-facturation/devis/nouveau",
+              title: "Créer un devis",
+              sub: "Devis & facturation",
+            },
+            { href: "/dashboard/projets", title: "Ouvrir un chantier", sub: "Quand le devis est signé" },
+          ].map((a) => (
+            <Link
+              key={a.href}
+              href={a.href}
+              className="rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-3 transition hover:border-[#1e3a5f]/20 hover:bg-white"
+            >
+              <p className="text-[14px] font-bold text-[#1e3a5f]">{a.title}</p>
+              <p className="mt-0.5 text-[12px] text-slate-500">{a.sub}</p>
+            </Link>
+          ))}
+        </section>
+      ) : null}
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.9fr)] lg:items-start xl:grid-cols-[minmax(0,1.75fr)_minmax(300px,0.85fr)]">
         <div data-demo-target="accueil-a-traiter">

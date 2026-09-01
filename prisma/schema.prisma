@@ -268,6 +268,7 @@ model ExternalOrganization {
   purchaseOrders   PurchaseOrder[]
   projectChannels  ProjectChannel[]
   commercialQuotesAsClient CommercialQuote[] @relation("CommercialQuoteClient")
+  commercialLeads          CommercialLead[]
   siteVisitsAsClient       SiteVisit[] @relation("SiteVisitClient")
   commercialInvoicesAsClient CommercialInvoice[] @relation("CommercialInvoiceClient")
   commercialComponentsAsSubcontractor CommercialWorkItemComponent[] @relation("CommercialComponentSubcontractor")
@@ -658,6 +659,7 @@ model Organization {
   materialRequirementOrderLinks MaterialRequirementOrderLink[]
   /// Domaine Devis & Facturation (Commercial*) — isolé des Quote* / Invoice / Payment SaaS
   commercialOrgSettings     CommercialOrgSettings?
+  commercialLeads           CommercialLead[]
   commercialQuotes          CommercialQuote[]
   commercialAmendments      CommercialAmendment[]
   commercialInvoices        CommercialInvoice[]
@@ -938,6 +940,7 @@ model Project {
   supplierInvoices SupplierInvoice[]
   annualServiceContracts AnnualServiceContract[]
   siteVisits             SiteVisit[]
+  commercialLeads        CommercialLead[]
 
   @@index([organizationId])
 }
@@ -1688,6 +1691,8 @@ model AgendaEvent {
   taskId          String?
   /// Commande chantier CDE-1
   purchaseOrderId String?
+  /// Lead commercial lié (visite / RDV prospect)
+  commercialLeadId String?
   responsibleId   String?
   reminderMinutes Int?
   recurrence      String?           // NONE | DAILY | WEEKLY | MONTHLY | YEARLY | CUSTOM
@@ -1707,6 +1712,7 @@ model AgendaEvent {
   followUpSheet FollowUpSheet?     @relation(fields: [followUpSheetId], references: [id], onDelete: SetNull)
   task        Task?                @relation(fields: [taskId], references: [id], onDelete: SetNull)
   purchaseOrder PurchaseOrder?     @relation(fields: [purchaseOrderId], references: [id], onDelete: SetNull)
+  commercialLead CommercialLead?   @relation(fields: [commercialLeadId], references: [id], onDelete: SetNull)
   attendees   AgendaEventAttendee[]
 
   @@index([ownerUserId, startAt])
@@ -1715,6 +1721,7 @@ model AgendaEvent {
   @@index([followUpSheetId, startAt])
   @@index([taskId, startAt])
   @@index([purchaseOrderId, startAt])
+  @@index([commercialLeadId, startAt])
   @@index([type, startAt])
   @@index([sourceMessageKind, sourceMessageId])
 }
@@ -4030,6 +4037,57 @@ model CommercialOrgSettings {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }
 
+/// Pipeline commercial — lead / prospect (avant client ExternalOrganization).
+enum CommercialLeadStatus {
+  NOUVEAU
+  CONTACTE
+  RDV_PLANIFIE
+  ETUDE_EN_COURS
+  DEVIS_A_PREPARER
+  DEVIS_ENVOYE
+  A_RELANCER
+  GAGNE
+  PERDU
+}
+
+model CommercialLead {
+  id                   String               @id @default(cuid())
+  organizationId       String
+  firstName            String
+  lastName             String
+  phone                String?
+  email                String?
+  city                 String?
+  postalCode           String?
+  addressLine1         String?
+  needDescription      String?              @db.Text
+  workType             String?
+  sourceSite           String?
+  sourcePage           String?
+  status               CommercialLeadStatus @default(NOUVEAU)
+  notes                String?              @db.Text
+  /// Client créé après conversion (évite double saisie).
+  externalOrganizationId String?
+  commercialQuoteId    String?
+  projectId            String?
+  nextAppointmentAt    DateTime?
+  createdById          String?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+
+  organization         Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  externalOrganization ExternalOrganization? @relation(fields: [externalOrganizationId], references: [id], onDelete: SetNull)
+  commercialQuote      CommercialQuote?     @relation(fields: [commercialQuoteId], references: [id], onDelete: SetNull)
+  project              Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  agendaEvents         AgendaEvent[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, createdAt])
+  @@index([organizationId, nextAppointmentAt])
+  @@index([externalOrganizationId])
+  @@index([email])
+}
+
 /// Devis commercial (affaire) — projectId optionnel (prospect)
 model CommercialQuote {
   id                     String                @id @default(cuid())
@@ -4095,6 +4153,7 @@ model CommercialQuote {
   retentionGuarantees  CommercialRetentionGuarantee[]
   projectBudgets       ProjectBudget[]
   siteVisit            SiteVisit?
+  commercialLeads      CommercialLead[]
 
   @@unique([organizationId, number])
   @@index([organizationId, status])

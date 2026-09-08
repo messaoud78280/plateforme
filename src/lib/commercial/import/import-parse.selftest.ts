@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseFrenchNumber, moneyClose } from "@/lib/commercial/import/french-number";
+import { parseFrenchNumber, moneyClose, parseFrenchDecimal, isPartialFrenchDecimalInput, formatFrenchDecimalInput } from "@/lib/commercial/import/french-number";
 import { validateImportedLineMath } from "@/lib/commercial/import/validate-math";
 import type { ImportedLine } from "@/lib/commercial/import/types";
 import {
@@ -18,7 +18,18 @@ assert.equal(parseFrenchNumber("1 230,00 €"), 1230);
 assert.equal(parseFrenchNumber("9\u00a0814,50"), 9814.5);
 assert.equal(parseFrenchNumber("10 %"), 10);
 assert.equal(parseFrenchNumber(""), null);
+assert.equal(parseFrenchNumber("12,50"), 12.5);
+assert.equal(parseFrenchNumber("12.50"), 12.5);
+assert.equal(parseFrenchNumber("0,75"), 0.75);
+assert.equal(parseFrenchNumber(" 12,50 "), 12.5);
 assert.equal(moneyClose(100, 100.01), true);
+assert.equal(parseFrenchDecimal("7,50"), 7.5);
+assert.equal(isPartialFrenchDecimalInput("12,"), true);
+assert.equal(isPartialFrenchDecimalInput("12,5"), true);
+assert.equal(isPartialFrenchDecimalInput("12a"), false);
+assert.equal(formatFrenchDecimalInput(12.5), "12,5");
+assert.equal(formatFrenchDecimalInput(7.5), "7,5");
+assert.equal(40 * 7.5, 300);
 
 const line: ImportedLine = {
   id: "1",

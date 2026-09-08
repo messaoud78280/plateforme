@@ -7,6 +7,7 @@ import type {
   BundleImportPreview,
   BundleImportSelection,
 } from "@/lib/commercial/chatgpt-bundle/commit";
+import { FrenchDecimalInput } from "@/components/commercial/FrenchDecimalInput";
 
 function fmtMoney(n: number) {
   return roundMoney(n, 2).toLocaleString("fr-FR", {
@@ -595,17 +596,16 @@ export function ChatGptBundleImportModal({
                               className="mt-1 w-full rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-600"
                             />
                             <div className="mt-1 grid grid-cols-4 gap-1">
-                              <input
-                                type="number"
-                                step="any"
+                              <FrenchDecimalInput
                                 value={it.quantity}
-                                onChange={(e) =>
-                                  patchLine(si, li, {
-                                    quantity: Number(e.target.value) || 0,
-                                  })
+                                maxFractionDigits={4}
+                                className="rounded border border-slate-200 px-1.5 py-1 text-[11px] text-right"
+                                onLiveValue={(n) =>
+                                  patchLine(si, li, { quantity: n })
                                 }
-                                className="rounded border border-slate-200 px-1.5 py-1 text-[11px]"
-                                title="Quantité"
+                                onCommit={(n) =>
+                                  patchLine(si, li, { quantity: n })
+                                }
                               />
                               <input
                                 value={it.unit}
@@ -615,29 +615,31 @@ export function ChatGptBundleImportModal({
                                 className="rounded border border-slate-200 px-1.5 py-1 text-[11px]"
                                 title="Unité"
                               />
-                              <input
-                                type="number"
-                                step="any"
+                              <FrenchDecimalInput
                                 value={it.unitPriceHt}
-                                onChange={(e) =>
-                                  patchLine(si, li, {
-                                    unitPriceHt: Number(e.target.value) || 0,
-                                  })
+                                maxFractionDigits={4}
+                                className="rounded border border-slate-200 px-1.5 py-1 text-[11px] text-right"
+                                onLiveValue={(n) =>
+                                  patchLine(si, li, { unitPriceHt: n })
                                 }
-                                className="rounded border border-slate-200 px-1.5 py-1 text-[11px]"
-                                title="PU HT"
+                                onCommit={(n) =>
+                                  patchLine(si, li, { unitPriceHt: n })
+                                }
                               />
-                              <input
-                                type="number"
-                                step="any"
-                                value={it.vatRate ?? bundle.quote.vatSuggestedRate ?? 20}
-                                onChange={(e) =>
-                                  patchLine(si, li, {
-                                    vatRate: Number(e.target.value) || 0,
-                                  })
+                              <FrenchDecimalInput
+                                value={
+                                  it.vatRate ??
+                                  bundle.quote.vatSuggestedRate ??
+                                  20
                                 }
-                                className="rounded border border-slate-200 px-1.5 py-1 text-[11px]"
-                                title="TVA %"
+                                maxFractionDigits={2}
+                                className="rounded border border-slate-200 px-1.5 py-1 text-[11px] text-right"
+                                onLiveValue={(n) =>
+                                  patchLine(si, li, { vatRate: n })
+                                }
+                                onCommit={(n) =>
+                                  patchLine(si, li, { vatRate: n })
+                                }
                               />
                             </div>
                             <p className="mt-1 text-right text-[11px] font-semibold text-slate-700">

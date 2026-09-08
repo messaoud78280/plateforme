@@ -11,8 +11,11 @@ import {
 import { useRouter } from "next/navigation";
 import {
   COMMERCIAL_QUOTE_STATUS_LABELS,
+  calculateDocumentTotals,
+  calculateLine,
   roundMoney,
 } from "@/lib/commercial/money";
+import { FrenchDecimalInput } from "@/components/commercial/FrenchDecimalInput";
 import {
   badgeClassForTone,
   DEVIS_STATUS_TONE,
@@ -25,7 +28,13 @@ import { QuoteDepositPanel } from "@/components/commercial/QuoteDepositPanel";
 import { QuoteProrataPanel } from "@/components/commercial/QuoteProrataPanel";
 import { LibraryPickerModal } from "@/components/commercial/LibraryPickerModal";
 import { ChatGptBundleImportModal } from "@/components/commercial/ChatGptBundleImportModal";
+import { IssuerEditModal } from "@/components/commercial/IssuerEditModal";
+import { ClientCoordsEditModal } from "@/components/commercial/ClientCoordsEditModal";
 import { LineCompositionDrawer } from "@/components/commercial/LineCompositionDrawer";
+import {
+  formatSirenDisplay,
+  formatSiretDisplay,
+} from "@/lib/commercial/company-profile";
 import { QuotePriceCheckPanel } from "@/components/commercial/QuotePriceCheckPanel";
 import { QuoteStatusActions } from "@/components/commercial/QuoteStatusActions";
 import { QuoteIssuanceCheckPanel } from "@/components/commercial/QuoteIssuanceCheckPanel";
@@ -62,15 +71,25 @@ function formatDisplayDate(value: string | Date | null | undefined): string {
 type IssuerSnapshot = {
   name?: string | null;
   tradeName?: string | null;
+  activity?: string | null;
   siret?: string | null;
+  siren?: string | null;
+  vatNumber?: string | null;
+  apeCode?: string | null;
+  apeLabel?: string | null;
+  legalForm?: string | null;
+  formeJuridique?: string | null;
+  capital?: string | null;
   email?: string | null;
   phone?: string | null;
+  website?: string | null;
   address?: string | null;
   addressLine1?: string | null;
   addressLine2?: string | null;
   city?: string | null;
   zipCode?: string | null;
   postalCode?: string | null;
+  country?: string | null;
   logoPath?: string | null;
 };
 
@@ -101,8 +120,11 @@ type Line = {
   vatRate: number;
   lineSellHt: number;
   lineCostHt: number;
+  lineVat?: number;
+  lineTtc?: number;
+  marginAmount?: number;
   sortOrder: number;
-  isOptional: boolean;
+  isOptional?: boolean;
   commercialWorkItemId?: string | null;
   compositionSnapshotJson?: unknown;
 };
@@ -121,6 +143,7 @@ type QuoteDetail = {
   internalNotes?: string | null;
   paymentScheduleJson?: PaymentSchedule | null;
   depositPercent?: number | null;
+  defaultVatRate?: number | null;
   issuerSnapshotJson?: IssuerSnapshot | null;
   clientSnapshotJson?: IssuerSnapshot | null;
   siteAddressSnapshot?: string | null;
@@ -206,6 +229,24 @@ export function QuoteEditor({
   const [chatgptImportOpen, setChatgptImportOpen] = useState(false);
   const [chatgptImportUndo, setChatgptImportUndo] = useState(false);
   const [chatgptUndoBusy, setChatgptUndoBusy] = useState(false);
+  const [issuerEditOpen, setIssuerEditOpen] = useState(false);
+  const [clientCoordsOpen, setClientCoordsOpen] = useState(false);
+  const [lineNumericDrafts, setLineNumericDrafts] = useState<
+    Record<
+      string,
+      {
+        quantity?: number;
+        unitSellHt?: number;
+        vatRate?: number;
+        discountPercent?: number;
+      }
+    >
+  >({});
+  const [linePersistError, setLinePersistError] = useState<{
+    lineId: string;
+    patch: Record<string, unknown>;
+    message: string;
+  } | null>(null);
   const [librarySectionId, setLibrarySectionId] = useState<string | null>(null);
   const [compositionLine, setCompositionLine] = useState<Line | null>(null);
   const [priceCheckOpen, setPriceCheckOpen] = useState(false);
@@ -237,18 +278,158 @@ export function QuoteEditor({
 
   const version = quote.currentVersion;
   const lines = version?.lines ?? [];
+
+  const displayLines = useMemo(() => {
+    return lines.map((l) => {
+      const d = lineNumericDrafts[l.id];
+      if (!d) return l;
+      const quantity = d.quantity ?? l.quantity;
+      const unitSellHt = d.unitSellHt ?? l.unitSellHt;
+      const vatRate = d.vatRate ?? l.vatRate;
+      const discountPercent = d.discountPercent ?? l.discountPercent ?? 0;
+      const calc = calculateLine({
+        kind: (l.kind as "WORK" | "COMMENT" | "OPTION" | "SUBTOTAL") || "WORK",
+        quantity,
+        unitCostHt: l.unitCostHt,
+        unitSellHt,
+        discountPercent,
+        vatRate,
+        isOptional: l.isOptional,
+      });
+      return {
+        ...l,
+        quantity,
+        unitSellHt,
+        vatRate,
+        discountPercent,
+        lineSellHt: calc.lineSellHt,
+        lineCostHt: calc.lineCostHt,
+        lineVat: calc.lineVat,
+        lineTtc: calc.lineTtc,
+        marginAmount: calc.marginAmount,
+      };
+    });
+  }, [lines, lineNumericDrafts]);
+
+  const liveTotals = useMemo(() => {
+    return calculateDocumentTotals(
+      displayLines.map((l) =>
+        calculateLine({
+          kind: (l.kind as "WORK" | "COMMENT" | "OPTION" | "SUBTOTAL") || "WORK",
+          quantity: l.quantity,
+          unitCostHt: l.unitCostHt,
+          unitSellHt: l.unitSellHt,
+          discountPercent: l.discountPercent,
+          vatRate: l.vatRate,
+          isOptional: l.isOptional,
+        }),
+      ),
+    );
+  }, [displayLines]);
+
+  const applyLineNumericDraft = useCallback(
+    (
+      lineId: string,
+      patch: {
+        quantity?: number;
+        unitSellHt?: number;
+        vatRate?: number;
+        discountPercent?: number;
+      },
+    ) => {
+      setLineNumericDrafts((prev) => ({
+        ...prev,
+        [lineId]: { ...prev[lineId], ...patch },
+      }));
+    },
+    [],
+  );
   const verifyAlerts = useMemo(() => {
     const notes = quote.internalNotes ?? "";
     const block = notes.match(
       /=== À vérifier avant envoi ===([\s\S]*?)(?=\n===|\n<!--|$)/,
     );
-    if (!block?.[1]) return [] as string[];
+    if (!block?.[1]) return [] as Array<{ raw: string; text: string; done: boolean }>;
     return block[1]
       .split("\n")
       .map((l) => l.trim())
-      .filter((l) => l.startsWith("⚠") || l.length > 2)
-      .slice(0, 8);
+      .filter((l) => l.length > 1)
+      .map((raw) => {
+        const done = raw.startsWith("✓") || raw.startsWith("✅");
+        const text = raw.replace(/^[⚠✓✅]\s*/, "").trim();
+        return { raw, text, done };
+      })
+      .filter((a) => a.text.length > 0)
+      .slice(0, 12);
   }, [quote.internalNotes]);
+
+  async function patchQuoteFields(payload: Record<string, unknown>) {
+    setSaveState("saving");
+    setError(null);
+    try {
+      const res = await fetch(`/api/commercial/quotes/${quote.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur");
+      const detail = await fetch(`/api/commercial/quotes/${quote.id}`).then((r) =>
+        r.json(),
+      );
+      if (detail.quote) {
+        setQuote(detail.quote);
+        if (!metaDirty.current) setMeta(metaFromQuote(detail.quote));
+      }
+      setSaveState("saved");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+      setSaveState("error");
+    }
+  }
+
+  async function setAlertDone(alertText: string, done: boolean) {
+    const notes = quote.internalNotes ?? "";
+    const nextLine = done ? `✓ ${alertText}` : `⚠ ${alertText}`;
+    let updated = notes;
+    const patterns = [
+      `⚠ ${alertText}`,
+      `✓ ${alertText}`,
+      `✅ ${alertText}`,
+      alertText,
+    ];
+    let replaced = false;
+    for (const p of patterns) {
+      if (updated.includes(p)) {
+        updated = updated.replace(p, nextLine);
+        replaced = true;
+        break;
+      }
+    }
+    if (!replaced) {
+      if (!updated.includes("=== À vérifier avant envoi ===")) {
+        updated = `${updated.trim()}\n\n=== À vérifier avant envoi ===\n${nextLine}`.trim();
+      } else {
+        updated = updated.replace(
+          /=== À vérifier avant envoi ===/,
+          `=== À vérifier avant envoi ===\n${nextLine}`,
+        );
+      }
+    }
+    await patchQuoteFields({ internalNotes: updated });
+  }
+
+  async function removeAlert(alertText: string) {
+    const notes = quote.internalNotes ?? "";
+    const updated = notes
+      .split("\n")
+      .filter((l) => {
+        const t = l.trim().replace(/^[⚠✓✅]\s*/, "");
+        return t !== alertText;
+      })
+      .join("\n");
+    await patchQuoteFields({ internalNotes: updated });
+  }
   const sections = useMemo(
     () => [...(version?.sections ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
     [version?.sections],
@@ -354,6 +535,28 @@ export function QuoteEditor({
       const seq = ++mutationSeq.current;
       setSaveState("saving");
       setError(null);
+      setLinePersistError(null);
+
+      // Optimistic numeric draft for instant totals
+      const numericPatch: {
+        quantity?: number;
+        unitSellHt?: number;
+        vatRate?: number;
+        discountPercent?: number;
+      } = {};
+      if (typeof patch.quantity === "number") numericPatch.quantity = patch.quantity;
+      if (typeof patch.unitSellHt === "number") numericPatch.unitSellHt = patch.unitSellHt;
+      if (typeof patch.vatRate === "number") numericPatch.vatRate = patch.vatRate;
+      if (typeof patch.discountPercent === "number") {
+        numericPatch.discountPercent = patch.discountPercent;
+      }
+      if (Object.keys(numericPatch).length) {
+        setLineNumericDrafts((prev) => ({
+          ...prev,
+          [lineId]: { ...prev[lineId], ...numericPatch },
+        }));
+      }
+
       try {
         const res = await fetch(`/api/commercial/quotes/${quote.id}/lines/${lineId}`, {
           method: "PATCH",
@@ -363,11 +566,20 @@ export function QuoteEditor({
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Erreur");
         await refreshQuote(seq);
-        if (seq === mutationSeq.current) setSaveState("saved");
+        if (seq === mutationSeq.current) {
+          setLineNumericDrafts((prev) => {
+            const next = { ...prev };
+            delete next[lineId];
+            return next;
+          });
+          setSaveState("saved");
+        }
       } catch (e) {
         if (seq === mutationSeq.current) {
           setSaveState("error");
-          setError(e instanceof Error ? e.message : "Erreur");
+          const message = e instanceof Error ? e.message : "Erreur";
+          setError(message);
+          setLinePersistError({ lineId, patch, message });
         }
       }
     },
@@ -851,6 +1063,21 @@ export function QuoteEditor({
       {error ? (
         <p className="mx-auto mb-3 max-w-[1500px] text-sm text-red-700">{error}</p>
       ) : null}
+      {linePersistError ? (
+        <div className="mx-auto mb-3 flex max-w-[1500px] flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+          <span>Modification non enregistrée — {linePersistError.message}</span>
+          <button
+            type="button"
+            className="font-semibold text-[#1e3a5f] underline-offset-2 hover:underline"
+            onClick={() => {
+              const { lineId, patch } = linePersistError;
+              void patchLine(lineId, patch);
+            }}
+          >
+            Réessayer
+          </button>
+        </div>
+      ) : null}
 
       {!canEdit ? (
         <p className="mx-auto mb-3 max-w-[1500px] rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
@@ -865,7 +1092,7 @@ export function QuoteEditor({
         <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           {/* Émetteur ↔ Client */}
           <div className="grid gap-6 border-b border-slate-100 px-5 py-6 sm:grid-cols-2 sm:px-8">
-            <div className="space-y-1 text-sm text-slate-700">
+            <div className="group space-y-1 text-sm text-slate-700">
               {issuer?.logoPath ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -874,14 +1101,39 @@ export function QuoteEditor({
                   className="mb-2 h-10 w-auto object-contain"
                 />
               ) : null}
-              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                Émetteur
-              </p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                  Émetteur
+                </p>
+                {canEdit ? (
+                  <button
+                    type="button"
+                    onClick={() => setIssuerEditOpen(true)}
+                    className="text-[11px] font-semibold text-[#1d4ed8] opacity-80 hover:opacity-100"
+                    title="Modifier l’émetteur"
+                  >
+                    ✎ Modifier
+                  </button>
+                ) : null}
+              </div>
               <p className="font-bold text-[#1e3a5f]">
                 {issuer?.tradeName || issuer?.name || "—"}
               </p>
+              {issuer?.activity ? (
+                <p className="text-xs text-slate-500">{issuer.activity}</p>
+              ) : null}
               {issuer?.siret ? (
-                <p className="text-xs text-slate-500">SIRET {issuer.siret}</p>
+                <p className="text-xs text-slate-500">
+                  SIRET {formatSiretDisplay(issuer.siret) ?? issuer.siret}
+                </p>
+              ) : null}
+              {issuer?.vatNumber ? (
+                <p className="text-xs text-slate-500">TVA {issuer.vatNumber}</p>
+              ) : null}
+              {issuer?.siren ? (
+                <p className="text-xs text-slate-500">
+                  SIREN {formatSirenDisplay(issuer.siren) ?? issuer.siren}
+                </p>
               ) : null}
               {snapshotAddress(issuer).map((l) => (
                 <p key={l} className="text-xs text-slate-600">
@@ -897,9 +1149,20 @@ export function QuoteEditor({
             </div>
 
             <div className="space-y-1 text-sm text-slate-700 sm:text-right">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                Client
-              </p>
+              <div className="flex items-center justify-between gap-2 sm:justify-end sm:gap-3">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                  Client
+                </p>
+                {canEdit ? (
+                  <button
+                    type="button"
+                    onClick={() => setClientCoordsOpen(true)}
+                    className="text-[11px] font-semibold text-[#1d4ed8]"
+                  >
+                    ✎ Modifier les coordonnées
+                  </button>
+                ) : null}
+              </div>
               {canEdit ? (
                 <button
                   type="button"
@@ -933,6 +1196,11 @@ export function QuoteEditor({
                       ]
                         .filter(Boolean)
                         .join(" ")}
+                    </p>
+                  )}
+                  {(quote.clientExternalOrg?.email || clientSnap?.email) && (
+                    <p className="text-xs text-slate-600">
+                      {quote.clientExternalOrg?.email || clientSnap?.email}
                     </p>
                   )}
                   <p className="mt-1 text-[11px] font-semibold text-[#1d4ed8]">
@@ -985,26 +1253,94 @@ export function QuoteEditor({
                   ? ` · ${version.lockState === "ACCEPTED_SNAPSHOT" ? "figée" : "verrouillée"}`
                   : ""}
               </p>
-              <p>
-                Émission :{" "}
-                <span className="font-medium text-slate-800">
-                  {formatDisplayDate(quote.issueDate)}
-                </span>
-              </p>
               <div className="flex items-center gap-1.5">
-                <span>Validité :</span>
+                <span>Émission :</span>
                 {canEdit ? (
                   <input
                     type="date"
-                    value={meta.validityDate}
+                    value={toDateInputValue(quote.issueDate)}
                     onChange={(e) =>
-                      scheduleMetaSave({ validityDate: e.target.value })
+                      void patchQuoteFields({
+                        issueDate: e.target.value || null,
+                      })
                     }
                     className="rounded border border-slate-200 px-1.5 py-0.5 text-xs"
                   />
                 ) : (
                   <span className="font-medium text-slate-800">
+                    {formatDisplayDate(quote.issueDate)}
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span>Validité :</span>
+                {canEdit ? (
+                  <>
+                    <select
+                      className="rounded border border-slate-200 px-1.5 py-0.5 text-xs"
+                      value=""
+                      onChange={(e) => {
+                        const days = Number(e.target.value);
+                        if (!days) return;
+                        const base = quote.issueDate
+                          ? new Date(quote.issueDate)
+                          : new Date();
+                        const d = new Date(base);
+                        d.setDate(d.getDate() + days);
+                        void patchQuoteFields({
+                          validityDate: d.toISOString().slice(0, 10),
+                        });
+                        setMeta((m) => ({
+                          ...m,
+                          validityDate: d.toISOString().slice(0, 10),
+                        }));
+                      }}
+                    >
+                      <option value="">Durée…</option>
+                      <option value="15">15 jours</option>
+                      <option value="30">30 jours</option>
+                      <option value="45">45 jours</option>
+                      <option value="60">60 jours</option>
+                    </select>
+                    <input
+                      type="date"
+                      value={meta.validityDate}
+                      onChange={(e) =>
+                        scheduleMetaSave({ validityDate: e.target.value })
+                      }
+                      className="rounded border border-slate-200 px-1.5 py-0.5 text-xs"
+                    />
+                  </>
+                ) : (
+                  <span className="font-medium text-slate-800">
                     {formatDisplayDate(quote.validityDate)}
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span>TVA :</span>
+                {canEdit ? (
+                  <select
+                    className="rounded border border-slate-200 px-1.5 py-0.5 text-xs"
+                    value={String(quote.defaultVatRate ?? 20)}
+                    onChange={(e) => {
+                      const rate = Number(e.target.value);
+                      void patchQuoteFields({ defaultVatRate: rate });
+                      const vatAlert = verifyAlerts.find((a) =>
+                        /tva/i.test(a.text),
+                      );
+                      if (vatAlert && !vatAlert.done) {
+                        void setAlertDone(vatAlert.text, true);
+                      }
+                    }}
+                  >
+                    <option value="5.5">5,5 %</option>
+                    <option value="10">10 %</option>
+                    <option value="20">20 %</option>
+                  </select>
+                ) : (
+                  <span className="font-medium text-slate-800">
+                    {quote.defaultVatRate ?? 20} %
                   </span>
                 )}
               </div>
@@ -1025,6 +1361,32 @@ export function QuoteEditor({
                 )}
               </div>
             </div>
+            {canEdit || quote.siteAddressSnapshot ? (
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                  Adresse d’intervention
+                </label>
+                {canEdit ? (
+                  <input
+                    defaultValue={quote.siteAddressSnapshot ?? ""}
+                    key={quote.siteAddressSnapshot ?? "site-empty"}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim();
+                      if (v === (quote.siteAddressSnapshot ?? "")) return;
+                      void patchQuoteFields({
+                        siteAddressSnapshot: v || null,
+                      });
+                    }}
+                    placeholder="Adresse chantier (peut différer du client)"
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs"
+                  />
+                ) : (
+                  <p className="mt-1 text-xs text-slate-700">
+                    {quote.siteAddressSnapshot || "—"}
+                  </p>
+                )}
+              </div>
+            ) : null}
           </div>
 
           {/* Lignes */}
@@ -1034,9 +1396,42 @@ export function QuoteEditor({
                 <p className="text-[10px] font-bold uppercase tracking-wide text-amber-900">
                   À vérifier avant envoi
                 </p>
-                <ul className="mt-1 space-y-0.5 text-xs text-amber-950">
+                <ul className="mt-1 space-y-1.5 text-xs text-amber-950">
                   {verifyAlerts.map((a) => (
-                    <li key={a}>{a.startsWith("⚠") ? a : `⚠ ${a}`}</li>
+                    <li
+                      key={a.text}
+                      className="flex flex-wrap items-center justify-between gap-2"
+                    >
+                      <span className={a.done ? "text-slate-500 line-through" : ""}>
+                        {a.done ? "✓" : "⚠"} {a.text}
+                      </span>
+                      <span className="flex gap-2">
+                        {!a.done ? (
+                          <button
+                            type="button"
+                            onClick={() => void setAlertDone(a.text, true)}
+                            className="font-semibold text-[#1e3a5f] underline-offset-2 hover:underline"
+                          >
+                            Marquer comme vérifié
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => void setAlertDone(a.text, false)}
+                            className="text-slate-500 underline-offset-2 hover:underline"
+                          >
+                            Réouvrir
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => void removeAlert(a.text)}
+                          className="text-red-700/80 underline-offset-2 hover:underline"
+                        >
+                          Supprimer
+                        </button>
+                      </span>
+                    </li>
                   ))}
                 </ul>
                 <p className="mt-1 text-[10px] text-amber-800/80">
@@ -1097,7 +1492,7 @@ export function QuoteEditor({
               </p>
             ) : (
               sections.map((sec) => {
-                const secLines = lines
+                const secLines = displayLines
                   .filter((l) => l.sectionId === sec.id)
                   .sort((a, b) => a.sortOrder - b.sortOrder);
                 return (
@@ -1137,6 +1532,7 @@ export function QuoteEditor({
                         key={line.id}
                         line={line}
                         canEdit={canEdit}
+                        onLiveNumeric={(p) => applyLineNumericDraft(line.id, p)}
                         onPatch={(p) => void patchLine(line.id, p)}
                         onDelete={() => void deleteLine(line.id)}
                         onDuplicate={() => void duplicateLine(line)}
@@ -1148,18 +1544,19 @@ export function QuoteEditor({
               })
             )}
 
-            {lines.some((l) => !l.sectionId) ? (
+            {displayLines.some((l) => !l.sectionId) ? (
               <div className="mb-3">
                 <div className="px-3 py-2 text-xs font-bold text-slate-500">
                   Sans chapitre
                 </div>
-                {lines
+                {displayLines
                   .filter((l) => !l.sectionId)
                   .map((line) => (
                     <LineRow
                       key={line.id}
                       line={line}
                       canEdit={canEdit}
+                      onLiveNumeric={(p) => applyLineNumericDraft(line.id, p)}
                       onPatch={(p) => void patchLine(line.id, p)}
                       onDelete={() => void deleteLine(line.id)}
                       onDuplicate={() => void duplicateLine(line)}
@@ -1217,7 +1614,7 @@ export function QuoteEditor({
 
             <QuotePaymentScheduleBlock
               schedule={meta.paymentScheduleJson}
-              totalTtc={quote.totalTtc}
+              totalTtc={liveTotals.totalTtc}
               canEdit={canEdit}
               onChange={(next) =>
                 scheduleMetaSave({ paymentScheduleJson: next })
@@ -1242,7 +1639,7 @@ export function QuoteEditor({
 
             <div>
               <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                Observations (client)
+                Description du projet / Notre préconisation (client)
               </label>
               <textarea
                 disabled={!canEdit}
@@ -1250,9 +1647,33 @@ export function QuoteEditor({
                 onChange={(e) =>
                   scheduleMetaSave({ clientNotes: e.target.value })
                 }
-                rows={2}
-                placeholder="Notes visibles sur le devis…"
+                rows={5}
+                placeholder="Description, préconisation, étapes, réserves visibles client…"
                 className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 disabled:bg-slate-50"
+              />
+              <p className="mt-1 text-[10px] text-slate-400">
+                Contenu susceptible d’apparaître sur le PDF client.
+              </p>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-bold uppercase tracking-wide text-amber-800/80">
+                Interne — non visible par le client
+              </label>
+              <textarea
+                disabled={!canEdit}
+                defaultValue={quote.internalNotes ?? ""}
+                key={`internal-${(quote.internalNotes ?? "").length}`}
+                onBlur={(e) => {
+                  const v = e.target.value;
+                  if (v === (quote.internalNotes ?? "")) return;
+                  void patchQuoteFields({
+                    internalNotes: v.trim() || null,
+                  });
+                }}
+                rows={4}
+                placeholder="Stratégie, risques, hypothèses, alertes…"
+                className="mt-1 w-full rounded-lg border border-amber-200 bg-amber-50/40 px-3 py-2 text-sm text-slate-800 disabled:bg-slate-50"
               />
             </div>
           </div>
@@ -1273,11 +1694,11 @@ export function QuoteEditor({
             </div>
 
             <div className="space-y-2 self-end">
-              <TotRow label="Total HT" value={`${fmtMoney(quote.totalSellHt)} €`} />
-              <TotRow label="TVA" value={`${fmtMoney(quote.totalVat)} €`} />
+              <TotRow label="Total HT" value={`${fmtMoney(liveTotals.totalSellHt)} €`} />
+              <TotRow label="TVA" value={`${fmtMoney(liveTotals.totalVat)} €`} />
               <TotRow
                 label="Total TTC"
-                value={`${fmtMoney(quote.totalTtc)} €`}
+                value={`${fmtMoney(liveTotals.totalTtc)} €`}
                 bold
               />
               <p className="pt-2 text-[10px] leading-relaxed text-slate-400">
@@ -1350,14 +1771,14 @@ export function QuoteEditor({
               </ul>
             ) : null}
             <div className="space-y-2">
-              <TotRow label="Déboursé" value={`${fmtMoney(quote.totalCostHt)} €`} />
-              <TotRow label="Marge" value={`${fmtMoney(quote.marginAmount)} €`} />
+              <TotRow label="Déboursé" value={`${fmtMoney(liveTotals.totalCostHt)} €`} />
+              <TotRow label="Marge" value={`${fmtMoney(liveTotals.marginAmount)} €`} />
               <TotRow
                 label="Taux de marque"
-                value={`${fmtMoney(quote.marginPercent)} %`}
+                value={`${fmtMoney(liveTotals.marginPercent)} %`}
               />
             </div>
-            {quote.marginPercent < minMarginPercent ? (
+            {liveTotals.marginPercent < minMarginPercent ? (
               <p className="mt-3 rounded-md bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900">
                 Taux de marque inférieur à votre objectif ({minMarginPercent} %)
               </p>
@@ -1478,6 +1899,43 @@ export function QuoteEditor({
             if (seq === mutationSeq.current) setSaveState("saved");
           });
         }}
+      />
+      <IssuerEditModal
+        open={issuerEditOpen}
+        onClose={() => setIssuerEditOpen(false)}
+        quoteId={quote.id}
+        currentIssuer={quote.issuerSnapshotJson}
+        onSaved={() => void refreshQuote()}
+      />
+      <ClientCoordsEditModal
+        open={clientCoordsOpen}
+        onClose={() => setClientCoordsOpen(false)}
+        quoteId={quote.id}
+        clientExternalOrgId={quote.clientExternalOrg?.id ?? null}
+        initial={{
+          name:
+            quote.clientExternalOrg?.tradeName ||
+            quote.clientExternalOrg?.name ||
+            clientSnap?.tradeName ||
+            clientSnap?.name ||
+            "",
+          email:
+            quote.clientExternalOrg?.email || clientSnap?.email || "",
+          phone:
+            quote.clientExternalOrg?.phone || clientSnap?.phone || "",
+          address:
+            quote.clientExternalOrg?.address ||
+            clientSnap?.addressLine1 ||
+            clientSnap?.address ||
+            "",
+          zipCode:
+            quote.clientExternalOrg?.zipCode ||
+            clientSnap?.postalCode ||
+            clientSnap?.zipCode ||
+            "",
+          city: quote.clientExternalOrg?.city || clientSnap?.city || "",
+        }}
+        onSaved={() => void refreshQuote()}
       />
       {compositionLine ? (
         <LineCompositionDrawer
@@ -1653,6 +2111,7 @@ function SectionTitleInput({
 function LineRow({
   line,
   canEdit,
+  onLiveNumeric,
   onPatch,
   onDelete,
   onDuplicate,
@@ -1660,6 +2119,11 @@ function LineRow({
 }: {
   line: Line;
   canEdit: boolean;
+  onLiveNumeric: (p: {
+    quantity?: number;
+    unitSellHt?: number;
+    vatRate?: number;
+  }) => void;
   onPatch: (p: Record<string, unknown>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
@@ -1668,10 +2132,7 @@ function LineRow({
   const [ref, setRef] = useState(line.reference ?? "");
   const [des, setDes] = useState(line.designation);
   const [desc, setDesc] = useState(line.description ?? "");
-  const [qty, setQty] = useState(String(line.quantity));
   const [unit, setUnit] = useState(line.unit);
-  const [pu, setPu] = useState(String(line.unitSellHt));
-  const [vat, setVat] = useState(String(line.vatRate));
   const hasComposition = Boolean(
     line.compositionSnapshotJson || line.commercialWorkItemId,
   );
@@ -1682,21 +2143,34 @@ function LineRow({
     setRef(line.reference ?? "");
     setDes(line.designation);
     setDesc(line.description ?? "");
-    setQty(String(line.quantity));
     setUnit(line.unit);
-    setPu(String(line.unitSellHt));
-    setVat(String(line.vatRate));
-  }, [line]);
+  }, [line.id, line.reference, line.designation, line.description, line.unit]);
 
-  function commit() {
+  function commitText() {
     onPatch({
       reference: ref.trim() || null,
       designation: des,
       description: desc.trim() || null,
-      quantity: Number(qty),
       unit,
-      unitSellHt: Number(pu),
-      vatRate: Number(vat),
+      quantity: line.quantity,
+      unitSellHt: line.unitSellHt,
+      vatRate: line.vatRate,
+    });
+  }
+
+  function commitNumeric(partial: {
+    quantity?: number;
+    unitSellHt?: number;
+    vatRate?: number;
+  }) {
+    onPatch({
+      reference: ref.trim() || null,
+      designation: des,
+      description: desc.trim() || null,
+      unit,
+      quantity: partial.quantity ?? line.quantity,
+      unitSellHt: partial.unitSellHt ?? line.unitSellHt,
+      vatRate: partial.vatRate ?? line.vatRate,
     });
   }
 
@@ -1715,7 +2189,6 @@ function LineRow({
               : ""
       }`}
     >
-      {/* Mobile card labels */}
       <div className="space-y-2 md:contents">
         <div className="md:contents">
           <div className="flex items-center gap-2 md:block">
@@ -1726,7 +2199,7 @@ function LineRow({
               disabled={!canEdit || line.kind === "COMMENT" || line.kind === "SUBTOTAL"}
               value={ref}
               onChange={(e) => setRef(e.target.value)}
-              onBlur={commit}
+              onBlur={commitText}
               className={inputClass}
               placeholder="—"
             />
@@ -1756,7 +2229,7 @@ function LineRow({
                   disabled={!canEdit}
                   value={des}
                   onChange={(e) => setDes(e.target.value)}
-                  onBlur={commit}
+                  onBlur={commitText}
                   className={inputClass}
                 />
                 {line.kind !== "COMMENT" && line.kind !== "SUBTOTAL" ? (
@@ -1764,7 +2237,7 @@ function LineRow({
                     disabled={!canEdit}
                     value={desc}
                     onChange={(e) => setDesc(e.target.value)}
-                    onBlur={commit}
+                    onBlur={commitText}
                     placeholder="Description"
                     className="w-full border-0 bg-transparent px-2 text-[11px] text-slate-500 outline-none placeholder:text-slate-300"
                   />
@@ -1784,19 +2257,20 @@ function LineRow({
         </div>
 
         {line.kind === "COMMENT" ? (
-          <div className="hidden md:block md:col-span-5" />
+          <div className="hidden md:col-span-5 md:block" />
         ) : (
           <>
             <div className="flex items-center gap-2 md:block">
               <span className="w-14 shrink-0 text-[10px] font-bold uppercase text-slate-400 md:hidden">
                 Qté
               </span>
-              <input
+              <FrenchDecimalInput
                 disabled={!canEdit || line.kind === "SUBTOTAL"}
-                value={qty}
-                onChange={(e) => setQty(e.target.value)}
-                onBlur={commit}
+                value={line.quantity}
+                maxFractionDigits={4}
                 className={`${inputClass} text-right`}
+                onLiveValue={(n) => onLiveNumeric({ quantity: n })}
+                onCommit={(n) => commitNumeric({ quantity: n })}
               />
             </div>
             <div className="flex items-center gap-2 md:block">
@@ -1807,7 +2281,7 @@ function LineRow({
                 disabled={!canEdit || line.kind === "SUBTOTAL"}
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                onBlur={commit}
+                onBlur={commitText}
                 className={inputClass}
               />
             </div>
@@ -1815,24 +2289,26 @@ function LineRow({
               <span className="w-14 shrink-0 text-[10px] font-bold uppercase text-slate-400 md:hidden">
                 PU HT
               </span>
-              <input
+              <FrenchDecimalInput
                 disabled={!canEdit || line.kind === "SUBTOTAL"}
-                value={pu}
-                onChange={(e) => setPu(e.target.value)}
-                onBlur={commit}
+                value={line.unitSellHt}
+                maxFractionDigits={4}
                 className={`${inputClass} text-right`}
+                onLiveValue={(n) => onLiveNumeric({ unitSellHt: n })}
+                onCommit={(n) => commitNumeric({ unitSellHt: n })}
               />
             </div>
             <div className="flex items-center gap-2 md:block">
               <span className="w-14 shrink-0 text-[10px] font-bold uppercase text-slate-400 md:hidden">
                 TVA %
               </span>
-              <input
+              <FrenchDecimalInput
                 disabled={!canEdit || line.kind === "SUBTOTAL"}
-                value={vat}
-                onChange={(e) => setVat(e.target.value)}
-                onBlur={commit}
+                value={line.vatRate}
+                maxFractionDigits={2}
                 className={`${inputClass} text-right`}
+                onLiveValue={(n) => onLiveNumeric({ vatRate: n })}
+                onCommit={(n) => commitNumeric({ vatRate: n })}
               />
             </div>
             <div className="flex items-center justify-between gap-2 md:justify-end md:pt-1.5">

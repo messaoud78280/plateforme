@@ -24,6 +24,7 @@ import { QuoteRetentionPanel } from "@/components/commercial/QuoteRetentionPanel
 import { QuoteDepositPanel } from "@/components/commercial/QuoteDepositPanel";
 import { QuoteProrataPanel } from "@/components/commercial/QuoteProrataPanel";
 import { LibraryPickerModal } from "@/components/commercial/LibraryPickerModal";
+import { ChatGptBundleImportModal } from "@/components/commercial/ChatGptBundleImportModal";
 import { LineCompositionDrawer } from "@/components/commercial/LineCompositionDrawer";
 import { QuotePriceCheckPanel } from "@/components/commercial/QuotePriceCheckPanel";
 import { QuoteStatusActions } from "@/components/commercial/QuoteStatusActions";
@@ -117,6 +118,7 @@ type QuoteDetail = {
   validityDate?: string | Date | null;
   paymentTerms?: string | null;
   clientNotes?: string | null;
+  internalNotes?: string | null;
   paymentScheduleJson?: PaymentSchedule | null;
   depositPercent?: number | null;
   issuerSnapshotJson?: IssuerSnapshot | null;
@@ -201,6 +203,9 @@ export function QuoteEditor({
   const [busyStatus, setBusyStatus] = useState(false);
   const [accepting, setAccepting] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [chatgptImportOpen, setChatgptImportOpen] = useState(false);
+  const [chatgptImportUndo, setChatgptImportUndo] = useState(false);
+  const [chatgptUndoBusy, setChatgptUndoBusy] = useState(false);
   const [librarySectionId, setLibrarySectionId] = useState<string | null>(null);
   const [compositionLine, setCompositionLine] = useState<Line | null>(null);
   const [priceCheckOpen, setPriceCheckOpen] = useState(false);
@@ -232,6 +237,18 @@ export function QuoteEditor({
 
   const version = quote.currentVersion;
   const lines = version?.lines ?? [];
+  const verifyAlerts = useMemo(() => {
+    const notes = quote.internalNotes ?? "";
+    const block = notes.match(
+      /=== À vérifier avant envoi ===([\s\S]*?)(?=\n===|\n<!--|$)/,
+    );
+    if (!block?.[1]) return [] as string[];
+    return block[1]
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.startsWith("⚠") || l.length > 2)
+      .slice(0, 8);
+  }, [quote.internalNotes]);
   const sections = useMemo(
     () => [...(version?.sections ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
     [version?.sections],
@@ -1012,6 +1029,56 @@ export function QuoteEditor({
 
           {/* Lignes */}
           <div className="px-2 py-2 sm:px-4">
+            {canEdit && verifyAlerts.length > 0 ? (
+              <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-2">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-amber-900">
+                  À vérifier avant envoi
+                </p>
+                <ul className="mt-1 space-y-0.5 text-xs text-amber-950">
+                  {verifyAlerts.map((a) => (
+                    <li key={a}>{a.startsWith("⚠") ? a : `⚠ ${a}`}</li>
+                  ))}
+                </ul>
+                <p className="mt-1 text-[10px] text-amber-800/80">
+                  Alertes internes — non reprises automatiquement sur le PDF.
+                </p>
+              </div>
+            ) : null}
+            {canEdit && chatgptImportUndo ? (
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2">
+                <p className="text-xs font-medium text-emerald-900">
+                  Dossier importé avec succès
+                </p>
+                <button
+                  type="button"
+                  disabled={chatgptUndoBusy}
+                  onClick={() => {
+                    void (async () => {
+                      setChatgptUndoBusy(true);
+                      try {
+                        const res = await fetch(
+                          `/api/commercial/quotes/${quote.id}/chatgpt-bundle/undo`,
+                          { method: "POST" },
+                        );
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || "Annulation impossible");
+                        setChatgptImportUndo(false);
+                        await refreshQuote();
+                      } catch (e) {
+                        setError(
+                          e instanceof Error ? e.message : "Annulation impossible",
+                        );
+                      } finally {
+                        setChatgptUndoBusy(false);
+                      }
+                    })();
+                  }}
+                  className="text-[11px] font-semibold text-[#1e3a5f] underline-offset-2 hover:underline disabled:opacity-50"
+                >
+                  {chatgptUndoBusy ? "Annulation…" : "Annuler le dernier import"}
+                </button>
+              </div>
+            ) : null}
             {/* En-tête table desktop */}
             <div className="mb-1 hidden grid-cols-[72px_minmax(0,1fr)_56px_48px_72px_48px_80px_56px] gap-1 border-b border-slate-100 px-2 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 md:grid">
               <div>Réf</div>
@@ -1104,7 +1171,7 @@ export function QuoteEditor({
 
             {canEdit ? (
               <div
-                className="relative px-2 py-3"
+                className="relative flex flex-wrap items-center gap-2 px-2 py-3"
                 ref={addMenuFor === "__footer__" ? addMenuRef : undefined}
               >
                 <button
@@ -1116,6 +1183,13 @@ export function QuoteEditor({
                   className="rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs font-semibold text-[#1d4ed8] hover:border-[#1e3a5f] hover:bg-slate-50"
                 >
                   + Ajouter
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setChatgptImportOpen(true)}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#1e3a5f] shadow-sm hover:bg-slate-50"
+                >
+                  ✨ Importer depuis ChatGPT
                 </button>
                 {addMenuFor === "__footer__" ? (
                   <AddMenu onSelect={runAddAction} />
@@ -1385,6 +1459,19 @@ export function QuoteEditor({
         open={libraryOpen}
         onClose={() => setLibraryOpen(false)}
         onAdded={() => {
+          const seq = ++mutationSeq.current;
+          void refreshQuote(seq).then(() => {
+            if (seq === mutationSeq.current) setSaveState("saved");
+          });
+        }}
+      />
+      <ChatGptBundleImportModal
+        quoteId={quote.id}
+        open={chatgptImportOpen}
+        hasExistingLines={lines.length > 0}
+        onClose={() => setChatgptImportOpen(false)}
+        onImported={({ canUndo }) => {
+          setChatgptImportUndo(canUndo);
           const seq = ++mutationSeq.current;
           void refreshQuote(seq).then(() => {
             if (seq === mutationSeq.current) setSaveState("saved");

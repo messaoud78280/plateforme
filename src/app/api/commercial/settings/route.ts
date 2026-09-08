@@ -32,6 +32,7 @@ function serializeSettings(s: Awaited<ReturnType<typeof ensureCommercialOrgSetti
     invoicePrefix: s.invoicePrefix,
     amendmentPrefix: s.amendmentPrefix,
     creditPrefix: s.creditPrefix,
+    nextQuoteSeq: s.nextQuoteSeq,
   };
 }
 
@@ -104,6 +105,16 @@ export async function PATCH(req: Request) {
       invoicePrefix: strRequired(body.invoicePrefix),
       amendmentPrefix: strRequired(body.amendmentPrefix),
       creditPrefix: strRequired(body.creditPrefix),
+      nextQuoteSeq:
+        body.nextQuoteSeq !== undefined
+          ? (() => {
+              const n = Number(body.nextQuoteSeq);
+              if (!Number.isInteger(n) || n < 1) {
+                throw new Error("Le prochain numéro de devis doit être un entier ≥ 1");
+              }
+              return n;
+            })()
+          : undefined,
     });
     return NextResponse.json({ settings: serializeSettings(settings) });
   } catch (e) {

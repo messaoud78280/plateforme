@@ -52,6 +52,7 @@ export default async function ParametresCommerciauxPage() {
           invoicePrefix: s.invoicePrefix,
           amendmentPrefix: s.amendmentPrefix,
           creditPrefix: s.creditPrefix,
+          nextQuoteSeq: s.nextQuoteSeq,
         }}
       />
     </div>

@@ -3,7 +3,11 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { calculateDocumentTotals, calculateLine, roundMoney } from "@/lib/commercial/money";
 import { d } from "@/lib/commercial/decimal";
-import { ensureCommercialOrgSettings, nextQuoteNumber } from "@/lib/commercial/settings";
+import {
+  assertQuoteNumberAvailable,
+  ensureCommercialOrgSettings,
+  nextQuoteNumber,
+} from "@/lib/commercial/settings";
 import {
   normalizeScheduleForStorage,
   parsePaymentSchedule,
@@ -594,6 +598,8 @@ export async function updateQuoteMeta(
   id: string,
   data: {
     subject?: string;
+    number?: string;
+    forceNumberChange?: boolean;
     clientExternalOrgId?: string | null;
     projectId?: string | null;
     responsibleId?: string | null;
@@ -613,12 +619,33 @@ export async function updateQuoteMeta(
 ) {
   const quote = await prisma.commercialQuote.findFirst({
     where: { id, organizationId: orgId },
-    select: { id: true, status: true, currentVersionId: true },
+    select: { id: true, status: true, currentVersionId: true, number: true },
   });
   if (!quote) throw new Error("Devis introuvable");
 
-  const guard = assertQuoteMetaUpdateAllowed(quote.status, data as Record<string, unknown>);
+  const { forceNumberChange, number: numberRaw, ...metaRest } = data;
+  const guard = assertQuoteMetaUpdateAllowed(
+    quote.status,
+    metaRest as Record<string, unknown>,
+  );
   if (!guard.ok) throw new Error(guard.error);
+
+  let nextNumber: string | undefined;
+  if (numberRaw !== undefined) {
+    nextNumber = String(numberRaw).trim().toUpperCase();
+    if (!nextNumber) throw new Error("Référence de devis invalide");
+    if (nextNumber !== quote.number) {
+      const locked = META_LOCKED_STATUSES.includes(quote.status);
+      if (locked && !forceNumberChange) {
+        throw new Error(
+          "Devis finalisé — confirmez explicitement le changement de référence",
+        );
+      }
+      await assertQuoteNumberAvailable(orgId, nextNumber, id);
+    } else {
+      nextNumber = undefined;
+    }
+  }
 
   let scheduleNorm: PaymentSchedule | null | undefined;
   if (data.paymentScheduleJson !== undefined) {
@@ -658,6 +685,7 @@ export async function updateQuoteMeta(
   const updated = await prisma.commercialQuote.update({
     where: { id },
     data: {
+      ...(nextNumber !== undefined ? { number: nextNumber } : {}),
       ...(data.subject !== undefined ? { subject: data.subject.trim() } : {}),
       ...(data.clientExternalOrgId !== undefined
         ? {

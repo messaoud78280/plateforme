@@ -36,6 +36,7 @@ export type CommercialSettingsFormValues = {
   invoicePrefix: string;
   amendmentPrefix: string;
   creditPrefix: string;
+  nextQuoteSeq: number;
 };
 
 function Field({
@@ -201,11 +202,29 @@ export function SettingsForm({ initial }: { initial: CommercialSettingsFormValue
       <section className="rounded-xl border border-slate-200 bg-white p-4 space-y-3">
         <h2 className="text-sm font-bold text-slate-900">Numérotation</h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Préfixe devis">
+          <Field
+            label="Préfixe devis"
+            hint="Format : PREFIXE-ANNÉE-0000 (ex. DEV-2026-0148). Préfixe modifiable ; le reste suit le compteur."
+          >
             <input
               className={inputCls}
               value={form.quotePrefix}
               onChange={(e) => set("quotePrefix", e.target.value)}
+            />
+          </Field>
+          <Field
+            label="Prochain numéro de devis"
+            hint={`Aperçu : ${(form.quotePrefix || "DEV").trim() || "DEV"}-${new Date().getFullYear()}-${String(form.nextQuoteSeq || 1).padStart(4, "0")} — alloué à la création du prochain devis. Ne renumérote pas les devis déjà créés.`}
+          >
+            <input
+              type="number"
+              min={1}
+              step={1}
+              className={inputCls}
+              value={form.nextQuoteSeq}
+              onChange={(e) =>
+                set("nextQuoteSeq", Math.max(1, Math.floor(Number(e.target.value) || 1)))
+              }
             />
           </Field>
           <Field label="Préfixe facture">
@@ -238,6 +257,13 @@ export function SettingsForm({ initial }: { initial: CommercialSettingsFormValue
             />
           </Field>
         </div>
+        <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+          Prochain devis :{" "}
+          <span className="font-bold text-[#1e3a5f]">
+            {(form.quotePrefix || "DEV").trim() || "DEV"}-{new Date().getFullYear()}-
+            {String(form.nextQuoteSeq || 1).padStart(4, "0")}
+          </span>
+        </p>
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-4 space-y-3">

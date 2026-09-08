@@ -1243,12 +1243,62 @@ export function QuoteEditor({
             </div>
 
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-slate-600">
-              <p>
-                <span className="font-semibold text-slate-800">{quote.number}</span>
-                {" — "}
-                <span className="font-bold text-[#1e3a5f]">
-                  V{version?.versionNumber ?? 1}
-                </span>
+              <p className="flex flex-wrap items-center gap-1.5">
+                {canEdit ? (
+                  <input
+                    defaultValue={quote.number}
+                    key={quote.number}
+                    onBlur={(e) => {
+                      const next = e.target.value.trim().toUpperCase();
+                      if (!next || next === quote.number) {
+                        e.target.value = quote.number;
+                        return;
+                      }
+                      void patchQuoteFields({ number: next });
+                    }}
+                    className="w-[11.5rem] rounded border border-slate-200 px-1.5 py-0.5 font-semibold text-slate-800"
+                    title="Référence devis (brouillon)"
+                    aria-label="Référence devis"
+                  />
+                ) : (
+                  <>
+                    <span className="font-semibold text-slate-800">{quote.number}</span>
+                    <button
+                      type="button"
+                      className="text-[10px] font-semibold text-[#1e3a5f] underline-offset-2 hover:underline"
+                      onClick={() => {
+                        const next = window.prompt(
+                          "Nouvelle référence devis (confirmation requise — devis finalisé) :",
+                          quote.number,
+                        );
+                        if (!next) return;
+                        const trimmed = next.trim().toUpperCase();
+                        if (!trimmed || trimmed === quote.number) return;
+                        if (
+                          !window.confirm(
+                            `Confirmer le changement de référence\n${quote.number} → ${trimmed} ?\nLes anciens PDF/clients peuvent encore afficher l’ancienne référence.`,
+                          )
+                        ) {
+                          return;
+                        }
+                        void patchQuoteFields({
+                          number: trimmed,
+                          forceNumberChange: true,
+                        });
+                      }}
+                    >
+                      Modifier
+                    </button>
+                  </>
+                )}
+                {(version?.versionNumber ?? 1) > 1 ? (
+                  <>
+                    {" — "}
+                    <span className="font-bold text-[#1e3a5f]">
+                      R{(version?.versionNumber ?? 1) - 1}
+                    </span>
+                  </>
+                ) : null}
                 {version?.lockState && version.lockState !== "DRAFT"
                   ? ` · ${version.lockState === "ACCEPTED_SNAPSHOT" ? "figée" : "verrouillée"}`
                   : ""}

@@ -263,8 +263,10 @@ export function generateQuotePdfBuffer(input: QuotePdfInput): Buffer {
     startNewPage();
   };
 
-  const versionSuffix =
-    input.versionNumber != null ? ` — V${input.versionNumber}` : "";
+  const displayNumber =
+    input.versionNumber != null && input.versionNumber > 1
+      ? `${input.number}-R${input.versionNumber - 1}`
+      : input.number;
 
   function drawContinuationHeader() {
     doc.setFont("helvetica", "bold");
@@ -274,7 +276,7 @@ export function generateQuotePdfBuffer(input: QuotePdfInput): Buffer {
     if (issuerName) doc.text(issuerName, MARGIN, y + 3.5);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...SLATE);
-    doc.text(`Devis ${input.number}${versionSuffix}`, pageW - MARGIN, y + 3.5, {
+    doc.text(`Devis ${displayNumber}`, pageW - MARGIN, y + 3.5, {
       align: "right",
     });
     doc.setDrawColor(...RULE);
@@ -309,19 +311,13 @@ export function generateQuotePdfBuffer(input: QuotePdfInput): Buffer {
   doc.setTextColor(...brand);
   doc.text("DEVIS", pageW - MARGIN, MARGIN + 7, { align: "right" });
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
+  doc.setFontSize(11);
   doc.setTextColor(...INK);
-  doc.text(input.number, pageW - MARGIN, MARGIN + 14, { align: "right" });
+  doc.text(displayNumber, pageW - MARGIN, MARGIN + 14, { align: "right" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(FS.small);
   doc.setTextColor(...SLATE);
-  let ry = MARGIN + 18.5;
-  if (input.versionNumber != null) {
-    doc.text(`Version V${input.versionNumber}`, pageW - MARGIN, ry, {
-      align: "right",
-    });
-    ry += 3.8;
-  }
+  let ry = MARGIN + 19;
   doc.text(fmtDateLong(input.issueDate), pageW - MARGIN, ry, { align: "right" });
   ry += 3.8;
   if (input.validityDate) {

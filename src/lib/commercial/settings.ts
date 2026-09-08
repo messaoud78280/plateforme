@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { formatQuoteNumber } from "@/lib/commercial/quote-number";
 
 type Tx = Prisma.TransactionClient;
 
@@ -11,10 +12,6 @@ export async function ensureCommercialOrgSettings(orgId: string) {
   });
 }
 
-function padSeq(n: number): string {
-  return String(n).padStart(4, "0");
-}
-
 export async function nextQuoteNumber(orgId: string, tx?: Tx): Promise<string> {
   const db = tx ?? prisma;
   const settings = await db.commercialOrgSettings.upsert({
@@ -22,13 +19,25 @@ export async function nextQuoteNumber(orgId: string, tx?: Tx): Promise<string> {
     create: { organizationId: orgId },
     update: {},
   });
-  const seq = settings.nextQuoteSeq;
-  await db.commercialOrgSettings.update({
-    where: { organizationId: orgId },
-    data: { nextQuoteSeq: seq + 1 },
-  });
   const year = new Date().getFullYear();
-  return `${settings.quotePrefix}-${year}-${padSeq(seq)}`;
+  let seq = settings.nextQuoteSeq;
+
+  for (let attempt = 0; attempt < 1000; attempt++) {
+    const candidate = formatQuoteNumber(settings.quotePrefix, seq, year);
+    const existing = await db.commercialQuote.findFirst({
+      where: { organizationId: orgId, number: candidate },
+      select: { id: true },
+    });
+    if (!existing) {
+      await db.commercialOrgSettings.update({
+        where: { organizationId: orgId },
+        data: { nextQuoteSeq: seq + 1 },
+      });
+      return candidate;
+    }
+    seq += 1;
+  }
+  throw new Error("Impossible d'allouer un numéro de devis unique");
 }
 
 export async function nextInvoiceNumber(orgId: string, tx?: Tx): Promise<string> {
@@ -44,7 +53,7 @@ export async function nextInvoiceNumber(orgId: string, tx?: Tx): Promise<string>
     data: { nextInvoiceSeq: seq + 1 },
   });
   const year = new Date().getFullYear();
-  return `${settings.invoicePrefix}-${year}-${padSeq(seq)}`;
+  return formatQuoteNumber(settings.invoicePrefix, seq, year);
 }
 
 export async function nextAmendmentNumber(orgId: string, tx?: Tx): Promise<string> {
@@ -60,7 +69,27 @@ export async function nextAmendmentNumber(orgId: string, tx?: Tx): Promise<strin
     data: { nextAmendmentSeq: seq + 1 },
   });
   const year = new Date().getFullYear();
-  return `${settings.amendmentPrefix}-${year}-${padSeq(seq)}`;
+  return formatQuoteNumber(settings.amendmentPrefix, seq, year);
+}
+
+async function assertQuoteNumberAvailable(
+  orgId: string,
+  number: string,
+  excludeQuoteId?: string,
+) {
+  const clash = await prisma.commercialQuote.findFirst({
+    where: {
+      organizationId: orgId,
+      number,
+      ...(excludeQuoteId ? { NOT: { id: excludeQuoteId } } : {}),
+    },
+    select: { id: true, number: true },
+  });
+  if (clash) {
+    throw new Error(
+      `La référence ${number} est déjà utilisée sur un autre devis de cette organisation`,
+    );
+  }
 }
 
 export async function updateCommercialOrgSettings(
@@ -87,9 +116,21 @@ export async function updateCommercialOrgSettings(
     invoicePrefix?: string;
     amendmentPrefix?: string;
     creditPrefix?: string;
+    nextQuoteSeq?: number;
   },
 ) {
-  await ensureCommercialOrgSettings(orgId);
+  const current = await ensureCommercialOrgSettings(orgId);
+
+  if (data.nextQuoteSeq !== undefined) {
+    if (!Number.isInteger(data.nextQuoteSeq) || data.nextQuoteSeq < 1) {
+      throw new Error("Le prochain numéro de devis doit être un entier ≥ 1");
+    }
+    const prefix = (data.quotePrefix ?? current.quotePrefix).trim() || "DEV";
+    const year = new Date().getFullYear();
+    const preview = formatQuoteNumber(prefix, data.nextQuoteSeq, year);
+    await assertQuoteNumberAvailable(orgId, preview);
+  }
+
   return prisma.commercialOrgSettings.update({
     where: { organizationId: orgId },
     data: {
@@ -135,6 +176,9 @@ export async function updateCommercialOrgSettings(
       ...(data.invoicePrefix !== undefined ? { invoicePrefix: data.invoicePrefix } : {}),
       ...(data.amendmentPrefix !== undefined ? { amendmentPrefix: data.amendmentPrefix } : {}),
       ...(data.creditPrefix !== undefined ? { creditPrefix: data.creditPrefix } : {}),
+      ...(data.nextQuoteSeq !== undefined ? { nextQuoteSeq: data.nextQuoteSeq } : {}),
     },
   });
 }
+
+export { assertQuoteNumberAvailable };

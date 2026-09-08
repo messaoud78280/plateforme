@@ -38,6 +38,9 @@ export async function PATCH(req: Request, ctx: Ctx) {
 
     const quote = await updateQuoteMeta(auth.orgId, id, {
       subject: body.subject !== undefined ? String(body.subject) : undefined,
+      number: body.number !== undefined ? String(body.number) : undefined,
+      forceNumberChange:
+        body.forceNumberChange === true || body.forceNumberChange === "true",
       clientExternalOrgId:
         body.clientExternalOrgId !== undefined
           ? body.clientExternalOrgId

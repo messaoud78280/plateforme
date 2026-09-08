@@ -120,7 +120,8 @@ function siteAddressLabel(bundle: BeworkQuoteBundleV1): string | null {
 
 export async function buildBundleImportPreview(opts: {
   orgId: string;
-  quoteId: string;
+  /** Absent = dry-run avant création d’un nouveau devis. */
+  quoteId?: string | null;
   bundle: BeworkQuoteBundleV1;
   fingerprint: string;
   parseWarnings: string[];
@@ -129,13 +130,16 @@ export async function buildBundleImportPreview(opts: {
   const customer = toImportedCustomer(bundle, null);
   const matches = await matchClientsInOrganization(opts.orgId, customer);
 
-  const quote = await prisma.commercialQuote.findFirst({
-    where: { id: opts.quoteId, organizationId: opts.orgId },
-    select: { internalNotes: true, projectId: true },
-  });
-  const alreadyImported = Boolean(
-    quote?.internalNotes?.includes(`chatgptBundleHash:${fingerprint}`),
-  );
+  let alreadyImported = false;
+  if (opts.quoteId) {
+    const quote = await prisma.commercialQuote.findFirst({
+      where: { id: opts.quoteId, organizationId: opts.orgId },
+      select: { internalNotes: true },
+    });
+    alreadyImported = Boolean(
+      quote?.internalNotes?.includes(`chatgptBundleHash:${fingerprint}`),
+    );
+  }
 
   const city = bundle.site.sameAsClientAddress
     ? bundle.client.address.city
@@ -449,6 +453,117 @@ export async function commitBundleIntoQuote(opts: {
     createdLineIds,
     createdSectionIds,
     href: `/dashboard/devis-facturation/devis/${opts.quoteId}`,
+  };
+}
+
+/**
+ * Nouveau devis depuis un bundle : createQuote (moteur existant) puis commitBundleIntoQuote.
+ */
+export async function createQuoteFromChatgptBundle(opts: {
+  orgId: string;
+  userId: string;
+  bundle: BeworkQuoteBundleV1;
+  fingerprint: string;
+  selection: BundleImportSelection;
+}): Promise<{
+  ok: true;
+  quoteId: string;
+  quoteNumber: string;
+  batchId: string;
+  createdLineIds: string[];
+  createdSectionIds: string[];
+  href: string;
+}> {
+  const { createQuote } = await import("@/lib/commercial/quotes");
+  const { bundle, selection } = opts;
+
+  const subject =
+    bundle.quote.title?.trim() ||
+    bundle.site.projectType?.trim() ||
+    "Devis import ChatGPT";
+
+  const validityDate =
+    bundle.quote.validityDays != null
+      ? new Date(Date.now() + bundle.quote.validityDays * 86_400_000)
+      : null;
+
+  const siteAddr = selection.importSite
+    ? (() => {
+        const addr = bundle.site.sameAsClientAddress
+          ? bundle.client.address
+          : bundle.site.address ?? bundle.client.address;
+        return (
+          [addr.line1, [addr.postalCode, addr.city].filter(Boolean).join(" ")]
+            .filter(Boolean)
+            .join(", ") || null
+        );
+      })()
+    : null;
+
+  // Client résolu avant create pour éviter un devis orphelin puis rattachement flou
+  let clientId = selection.clientExternalOrgId;
+  if (selection.importClient && !clientId && selection.createClientIfMissing) {
+    const customer = toImportedCustomer(bundle, selection.primaryEmailOverride);
+    if (customer.name) {
+      const created = await createCommercialClientFromImport({
+        orgId: opts.orgId,
+        customer,
+      });
+      clientId = created.id;
+      const secondaryEmails = bundle.client.emails
+        .map((e) => e.email)
+        .filter((e) => e && e !== customer.email);
+      if (secondaryEmails.length) {
+        await prisma.externalOrganization.update({
+          where: { id: created.id },
+          data: {
+            notes: [
+              "Emails complémentaires (import ChatGPT) :",
+              ...secondaryEmails,
+            ].join("\n"),
+          },
+        });
+      }
+    }
+  }
+
+  const quote = await createQuote({
+    orgId: opts.orgId,
+    userId: opts.userId,
+    subject,
+    clientExternalOrgId: selection.importClient ? clientId : null,
+    projectId: selection.importSite ? selection.projectId : null,
+    siteAddressSnapshot: siteAddr,
+    validityDate,
+  });
+
+  // Sur devis neuf : REPLACE pour retirer la section vide « Ouvrages » par défaut
+  const commitSelection: BundleImportSelection = {
+    ...selection,
+    pricingMode: selection.importPricing ? "REPLACE" : selection.pricingMode,
+    // Client déjà créé / rattaché
+    clientExternalOrgId: clientId,
+    createClientIfMissing: false,
+    forceDuplicate: true,
+  };
+
+  const committed = await commitBundleIntoQuote({
+    orgId: opts.orgId,
+    userId: opts.userId,
+    quoteId: quote.id,
+    bundle,
+    fingerprint: opts.fingerprint,
+    selection: commitSelection,
+  });
+
+  return {
+    ok: true,
+    quoteId: quote.id,
+    quoteNumber: quote.number,
+    batchId: committed.batchId,
+    createdLineIds: committed.createdLineIds,
+    createdSectionIds: committed.createdSectionIds,
+    href: committed.href,
   };
 }
 

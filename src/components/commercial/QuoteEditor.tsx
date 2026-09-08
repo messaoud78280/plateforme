@@ -1466,6 +1466,7 @@ export function QuoteEditor({
         }}
       />
       <ChatGptBundleImportModal
+        mode="into-quote"
         quoteId={quote.id}
         open={chatgptImportOpen}
         hasExistingLines={lines.length > 0}

@@ -14,6 +14,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { Drawer } from "@/components/ui/Drawer";
+import { ChatGptBundleImportModal } from "@/components/commercial/ChatGptBundleImportModal";
 import { cn } from "@/lib/cn";
 
 export type QuoteClientOpt = {
@@ -183,6 +184,7 @@ export function CreateQuoteForm({
   const [moreOpen, setMoreOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [chatgptImportOpen, setChatgptImportOpen] = useState(false);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [newClientBusy, setNewClientBusy] = useState(false);
@@ -391,19 +393,36 @@ export function CreateQuoteForm({
       </div>
 
       <header className="overflow-hidden rounded-2xl bw-surface-tinted-cyan px-5 py-5 shadow-[var(--cc-shadow)] sm:px-6 sm:py-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-bework-cyan">
-          Devis & Facturation
-        </p>
-        <h1 className="mt-1 text-[1.75rem] font-semibold tracking-tight text-bework-navy sm:text-[1.9rem]">
-          Nouveau devis
-        </h1>
-        <p className="mt-1.5 max-w-2xl text-[0.9375rem] leading-relaxed text-bework-muted">
-          Préparez les informations commerciales avant de passer au chiffrage.
-        </p>
-        <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-[12px] font-semibold text-bework-navy ring-1 ring-bework-cyan/20">
-          <Sparkles className="h-3.5 w-3.5 text-bework-cyan" />
-          Étape suivante : Chiffrage
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-bework-cyan">
+              Devis & Facturation
+            </p>
+            <h1 className="mt-1 text-[1.75rem] font-semibold tracking-tight text-bework-navy sm:text-[1.9rem]">
+              Nouveau devis
+            </h1>
+            <p className="mt-1.5 max-w-2xl text-[0.9375rem] leading-relaxed text-bework-muted">
+              Préparez les informations commerciales avant de passer au chiffrage.
+            </p>
+            <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-[12px] font-semibold text-bework-navy ring-1 ring-bework-cyan/20">
+              <Sparkles className="h-3.5 w-3.5 text-bework-cyan" />
+              Étape suivante : Chiffrage
+            </p>
+          </div>
+          <div className="w-full max-w-xs shrink-0 rounded-xl border border-bework-navy/10 bg-white/80 p-3 shadow-sm sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setChatgptImportOpen(true)}
+              className="w-full rounded-lg bg-[#1e3a5f] px-3 py-2.5 text-sm font-semibold text-white hover:bg-[#162d4a]"
+            >
+              ✨ Importer depuis ChatGPT
+            </button>
+            <p className="mt-2 text-[11px] leading-snug text-bework-muted">
+              Vous avez préparé le dossier avec ChatGPT ? Importez-le sans
+              ressaisie.
+            </p>
+          </div>
+        </div>
       </header>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.95fr)] lg:items-start">
@@ -972,6 +991,21 @@ export function CreateQuoteForm({
           </p>
         </div>
       </Drawer>
+
+      <ChatGptBundleImportModal
+        mode="create-quote"
+        open={chatgptImportOpen}
+        onClose={() => setChatgptImportOpen(false)}
+        onImported={({ href, quoteId }) => {
+          const target =
+            href ||
+            (quoteId ? `/dashboard/devis-facturation/devis/${quoteId}` : null);
+          if (target) {
+            router.push(target);
+            router.refresh();
+          }
+        }}
+      />
     </div>
   );
 }

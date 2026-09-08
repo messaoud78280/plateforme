@@ -18,22 +18,40 @@ function fmtMoney(n: number) {
 type ParseError = { path: string; message: string };
 
 type Props = {
-  quoteId: string;
+  /** into-quote = devis existant ; create-quote = page Nouveau devis */
+  mode?: "into-quote" | "create-quote";
+  quoteId?: string | null;
   open: boolean;
-  hasExistingLines: boolean;
+  hasExistingLines?: boolean;
   onClose: () => void;
-  onImported: (info: { canUndo: boolean }) => void;
+  onImported: (info: {
+    canUndo: boolean;
+    quoteId?: string;
+    href?: string;
+  }) => void;
 };
 
 type Step = "paste" | "preview";
 
 export function ChatGptBundleImportModal({
-  quoteId,
+  mode = "into-quote",
+  quoteId = null,
   open,
-  hasExistingLines,
+  hasExistingLines = false,
   onClose,
   onImported,
 }: Props) {
+  const isCreate = mode === "create-quote";
+  const parseUrl = isCreate
+    ? "/api/commercial/quotes/chatgpt-bundle/parse"
+    : `/api/commercial/quotes/${quoteId}/chatgpt-bundle/parse`;
+  const commitUrl = isCreate
+    ? "/api/commercial/quotes/chatgpt-bundle/commit"
+    : `/api/commercial/quotes/${quoteId}/chatgpt-bundle/commit`;
+  const mediaUrl =
+    !isCreate && quoteId
+      ? `/api/commercial/quotes/${quoteId}/chatgpt-bundle/media`
+      : null;
   const [step, setStep] = useState<Step>("paste");
   const [rawText, setRawText] = useState("");
   const [helpOpen, setHelpOpen] = useState(false);
@@ -89,14 +107,11 @@ export function ChatGptBundleImportModal({
     setErrors([]);
     setErrorBanner(null);
     try {
-      const res = await fetch(
-        `/api/commercial/quotes/${quoteId}/chatgpt-bundle/parse`,
-        {
+      const res = await fetch(parseUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rawText }),
-        },
-      );
+        });
       const data = await res.json();
       if (!res.ok || !data.ok) {
         setErrorBanner(data.error || "Le dossier n’a pas pu être interprété.");
@@ -169,15 +184,18 @@ export function ChatGptBundleImportModal({
   }, [bundle]);
 
   async function uploadMedia(key: string, file: File) {
+    if (!mediaUrl) {
+      setErrorBanner(
+        "Associez les images après création du devis (dans le chiffrage).",
+      );
+      return;
+    }
     setMediaBusyKey(key);
     try {
       const fd = new FormData();
       fd.set("key", key);
       fd.set("file", file);
-      const res = await fetch(
-        `/api/commercial/quotes/${quoteId}/chatgpt-bundle/media`,
-        { method: "POST", body: fd },
-      );
+      const res = await fetch(mediaUrl, { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Upload échoué");
       setBundle((cur) => {
@@ -204,7 +222,7 @@ export function ChatGptBundleImportModal({
 
   async function commit() {
     if (!bundle || !fingerprint) return;
-    if (preview?.alreadyImported && !forceDuplicate) {
+    if (!isCreate && preview?.alreadyImported && !forceDuplicate) {
       setErrorBanner(
         "Ce dossier semble avoir déjà été importé. Confirmez « Importer quand même ».",
       );
@@ -215,32 +233,33 @@ export function ChatGptBundleImportModal({
     try {
       const selection: BundleImportSelection = {
         ...sel,
-        pricingMode,
+        pricingMode: isCreate ? "REPLACE" : pricingMode,
         clientExternalOrgId:
           sel.importClient && clientChoice === "match" ? matchedClientId : null,
         createClientIfMissing: sel.importClient && clientChoice === "new",
         primaryEmailOverride: primaryEmail,
         projectId: sel.importSite ? projectId : null,
-        forceDuplicate,
+        forceDuplicate: isCreate ? true : forceDuplicate,
       };
-      const res = await fetch(
-        `/api/commercial/quotes/${quoteId}/chatgpt-bundle/commit`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            bundle,
-            originalFingerprint: fingerprint,
-            selection,
-          }),
-        },
-      );
+      const res = await fetch(commitUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bundle,
+          originalFingerprint: fingerprint,
+          selection,
+        }),
+      });
       const data = await res.json();
       if (!res.ok || !data.ok) {
         setErrorBanner(data.error || "Échec de l’import");
         return;
       }
-      onImported({ canUndo: Boolean(data.createdLineIds?.length) });
+      onImported({
+        canUndo: Boolean(data.createdLineIds?.length),
+        quoteId: data.quoteId as string | undefined,
+        href: data.href as string | undefined,
+      });
       onClose();
     } catch {
       setErrorBanner("Échec de l’import");
@@ -331,6 +350,36 @@ export function ChatGptBundleImportModal({
               <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
                 Dossier détecté
               </p>
+
+              {bundle.quote.title || bundle.quote.description ? (
+                <section className="rounded-xl border border-slate-200 bg-white p-3">
+                  <p className="text-xs font-bold uppercase tracking-wide text-[#1e3a5f]">
+                    Devis
+                  </p>
+                  {bundle.quote.title ? (
+                    <p className="mt-1 font-semibold text-slate-900">
+                      {bundle.quote.title}
+                    </p>
+                  ) : null}
+                  {bundle.quote.description ? (
+                    <p className="mt-1 text-xs text-slate-600">
+                      {bundle.quote.description}
+                    </p>
+                  ) : null}
+                  <p className="mt-2 text-[11px] text-slate-500">
+                    {bundle.quote.validityDays != null
+                      ? `Validité : ${bundle.quote.validityDays} jours`
+                      : "Validité : à préciser"}
+                    {bundle.quote.vatSuggestedRate != null
+                      ? ` · TVA proposée : ${bundle.quote.vatSuggestedRate} %${
+                          bundle.quote.vatRequiresConfirmation
+                            ? " (à confirmer)"
+                            : ""
+                        }`
+                      : ""}
+                  </p>
+                </section>
+              ) : null}
 
               {preview.alreadyImported ? (
                 <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
@@ -486,7 +535,7 @@ export function ChatGptBundleImportModal({
                     {preview.vatRequiresConfirmation ? " — à confirmer" : ""}
                   </p>
                 ) : null}
-                {hasExistingLines && sel.importPricing ? (
+                {hasExistingLines && !isCreate && sel.importPricing ? (
                   <div className="mt-2 flex flex-wrap gap-2">
                     <button
                       type="button"
@@ -679,13 +728,22 @@ export function ChatGptBundleImportModal({
                   setSel((s) => ({ ...s, importMediaManifest: v }))
                 }
               >
+                {isCreate ? (
+                  <p className="mb-2 text-[11px] text-slate-500">
+                    Emplacements prévus — associez les images après création du
+                    devis (chiffrage → Importer depuis ChatGPT ou zone médias).
+                  </p>
+                ) : null}
                 <div className="space-y-2">
                   {bundle.mediaManifest.map((m) => (
                     <div
                       key={m.key}
                       className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2"
-                      onDragOver={(e) => e.preventDefault()}
+                      onDragOver={(e) => {
+                        if (!isCreate) e.preventDefault();
+                      }}
                       onDrop={(e) => {
+                        if (isCreate) return;
                         e.preventDefault();
                         const f = e.dataTransfer.files?.[0];
                         if (f) void uploadMedia(m.key, f);
@@ -700,11 +758,12 @@ export function ChatGptBundleImportModal({
                             "Illustration non contractuelle — aperçu indicatif."}
                         </p>
                       ) : null}
-                      {m.fileName ? (
+                      {!isCreate && m.fileName ? (
                         <p className="mt-1 text-[11px] text-emerald-700">
                           Associé : {m.fileName}
                         </p>
-                      ) : (
+                      ) : null}
+                      {!isCreate && !m.fileName ? (
                         <label className="mt-2 inline-flex cursor-pointer rounded-md bg-white px-2.5 py-1 text-[11px] font-semibold text-[#1e3a5f] ring-1 ring-slate-200">
                           {mediaBusyKey === m.key
                             ? "Envoi…"
@@ -720,7 +779,7 @@ export function ChatGptBundleImportModal({
                             }}
                           />
                         </label>
-                      )}
+                      ) : null}
                     </div>
                   ))}
                 </div>
@@ -767,7 +826,13 @@ export function ChatGptBundleImportModal({
                 onClick={() => void commit()}
                 className="rounded-lg bg-[#1e3a5f] px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
               >
-                {busy ? "Import…" : "Importer le dossier"}
+                {busy
+                  ? isCreate
+                    ? "Création…"
+                    : "Import…"
+                  : isCreate
+                    ? "Créer le devis avec ces informations"
+                    : "Importer le dossier"}
               </button>
             )}
           </div>

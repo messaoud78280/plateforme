@@ -7,6 +7,7 @@ export { parseBeworkQuoteBundle } from "@/lib/commercial/chatgpt-bundle/parse";
 export {
   buildBundleImportPreview,
   commitBundleIntoQuote,
+  createQuoteFromChatgptBundle,
   undoLastChatgptImport,
   type BundleImportPreview,
   type BundleImportSelection,

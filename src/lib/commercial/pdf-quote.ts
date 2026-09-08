@@ -38,9 +38,14 @@ import {
 export type QuotePdfSnapshot = {
   name?: string | null;
   tradeName?: string | null;
+  activity?: string | null;
   siret?: string | null;
+  siren?: string | null;
   vatNumber?: string | null;
+  apeCode?: string | null;
+  apeLabel?: string | null;
   legalForm?: string | null;
+  formeJuridique?: string | null;
   capital?: string | null;
   email?: string | null;
   phone?: string | null;
@@ -131,12 +136,25 @@ const FS = {
 
 function issuerContactLines(s: QuotePdfSnapshot | null): string[] {
   if (!s) return [];
+  const ape =
+    s.apeCode && s.apeLabel
+      ? `APE ${s.apeCode} — ${s.apeLabel}`
+      : s.apeCode
+        ? `APE ${s.apeCode}`
+        : null;
+  const legalBits = compactLines([
+    s.siret ? `SIRET ${s.siret}` : null,
+    s.vatNumber ? `TVA ${s.vatNumber}` : null,
+  ]).join("  ·  ");
   return compactLines([
+    s.activity,
     s.addressLine1 || s.address,
     s.addressLine2,
     [s.postalCode || s.zipCode, s.city].filter(Boolean).join(" ") || null,
     s.country && s.country !== "France" ? s.country : null,
-    compactLines([s.phone, s.email]).join("  ·  ") || null,
+    compactLines([s.phone, s.email, s.website]).join("  ·  ") || null,
+    legalBits || null,
+    ape,
   ]);
 }
 
@@ -156,7 +174,7 @@ function footerLegalLine(s: QuotePdfSnapshot | null, extra?: string | null): str
   if (!s) return (extra ?? "").trim();
   const parts = compactLines([
     s.tradeName || s.name,
-    s.legalForm,
+    s.legalForm || s.formeJuridique,
     s.capital ? `au capital de ${s.capital}` : null,
     s.siret ? `SIRET ${s.siret}` : null,
     s.vatNumber ? `TVA ${s.vatNumber}` : null,

@@ -11,6 +11,14 @@ import {
   type PaymentSchedule,
 } from "@/lib/commercial/payment-schedule";
 
+import {
+  companyProfileToIssuerSnapshot,
+  issuerSnapshotFromUnknown,
+  isUrbanAmenagementsOrg,
+  parseCompanyProfile,
+  withKnownOrgDefaults,
+} from "@/lib/commercial/company-profile";
+
 const EDITABLE_STATUSES: CommercialQuoteStatus[] = ["DRAFT", "TO_VALIDATE", "VALIDATED"];
 
 const ALLOWED_TRANSITIONS: Record<CommercialQuoteStatus, CommercialQuoteStatus[]> = {
@@ -38,6 +46,10 @@ export const QUOTE_CONTRACTUAL_META_KEYS = [
   "clientNotes",
   "depositPercent",
   "depositAmountHt",
+  "issuerSnapshotJson",
+  "clientSnapshotJson",
+  "issueDate",
+  "defaultVatRate",
 ] as const;
 
 const META_LOCKED_STATUSES: CommercialQuoteStatus[] = [
@@ -69,12 +81,14 @@ export function assertQuoteMetaUpdateAllowed(
 }
 
 async function buildIssuerSnapshot(orgId: string): Promise<Snapshot> {
+  await ensureCommercialOrgSettings(orgId);
   const org = await prisma.organization.findUnique({
     where: { id: orgId },
     select: {
       name: true,
       siret: true,
       demoEnvironment: { select: { logoUrl: true, companyName: true } },
+      commercialOrgSettings: { select: { quoteDocumentSettingsJson: true } },
       owner: {
         select: {
           company: true,
@@ -93,7 +107,39 @@ async function buildIssuerSnapshot(orgId: string): Promise<Snapshot> {
   });
   const owner = org?.owner;
   const logoUrl = org?.demoEnvironment?.logoUrl?.trim() || null;
-  return {
+  const rawProfile = parseCompanyProfile(
+    org?.commercialOrgSettings?.quoteDocumentSettingsJson,
+  );
+  const profile = withKnownOrgDefaults(org?.name, rawProfile);
+
+  // Persister les valeurs connues Urban si le profil org était vide (une fois)
+  if (
+    isUrbanAmenagementsOrg(org?.name) &&
+    !rawProfile.email &&
+    profile.email &&
+    org?.commercialOrgSettings
+  ) {
+    const { mergeCompanyProfileIntoDocSettings } = await import(
+      "@/lib/commercial/company-profile"
+    );
+    await prisma.commercialOrgSettings.update({
+      where: { organizationId: orgId },
+      data: {
+        quoteDocumentSettingsJson: mergeCompanyProfileIntoDocSettings(
+          org.commercialOrgSettings.quoteDocumentSettingsJson,
+          profile,
+        ),
+      },
+    });
+    if (!org.siret && profile.siret) {
+      await prisma.organization.update({
+        where: { id: orgId },
+        data: { siret: profile.siret },
+      });
+    }
+  }
+
+  const snap = companyProfileToIssuerSnapshot(profile, {
     name: org?.name ?? org?.demoEnvironment?.companyName ?? owner?.company ?? "Entreprise",
     siret: org?.siret ?? null,
     formeJuridique: owner?.formeJuridique ?? null,
@@ -104,9 +150,13 @@ async function buildIssuerSnapshot(orgId: string): Promise<Snapshot> {
     city: owner?.billingCity ?? null,
     postalCode: owner?.billingPostalCode ?? null,
     country: owner?.billingCountry ?? "France",
-    /** Source existante DemoEnvironment — pas de 2ᵉ modèle logo Commercial. */
     logoPath: logoUrl,
-  } as Prisma.InputJsonValue;
+  });
+
+  // Email pro du profil prioritaire — ne pas laisser le Gmail perso écraser
+  if (profile.email) snap.email = profile.email;
+
+  return snap as Prisma.InputJsonValue;
 }
 
 async function buildClientSnapshot(clientExternalOrgId: string | null): Promise<Snapshot | null> {
@@ -343,25 +393,34 @@ export async function getQuoteDetail(orgId: string, id: string) {
     if (!quote) return null;
   }
 
-  /** Émetteur manquant sur devis éditable → renseigner depuis l’organisation (logo démo inclus). */
+  /** Émetteur manquant / incomplet (brouillon) → profil organisation (Urban inclus). */
   if (
     EDITABLE_STATUSES.includes(quote.status) &&
-    quote.currentVersion?.lockState === "DRAFT" &&
-    !hasIssuerName(quote.issuerSnapshotJson)
+    quote.currentVersion?.lockState === "DRAFT"
   ) {
-    const issuerSnapshotJson = await buildIssuerSnapshot(orgId);
-    await prisma.commercialQuote.update({
-      where: { id: quote.id },
-      data: { issuerSnapshotJson },
+    const org = await prisma.organization.findUnique({
+      where: { id: orgId },
+      select: { name: true },
     });
-    if (quote.currentVersionId) {
-      await prisma.commercialQuoteVersion.update({
-        where: { id: quote.currentVersionId },
+    const needsRefresh =
+      !hasIssuerName(quote.issuerSnapshotJson) ||
+      (isUrbanAmenagementsOrg(org?.name) &&
+        urbanIssuerIncomplete(quote.issuerSnapshotJson));
+    if (needsRefresh) {
+      const issuerSnapshotJson = await buildIssuerSnapshot(orgId);
+      await prisma.commercialQuote.update({
+        where: { id: quote.id },
         data: { issuerSnapshotJson },
       });
+      if (quote.currentVersionId) {
+        await prisma.commercialQuoteVersion.update({
+          where: { id: quote.currentVersionId },
+          data: { issuerSnapshotJson },
+        });
+      }
+      quote = await reloadQuoteDetail(orgId, id);
+      if (!quote) return null;
     }
-    quote = await reloadQuoteDetail(orgId, id);
-    if (!quote) return null;
   }
 
   const version = quote.currentVersion;
@@ -461,6 +520,17 @@ function hasIssuerName(raw: unknown): boolean {
   return name.length > 0;
 }
 
+/** Brouillon Urban avec Gmail perso / SIRET / adresse / TVA manquants → refresh profil. */
+function urbanIssuerIncomplete(raw: unknown): boolean {
+  const s = issuerSnapshotFromUnknown(raw);
+  if (!s) return true;
+  if (s.email && /@gmail\.com$/i.test(s.email) && /djebaili/i.test(s.email)) {
+    return true;
+  }
+  if (!s.siret || !s.addressLine1 || !s.vatNumber || !s.activity) return true;
+  return false;
+}
+
 /** Crée une V1 DRAFT vide si le devis éditable n’a pas de version courante. */
 async function ensureDraftHasCurrentVersion(orgId: string, quoteId: string) {
   const quote = await prisma.commercialQuote.findFirst({
@@ -529,12 +599,16 @@ export async function updateQuoteMeta(
     responsibleId?: string | null;
     siteAddressSnapshot?: string | null;
     validityDate?: Date | null;
+    issueDate?: Date | null;
     paymentTerms?: string | null;
     paymentScheduleJson?: PaymentSchedule | null;
     internalNotes?: string | null;
     clientNotes?: string | null;
     depositPercent?: number | null;
     depositAmountHt?: number | null;
+    defaultVatRate?: number | null;
+    issuerSnapshotJson?: Prisma.InputJsonValue | null;
+    clientSnapshotJson?: Prisma.InputJsonValue | null;
   },
 ) {
   const quote = await prisma.commercialQuote.findFirst({
@@ -564,7 +638,9 @@ export async function updateQuoteMeta(
   }
 
   let clientSnapshotJson: Snapshot | null | undefined;
-  if (data.clientExternalOrgId !== undefined) {
+  if (data.clientSnapshotJson !== undefined) {
+    clientSnapshotJson = data.clientSnapshotJson;
+  } else if (data.clientExternalOrgId !== undefined) {
     if (data.clientExternalOrgId) {
       const client = await prisma.externalOrganization.findFirst({
         where: {
@@ -586,8 +662,13 @@ export async function updateQuoteMeta(
       ...(data.clientExternalOrgId !== undefined
         ? {
             clientExternalOrgId: data.clientExternalOrgId,
-            clientSnapshotJson: clientSnapshotJson ?? undefined,
+            ...(clientSnapshotJson !== undefined
+              ? { clientSnapshotJson: clientSnapshotJson ?? Prisma.JsonNull }
+              : {}),
           }
+        : {}),
+      ...(data.clientExternalOrgId === undefined && clientSnapshotJson !== undefined
+        ? { clientSnapshotJson: clientSnapshotJson ?? Prisma.JsonNull }
         : {}),
       ...(data.projectId !== undefined ? { projectId: data.projectId } : {}),
       ...(data.responsibleId !== undefined ? { responsibleId: data.responsibleId } : {}),
@@ -595,6 +676,7 @@ export async function updateQuoteMeta(
         ? { siteAddressSnapshot: data.siteAddressSnapshot }
         : {}),
       ...(data.validityDate !== undefined ? { validityDate: data.validityDate } : {}),
+      ...(data.issueDate !== undefined ? { issueDate: data.issueDate } : {}),
       ...(data.paymentTerms !== undefined ? { paymentTerms: data.paymentTerms } : {}),
       ...(data.paymentScheduleJson !== undefined
         ? { paymentScheduleJson: scheduleNorm === null ? Prisma.DbNull : scheduleNorm }
@@ -603,6 +685,17 @@ export async function updateQuoteMeta(
       ...(data.clientNotes !== undefined ? { clientNotes: data.clientNotes } : {}),
       ...(data.depositPercent !== undefined ? { depositPercent: data.depositPercent } : {}),
       ...(data.depositAmountHt !== undefined ? { depositAmountHt: data.depositAmountHt } : {}),
+      ...(data.defaultVatRate !== undefined
+        ? { defaultVatRate: data.defaultVatRate ?? 20 }
+        : {}),
+      ...(data.issuerSnapshotJson !== undefined
+        ? {
+            issuerSnapshotJson:
+              data.issuerSnapshotJson === null
+                ? Prisma.JsonNull
+                : data.issuerSnapshotJson,
+          }
+        : {}),
     } as Prisma.CommercialQuoteUncheckedUpdateInput,
   });
 
@@ -629,7 +722,21 @@ export async function updateQuoteMeta(
   if (quote.currentVersionId && clientSnapshotJson !== undefined) {
     await prisma.commercialQuoteVersion.update({
       where: { id: quote.currentVersionId },
-      data: { clientSnapshotJson: clientSnapshotJson ?? undefined },
+      data: {
+        clientSnapshotJson:
+          clientSnapshotJson === null ? Prisma.JsonNull : clientSnapshotJson,
+      },
+    });
+  }
+  if (quote.currentVersionId && data.issuerSnapshotJson !== undefined) {
+    await prisma.commercialQuoteVersion.update({
+      where: { id: quote.currentVersionId },
+      data: {
+        issuerSnapshotJson:
+          data.issuerSnapshotJson === null
+            ? Prisma.JsonNull
+            : data.issuerSnapshotJson,
+      },
     });
   }
 

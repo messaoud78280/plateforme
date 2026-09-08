@@ -104,6 +104,26 @@ export async function PATCH(req: Request, ctx: Ctx) {
             ? Number(body.depositAmountHt)
             : null
           : undefined,
+      issueDate:
+        body.issueDate !== undefined
+          ? body.issueDate
+            ? new Date(String(body.issueDate))
+            : null
+          : undefined,
+      defaultVatRate:
+        body.defaultVatRate !== undefined
+          ? body.defaultVatRate != null && body.defaultVatRate !== ""
+            ? Number(body.defaultVatRate)
+            : null
+          : undefined,
+      issuerSnapshotJson:
+        body.issuerSnapshotJson !== undefined
+          ? (body.issuerSnapshotJson as never)
+          : undefined,
+      clientSnapshotJson:
+        body.clientSnapshotJson !== undefined
+          ? (body.clientSnapshotJson as never)
+          : undefined,
     });
     return NextResponse.json({ quote });
   } catch (e) {

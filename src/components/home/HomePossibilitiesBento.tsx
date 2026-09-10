@@ -35,18 +35,8 @@ export function HomePossibilitiesBento() {
         </div>
 
         <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-6 md:gap-5">
-          {/* Grande — réservation */}
+          {/* Grande — messagerie (priorité) */}
           <article className={`${BW_CARD} p-5 md:col-span-4 md:row-span-2 md:p-6`}>
-            <CardHead
-              title="Système de réservation"
-              href="/demonstrations/reservation"
-              accent="#0d9488"
-            />
-            <MiniReservation />
-          </article>
-
-          {/* Verticale — messagerie */}
-          <article className={`${BW_CARD} p-5 md:col-span-2 md:row-span-2`}>
             <CardHead
               title="Messagerie"
               href="/demonstrations/messagerie"
@@ -55,20 +45,30 @@ export function HomePossibilitiesBento() {
             <MiniMessagerie />
           </article>
 
-          {/* CRM */}
-          <article className={`${BW_CARD} p-5 md:col-span-3`}>
-            <CardHead title="CRM" href="/demonstrations/crm" accent="#ea580c" />
-            <MiniCrm />
-          </article>
-
-          {/* Agenda */}
-          <article className={`${BW_CARD} p-5 md:col-span-3`}>
+          {/* Verticale — agenda (priorité) */}
+          <article className={`${BW_CARD} p-5 md:col-span-2 md:row-span-2`}>
             <CardHead
               title="Agenda"
               href="/demonstrations/agenda"
               accent="#2563eb"
             />
             <MiniAgenda />
+          </article>
+
+          {/* Réservation */}
+          <article className={`${BW_CARD} p-5 md:col-span-3`}>
+            <CardHead
+              title="Réservation"
+              href="/demonstrations/reservation"
+              accent="#0d9488"
+            />
+            <MiniReservation />
+          </article>
+
+          {/* CRM */}
+          <article className={`${BW_CARD} p-5 md:col-span-3`}>
+            <CardHead title="CRM" href="/demonstrations/crm" accent="#ea580c" />
+            <MiniCrm />
           </article>
 
           {/* Dashboard large */}
@@ -134,19 +134,19 @@ function CardHead({
 }
 
 function MiniReservation() {
-  const hours = ["09:00", "10:30", "14:00", "16:00"] as const;
+  const hours = ["09:00", "10:30", "14:00"] as const;
   const [hour, setHour] = useState<(typeof hours)[number]>("10:30");
   const [done, setDone] = useState(false);
 
   if (done) {
     return (
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-8 text-center">
-        <p className="text-sm font-bold text-emerald-800">Créneau confirmé (simulation)</p>
-        <p className="mt-1 text-xs text-emerald-700">{hour}</p>
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-6 text-center">
+        <p className="text-sm font-bold text-emerald-800">Créneau confirmé</p>
+        <p className="mt-1 text-xs text-emerald-700">{hour} (simulation)</p>
         <button
           type="button"
           onClick={() => setDone(false)}
-          className="mt-3 text-xs font-semibold text-emerald-800 underline-offset-2 hover:underline"
+          className="mt-2 text-xs font-semibold text-emerald-800 underline-offset-2 hover:underline"
         >
           Recommencer
         </button>
@@ -156,8 +156,7 @@ function MiniReservation() {
 
   return (
     <div>
-      <p className="text-xs font-semibold text-slate-500">Choisissez une heure</p>
-      <div className="mt-2 flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2">
         {hours.map((h) => (
           <button
             key={h}
@@ -176,35 +175,105 @@ function MiniReservation() {
       <button
         type="button"
         onClick={() => setDone(true)}
-        className="mt-4 w-full rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-700"
+        className="mt-3 w-full rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-700"
       >
-        Réserver (simulation)
+        Réserver
       </button>
     </div>
   );
 }
 
 function MiniMessagerie() {
+  const threads = [
+    {
+      n: "SM",
+      name: "Sophie Martin",
+      t: "Le rendez-vous de jeudi est confirmé.",
+      time: "10:42",
+      unread: 2,
+      color: "#7c3aed",
+    },
+    {
+      n: "AN",
+      name: "Atelier Nova",
+      t: "Je viens de déposer les documents.",
+      time: "09:18",
+      unread: 1,
+      color: "#2563eb",
+    },
+    {
+      n: "TL",
+      name: "Thomas Leroy",
+      t: "On peut décaler à 14 h ?",
+      time: "Hier",
+      unread: 0,
+      color: "#0d9488",
+    },
+  ] as const;
+  const [active, setActive] = useState(0);
+
   return (
-    <div className="space-y-2">
-      {[
-        { n: "C", name: "Camille", t: "Peux-tu valider le planning ?" },
-        { n: "É", name: "Équipe", t: "Livraison reportée à jeudi." },
-        { n: "S", name: "Samir", t: "Le client a confirmé." },
-      ].map((m) => (
-        <div
-          key={m.name}
-          className="flex items-start gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2.5"
-        >
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-100 text-[10px] font-bold text-violet-700">
-            {m.n}
+    <div className="grid gap-3 sm:grid-cols-[0.95fr_1.05fr]">
+      <ul className="space-y-1.5">
+        {threads.map((m, i) => (
+          <li key={m.name}>
+            <button
+              type="button"
+              onClick={() => setActive(i)}
+              className={`flex w-full items-start gap-2.5 rounded-xl border px-3 py-2.5 text-left transition ${
+                active === i
+                  ? "border-violet-300 bg-violet-50/80"
+                  : "border-slate-100 bg-slate-50/60 hover:border-slate-200"
+              }`}
+            >
+              <span
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                style={{ backgroundColor: m.color }}
+              >
+                {m.n}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center justify-between gap-2">
+                  <span className="truncate text-xs font-bold text-slate-800">{m.name}</span>
+                  <span className="shrink-0 text-[10px] text-slate-400">{m.time}</span>
+                </span>
+                <span className="mt-0.5 block truncate text-[11px] text-slate-500">{m.t}</span>
+              </span>
+              {m.unread > 0 ? (
+                <span className="mt-0.5 flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-violet-600 px-1 text-[10px] font-bold text-white">
+                  {m.unread}
+                </span>
+              ) : null}
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <div className="flex min-h-[11rem] flex-col rounded-2xl border border-slate-200 bg-[#efeae2]/40 p-3">
+        <div className="mb-2 flex items-center gap-2 border-b border-slate-200/80 pb-2">
+          <span
+            className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-white"
+            style={{ backgroundColor: threads[active].color }}
+          >
+            {threads[active].n}
           </span>
-          <span className="min-w-0">
-            <span className="block text-xs font-bold text-slate-800">{m.name}</span>
-            <span className="block truncate text-[11px] text-slate-500">{m.t}</span>
+          <span className="text-xs font-bold text-slate-800">{threads[active].name}</span>
+        </div>
+        <div className="flex flex-1 flex-col justify-end gap-2">
+          <div className="max-w-[85%] self-start rounded-2xl rounded-bl-md bg-white px-3 py-2 text-[11px] leading-relaxed text-slate-700 shadow-sm">
+            {threads[active].t}
+          </div>
+          <div className="max-w-[80%] self-end rounded-2xl rounded-br-md bg-[#dcf8c6] px-3 py-2 text-[11px] leading-relaxed text-slate-800 shadow-sm">
+            Parfait, je confirme de mon côté.
+          </div>
+        </div>
+        <div className="mt-3 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2">
+          <span className="flex-1 text-[11px] text-slate-400">Écrire un message…</span>
+          <span className="rounded-full bg-violet-600 px-2.5 py-1 text-[10px] font-bold text-white">
+            Envoyer
           </span>
         </div>
-      ))}
+      </div>
     </div>
   );
 }
@@ -216,8 +285,8 @@ function MiniCrm() {
     <div>
       <div className="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-3">
         <div>
-          <p className="text-xs font-bold text-slate-800">Atelier Nord</p>
-          <p className="text-[11px] text-slate-500">2 400 €</p>
+          <p className="text-xs font-bold text-slate-800">Atelier Nova</p>
+          <p className="text-[11px] text-slate-500">4 200 €</p>
         </div>
         <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[10px] font-bold text-orange-700">
           {stages[stage]}
@@ -235,30 +304,42 @@ function MiniCrm() {
 }
 
 function MiniAgenda() {
-  const [sel, setSel] = useState(1);
-  const days = [
-    { d: "12", l: "Visite" },
-    { d: "13", l: "RDV" },
-    { d: "14", l: "Libre" },
-    { d: "17", l: "Bilan" },
-  ];
+  const events = [
+    { day: "Lun", time: "09:00", title: "RDV Sophie", tone: "bg-blue-50 text-blue-800 border-blue-200" },
+    { day: "Mar", time: "10:30", title: "Intervention", tone: "bg-teal-50 text-teal-800 border-teal-200" },
+    { day: "Mer", time: "14:00", title: "Point équipe", tone: "bg-violet-50 text-violet-800 border-violet-200" },
+    { day: "Jeu", time: "11:00", title: "Relance", tone: "bg-orange-50 text-orange-800 border-orange-200" },
+  ] as const;
+  const [sel, setSel] = useState(0);
+
   return (
-    <div className="grid grid-cols-4 gap-2">
-      {days.map((day, i) => (
-        <button
-          key={day.d}
-          type="button"
-          onClick={() => setSel(i)}
-          className={`rounded-xl border px-2 py-3 text-center transition ${
-            sel === i
-              ? "border-[#2563eb] bg-[#eff6ff]"
-              : "border-slate-200 hover:border-slate-300"
-          }`}
-        >
-          <span className="block text-sm font-bold text-slate-900">{day.d}</span>
-          <span className="mt-1 block text-[10px] text-slate-500">{day.l}</span>
-        </button>
-      ))}
+    <div className="flex h-full flex-col">
+      <div className="grid grid-cols-4 gap-1.5">
+        {events.map((e, i) => (
+          <button
+            key={e.day}
+            type="button"
+            onClick={() => setSel(i)}
+            className={`rounded-lg border px-1 py-2 text-center transition ${
+              sel === i
+                ? "border-[#2563eb] bg-[#eff6ff]"
+                : "border-slate-200 hover:border-slate-300"
+            }`}
+          >
+            <span className="block text-[10px] font-semibold text-slate-500">{e.day}</span>
+            <span className="mt-0.5 block text-sm font-bold text-slate-900">
+              {10 + i}
+            </span>
+          </button>
+        ))}
+      </div>
+      <div className={`mt-3 flex-1 rounded-xl border px-3 py-3 ${events[sel].tone}`}>
+        <p className="text-[10px] font-bold uppercase tracking-wide opacity-70">
+          {events[sel].time}
+        </p>
+        <p className="mt-1 text-sm font-bold">{events[sel].title}</p>
+        <p className="mt-2 text-[11px] opacity-80">Semaine type — démo BeWork</p>
+      </div>
     </div>
   );
 }

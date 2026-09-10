@@ -75,6 +75,8 @@ export const DEMO_INTERACTIVE_SLUGS = [
   "reservation",
   "crm",
   "dashboard",
+  "documents",
+  "espace-client",
 ] as const;
 
 export type DemoInteractiveSlug = (typeof DEMO_INTERACTIVE_SLUGS)[number];

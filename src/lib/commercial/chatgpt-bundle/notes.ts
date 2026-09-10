@@ -1,4 +1,5 @@
 import type { BeworkQuoteBundleV1 } from "@/lib/commercial/chatgpt-bundle/types";
+import { buildCleanClientNotes } from "@/lib/commercial/client-notes-structure";
 import { calculateLine, roundMoney } from "@/lib/commercial/money";
 
 export function clientDisplayName(bundle: BeworkQuoteBundleV1): string {
@@ -15,36 +16,40 @@ export function primaryEmail(bundle: BeworkQuoteBundleV1): string | null {
   );
 }
 
-export function buildClientNotesFromBundle(bundle: BeworkQuoteBundleV1): string {
-  const parts: string[] = [];
-  if (bundle.quote.description) {
-    parts.push(bundle.quote.description.trim());
-  }
+function adviceParagraphsFromBundle(bundle: BeworkQuoteBundleV1): string[] {
   const advice = bundle.clientAdvice.filter((b) => b.visibility === "client");
-  if (advice.length) {
-    parts.push("=== Notre préconisation ===");
-    for (const a of advice) {
-      parts.push(a.title ? `${a.title}\n${a.content}` : a.content);
+  const out: string[] = [];
+  for (const a of advice) {
+    const title = a.title?.trim() || null;
+    const content = a.content.trim();
+    if (!content) continue;
+    // Évite « Notre préconisation » en double sous le titre de section
+    if (
+      title &&
+      !/^(notre\s+)?pr[eé]conisation$/i.test(title) &&
+      !content.toLowerCase().startsWith(title.toLowerCase())
+    ) {
+      out.push(`${title}\n${content}`);
+    } else {
+      out.push(content);
     }
   }
-  if (bundle.workStages.length) {
-    parts.push("=== Déroulement prévisionnel des travaux ===");
-    for (const s of bundle.workStages) {
-      parts.push(
-        `${String(s.order).padStart(2, "0")}. ${s.title}${
-          s.description ? `\n${s.description}` : ""
-        }`,
-      );
-    }
-  }
-  const reserves = bundle.reservations.filter((b) => b.visibility === "client");
-  if (reserves.length) {
-    parts.push("=== Réserves ===");
-    for (const r of reserves) {
-      parts.push(r.content);
-    }
-  }
-  return parts.join("\n\n").trim();
+  return out;
+}
+
+export function buildClientNotesFromBundle(bundle: BeworkQuoteBundleV1): string {
+  return buildCleanClientNotes({
+    intro: bundle.quote.description,
+    adviceParagraphs: adviceParagraphsFromBundle(bundle),
+    stages: bundle.workStages.map((s) => ({
+      order: s.order,
+      title: s.title,
+      description: s.description,
+    })),
+    reserves: bundle.reservations
+      .filter((b) => b.visibility === "client")
+      .map((r) => r.content),
+  });
 }
 
 export function buildInternalNotesFromBundle(

@@ -28,6 +28,7 @@ import { QuoteDepositPanel } from "@/components/commercial/QuoteDepositPanel";
 import { QuoteProrataPanel } from "@/components/commercial/QuoteProrataPanel";
 import { LibraryPickerModal } from "@/components/commercial/LibraryPickerModal";
 import { ChatGptBundleImportModal } from "@/components/commercial/ChatGptBundleImportModal";
+import { QuoteClientNotesPreview } from "@/components/commercial/QuoteClientNotesPreview";
 import { IssuerEditModal } from "@/components/commercial/IssuerEditModal";
 import { ClientCoordsEditModal } from "@/components/commercial/ClientCoordsEditModal";
 import { LineCompositionDrawer } from "@/components/commercial/LineCompositionDrawer";
@@ -1704,6 +1705,7 @@ export function QuoteEditor({
               <p className="mt-1 text-[10px] text-slate-400">
                 Contenu susceptible d’apparaître sur le PDF client.
               </p>
+              <QuoteClientNotesPreview notes={meta.clientNotes} />
             </div>
 
             <div>
@@ -2283,14 +2285,66 @@ function LineRow({
                   className={inputClass}
                 />
                 {line.kind !== "COMMENT" && line.kind !== "SUBTOTAL" ? (
-                  <input
-                    disabled={!canEdit}
-                    value={desc}
-                    onChange={(e) => setDesc(e.target.value)}
-                    onBlur={commitText}
-                    placeholder="Description"
-                    className="w-full border-0 bg-transparent px-2 text-[11px] text-slate-500 outline-none placeholder:text-slate-300"
-                  />
+                  <>
+                    <input
+                      disabled={!canEdit}
+                      value={desc}
+                      onChange={(e) => setDesc(e.target.value)}
+                      onBlur={commitText}
+                      placeholder="Description"
+                      className="w-full border-0 bg-transparent px-2 text-[11px] text-slate-500 outline-none placeholder:text-slate-300"
+                    />
+                    <input
+                      disabled={!canEdit}
+                      defaultValue={
+                        (() => {
+                          const t =
+                            line.compositionSnapshotJson &&
+                            typeof line.compositionSnapshotJson === "object"
+                              ? (line.compositionSnapshotJson as {
+                                  technical?: { thicknessNote?: string };
+                                }).technical?.thicknessNote
+                              : null;
+                          return t ?? "";
+                        })()
+                      }
+                      key={`th-${line.id}-${String(
+                        (line.compositionSnapshotJson as { technical?: { thicknessNote?: string } } | null)
+                          ?.technical?.thicknessNote ?? "",
+                      )}`}
+                      onBlur={(e) => {
+                        const thicknessNote = e.target.value.trim() || null;
+                        const prev =
+                          line.compositionSnapshotJson &&
+                          typeof line.compositionSnapshotJson === "object"
+                            ? { ...(line.compositionSnapshotJson as Record<string, unknown>) }
+                            : {};
+                        const prevTech =
+                          prev.technical && typeof prev.technical === "object"
+                            ? { ...(prev.technical as Record<string, unknown>) }
+                            : {};
+                        if (thicknessNote) prevTech.thicknessNote = thicknessNote;
+                        else delete prevTech.thicknessNote;
+                        const next = { ...prev };
+                        if (Object.keys(prevTech).length) next.technical = prevTech;
+                        else delete next.technical;
+                        onPatch({
+                          reference: ref.trim() || null,
+                          designation: des,
+                          description: desc.trim() || null,
+                          unit,
+                          quantity: line.quantity,
+                          unitSellHt: line.unitSellHt,
+                          vatRate: line.vatRate,
+                          compositionSnapshotJson:
+                            Object.keys(next).length ? next : null,
+                        });
+                      }}
+                      placeholder="Épaisseur (info technique, ex. 12 à 15 cm)"
+                      className="w-full border-0 bg-transparent px-2 text-[10px] text-slate-400 outline-none placeholder:text-slate-300"
+                      title="Information technique optionnelle — n’affecte pas le prix"
+                    />
+                  </>
                 ) : null}
                 {hasComposition ? (
                   <button

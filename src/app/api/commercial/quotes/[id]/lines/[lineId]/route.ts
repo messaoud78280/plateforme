@@ -54,6 +54,10 @@ export async function PATCH(req: Request, ctx: Ctx) {
             ? String(body.commercialWorkItemId)
             : null
           : undefined,
+      compositionSnapshotJson:
+        body.compositionSnapshotJson !== undefined
+          ? (body.compositionSnapshotJson as never)
+          : undefined,
     });
     return NextResponse.json({ line });
   } catch (e) {

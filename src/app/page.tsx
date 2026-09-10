@@ -2,48 +2,40 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
-import { HomeAdoptionUx } from "@/components/home/HomeAdoptionUx";
-import { HomeAiAdvanced } from "@/components/home/HomeAiAdvanced";
-import { HomeAutomations } from "@/components/home/HomeAutomations";
-import { HomeConnectSoftware } from "@/components/home/HomeConnectSoftware";
-import { HomeCoreAdaptation } from "@/components/home/HomeCoreAdaptation";
+import { HomeAudienceProfiles } from "@/components/home/HomeAudienceProfiles";
+import { HomeCreateShowcase } from "@/components/home/HomeCreateShowcase";
 import { HomeDemoClose } from "@/components/home/HomeDemoClose";
-import { HomeMethodFlow } from "@/components/home/HomeMethodFlow";
+import { HomeEmotionalShift } from "@/components/home/HomeEmotionalShift";
+import { HomeFormationDay } from "@/components/home/HomeFormationDay";
+import { HomeMetierIdeas } from "@/components/home/HomeMetierIdeas";
 import { HomePlatformHero } from "@/components/home/HomePlatformHero";
-import { HomePlatformModules } from "@/components/home/HomePlatformModules";
-import { HomeProblemsRecognition } from "@/components/home/HomeProblemsRecognition";
+import { HomePossibilityBridge } from "@/components/home/HomePossibilityBridge";
+import { HomePricingSession } from "@/components/home/HomePricingSession";
 import { HomeSectionHeader } from "@/components/home/HomeSectionHeader";
-import { HomeTrustBand } from "@/components/home/HomeTrustBand";
+import { HomeSmallGroups } from "@/components/home/HomeSmallGroups";
+import { HomeStartFromZero } from "@/components/home/HomeStartFromZero";
 import { HOME_SECTION } from "@/components/home/homeSectionStyles";
 import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
+import { FORMATION_FAQ, BEWORK_FORMATION_TAGLINE } from "@/lib/bework-formation";
 import { jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
 import {
   SEO_OG_ALTERNATE_LOCALES,
   hreflangFrancophonieLanguages,
   metaDescriptionFrancophonie,
 } from "@/lib/seo-francophonie";
-import { BEWORK_BRAND_SIGNATURE, SEO_KEYWORDS_HOME, SEO_SITE_TITLE_DEFAULT, SEO_VALUE_PROPOSITION } from "@/lib/seo-keywords";
+import {
+  BEWORK_BRAND_SIGNATURE,
+  SEO_KEYWORDS_HOME,
+  SEO_SITE_TITLE_DEFAULT,
+} from "@/lib/seo-keywords";
 import { SITE_URL } from "@/lib/site";
 
 const HOME_META_TITLE = SEO_SITE_TITLE_DEFAULT;
 const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
-  "BeWork construit la plateforme de votre entreprise BTP, connecte vos logiciels et automatise vos processus — une solution sur mesure adaptée à votre organisation",
+  "Formation pratique d’une journée pour apprendre à créer sites, applications et outils numériques avec l’intelligence artificielle — sans prérequis en programmation. 200 € / participant.",
 );
 
-const HOME_FAQ_ITEMS = [
-  {
-    q: "Est-ce que BeWork remplace mes logiciels actuels ?",
-    a: "Pas forcément. BeWork peut devenir votre plateforme centrale tout en connectant les logiciels que vous utilisez déjà, lorsque les interfaces disponibles le permettent. Nous étudions votre situation avant de proposer quoi que ce soit.",
-  },
-  {
-    q: "Faut-il connaître les technologies pour nous contacter ?",
-    a: "Non. Expliquez-nous comment vous travaillez aujourd'hui, vos outils et ce que vous aimeriez améliorer. BeWork étudie la faisabilité, les intégrations et l'architecture adaptée.",
-  },
-  {
-    q: "Comment se passe l'accompagnement ?",
-    a: "Nous concevons, déployons, formons vos équipes et accompagnons l'adoption jusqu'à l'usage quotidien, puis faisons évoluer la solution selon vos retours.",
-  },
-] as const;
+const HOME_FAQ_ITEMS = FORMATION_FAQ.slice(0, 4);
 
 export const metadata: Metadata = {
   title: { absolute: HOME_META_TITLE },
@@ -62,16 +54,13 @@ export const metadata: Metadata = {
   keywords: [
     ...SEO_KEYWORDS_HOME,
     BEWORK_BRAND_SIGNATURE,
-    "plateforme BTP sur mesure",
-    "logiciel BTP sur mesure",
-    "automatisation BTP",
-    "automatisation entreprise BTP",
-    "logiciel gestion chantier",
-    "plateforme gestion chantier",
-    "connexion logiciels BTP",
-    "digitalisation entreprise BTP",
-    "développement logiciel BTP",
-    "outil métier BTP",
+    "apprendre à créer avec l'IA",
+    "créer une application sans savoir coder",
+    "formation intelligence artificielle débutant",
+    "création d'outils professionnels avec l'IA",
+    "IA pour entrepreneurs",
+    "IA pour artisans",
+    "IA pour indépendants",
   ],
   alternates: { canonical: SITE_URL, languages: hreflangFrancophonieLanguages("/") },
   openGraph: {
@@ -87,7 +76,7 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "BeWork — plateforme BTP sur mesure, connexion logiciels et automatisation",
+        alt: "BeWork — apprendre à créer avec l’intelligence artificielle",
       },
     ],
   },
@@ -110,11 +99,9 @@ const homeJsonLd = {
       description: HOME_META_DESCRIPTION,
       isPartOf: { "@id": `${SITE_URL}/#website` },
       about: [
-        { "@type": "Thing", name: "Plateforme BTP sur mesure" },
-        { "@type": "Thing", name: "Connexion logiciels BTP" },
-        { "@type": "Thing", name: "Automatisation processus BTP" },
-        { "@type": "Thing", name: "Logiciel gestion chantier" },
-        { "@type": "Thing", name: "Développement logiciel BTP" },
+        { "@type": "Thing", name: "Formation création avec l’IA" },
+        { "@type": "Thing", name: "Créer sans savoir coder" },
+        { "@type": "Thing", name: "Outils numériques professionnels" },
       ],
       speakable: {
         "@type": "SpeakableSpecification",
@@ -122,30 +109,28 @@ const homeJsonLd = {
       },
     },
     {
+      "@type": "Course",
+      "@id": `${SITE_URL}/#formation`,
+      name: "Journée BeWork — Créer avec l’IA",
+      description: BEWORK_FORMATION_TAGLINE,
+      provider: { "@id": `${SITE_URL}/#organization` },
+      url: `${SITE_URL}/formation`,
+      offers: {
+        "@type": "Offer",
+        price: "200",
+        priceCurrency: "EUR",
+        url: `${SITE_URL}/contact#participer`,
+        availability: "https://schema.org/InStock",
+      },
+    },
+    {
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#service`,
-      name: "BeWork — plateforme métier BTP sur mesure",
-      description: SEO_VALUE_PROPOSITION,
+      name: "BeWork — formations pratiques créer avec l’IA",
+      description: BEWORK_FORMATION_TAGLINE,
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),
       url: SITE_URL,
-    },
-    {
-      "@type": "SoftwareApplication",
-      "@id": `${SITE_URL}/#software`,
-      name: "Plateforme BeWork",
-      applicationCategory: "BusinessApplication",
-      operatingSystem: "Web",
-      description:
-        "Plateforme métier sur mesure pour les entreprises du BTP — centralisation des chantiers, documents, équipes, planning, gestion commerciale, achats et pilotage financier.",
-      provider: { "@id": `${SITE_URL}/#organization` },
-      areaServed: jsonLdExpandedAreaServed(),
-      offers: {
-        "@type": "Offer",
-        priceCurrency: "EUR",
-        description: "Plateforme BeWork sur mesure — mise en place et accompagnement sur étude.",
-        url: `${SITE_URL}/contact`,
-      },
     },
     {
       "@type": "FAQPage",
@@ -165,44 +150,25 @@ const homeJsonLd = {
 export default function HomePage() {
   return (
     <div className="min-h-screen min-w-0 overflow-x-clip bg-white">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
+      />
       <MarketingSiteHeader plainBg />
 
       <main className="pt-0">
-        {/* 1. Hero — construire / connecter / automatiser */}
         <HomePlatformHero />
-
-        {/* 2. Reconnaissance — problèmes concrets BTP */}
-        <HomeProblemsRecognition />
-
-        {/* 3. Plateforme — modules métier */}
-        <HomePlatformModules />
-
-        {/* 4. Connexions logiciels */}
-        <HomeConnectSoftware />
-
-        {/* 5. Automatisations — workflows visuels */}
-        <HomeAutomations />
-
-        {/* 6. Adaptation — pas votre entreprise qui s'adapte */}
-        <HomeCoreAdaptation />
-
-        {/* 7. UX adoption — puissante derrière, simple devant */}
-        <HomeAdoptionUx />
-
-        {/* 8. Solutions IA avancées — repositionnées plus bas */}
-        <HomeAiAdvanced />
-
-        {/* 9. Méthode */}
-        <HomeMethodFlow />
-
-        {/* 10. Trust */}
-        <HomeTrustBand />
-
-        {/* 11. CTA final */}
+        <HomePossibilityBridge />
+        <HomeStartFromZero />
+        <HomeCreateShowcase />
+        <HomeFormationDay />
+        <HomeAudienceProfiles />
+        <HomeMetierIdeas />
+        <HomePricingSession />
+        <HomeSmallGroups />
+        <HomeEmotionalShift />
         <HomeDemoClose />
 
-        {/* FAQ */}
         <section id="faq" className={`${HOME_SECTION} bg-white`} aria-labelledby="faq-heading">
           <div className="container-site">
             <HomeSectionHeader
@@ -210,8 +176,11 @@ export default function HomePage() {
               title="Questions fréquentes"
               lead={
                 <>
-                  Les précisions avant un premier échange.{" "}
-                  <Link href="/faq" className="font-semibold text-[#0a0a0a] underline-offset-2 hover:underline">
+                  Les réponses essentielles avant de vous inscrire.{" "}
+                  <Link
+                    href="/faq"
+                    className="font-semibold text-[#0a0a0a] underline-offset-2 hover:underline"
+                  >
                     Voir toute la FAQ
                   </Link>
                 </>
@@ -226,22 +195,28 @@ export default function HomePage() {
               ))}
             </dl>
             <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-slate-500">
-              Tarifs et formules :{" "}
-              <Link href="/tarifs" className="font-semibold text-[#0a0a0a] underline-offset-2 hover:underline">
-                voir les tarifs
-              </Link>
-              {" · "}
-              Notre approche :{" "}
+              Tarif :{" "}
               <Link
-                href="/notre-facon-de-travailler"
+                href="/tarifs"
                 className="font-semibold text-[#0a0a0a] underline-offset-2 hover:underline"
               >
-                méthode BeWork
+                200 € / participant
               </Link>
               {" · "}
-              Ressources :{" "}
-              <Link href="/ressources" className="font-semibold text-[#0a0a0a] underline-offset-2 hover:underline">
-                centre de ressources
+              Démonstrations :{" "}
+              <Link
+                href="/demonstrations"
+                className="font-semibold text-[#0a0a0a] underline-offset-2 hover:underline"
+              >
+                voir les exemples
+              </Link>
+              {" · "}
+              Formation :{" "}
+              <Link
+                href="/formation"
+                className="font-semibold text-[#0a0a0a] underline-offset-2 hover:underline"
+              >
+                le détail de la journée
               </Link>
             </p>
           </div>

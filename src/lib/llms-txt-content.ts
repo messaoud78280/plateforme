@@ -111,58 +111,19 @@ ${line("Cas clients", "/cas-clients")}
 
 ## Pages clés
 
-${line("Accueil", "/", "Solutions IA sur mesure et plateformes métier pour le BTP.")}
-${line("Capacités plateforme (AO, DCE, marchés)", "/assistants-administratifs-taches", "Modules et workflows : candidatures/DCE, organisation de réponse et suivi admin marché public — utilisés par vos équipes.")}
-${line("Services", "/services")}
-${line("Tarifs", "/tarifs", "Projet IA ou plateforme — sur étude — bework.fr/tarifs.")}
-${line("Contact & étude de besoin", "/contact")}
+${line("Accueil", "/", "Formation pratique : apprendre à créer sites, apps et outils avec l’IA — sans prérequis en programmation.")}
+${line("La formation", "/formation", "Journée pratique en petit groupe — méthode de création avec l’IA.")}
+${line("Démonstrations", "/demonstrations", "Exemples interactifs : messagerie, agenda, CRM, réservation…")}
+${line("Pour qui ?", "/pour-qui")}
+${line("Tarifs", "/tarifs", "Session à 200 € / participant.")}
+${line("Contact / Participer", "/contact")}
 ${line("FAQ", "/faq")}
-${line("Notre façon de travailler", "/notre-facon-de-travailler", "Comprendre, concevoir, déployer, former, accompagner, évoluer.")}
 
-## Déploiement par pays (URLs historiques)
+## Archives SEO historiques (réorientation progressive)
 
-${line("Plateforme BTP France", "/externalisation-administrative-btp-france")}
-${line("Plateforme BTP Belgique", "/externalisation-administrative-btp-belgique")}
-${line("Plateforme BTP Suisse", "/externalisation-administrative-btp-suisse")}
-${line("Plateforme BTP Luxembourg", "/externalisation-administrative-btp-luxembourg")}
-
-## Douleurs business BTP
-
-${line("Relance devis BTP", "/relance-devis-btp")}
-${line("Devis en retard", "/devis-retard-btp")}
-${line("Chantier mal suivi", "/chantier-mal-suivi")}
-${line("Facture impayée BTP", "/facture-impayee-btp")}
-${line("Comparatif plateforme vs recruter / externaliser", "/comparatif-assistance-travaux-btp")}
-${line("Checklist dépôt appel d'offres BTP", "/checklist-depot-appel-offres-btp")}
-${line("Admin BTP sans recruter", "/admin-btp-sans-recruter")}
-
-## Appels d'offres & marchés publics
-
-${line("Réponse aux appels d'offres BTP", "/reponse-appel-offres-btp", "Analyse DCE, pièces, structure mémoire, préparation dépôt — prix et dépôt définitif chez le client.")}
-${line("Réponses AO (section hub)", "/assistants-administratifs-taches#reponses-appels-offres")}
-${line("Facturation Chorus Pro BTP", "/facturation-chorus-pro-btp")}
-${line("Suivi admin marché public BTP", "/gestion-marche-public-btp")}
-${line("Promoteurs immobiliers", "/promoteurs-immobiliers")}
-${line("Marchés publics & exécution (7 blocs)", "/assistants-administratifs-taches#marches-publics-accords-cadres")}
-
-## Plateforme travaux par pays
-
-${line("Plateforme travaux France", "/assistant-travaux-france")}
-${line("Plateforme travaux Belgique", "/assistant-travaux-belgique")}
-${line("Plateforme travaux Suisse", "/assistant-travaux-suisse")}
-${line("Plateforme travaux Luxembourg", "/assistant-travaux-luxembourg")}
-
-## Plateforme travaux par ville
-
-${(Object.entries(ASSISTANT_TRAVAUX_VILLE_PATHS) as [keyof typeof ASSISTANT_TRAVAUX_VILLE_PATHS, string][])
-  .map(([key, path]) => line(`Plateforme BTP ${ASSISTANT_TRAVAUX_VILLES[key].label}`, path))
-  .join("\n")}
-
-## Blog SEO (appels d'offres & administratif chantier)
-
-${Object.entries(BLOG_ARTICLES_SEO)
-  .map(([slug, a]) => line(a.title, `/blog/${slug}`, a.description))
-  .join("\n")}
+${line("Services (archives)", "/services")}
+${line("Ressources", "/ressources")}
+${line("Cas clients", "/cas-clients")}
 
 ## Fichiers machine
 

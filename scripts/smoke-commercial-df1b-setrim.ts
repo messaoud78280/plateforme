@@ -135,7 +135,9 @@ async function main() {
     },
   });
   const settings = await ensureCommercialOrgSettings(ORG_ID);
-  const pdf = generatePdfForQuoteVersion({
+  const pdf = await generatePdfForQuoteVersion({
+    orgId: ORG_ID,
+    quoteId: quote.id,
     quote: {
       ...ctxQuote,
       projectTitle: ctxQuote.project?.title ?? null,
@@ -143,6 +145,7 @@ async function main() {
     version,
     quoteMentions: settings.quoteMentions,
     legalMentions: settings.legalMentions,
+    internalNotes: ctxQuote.internalNotes,
   });
   const latin = pdf.toString("latin1");
   assert.ok(pdf.length > 800);

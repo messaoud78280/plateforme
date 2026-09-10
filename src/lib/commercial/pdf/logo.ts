@@ -19,7 +19,16 @@ export function tryDrawLogo(
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const path = require("path") as typeof import("path");
     const raw = logoPath.trim();
-    if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("data:")) {
+    // data: pré-résolu (URL http téléchargée côté serveur avant génération)
+    if (raw.startsWith("data:")) {
+      const isJpeg = raw.startsWith("data:image/jpeg") || raw.startsWith("data:image/jpg");
+      const ext = isJpeg ? "JPEG" : "PNG";
+      let w = maxW;
+      let h = Math.min(maxH, maxW * 0.42);
+      doc.addImage(raw, ext, x, y, w, h);
+      return h + 2;
+    }
+    if (raw.startsWith("http://") || raw.startsWith("https://")) {
       return 0;
     }
     const p = raw.startsWith("/")

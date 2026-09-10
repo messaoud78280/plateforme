@@ -14,6 +14,10 @@ import {
   parseQuoteDocumentSettings,
   type QuoteDocumentSettings,
 } from "@/lib/commercial/pdf/document-settings";
+import {
+  appendThicknessToDescription,
+  parseLineTechnicalInfo,
+} from "@/lib/commercial/line-technical-info";
 
 export type QuotePdfVersionSource = {
   id: string;
@@ -41,6 +45,7 @@ export type QuotePdfVersionSource = {
     lineVat?: unknown;
     isOptional: boolean;
     sortOrder: number;
+    compositionSnapshotJson?: unknown;
   }>;
 };
 
@@ -67,11 +72,12 @@ function asSnapshot(raw: unknown): QuotePdfSnapshot | null {
 }
 
 function mapLine(l: QuotePdfVersionSource["lines"][number]) {
+  const tech = parseLineTechnicalInfo(l.compositionSnapshotJson);
   return {
     kind: l.kind,
     reference: l.reference,
     designation: l.designation,
-    description: l.description ?? null,
+    description: appendThicknessToDescription(l.description ?? null, tech.thicknessNote),
     quantity: d(l.quantity),
     unit: l.unit,
     unitSellHt: d(l.unitSellHt),

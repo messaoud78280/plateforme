@@ -2,10 +2,8 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { BlueprintCotationFooterHairline } from "@/components/home/BlueprintCotationDecor";
 import { MarketingSitePreFooter } from "@/components/layout/MarketingSitePreFooter";
-import { BTP_PAIN_PAGE_CLUSTER } from "@/lib/btp-pain-pages";
-import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
+import { DEMO_PROJECTS, BEWORK_FORMATION_TAGLINE } from "@/lib/bework-formation";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
-import { BEWORK_BRAND_SIGNATURE } from "@/lib/seo-keywords";
 import { SITE_URL, getOrgSameAs } from "@/lib/site";
 
 const COL_LINK =
@@ -67,10 +65,11 @@ function SocialIcon({ type }: { type: ReturnType<typeof socialLabel> }) {
   }
 }
 
-/** Pied de page marketing sombre multi-colonnes (style catalogue type « annuaire pro » adapté au site BeWork). */
+/** Pied de page marketing — positionnement formation création IA. */
 export function MarketingSiteFooter() {
   const year = new Date().getFullYear();
   const sameAs = getOrgSameAs();
+  const demoLinks = DEMO_PROJECTS.slice(0, 5);
 
   return (
     <>
@@ -79,292 +78,174 @@ export function MarketingSiteFooter() {
         <BlueprintCotationFooterHairline />
         <div className="relative z-10 mx-auto max-w-site px-5 py-14 sm:px-6 lg:py-16">
           <div className="grid grid-cols-2 gap-10 sm:gap-12 md:grid-cols-3 lg:grid-cols-6 lg:gap-8">
-          {/* Marque */}
-          <div className="col-span-2 md:col-span-3 lg:col-span-1 lg:max-w-xs">
-            <Link href="/" className="inline-block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
-              <span className="text-xl font-extrabold tracking-tight text-white">
-                Be<span className="text-[color:var(--accent-500)]">Work</span>
-              </span>
-            </Link>
-            <p className="mt-3 text-sm font-medium leading-snug text-slate-300">{BEWORK_BRAND_SIGNATURE}</p>
-            <p className="mt-3 text-base leading-relaxed text-slate-400">
-              BeWork conçoit, déploie et fait évoluer ces plateformes pour les entreprises du BTP. Vos équipes les
-              utilisent au quotidien.
-            </p>
-            <p className="mt-4 text-xs leading-relaxed text-slate-500">
-              Société française — Éditeur et partenaire d&apos;évolution.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <ColumnTitle>Solutions BTP</ColumnTitle>
-            <ul className="flex flex-col gap-3">
-              <li>
-                <Link href="/relance-devis-btp" className={COL_LINK}>
-                  Signer plus de devis
-                </Link>
-              </li>
-              {BTP_PAIN_PAGE_CLUSTER.map((p) => (
-                <li key={p.href}>
-                  <Link href={p.href} className={COL_LINK}>
-                    {p.title}
-                  </Link>
-                </li>
-              ))}
-              <li>
-                <Link href="/dict-dt-travaux" className={COL_LINK}>
-                  Chantiers &amp; dossiers travaux
-                </Link>
-              </li>
-              <li>
-                <Link href="/impayes-btp-relances" className={COL_LINK}>
-                  Facturation &amp; impayés
-                </Link>
-              </li>
-              <li>
-                <Link href="/suivi-fournisseurs-chantier" className={COL_LINK}>
-                  Fournisseurs &amp; achats
-                </Link>
-              </li>
-              <li>
-                <Link href="/#plateforme" className={COL_LINK}>
-                  Plateforme interne BTP
-                </Link>
-              </li>
-              <li>
-                <Link href="/#socle" className={COL_LINK}>
-                  Composez votre plateforme
-                </Link>
-              </li>
-              <li>
-                <Link href="/assistants-administratifs-taches" className={COL_LINK}>
-                  Capacités plateforme
-                </Link>
-              </li>
-              <li>
-                <Link href="/assistants-administratifs-taches#marches-publics-accords-cadres" className={COL_LINK}>
-                  Marchés publics &amp; accords-cadres
-                </Link>
-              </li>
-              <li>
-                <Link href="/externaliser-administratif" className={COL_LINK}>
-                  Équiper l&apos;admin BTP
-                </Link>
-              </li>
-              <li>
-                <Link href="/services" className={COL_LINK}>
-                  Capacités métier (hub)
-                </Link>
-              </li>
-              <li>
-                <Link href="/services/compte-rendu-chantier" className={COL_LINK}>
-                  Compte rendu de chantier
-                </Link>
-              </li>
-              <li>
-                <Link href="/services/analyse-dce-btp" className={COL_LINK}>
-                  Analyse DCE
-                </Link>
-              </li>
-              <li>
-                <Link href="/services/ppsps" className={COL_LINK}>
-                  PPSPS
-                </Link>
-              </li>
-              <li>
-                <Link href="/services/doe-btp" className={COL_LINK}>
-                  DOE
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className={COL_LINK}>
-                  Demander une démonstration
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <ColumnTitle>Déploiement par pays</ColumnTitle>
-            <ul className="flex flex-col gap-3">
-              {EXTERNALISATION_ADMIN_BT_NAV.map((z) => (
-                <li key={z.href}>
-                  <Link href={z.href} className={COL_LINK}>
-                    {z.title === "Suisse" ? "Suisse romande" : z.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <ColumnTitle>Ressources</ColumnTitle>
-            <ul className="flex flex-col gap-3">
-              <li>
-                <Link href="/ressources" className={COL_LINK}>
-                  Hub ressources
-                </Link>
-              </li>
-              <li>
-                <Link href="/ressources/tutos" className={COL_LINK}>
-                  Tutoriels PDF
-                </Link>
-              </li>
-              <li>
-                <Link href="/ressources/guides" className={COL_LINK}>
-                  Guides
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog" className={COL_LINK}>
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link href="/cas-clients" className={COL_LINK}>
-                  Cas clients
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <ColumnTitle>Offre &amp; espace client</ColumnTitle>
-            <ul className="flex flex-col gap-3">
-              <li>
-                <Link href="/tarifs" className={COL_LINK}>
-                  Étude tarifaire personnalisée
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact#formulaire" className={COL_LINK}>
-                  Demander une démonstration
-                </Link>
-              </li>
-              <li>
-                <Link href="/essayer" className={COL_LINK}>
-                  Essayer BeWork (14 jours)
-                </Link>
-              </li>
-              <li>
-                <Link href="/inscription" className={COL_LINK}>
-                  Accès client (sur validation)
-                </Link>
-              </li>
-              <li>
-                <Link href="/connexion" className={COL_LINK}>
-                  Connexion
-                </Link>
-              </li>
-              <li>
-                <Link href="/#approche" className={COL_LINK}>
-                  Process BeWork
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <ColumnTitle>À propos</ColumnTitle>
-            <ul className="flex flex-col gap-3">
-              <li>
-                <Link href="/notre-facon-de-travailler" className={COL_LINK}>
-                  Notre façon de travailler
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className={COL_LINK}>
-                  FAQ
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className={COL_LINK} {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "footer-column")}>
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/conditions-generales-vente" className={COL_LINK}>
-                  Conditions générales de vente
-                </Link>
-              </li>
-              <li>
-                <Link href="/mentions-legales" className={COL_LINK}>
-                  Mentions légales
-                </Link>
-              </li>
-              <li>
-                <Link href="/politique-confidentialite" className={COL_LINK}>
-                  Politique de confidentialité
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div className="border-t border-slate-800/90">
-        <div className="mx-auto flex max-w-site flex-col gap-6 px-5 py-6 sm:px-6 md:flex-row md:items-center md:justify-between md:gap-4">
-          <p className="text-sm text-slate-500 sm:text-base">
-            © {year} BeWork. Tous droits réservés.
-          </p>
-
-          <div className="flex flex-wrap items-center gap-5 md:justify-end">
-            {sameAs.length > 0 ? (
-              <>
-                <div className="flex items-center gap-2">
-                  {sameAs.map((url) => {
-                    const t = socialLabel(url);
-                    return (
-                      <a
-                        key={url}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-600 text-slate-400 transition-colors hover:border-slate-400 hover:text-white"
-                        aria-label={t === "other" ? "BeWork — lien externe" : `BeWork sur ${t}`}
-                      >
-                        <SocialIcon type={t} />
-                      </a>
-                    );
-                  })}
-                </div>
-                <span className="hidden h-8 w-px bg-slate-700 sm:block" aria-hidden />
-              </>
-            ) : null}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-slate-400 sm:text-base">
-              <Link href="/faq" className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70">
-                Centre d&apos;aide / FAQ
-              </Link>
+            <div className="col-span-2 md:col-span-3 lg:col-span-1 lg:max-w-xs">
               <Link
-                href="/contact"
-                className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
-                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "footer-bar")}
+                href="/"
+                className="inline-block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
-                Demandes légales
+                <span className="text-xl font-extrabold tracking-tight text-white">
+                  Be<span className="text-[color:var(--accent-500)]">Work</span>
+                </span>
               </Link>
-              <a
-                href={`${SITE_URL}/sitemap.xml`}
-                className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
-              >
-                Plan du site
-              </a>
-              <a
-                href={`${SITE_URL}/llms.txt`}
-                className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
-              >
-                Index IA (llms.txt)
-              </a>
-              <a
-                href={`${SITE_URL}/ai.txt`}
-                className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
-              >
-                Politique IA (ai.txt)
-              </a>
+              <p className="mt-3 text-sm font-medium leading-snug text-slate-300">{BEWORK_FORMATION_TAGLINE}</p>
+              <p className="mt-4 text-xs leading-relaxed text-slate-500">Société française — Formation pratique.</p>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <ColumnTitle>Formation</ColumnTitle>
+              <ul className="flex flex-col gap-3">
+                <li>
+                  <Link href="/formation" className={COL_LINK}>
+                    La formation
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/pour-qui" className={COL_LINK}>
+                    Pour qui ?
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/tarifs" className={COL_LINK}>
+                    Tarif de la session
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact#participer" className={COL_LINK}>
+                    Participer
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <ColumnTitle>Démonstrations</ColumnTitle>
+              <ul className="flex flex-col gap-3">
+                <li>
+                  <Link href="/demonstrations" className={COL_LINK}>
+                    Toutes les démos
+                  </Link>
+                </li>
+                {demoLinks.map((d) => (
+                  <li key={d.slug}>
+                    <Link href={`/demonstrations/${d.slug}`} className={COL_LINK}>
+                      {d.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <ColumnTitle>Ressources</ColumnTitle>
+              <ul className="flex flex-col gap-3">
+                <li>
+                  <Link href="/faq" className={COL_LINK}>
+                    FAQ
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog" className={COL_LINK}>
+                    Blog
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <ColumnTitle>Légal</ColumnTitle>
+              <ul className="flex flex-col gap-3">
+                <li>
+                  <Link href="/mentions-legales" className={COL_LINK}>
+                    Mentions légales
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/politique-confidentialite" className={COL_LINK}>
+                    Politique de confidentialité
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/conditions-generales-vente" className={COL_LINK}>
+                    Conditions générales de vente
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <ColumnTitle>Contact</ColumnTitle>
+              <ul className="flex flex-col gap-3">
+                <li>
+                  <Link
+                    href="/contact"
+                    className={COL_LINK}
+                    {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "footer-column")}
+                  >
+                    Nous écrire
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact#participer" className={COL_LINK}>
+                    Inscription session
+                  </Link>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
-      </div>
-    </footer>
+
+        <div className="border-t border-slate-800/90">
+          <div className="mx-auto flex max-w-site flex-col gap-6 px-5 py-6 sm:px-6 md:flex-row md:items-center md:justify-between md:gap-4">
+            <p className="text-sm text-slate-500 sm:text-base">© {year} BeWork. Tous droits réservés.</p>
+
+            <div className="flex flex-wrap items-center gap-5 md:justify-end">
+              {sameAs.length > 0 ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    {sameAs.map((url) => {
+                      const t = socialLabel(url);
+                      return (
+                        <a
+                          key={url}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-600 text-slate-400 transition-colors hover:border-slate-400 hover:text-white"
+                          aria-label={t === "other" ? "BeWork — lien externe" : `BeWork sur ${t}`}
+                        >
+                          <SocialIcon type={t} />
+                        </a>
+                      );
+                    })}
+                  </div>
+                  <span className="hidden h-8 w-px bg-slate-700 sm:block" aria-hidden />
+                </>
+              ) : null}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-slate-400 sm:text-base">
+                <Link
+                  href="/faq"
+                  className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
+                >
+                  FAQ
+                </Link>
+                <Link
+                  href="/contact"
+                  className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
+                  {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "footer-bar")}
+                >
+                  Contact
+                </Link>
+                <a
+                  href={`${SITE_URL}/sitemap.xml`}
+                  className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
+                >
+                  Plan du site
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </>
   );
 }

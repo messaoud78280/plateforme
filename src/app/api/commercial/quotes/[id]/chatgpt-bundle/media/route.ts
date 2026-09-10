@@ -3,6 +3,7 @@ import { requireCommercialApiSession } from "@/lib/commercial/access";
 import { prisma } from "@/lib/prisma";
 import { createServiceRoleClient } from "@/lib/supabase";
 import { DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
+import { upsertMediaStorageKeyInInternalNotes } from "@/lib/commercial/quote-project-presentation";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -26,7 +27,7 @@ export async function POST(req: Request, ctx: Ctx) {
   const { id: quoteId } = await ctx.params;
   const quote = await prisma.commercialQuote.findFirst({
     where: { id: quoteId, organizationId: auth.orgId },
-    select: { id: true },
+    select: { id: true, internalNotes: true },
   });
   if (!quote) {
     return NextResponse.json({ error: "Devis introuvable" }, { status: 404 });
@@ -71,6 +72,18 @@ export async function POST(req: Request, ctx: Ctx) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    const nextNotes = upsertMediaStorageKeyInInternalNotes(
+      quote.internalNotes,
+      safeKey,
+      path,
+      file.name,
+    );
+    await prisma.commercialQuote.update({
+      where: { id: quoteId },
+      data: { internalNotes: nextNotes },
+    });
+
     return NextResponse.json({
       ok: true,
       key: safeKey,

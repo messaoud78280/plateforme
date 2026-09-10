@@ -11,6 +11,11 @@ import { DOCUMENTS_BUCKET, downloadStorageObject } from "@/lib/storage/supabase-
 import { generateCommercialQuotePdf } from "@/lib/commercial/pdf-quote";
 import { buildQuotePdfInputFromVersion } from "@/lib/commercial/quote-pdf-input";
 import { ensureCommercialOrgSettings } from "@/lib/commercial/settings";
+import {
+  buildProjectPresentationForPdf,
+  resolveLogoDataUrl,
+} from "@/lib/commercial/quote-project-presentation";
+import { parseCompanyProfile } from "@/lib/commercial/company-profile";
 
 export const ACCEPTED_PDF_KIND = "ACCEPTED_PDF";
 
@@ -87,6 +92,7 @@ async function loadVersionPdfContext(orgId: string, quoteId: string, versionId: 
       paymentTerms: true,
       paymentScheduleJson: true,
       clientNotes: true,
+      internalNotes: true,
       siteAddressSnapshot: true,
       clientSnapshotJson: true,
       issuerSnapshotJson: true,
@@ -129,7 +135,9 @@ async function loadVersionPdfContext(orgId: string, quoteId: string, versionId: 
   };
 }
 
-export function generatePdfForQuoteVersion(opts: {
+export async function generatePdfForQuoteVersion(opts: {
+  orgId: string;
+  quoteId: string;
   quote: Parameters<typeof buildQuotePdfInputFromVersion>[0]["quote"];
   version: Parameters<typeof buildQuotePdfInputFromVersion>[0]["version"];
   statusForPdf?: string;
@@ -139,7 +147,8 @@ export function generatePdfForQuoteVersion(opts: {
   accentColor?: string | null;
   documentSettings?: unknown;
   bank?: { iban?: string | null; bic?: string | null; name?: string | null } | null;
-}): Buffer {
+  internalNotes?: string | null;
+}): Promise<Buffer> {
   const input = buildQuotePdfInputFromVersion({
     ...opts,
     documentSettings: opts.documentSettings as
@@ -147,7 +156,24 @@ export function generatePdfForQuoteVersion(opts: {
       | null
       | undefined,
   });
-  return generateCommercialQuotePdf(input);
+
+  const presentation = await buildProjectPresentationForPdf({
+    orgId: opts.orgId,
+    quoteId: opts.quoteId,
+    clientNotes: opts.version.clientNotes ?? opts.quote.clientNotes,
+    internalNotes: opts.internalNotes,
+  });
+
+  const profileLogo = parseCompanyProfile(opts.documentSettings)?.logoPath ?? null;
+  const issuerLogoDataUrl = await resolveLogoDataUrl(
+    input.issuer?.logoPath || profileLogo,
+  );
+
+  return generateCommercialQuotePdf({
+    ...input,
+    projectPresentation: presentation,
+    issuerLogoDataUrl,
+  });
 }
 
 function isAlreadyExistsError(message: string): boolean {
@@ -218,7 +244,9 @@ export async function ensureAcceptedQuoteSnapshot(
   const ctx = await loadVersionPdfContext(orgId, quoteId, versionId);
 
   const t0 = Date.now();
-  const bytes = generatePdfForQuoteVersion({
+  const bytes = await generatePdfForQuoteVersion({
+    orgId,
+    quoteId,
     quote: ctx.quote,
     version: ctx.version,
     statusForPdf: "ACCEPTED",
@@ -228,6 +256,7 @@ export async function ensureAcceptedQuoteSnapshot(
     accentColor: ctx.accentColor,
     documentSettings: ctx.documentSettings,
     bank: ctx.bank,
+    internalNotes: ctx.quote.internalNotes,
   });
   const generationMs = Date.now() - t0;
   const hash = sha256Hex(bytes);
@@ -350,7 +379,9 @@ export async function generateCurrentQuotePdfPreview(
   });
   if (!quote?.currentVersionId) return null;
   const ctx = await loadVersionPdfContext(orgId, quoteId, quote.currentVersionId);
-  const buffer = generatePdfForQuoteVersion({
+  const buffer = await generatePdfForQuoteVersion({
+    orgId,
+    quoteId,
     quote: ctx.quote,
     version: ctx.version,
     quoteMentions: ctx.quoteMentions,
@@ -359,6 +390,7 @@ export async function generateCurrentQuotePdfPreview(
     accentColor: ctx.accentColor,
     documentSettings: ctx.documentSettings,
     bank: ctx.bank,
+    internalNotes: ctx.quote.internalNotes,
   });
   return { buffer, filename: `${quote.number}.pdf` };
 }

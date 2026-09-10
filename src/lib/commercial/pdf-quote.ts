@@ -34,6 +34,7 @@ import {
   DEFAULT_ACCEPTANCE_TEXT,
   type QuoteDocumentSettings,
 } from "@/lib/commercial/pdf/document-settings";
+import type { QuotePdfProjectPresentation } from "@/lib/commercial/quote-project-presentation";
 
 export type QuotePdfSnapshot = {
   name?: string | null;
@@ -112,6 +113,10 @@ export type QuotePdfInput = {
   executionStartNote?: string | null;
   consumerContractContext?: string | null;
   vatBreakdown?: QuotePdfVatSlice[];
+  /** Présentation projet optionnelle (préconisation, étapes, visuels, réserves). */
+  projectPresentation?: QuotePdfProjectPresentation | null;
+  /** Logo déjà résolu en data URL (http/https). */
+  issuerLogoDataUrl?: string | null;
   totals: {
     totalSellHt: number;
     totalVat: number;
@@ -167,6 +172,8 @@ function clientBlockLines(s: QuotePdfSnapshot | null): string[] {
     s.addressLine1 || s.address,
     s.addressLine2,
     [s.postalCode || s.zipCode, s.city].filter(Boolean).join(" ") || null,
+    s.email || null,
+    s.phone || null,
   ]);
 }
 
@@ -288,7 +295,8 @@ export function generateQuotePdfBuffer(input: QuotePdfInput): Buffer {
   paintDraftIfNeeded();
 
   // ——— PAGE 1 HEADER ———
-  const logoH = tryDrawLogo(doc, input.issuer?.logoPath, MARGIN, y, 52, 20);
+  const logoSource = input.issuerLogoDataUrl || input.issuer?.logoPath;
+  const logoH = tryDrawLogo(doc, logoSource, MARGIN, y, 38, 16);
   const issuerName = input.issuer?.tradeName || input.issuer?.name || "";
   let leftY = logoH > 0 ? y + logoH + 1.5 : y;
   if (issuerName) {
@@ -896,8 +904,229 @@ export function generateQuotePdfBuffer(input: QuotePdfInput): Buffer {
     drawTextSection("Conditions particulières", particular);
   }
 
-  if (input.clientNotes?.trim()) {
-    drawTextSection("Observations", input.clientNotes.trim());
+  // ——— Présentation du projet (structurée, sans ===) ———
+  const presentation = input.projectPresentation;
+  const drawKeepTitleBody = (title: string, bodyLines: string[]) => {
+    if (!bodyLines.length) return;
+    const firstChunk = Math.min(bodyLines.length, 4);
+    ensureSpace(10 + firstChunk * 3.3);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(FS.section);
+    doc.setTextColor(...brand);
+    doc.text(title, MARGIN, y);
+    y += 4.5;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(FS.small);
+    doc.setTextColor(...SLATE);
+    for (const line of bodyLines) {
+      ensureSpace(4);
+      doc.text(line, MARGIN, y);
+      y += 3.3;
+    }
+    y += 2.5;
+  };
+
+  if (presentation) {
+    const hasVisualStages = presentation.stages.some((s) => s.imageDataUrl);
+    const remaining = contentBottom() - y;
+    // Visuels : démarrer la présentation sur une page dédiée si l’espace restant est trop juste
+    // (évite page 3 quasi vide + titre orphelin).
+    if (
+      presentation.stages.length >= 2 &&
+      (hasVisualStages || remaining < 95) &&
+      y > MARGIN + HEADER_CONT_H + 20
+    ) {
+      startNewPage();
+    }
+
+    ensureSpace(12);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(FS.title);
+    doc.setTextColor(...brand);
+    doc.text("Présentation du projet", MARGIN, y);
+    y += 6;
+
+    if (presentation.intro?.trim()) {
+      const introLines = doc.splitTextToSize(
+        pdfSafe(presentation.intro.trim()),
+        pageW - MARGIN * 2,
+      ) as string[];
+      drawKeepTitleBody("Objet des travaux", introLines);
+    }
+
+    if (presentation.adviceParagraphs.length) {
+      const body = presentation.adviceParagraphs.join("\n\n");
+      const lines = doc.splitTextToSize(
+        pdfSafe(body),
+        pageW - MARGIN * 2,
+      ) as string[];
+      drawKeepTitleBody("Notre préconisation", lines);
+    }
+
+    if (presentation.stages.length) {
+      const colGap = 4;
+      const colW = (pageW - MARGIN * 2 - colGap) / 2;
+      const imgH = 38;
+      const cardBase = 8 + imgH + 3 + 4 + 8;
+
+      // Mesure 1re rangée pour garder titre + cartes ensemble (pas de titre orphelin).
+      const firstLeft = presentation.stages[0]!;
+      const firstRight = presentation.stages[1];
+      const measureDesc = (s: typeof firstLeft | undefined) =>
+        s?.description
+          ? (doc.splitTextToSize(pdfSafe(s.description), colW) as string[]).length
+          : 0;
+      const measureDisc = (s: typeof firstLeft | undefined) =>
+        s && (s.mediaType === "ai_preview" || s.disclaimer)
+          ? (doc.splitTextToSize(
+              pdfSafe(
+                s.disclaimer ||
+                  "Illustration non contractuelle — aperçu indicatif du principe d'intervention.",
+              ),
+              colW,
+            ) as string[]).length
+          : 0;
+      const firstRowH = Math.max(
+        cardBase + measureDesc(firstLeft) * 2.8 + measureDisc(firstLeft) * 2.6,
+        firstRight
+          ? cardBase + measureDesc(firstRight) * 2.8 + measureDisc(firstRight) * 2.6
+          : 0,
+      );
+      ensureSpace(10 + firstRowH);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(FS.section);
+      doc.setTextColor(...brand);
+      doc.text("Déroulement prévisionnel des travaux", MARGIN, y);
+      y += 5;
+
+      for (let i = 0; i < presentation.stages.length; i += 2) {
+        const left = presentation.stages[i];
+        const right = presentation.stages[i + 1];
+        const descLeft = left.description
+          ? (doc.splitTextToSize(pdfSafe(left.description), colW) as string[])
+          : [];
+        const descRight = right?.description
+          ? (doc.splitTextToSize(pdfSafe(right.description), colW) as string[])
+          : [];
+        const discLeft =
+          left.mediaType === "ai_preview" || left.disclaimer
+            ? (doc.splitTextToSize(
+                pdfSafe(
+                  left.disclaimer ||
+                    "Illustration non contractuelle — aperçu indicatif du principe d'intervention.",
+                ),
+                colW,
+              ) as string[])
+            : [];
+        const discRight =
+          right && (right.mediaType === "ai_preview" || right.disclaimer)
+            ? (doc.splitTextToSize(
+                pdfSafe(
+                  right.disclaimer ||
+                    "Illustration non contractuelle — aperçu indicatif du principe d'intervention.",
+                ),
+                colW,
+              ) as string[])
+            : [];
+        const cardH = Math.max(
+          cardBase + descLeft.length * 2.8 + discLeft.length * 2.6,
+          right
+            ? cardBase + descRight.length * 2.8 + discRight.length * 2.6
+            : 0,
+        );
+        if (i > 0) ensureSpace(cardH + 2);
+
+        const drawStageCard = (
+          stage: typeof left,
+          x: number,
+          descs: string[],
+          discs: string[],
+        ) => {
+          let cy = y;
+          if (stage.imageDataUrl && stage.imageFormat) {
+            try {
+              doc.addImage(
+                stage.imageDataUrl,
+                stage.imageFormat,
+                x,
+                cy,
+                colW,
+                imgH,
+              );
+            } catch {
+              doc.setFillColor(...tint(brand, 0.92));
+              doc.rect(x, cy, colW, imgH, "F");
+            }
+          } else {
+            doc.setFillColor(...tint(brand, 0.94));
+            doc.setDrawColor(...RULE);
+            doc.setLineWidth(0.2);
+            doc.rect(x, cy, colW, imgH, "FD");
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(FS.small);
+            doc.setTextColor(...MUTED);
+            doc.text("Visuel à joindre", x + colW / 2, cy + imgH / 2, {
+              align: "center",
+            });
+          }
+          cy += imgH + 3;
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(FS.body);
+          doc.setTextColor(...brand);
+          doc.text(`${stage.order}`, x, cy);
+          cy += 3.5;
+          doc.setTextColor(...INK);
+          const titleLines = doc.splitTextToSize(pdfSafe(stage.title), colW) as string[];
+          doc.text(titleLines, x, cy);
+          cy += titleLines.length * 3.5;
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(FS.small);
+          doc.setTextColor(...SLATE);
+          for (const line of descs) {
+            doc.text(line, x, cy);
+            cy += 2.8;
+          }
+          if (discs.length) {
+            cy += 0.8;
+            doc.setTextColor(...MUTED);
+            doc.setFontSize(6.2);
+            for (const line of discs) {
+              doc.text(line, x, cy);
+              cy += 2.6;
+            }
+          }
+        };
+
+        drawStageCard(left, MARGIN, descLeft, discLeft);
+        if (right) {
+          drawStageCard(right, MARGIN + colW + colGap, descRight, discRight);
+        }
+        y += cardH + 3;
+      }
+      y += 1;
+    }
+
+    if (presentation.reserves.length) {
+      const body = presentation.reserves.join("\n\n");
+      const lines = doc.splitTextToSize(
+        pdfSafe(body),
+        pageW - MARGIN * 2,
+      ) as string[];
+      // Garder réserves + début Bon pour accord ensemble si possible
+      const signaturePreviewH = 42;
+      ensureSpace(10 + Math.min(lines.length, 3) * 3.3 + Math.min(signaturePreviewH, 20));
+      drawKeepTitleBody("Réserves techniques", lines);
+    }
+  } else if (input.clientNotes?.trim()) {
+    // Fallback : notes libres sans sections — strip === visibles
+    const cleaned = input.clientNotes
+      .replace(/={2,}[^=\n]*={2,}/g, "")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+    if (cleaned) {
+      drawTextSection("Observations", cleaned);
+    }
   }
 
   const mentions = [input.quoteMentions, input.legalMentions]

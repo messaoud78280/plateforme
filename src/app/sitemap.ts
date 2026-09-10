@@ -68,9 +68,24 @@ const RESOURCE_EDITORIAL_PAGES = [
 
 const PDF_RESOURCE_PAGES = RESOURCE_PDF_CATALOG.map((r) => entry(r.href, r.kind === "guide" ? 0.83 : 0.81));
 
+const FORMATION_DEMO_PAGES = [
+  "/formation",
+  "/pour-qui",
+  "/demonstrations",
+  "/demonstrations/messagerie",
+  "/demonstrations/agenda",
+  "/demonstrations/reservation",
+  "/demonstrations/crm",
+  "/demonstrations/dashboard",
+  "/demonstrations/espace-client",
+  "/demonstrations/documents",
+  "/demonstrations/site",
+] as const;
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: MetadataRoute.Sitemap = [
     entry("/", 1, "weekly"),
+    ...FORMATION_DEMO_PAGES.map((path) => entry(path, path === "/formation" || path === "/demonstrations" ? 0.95 : 0.88)),
     entry("/assistant-administratif-externalise", 0.95),
     entry("/assistant-administratif-pme", 0.9),
     entry("/assistant-administratif-btp", 0.9),

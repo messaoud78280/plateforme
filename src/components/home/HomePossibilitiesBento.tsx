@@ -20,8 +20,8 @@ export function HomePossibilitiesBento() {
       className={BW_SECTION}
       aria-labelledby="bento-heading"
     >
-      <BwAtmosphere variant="violet" />
-      <div className="container-site relative">
+      <BwAtmosphere variant="creation" />
+      <div className="container-site relative z-[1]">
         <div className="max-w-2xl">
           <p className={BW_EYEBROW}>Des exemples concrets</p>
           <h2 id="bento-heading" className={`mt-3 ${BW_H2}`}>

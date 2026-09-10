@@ -3,38 +3,57 @@
 /* Ancres : évite que le sticky header recouvre la cible au scroll */
 html {
   scroll-padding-top: 5rem;
-  /* Réserve l’espace de la barre de défilement pour limiter les micro-décalages largeur / scroll (header sticky). */
   scrollbar-gutter: stable;
-  /* Coupe le léger débordement horizontal des décors skew sans créer une portée de défilement (voir ancien overflow-hidden sur un bloc parent). */
   overflow-x: clip;
-  /* smooth sur tout le html + ancre # peut provoquer un scroll bloquant vers le haut (Chrome) ; les ancres utilisent scroll-padding-top. */
   scroll-behavior: auto;
-  /* DESIGN-SYSTEM-V3 — fond application calme (grille blueprint très atténuée) */
-  background-color: var(--background);
-  background-image:
-    linear-gradient(to right, rgba(23, 59, 103, 0.022) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(23, 59, 103, 0.022) 1px, transparent 1px);
-  background-size: 48px 48px;
-  background-attachment: local;
+  background-color: var(--bw-canvas, #f9fbff);
+  background-image: none;
 }
 
 body {
   min-width: 0;
   width: 100%;
-  background: transparent;
+  background: linear-gradient(
+    180deg,
+    #f9fbff 0%,
+    #ffffff 18%,
+    #fafcff 45%,
+    #ffffff 72%,
+    #f8faff 100%
+  );
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-family);
   position: relative;
   z-index: 1;
 }
 :root {
+  /* BeWork signature visuelle — backgrounds / marque */
+  --bw-blue: #275be8;
+  --bw-blue-strong: #1753ff;
+  --bw-blue-soft: #dde9ff;
+  --bw-blue-ice: #f1f6ff;
+  --bw-violet: #7657f6;
+  --bw-violet-soft: #eee9ff;
+  --bw-peach: #ffaa78;
+  --bw-peach-soft: #fff0e6;
+  --bw-mint: #62d9b0;
+  --bw-mint-soft: #e6faf3;
+  --bw-ink: #0b0d12;
+  --bw-text: #42526b;
+  --bw-muted: #8190a8;
+  --bw-white: #ffffff;
+  --bw-surface: rgba(255, 255, 255, 0.82);
+  --bw-border: rgba(45, 75, 130, 0.1);
+  --bw-canvas: #f9fbff;
+
   /* DESIGN-SYSTEM-V3 + UI-COLOR-2 — BeWork premium, coloré avec maîtrise */
-  --background: #eef3f9;
+  --background: var(--bw-canvas);
   --foreground: #0f172a;
 
   /* Alias primary (API design demandée) */
-  --primary: #2563eb;
-  --primary-soft: #e8f0fe;
+  --primary: var(--bw-blue);
+  --primary-soft: var(--bw-blue-soft);
   --primary-muted: #dbe7fb;
   --primary-foreground: #ffffff;
 
@@ -1824,7 +1843,7 @@ html[data-density="compact"] .data-table-cc td {
   font-size: 0.8125rem;
 }
 
-/* Overlay futuriste (aurora très discret) — donne la sensation "sorti du futur". */
+/* Overlay ambient global — très discret (pas de grille). */
 html::before {
   content: "";
   position: fixed;
@@ -1833,12 +1852,10 @@ html::before {
   z-index: 0;
   opacity: 0.9;
   background:
-    radial-gradient(650px 320px at 18% 10%, rgba(37, 99, 235, 0.18) 0%, transparent 65%),
-    radial-gradient(520px 280px at 82% 18%, rgba(124, 58, 237, 0.14) 0%, transparent 65%),
-    radial-gradient(560px 300px at 62% 88%, rgba(13, 148, 136, 0.11) 0%, transparent 68%);
-  mix-blend-mode: screen;
-  filter: saturate(1.15);
-  animation: bework-aurora-drift 18s ease-in-out infinite alternate;
+    radial-gradient(900px 480px at 12% 8%, rgba(39, 91, 232, 0.1) 0%, transparent 62%),
+    radial-gradient(780px 420px at 88% 12%, rgba(118, 87, 246, 0.08) 0%, transparent 60%),
+    radial-gradient(700px 400px at 70% 92%, rgba(255, 170, 120, 0.06) 0%, transparent 65%);
+  animation: bework-aurora-drift 24s ease-in-out infinite alternate;
 }
 
 @keyframes bework-aurora-drift {
@@ -1846,13 +1863,276 @@ html::before {
     transform: translate3d(0, 0, 0) scale(1);
   }
   to {
-    transform: translate3d(0, -10px, 0) scale(1.02);
+    transform: translate3d(0, -12px, 0) scale(1.02);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html::before {
     animation: none;
+  }
+}
+
+/* ——— Atmosphères + halos BeWork ——— */
+.bw-atmosphere {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.bw-halo {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.bw-halo--blue {
+  width: min(760px, 92vw);
+  height: min(760px, 92vw);
+  background: radial-gradient(
+    circle,
+    rgba(39, 91, 232, 0.22) 0%,
+    rgba(39, 91, 232, 0.12) 32%,
+    rgba(39, 91, 232, 0.045) 58%,
+    transparent 74%
+  );
+  filter: blur(32px);
+}
+
+.bw-halo--violet {
+  width: min(680px, 88vw);
+  height: min(680px, 88vw);
+  background: radial-gradient(
+    circle,
+    rgba(118, 87, 246, 0.18) 0%,
+    rgba(118, 87, 246, 0.09) 38%,
+    rgba(118, 87, 246, 0.035) 62%,
+    transparent 78%
+  );
+  filter: blur(40px);
+}
+
+.bw-halo--peach {
+  width: min(620px, 85vw);
+  height: min(620px, 85vw);
+  background: radial-gradient(
+    circle,
+    rgba(255, 170, 120, 0.17) 0%,
+    rgba(255, 170, 120, 0.08) 42%,
+    rgba(255, 170, 120, 0.025) 65%,
+    transparent 80%
+  );
+  filter: blur(42px);
+}
+
+.bw-halo--mint {
+  width: min(520px, 75vw);
+  height: min(520px, 75vw);
+  background: radial-gradient(
+    circle,
+    rgba(98, 217, 176, 0.14) 0%,
+    rgba(98, 217, 176, 0.06) 40%,
+    transparent 72%
+  );
+  filter: blur(40px);
+}
+
+/* Hero */
+.bw-atmosphere--hero {
+  background: linear-gradient(135deg, #f8fbff 0%, #ffffff 42%, #fbf9ff 72%, #fffdfc 100%);
+}
+.bw-halo--hero-1 {
+  left: -220px;
+  top: 80px;
+}
+.bw-halo--hero-2 {
+  right: -180px;
+  top: -60px;
+}
+.bw-halo--hero-3 {
+  left: 30%;
+  bottom: -340px;
+}
+
+/* Création / showroom */
+.bw-atmosphere--creation {
+  background: linear-gradient(
+    180deg,
+    rgba(241, 246, 255, 0.82) 0%,
+    #ffffff 25%,
+    rgba(246, 243, 255, 0.72) 60%,
+    #ffffff 100%
+  );
+}
+.bw-halo--creation-1 {
+  left: -180px;
+  bottom: -200px;
+}
+.bw-halo--creation-2 {
+  right: -160px;
+  top: -80px;
+}
+.bw-halo--creation-3 {
+  left: 40%;
+  bottom: -280px;
+  opacity: 0.7;
+}
+
+/* Formation / journée */
+.bw-atmosphere--formation {
+  background: linear-gradient(135deg, #ffffff 0%, #fff9f5 46%, #f6f8ff 100%);
+}
+.bw-halo--formation-1 {
+  right: -120px;
+  top: 10%;
+}
+.bw-halo--formation-2 {
+  left: -160px;
+  top: 20%;
+}
+.bw-halo--formation-3 {
+  left: 45%;
+  bottom: -260px;
+  opacity: 0.55;
+}
+
+/* Timeline calme */
+.bw-atmosphere--timeline {
+  background: linear-gradient(180deg, #fafcff 0%, #ffffff 50%, #f9f7ff 100%);
+}
+.bw-halo--timeline-1 {
+  left: -200px;
+  top: 20%;
+  opacity: 0.75;
+}
+.bw-halo--timeline-2 {
+  right: -180px;
+  bottom: 10%;
+  opacity: 0.45;
+}
+
+/* Réassurance / FAQ / tarif */
+.bw-atmosphere--reassurance {
+  background: linear-gradient(180deg, #ffffff 0%, #fafcff 50%, #ffffff 100%);
+}
+.bw-halo--reassure-1 {
+  left: 20%;
+  top: -180px;
+  opacity: 0.8;
+}
+.bw-halo--reassure-2 {
+  right: -100px;
+  bottom: -160px;
+  opacity: 0.55;
+}
+
+/* CTA final */
+.bw-atmosphere--cta {
+  background: linear-gradient(125deg, #eef4ff 0%, #f4eeff 55%, #fff2e9 100%);
+}
+.bw-halo--cta-1 {
+  left: -200px;
+  top: -40px;
+}
+.bw-halo--cta-2 {
+  right: -160px;
+  top: 10%;
+}
+.bw-halo--cta-3 {
+  left: 35%;
+  bottom: -280px;
+  opacity: 0.65;
+}
+
+/* Surfaces / cards marketing */
+.bw-surface-card {
+  background: var(--bw-surface);
+  border: 1px solid var(--bw-border);
+  box-shadow: 0 12px 40px rgba(30, 50, 90, 0.06);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.bw-surface-tarif {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(241, 246, 255, 0.92));
+  border: 1px solid rgba(39, 91, 232, 0.1);
+  box-shadow: 0 30px 80px rgba(32, 62, 120, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Animations halos */
+@media (prefers-reduced-motion: no-preference) {
+  .bw-atmosphere--animated .bw-halo--blue,
+  .bw-atmosphere--animated .bw-halo--hero-1,
+  .bw-atmosphere--animated .bw-halo--cta-1 {
+    animation: bw-float-a 22s ease-in-out infinite;
+  }
+  .bw-atmosphere--animated .bw-halo--violet,
+  .bw-atmosphere--animated .bw-halo--hero-2,
+  .bw-atmosphere--animated .bw-halo--cta-2 {
+    animation: bw-float-b 28s ease-in-out infinite;
+  }
+  .bw-atmosphere--animated .bw-halo--peach,
+  .bw-atmosphere--animated .bw-halo--hero-3 {
+    animation: bw-breathe 20s ease-in-out infinite;
+  }
+}
+
+@keyframes bw-float-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(25px, -18px, 0) scale(1.035);
+  }
+}
+
+@keyframes bw-float-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-20px, 14px, 0) scale(1.025);
+  }
+}
+
+@keyframes bw-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bw-atmosphere--animated .bw-halo {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .bw-halo--blue,
+  .bw-halo--violet,
+  .bw-halo--peach,
+  .bw-halo--mint {
+    width: min(420px, 95vw);
+    height: min(420px, 95vw);
+    filter: blur(28px);
+    opacity: 0.8;
+  }
+  .bw-halo--hero-3,
+  .bw-halo--creation-3,
+  .bw-halo--formation-3,
+  .bw-halo--cta-3 {
+    display: none;
   }
 }
 

@@ -15,22 +15,22 @@ export function HomeFinalCta() {
       className={BW_SECTION_TIGHT}
       aria-labelledby="final-cta-heading"
     >
-      <BwAtmosphere variant="default" />
-      <div className="container-site relative">
+      <BwAtmosphere variant="cta" />
+      <div className="container-site relative z-[1]">
         <div className="mx-auto max-w-3xl text-center">
           <h2
             id="final-cta-heading"
             className="font-display text-[2rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0a0a0a] sm:text-[2.75rem] md:text-[3.25rem]"
           >
-            Vous venez avec une idée.
+            Une idée.
             <br />
-            <span className="text-[#2563eb]">
-              Vous repartez en sachant comment commencer.
-            </span>
+            Un projet.
+            <br />
+            <span className="text-[#2563eb]">Une nouvelle autonomie.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-slate-500">
-            Une journée pour comprendre, pratiquer et repartir avec une méthode
-            — sans savoir coder.
+            Vous venez avec une idée. Vous repartez en sachant comment commencer
+            à la construire — sans savoir coder.
           </p>
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
             <Link

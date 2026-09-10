@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { BwAtmosphere } from "@/components/home/BwAtmosphere";
 import { CTA_GROUP, CTA_PRIMARY, CTA_SECONDARY } from "@/components/marketing/marketingCtaStyles";
 import { FORMATION_FAQ } from "@/lib/bework-formation";
 import { absoluteUrl } from "@/lib/site";
@@ -56,14 +57,15 @@ const faqWebPageLd = {
 
 export default function FaqPage() {
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
+    <div className="relative min-h-screen overflow-hidden bg-transparent">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqWebPageLd) }} />
+      <BwAtmosphere variant="reassurance" />
       <MarketingSiteHeader plainBg />
 
-      <main className="px-6 py-16 md:py-24">
+      <main className="relative z-[1] px-6 py-16 md:py-24">
         <article className="mx-auto max-w-4xl">
           <header className="mx-auto max-w-3xl text-center">
-            <h1 className="font-heading text-3xl font-bold tracking-tight text-black md:text-4xl">
+            <h1 className="font-heading text-3xl font-bold tracking-tight text-[#0B0D12] md:text-4xl">
               FAQ — Formation BeWork
             </h1>
             <p className="mt-6 text-lg leading-relaxed text-slate-700">

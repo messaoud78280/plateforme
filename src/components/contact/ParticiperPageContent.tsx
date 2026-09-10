@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FormationInterestForm } from "@/components/contact/FormationInterestForm";
+import { BwAtmosphere } from "@/components/home/BwAtmosphere";
 import {
   HOME_BG_SOFT,
   HOME_BG_WHITE,
@@ -157,23 +158,13 @@ export function ParticiperPageContent() {
   return (
     <>
       {/* 1. Intro */}
-      <section className={`${HOME_SECTION} ${HOME_BG_WHITE} relative overflow-hidden border-b border-slate-100`}>
+      <section className={`${HOME_SECTION} ${HOME_BG_WHITE} relative overflow-hidden border-b border-[rgba(45,75,130,0.08)]`}>
+        <BwAtmosphere variant="hero" />
         <div
-          className="pointer-events-none absolute inset-0"
-          aria-hidden
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(15,23,42,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.035) 1px, transparent 1px)",
-            backgroundSize: "56px 56px",
-            maskImage:
-              "radial-gradient(ellipse 75% 65% at 25% 15%, #000 25%, transparent 75%)",
-          }}
-        />
-        <div
-          className="pointer-events-none absolute -left-20 top-8 h-72 w-72 rounded-full bg-[#2563eb]/10 blur-3xl"
+          className="pointer-events-none absolute -left-20 top-8 h-72 w-72 rounded-full bg-[rgba(39,91,232,0.10)] blur-3xl"
           aria-hidden
         />
-        <div className="container-site relative">
+        <div className="container-site relative z-[1]">
           <div className="max-w-3xl">
             <p className={HOME_EYEBROW}>La journée BeWork</p>
             <h1 className="mt-5 font-display text-[2.15rem] font-extrabold leading-[1.05] tracking-[-0.045em] text-[#0a0a0a] sm:text-[3rem] md:text-[3.65rem]">
@@ -271,9 +262,6 @@ export function ParticiperPageContent() {
               className="pointer-events-none absolute inset-0 opacity-40"
               aria-hidden
               style={{
-                backgroundImage:
-                  "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)",
-                backgroundSize: "48px 48px",
                 maskImage:
                   "radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 80%)",
               }}
@@ -498,18 +486,7 @@ export function ParticiperPageContent() {
         aria-labelledby="tarif-journee-heading"
       >
         <div className="container-site">
-          <div className="relative mx-auto max-w-3xl overflow-hidden rounded-[1.75rem] border border-slate-200/90 bg-white px-6 py-12 sm:px-10 sm:py-14">
-            <div
-              className="pointer-events-none absolute inset-0 opacity-50"
-              aria-hidden
-              style={{
-                backgroundImage:
-                  "linear-gradient(rgba(15,23,42,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.03) 1px, transparent 1px)",
-                backgroundSize: "40px 40px",
-                maskImage:
-                  "radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%)",
-              }}
-            />
+          <div className="bw-surface-tarif relative mx-auto max-w-3xl overflow-hidden rounded-[1.75rem] px-6 py-12 sm:px-10 sm:py-14">
             <div className="relative text-center">
               <p className={HOME_EYEBROW}>Une formule simple</p>
               <h2

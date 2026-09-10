@@ -113,37 +113,37 @@ export const METIER_SELECTOR = [
   {
     id: "artisan",
     label: "Artisan",
-    ideas: ["Demandes de devis", "Planning", "Suivi client", "Photos chantier", "Réservations"],
+    ideas: ["Devis", "Planning", "Clients", "Interventions"],
   },
   {
     id: "independant",
     label: "Indépendant",
-    ideas: ["Espace client", "Prise de rendez-vous", "Facturation simple", "Portfolio"],
+    ideas: ["Espace client", "Rendez-vous", "Portfolio", "Suivi"],
   },
   {
     id: "commerce",
     label: "Commerce",
-    ideas: ["Catalogue", "Demandes clients", "Stock léger", "Relances"],
+    ideas: ["Catalogue", "Demandes", "Stock léger", "Relances"],
   },
   {
     id: "restaurant",
     label: "Restaurant",
-    ideas: ["Réservation", "Planning", "Événements", "Demandes clients"],
+    ideas: ["Réservation", "Planning", "Clients", "Événements"],
   },
   {
     id: "agence",
     label: "Agence",
-    ideas: ["CRM", "Suivi commercial", "Pipeline", "Reporting"],
+    ideas: ["CRM", "Pipeline", "Relances", "Reporting"],
   },
   {
     id: "immobilier",
     label: "Immobilier",
-    ideas: ["Prospects", "Biens", "Relances", "Rendez-vous", "Espace client"],
+    ideas: ["Prospects", "Biens", "Relances", "Rendez-vous"],
   },
   {
     id: "entreprise",
     label: "Entreprise",
-    ideas: ["CRM", "Application interne", "Tableau de bord", "Documents"],
+    ideas: ["CRM", "Tableau de bord", "Documents", "Outil interne"],
   },
   {
     id: "porteur",
@@ -206,28 +206,28 @@ export const FORMATION_FAQ = [
     a: "Non. La formation est conçue pour des personnes qui ne viennent pas du développement informatique.",
   },
   {
-    q: "Est-ce que je serai développeur après une journée ?",
-    a: "Non. Ce n’est pas la promesse de BeWork. Vous découvrirez une méthode de création assistée par l’intelligence artificielle et apprendrez à construire progressivement vos propres projets.",
+    q: "Est-ce adapté aux débutants ?",
+    a: "Oui. BeWork part du principe que vous n’avez pas besoin d’être développeur. La journée est pensée pour débuter clairement, sans jargon inutile.",
+  },
+  {
+    q: "Que peut-on créer ?",
+    a: "Sites, applications, systèmes de réservation, CRM, agendas, tableaux de bord, messageries, espaces clients, outils métier ou prototypes — selon votre idée et votre niveau de départ.",
   },
   {
     q: "Dois-je venir avec mon ordinateur ?",
     a: "Oui. La journée est pratique et doit idéalement être suivie depuis votre propre ordinateur.",
   },
   {
-    q: "Peut-on vraiment créer une application sans savoir programmer ?",
-    a: "Il est aujourd’hui possible d’aller très loin grâce à l’intelligence artificielle. La formation vous apprend surtout à structurer votre besoin, guider la création, tester le résultat et comprendre les limites.",
+    q: "Puis-je venir avec une idée ?",
+    a: "Oui. Une idée, même floue, permet justement de mieux comprendre comment structurer un besoin et avancer concrètement.",
   },
   {
-    q: "Puis-je venir avec mon propre projet ?",
-    a: "Oui. Les projets personnels et professionnels permettent justement de mieux comprendre comment appliquer la méthode à un besoin concret.",
-  },
-  {
-    q: "La formation est-elle uniquement destinée aux entreprises ?",
-    a: "Non. Entrepreneurs, indépendants, salariés, artisans, dirigeants et porteurs de projets peuvent participer.",
+    q: "Que vais-je savoir faire après ?",
+    a: "Structurer un besoin, lancer une première création, demander des modifications, tester, corriger et continuer votre projet. Vous ne repartirez pas développeur — vous repartirez capable de commencer.",
   },
   {
     q: "Quels outils utilisez-vous ?",
-    a: "Nous utilisons pendant la journée un environnement de création assisté par intelligence artificielle sélectionné pour être accessible aux débutants. Les outils et la méthode sont présentés directement aux participants.",
+    a: "Nous utilisons pendant la journée un environnement de création assisté par intelligence artificielle, choisi pour être accessible aux débutants. Les outils sont présentés aux participants — pas détaillés sur le site.",
   },
   {
     q: "Pourquoi ne présentez-vous pas toute la méthode sur le site ?",

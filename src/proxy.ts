@@ -12,6 +12,10 @@ import {
   canAccessDashboardHref,
   requiredHrefForApiPath,
 } from "@/lib/equipe-acces/dashboard-policy";
+import {
+  isBeworkV3ConfidentialPath,
+  isBeworkV3LegacyBtpPath,
+} from "@/lib/bework-v3-public-gate";
 
 /** Hôte canonique (ex. www.bework.fr) — dérivé de NEXT_PUBLIC_SITE_URL en prod. */
 function getCanonicalHost(): string {
@@ -187,6 +191,30 @@ export async function proxy(request: NextRequest) {
 
   const blocked = geoBlockResponse(request);
   if (blocked) return blocked;
+
+  const pathname = request.nextUrl.pathname;
+
+  // BeWork V3 — contenus confidentiels (prompts / outils / PDF) : plus accessibles.
+  if (isBeworkV3ConfidentialPath(pathname)) {
+    return new NextResponse("Gone", {
+      status: 410,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+        "X-Robots-Tag": "noindex, nofollow",
+      },
+    });
+  }
+
+  // BeWork V3 — landings SaaS / BTP : redirection vers la formation.
+  if (isBeworkV3LegacyBtpPath(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/formation";
+    url.search = "";
+    const res = NextResponse.redirect(url, 308);
+    res.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return res;
+  }
 
   const canonicalHost = getCanonicalHost();
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();

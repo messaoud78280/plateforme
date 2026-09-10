@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { HomeEditorialQuestion } from "@/components/home/HomeEditorialQuestion";
+import { HomeFaqAccordion } from "@/components/home/HomeFaqAccordion";
 import { HomeFinalCta } from "@/components/home/HomeFinalCta";
 import { HomeJourneeBlock } from "@/components/home/HomeJourneeBlock";
+import { HomeMetierSelector } from "@/components/home/HomeMetierSelector";
 import { HomePlatformHero } from "@/components/home/HomePlatformHero";
 import { HomePossibilitiesBento } from "@/components/home/HomePossibilitiesBento";
-import {
-  BW_EYEBROW,
-  BW_SECTION,
-} from "@/components/home/homeSectionStyles";
-import { BwAtmosphere } from "@/components/home/BwAtmosphere";
+import { HomePricingSession } from "@/components/home/HomePricingSession";
+import { HomeSkillsAfter } from "@/components/home/HomeSkillsAfter";
 import { BEWORK_FORMATION_TAGLINE, FORMATION_FAQ } from "@/lib/bework-formation";
 import { jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
 import {
@@ -31,7 +29,7 @@ const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
   "Sans savoir coder, créez ce que vous imaginez. Journée pratique BeWork pour apprendre à créer sites, applications et outils avec l’IA — 200 € / participant.",
 );
 
-const HOME_FAQ_ITEMS = FORMATION_FAQ.slice(0, 4);
+const HOME_FAQ_ITEMS = FORMATION_FAQ.slice(0, 7);
 
 export const metadata: Metadata = {
   title: { absolute: HOME_META_TITLE },
@@ -137,10 +135,10 @@ const homeJsonLd = {
   ],
 };
 
-/** Homepage — hero validé + suite maquette (étape 1 harmonisation). */
+/** Homepage BeWork V3 — expérience de marque (hero conservé). */
 export default function HomePage() {
   return (
-    <div className="min-h-screen min-w-0 overflow-x-clip bg-[#f7f8fb]">
+    <div className="min-h-screen min-w-0 overflow-x-clip bg-transparent">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
@@ -150,51 +148,12 @@ export default function HomePage() {
         <HomePlatformHero />
         <HomeEditorialQuestion />
         <HomePossibilitiesBento />
+        <HomeMetierSelector />
         <HomeJourneeBlock />
+        <HomeSkillsAfter />
+        <HomePricingSession />
+        <HomeFaqAccordion />
         <HomeFinalCta />
-
-        <section id="faq" className={BW_SECTION} aria-labelledby="faq-heading">
-          <BwAtmosphere variant="soft" />
-          <div className="container-site relative">
-            <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
-              <div>
-                <p className={BW_EYEBROW}>FAQ</p>
-                <h2
-                  id="faq-heading"
-                  className="mt-3 font-display text-[1.85rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0a0a0a] sm:text-[2.5rem]"
-                >
-                  Des questions&nbsp;?
-                  <br />
-                  <span className="text-[#2563eb]">C’est normal.</span>
-                </h2>
-                <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-500 sm:text-base">
-                  Les réponses essentielles avant de vous inscrire.{" "}
-                  <Link
-                    href="/faq"
-                    className="font-semibold text-[#0a0a0a] underline-offset-2 hover:underline"
-                  >
-                    Voir toute la FAQ
-                  </Link>
-                </p>
-              </div>
-              <dl className="space-y-4">
-                {HOME_FAQ_ITEMS.map((item, i) => (
-                  <div
-                    key={i}
-                    className="rounded-2xl border border-slate-200/80 bg-white/90 px-5 py-4 shadow-[0_4px_16px_rgba(15,23,42,0.03)]"
-                  >
-                    <dt className="text-sm font-bold text-[#0a0a0a] sm:text-base">
-                      {item.q}
-                    </dt>
-                    <dd className="mt-2 text-sm leading-relaxed text-slate-600">
-                      {item.a}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </div>
-        </section>
       </main>
       <MarketingSiteFooter />
     </div>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { BwAtmosphere } from "@/components/home/BwAtmosphere";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 
 const HOURS = ["09:00", "10:30", "11:30", "14:00", "15:30", "17:00"] as const;
@@ -19,31 +20,9 @@ export function HomePlatformHero() {
       className="relative scroll-mt-28 overflow-hidden"
       aria-labelledby="hero-heading"
     >
-      {/* Fond maquette : grille + halos */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        aria-hidden
-        style={{
-          backgroundColor: "#f7f8fb",
-          backgroundImage:
-            "linear-gradient(rgba(15,23,42,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.035) 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-        }}
-      />
-      <div
-        className="pointer-events-none absolute -left-24 top-10 h-[28rem] w-[28rem] rounded-full bg-[#93c5fd]/35 blur-[100px]"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute right-[-4rem] top-0 h-[26rem] w-[26rem] rounded-full bg-[#c4b5fd]/40 blur-[110px]"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute bottom-10 left-[20%] h-[18rem] w-[18rem] rounded-full bg-[#fdba74]/25 blur-[90px]"
-        aria-hidden
-      />
+      <BwAtmosphere variant="hero" />
 
-      <div className="container-site relative pb-16 pt-10 sm:pb-20 sm:pt-12 lg:pb-24 lg:pt-14">
+      <div className="container-site relative z-[1] pb-16 pt-10 sm:pb-20 sm:pt-12 lg:pb-24 lg:pt-14">
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-10 xl:gap-14">
           {/* ——— Colonne gauche ——— */}
           <div className="max-w-xl lg:max-w-none">

@@ -83,17 +83,11 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
 
           <div className="hidden items-center gap-2 lg:flex">
             <Link
-              href="/connexion"
-              className="rounded-full px-3 py-2 text-[13px] font-medium text-slate-500 transition hover:text-slate-800"
-            >
-              Se connecter
-            </Link>
-            <Link
-              href="/#journee"
+              href="/contact#participer"
               className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#2563eb] px-4 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(37,99,235,0.28)] transition hover:bg-[#1d4ed8]"
-              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-decouvrir-journee")}
+              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-participer")}
             >
-              Découvrir la journée
+              Participer
               <span aria-hidden>→</span>
             </Link>
           </div>
@@ -130,18 +124,11 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       >
         <div className="container-site flex flex-col gap-3 overflow-y-auto pb-10">
           <Link
-            href="/#journee"
+            href="/contact#participer"
             className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#2563eb] text-sm font-semibold text-white"
             onClick={() => setMobileOpen(false)}
           >
-            Découvrir la journée →
-          </Link>
-          <Link
-            href="/connexion"
-            className="inline-flex h-11 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700"
-            onClick={() => setMobileOpen(false)}
-          >
-            Se connecter
+            Participer →
           </Link>
           <nav className="mt-2 flex flex-col gap-1.5" aria-label="Navigation mobile">
             {NAV_ITEMS.map((item) => (

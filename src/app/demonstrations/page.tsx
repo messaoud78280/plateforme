@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { BwAtmosphere } from "@/components/home/BwAtmosphere";
 import {
-  HOME_BG_WHITE,
   HOME_CARD,
   HOME_CONTENT,
   HOME_EYEBROW,
@@ -29,18 +29,23 @@ export const metadata: Metadata = {
 
 export default function DemonstrationsHubPage() {
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
+    <div className="min-h-screen bg-transparent">
       <MarketingSiteHeader plainBg />
 
       <main>
-        <section className={`${HOME_SECTION} ${HOME_BG_WHITE}`}>
-          <div className="mx-auto max-w-site px-5 sm:px-6">
+        <section className={`${HOME_SECTION} relative overflow-hidden`}>
+          <BwAtmosphere variant="creation" />
+          <div className="relative z-[1] mx-auto max-w-site px-5 sm:px-6">
             <div className={HOME_HEADER}>
               <p className={HOME_EYEBROW}>Démonstrations</p>
-              <h1 className={HOME_H2}>Voyez ce qu&apos;il est possible de créer</h1>
+              <h1 className={HOME_H2}>
+                Ce n&apos;est pas une image.
+                <br />
+                <span className="text-[#275BE8]">Essayez.</span>
+              </h1>
               <p className={HOME_LEAD}>
-                Interfaces d&apos;exemple, données fictives, sans inscription. Ces projets illustrent le type de
-                réalisations abordées pendant nos formations — pas une promesse de livrable clé en main.
+                Découvrez quelques exemples de ce qu&apos;il est aujourd&apos;hui possible de
+                construire. Interfaces d&apos;exemple, données fictives, sans inscription.
               </p>
             </div>
 
@@ -49,19 +54,21 @@ export default function DemonstrationsHubPage() {
                 <li key={demo.slug}>
                   <Link
                     href={`/demonstrations/${demo.slug}`}
-                    className={`${HOME_CARD} group flex h-full flex-col p-6 transition hover:border-[#93c5fd] hover:shadow-md`}
+                    className={`${HOME_CARD} group flex h-full flex-col p-6 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_55px_rgba(30,60,120,0.10)]`}
                   >
                     <span
                       className="h-1.5 w-12 rounded-full"
                       style={{ backgroundColor: demo.accent }}
                       aria-hidden
                     />
-                    <h2 className="mt-4 text-lg font-semibold text-[#0f172a] group-hover:text-[#1d4ed8]">
+                    <h2 className="mt-4 text-lg font-semibold text-[#0B0D12] group-hover:text-[#275BE8]">
                       {demo.title}
                     </h2>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">{demo.description}</p>
-                    <span className="mt-4 text-sm font-semibold text-[#1d4ed8]">
-                      {interactive.has(demo.slug) ? "Ouvrir la démo interactive →" : "Voir l’aperçu →"}
+                    <p className="mt-2 flex-1 text-sm leading-relaxed text-[#42526B]">
+                      {demo.description}
+                    </p>
+                    <span className="mt-4 text-sm font-semibold text-[#275BE8]">
+                      {interactive.has(demo.slug) ? "Explorer →" : "Voir l’aperçu →"}
                     </span>
                   </Link>
                 </li>
@@ -79,7 +86,6 @@ export default function DemonstrationsHubPage() {
           </div>
         </section>
       </main>
-
       <MarketingSiteFooter />
     </div>
   );

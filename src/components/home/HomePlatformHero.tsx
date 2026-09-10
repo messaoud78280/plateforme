@@ -168,18 +168,18 @@ export function HomePlatformHero() {
               style={{ animationDelay: "320ms" }}
             >
               <Link
-                href="/#demonstrations"
-                className={HOME_BTN_PRIMARY}
-                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-voir")}
-              >
-                Voir jusqu’où je peux aller
-              </Link>
-              <Link
                 href="/#journee"
-                className={HOME_BTN_SECONDARY}
+                className={HOME_BTN_PRIMARY}
                 {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-journee")}
               >
                 Découvrir la journée BeWork
+              </Link>
+              <Link
+                href="/#demonstrations"
+                className={HOME_BTN_SECONDARY}
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-voir")}
+              >
+                Voir jusqu’où je peux aller
               </Link>
             </div>
 

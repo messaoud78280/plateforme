@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { MarketingHeaderBlueprintDecor } from "@/components/layout/MarketingHeaderBlueprintDecor";
 import { CTA_PRIMARY } from "@/components/marketing/marketingCtaStyles";
-import { BEWORK_SESSION_PRICE_EUR } from "@/lib/bework-formation";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { BEWORK_BRAND_SIGNATURE } from "@/lib/seo-keywords";
 
@@ -112,7 +111,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-desktop-participer")}
           >
             <span className="whitespace-nowrap">
-              Participer — {BEWORK_SESSION_PRICE_EUR}&nbsp;€
+              Participer
             </span>
           </Link>
         </div>
@@ -154,7 +153,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               onClick={() => setMobileOpen(false)}
               {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-mobile-participer")}
             >
-              Participer — {BEWORK_SESSION_PRICE_EUR}&nbsp;€
+              Participer
             </Link>
 
             <nav className="flex flex-col gap-2" aria-label="Navigation mobile">

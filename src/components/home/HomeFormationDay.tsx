@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   HOME_BG_WHITE,
-  HOME_BTN_PRIMARY,
+  HOME_BTN_SECONDARY,
   HOME_CONTENT,
   HOME_EYEBROW,
   HOME_SECTION,
@@ -80,11 +80,11 @@ export function HomeFormationDay() {
 
         <div className="mt-12 flex justify-center sm:mt-14">
           <Link
-            href="/contact#participer"
-            className={HOME_BTN_PRIMARY}
-            {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-journee-participer")}
+            href="/#tarif"
+            className={HOME_BTN_SECONDARY}
+            {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-journee-tarif")}
           >
-            Participer à une prochaine session
+            Voir ce que comprend la journée
           </Link>
         </div>
       </div>

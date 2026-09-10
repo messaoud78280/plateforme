@@ -6,10 +6,9 @@ import {
   HOME_BTN_SECONDARY,
   HOME_SECTION,
 } from "@/components/home/homeSectionStyles";
-import { BEWORK_SESSION_PRICE_EUR } from "@/lib/bework-formation";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 
-/** Clôture — relancer l’envie puis l’action. */
+/** Clôture — relancer l’envie puis l’action (sans afficher le prix). */
 export function HomeDemoClose() {
   return (
     <section
@@ -37,10 +36,10 @@ export function HomeDemoClose() {
               className={HOME_BTN_PRIMARY}
               {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-close-participer")}
             >
-              Participer — {BEWORK_SESSION_PRICE_EUR}&nbsp;€
+              Demander une place
             </Link>
-            <Link href="/#demonstrations" className={HOME_BTN_SECONDARY}>
-              Revoir les démonstrations
+            <Link href="/#tarif" className={HOME_BTN_SECONDARY}>
+              Revoir le tarif
             </Link>
           </div>
         </div>

@@ -64,15 +64,10 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
         >
           <Link
             href="/"
-            className="flex shrink-0 flex-col gap-0.5"
+            className="flex shrink-0 items-center"
             aria-label="BeWork — Accueil"
           >
             <BeWorkLogo size="sm" priority />
-            <span className="hidden text-[8px] font-semibold uppercase leading-[1.2] tracking-[0.12em] text-slate-400 sm:block sm:text-[9px]">
-              Apprendre aujourd&apos;hui
-              <br />
-              Créer demain
-            </span>
           </Link>
 
           <nav

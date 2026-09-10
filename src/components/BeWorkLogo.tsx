@@ -1,10 +1,10 @@
 import Image from "next/image";
 import { BEWORK_BRAND_SIGNATURE } from "@/lib/seo-keywords";
 
-/** Logo wordmark header BeWork (Be noir + Work bleu) */
-const LOGO_PATH = "/BeWork.logo.wordmark.png";
+/** Logo wordmark BeWork + baseline « Apprendre aujourd’hui / Créer demain » */
+const LOGO_PATH = "/BeWork.logo.brand.png";
 /** Ratio intrinsèque du fichier (évite déformation) */
-const LOGO_RATIO = 968 / 209;
+const LOGO_RATIO = 1024 / 334;
 
 interface BeWorkLogoProps {
   className?: string;
@@ -26,19 +26,19 @@ const sizeBox: Record<
   { heightClass: string; heightPx: number; sizes: string }
 > = {
   sm: {
-    heightClass: "h-10 sm:h-11",
-    heightPx: 44,
-    sizes: "200px",
+    heightClass: "h-16 sm:h-[4.75rem]",
+    heightPx: 76,
+    sizes: "270px",
   },
   md: {
-    heightClass: "h-12 md:h-14",
-    heightPx: 56,
-    sizes: "(max-width:768px) 220px, 280px",
+    heightClass: "h-[5.4rem] md:h-24",
+    heightPx: 97,
+    sizes: "(max-width:768px) 320px, 400px",
   },
   lg: {
-    heightClass: "h-14 md:h-16 lg:h-[4.5rem]",
-    heightPx: 72,
-    sizes: "(max-width:768px) 280px, 360px",
+    heightClass: "h-24 md:h-[6.75rem] lg:h-[8.1rem]",
+    heightPx: 130,
+    sizes: "(max-width:768px) 400px, 510px",
   },
 };
 
@@ -61,7 +61,7 @@ export function BeWorkLogo({
     <span className={`inline-flex flex-col ${className}`}>
       <Image
         src={LOGO_PATH}
-        alt="BeWork — plateformes intelligentes pour le BTP"
+        alt="BeWork — Apprendre aujourd’hui, créer demain"
         width={displayWidth}
         height={displayHeight}
         className={`block shrink-0 object-contain object-left ${override || box.heightClass} ${override ? "" : "w-auto"}`}

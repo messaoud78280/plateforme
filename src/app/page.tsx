@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
-import { HomeEditorialQuestion } from "@/components/home/HomeEditorialQuestion";
 import { HomeFaqAccordion } from "@/components/home/HomeFaqAccordion";
 import { HomeFinalCta } from "@/components/home/HomeFinalCta";
 import { HomeJourneeBlock } from "@/components/home/HomeJourneeBlock";
@@ -92,7 +91,6 @@ export default function HomePage() {
       <MarketingSiteHeader plainBg />
       <main>
         <HomePlatformHero />
-        <HomeEditorialQuestion />
         <HomePossibilitiesBento />
         <HomeMetierSelector />
         <HomeJourneeBlock />

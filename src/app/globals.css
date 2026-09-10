@@ -2371,6 +2371,13 @@ html::before {
   z-index: 5;
 }
 
+/* Hero : pas de mask bas (évite une couture avant la section suivante) */
+.bw-home-flow > section#hero {
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+  mask: none !important;
+}
+
 /* Préfooter marketing : sans trait, transparent */
 .bw-prefooter-blend {
   border-top: none !important;

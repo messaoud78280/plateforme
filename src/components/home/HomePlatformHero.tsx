@@ -268,8 +268,8 @@ export function HomePlatformHero() {
           </div>
         </div>
 
-        {/* Barre confiance */}
-        <ul className="mt-14 grid gap-6 border-t border-slate-200/70 pt-8 sm:mt-16 sm:grid-cols-3 sm:gap-8">
+        {/* Barre confiance — sans border-t (évite la ligne horizontale parasite) */}
+        <ul className="mt-14 grid gap-6 pt-2 sm:mt-16 sm:grid-cols-3 sm:gap-8">
           {TRUST.map((item) => (
             <li key={item.title} className="flex items-start gap-3">
               <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eff6ff] text-[#275BE8]">

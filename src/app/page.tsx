@@ -2,20 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
-import { HomeBigQuestion } from "@/components/home/HomeBigQuestion";
-import { HomeBrandStatement } from "@/components/home/HomeBrandStatement";
-import { HomeDemoClose } from "@/components/home/HomeDemoClose";
-import { HomeEditorialTrigger } from "@/components/home/HomeEditorialTrigger";
-import { HomeFormationDay } from "@/components/home/HomeFormationDay";
-import { HomeMetierSelector } from "@/components/home/HomeMetierSelector";
+import { HomeEditorialQuestion } from "@/components/home/HomeEditorialQuestion";
+import { HomeFinalCta } from "@/components/home/HomeFinalCta";
+import { HomeJourneeBlock } from "@/components/home/HomeJourneeBlock";
 import { HomePlatformHero } from "@/components/home/HomePlatformHero";
-import { HomePricingSession } from "@/components/home/HomePricingSession";
-import { HomeSectionHeader } from "@/components/home/HomeSectionHeader";
-import { HomeShowroomBento } from "@/components/home/HomeShowroomBento";
-import { HomeStartFromZero } from "@/components/home/HomeStartFromZero";
-import { HOME_SECTION } from "@/components/home/homeSectionStyles";
-import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
-import { FORMATION_FAQ, BEWORK_FORMATION_TAGLINE } from "@/lib/bework-formation";
+import { HomePossibilitiesBento } from "@/components/home/HomePossibilitiesBento";
+import {
+  BW_EYEBROW,
+  BW_SECTION,
+} from "@/components/home/homeSectionStyles";
+import { BwAtmosphere } from "@/components/home/BwAtmosphere";
+import { BEWORK_FORMATION_TAGLINE, FORMATION_FAQ } from "@/lib/bework-formation";
 import { jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
 import {
   SEO_OG_ALTERNATE_LOCALES,
@@ -31,7 +28,7 @@ import { SITE_URL } from "@/lib/site";
 
 const HOME_META_TITLE = SEO_SITE_TITLE_DEFAULT;
 const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
-  "Créer avec l’IA sans savoir coder : sites, applications et outils professionnels. Journée pratique BeWork — 200 € / participant. Aucun prérequis en programmation.",
+  "Sans savoir coder, créez ce que vous imaginez. Journée pratique BeWork pour apprendre à créer sites, applications et outils avec l’IA — 200 € / participant.",
 );
 
 const HOME_FAQ_ITEMS = FORMATION_FAQ.slice(0, 4);
@@ -53,17 +50,9 @@ export const metadata: Metadata = {
   keywords: [
     ...SEO_KEYWORDS_HOME,
     BEWORK_BRAND_SIGNATURE,
-    "créer avec l'IA",
     "créer sans savoir coder",
-    "créer une application avec l'IA",
-    "création site avec IA",
-    "outil professionnel avec IA",
-    "application sans code",
-    "formation IA débutant",
-    "IA pour entrepreneur",
-    "IA pour artisan",
-    "IA pour indépendant",
-    "formation intelligence artificielle pratique",
+    "créer avec l'IA",
+    "formation IA pratique",
   ],
   alternates: { canonical: SITE_URL, languages: hreflangFrancophonieLanguages("/") },
   openGraph: {
@@ -103,7 +92,6 @@ const homeJsonLd = {
       about: [
         { "@type": "Thing", name: "Créer avec l’IA" },
         { "@type": "Thing", name: "Créer sans savoir coder" },
-        { "@type": "Thing", name: "Formation pratique intelligence artificielle" },
       ],
       speakable: {
         "@type": "SpeakableSpecification",
@@ -149,34 +137,37 @@ const homeJsonLd = {
   ],
 };
 
+/** Homepage — hero validé + suite maquette (étape 1 harmonisation). */
 export default function HomePage() {
   return (
-    <div className="min-h-screen min-w-0 overflow-x-clip bg-white">
+    <div className="min-h-screen min-w-0 overflow-x-clip bg-[#f7f8fb]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
       />
       <MarketingSiteHeader plainBg />
-
-      <main className="pt-0">
+      <main>
         <HomePlatformHero />
-        <HomeEditorialTrigger />
-        <HomeBigQuestion />
-        <HomeShowroomBento />
-        <HomeMetierSelector />
-        <HomeStartFromZero />
-        <HomeBrandStatement />
-        <HomeFormationDay />
-        <HomePricingSession />
-        <HomeDemoClose />
+        <HomeEditorialQuestion />
+        <HomePossibilitiesBento />
+        <HomeJourneeBlock />
+        <HomeFinalCta />
 
-        <section id="faq" className={`${HOME_SECTION} bg-[#fafafa]`} aria-labelledby="faq-heading">
-          <div className="container-site">
-            <HomeSectionHeader
-              id="faq-heading"
-              title="Questions fréquentes"
-              lead={
-                <>
+        <section id="faq" className={BW_SECTION} aria-labelledby="faq-heading">
+          <BwAtmosphere variant="soft" />
+          <div className="container-site relative">
+            <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
+              <div>
+                <p className={BW_EYEBROW}>FAQ</p>
+                <h2
+                  id="faq-heading"
+                  className="mt-3 font-display text-[1.85rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0a0a0a] sm:text-[2.5rem]"
+                >
+                  Des questions&nbsp;?
+                  <br />
+                  <span className="text-[#2563eb]">C’est normal.</span>
+                </h2>
+                <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-500 sm:text-base">
                   Les réponses essentielles avant de vous inscrire.{" "}
                   <Link
                     href="/faq"
@@ -184,33 +175,27 @@ export default function HomePage() {
                   >
                     Voir toute la FAQ
                   </Link>
-                </>
-              }
-            />
-            <dl className="mx-auto mt-10 max-w-2xl space-y-6 sm:mt-12">
-              {HOME_FAQ_ITEMS.map((item, i) => (
-                <div key={i}>
-                  <dt className="text-base font-semibold text-[#0a0a0a]">{item.q}</dt>
-                  <dd className="mt-2 text-sm leading-relaxed text-slate-600">{item.a}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-slate-500">
-              Tarif :{" "}
-              <Link
-                href="/#tarif"
-                className="font-semibold text-[#0a0a0a] underline-offset-2 hover:underline"
-              >
-                200&nbsp;€ / participant
-              </Link>
-              .
-            </p>
+                </p>
+              </div>
+              <dl className="space-y-4">
+                {HOME_FAQ_ITEMS.map((item, i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl border border-slate-200/80 bg-white/90 px-5 py-4 shadow-[0_4px_16px_rgba(15,23,42,0.03)]"
+                  >
+                    <dt className="text-sm font-bold text-[#0a0a0a] sm:text-base">
+                      {item.q}
+                    </dt>
+                    <dd className="mt-2 text-sm leading-relaxed text-slate-600">
+                      {item.a}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </div>
         </section>
-
-        <SeoInternalLinks path="/" />
       </main>
-
       <MarketingSiteFooter />
     </div>
   );

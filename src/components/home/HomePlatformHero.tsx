@@ -1,408 +1,287 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import {
-  HOME_BTN_GROUP,
-  HOME_BTN_PRIMARY,
-  HOME_BTN_SECONDARY,
-  HOME_REVEAL,
-} from "@/components/home/homeSectionStyles";
+import { useState } from "react";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 
-type Scene = {
-  idea: string;
-  chips: readonly string[];
-  kind: "reservation" | "crm" | "client" | "dashboard";
-};
+const HOURS = ["09:00", "10:30", "11:30", "14:00", "15:30", "17:00"] as const;
+const DAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"] as const;
+const DATES = [24, 25, 26, 27, 28, 29, 30] as const;
 
-const SCENES: readonly Scene[] = [
-  {
-    idea: "Un système permettant à mes clients de réserver directement un rendez-vous.",
-    chips: ["Réservation", "Calendrier", "Clients", "Notifications"],
-    kind: "reservation",
-  },
-  {
-    idea: "Un outil pour suivre mes prospects et mes relances.",
-    chips: ["Prospects", "Opportunités", "Relances", "Dashboard"],
-    kind: "crm",
-  },
-  {
-    idea: "Un espace permettant à mes clients de suivre leur projet.",
-    chips: ["Espace client", "Documents", "Progression", "Notifications"],
-    kind: "client",
-  },
-  {
-    idea: "Un tableau de bord pour comprendre mon activité en un coup d’œil.",
-    chips: ["Indicateurs", "Tendances", "Alertes", "Objectifs"],
-    kind: "dashboard",
-  },
-] as const;
-
-/** Hero V2 — composition éditoriale asymétrique + signature Idée → Outil. */
+/** Hero maquette — colonne gauche éditoriale + mockup MonStudio. */
 export function HomePlatformHero() {
-  const [reduceMotion, setReduceMotion] = useState(false);
-  const [sceneIndex, setSceneIndex] = useState(0);
-  const [phase, setPhase] = useState<"idea" | "chips" | "ui">("idea");
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const apply = () => setReduceMotion(mq.matches);
-    apply();
-    mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
-  }, []);
-
-  useEffect(() => {
-    if (reduceMotion) {
-      setPhase("ui");
-      return;
-    }
-
-    let cancelled = false;
-    let timeout: ReturnType<typeof setTimeout>;
-
-    const run = () => {
-      setVisible(true);
-      setPhase("idea");
-      timeout = setTimeout(() => {
-        if (cancelled) return;
-        setPhase("chips");
-        timeout = setTimeout(() => {
-          if (cancelled) return;
-          setPhase("ui");
-          timeout = setTimeout(() => {
-            if (cancelled) return;
-            setVisible(false);
-            timeout = setTimeout(() => {
-              if (cancelled) return;
-              setSceneIndex((i) => (i + 1) % SCENES.length);
-              run();
-            }, 420);
-          }, 4200);
-        }, 900);
-      }, 700);
-    };
-
-    run();
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
-    };
-  }, [reduceMotion]);
-
-  const scene = SCENES[sceneIndex];
+  const [slot, setSlot] = useState<(typeof HOURS)[number]>("11:30");
+  const [day, setDay] = useState(26);
 
   return (
     <section
       id="hero"
-      className="relative scroll-mt-24 overflow-hidden border-b border-slate-100"
+      className="relative scroll-mt-28 overflow-hidden"
       aria-labelledby="hero-heading"
     >
+      {/* Fond maquette : grille + halos */}
       <div
         className="pointer-events-none absolute inset-0"
         aria-hidden
         style={{
+          backgroundColor: "#f7f8fb",
           backgroundImage:
             "linear-gradient(rgba(15,23,42,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.035) 1px, transparent 1px)",
-          backgroundSize: "56px 56px",
-          maskImage:
-            "radial-gradient(ellipse 80% 70% at 30% 20%, #000 20%, transparent 75%)",
+          backgroundSize: "48px 48px",
         }}
       />
       <div
-        className="pointer-events-none absolute -left-24 top-10 h-[28rem] w-[28rem] rounded-full bg-[#2563eb]/10 blur-3xl"
+        className="pointer-events-none absolute -left-24 top-10 h-[28rem] w-[28rem] rounded-full bg-[#93c5fd]/35 blur-[100px]"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -right-16 bottom-0 h-[22rem] w-[22rem] rounded-full bg-[#7c3aed]/10 blur-3xl"
+        className="pointer-events-none absolute right-[-4rem] top-0 h-[26rem] w-[26rem] rounded-full bg-[#c4b5fd]/40 blur-[110px]"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute bottom-10 left-[20%] h-[18rem] w-[18rem] rounded-full bg-[#fdba74]/25 blur-[90px]"
         aria-hidden
       />
 
-      <div className="container-site relative py-14 sm:py-16 md:py-20 lg:py-28">
-        <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14 xl:gap-20">
-          {/* Colonne éditoriale */}
-          <div className="max-w-xl lg:max-w-none lg:pt-2">
-            <p
-              className={`text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 ${HOME_REVEAL}`}
-            >
-              BeWork — Créer à l’ère de l’IA
+      <div className="container-site relative pb-16 pt-10 sm:pb-20 sm:pt-12 lg:pb-24 lg:pt-14">
+        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-10 xl:gap-14">
+          {/* ——— Colonne gauche ——— */}
+          <div className="max-w-xl lg:max-w-none">
+            <p className="inline-flex items-center gap-1.5 rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.04em] text-[#1d4ed8]">
+              <span aria-hidden>✦</span>
+              UNE JOURNÉE. DES COMPÉTENCES POUR DEMAIN
             </p>
 
-            <h1 id="hero-heading" className="mt-6 sm:mt-8">
-              <span
-                className={`block font-display text-[1.35rem] font-extrabold leading-[1.15] tracking-[-0.03em] text-[#0a0a0a] sm:text-2xl md:text-[1.75rem] ${HOME_REVEAL}`}
-                style={{ animationDelay: "60ms" }}
-              >
-                Sans savoir coder.
-              </span>
-              <span
-                className={`mt-4 block font-display text-[2.35rem] font-extrabold leading-[1.02] tracking-[-0.045em] text-[#0a0a0a] sm:mt-5 sm:text-[3.25rem] md:text-[3.75rem] lg:text-[4.15rem] ${HOME_REVEAL}`}
-                style={{ animationDelay: "140ms" }}
-              >
-                <span className="text-[#1d4ed8]">Créez</span>{" "}
-                ce que
-                <br className="hidden sm:block" />
-                vous imaginez.
-              </span>
+            <h1
+              id="hero-heading"
+              className="mt-6 font-display text-[2.55rem] font-extrabold leading-[1.02] tracking-[-0.045em] text-[#0a0a0a] sm:mt-7 sm:text-[3.35rem] md:text-[3.85rem] lg:text-[4.15rem]"
+            >
+              <span className="block">Sans savoir coder.</span>
+              <span className="mt-1 block text-[#2563eb]">Créez ce que</span>
+              <span className="block">vous imaginez.</span>
             </h1>
 
-            <p
-              className={`mt-7 max-w-lg text-[1.02rem] leading-relaxed text-slate-600 sm:mt-8 sm:text-lg ${HOME_REVEAL}`}
-              style={{ animationDelay: "200ms" }}
-            >
-              Sites, applications, outils professionnels, plateformes, systèmes
-              de réservation… aucune connaissance en programmation requise.
+            <p className="mt-6 max-w-md text-[1.02rem] leading-relaxed text-slate-500 sm:mt-7 sm:text-[1.08rem]">
+              Une journée pratique pour apprendre à créer des sites, des
+              applications, des outils professionnels ou des systèmes de
+              réservation avec l’IA. Pas de prérequis techniques, juste l’envie
+              de passer de l’idée à la réalité.
             </p>
 
-            <p
-              className={`mt-4 max-w-md text-sm leading-relaxed text-slate-500 sm:text-base ${HOME_REVEAL}`}
-              style={{ animationDelay: "240ms" }}
-            >
-              Vous avez l’idée. BeWork vous apprend à la construire.
-            </p>
-
-            <div
-              className={`mt-8 ${HOME_BTN_GROUP} sm:mt-10 ${HOME_REVEAL}`}
-              style={{ animationDelay: "320ms" }}
-            >
+            <div className="mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap sm:items-center">
               <Link
                 href="/#journee"
-                className={HOME_BTN_PRIMARY}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#2563eb] px-6 text-[0.95rem] font-semibold text-white shadow-[0_12px_28px_rgba(37,99,235,0.32)] transition hover:bg-[#1d4ed8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb]"
                 {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-journee")}
               >
-                Découvrir la journée BeWork
+                Découvrir la journée
+                <span aria-hidden>→</span>
               </Link>
               <Link
-                href="/#demonstrations"
-                className={HOME_BTN_SECONDARY}
-                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-voir")}
+                href="/demonstrations/reservation"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white px-5 text-[0.95rem] font-semibold text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.04)] transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb]/40"
               >
-                Voir jusqu’où je peux aller
+                <span
+                  className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[10px] text-slate-600"
+                  aria-hidden
+                >
+                  ▶
+                </span>
+                Voir la démo (2&nbsp;min)
               </Link>
             </div>
 
-            <div
-              className={`mt-10 flex flex-wrap gap-2 sm:mt-12 ${HOME_REVEAL}`}
-              style={{ animationDelay: "380ms" }}
-            >
-              {["Vous imaginez.", "Vous décrivez.", "Vous construisez."].map(
-                (label, i) => (
+            <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2.5 text-sm text-slate-600 sm:mt-8">
+              {[
+                "Méthode pas à pas",
+                "En petit groupe",
+                "Accessible à tous",
+              ].map((label) => (
+                <li key={label} className="inline-flex items-center gap-2">
                   <span
-                    key={label}
-                    className="bework-pill-holo bework-sheen inline-flex items-center rounded-full px-3.5 py-1.5 text-[10px] font-bold tracking-[0.08em] text-[#0a0a0a] backdrop-blur-[10px] sm:text-[11px]"
-                    style={{
-                      ["--pill-color" as string]:
-                        i === 0 ? "#2563eb" : i === 1 ? "#7c3aed" : "#ea580c",
-                      background:
-                        i === 0
-                          ? "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, #eff6ff 155%)"
-                          : i === 1
-                            ? "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, #f5f3ff 155%)"
-                            : "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, #fff7ed 155%)",
-                      boxShadow:
-                        "0 10px 24px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.62)",
-                    }}
+                    className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[11px] font-bold text-emerald-600"
+                    aria-hidden
                   >
-                    {label}
+                    ✓
                   </span>
-                ),
-              )}
-            </div>
+                  {label}
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* Signature visuelle Idée → Outil */}
-          <div
-            className={`relative ${HOME_REVEAL}`}
-            style={{ animationDelay: "220ms" }}
-            aria-live="polite"
-          >
-            <div className="relative overflow-hidden rounded-[1.75rem] border border-slate-200/90 bg-white/90 p-5 shadow-[0_24px_64px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:p-6 md:p-7">
-              <div
-                className="pointer-events-none absolute inset-0 opacity-[0.45]"
-                aria-hidden
-                style={{
-                  background:
-                    "radial-gradient(ellipse 70% 50% at 80% 0%, rgba(37,99,235,0.12), transparent 60%)",
-                }}
-              />
+          {/* ——— Colonne droite : mockup ——— */}
+          <div className="relative mx-auto w-full max-w-[34rem] lg:mx-0 lg:max-w-none">
+            {/* Bulles */}
+            <div className="absolute -left-1 -top-3 z-20 max-w-[13.5rem] rounded-2xl border border-slate-200/80 bg-white px-3.5 py-3 shadow-[0_12px_32px_rgba(15,23,42,0.1)] sm:-left-4 sm:-top-4 sm:max-w-[15rem] sm:px-4">
+              <p className="text-[11px] font-semibold text-slate-800 sm:text-xs">
+                <span aria-hidden>💡</span> Une idée…
+              </p>
+              <p className="mt-1 text-[11px] leading-snug text-slate-500 sm:text-xs">
+                Un système pour que mes clients réservent un rendez-vous en ligne
+              </p>
+            </div>
 
-              <div className="relative">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                    J’aimerais créer…
-                  </p>
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold text-slate-500">
-                    Idée → Outil
+            <div className="absolute -right-1 top-8 z-20 rounded-full border border-violet-200/80 bg-gradient-to-r from-[#ede9fe] to-[#dbeafe] px-3 py-1.5 text-[11px] font-semibold text-[#5b21b6] shadow-sm sm:right-2 sm:top-6 sm:text-xs">
+              ✦ …devient un outil.
+            </div>
+
+            {/* Icônes flottantes */}
+            <div className="absolute -right-2 top-28 z-10 hidden flex-col gap-2.5 sm:flex lg:-right-3 xl:-right-5">
+              {[
+                { bg: "bg-[#dbeafe]", icon: "📅", label: "Agenda" },
+                { bg: "bg-[#ede9fe]", icon: "👥", label: "Clients" },
+                { bg: "bg-[#ffedd5]", icon: "📊", label: "Stats" },
+                { bg: "bg-[#d1fae5]", icon: "💬", label: "Messages" },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  title={item.label}
+                  className={`flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 ${item.bg} text-base shadow-[0_8px_20px_rgba(15,23,42,0.08)]`}
+                >
+                  <span aria-hidden>{item.icon}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Panneau MonStudio */}
+            <div className="relative z-[1] mt-10 overflow-hidden rounded-[1.5rem] border border-slate-200/90 bg-white shadow-[0_28px_64px_rgba(15,23,42,0.12)] sm:mt-8 sm:rounded-[1.75rem]">
+              <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-5">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#2563eb] text-[11px] font-bold text-white">
+                    M
+                  </span>
+                  <span className="text-sm font-bold tracking-tight text-slate-900">
+                    MonStudio
                   </span>
                 </div>
+                <nav className="hidden items-center gap-1 text-[11px] font-medium text-slate-500 sm:flex">
+                  {["Réservation", "Calendrier", "Clients", "Paramètres"].map(
+                    (label, i) => (
+                      <span
+                        key={label}
+                        className={`rounded-md px-2 py-1 ${
+                          i === 0 ? "bg-[#eff6ff] text-[#2563eb]" : ""
+                        }`}
+                      >
+                        {label}
+                      </span>
+                    ),
+                  )}
+                </nav>
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-500">
+                  SL
+                </span>
+              </div>
 
-                <div
-                  className={`mt-4 min-h-[4.5rem] transition-all duration-[420ms] ease-out ${
-                    visible
-                      ? "translate-y-0 opacity-100 blur-0"
-                      : "translate-y-2 opacity-0 blur-[3px]"
-                  }`}
-                >
-                  <p className="font-display text-lg font-bold leading-snug tracking-tight text-[#0a0a0a] sm:text-xl">
-                    {scene.idea}
-                  </p>
-                </div>
+              <div className="p-4 sm:p-5">
+                <h2 className="text-base font-bold tracking-tight text-slate-900 sm:text-lg">
+                  Réserver un rendez-vous
+                </h2>
+                <p className="mt-1 text-xs text-slate-500 sm:text-sm">
+                  Choisissez un créneau qui vous convient.
+                </p>
 
-                <div
-                  className={`mt-5 flex flex-wrap gap-2 transition-all duration-500 ease-out ${
-                    phase === "idea" && !reduceMotion
-                      ? "translate-y-1 opacity-0"
-                      : "translate-y-0 opacity-100"
-                  }`}
-                >
-                  {scene.chips.map((chip, i) => (
-                    <span
-                      key={`${scene.kind}-${chip}`}
-                      className="rounded-full border border-[#2563eb]/15 bg-[#eff6ff]/80 px-3 py-1 text-[11px] font-semibold text-[#1d4ed8] transition-all duration-500"
-                      style={{
-                        transitionDelay: reduceMotion ? "0ms" : `${i * 70}ms`,
-                        opacity: phase === "idea" && !reduceMotion ? 0 : 1,
-                        transform:
-                          phase === "idea" && !reduceMotion
-                            ? "translateY(6px)"
-                            : "translateY(0)",
-                      }}
+                <div className="mt-4 grid gap-4 sm:grid-cols-[1.15fr_0.85fr]">
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3">
+                    <div className="mb-3 flex items-center justify-between">
+                      <p className="text-xs font-bold text-slate-800">Mars 2024</p>
+                      <div className="flex gap-1">
+                        <span className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] text-slate-400">
+                          ‹
+                        </span>
+                        <span className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] text-slate-400">
+                          ›
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mb-1.5 grid grid-cols-7 gap-1 text-center text-[9px] font-semibold text-slate-400">
+                      {DAYS.map((d) => (
+                        <span key={d}>{d}</span>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-7 gap-1">
+                      {DATES.map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => setDay(d)}
+                          className={`rounded-lg py-1.5 text-[11px] font-semibold transition ${
+                            day === d
+                              ? "bg-[#2563eb] text-white shadow-sm"
+                              : "bg-white text-slate-700 hover:bg-slate-100"
+                          }`}
+                        >
+                          {d}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-bold text-slate-800">
+                      Mardi {day} mars
+                    </p>
+                    <div className="mt-2 grid grid-cols-2 gap-1.5">
+                      {HOURS.map((h) => (
+                        <button
+                          key={h}
+                          type="button"
+                          onClick={() => setSlot(h)}
+                          className={`rounded-lg border px-2 py-2 text-[11px] font-semibold transition ${
+                            slot === h
+                              ? "border-[#2563eb] bg-[#2563eb] text-white"
+                              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                          }`}
+                        >
+                          {h}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      className="mt-3 w-full rounded-xl bg-[#2563eb] px-3 py-2.5 text-xs font-bold text-white shadow-[0_8px_18px_rgba(37,99,235,0.28)]"
                     >
-                      {chip}
-                    </span>
-                  ))}
-                </div>
-
-                <div
-                  className={`mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white transition-all duration-500 ease-out ${
-                    phase === "ui" || reduceMotion
-                      ? "translate-y-0 opacity-100"
-                      : "translate-y-3 opacity-40"
-                  }`}
-                >
-                  <MiniSceneUI kind={scene.kind} />
+                      Confirmer la réservation
+                    </button>
+                    <p className="mt-2 flex items-center justify-center gap-1 text-[10px] font-medium text-emerald-600">
+                      <span aria-hidden>✓</span> Réservation instantanée
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <p className="mt-4 text-center text-[11px] leading-relaxed text-slate-400 sm:text-left">
-              Une idée qui prend forme — sans expliquer comment.
+            {/* Témoignage */}
+            <div className="absolute -bottom-3 left-2 z-20 max-w-[15rem] rounded-2xl border border-slate-200/90 bg-white p-3 shadow-[0_14px_36px_rgba(15,23,42,0.12)] sm:bottom-4 sm:left-4 sm:max-w-[16.5rem] sm:p-3.5">
+              <div className="flex items-start gap-2.5">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#fdba74] to-[#f472b6] text-[11px] font-bold text-white">
+                  SL
+                </span>
+                <div>
+                  <p className="text-[11px] font-semibold leading-snug text-slate-800 sm:text-xs">
+                    « Exactement ce que je voulais ! »
+                  </p>
+                  <p className="mt-1 text-[10px] text-slate-500">
+                    Sophie L. — Coach indépendante
+                  </p>
+                  <p className="mt-0.5 text-[10px] tracking-tight text-amber-400" aria-label="5 étoiles">
+                    ★★★★★
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Annotation manuscrite */}
+            <p
+              className="pointer-events-none absolute -bottom-8 right-2 rotate-[-6deg] text-[12px] font-semibold text-[#ea580c] sm:-bottom-2 sm:right-10 sm:text-sm"
+              style={{ fontFamily: "ui-rounded, system-ui, sans-serif" }}
+            >
+              ↗ Vos idées prennent vie.
             </p>
           </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function MiniSceneUI({ kind }: { kind: Scene["kind"] }) {
-  if (kind === "reservation") {
-    return (
-      <div className="p-4 sm:p-5">
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-bold text-slate-800">Réservation</p>
-          <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-            Disponible
-          </span>
-        </div>
-        <div className="mt-3 grid grid-cols-4 gap-1.5">
-          {["Lun", "Mar", "Mer", "Jeu"].map((d, i) => (
-            <div
-              key={d}
-              className={`rounded-lg border px-1 py-2 text-center text-[10px] font-semibold ${
-                i === 1
-                  ? "border-[#1d4ed8] bg-[#eff6ff] text-[#1d4ed8]"
-                  : "border-slate-200 text-slate-500"
-              }`}
-            >
-              {d}
-              <div className="mt-1 text-[11px]">{10 + i}:30</div>
-            </div>
-          ))}
-        </div>
-        <button
-          type="button"
-          className="mt-3 w-full rounded-xl bg-[#1d4ed8] px-3 py-2 text-xs font-bold text-white"
-        >
-          Confirmer le créneau
-        </button>
-      </div>
-    );
-  }
-
-  if (kind === "crm") {
-    return (
-      <div className="p-4 sm:p-5">
-        <p className="text-xs font-bold text-slate-800">Pipeline</p>
-        <div className="mt-3 space-y-2">
-          {[
-            { name: "Atelier Nord", stage: "Prospect", tone: "bg-orange-50 text-orange-700" },
-            { name: "Studio KL", stage: "Relance", tone: "bg-violet-50 text-violet-700" },
-            { name: "Maison Verte", stage: "Proposition", tone: "bg-blue-50 text-blue-700" },
-          ].map((row) => (
-            <div
-              key={row.name}
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2"
-            >
-              <span className="text-xs font-semibold text-slate-800">{row.name}</span>
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${row.tone}`}>
-                {row.stage}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (kind === "client") {
-    return (
-      <div className="p-4 sm:p-5">
-        <p className="text-xs font-bold text-slate-800">Espace client</p>
-        <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="font-semibold text-slate-700">Projet en cours</span>
-            <span className="font-bold text-[#1d4ed8]">68 %</span>
-          </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-            <div className="h-full w-[68%] rounded-full bg-[#1d4ed8]" />
-          </div>
-          <ul className="mt-3 space-y-1.5 text-[11px] text-slate-600">
-            <li>• Devis validé</li>
-            <li>• Documents partagés</li>
-            <li>• Prochaine étape à confirmer</li>
-          </ul>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-4 sm:p-5">
-      <p className="text-xs font-bold text-slate-800">Tableau de bord</p>
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        {[
-          { l: "Demandes", v: "128" },
-          { l: "Réponse", v: "94 %" },
-          { l: "Délai", v: "1,8 j" },
-        ].map((k) => (
-          <div key={k.l} className="rounded-xl border border-slate-200 bg-white p-2.5 text-center">
-            <p className="text-[9px] font-medium text-slate-500">{k.l}</p>
-            <p className="mt-0.5 text-sm font-bold text-slate-900">{k.v}</p>
-          </div>
-        ))}
-      </div>
-      <div className="mt-3 flex h-12 items-end gap-1.5">
-        {[40, 65, 48, 78, 55, 70, 42].map((h, i) => (
-          <div
-            key={i}
-            className="flex-1 rounded-t-sm bg-[#1d4ed8]/80"
-            style={{ height: `${h}%` }}
-          />
-        ))}
-      </div>
-    </div>
   );
 }

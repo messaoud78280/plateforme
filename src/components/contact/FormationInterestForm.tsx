@@ -7,8 +7,10 @@ import {
 } from "@/lib/bework-formation";
 
 const INPUT_CLASS =
-  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/20";
-const LABEL_CLASS = "mb-1.5 block text-sm font-semibold text-slate-800";
+  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/20";
+const LABEL_CLASS = "mb-2 block text-sm font-semibold text-slate-800";
+const CHOICE_CLASS =
+  "flex cursor-pointer items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 has-[:checked]:border-[#1d4ed8]/40 has-[:checked]:bg-[#eff6ff]";
 
 /** Formulaire d’intérêt formation — POST `/api/contact` avec source `formation_interest`. */
 export function FormationInterestForm() {
@@ -35,7 +37,7 @@ export function FormationInterestForm() {
     const itLabel = IT_LEVEL_OPTIONS.find((o) => o.value === itLevel)?.label ?? itLevel;
 
     const messageParts = [
-      "Demande d’intérêt — formation BeWork",
+      "Demande de place — journée BeWork",
       `Niveau informatique : ${itLabel || "—"}`,
       `A une idée de projet : ${hasIdea === "oui" ? "Oui" : hasIdea === "non" ? "Non" : "—"}`,
       intentLabels.length ? `Souhaite apprendre à créer : ${intentLabels.join(", ")}` : null,
@@ -80,22 +82,26 @@ export function FormationInterestForm() {
 
   if (status === "success") {
     return (
-      <div role="status" className="rounded-2xl border border-emerald-200 bg-emerald-50/90 px-6 py-8 text-center shadow-sm">
+      <div
+        role="status"
+        className="rounded-2xl border border-emerald-200 bg-emerald-50/90 px-6 py-8 text-center shadow-sm"
+      >
         <p className="text-base font-semibold text-emerald-900">
-          Votre demande a bien été envoyée. BeWork vous recontactera rapidement.
+          Votre demande a bien été envoyée. BeWork vous recontactera rapidement
+          pour les prochaines dates.
         </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5" noValidate>
+    <form onSubmit={onSubmit} className="relative space-y-6" noValidate>
       <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden>
         <label htmlFor="website">Site web</label>
         <input type="text" id="website" name="website" tabIndex={-1} autoComplete="off" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="prenom" className={LABEL_CLASS}>
             Prénom <span className="text-red-600">*</span>
@@ -110,7 +116,7 @@ export function FormationInterestForm() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="email" className={LABEL_CLASS}>
             E-mail <span className="text-red-600">*</span>
@@ -139,15 +145,12 @@ export function FormationInterestForm() {
       </div>
 
       <fieldset>
-        <legend className={`${LABEL_CLASS} mb-2`}>
+        <legend className={`${LABEL_CLASS} mb-3`}>
           Niveau informatique <span className="text-red-600">*</span>
         </legend>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2.5">
           {IT_LEVEL_OPTIONS.map((o) => (
-            <label
-              key={o.value}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-            >
+            <label key={o.value} className={CHOICE_CLASS}>
               <input
                 type="radio"
                 name="itLevel"
@@ -162,18 +165,15 @@ export function FormationInterestForm() {
       </fieldset>
 
       <fieldset>
-        <legend className={`${LABEL_CLASS} mb-2`}>
+        <legend className={`${LABEL_CLASS} mb-3`}>
           Avez-vous déjà une idée de projet&nbsp;? <span className="text-red-600">*</span>
         </legend>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2.5">
           {[
             { value: "oui", label: "Oui" },
             { value: "non", label: "Non" },
           ].map((o) => (
-            <label
-              key={o.value}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-            >
+            <label key={o.value} className={CHOICE_CLASS}>
               <input
                 type="radio"
                 name="hasIdea"
@@ -189,25 +189,30 @@ export function FormationInterestForm() {
 
       <div>
         <label htmlFor="projectDesc" className={LABEL_CLASS}>
-          Description du projet <span className="font-normal text-slate-500">(optionnel)</span>
+          Description du projet{" "}
+          <span className="font-normal text-slate-500">(optionnel)</span>
         </label>
         <textarea
           id="projectDesc"
           name="projectDesc"
-          rows={3}
+          rows={4}
           maxLength={2000}
           className={`${INPUT_CLASS} resize-y`}
-          placeholder="En quelques phrases…"
+          placeholder="En quelques phrases, ce que vous aimeriez créer…"
         />
       </div>
 
       <fieldset>
-        <legend className={`${LABEL_CLASS} mb-2`}>Je souhaite apprendre à créer</legend>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <legend className={`${LABEL_CLASS} mb-3`}>Je souhaite apprendre à créer</legend>
+        <div className="grid gap-2.5 sm:grid-cols-2">
           {LEARN_INTENT_OPTIONS.map((o) => (
             <label
               key={o.value}
-              className="flex cursor-pointer items-center gap-3 rounded-lg px-1 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+              className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm transition ${
+                intents.includes(o.value)
+                  ? "border-[#1d4ed8]/40 bg-[#eff6ff] text-slate-900"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+              }`}
             >
               <input
                 type="checkbox"
@@ -221,7 +226,7 @@ export function FormationInterestForm() {
         </div>
       </fieldset>
 
-      <label className="flex cursor-pointer items-start gap-3 text-sm text-slate-700">
+      <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-slate-700">
         <input
           type="checkbox"
           name="consent"
@@ -235,18 +240,24 @@ export function FormationInterestForm() {
       </label>
 
       {status === "error" ? (
-        <p className="text-sm font-medium text-red-700" role="alert">
-          L&apos;envoi a échoué. Réessayez dans un instant ou écrivez-nous directement.
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700" role="alert">
+          L&apos;envoi a échoué. Réessayez dans un instant ou écrivez-nous
+          directement.
         </p>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={status === "loading"}
-        className="inline-flex w-full items-center justify-center rounded-xl bg-[#1d4ed8] px-6 py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-[#1e40af] disabled:opacity-60 sm:w-auto"
-      >
-        {status === "loading" ? "Envoi…" : "Envoyer ma demande"}
-      </button>
+      <div>
+        <button
+          type="submit"
+          disabled={status === "loading"}
+          className="inline-flex w-full items-center justify-center rounded-xl bg-[#1d4ed8] px-6 py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-[#1e40af] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8] disabled:opacity-60"
+        >
+          {status === "loading" ? "Envoi…" : "Demander une place"}
+        </button>
+        <p className="mt-3 text-center text-sm text-slate-500">
+          Nous vous recontactons pour vous proposer les prochaines dates.
+        </p>
+      </div>
     </form>
   );
 }

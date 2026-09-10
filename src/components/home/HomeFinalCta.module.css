@@ -1,0 +1,388 @@
+/* CTA final — IMAGE 1 composition + IMAGE 2 background */
+
+.scene {
+  --fc-blue: #2563eb;
+  --fc-ink: #0a0a0a;
+  --fc-muted: #5b6b7c;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  scroll-margin-top: 7rem;
+  min-height: min(86vh, 820px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4.5rem 1.25rem 5rem;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  /* Fondu haut seulement (continuité avec la page) — bas opaque, net avant footer */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 12%,
+    #000 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 12%,
+    #000 100%
+  );
+}
+
+.bg picture,
+.bgImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.bgImg {
+  object-fit: cover;
+  object-position: center center;
+  /* Pas de scale / blur : conserve la netteté native */
+  transform: none;
+  image-rendering: auto;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.bgVeil {
+  position: absolute;
+  inset: 0;
+  /* Voile lisibilité + fondu haut/bas vers sections voisines */
+  background:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.55) 0%, transparent 18%),
+    linear-gradient(to top, rgba(238, 244, 255, 0.45) 0%, transparent 22%),
+    radial-gradient(ellipse 48% 42% at 50% 46%, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.06) 48%, transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 30%, transparent 75%, rgba(255, 255, 255, 0.1) 100%);
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
+  z-index: 2;
+  width: min(920px, 100%);
+  margin-inline: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.halo {
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: -1;
+  width: min(680px, 105%);
+  height: min(380px, 65%);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.18) 45%, transparent 72%);
+  /* Pas de filter:blur sur le fond — uniquement un dégradé soft */
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-manrope), var(--font-heading-family), system-ui, sans-serif;
+  font-size: clamp(2.35rem, 7.5vw, 3.75rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.lineInk,
+.lineBlue {
+  display: block;
+}
+
+.lineInk {
+  color: var(--fc-ink);
+}
+
+.lineBlue {
+  color: var(--fc-blue);
+}
+
+.lead {
+  margin: 1.35rem auto 0;
+  max-width: 40rem;
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  line-height: 1.6;
+  color: var(--fc-muted);
+  font-weight: 450;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+  margin-top: 1.85rem;
+  width: min(100%, 22rem);
+}
+
+.btnPrimary,
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  height: 52px;
+  padding: 0 1.55rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 650;
+  text-decoration: none;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+
+.btnPrimary {
+  background: var(--fc-blue);
+  color: #fff;
+  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.28);
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  background: #1d4ed8;
+}
+
+.btnSecondary {
+  background: rgba(255, 255, 255, 0.82);
+  color: #1e293b;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 8px 22px rgba(30, 50, 90, 0.06);
+  backdrop-filter: blur(8px);
+}
+
+.btnSecondary:hover {
+  transform: translateY(-2px);
+  background: #fff;
+}
+
+/* Corner micro-copy */
+.corner {
+  display: none;
+  position: absolute;
+  z-index: 2;
+  margin: 0;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1.45;
+  color: rgba(100, 116, 139, 0.72);
+  pointer-events: none;
+}
+
+.cornerTL {
+  top: 1.75rem;
+  left: 2rem;
+}
+
+.cornerBL {
+  bottom: 2.25rem;
+  left: 2rem;
+}
+
+.cornerBR {
+  bottom: 2.25rem;
+  right: 2rem;
+  text-align: right;
+}
+
+.rail {
+  display: none;
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 1.85rem;
+  margin: 0;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(100, 116, 139, 0.68);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Badges IDÉE / PROJET */
+.badge {
+  display: none;
+  position: absolute;
+  z-index: 2;
+  align-items: center;
+  gap: 0.55rem;
+  pointer-events: none;
+}
+
+.badgeIdee {
+  left: clamp(1.5rem, 8vw, 7.5rem);
+  top: 38%;
+}
+
+.badgeProjet {
+  right: clamp(1.5rem, 7vw, 6.5rem);
+  top: 28%;
+}
+
+.badgePill {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 8px 20px rgba(60, 90, 140, 0.08);
+  backdrop-filter: blur(10px);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.badgeLine {
+  width: clamp(2.5rem, 5vw, 4.5rem);
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15));
+  opacity: 0.9;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* Reveal */
+.title,
+.lead,
+.actions {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.isIn.title {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.isIn.lead {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.7s ease 0.12s, transform 0.7s ease 0.12s;
+}
+
+.isIn.actions {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.7s ease 0.24s, transform 0.7s ease 0.24s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title,
+  .lead,
+  .actions,
+  .isIn.title,
+  .isIn.lead,
+  .isIn.actions {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .bgImg {
+    transform: none;
+  }
+}
+
+/* —— Desktop —— */
+@media (min-width: 900px) {
+  .scene {
+    min-height: min(90vh, 860px);
+    padding: 5.5rem 2rem 5.75rem;
+  }
+
+  .corner,
+  .rail,
+  .badge {
+    display: flex;
+  }
+
+  .title {
+    font-size: clamp(4.25rem, 5.6vw, 5.5rem);
+    line-height: 0.96;
+  }
+
+  .lead {
+    margin-top: 1.55rem;
+    max-width: 44rem;
+    font-size: 1.2rem;
+  }
+
+  .actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+    width: auto;
+    margin-top: 2.1rem;
+  }
+
+  .btnPrimary,
+  .btnSecondary {
+    height: 54px;
+    padding: 0 1.7rem;
+    font-size: 0.98rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .scene {
+    min-height: 820px;
+  }
+
+  .title {
+    font-size: 5.5rem;
+  }
+
+  .cornerTL {
+    top: 2.25rem;
+    left: 2.75rem;
+  }
+
+  .cornerBL {
+    bottom: 2.75rem;
+    left: 2.75rem;
+  }
+
+  .cornerBR {
+    bottom: 2.75rem;
+    right: 2.75rem;
+  }
+
+  .badgeIdee {
+    left: 9%;
+    top: 40%;
+  }
+
+  .badgeProjet {
+    right: 8%;
+    top: 26%;
+  }
+}

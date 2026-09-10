@@ -20,10 +20,10 @@ export const BW = {
 
 /** Section standard — paddings maîtrisés (pas de vide mort). */
 export const BW_SECTION =
-  "relative scroll-mt-28 overflow-hidden py-14 sm:py-16 md:py-20 lg:py-24" as const;
+  "relative scroll-mt-28 overflow-visible bg-transparent pb-24 pt-14 sm:pb-28 sm:pt-16 md:pb-32 md:pt-20 lg:pb-36 lg:pt-24" as const;
 
 export const BW_SECTION_TIGHT =
-  "relative scroll-mt-28 overflow-hidden py-12 sm:py-14 md:py-16" as const;
+  "relative scroll-mt-28 overflow-visible bg-transparent pb-20 pt-12 sm:pb-24 sm:pt-14 md:pb-28 md:pt-16" as const;
 
 export const BW_EYEBROW =
   "text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500" as const;

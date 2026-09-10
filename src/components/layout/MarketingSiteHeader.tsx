@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
+import styles from "./MarketingSiteHeader.module.css";
 
 type Props = {
   plainBg?: boolean;
@@ -17,10 +18,11 @@ const NAV_ITEMS = [
   { href: "/#faq", label: "FAQ" },
 ] as const;
 
-const NAV_LINK =
-  "inline-flex items-center rounded-full px-3 py-2 text-[13px] font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb]/40";
+function cx(...parts: Array<string | false | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
 
-/** Header maquette — flottant, logo + baseline, nav centrale, CTAs. */
+/** Header marketing flottant — présence premium, logo ancré, nav aérée. */
 export function MarketingSiteHeader({ plainBg = false }: Props) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -54,37 +56,34 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
   return (
     <header
       ref={headerRef}
-      className={`sticky top-0 z-50 ${plainBg ? "" : ""}`}
+      className={cx(styles.root, plainBg && styles.rootPlain)}
     >
-      <div className="container-site pt-3 sm:pt-4">
-        <div
-          className={`flex items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white/90 px-3 py-2.5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-md transition-[padding,box-shadow] sm:px-4 lg:rounded-[1.35rem] lg:px-5 ${
-            scrolled ? "py-2 shadow-[0_10px_36px_rgba(15,23,42,0.08)]" : "py-2.5"
-          }`}
-        >
+      <div className={styles.shell}>
+        <div className={cx(styles.bar, scrolled && styles.barScrolled)}>
           <Link
             href="/"
-            className="flex shrink-0 items-center"
+            className={styles.brand}
             aria-label="BeWork — Accueil"
           >
-            <BeWorkLogo size="sm" priority />
+            <BeWorkLogo
+              size="sm"
+              priority
+              imageClassName={styles.logoImg}
+            />
           </Link>
 
-          <nav
-            className="hidden items-center gap-0.5 lg:flex"
-            aria-label="Navigation principale"
-          >
+          <nav className={styles.nav} aria-label="Navigation principale">
             {NAV_ITEMS.map((item) => (
-              <Link key={item.href} href={item.href} className={NAV_LINK}>
+              <Link key={item.href} href={item.href} className={styles.navLink}>
                 {item.label}
               </Link>
             ))}
           </nav>
 
-          <div className="hidden items-center gap-2 lg:flex">
+          <div className={styles.actions}>
             <Link
               href="/contact#participer"
-              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#2563eb] px-4 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(37,99,235,0.28)] transition hover:bg-[#1d4ed8]"
+              className={styles.cta}
               {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-participer")}
             >
               Participer
@@ -94,21 +93,21 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
 
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-800 lg:hidden"
+            className={styles.menuBtn}
             aria-expanded={mobileOpen}
             aria-controls="marketing-mobile-nav"
             aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
             onClick={() => setMobileOpen((v) => !v)}
           >
             {mobileOpen ? (
-              <span className="text-xl leading-none" aria-hidden>
+              <span className={styles.menuClose} aria-hidden>
                 ×
               </span>
             ) : (
-              <span className="flex flex-col gap-1.5" aria-hidden>
-                <span className="block h-0.5 w-4 rounded-full bg-current" />
-                <span className="block h-0.5 w-4 rounded-full bg-current" />
-                <span className="block h-0.5 w-4 rounded-full bg-current" />
+              <span className={styles.menuIcon} aria-hidden>
+                <span />
+                <span />
+                <span />
               </span>
             )}
           </button>
@@ -117,25 +116,23 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
 
       <div
         id="marketing-mobile-nav"
-        className={`fixed inset-0 z-40 bg-white/98 pt-[5.5rem] backdrop-blur-sm transition-[opacity,visibility] duration-200 lg:hidden ${
-          mobileOpen ? "visible opacity-100" : "invisible pointer-events-none opacity-0"
-        }`}
+        className={cx(styles.mobilePanel, mobileOpen && styles.mobileOpen)}
         aria-hidden={!mobileOpen}
       >
-        <div className="container-site flex flex-col gap-3 overflow-y-auto pb-10">
+        <div className={styles.mobileInner}>
           <Link
             href="/contact#participer"
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#2563eb] text-sm font-semibold text-white"
+            className={styles.ctaMobile}
             onClick={() => setMobileOpen(false)}
           >
             Participer →
           </Link>
-          <nav className="mt-2 flex flex-col gap-1.5" aria-label="Navigation mobile">
+          <nav className={styles.mobileNav} aria-label="Navigation mobile">
             {NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-xl border border-slate-100 bg-slate-50/80 px-4 py-3.5 text-sm font-semibold text-slate-900"
+                className={styles.mobileLink}
                 onClick={() => setMobileOpen(false)}
               >
                 {item.label}

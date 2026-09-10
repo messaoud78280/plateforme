@@ -5,22 +5,10 @@
   --jw-eyebrow: #7b8799;
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow: visible;
   scroll-margin-top: 7rem;
-  padding: 4rem 0 5.5rem;
-  background: linear-gradient(
-    145deg,
-    #f5f8ff 0%,
-    #ffffff 38%,
-    #faf7ff 68%,
-    #fff7f1 100%
-  );
-}
-
-@media (min-width: 1024px) {
-  .scene {
-    padding: 4.5rem 0 6rem;
-  }
+  padding: 4rem 0 6.5rem;
+  background: transparent;
 }
 
 .halo {
@@ -28,6 +16,9 @@
   position: absolute;
   border-radius: 50%;
   z-index: 0;
+  /* Soft edge — évite une plaque colorée à bord net */
+  -webkit-mask-image: radial-gradient(circle, #000 0%, #000 55%, transparent 78%);
+  mask-image: radial-gradient(circle, #000 0%, #000 55%, transparent 78%);
 }
 
 .haloBlue {

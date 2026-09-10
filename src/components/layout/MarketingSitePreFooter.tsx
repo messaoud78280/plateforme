@@ -8,7 +8,7 @@ import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 export function MarketingSitePreFooter() {
   return (
     <section
-      className="relative z-10 isolate overflow-hidden border-t border-[rgba(45,75,130,0.08)] text-slate-900"
+      className="bw-prefooter-blend relative z-10 isolate overflow-hidden text-slate-900"
       aria-labelledby="prefooter-formation"
     >
       <BwAtmosphere variant="cta" />

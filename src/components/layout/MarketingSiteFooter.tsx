@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { BlueprintCotationFooterHairline } from "@/components/home/BlueprintCotationDecor";
 import { MarketingSitePreFooter } from "@/components/layout/MarketingSitePreFooter";
 import { DEMO_PROJECTS, BEWORK_FORMATION_TAGLINE } from "@/lib/bework-formation";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
@@ -74,8 +73,7 @@ export function MarketingSiteFooter() {
   return (
     <>
       <MarketingSitePreFooter />
-      <footer className="relative z-10 border-t border-slate-800/80 bg-[#0b1220] text-slate-300">
-        <BlueprintCotationFooterHairline />
+      <footer className="bw-footer-blend relative z-10 bg-[#0b1220] text-slate-300">
         <div className="relative z-10 mx-auto max-w-site px-5 py-14 sm:px-6 lg:py-16">
           <div className="grid grid-cols-2 gap-10 sm:gap-12 md:grid-cols-3 lg:grid-cols-6 lg:gap-8">
             <div className="col-span-2 md:col-span-3 lg:col-span-1 lg:max-w-xs">

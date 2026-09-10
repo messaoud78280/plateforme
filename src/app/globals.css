@@ -13,14 +13,20 @@ html {
 body {
   min-width: 0;
   width: 100%;
-  background: linear-gradient(
-    180deg,
-    #f9fbff 0%,
-    #ffffff 18%,
-    #fafcff 45%,
-    #ffffff 72%,
-    #f8faff 100%
-  );
+  /* Fond continu BeWork — pas de paliers blanc pur (sinon bandes au scroll) */
+  background:
+    radial-gradient(ellipse 70% 50% at 12% 8%, rgba(160, 200, 255, 0.28) 0%, transparent 58%),
+    radial-gradient(ellipse 60% 45% at 88% 18%, rgba(190, 170, 255, 0.2) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 40% at 70% 55%, rgba(255, 200, 160, 0.14) 0%, transparent 58%),
+    linear-gradient(
+      180deg,
+      #f3f8ff 0%,
+      #f7f9ff 20%,
+      #f6f4ff 40%,
+      #fff8f3 60%,
+      #f4f7ff 80%,
+      #eef4ff 100%
+    );
   background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-family);
@@ -1877,9 +1883,24 @@ html::before {
 .bw-atmosphere {
   pointer-events: none;
   position: absolute;
-  inset: 0;
-  overflow: hidden;
+  /* Déborde pour fondre dans la section voisine (pas de clip rectangulaire) */
+  inset: -7rem 0;
+  overflow: visible;
   z-index: 0;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 18%,
+    #000 82%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 18%,
+    #000 82%,
+    transparent 100%
+  );
 }
 
 .bw-halo {
@@ -1940,9 +1961,9 @@ html::before {
   filter: blur(40px);
 }
 
-/* Hero */
+/* Hero — transparent, reprend le canvas global */
 .bw-atmosphere--hero {
-  background: linear-gradient(135deg, #f8fbff 0%, #ffffff 42%, #fbf9ff 72%, #fffdfc 100%);
+  background: transparent;
 }
 .bw-halo--hero-1 {
   left: -220px;
@@ -1957,15 +1978,9 @@ html::before {
   bottom: -340px;
 }
 
-/* Création / showroom */
+/* Création / showroom — transparent */
 .bw-atmosphere--creation {
-  background: linear-gradient(
-    180deg,
-    rgba(241, 246, 255, 0.82) 0%,
-    #ffffff 25%,
-    rgba(246, 243, 255, 0.72) 60%,
-    #ffffff 100%
-  );
+  background: transparent;
 }
 .bw-halo--creation-1 {
   left: -180px;
@@ -1981,9 +1996,9 @@ html::before {
   opacity: 0.7;
 }
 
-/* Formation / journée */
+/* Formation / journée — transparent */
 .bw-atmosphere--formation {
-  background: linear-gradient(135deg, #ffffff 0%, #fff9f5 46%, #f6f8ff 100%);
+  background: transparent;
 }
 .bw-halo--formation-1 {
   right: -120px;
@@ -1999,9 +2014,9 @@ html::before {
   opacity: 0.55;
 }
 
-/* Timeline calme */
+/* Timeline calme — transparent */
 .bw-atmosphere--timeline {
-  background: linear-gradient(180deg, #fafcff 0%, #ffffff 50%, #f9f7ff 100%);
+  background: transparent;
 }
 .bw-halo--timeline-1 {
   left: -200px;
@@ -2014,9 +2029,9 @@ html::before {
   opacity: 0.45;
 }
 
-/* Réassurance / FAQ / tarif */
+/* Réassurance / FAQ — transparent */
 .bw-atmosphere--reassurance {
-  background: linear-gradient(180deg, #ffffff 0%, #fafcff 50%, #ffffff 100%);
+  background: transparent;
 }
 .bw-halo--reassure-1 {
   left: 20%;
@@ -2029,9 +2044,9 @@ html::before {
   opacity: 0.55;
 }
 
-/* CTA final */
+/* CTA / prefooter — transparent (le canvas global assure la continuité) */
 .bw-atmosphere--cta {
-  background: linear-gradient(125deg, #eef4ff 0%, #f4eeff 55%, #fff2e9 100%);
+  background: transparent;
 }
 .bw-halo--cta-1 {
   left: -200px;
@@ -2223,4 +2238,150 @@ html::before {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* ——— Homepage : univers continu (canvas global + sections transparentes) ——— */
+.bw-home-flow {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+  overflow-x: clip;
+}
+
+/* Canvas unique — un seul fond pour toute la homepage */
+.bw-home-canvas {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 55% at 10% 6%, rgba(160, 200, 255, 0.42) 0%, transparent 62%),
+    radial-gradient(ellipse 65% 48% at 90% 14%, rgba(190, 170, 255, 0.32) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 40% at 68% 30%, rgba(255, 255, 255, 0.4) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 48% at 18% 46%, rgba(255, 200, 160, 0.26) 0%, transparent 62%),
+    radial-gradient(ellipse 62% 44% at 88% 54%, rgba(170, 150, 255, 0.24) 0%, transparent 60%),
+    radial-gradient(ellipse 72% 50% at 42% 70%, rgba(180, 215, 255, 0.3) 0%, transparent 62%),
+    radial-gradient(ellipse 58% 42% at 78% 88%, rgba(255, 210, 175, 0.28) 0%, transparent 60%),
+    linear-gradient(
+      180deg,
+      #f3f8ff 0%,
+      #f7f9ff 10%,
+      #f6f4ff 22%,
+      #faf7ff 34%,
+      #fff8f2 46%,
+      #f5f7ff 58%,
+      #f7f3ff 70%,
+      #fff5ec 82%,
+      #eef4ff 100%
+    );
+}
+
+.bw-home-canvas::before,
+.bw-home-canvas::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(12px);
+}
+
+.bw-home-canvas::before {
+  left: -14%;
+  top: 16%;
+  width: min(820px, 78vw);
+  height: min(820px, 78vw);
+  background: radial-gradient(circle, rgba(120, 170, 255, 0.26) 0%, transparent 72%);
+}
+
+.bw-home-canvas::after {
+  right: -12%;
+  top: 52%;
+  width: min(740px, 70vw);
+  height: min(740px, 70vw);
+  background: radial-gradient(circle, rgba(255, 180, 140, 0.22) 0%, transparent 72%);
+}
+
+/*
+ * Utilitaire de fondu de section (halos / atmosphères locales).
+ * Soft-mask vertical — jamais de bande opaque.
+ */
+.section-blend,
+.bw-section-halos {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+}
+
+/* Sections : transparentes, chevauchement atmosphérique */
+.bw-home-flow > section {
+  position: relative;
+  z-index: 1;
+  overflow: visible !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  /* Dissout uniquement le bas (cartes) — pas de masque haut (sinon coupe sous le header) */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 calc(100% - 120px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 calc(100% - 120px),
+    transparent 100%
+  );
+}
+
+.bw-home-flow > section + section {
+  margin-top: -6rem;
+  padding-top: calc(6rem + 3.75rem) !important;
+}
+
+@media (min-width: 768px) {
+  .bw-home-flow > section + section {
+    margin-top: -7.5rem;
+    padding-top: calc(7.5rem + 4.25rem) !important;
+  }
+}
+
+/* CTA photo : pas de mask qui écrase le masque image interne */
+.bw-home-flow > section#cta-final {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+/* Contenu au-dessus du canvas */
+.bw-home-flow > section > .container-site,
+.bw-home-flow > section > [class*="shell"],
+.bw-home-flow > section > [class*="inner"] {
+  position: relative;
+  z-index: 5;
+}
+
+/* Préfooter marketing : sans trait, transparent */
+.bw-prefooter-blend {
+  border-top: none !important;
+  position: relative;
+  background: transparent !important;
+  margin-top: -2.5rem;
+  padding-top: 2.5rem;
+}
+
+/* Footer : entrée nette — pas de voile / dégradé sombre au-dessus */
+.bw-footer-blend {
+  border-top: none !important;
+  position: relative;
 }

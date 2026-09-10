@@ -89,7 +89,8 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
       />
       <MarketingSiteHeader plainBg />
-      <main>
+      <main className="bw-home-flow">
+        <div className="bw-home-canvas" aria-hidden />
         <HomePlatformHero />
         <HomePossibilitiesBento />
         <HomeMetierSelector />

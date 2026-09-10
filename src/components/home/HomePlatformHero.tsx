@@ -141,13 +141,7 @@ export function HomePlatformHero() {
                 className={`mt-4 block font-display text-[2.35rem] font-extrabold leading-[1.02] tracking-[-0.045em] text-[#0a0a0a] sm:mt-5 sm:text-[3.25rem] md:text-[3.75rem] lg:text-[4.15rem] ${HOME_REVEAL}`}
                 style={{ animationDelay: "140ms" }}
               >
-                <span className="relative inline-block text-[#1d4ed8]">
-                  Créez
-                  <span
-                    className="absolute inset-x-0 bottom-1 -z-10 h-[0.32em] rounded-sm bg-[#2563eb]/15 sm:bottom-1.5"
-                    aria-hidden
-                  />
-                </span>{" "}
+                <span className="text-[#1d4ed8]">Créez</span>{" "}
                 ce que
                 <br className="hidden sm:block" />
                 vous imaginez.

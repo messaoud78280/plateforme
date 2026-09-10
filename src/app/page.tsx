@@ -2,17 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
-import { HomeAudienceProfiles } from "@/components/home/HomeAudienceProfiles";
-import { HomeCreateShowcase } from "@/components/home/HomeCreateShowcase";
+import { HomeBigQuestion } from "@/components/home/HomeBigQuestion";
+import { HomeBrandStatement } from "@/components/home/HomeBrandStatement";
 import { HomeDemoClose } from "@/components/home/HomeDemoClose";
-import { HomeEmotionalShift } from "@/components/home/HomeEmotionalShift";
+import { HomeEditorialTrigger } from "@/components/home/HomeEditorialTrigger";
 import { HomeFormationDay } from "@/components/home/HomeFormationDay";
-import { HomeMetierIdeas } from "@/components/home/HomeMetierIdeas";
+import { HomeMetierSelector } from "@/components/home/HomeMetierSelector";
 import { HomePlatformHero } from "@/components/home/HomePlatformHero";
-import { HomePossibilityBridge } from "@/components/home/HomePossibilityBridge";
 import { HomePricingSession } from "@/components/home/HomePricingSession";
 import { HomeSectionHeader } from "@/components/home/HomeSectionHeader";
-import { HomeSmallGroups } from "@/components/home/HomeSmallGroups";
+import { HomeShowroomBento } from "@/components/home/HomeShowroomBento";
 import { HomeStartFromZero } from "@/components/home/HomeStartFromZero";
 import { HOME_SECTION } from "@/components/home/homeSectionStyles";
 import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
@@ -32,7 +31,7 @@ import { SITE_URL } from "@/lib/site";
 
 const HOME_META_TITLE = SEO_SITE_TITLE_DEFAULT;
 const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
-  "Formation pratique d’une journée pour apprendre à créer sites, applications et outils numériques avec l’intelligence artificielle — sans prérequis en programmation. 200 € / participant.",
+  "Créer avec l’IA sans savoir coder : sites, applications et outils professionnels. Journée pratique BeWork — 200 € / participant. Aucun prérequis en programmation.",
 );
 
 const HOME_FAQ_ITEMS = FORMATION_FAQ.slice(0, 4);
@@ -54,13 +53,17 @@ export const metadata: Metadata = {
   keywords: [
     ...SEO_KEYWORDS_HOME,
     BEWORK_BRAND_SIGNATURE,
-    "apprendre à créer avec l'IA",
-    "créer une application sans savoir coder",
-    "formation intelligence artificielle débutant",
-    "création d'outils professionnels avec l'IA",
-    "IA pour entrepreneurs",
-    "IA pour artisans",
-    "IA pour indépendants",
+    "créer avec l'IA",
+    "créer sans savoir coder",
+    "créer une application avec l'IA",
+    "création site avec IA",
+    "outil professionnel avec IA",
+    "application sans code",
+    "formation IA débutant",
+    "IA pour entrepreneur",
+    "IA pour artisan",
+    "IA pour indépendant",
+    "formation intelligence artificielle pratique",
   ],
   alternates: { canonical: SITE_URL, languages: hreflangFrancophonieLanguages("/") },
   openGraph: {
@@ -76,7 +79,7 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "BeWork — apprendre à créer avec l’intelligence artificielle",
+        alt: "BeWork — créer à l’ère de l’IA",
       },
     ],
   },
@@ -92,16 +95,15 @@ const homeJsonLd = {
   "@graph": [
     {
       "@type": "WebPage",
-      "@id": `${SITE_URL}/#accueil`,
+      "@id": `${SITE_URL}/#webpage`,
       url: SITE_URL,
       name: HOME_META_TITLE,
-      inLanguage: "fr-FR",
       description: HOME_META_DESCRIPTION,
       isPartOf: { "@id": `${SITE_URL}/#website` },
       about: [
-        { "@type": "Thing", name: "Formation création avec l’IA" },
+        { "@type": "Thing", name: "Créer avec l’IA" },
         { "@type": "Thing", name: "Créer sans savoir coder" },
-        { "@type": "Thing", name: "Outils numériques professionnels" },
+        { "@type": "Thing", name: "Formation pratique intelligence artificielle" },
       ],
       speakable: {
         "@type": "SpeakableSpecification",
@@ -126,7 +128,7 @@ const homeJsonLd = {
     {
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#service`,
-      name: "BeWork — formations pratiques créer avec l’IA",
+      name: "BeWork — journées pratiques créer avec l’IA",
       description: BEWORK_FORMATION_TAGLINE,
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),
@@ -158,18 +160,17 @@ export default function HomePage() {
 
       <main className="pt-0">
         <HomePlatformHero />
-        <HomePossibilityBridge />
+        <HomeEditorialTrigger />
+        <HomeBigQuestion />
+        <HomeShowroomBento />
+        <HomeMetierSelector />
         <HomeStartFromZero />
-        <HomeCreateShowcase />
+        <HomeBrandStatement />
         <HomeFormationDay />
-        <HomeAudienceProfiles />
-        <HomeMetierIdeas />
         <HomePricingSession />
-        <HomeSmallGroups />
-        <HomeEmotionalShift />
         <HomeDemoClose />
 
-        <section id="faq" className={`${HOME_SECTION} bg-white`} aria-labelledby="faq-heading">
+        <section id="faq" className={`${HOME_SECTION} bg-[#fafafa]`} aria-labelledby="faq-heading">
           <div className="container-site">
             <HomeSectionHeader
               id="faq-heading"
@@ -197,36 +198,17 @@ export default function HomePage() {
             <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-slate-500">
               Tarif :{" "}
               <Link
-                href="/tarifs"
+                href="/#tarif"
                 className="font-semibold text-[#0a0a0a] underline-offset-2 hover:underline"
               >
-                200 € / participant
+                200&nbsp;€ / participant
               </Link>
-              {" · "}
-              Démonstrations :{" "}
-              <Link
-                href="/demonstrations"
-                className="font-semibold text-[#0a0a0a] underline-offset-2 hover:underline"
-              >
-                voir les exemples
-              </Link>
-              {" · "}
-              Formation :{" "}
-              <Link
-                href="/formation"
-                className="font-semibold text-[#0a0a0a] underline-offset-2 hover:underline"
-              >
-                le détail de la journée
-              </Link>
+              .
             </p>
           </div>
         </section>
 
-        <section className="bg-white pb-10 pt-2">
-          <div className="container-site">
-            <SeoInternalLinks path="/" />
-          </div>
-        </section>
+        <SeoInternalLinks path="/" />
       </main>
 
       <MarketingSiteFooter />

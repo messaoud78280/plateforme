@@ -81,28 +81,72 @@ export type DemoInteractiveSlug = (typeof DEMO_INTERACTIVE_SLUGS)[number];
 
 export const FORMATION_DAY_STEPS = [
   {
-    title: "Comprendre",
-    text: "Découvrez ce qu’il est réellement possible de construire aujourd’hui avec l’IA, mais aussi ses limites.",
+    title: "Imaginer",
+    text: "Transformer un besoin en projet concret.",
   },
   {
-    title: "Préparer",
-    text: "Nous vous aidons à mettre en place votre environnement pour pouvoir commencer à créer.",
+    title: "Structurer",
+    text: "Comprendre comment présenter correctement son idée.",
   },
   {
     title: "Construire",
-    text: "Vous découvrez concrètement comment transformer une idée en projet numérique.",
+    text: "Voir le projet prendre forme.",
+  },
+  {
+    title: "Tester",
+    text: "Comprendre ce qui fonctionne et ce qui doit évoluer.",
   },
   {
     title: "Améliorer",
-    text: "Vous apprenez à faire évoluer un résultat, corriger les problèmes et préciser vos demandes.",
+    text: "Affiner le résultat progressivement.",
   },
   {
-    title: "Mettre en pratique",
-    text: "Vous travaillez sur des exemples concrets et commencez à réfléchir à vos propres besoins.",
+    title: "Continuer",
+    text: "Être capable de poursuivre après la journée.",
+  },
+] as const;
+
+/** Sélecteur interactif métiers — exemples sans détail technique. */
+export const METIER_SELECTOR = [
+  {
+    id: "artisan",
+    label: "Artisan",
+    ideas: ["Demandes de devis", "Planning", "Suivi client", "Photos chantier", "Réservations"],
   },
   {
-    title: "Repartir avec une méthode",
-    text: "L’objectif est que vous puissiez continuer à expérimenter et créer après la formation.",
+    id: "independant",
+    label: "Indépendant",
+    ideas: ["Espace client", "Prise de rendez-vous", "Facturation simple", "Portfolio"],
+  },
+  {
+    id: "commerce",
+    label: "Commerce",
+    ideas: ["Catalogue", "Demandes clients", "Stock léger", "Relances"],
+  },
+  {
+    id: "restaurant",
+    label: "Restaurant",
+    ideas: ["Réservation", "Planning", "Événements", "Demandes clients"],
+  },
+  {
+    id: "agence",
+    label: "Agence",
+    ideas: ["CRM", "Suivi commercial", "Pipeline", "Reporting"],
+  },
+  {
+    id: "immobilier",
+    label: "Immobilier",
+    ideas: ["Prospects", "Biens", "Relances", "Rendez-vous", "Espace client"],
+  },
+  {
+    id: "entreprise",
+    label: "Entreprise",
+    ideas: ["CRM", "Application interne", "Tableau de bord", "Documents"],
+  },
+  {
+    id: "porteur",
+    label: "Porteur de projet",
+    ideas: ["Prototype", "Site", "Application", "Première version"],
   },
 ] as const;
 
@@ -181,7 +225,7 @@ export const FORMATION_FAQ = [
   },
   {
     q: "Quels outils utilisez-vous ?",
-    a: "Nous utilisons pendant la journée un environnement de création assisté par intelligence artificielle sélectionné pour permettre aux débutants de travailler efficacement. Les outils et notre méthode sont présentés directement aux participants pendant la formation.",
+    a: "Nous utilisons pendant la journée un environnement de création assisté par intelligence artificielle sélectionné pour être accessible aux débutants. Les outils et la méthode sont présentés directement aux participants.",
   },
   {
     q: "Pourquoi ne présentez-vous pas toute la méthode sur le site ?",

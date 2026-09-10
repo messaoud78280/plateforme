@@ -70,7 +70,7 @@ export const SEO_KEYWORDS_HOME: string[] = [
 /**
  * Signature courte officielle BeWork (header, titres SEO, OG, JSON-LD).
  */
-export const BEWORK_BRAND_SIGNATURE = "Apprenez à créer avec l’IA";
+export const BEWORK_BRAND_SIGNATURE = "Créer à l’ère de l’IA";
 
 /** Signature institutionnelle (footer, clôture). */
 export const BEWORK_BRAND_INSTITUTIONAL = "Formation pratique. Création avec l’IA. Méthode réutilisable.";

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   HOME_BTN_GROUP,
   HOME_BTN_PRIMARY,
@@ -10,47 +10,41 @@ import {
 } from "@/components/home/homeSectionStyles";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 
-const CREATE_ROTATIONS = [
-  "un site pour mon activité.",
-  "un système de réservation.",
-  "une application pour mes clients.",
-  "mon propre CRM.",
-  "un outil pour organiser mon entreprise.",
-  "un espace client.",
-  "un tableau de bord.",
-  "une plateforme adaptée à mon métier.",
-  "quelque chose qui n’existe pas encore.",
+type Scene = {
+  idea: string;
+  chips: readonly string[];
+  kind: "reservation" | "crm" | "client" | "dashboard";
+};
+
+const SCENES: readonly Scene[] = [
+  {
+    idea: "Un système permettant à mes clients de réserver directement un rendez-vous.",
+    chips: ["Réservation", "Calendrier", "Clients", "Notifications"],
+    kind: "reservation",
+  },
+  {
+    idea: "Un outil pour suivre mes prospects et mes relances.",
+    chips: ["Prospects", "Opportunités", "Relances", "Dashboard"],
+    kind: "crm",
+  },
+  {
+    idea: "Un espace permettant à mes clients de suivre leur projet.",
+    chips: ["Espace client", "Documents", "Progression", "Notifications"],
+    kind: "client",
+  },
+  {
+    idea: "Un tableau de bord pour comprendre mon activité en un coup d’œil.",
+    chips: ["Indicateurs", "Tendances", "Alertes", "Objectifs"],
+    kind: "dashboard",
+  },
 ] as const;
 
-const ECO_NODES_LEFT = [
-  { label: "Messagerie", color: "#7c3aed" },
-  { label: "Agenda", color: "#2563eb" },
-  { label: "Réservation", color: "#0d9488" },
-  { label: "CRM", color: "#ea580c" },
-] as const;
-
-const ECO_NODES_RIGHT = [
-  { label: "Dashboard", color: "#4f46e5" },
-  { label: "Site", color: "#1d4ed8" },
-  { label: "Espace client", color: "#059669" },
-  { label: "Documents", color: "#6366f1" },
-] as const;
-
-const BEWORK_MODULES = [
-  { label: "Idée", color: "#a78bfa" },
-  { label: "Prototype", color: "#60a5fa" },
-  { label: "Outil", color: "#34d399" },
-  { label: "Espace client", color: "#fb923c" },
-  { label: "Dashboard", color: "#818cf8" },
-  { label: "Site", color: "#38bdf8" },
-] as const;
-
-/** Hero — première impression : la possibilité avant la formation. */
+/** Hero V2 — composition éditoriale asymétrique + signature Idée → Outil. */
 export function HomePlatformHero() {
-  const stageRef = useRef<HTMLDivElement | null>(null);
-  const [rotIndex, setRotIndex] = useState(0);
-  const [rotVisible, setRotVisible] = useState(true);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [sceneIndex, setSceneIndex] = useState(0);
+  const [phase, setPhase] = useState<"idea" | "chips" | "ui">("idea");
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -61,418 +55,246 @@ export function HomePlatformHero() {
   }, []);
 
   useEffect(() => {
-    if (reduceMotion) return;
+    if (reduceMotion) {
+      setPhase("ui");
+      return;
+    }
+
     let cancelled = false;
     let timeout: ReturnType<typeof setTimeout>;
 
-    const cycle = () => {
+    const run = () => {
+      setVisible(true);
+      setPhase("idea");
       timeout = setTimeout(() => {
         if (cancelled) return;
-        setRotVisible(false);
+        setPhase("chips");
         timeout = setTimeout(() => {
           if (cancelled) return;
-          setRotIndex((i) => (i + 1) % CREATE_ROTATIONS.length);
-          setRotVisible(true);
-          cycle();
-        }, 380);
-      }, 2800);
+          setPhase("ui");
+          timeout = setTimeout(() => {
+            if (cancelled) return;
+            setVisible(false);
+            timeout = setTimeout(() => {
+              if (cancelled) return;
+              setSceneIndex((i) => (i + 1) % SCENES.length);
+              run();
+            }, 420);
+          }, 4200);
+        }, 900);
+      }, 700);
     };
-    cycle();
+
+    run();
     return () => {
       cancelled = true;
       clearTimeout(timeout);
     };
   }, [reduceMotion]);
 
-  useEffect(() => {
-    const el = stageRef.current;
-    if (!el) return;
-
-    if (reduceMotion) {
-      el.style.setProperty("--spot-x", "50%");
-      el.style.setProperty("--spot-y", "42%");
-      el.style.setProperty("--spot-opacity", "0.35");
-      el.style.setProperty("--grid-opacity", "0.06");
-      el.style.setProperty("--hero-parallax", "0px");
-      return;
-    }
-
-    el.style.setProperty("--spot-x", "50%");
-    el.style.setProperty("--spot-y", "50%");
-    el.style.setProperty("--spot-opacity", "0.0");
-    el.style.setProperty("--grid-opacity", "0.06");
-    el.style.setProperty("--hero-parallax", "0px");
-
-    let raf = 0;
-    let lastX = 0;
-    let lastY = 0;
-
-    const applyPointer = () => {
-      raf = 0;
-      const rect = el.getBoundingClientRect();
-      const x = ((lastX - rect.left) / rect.width) * 100;
-      const y = ((lastY - rect.top) / rect.height) * 100;
-      el.style.setProperty("--spot-x", `${Math.max(0, Math.min(100, x)).toFixed(2)}%`);
-      el.style.setProperty("--spot-y", `${Math.max(0, Math.min(100, y)).toFixed(2)}%`);
-      el.style.setProperty("--spot-opacity", "0.95");
-    };
-
-    const onPointerMove = (e: PointerEvent) => {
-      lastX = e.clientX;
-      lastY = e.clientY;
-      if (raf) return;
-      raf = window.requestAnimationFrame(applyPointer);
-    };
-
-    const onPointerLeave = () => {
-      el.style.setProperty("--spot-opacity", "0.18");
-    };
-
-    let scrollRaf = 0;
-    const onScroll = () => {
-      if (scrollRaf) return;
-      scrollRaf = window.requestAnimationFrame(() => {
-        scrollRaf = 0;
-        const t = Math.max(0, Math.min(1, window.scrollY / 900));
-        el.style.setProperty("--grid-opacity", (0.03 + t * 0.08).toFixed(3));
-        el.style.setProperty("--hero-parallax", `${(-t * 10).toFixed(2)}px`);
-      });
-    };
-
-    el.addEventListener("pointermove", onPointerMove);
-    el.addEventListener("pointerleave", onPointerLeave);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-
-    return () => {
-      el.removeEventListener("pointermove", onPointerMove);
-      el.removeEventListener("pointerleave", onPointerLeave);
-      window.removeEventListener("scroll", onScroll);
-      if (raf) window.cancelAnimationFrame(raf);
-      if (scrollRaf) window.cancelAnimationFrame(scrollRaf);
-    };
-  }, [reduceMotion]);
+  const scene = SCENES[sceneIndex];
 
   return (
     <section
       id="hero"
-      className="relative overflow-x-clip bg-white pb-16 pt-10 sm:pb-20 sm:pt-14 md:pb-28 md:pt-18 lg:pb-32 lg:pt-20"
+      className="relative scroll-mt-24 overflow-hidden border-b border-slate-100"
+      aria-labelledby="hero-heading"
     >
       <div
-        className="pointer-events-none absolute left-1/4 top-0 h-[600px] w-[600px] -translate-x-1/2 rounded-full"
+        className="pointer-events-none absolute inset-0"
+        aria-hidden
         style={{
-          background:
-            "radial-gradient(ellipse at center, rgba(37,99,235,0.07) 0%, transparent 68%)",
+          backgroundImage:
+            "linear-gradient(rgba(15,23,42,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.035) 1px, transparent 1px)",
+          backgroundSize: "56px 56px",
+          maskImage:
+            "radial-gradient(ellipse 80% 70% at 30% 20%, #000 20%, transparent 75%)",
         }}
+      />
+      <div
+        className="pointer-events-none absolute -left-24 top-10 h-[28rem] w-[28rem] rounded-full bg-[#2563eb]/10 blur-3xl"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute right-1/4 top-10 h-[500px] w-[500px] translate-x-1/2 rounded-full"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, rgba(124,58,237,0.06) 0%, transparent 68%)",
-        }}
+        className="pointer-events-none absolute -right-16 bottom-0 h-[22rem] w-[22rem] rounded-full bg-[#7c3aed]/10 blur-3xl"
         aria-hidden
       />
 
-      <div className="container-site">
-        <div className="mx-auto max-w-4xl text-center">
-          <p
-            className={`text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 ${HOME_REVEAL}`}
-          >
-            Créer à l’ère de l’IA
-          </p>
-
-          <h1 className="mt-5 sm:mt-7">
-            <span
-              className={`block font-display text-[1.05rem] font-semibold leading-snug tracking-[-0.02em] text-slate-400 sm:text-xl md:text-2xl ${HOME_REVEAL}`}
-              style={{ animationDelay: "60ms" }}
-            >
-              Avant, il fallait savoir coder.
-            </span>
-            <span
-              className={`mt-3 block font-display text-balance text-[2.05rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0a0a0a] sm:mt-4 sm:text-[3.1rem] md:text-[3.55rem] lg:text-[4rem] ${HOME_REVEAL}`}
-              style={{ animationDelay: "140ms" }}
-            >
-              Aujourd’hui, il faut savoir{" "}
-              <span className="relative inline-block">
-                <span className="relative z-10">quoi créer.</span>
-                <span
-                  className="absolute inset-x-0 bottom-1 -z-0 h-[0.28em] rounded-sm bg-[#2563eb]/12 sm:bottom-1.5"
-                  aria-hidden
-                />
-              </span>
-            </span>
-          </h1>
-
-          <p
-            className={`mx-auto mt-6 max-w-2xl text-[1rem] leading-relaxed text-slate-600 sm:mt-8 sm:text-lg ${HOME_REVEAL}`}
-            style={{ animationDelay: "200ms" }}
-          >
-            Sites, applications, outils professionnels, plateformes, systèmes de
-            réservation… L’intelligence artificielle permet aujourd’hui de
-            transformer une idée en projet concret, même lorsque l’on part de
-            zéro.
-          </p>
-
-          <p
-            className={`mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base ${HOME_REVEAL}`}
-            style={{ animationDelay: "240ms" }}
-          >
-            BeWork vous apprend comment commencer à construire les vôtres.
-          </p>
-
-          <p
-            className={`mx-auto mt-5 inline-flex items-center rounded-full border border-[#2563eb]/20 bg-[#eff6ff] px-4 py-1.5 text-[12px] font-bold tracking-wide text-[#1d4ed8] sm:mt-6 sm:text-[13px] ${HOME_REVEAL}`}
-            style={{ animationDelay: "280ms" }}
-          >
-            Aucune connaissance en programmation requise.
-          </p>
-
-          <div
-            className={`mx-auto mt-8 max-w-md sm:mt-10 sm:max-w-none ${HOME_BTN_GROUP} sm:justify-center ${HOME_REVEAL}`}
-            style={{ animationDelay: "320ms" }}
-          >
-            <Link
-              href="/demonstrations"
-              className={HOME_BTN_PRIMARY}
-              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-creer")}
-            >
-              Découvrir ce que je peux créer
-            </Link>
-            <Link
-              href="/formation"
-              className={HOME_BTN_SECONDARY}
-              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-journee")}
-            >
-              Découvrir la journée BeWork
-            </Link>
-          </div>
-        </div>
-
-        {/* Animation JE VOUDRAIS CRÉER… */}
-        <div
-          className={`mx-auto mt-12 max-w-3xl text-center sm:mt-14 ${HOME_REVEAL}`}
-          style={{ animationDelay: "380ms" }}
-          aria-live="polite"
-        >
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400">
-            Je voudrais créer…
-          </p>
-          <div className="relative mx-auto mt-3 flex h-[3.25rem] items-center justify-center overflow-hidden sm:h-[3.75rem]">
+      <div className="container-site relative py-14 sm:py-16 md:py-20 lg:py-28">
+        <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14 xl:gap-20">
+          {/* Colonne éditoriale */}
+          <div className="max-w-xl lg:max-w-none lg:pt-2">
             <p
-              key={rotIndex}
-              className={`font-display text-balance text-xl font-extrabold tracking-tight text-[#0a0a0a] transition-all duration-[380ms] ease-out sm:text-2xl md:text-[1.75rem] ${
-                rotVisible
-                  ? "translate-y-0 opacity-100 blur-0"
-                  : "translate-y-2 opacity-0 blur-[4px]"
-              }`}
+              className={`text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 ${HOME_REVEAL}`}
             >
-              {CREATE_ROTATIONS[rotIndex]}
+              BeWork — Créer à l’ère de l’IA
             </p>
-          </div>
-        </div>
 
-        {/* Triade */}
-        <div
-          className={`mx-auto mt-10 flex max-w-2xl flex-wrap items-center justify-center gap-2 sm:mt-12 sm:gap-3 ${HOME_REVEAL}`}
-          style={{ animationDelay: "420ms" }}
-        >
-          {["Vous imaginez.", "Vous décrivez.", "Vous construisez."].map(
-            (label, i) => (
+            <h1 id="hero-heading" className="mt-6 sm:mt-8">
               <span
-                key={label}
-                className="bework-pill-holo bework-sheen inline-flex items-center rounded-full px-4 py-2 text-[11px] font-bold tracking-[0.08em] text-[#0a0a0a] backdrop-blur-[10px] sm:text-xs"
-                style={{
-                  ["--pill-color" as string]:
-                    i === 0 ? "#2563eb" : i === 1 ? "#7c3aed" : "#ea580c",
-                  background:
-                    i === 0
-                      ? "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, #eff6ff 155%)"
-                      : i === 1
-                        ? "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, #f5f3ff 155%)"
-                        : "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, #fff7ed 155%)",
-                  boxShadow:
-                    "0 10px 24px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.62)",
-                }}
+                className={`block font-display text-[1.35rem] font-extrabold leading-[1.15] tracking-[-0.03em] text-[#0a0a0a] sm:text-2xl md:text-[1.75rem] ${HOME_REVEAL}`}
+                style={{ animationDelay: "60ms" }}
               >
-                {label}
+                Sans savoir coder.
               </span>
-            ),
-          )}
-        </div>
-
-        <p
-          className={`mx-auto mt-6 max-w-2xl text-center text-sm leading-relaxed text-slate-500 sm:text-base ${HOME_REVEAL}`}
-          style={{ animationDelay: "460ms" }}
-        >
-          BeWork vous apprend à transformer vos idées en projets numériques grâce
-          à l’intelligence artificielle, même si vous n’avez jamais écrit une
-          ligne de code.
-        </p>
-
-        {/* Stage écosystème — coque visuelle conservée */}
-        <div
-          ref={stageRef}
-          className={`relative mx-auto mt-14 max-w-5xl overflow-hidden rounded-3xl sm:mt-18 md:mt-22 ${HOME_REVEAL}`}
-          style={{ animationDelay: "520ms" }}
-          aria-hidden
-        >
-          <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-[#0b1526] via-[#0f1e3a] to-[#111827]" />
-          <div
-            className="pointer-events-none absolute inset-0 rounded-3xl"
-            style={{
-              background:
-                "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(37,99,235,0.18) 0%, transparent 70%)",
-            }}
-          />
-          <div
-            className="pointer-events-none absolute inset-0 rounded-3xl"
-            style={{
-              opacity: "var(--spot-opacity)",
-              mixBlendMode: "screen",
-              background:
-                "radial-gradient(520px circle at var(--spot-x) var(--spot-y), rgba(37,99,235,0.35) 0%, transparent 60%)",
-              transform: "translate3d(0,var(--hero-parallax),0)",
-            }}
-          />
-          <div
-            className="pointer-events-none absolute inset-0 rounded-3xl"
-            style={{
-              opacity: "var(--grid-opacity)",
-              backgroundImage:
-                "linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)",
-              backgroundSize: "48px 48px",
-              transform: "translate3d(0,var(--hero-parallax),0)",
-            }}
-          />
-          <div
-            className="pointer-events-none absolute inset-0 rounded-3xl"
-            style={{
-              opacity: "0.08",
-              mixBlendMode: "overlay",
-              transform: "translate3d(0,var(--hero-parallax),0)",
-              backgroundImage:
-                "repeating-linear-gradient(to bottom, rgba(255,255,255,0.10) 0px, rgba(255,255,255,0.10) 1px, transparent 1px, transparent 4px), radial-gradient(rgba(255,255,255,0.12) 0.55px, transparent 0.65px)",
-              backgroundSize: "100% 6px, 3px 3px",
-            }}
-          />
-
-          <div className="relative px-6 py-8 sm:px-10 sm:py-10">
-            <div className="flex items-center justify-center gap-0">
-              <div className="hidden flex-col gap-3 sm:flex">
-                {ECO_NODES_LEFT.map((node, i) => (
-                  <EcoNode
-                    key={node.label}
-                    label={node.label}
-                    color={node.color}
-                    side="left"
-                    delayMs={400 + i * 60}
-                  />
-                ))}
-              </div>
-              <div className="hidden sm:block">
-                <ConnectorLines nodes={ECO_NODES_LEFT} side="left" />
-              </div>
-
-              <div className="relative z-10 flex-shrink-0">
-                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-[#1a2e52] to-[#0f1e3a] px-7 py-6 text-center shadow-[0_0_40px_rgba(37,99,235,0.25),0_8px_32px_rgba(0,0,0,0.5)] sm:px-10 sm:py-8">
-                  <div
-                    className="pointer-events-none absolute inset-0"
-                    style={{
-                      background:
-                        "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(96,165,250,0.18) 0%, transparent 70%)",
-                    }}
-                  />
-                  <div className="relative">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-blue-300/60">
-                      Votre idée
-                    </p>
-                    <p className="font-display mt-1 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-                      BeWork
-                    </p>
-                    <div className="mt-4 flex flex-wrap justify-center gap-1.5">
-                      {BEWORK_MODULES.map((mod) => (
-                        <span
-                          key={mod.label}
-                          className="rounded-md border px-2 py-0.5 text-[10px] font-semibold transition-all duration-200 hover:scale-105"
-                          style={{
-                            borderColor: `${mod.color}30`,
-                            background: `${mod.color}12`,
-                            color: mod.color,
-                          }}
-                        >
-                          {mod.label}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <AnimatedPulse
-                    className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full"
-                    color="#60a5fa"
-                    delay={0}
-                  />
-                  <AnimatedPulse
-                    className="absolute -bottom-1 -left-1 h-2 w-2 rounded-full"
-                    color="#c4b5fd"
-                    delay={700}
-                  />
-                  <AnimatedPulse
-                    className="absolute -left-1 top-1/2 h-1.5 w-1.5 rounded-full"
-                    color="#fb923c"
-                    delay={1400}
-                  />
-                  <AnimatedPulse
-                    className="absolute -right-1 bottom-1/3 h-1.5 w-1.5 rounded-full"
-                    color="#34d399"
-                    delay={2100}
-                  />
-                </div>
-              </div>
-
-              <div className="hidden sm:block">
-                <ConnectorLines nodes={ECO_NODES_RIGHT} side="right" />
-              </div>
-              <div className="hidden flex-col gap-3 sm:flex">
-                {ECO_NODES_RIGHT.map((node, i) => (
-                  <EcoNode
-                    key={node.label}
-                    label={node.label}
-                    color={node.color}
-                    side="right"
-                    delayMs={420 + i * 60}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-wrap justify-center gap-2 sm:hidden">
-              {[...ECO_NODES_LEFT, ...ECO_NODES_RIGHT].map((node, i) => (
-                <span
-                  key={node.label}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${HOME_REVEAL}`}
-                  style={{
-                    borderColor: `${node.color}50`,
-                    background: `${node.color}12`,
-                    color: node.color,
-                    animationDelay: `${400 + i * 55}ms`,
-                  }}
-                >
+              <span
+                className={`mt-4 block font-display text-[2.35rem] font-extrabold leading-[1.02] tracking-[-0.045em] text-[#0a0a0a] sm:mt-5 sm:text-[3.25rem] md:text-[3.75rem] lg:text-[4.15rem] ${HOME_REVEAL}`}
+                style={{ animationDelay: "140ms" }}
+              >
+                <span className="relative inline-block text-[#1d4ed8]">
+                  Créez
                   <span
-                    className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: node.color }}
+                    className="absolute inset-x-0 bottom-1 -z-10 h-[0.32em] rounded-sm bg-[#2563eb]/15 sm:bottom-1.5"
                     aria-hidden
                   />
-                  {node.label}
-                </span>
-              ))}
+                </span>{" "}
+                ce que
+                <br className="hidden sm:block" />
+                vous imaginez.
+              </span>
+            </h1>
+
+            <p
+              className={`mt-7 max-w-lg text-[1.02rem] leading-relaxed text-slate-600 sm:mt-8 sm:text-lg ${HOME_REVEAL}`}
+              style={{ animationDelay: "200ms" }}
+            >
+              Sites, applications, outils professionnels, plateformes, systèmes
+              de réservation… aucune connaissance en programmation requise.
+            </p>
+
+            <p
+              className={`mt-4 max-w-md text-sm leading-relaxed text-slate-500 sm:text-base ${HOME_REVEAL}`}
+              style={{ animationDelay: "240ms" }}
+            >
+              Vous avez l’idée. BeWork vous apprend à la construire.
+            </p>
+
+            <div
+              className={`mt-8 ${HOME_BTN_GROUP} sm:mt-10 ${HOME_REVEAL}`}
+              style={{ animationDelay: "320ms" }}
+            >
+              <Link
+                href="/#demonstrations"
+                className={HOME_BTN_PRIMARY}
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-voir")}
+              >
+                Voir jusqu’où je peux aller
+              </Link>
+              <Link
+                href="/#journee"
+                className={HOME_BTN_SECONDARY}
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-journee")}
+              >
+                Découvrir la journée BeWork
+              </Link>
             </div>
 
-            <p className="mt-6 text-center text-sm font-medium text-white/50">
-              <span className="font-semibold text-white/80">
-                Le site montre ce qui est possible.
-              </span>{" "}
-              La journée vous apprend comment y arriver.
+            <div
+              className={`mt-10 flex flex-wrap gap-2 sm:mt-12 ${HOME_REVEAL}`}
+              style={{ animationDelay: "380ms" }}
+            >
+              {["Vous imaginez.", "Vous décrivez.", "Vous construisez."].map(
+                (label, i) => (
+                  <span
+                    key={label}
+                    className="bework-pill-holo bework-sheen inline-flex items-center rounded-full px-3.5 py-1.5 text-[10px] font-bold tracking-[0.08em] text-[#0a0a0a] backdrop-blur-[10px] sm:text-[11px]"
+                    style={{
+                      ["--pill-color" as string]:
+                        i === 0 ? "#2563eb" : i === 1 ? "#7c3aed" : "#ea580c",
+                      background:
+                        i === 0
+                          ? "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, #eff6ff 155%)"
+                          : i === 1
+                            ? "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, #f5f3ff 155%)"
+                            : "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, #fff7ed 155%)",
+                      boxShadow:
+                        "0 10px 24px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.62)",
+                    }}
+                  >
+                    {label}
+                  </span>
+                ),
+              )}
+            </div>
+          </div>
+
+          {/* Signature visuelle Idée → Outil */}
+          <div
+            className={`relative ${HOME_REVEAL}`}
+            style={{ animationDelay: "220ms" }}
+            aria-live="polite"
+          >
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-slate-200/90 bg-white/90 p-5 shadow-[0_24px_64px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:p-6 md:p-7">
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.45]"
+                aria-hidden
+                style={{
+                  background:
+                    "radial-gradient(ellipse 70% 50% at 80% 0%, rgba(37,99,235,0.12), transparent 60%)",
+                }}
+              />
+
+              <div className="relative">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                    J’aimerais créer…
+                  </p>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold text-slate-500">
+                    Idée → Outil
+                  </span>
+                </div>
+
+                <div
+                  className={`mt-4 min-h-[4.5rem] transition-all duration-[420ms] ease-out ${
+                    visible
+                      ? "translate-y-0 opacity-100 blur-0"
+                      : "translate-y-2 opacity-0 blur-[3px]"
+                  }`}
+                >
+                  <p className="font-display text-lg font-bold leading-snug tracking-tight text-[#0a0a0a] sm:text-xl">
+                    {scene.idea}
+                  </p>
+                </div>
+
+                <div
+                  className={`mt-5 flex flex-wrap gap-2 transition-all duration-500 ease-out ${
+                    phase === "idea" && !reduceMotion
+                      ? "translate-y-1 opacity-0"
+                      : "translate-y-0 opacity-100"
+                  }`}
+                >
+                  {scene.chips.map((chip, i) => (
+                    <span
+                      key={`${scene.kind}-${chip}`}
+                      className="rounded-full border border-[#2563eb]/15 bg-[#eff6ff]/80 px-3 py-1 text-[11px] font-semibold text-[#1d4ed8] transition-all duration-500"
+                      style={{
+                        transitionDelay: reduceMotion ? "0ms" : `${i * 70}ms`,
+                        opacity: phase === "idea" && !reduceMotion ? 0 : 1,
+                        transform:
+                          phase === "idea" && !reduceMotion
+                            ? "translateY(6px)"
+                            : "translateY(0)",
+                      }}
+                    >
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+
+                <div
+                  className={`mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white transition-all duration-500 ease-out ${
+                    phase === "ui" || reduceMotion
+                      ? "translate-y-0 opacity-100"
+                      : "translate-y-3 opacity-40"
+                  }`}
+                >
+                  <MiniSceneUI kind={scene.kind} />
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-4 text-center text-[11px] leading-relaxed text-slate-400 sm:text-left">
+              Une idée qui prend forme — sans expliquer comment.
             </p>
           </div>
         </div>
@@ -481,111 +303,112 @@ export function HomePlatformHero() {
   );
 }
 
-function EcoNode({
-  label,
-  color,
-  side,
-  delayMs,
-}: {
-  label: string;
-  color: string;
-  side: "left" | "right";
-  delayMs: number;
-}) {
+function MiniSceneUI({ kind }: { kind: Scene["kind"] }) {
+  if (kind === "reservation") {
+    return (
+      <div className="p-4 sm:p-5">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-bold text-slate-800">Réservation</p>
+          <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+            Disponible
+          </span>
+        </div>
+        <div className="mt-3 grid grid-cols-4 gap-1.5">
+          {["Lun", "Mar", "Mer", "Jeu"].map((d, i) => (
+            <div
+              key={d}
+              className={`rounded-lg border px-1 py-2 text-center text-[10px] font-semibold ${
+                i === 1
+                  ? "border-[#1d4ed8] bg-[#eff6ff] text-[#1d4ed8]"
+                  : "border-slate-200 text-slate-500"
+              }`}
+            >
+              {d}
+              <div className="mt-1 text-[11px]">{10 + i}:30</div>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          className="mt-3 w-full rounded-xl bg-[#1d4ed8] px-3 py-2 text-xs font-bold text-white"
+        >
+          Confirmer le créneau
+        </button>
+      </div>
+    );
+  }
+
+  if (kind === "crm") {
+    return (
+      <div className="p-4 sm:p-5">
+        <p className="text-xs font-bold text-slate-800">Pipeline</p>
+        <div className="mt-3 space-y-2">
+          {[
+            { name: "Atelier Nord", stage: "Prospect", tone: "bg-orange-50 text-orange-700" },
+            { name: "Studio KL", stage: "Relance", tone: "bg-violet-50 text-violet-700" },
+            { name: "Maison Verte", stage: "Proposition", tone: "bg-blue-50 text-blue-700" },
+          ].map((row) => (
+            <div
+              key={row.name}
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2"
+            >
+              <span className="text-xs font-semibold text-slate-800">{row.name}</span>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${row.tone}`}>
+                {row.stage}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (kind === "client") {
+    return (
+      <div className="p-4 sm:p-5">
+        <p className="text-xs font-bold text-slate-800">Espace client</p>
+        <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="font-semibold text-slate-700">Projet en cours</span>
+            <span className="font-bold text-[#1d4ed8]">68 %</span>
+          </div>
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-full w-[68%] rounded-full bg-[#1d4ed8]" />
+          </div>
+          <ul className="mt-3 space-y-1.5 text-[11px] text-slate-600">
+            <li>• Devis validé</li>
+            <li>• Documents partagés</li>
+            <li>• Prochaine étape à confirmer</li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div
-      className={`flex cursor-default items-center gap-2 rounded-xl border px-3 py-2 backdrop-blur-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md ${
-        side === "right" ? "flex-row-reverse" : ""
-      } ${HOME_REVEAL}`}
-      style={{
-        borderColor: `${color}40`,
-        background: `${color}10`,
-        animationDelay: `${delayMs}ms`,
-      }}
-    >
-      <span
-        className="h-2 w-2 shrink-0 rounded-full shadow-[0_0_6px_currentColor]"
-        style={{ backgroundColor: color, color }}
-        aria-hidden
-      />
-      <span className="whitespace-nowrap text-xs font-semibold" style={{ color }}>
-        {label}
-      </span>
+    <div className="p-4 sm:p-5">
+      <p className="text-xs font-bold text-slate-800">Tableau de bord</p>
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {[
+          { l: "Demandes", v: "128" },
+          { l: "Réponse", v: "94 %" },
+          { l: "Délai", v: "1,8 j" },
+        ].map((k) => (
+          <div key={k.l} className="rounded-xl border border-slate-200 bg-white p-2.5 text-center">
+            <p className="text-[9px] font-medium text-slate-500">{k.l}</p>
+            <p className="mt-0.5 text-sm font-bold text-slate-900">{k.v}</p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex h-12 items-end gap-1.5">
+        {[40, 65, 48, 78, 55, 70, 42].map((h, i) => (
+          <div
+            key={i}
+            className="flex-1 rounded-t-sm bg-[#1d4ed8]/80"
+            style={{ height: `${h}%` }}
+          />
+        ))}
+      </div>
     </div>
-  );
-}
-
-function ConnectorLines({
-  nodes,
-  side,
-}: {
-  nodes: readonly { color: string }[];
-  side: "left" | "right";
-}) {
-  const count = nodes.length;
-  const width = 72;
-  const itemH = 44;
-  const height = count * (itemH + 12);
-  const midY = height / 2;
-
-  return (
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0"
-    >
-      {nodes.map((node, i) => {
-        const y = itemH / 2 + i * (itemH + 12);
-        const x0 = side === "left" ? 0 : width;
-        const x1 = side === "left" ? width : 0;
-        const ctrl = side === "left" ? 36 : -36;
-        const d = `M${x0},${y} C${x0 + ctrl},${y} ${x1 - ctrl},${midY} ${x1},${midY}`;
-        return (
-          <g key={i}>
-            <path
-              d={d}
-              stroke={node.color}
-              strokeWidth="1"
-              strokeOpacity="0.2"
-              strokeLinecap="round"
-            />
-            <path
-              d={d}
-              stroke={node.color}
-              strokeWidth="1.5"
-              strokeOpacity="0.7"
-              strokeLinecap="round"
-              strokeDasharray="8 18"
-              className="motion-safe:animate-[connector-flow_2.2s_linear_infinite]"
-              style={{ animationDelay: `${i * 280}ms` }}
-            />
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
-
-function AnimatedPulse({
-  className,
-  color,
-  delay,
-}: {
-  className: string;
-  color: string;
-  delay: number;
-}) {
-  return (
-    <span
-      className={`motion-safe:animate-[hero-pulse_2.4s_ease-in-out_infinite] ${className}`}
-      style={{
-        backgroundColor: color,
-        boxShadow: `0 0 8px 2px ${color}80`,
-        animationDelay: `${delay}ms`,
-      }}
-    />
   );
 }

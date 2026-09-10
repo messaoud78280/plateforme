@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { MarketingHeaderBlueprintDecor } from "@/components/layout/MarketingHeaderBlueprintDecor";
-import { CTA_PRIMARY, CTA_SECONDARY } from "@/components/marketing/marketingCtaStyles";
+import { CTA_PRIMARY } from "@/components/marketing/marketingCtaStyles";
+import { BEWORK_SESSION_PRICE_EUR } from "@/lib/bework-formation";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { BEWORK_BRAND_SIGNATURE } from "@/lib/seo-keywords";
 
@@ -18,20 +19,20 @@ const REASSURANCE = [
   "Sans prérequis en programmation",
   "Petits groupes",
   "Démonstrations concrètes",
-];
+] as const;
 
+/** Navigation homepage V2 — ancres narratives. */
 const NAV_ITEMS = [
-  { href: "/", label: "Accueil" },
-  { href: "/formation", label: "La formation" },
-  { href: "/demonstrations", label: "Démonstrations" },
-  { href: "/pour-qui", label: "Pour qui ?" },
-  { href: "/faq", label: "FAQ" },
-  { href: "/contact", label: "Contact" },
+  { href: "/#hero", label: "Découvrir" },
+  { href: "/#possibilite", label: "Possibilités" },
+  { href: "/#demonstrations", label: "Démonstrations" },
+  { href: "/#journee", label: "La journée" },
+  { href: "/#faq", label: "FAQ" },
 ] as const;
 
 const NAV_LINK =
-  "inline-flex items-center gap-1 rounded-lg px-3.5 py-2.5 text-base font-semibold tracking-normal text-slate-700 transition-[color,background,box-shadow] hover:bg-white/80 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35";
-const HEADER_BTN_SECONDARY = CTA_SECONDARY;
+  "inline-flex items-center rounded-lg px-3 py-2 text-[13px] font-semibold tracking-normal text-slate-600 transition-[color,background] hover:bg-white/80 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35";
+
 const HEADER_BTN_PRIMARY = CTA_PRIMARY;
 
 export function MarketingSiteHeader({ plainBg = false }: Props) {
@@ -40,7 +41,6 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
   const headerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    /** Seuil avec hystérésis : évite basculements rapides près du haut (scroll élastique, barre de défilement). */
     const releaseScrollY = 4;
     const engageScrollY = 32;
     const onScroll = () => {
@@ -79,9 +79,9 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
     >
       <MarketingHeaderBlueprintDecor plainBg={plainBg} />
       <div
-        className={`container-site relative z-10 grid grid-cols-[1fr_auto] items-center gap-x-4 font-sans lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center lg:gap-x-8 ${barPy}`}
+        className={`container-site relative z-10 grid grid-cols-[1fr_auto] items-center gap-x-4 font-sans lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-x-6 ${barPy}`}
       >
-        <div className="relative z-20 col-start-1 row-start-1 flex shrink-0 flex-col items-start gap-1.5 justify-self-start">
+        <div className="relative z-20 col-start-1 row-start-1 flex shrink-0 flex-col items-start gap-1 justify-self-start">
           <Link
             href="/"
             className="group inline-flex items-center transition-opacity hover:opacity-90"
@@ -89,40 +89,32 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
           >
             <BeWorkLogo size="sm" priority />
           </Link>
-          <p className="max-w-[14rem] text-[10px] font-medium leading-snug tracking-tight text-[#1d4ed8]/90 sm:max-w-none sm:whitespace-nowrap sm:text-[11px]">
+          <p className="max-w-[14rem] text-[10px] font-semibold uppercase leading-snug tracking-[0.14em] text-[#1d4ed8]/90 sm:max-w-none sm:whitespace-nowrap sm:text-[10px]">
             {BEWORK_BRAND_SIGNATURE}
           </p>
         </div>
 
-        {/* Desktop : CTAs au-dessus, nav en dessous */}
-        <div className="hidden min-w-0 flex-col items-end gap-2 lg:col-start-2 lg:row-start-1 lg:flex">
-          <div
-            className="flex shrink-0 items-center gap-2 whitespace-nowrap"
-            role="group"
-            aria-label="Actions principales"
-          >
-            <Link href="/demonstrations" className={HEADER_BTN_SECONDARY}>
-              <span className="whitespace-nowrap">Démonstrations</span>
+        <nav
+          className="relative hidden max-w-full flex-wrap items-center justify-center gap-x-0.5 gap-y-1 rounded-xl border border-slate-200/60 bg-white/90 p-1 shadow-sm backdrop-blur-sm lg:col-start-2 lg:row-start-1 lg:flex"
+          aria-label="Navigation principale"
+        >
+          {NAV_ITEMS.map((item) => (
+            <Link key={item.href} href={item.href} className={`${NAV_LINK} whitespace-nowrap`}>
+              {item.label}
             </Link>
-            <Link
-              href="/contact#participer"
-              className={HEADER_BTN_PRIMARY}
-              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-desktop-participer")}
-            >
-              <span className="whitespace-nowrap">Participer</span>
-            </Link>
-          </div>
+          ))}
+        </nav>
 
-          <nav
-            className="relative flex max-w-full flex-wrap items-center justify-end gap-x-0.5 gap-y-1 rounded-xl border border-slate-200/70 bg-white/95 p-1 shadow-sm"
-            aria-label="Navigation principale"
+        <div className="hidden shrink-0 items-center justify-self-end lg:col-start-3 lg:row-start-1 lg:flex">
+          <Link
+            href="/contact#participer"
+            className={HEADER_BTN_PRIMARY}
+            {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-desktop-participer")}
           >
-            {NAV_ITEMS.map((item) => (
-              <Link key={item.href} href={item.href} className={`${NAV_LINK} whitespace-nowrap`}>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+            <span className="whitespace-nowrap">
+              Participer — {BEWORK_SESSION_PRICE_EUR}&nbsp;€
+            </span>
+          </Link>
         </div>
 
         <button
@@ -147,7 +139,6 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
         </button>
       </div>
 
-      {/* Menu mobile */}
       <div
         id="marketing-mobile-nav"
         className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(4.5rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 lg:hidden ${
@@ -157,23 +148,14 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       >
         <div className="h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px))] overflow-y-auto overscroll-contain pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-3">
           <div className="container-site flex flex-col gap-3">
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-              <Link
-                href="/demonstrations"
-                className={HEADER_BTN_SECONDARY}
-                onClick={() => setMobileOpen(false)}
-              >
-                Démonstrations
-              </Link>
-              <Link
-                href="/contact#participer"
-                className={HEADER_BTN_PRIMARY}
-                onClick={() => setMobileOpen(false)}
-                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-mobile-participer")}
-              >
-                Participer
-              </Link>
-            </div>
+            <Link
+              href="/contact#participer"
+              className={`${HEADER_BTN_PRIMARY} w-full`}
+              onClick={() => setMobileOpen(false)}
+              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-mobile-participer")}
+            >
+              Participer — {BEWORK_SESSION_PRICE_EUR}&nbsp;€
+            </Link>
 
             <nav className="flex flex-col gap-2" aria-label="Navigation mobile">
               {NAV_ITEMS.map((item) => (
@@ -189,23 +171,14 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             </nav>
 
             <div className="rounded-xl border border-slate-100 bg-slate-50/80 px-4 py-3 sm:px-5">
-              <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]/95">Pourquoi BeWork ?</p>
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]/95">
+                Pourquoi BeWork ?
+              </p>
               <div className="mt-2 space-y-2 text-sm text-slate-600">
                 {REASSURANCE.map((line) => (
                   <p key={line}>• {line}</p>
                 ))}
               </div>
-            </div>
-
-            <div className="flex flex-col gap-2.5 pt-1">
-              <Link
-                href="/contact#participer"
-                className={`${HEADER_BTN_PRIMARY} w-full`}
-                onClick={() => setMobileOpen(false)}
-                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-mobile-footer-participer")}
-              >
-                Participer à une session
-              </Link>
             </div>
           </div>
         </div>

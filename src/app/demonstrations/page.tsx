@@ -14,22 +14,63 @@ import {
 } from "@/components/home/homeSectionStyles";
 import { CTA_PRIMARY, CTA_SECONDARY } from "@/components/marketing/marketingCtaStyles";
 import { DEMO_INTERACTIVE_SLUGS, DEMO_PROJECTS } from "@/lib/bework-formation";
-import { absoluteUrl } from "@/lib/site";
+import {
+  breadcrumbJsonLd,
+  buildMarketingPageMetadata,
+  SEO_PAGES,
+} from "@/lib/seo-formation-pages";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
-const PATH = "/demonstrations" as const;
-const pageUrl = absoluteUrl(PATH);
+const seo = SEO_PAGES.demonstrations;
+const pageUrl = absoluteUrl(seo.path);
 const interactive = new Set<string>(DEMO_INTERACTIVE_SLUGS);
 
-export const metadata: Metadata = {
-  title: "Démonstrations — Exemples de projets créés avec l’IA",
-  description:
-    "Explorez des démonstrations BeWork : messagerie, agenda, réservation, CRM, tableau de bord, espace client… Des exemples de ce qu’il est possible d’aborder en formation.",
-  alternates: { canonical: pageUrl },
+export const metadata: Metadata = buildMarketingPageMetadata({
+  path: seo.path,
+  title: seo.title,
+  description: seo.description,
+  keywords: [...seo.keywords],
+});
+
+const demosJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollectionPage",
+      "@id": `${pageUrl}#webpage`,
+      url: pageUrl,
+      name: `${seo.title} | BeWork`,
+      description: seo.description,
+      isPartOf: { "@id": `${SITE_URL}/#website` },
+      about: { "@type": "Thing", name: "Démonstrations de projets créés avec l’IA" },
+    },
+    {
+      "@type": "ItemList",
+      "@id": `${pageUrl}#list`,
+      name: "Démonstrations BeWork",
+      numberOfItems: DEMO_PROJECTS.length,
+      itemListElement: DEMO_PROJECTS.map((demo, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: demo.title,
+        url: absoluteUrl(`/demonstrations/${demo.slug}`),
+        description: demo.description,
+      })),
+    },
+    breadcrumbJsonLd([
+      { name: "Accueil", path: "/" },
+      { name: "Démonstrations", path: "/demonstrations" },
+    ]),
+  ],
 };
 
 export default function DemonstrationsHubPage() {
   return (
     <div className="min-h-screen bg-transparent">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(demosJsonLd) }}
+      />
       <MarketingSiteHeader plainBg />
 
       <main>
@@ -43,10 +84,7 @@ export default function DemonstrationsHubPage() {
                 <br />
                 <span className="text-[#275BE8]">Essayez.</span>
               </h1>
-              <p className={HOME_LEAD}>
-                Découvrez quelques exemples de ce qu&apos;il est aujourd&apos;hui possible de
-                construire. Interfaces d&apos;exemple, données fictives, sans inscription.
-              </p>
+              <p className={HOME_LEAD}>{seo.description}</p>
             </div>
 
             <ul className={`${HOME_CONTENT} grid gap-4 sm:grid-cols-2 lg:grid-cols-3`}>

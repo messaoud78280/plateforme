@@ -39,8 +39,6 @@ const FORMATION_CORE = [
   "/mentions-legales",
   "/politique-confidentialite",
   "/conditions-generales-vente",
-  "/llms.txt",
-  "/ai.txt",
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -50,7 +48,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       return entry(path, 0.95, "weekly");
     }
     if (path.startsWith("/demonstrations/")) return entry(path, 0.88);
-    if (path === "/llms.txt" || path === "/ai.txt") return entry(path, 0.7, "weekly");
     if (
       path === "/mentions-legales" ||
       path === "/politique-confidentialite" ||

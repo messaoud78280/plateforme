@@ -15,21 +15,52 @@ import {
 } from "@/components/home/homeSectionStyles";
 import { CTA_GROUP, CTA_PRIMARY, CTA_SECONDARY } from "@/components/marketing/marketingCtaStyles";
 import { AUDIENCE_PROFILES, METIER_IDEAS } from "@/lib/bework-formation";
-import { absoluteUrl } from "@/lib/site";
+import {
+  breadcrumbJsonLd,
+  buildMarketingPageMetadata,
+  SEO_PAGES,
+} from "@/lib/seo-formation-pages";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
-const PATH = "/pour-qui" as const;
-const pageUrl = absoluteUrl(PATH);
+const seo = SEO_PAGES.pourQui;
+const pageUrl = absoluteUrl(seo.path);
 
-export const metadata: Metadata = {
-  title: "Pour qui ? — Formation création avec l’IA",
-  description:
-    "Entrepreneurs, artisans, indépendants, TPE/PME, porteurs de projet : à qui s’adresse la formation BeWork pour créer sites et outils avec l’IA.",
-  alternates: { canonical: pageUrl },
+export const metadata: Metadata = buildMarketingPageMetadata({
+  path: seo.path,
+  title: seo.title,
+  description: seo.description,
+  keywords: [...seo.keywords],
+});
+
+const pourQuiJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": `${pageUrl}#webpage`,
+      url: pageUrl,
+      name: `${seo.title} | BeWork`,
+      description: seo.description,
+      isPartOf: { "@id": `${SITE_URL}/#website` },
+      about: AUDIENCE_PROFILES.map((p) => ({
+        "@type": "Audience",
+        audienceType: p.title,
+      })),
+    },
+    breadcrumbJsonLd([
+      { name: "Accueil", path: "/" },
+      { name: "Pour qui ?", path: "/pour-qui" },
+    ]),
+  ],
 };
 
 export default function PourQuiPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pourQuiJsonLd) }}
+      />
       <MarketingSiteHeader plainBg />
 
       <main>

@@ -50,47 +50,50 @@ export { tutoPageMetadata, getTutoPageDescription } from "@/lib/seo-tuto-metadat
 
 export type GeoAeoBriefItem = { question: string; answer: string };
 
-/** Réponses courtes aux 8 questions GEO/AEO — le tarif est complété côté composant si besoin. */
+/** Réponses courtes aux questions GEO/AEO — alignées formation V3 (pas de BTP / SaaS). */
 export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBriefItem[] {
+  const priceHint = priceFromLabel
+    ? ` Tarif public : ${priceFromLabel} € / participant pour la journée.`
+    : " Tarif public : 200 € / participant pour la journée.";
+
   return [
     {
       question: "Qui est BeWork ?",
-      answer: `BeWork — ${BEWORK_BRAND_SIGNATURE}. ${BEWORK_AEO_DEFINITION} Société française : concepteur de solutions IA et de plateformes métier en France, Belgique, Suisse et Luxembourg.`,
+      answer: `BeWork — ${BEWORK_BRAND_SIGNATURE}. ${BEWORK_AEO_DEFINITION} Société française (Guyancourt), sessions pour la francophonie.`,
     },
     {
       question: "À qui s’adresse BeWork ?",
       answer:
-        "PME BTP, entreprises générales, artisans structurés, dirigeants, chargés d’affaires et conducteurs de travaux qui veulent une solution IA, une automatisation, une analyse documentaire, une intégration à leurs outils, ou une plateforme métier — sans devoir tout reconstruire seuls.",
+        "Entrepreneurs, artisans, indépendants, TPE/PME, porteurs de projet et professionnels curieux de l’IA qui veulent apprendre à créer sites, apps ou outils — sans prérequis en programmation.",
     },
     {
       question: "Quel problème BeWork résout-il ?",
       answer:
-        "Temps perdu sur des tâches répétitives, documents difficiles à exploiter, information dispersée, outils qui ne dialoguent pas, idées métier sans logiciel adapté. BeWork étudie le besoin et construit la solution autour de l’entreprise — sans se substituer aux décisions ni aux engagements contractuels du client.",
+        "Passer de l’idée à une première construction concrète avec l’IA : structurer un besoin, guider la création, tester et améliorer — sans devoir devenir développeur ni dépendre d’un abonnement logiciel BeWork.",
     },
     {
       question: "Quels services BeWork propose-t-il ?",
       answer:
-        "Conception de solutions IA sur mesure (applications, agents, automatisations, analyse documentaire, recherche, intégrations), conception de plateformes métier, formation des équipes, accompagnement à l’adoption et évolution continue. La plateforme BeWork est une offre majeure et une preuve de savoir-faire.",
+        "Une journée pratique en petit groupe pour apprendre à créer avec l’IA, des démonstrations illustratives sur le site, et une méthode réutilisable après la session. Pas de plateforme SaaS ni de catalogue d’outils imposé.",
     },
     {
       question: "Pourquoi faire confiance à BeWork ?",
       answer:
-        "Expertise métier BTP, solutions pensées pour être utilisées (simples devant), confidentialité et isolation multi-entreprises, hébergement principal en Europe selon les engagements contractuels. BeWork n’est ni un secrétariat exécutant, ni un bureau d’études, ni un cabinet juridique.",
+        "Promesse claire et bornée : une journée pour apprendre à créer, pas pour vendre un logiciel. Démos en données fictives. Aucun avis, note ou volume clients inventé. La méthode détaillée se transmet en session, pas en page publique.",
     },
     {
       question: "Combien coûte BeWork ?",
-      answer:
-        `Projet IA sur mesure ou plateforme BeWork : proposition sur étude (périmètre, utilisateurs, intégrations, formation, accompagnement). Aucune grille publique fixe — détail sur bework.fr/tarifs. ${priceFromLabel ? `Référence historique éventuelle à partir de ${priceFromLabel} € HT : à confirmer selon le modèle retenu.` : ""}`.trim(),
+      answer: `Journée BeWork : tarif unique publié sur bework.fr/tarifs.${priceHint} Pas d’abonnement lié à cette offre.`,
     },
     {
       question: "Comment commencer avec BeWork ?",
       answer:
-        "Parler de votre besoin via bework.fr/#besoin ou /contact. Expliquez ce que vous voulez améliorer, automatiser ou créer — sans jargon technique. BeWork étudie la faisabilité, propose une approche, puis conçoit, déploie et forme.",
+        "Explorez les démonstrations, lisez le déroulé sur /formation, puis demandez une place via /contact#participer. Indiquez votre idée ou votre activité pour préparer la session.",
     },
     {
-      question: "Dois-je adopter toute la plateforme BeWork ?",
+      question: "Faut-il savoir coder pour BeWork ?",
       answer:
-        "Non. Vous pouvez venir pour un besoin IA précis, une intégration à vos logiciels existants, ou une plateforme complète. BeWork part de votre besoin, pas d’un catalogue obligatoire.",
+        "Non. La journée est conçue pour des débutants. Vous apprenez à créer avec l’IA ; vous ne suivez pas une formation développeur.",
     },
   ] as const;
 }

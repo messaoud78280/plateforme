@@ -24,6 +24,7 @@ import {
   SEO_OG_LOCALE_PRIMARY,
   hreflangFrancophonieLanguages,
 } from "@/lib/seo-francophonie";
+import { beworkCourseJsonLd } from "@/lib/seo-formation-pages";
 import { absoluteUrl, getOrgSameAs, SITE_URL } from "@/lib/site";
 const defaultOgImage = absoluteUrl("/opengraph-image");
 const defaultLogoImage = absoluteUrl("/icon-512.png");
@@ -64,7 +65,6 @@ const architectsDaughter = Architects_Daughter({
 const searchEngineVerification = buildSearchEngineVerification();
 const llmsTxtUrl = absoluteUrl("/llms.txt");
 const aiTxtUrl = absoluteUrl("/ai.txt");
-const rssFeedUrl = absoluteUrl("/feed.xml");
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -240,20 +240,7 @@ const jsonLd = {
           "Entrepreneurs, artisans, indépendants, TPE/PME, porteurs de projet et professionnels curieux de l’IA qui veulent apprendre à créer sans prérequis en programmation",
       },
     },
-    {
-      "@type": "Course",
-      "@id": `${SITE_URL}/#course`,
-      name: "Journée BeWork — Créer avec l’IA",
-      description: BEWORK_AEO_DEFINITION,
-      provider: { "@id": `${SITE_URL}/#organization` },
-      url: absoluteUrl("/formation"),
-      offers: {
-        "@type": "Offer",
-        price: "200",
-        priceCurrency: "EUR",
-        url: absoluteUrl("/contact#participer"),
-      },
-    },
+    beworkCourseJsonLd({ description: BEWORK_AEO_DEFINITION }),
   ],
 };
 
@@ -267,7 +254,6 @@ export default function RootLayout({
       <head>
         <link rel="alternate" type="text/plain" href={llmsTxtUrl} title="Index pour assistants IA (llms.txt)" />
         <link rel="alternate" type="text/plain" href={aiTxtUrl} title="Politique indexation moteurs IA (ai.txt)" />
-        <link rel="alternate" type="application/rss+xml" href={rssFeedUrl} title="Flux RSS BeWork" />
         <PlausibleScript />
       </head>
       <body

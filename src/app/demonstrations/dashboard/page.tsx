@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { DemoDashboard } from "@/components/demonstrations/DemoDashboard";
 import { DemoShell } from "@/components/demonstrations/DemoShell";
+import { demoPageMetadata } from "@/lib/seo-formation-pages";
 
-export const metadata: Metadata = {
-  title: "Démo — Tableau de bord",
-  description: "Démonstration BeWork d’un tableau de bord d’activité. Données fictives.",
-};
+export const metadata: Metadata = demoPageMetadata(
+  "dashboard",
+  "Tableau de bord",
+  "Transformez vos données en une interface claire pour suivre votre activité.",
+);
 
 export default function DemoDashboardPage() {
   return (

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { DemoReservation } from "@/components/demonstrations/DemoReservation";
 import { DemoShell } from "@/components/demonstrations/DemoShell";
+import { demoPageMetadata } from "@/lib/seo-formation-pages";
 
-export const metadata: Metadata = {
-  title: "Démo — Système de réservation",
-  description: "Démonstration BeWork d’un parcours de réservation. Données fictives, sans inscription.",
-};
+export const metadata: Metadata = demoPageMetadata(
+  "reservation",
+  "Système de réservation",
+  "Permettez à vos clients de sélectionner une prestation, une date et d’envoyer leur demande.",
+);
 
 export default function DemoReservationPage() {
   return (

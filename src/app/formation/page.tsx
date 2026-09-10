@@ -14,28 +14,56 @@ import {
 } from "@/components/home/homeSectionStyles";
 import { CTA_GROUP, CTA_PRIMARY, CTA_SECONDARY } from "@/components/marketing/marketingCtaStyles";
 import {
-  BEWORK_FORMATION_TAGLINE,
   BEWORK_SESSION_PRICE_EUR,
   FORMATION_DAY_STEPS,
   FORMATION_FAQ,
   FORMATION_INCLUDES,
 } from "@/lib/bework-formation";
-import { absoluteUrl } from "@/lib/site";
+import {
+  beworkCourseJsonLd,
+  breadcrumbJsonLd,
+  buildMarketingPageMetadata,
+  SEO_PAGES,
+} from "@/lib/seo-formation-pages";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
-const PATH = "/formation" as const;
-const pageUrl = absoluteUrl(PATH);
+const seo = SEO_PAGES.formation;
+const pageUrl = absoluteUrl(seo.path);
 
-export const metadata: Metadata = {
-  title: "Formation — Créer avec l’intelligence artificielle",
-  description:
-    "Formation pratique BeWork : apprenez à créer sites, applications et outils numériques avec l’IA, sans prérequis en programmation. Une journée, petits groupes.",
-  alternates: { canonical: pageUrl },
-  openGraph: {
-    title: "Formation BeWork — Créer avec l’IA",
-    description: BEWORK_FORMATION_TAGLINE,
-    url: pageUrl,
-    type: "website",
-  },
+export const metadata: Metadata = buildMarketingPageMetadata({
+  path: seo.path,
+  title: seo.title,
+  description: seo.description,
+  keywords: [...seo.keywords],
+});
+
+const formationJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": `${pageUrl}#webpage`,
+      url: pageUrl,
+      name: `${seo.title} | BeWork`,
+      description: seo.description,
+      isPartOf: { "@id": `${SITE_URL}/#website` },
+      mainEntity: { "@id": `${SITE_URL}/#course` },
+    },
+    beworkCourseJsonLd(),
+    breadcrumbJsonLd([
+      { name: "Accueil", path: "/" },
+      { name: "Formation", path: "/formation" },
+    ]),
+    {
+      "@type": "FAQPage",
+      "@id": `${pageUrl}#faq`,
+      mainEntity: FORMATION_FAQ.slice(0, 4).map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+      })),
+    },
+  ],
 };
 
 export default function FormationPage() {
@@ -43,6 +71,10 @@ export default function FormationPage() {
 
   return (
     <div className="min-h-screen bg-transparent">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(formationJsonLd) }}
+      />
       <MarketingSiteHeader plainBg />
 
       <main>
@@ -52,7 +84,7 @@ export default function FormationPage() {
             <div className={HOME_HEADER}>
               <p className={HOME_EYEBROW}>La formation</p>
               <h1 className={HOME_H2}>Apprenez à créer avec l&apos;intelligence artificielle</h1>
-              <p className={HOME_LEAD}>{BEWORK_FORMATION_TAGLINE}</p>
+              <p className={HOME_LEAD}>{seo.description}</p>
               <div className={`mt-8 ${CTA_GROUP} justify-center`}>
                 <Link href="/contact#participer" className={CTA_PRIMARY}>
                   Participer — {BEWORK_SESSION_PRICE_EUR}&nbsp;€

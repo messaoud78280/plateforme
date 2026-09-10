@@ -8,22 +8,24 @@ import {
   BEWORK_SESSION_PRICE_EUR,
   FORMATION_INCLUDES,
 } from "@/lib/bework-formation";
-import { absoluteUrl } from "@/lib/site";
+import {
+  beworkCourseJsonLd,
+  beworkSessionOfferJsonLd,
+  breadcrumbJsonLd,
+  buildMarketingPageMetadata,
+  SEO_PAGES,
+} from "@/lib/seo-formation-pages";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
-const PATH = "/tarifs" as const;
-const pageUrl = absoluteUrl(PATH);
+const seo = SEO_PAGES.tarifs;
+const pageUrl = absoluteUrl(seo.path);
 
-export const metadata: Metadata = {
-  title: `Tarifs — Session formation ${BEWORK_SESSION_PRICE_EUR} €`,
-  description: `Tarif unique BeWork : ${BEWORK_SESSION_PRICE_EUR} € pour une journée de formation pratique à la création avec l’intelligence artificielle.`,
-  alternates: { canonical: pageUrl },
-  openGraph: {
-    title: `BeWork — ${BEWORK_SESSION_PRICE_EUR} € la session`,
-    description: BEWORK_FORMATION_TAGLINE,
-    url: pageUrl,
-    type: "website",
-  },
-};
+export const metadata: Metadata = buildMarketingPageMetadata({
+  path: seo.path,
+  title: seo.title,
+  description: seo.description,
+  keywords: [...seo.keywords],
+});
 
 const FAQ_TARIFS = [
   {
@@ -40,9 +42,51 @@ const FAQ_TARIFS = [
   },
 ] as const;
 
+const tarifsJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": `${pageUrl}#webpage`,
+      url: pageUrl,
+      name: `${seo.title} | BeWork`,
+      description: seo.description,
+      isPartOf: { "@id": `${SITE_URL}/#website` },
+      mainEntity: { "@id": `${pageUrl}#product` },
+    },
+    {
+      "@type": "Product",
+      "@id": `${pageUrl}#product`,
+      name: "Journée BeWork",
+      description: seo.description,
+      brand: { "@type": "Brand", name: "BeWork" },
+      category: "Formation professionnelle",
+      offers: beworkSessionOfferJsonLd(),
+    },
+    beworkCourseJsonLd(),
+    {
+      "@type": "FAQPage",
+      "@id": `${pageUrl}#faq`,
+      mainEntity: FAQ_TARIFS.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+      })),
+    },
+    breadcrumbJsonLd([
+      { name: "Accueil", path: "/" },
+      { name: "Tarifs", path: "/tarifs" },
+    ]),
+  ],
+};
+
 export default function TarifsPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(tarifsJsonLd) }}
+      />
       <MarketingSiteHeader plainBg />
 
       <main className="mx-auto max-w-site px-4 py-10 sm:py-12 md:py-16">

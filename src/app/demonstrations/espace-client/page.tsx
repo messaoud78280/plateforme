@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { DemoEspaceClient } from "@/components/demonstrations/DemoEspaceClient";
 import { DemoShell } from "@/components/demonstrations/DemoShell";
+import { demoPageMetadata } from "@/lib/seo-formation-pages";
 
-export const metadata: Metadata = {
-  title: "Démo — Espace client",
-  description: "Aperçu BeWork d’un espace client privé. Données fictives, sans inscription.",
-};
+export const metadata: Metadata = demoPageMetadata(
+  "espace-client",
+  "Espace client",
+  "Créez un espace privé dans lequel vos clients retrouvent informations, documents ou suivi.",
+);
 
 export default function DemoEspaceClientPage() {
   return (

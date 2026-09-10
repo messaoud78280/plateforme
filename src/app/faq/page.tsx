@@ -5,17 +5,22 @@ import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { BwAtmosphere } from "@/components/home/BwAtmosphere";
 import { CTA_GROUP, CTA_PRIMARY, CTA_SECONDARY } from "@/components/marketing/marketingCtaStyles";
 import { FORMATION_FAQ } from "@/lib/bework-formation";
-import { absoluteUrl } from "@/lib/site";
+import {
+  breadcrumbJsonLd,
+  buildMarketingPageMetadata,
+  SEO_PAGES,
+} from "@/lib/seo-formation-pages";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
-const FAQ_PAGE_PATH = "/faq" as const;
-const faqUrl = absoluteUrl(FAQ_PAGE_PATH);
+const seo = SEO_PAGES.faq;
+const faqUrl = absoluteUrl(seo.path);
 
-export const metadata: Metadata = {
-  title: "FAQ — Formation créer avec l’IA",
-  description:
-    "Questions fréquentes sur la formation BeWork : prérequis, ordinateur, projets personnels, outils, et ce que vous apprenez en une journée.",
-  alternates: { canonical: faqUrl },
-};
+export const metadata: Metadata = buildMarketingPageMetadata({
+  path: seo.path,
+  title: seo.title,
+  description: seo.description,
+  keywords: [...seo.keywords],
+});
 
 function faqQuestionSlug(question: string): string {
   return (
@@ -39,19 +44,27 @@ const faqWebPageLd = {
       "@type": "WebPage",
       "@id": `${faqUrl}#webpage`,
       url: faqUrl,
-      name: "FAQ BeWork — Formation créer avec l’IA",
+      name: `${seo.title} | BeWork`,
       inLanguage: "fr-FR",
-      description:
-        "Réponses aux questions fréquentes sur la formation pratique BeWork pour créer sites, applications et outils avec l’intelligence artificielle.",
+      description: seo.description,
+      isPartOf: { "@id": `${SITE_URL}/#website` },
+      mainEntity: { "@id": `${faqUrl}#faq` },
     },
     {
-      "@type": "BreadcrumbList",
-      "@id": `${faqUrl}#breadcrumb`,
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Accueil", item: absoluteUrl("/") },
-        { "@type": "ListItem", position: 2, name: "FAQ", item: faqUrl },
-      ],
+      "@type": "FAQPage",
+      "@id": `${faqUrl}#faq`,
+      url: faqUrl,
+      inLanguage: "fr-FR",
+      mainEntity: FORMATION_FAQ.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+      })),
     },
+    breadcrumbJsonLd([
+      { name: "Accueil", path: "/" },
+      { name: "FAQ", path: "/faq" },
+    ]),
   ],
 };
 

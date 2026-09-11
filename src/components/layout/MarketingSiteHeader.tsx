@@ -92,7 +92,12 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 aria-label="Découvrir la formation"
                 {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-formation")}
               >
-                Découvrir la formation
+                <span className={styles.ctaSecondaryFull} aria-hidden>
+                  Découvrir la formation
+                </span>
+                <span className={styles.ctaSecondaryShort} aria-hidden>
+                  Formation
+                </span>
               </Link>
               <Link
                 href="/contact#participer"

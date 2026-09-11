@@ -1,0 +1,307 @@
+/* Collage hero — micro-interactions (design inchangé) */
+
+.scene {
+  --mx: 0;
+  --my: 0;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  isolation: isolate;
+  perspective: 900px;
+  transition: filter 0.35s var(--ease);
+}
+
+@media (pointer: fine) {
+  .scene:hover {
+    filter: saturate(1.03) contrast(1.015);
+  }
+}
+
+.layerBack,
+.layerMid,
+.layerFront {
+  will-change: transform;
+  transition: transform 0.45s var(--ease);
+}
+
+@media (pointer: fine) and (min-width: 1024px) {
+  .layerBack {
+    transform: translate3d(calc(var(--mx) * 5px), calc(var(--my) * 4px), 0);
+  }
+
+  .layerMid {
+    transform: translate3d(calc(var(--mx) * 9px), calc(var(--my) * 7px), 0);
+  }
+
+  .layerFront {
+    transform: translate3d(calc(var(--mx) * 12px), calc(var(--my) * 10px), 0);
+  }
+}
+
+/* ——— Fenêtre MonProjet ——— */
+
+.window {
+  transform-style: preserve-3d;
+  transition:
+    transform 0.35s var(--ease),
+    box-shadow 0.35s var(--ease),
+    filter 0.35s var(--ease);
+}
+
+@media (pointer: fine) {
+  .window:hover {
+    transform: translate3d(calc(var(--mx) * 5px), calc(var(--my) * 4px), 0) scale(1.012)
+      rotateX(calc(var(--my) * -1.4deg)) rotateY(calc(var(--mx) * 1.6deg));
+    box-shadow:
+      0 28px 60px rgba(15, 23, 42, 0.16),
+      0 0 0 1px rgba(39, 91, 232, 0.08),
+      0 0 36px rgba(39, 91, 232, 0.12);
+    filter: brightness(1.02);
+  }
+
+  .windowLit {
+    filter: brightness(1.035);
+    box-shadow:
+      0 26px 58px rgba(15, 23, 42, 0.14),
+      0 0 28px rgba(39, 91, 232, 0.14);
+  }
+}
+
+/* ——— Cartes génériques ——— */
+
+.card {
+  transition:
+    transform 0.3s var(--ease),
+    box-shadow 0.3s var(--ease);
+}
+
+@media (pointer: fine) {
+  .booking:hover {
+    transform: translate3d(calc(var(--mx) * 9px), calc(var(--my) * 7px - 5px), 0);
+    box-shadow: 0 22px 48px rgba(15, 23, 42, 0.16);
+  }
+
+  .booking:hover .bookBtn {
+    box-shadow: 0 0 0 1px rgba(39, 91, 232, 0.15), 0 8px 20px rgba(39, 91, 232, 0.35);
+  }
+
+  .booking:hover .dayActive {
+    animation: softPulse 0.55s var(--ease) 1;
+  }
+
+  .booking:hover .slotActive {
+    animation: softPulse 0.55s var(--ease) 1;
+  }
+
+  .activity:hover {
+    transform: translate3d(calc(var(--mx) * 9px), calc(var(--my) * 7px - 4px), 0);
+    box-shadow: 0 24px 52px rgba(15, 23, 42, 0.16);
+  }
+
+  .assistant:hover {
+    transform: translate3d(calc(var(--mx) * 12px), calc(var(--my) * 10px - 4px), 0);
+    box-shadow: 0 22px 48px rgba(124, 58, 237, 0.16);
+  }
+
+  .assistant:hover .aiIcon {
+    transform: scale(1.08) rotate(-8deg);
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.16), 0 0 18px rgba(39, 91, 232, 0.28);
+  }
+
+  .assistant:hover .aiMsg {
+    animation: msgReveal 0.55s var(--ease) both;
+  }
+}
+
+.bookBtn {
+  transition: box-shadow 0.3s var(--ease);
+}
+
+.aiIcon {
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+
+.aiMsg {
+  overflow: hidden;
+}
+
+@keyframes softPulse {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes msgReveal {
+  from {
+    opacity: 0.55;
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* ——— Activité / barres ——— */
+
+.bar {
+  height: var(--h, 50%);
+  transform-origin: bottom center;
+  transform: scaleY(1);
+}
+
+.delta {
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease), color 0.35s var(--ease);
+}
+
+@media (pointer: fine) {
+  .activity:not(.activityPlayed) .bar {
+    transform: scaleY(0.65);
+  }
+
+  .activityPlayed .bar {
+    animation: barGrow 0.5s var(--ease) var(--bar-delay, 0ms) both;
+  }
+
+  .activityPlayed .delta {
+    opacity: 1;
+    transform: translateY(0);
+    color: #059669;
+  }
+
+  .activity:not(.activityPlayed) .delta {
+    opacity: 0.65;
+    transform: translateY(2px);
+  }
+}
+
+@keyframes barGrow {
+  from {
+    transform: scaleY(0.62);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* ——— Pastilles ——— */
+
+.pill {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: #fff;
+  padding: 0.375rem 0.75rem;
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  transition:
+    transform 0.25s var(--ease),
+    box-shadow 0.25s var(--ease),
+    border-color 0.25s var(--ease);
+  cursor: default;
+}
+
+@media (pointer: fine) {
+  .pill:hover {
+    transform: translate3d(-5px, 0, 0) scale(1.02);
+    border-color: color-mix(in srgb, var(--pill-glow) 35%, white);
+    box-shadow:
+      0 12px 26px rgba(15, 23, 42, 0.12),
+      0 0 0 1px color-mix(in srgb, var(--pill-glow) 22%, transparent),
+      0 0 18px color-mix(in srgb, var(--pill-glow) 28%, transparent);
+  }
+}
+
+/* ——— Note manuscrite ——— */
+
+.note {
+  transition: transform 0.35s var(--ease), opacity 0.35s var(--ease), filter 0.35s var(--ease);
+}
+
+@media (pointer: fine) {
+  .scene:hover .note {
+    transform: rotate(-7deg) translate3d(0, -3px, 0);
+    filter: saturate(1.15);
+    opacity: 1;
+  }
+}
+
+/* ——— Entrée mobile / viewport (une fois) ——— */
+
+@media (pointer: coarse), (max-width: 1023px) {
+  .reveal {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+    transition:
+      opacity 0.55s var(--ease) var(--delay, 0ms),
+      transform 0.55s var(--ease) var(--delay, 0ms);
+  }
+
+  .entered .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .entered .layerMid.reveal:nth-of-type(1),
+  .entered .booking.reveal {
+    transform: none;
+  }
+}
+
+/* Spécificité entrée : réservation depuis la gauche, activité depuis le bas */
+@media (pointer: coarse), (max-width: 1023px) {
+  .booking.reveal {
+    transform: translate3d(-16px, 10px, 0);
+  }
+
+  .activity.reveal {
+    transform: translate3d(0, 18px, 0);
+  }
+
+  .assistant.reveal {
+    transform: translate3d(14px, 8px, 0);
+  }
+
+  .pill.reveal {
+    transform: translate3d(12px, 0, 0);
+  }
+
+  .entered .booking.reveal,
+  .entered .activity.reveal,
+  .entered .assistant.reveal,
+  .entered .pill.reveal {
+    transform: none;
+  }
+}
+
+/* ——— Reduced motion ——— */
+
+@media (prefers-reduced-motion: reduce) {
+  .scene,
+  .layerBack,
+  .layerMid,
+  .layerFront,
+  .window,
+  .card,
+  .pill,
+  .note,
+  .aiIcon,
+  .bar,
+  .delta,
+  .reveal {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    clip-path: none !important;
+  }
+
+  .scene:hover {
+    filter: none;
+  }
+}

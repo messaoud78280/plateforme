@@ -3,6 +3,7 @@ import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { HomeFaqAccordion } from "@/components/home/HomeFaqAccordion";
 import { HomeFinalCta } from "@/components/home/HomeFinalCta";
+import { HomeAgentsFamilies } from "@/components/home/HomeAgentsFamilies";
 import { HomeJourneeBlock } from "@/components/home/HomeJourneeBlock";
 import { HomeMetierSelector } from "@/components/home/HomeMetierSelector";
 import { HomePlatformHero } from "@/components/home/HomePlatformHero";
@@ -94,6 +95,7 @@ export default function HomePage() {
         <HomePlatformHero />
         <HomePossibilitiesBento />
         <HomeMetierSelector />
+        <HomeAgentsFamilies />
         <HomeJourneeBlock />
         <HomeSkillsAfter />
         <HomePricingSession />

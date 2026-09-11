@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import styles from "./MarketingSiteHeader.module.css";
@@ -11,27 +12,48 @@ type Props = {
 };
 
 const NAV_ITEMS = [
-  { href: "/#hero", label: "Découvrir" },
-  { href: "/#possibilites", label: "Possibilités" },
-  { href: "/#demonstrations", label: "Démonstrations" },
-  { href: "/#journee", label: "La journée" },
-  { href: "/#faq", label: "FAQ" },
+  { href: "/#hero", label: "Découvrir", match: "home" },
+  { href: "/#possibilites", label: "Possibilités", match: "possibilites" },
+  { href: "/#demonstrations", label: "Démonstrations", match: "demonstrations" },
+  { href: "/formation#programme", label: "Programme", match: "programme" },
+  { href: "/#faq", label: "FAQ", match: "faq" },
 ] as const;
 
 function cx(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-/** Header marketing flottant — présence premium, logo ancré, nav aérée. */
+function useActiveNav() {
+  const pathname = usePathname();
+  const [hash, setHash] = useState("");
+
+  useEffect(() => {
+    const sync = () => setHash(window.location.hash.replace(/^#/, ""));
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, [pathname]);
+
+  return (match: (typeof NAV_ITEMS)[number]["match"]) => {
+    if (match === "programme") {
+      return pathname.startsWith("/formation");
+    }
+    if (pathname !== "/" && pathname !== "") return false;
+    if (match === "home") return !hash || hash === "hero";
+    return hash === match;
+  };
+}
+
+/** Header marketing flottant — deux étages dans un seul panneau premium. */
 export function MarketingSiteHeader({ plainBg = false }: Props) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const headerRef = useRef<HTMLElement | null>(null);
+  const isActive = useActiveNav();
 
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
-      setScrolled((prev) => (prev ? y > 4 : y > 24));
+      setScrolled((prev) => (prev ? y > 60 : y > 100));
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -54,63 +76,79 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
   }, [mobileOpen]);
 
   return (
-    <header
-      ref={headerRef}
-      className={cx(styles.root, plainBg && styles.rootPlain)}
-    >
+    <header className={cx(styles.root, plainBg && styles.rootPlain)}>
       <div className={styles.shell}>
-        <div className={cx(styles.bar, scrolled && styles.barScrolled)}>
-          <Link
-            href="/"
-            className={styles.brand}
-            aria-label="BeWork — Accueil"
-          >
-            <BeWorkLogo
-              size="sm"
-              priority
-              imageClassName={styles.logoImg}
-            />
-          </Link>
-
-          <nav className={styles.nav} aria-label="Navigation principale">
-            {NAV_ITEMS.map((item) => (
-              <Link key={item.href} href={item.href} className={styles.navLink}>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className={styles.actions}>
-            <Link
-              href="/contact#participer"
-              className={styles.cta}
-              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-participer")}
-            >
-              Participer
-              <span aria-hidden>→</span>
+        <div className={cx(styles.panel, scrolled && styles.panelScrolled)}>
+          {/* ——— Étage 1 : marque + CTA ——— */}
+          <div className={styles.tierBrand}>
+            <Link href="/" className={styles.brand} aria-label="BeWork — Accueil">
+              <BeWorkLogo size="md" priority imageClassName={styles.logoImg} />
             </Link>
+
+            <div className={styles.actions}>
+              <Link
+                href="/formation"
+                className={styles.ctaSecondary}
+                aria-label="Découvrir la formation"
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-formation")}
+              >
+                Découvrir la formation
+              </Link>
+              <Link
+                href="/contact#participer"
+                className={styles.cta}
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-participer")}
+              >
+                Participer
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
+
+            <div className={styles.mobileTopActions}>
+              <Link
+                href="/contact#participer"
+                className={styles.ctaCompact}
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-participer-mobile")}
+              >
+                Participer
+              </Link>
+              <button
+                type="button"
+                className={styles.menuBtn}
+                aria-expanded={mobileOpen}
+                aria-controls="marketing-mobile-nav"
+                aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
+                onClick={() => setMobileOpen((v) => !v)}
+              >
+                {mobileOpen ? (
+                  <span className={styles.menuClose} aria-hidden>
+                    ×
+                  </span>
+                ) : (
+                  <span className={styles.menuIcon} aria-hidden>
+                    <span />
+                    <span />
+                    <span />
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
 
-          <button
-            type="button"
-            className={styles.menuBtn}
-            aria-expanded={mobileOpen}
-            aria-controls="marketing-mobile-nav"
-            aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
-            onClick={() => setMobileOpen((v) => !v)}
-          >
-            {mobileOpen ? (
-              <span className={styles.menuClose} aria-hidden>
-                ×
-              </span>
-            ) : (
-              <span className={styles.menuIcon} aria-hidden>
-                <span />
-                <span />
-                <span />
-              </span>
-            )}
-          </button>
+          {/* ——— Étage 2 : navigation ——— */}
+          <div className={styles.tierNav}>
+            <nav className={styles.nav} aria-label="Navigation principale">
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cx(styles.navLink, isActive(item.match) && styles.navLinkActive)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
         </div>
       </div>
 
@@ -120,13 +158,6 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
         aria-hidden={!mobileOpen}
       >
         <div className={styles.mobileInner}>
-          <Link
-            href="/contact#participer"
-            className={styles.ctaMobile}
-            onClick={() => setMobileOpen(false)}
-          >
-            Participer →
-          </Link>
           <nav className={styles.mobileNav} aria-label="Navigation mobile">
             {NAV_ITEMS.map((item) => (
               <Link
@@ -139,6 +170,23 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               </Link>
             ))}
           </nav>
+
+          <div className={styles.mobileActions}>
+            <Link
+              href="/formation"
+              className={styles.ctaSecondaryMobile}
+              onClick={() => setMobileOpen(false)}
+            >
+              Découvrir la formation
+            </Link>
+            <Link
+              href="/contact#participer"
+              className={styles.ctaMobile}
+              onClick={() => setMobileOpen(false)}
+            >
+              Participer →
+            </Link>
+          </div>
         </div>
       </div>
     </header>

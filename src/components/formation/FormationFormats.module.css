@@ -258,6 +258,23 @@
   }
 }
 
+.scenePhotoWrap {
+  min-height: 0;
+  background: #0f172a;
+  line-height: 0;
+}
+
+.scenePhoto {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
 .sceneVisual {
   display: block;
   width: 100%;

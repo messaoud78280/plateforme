@@ -128,12 +128,20 @@ export function beworkCourseJsonLd(overrides?: {
       { "@type": "Thing", name: "Formation IA débutant" },
     ],
     offers: beworkSessionOfferJsonLd(),
-    hasCourseInstance: {
-      "@type": "CourseInstance",
-      courseMode: "onsite",
-      courseWorkload: "PT1D",
-      offers: beworkSessionOfferJsonLd(),
-    },
+    hasCourseInstance: [
+      {
+        "@type": "CourseInstance",
+        courseMode: "onsite",
+        courseWorkload: "PT1D",
+        offers: beworkSessionOfferJsonLd(),
+      },
+      {
+        "@type": "CourseInstance",
+        courseMode: "online",
+        courseWorkload: "PT1D",
+        offers: beworkSessionOfferJsonLd(),
+      },
+    ],
   };
 }
 
@@ -155,14 +163,19 @@ export const SEO_PAGES = {
   },
   formation: {
     path: "/formation",
-    title: "Formation IA pratique — 1 journée",
+    title: "Formation IA débutant — Créer sans savoir coder",
+    absoluteTitle: "Formation IA débutant — Créer sans savoir coder | BeWork",
     description:
-      "Formation BeWork : une journée pour passer de l’idée à la construction avec l’IA. Accessible sans programmation. Déroulé, acquis et méthode.",
+      "Une journée pratique pour découvrir comment créer sites, applications et outils numériques avec l’IA, sans savoir coder. Présentiel principalement, sessions visio disponibles.",
     keywords: [
-      "formation créer avec l'IA",
-      "formation IA une journée",
-      "apprendre à créer sans coder",
-      "formation intelligence artificielle débutant",
+      "formation IA débutant",
+      "créer avec intelligence artificielle",
+      "créer sans coder",
+      "formation IA pratique",
+      "créer un site avec IA",
+      "créer une application avec IA",
+      "IA entrepreneur",
+      "IA demandeur d’emploi",
     ],
   },
   demonstrations: {

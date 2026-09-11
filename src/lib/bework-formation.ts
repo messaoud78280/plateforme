@@ -200,6 +200,312 @@ export const FORMATION_INCLUDES = [
   "Accompagnement pendant la journée",
 ] as const;
 
+/** Programme horaire indicatif — page /formation. */
+export const FORMATION_SCHEDULE = [
+  {
+    time: "09:00",
+    title: "Découvrir",
+    points: [
+      "Ce qui a changé avec l’IA",
+      "Ce qu’un non-développeur peut aujourd’hui commencer à faire",
+      "Démonstrations concrètes",
+      "Limites à connaître",
+    ],
+  },
+  {
+    time: "09:45",
+    title: "Comprendre",
+    points: [
+      "Comment dialoguer avec une IA",
+      "Comment expliquer ce que l’on veut",
+      "Comment décomposer une idée",
+      "Pourquoi plusieurs agents selon le travail demandé",
+    ],
+  },
+  {
+    time: "10:15",
+    title: "Préparer",
+    points: [
+      "Installation guidée de l’environnement nécessaire",
+      "Connexion aux services",
+      "Réglages essentiels",
+      "Prise en main",
+    ],
+  },
+  {
+    time: "10:45",
+    title: "Première création",
+    points: [
+      "Construire ensemble une première interface",
+      "Partir d’une idée simple",
+      "Observer le passage idée → demande → interface",
+    ],
+  },
+  {
+    time: "11:30",
+    title: "Modifier",
+    points: [
+      "Changer texte, design, fonctions, organisation",
+      "Découvrir qu’un projet n’est pas figé",
+    ],
+  },
+  {
+    time: "12:30",
+    title: "Pause",
+    points: ["Temps de respiration avant la suite de la journée"],
+    pause: true,
+  },
+  {
+    time: "13:30",
+    title: "Construire plus loin",
+    points: [
+      "Ajouter des fonctions",
+      "Exemples : réservation, formulaire, clients, planning, données, dashboard",
+    ],
+  },
+  {
+    time: "14:30",
+    title: "Comprendre ce que l’on construit",
+    points: [
+      "Sans cours de programmation lourd",
+      "Interface, information, utilisateur, donnée, action, logique",
+    ],
+  },
+  {
+    time: "15:15",
+    title: "Tester & corriger",
+    points: [
+      "Identifier un problème",
+      "L’expliquer",
+      "Demander une correction",
+      "Vérifier et recommencer",
+    ],
+  },
+  {
+    time: "16:00",
+    title: "Votre idée",
+    points: [
+      "Quel problème voulez-vous résoudre ?",
+      "Pour qui ?",
+      "Avec quelles fonctions ?",
+      "Quelle première version simple ?",
+    ],
+  },
+  {
+    time: "16:40",
+    title: "Continuer après la journée",
+    points: [
+      "Comment progresser seul",
+      "Comment demander de l’aide à l’IA",
+      "Éviter de vouloir tout créer immédiatement",
+      "Construire progressivement",
+    ],
+  },
+  {
+    time: "17:00",
+    title: "Échanges / conclusion",
+    points: ["Questions", "Perspectives", "Prochaines étapes"],
+  },
+] as const;
+
+/** Acquis — verbes d’action, pas « maîtriser ». */
+export const FORMATION_ACQUIS = [
+  { verb: "Transformer", text: "une idée en besoin plus clair" },
+  { verb: "Structurer", text: "les premières fonctions d’un projet" },
+  { verb: "Demander", text: "précisément quelque chose à une IA" },
+  { verb: "Créer", text: "une première version" },
+  { verb: "Modifier", text: "un résultat" },
+  { verb: "Tester", text: "ce que vous avez créé" },
+  { verb: "Corriger", text: "un problème avec l’aide de l’IA" },
+  { verb: "Améliorer", text: "progressivement" },
+  { verb: "Comprendre", text: "les grandes briques d’un projet numérique" },
+  { verb: "Continuer", text: "à apprendre après la journée" },
+] as const;
+
+export const FORMATION_INTERACTIVE_BEATS = [
+  "Vous regardez",
+  "Vous essayez",
+  "Vous vous trompez",
+  "Vous demandez",
+  "Vous corrigez",
+  "Vous recommencez",
+  "Vous comprenez",
+] as const;
+
+export const FORMATION_PROJECT_STEPS = [
+  { label: "Qui ?", hint: "Pour qui créez-vous ?" },
+  { label: "Pourquoi ?", hint: "Quel problème résoudre ?" },
+  { label: "Quelles fonctions ?", hint: "Qu’est-ce qui doit vraiment exister ?" },
+  { label: "Quelle première version ?", hint: "Le plus simple pour commencer" },
+] as const;
+
+/** Profils — page /formation (rassurer, pas catégoriser). */
+export const FORMATION_AUDIENCE = [
+  {
+    title: "Entrepreneur",
+    text: "Créer ses premiers outils sans engager immédiatement de gros budgets.",
+  },
+  {
+    title: "Indépendant",
+    text: "Créer des outils adaptés à sa propre manière de travailler.",
+  },
+  {
+    title: "Artisan / commerçant",
+    text: "Site, demandes clients, réservation, organisation.",
+  },
+  {
+    title: "Salarié",
+    text: "Comprendre les nouvelles possibilités et gagner en autonomie.",
+  },
+  {
+    title: "Demandeur d’emploi",
+    text: "Découvrir de nouvelles compétences et éventuellement une nouvelle direction.",
+  },
+  {
+    title: "Porteur de projet",
+    text: "Passer de l’idée abstraite à une première version.",
+  },
+  {
+    title: "Personne en réflexion",
+    text: "Découvrir un univers qui pouvait auparavant sembler inaccessible.",
+  },
+  {
+    title: "Curieux",
+    text: "Comprendre concrètement ce que cette nouvelle génération d’IA permet.",
+  },
+] as const;
+
+export const FORMATION_REORIENT_PATH = [
+  "Curiosité",
+  "Découverte",
+  "Première création",
+  "Envie d’aller plus loin",
+] as const;
+
+export const FORMATION_BUSINESS_NEEDS = [
+  "Site internet",
+  "Landing page",
+  "Formulaire",
+  "Réservation",
+  "Agenda",
+  "CRM",
+  "Suivi client",
+  "Dashboard",
+  "Espace client",
+  "Automatisation simple",
+] as const;
+
+/** Showroom léger — renvoie vers /demonstrations pour le détail. */
+export const FORMATION_CREATION_EXAMPLES = [
+  "Site internet",
+  "Landing page",
+  "Réservation",
+  "Agenda",
+  "CRM",
+  "Messagerie",
+  "Tableau de bord",
+  "Espace client",
+  "Outil métier",
+  "Formulaire",
+  "Portfolio",
+  "Prototype",
+] as const;
+
+/** Inclus tarif — page /formation. */
+export const FORMATION_TARIF_INCLUDES = [
+  "Journée complète",
+  "Petit groupe",
+  "Démonstrations",
+  "Installation / préparation guidée",
+  "Exercices pratiques",
+  "Accompagnement",
+  "Travail autour des idées",
+  "Méthode réutilisable",
+] as const;
+
+export const FORMATION_CHECKLIST_ONSITE = [
+  "Ordinateur portable",
+  "Chargeur",
+  "Accès email",
+  "Navigateur récent",
+  "Droits d’installation",
+  "Idée éventuelle",
+] as const;
+
+export const FORMATION_CHECKLIST_VISIO = [
+  "Connexion stable",
+  "Webcam recommandée",
+  "Micro",
+  "Partage d’écran disponible",
+] as const;
+
+export const FORMATION_NAV = [
+  { href: "#presentation", label: "Présentation" },
+  { href: "#formats", label: "Formats" },
+  { href: "#prerequis", label: "Prérequis" },
+  { href: "#programme", label: "Programme" },
+  { href: "#acquis", label: "Acquis" },
+  { href: "#pour-qui", label: "Pour qui" },
+  { href: "#tarif", label: "Tarif" },
+  { href: "#faq", label: "FAQ" },
+] as const;
+
+/** FAQ pratique complète — page /formation. */
+export const FORMATION_PAGE_FAQ = [
+  {
+    q: "Faut-il savoir coder ?",
+    a: "Non.",
+  },
+  {
+    q: "Faut-il être bon en informatique ?",
+    a: "Non. La journée est conçue pour des personnes qui partent de zéro ou qui se sentent peu à l’aise.",
+  },
+  {
+    q: "Puis-je venir sans idée ?",
+    a: "Oui. Nous utiliserons des exemples concrets. Une idée n’est pas un prérequis.",
+  },
+  {
+    q: "Puis-je venir avec mon projet ?",
+    a: "Oui. Même une idée floue permet de mieux comprendre comment structurer un besoin.",
+  },
+  {
+    q: "Quel ordinateur faut-il ?",
+    a: "Windows ou Mac relativement récent. 8 Go de RAM recommandés minimum. 16 Go = plus confortable.",
+  },
+  {
+    q: "Faut-il un ordinateur très puissant ?",
+    a: "Non. Pas besoin d’une machine haut de gamme ni d’un ordinateur gaming.",
+  },
+  {
+    q: "Faut-il une carte graphique spéciale ?",
+    a: "Non pour les activités prévues.",
+  },
+  {
+    q: "Dois-je installer quelque chose avant ?",
+    a: "Les instructions nécessaires seront indiquées avant la session. Une grande partie de la mise en place pourra être faite ensemble.",
+  },
+  {
+    q: "Peut-on suivre la journée à distance ?",
+    a: "Oui. BeWork privilégie le présentiel, mais organise également des sessions en visioconférence pour les personnes qui ne peuvent pas se déplacer.",
+  },
+  {
+    q: "La visio se déroule-t-elle en même temps que le présentiel ?",
+    a: "Non. Les sessions distancielles sont des sessions dédiées.",
+  },
+  {
+    q: "Est-ce que je deviendrai développeur ?",
+    a: "Non. Vous repartirez capable de commencer, de demander, de tester et de continuer à apprendre — pas développeur en une journée.",
+  },
+  {
+    q: "Est-ce que je pourrai continuer après ?",
+    a: "Oui. C’est l’un des principaux objectifs de la journée.",
+  },
+  {
+    q: "Les outils utilisés sont-ils gratuits ?",
+    a: "Certains disposent d’offres gratuites, d’autres peuvent avoir des abonnements ou coûts propres. Nous restons transparents pendant la session.",
+  },
+] as const;
+
 export const FORMATION_FAQ = [
   {
     q: "Faut-il savoir coder ?",

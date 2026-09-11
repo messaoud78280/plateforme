@@ -1,0 +1,148 @@
+/* Section « Pourquoi cette journée » — scène alignée aux autres blocs + animations */
+
+.section {
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  padding: 3.25rem 0 3.5rem;
+  scroll-margin-top: 6.5rem;
+  background: transparent;
+}
+
+@media (min-width: 768px) {
+  .section {
+    scroll-margin-top: 10.5rem;
+    padding: 4.25rem 0 4.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section {
+    padding: 4.75rem 0 5rem;
+  }
+}
+
+.shell {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+@media (min-width: 768px) {
+  .shell {
+    width: min(1220px, calc(100% - 3rem));
+  }
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+}
+
+.frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow:
+    0 22px 56px rgba(40, 60, 110, 0.1),
+    0 2px 0 rgba(255, 255, 255, 0.65) inset;
+  line-height: 0;
+}
+
+@media (min-width: 768px) {
+  .frame {
+    border-radius: 1.75rem;
+  }
+}
+
+.scene {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: center top;
+  user-select: none;
+  -webkit-user-drag: none;
+  transform-origin: center center;
+}
+
+/* ——— Entrée scroll (même logique que Formats) ——— */
+
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0) scale(0.985);
+}
+
+.ready .reveal {
+  animation: fadeUp 0.75s var(--ease) forwards;
+  animation-delay: var(--d, 0ms);
+}
+
+.ready.ambient:not(.reduced) .scene {
+  animation: softFloat 7.5s ease-in-out infinite;
+}
+
+.ready.ambient:not(.reduced) .frame {
+  animation: softGlow 7.5s ease-in-out infinite;
+}
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes softFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+@keyframes softGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 22px 56px rgba(40, 60, 110, 0.1),
+      0 2px 0 rgba(255, 255, 255, 0.65) inset;
+  }
+  50% {
+    box-shadow:
+      0 28px 64px rgba(39, 91, 232, 0.14),
+      0 2px 0 rgba(255, 255, 255, 0.7) inset;
+  }
+}
+
+@media (max-width: 639px) {
+  .section {
+    padding: 2.5rem 0 2.75rem;
+  }
+
+  .shell {
+    width: min(100%, calc(100% - 1.25rem));
+  }
+
+  .frame {
+    border-radius: 1.15rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .scene,
+  .frame {
+    animation: none !important;
+  }
+}

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
@@ -19,8 +20,34 @@ const NAV_ITEMS = [
   { href: "/#faq", label: "FAQ", match: "faq" },
 ] as const;
 
+const PLATFORM_HREF = "/dashboard";
+const LOGIN_HREF = `/connexion?callbackUrl=${encodeURIComponent(PLATFORM_HREF)}`;
+
 function cx(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(" ");
+}
+
+function LockIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path
+        d="M4.5 7V5.25a3.5 3.5 0 0 1 7 0V7"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+      <rect
+        x="3"
+        y="7"
+        width="10"
+        height="7"
+        rx="1.75"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
+      <circle cx="8" cy="10.25" r="1" fill="currentColor" />
+    </svg>
+  );
 }
 
 function useActiveNav() {
@@ -49,6 +76,13 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isActive = useActiveNav();
+  const { data: session, status } = useSession();
+  const isAuthed = status === "authenticated" && Boolean(session?.user);
+  const privateHref = isAuthed ? PLATFORM_HREF : LOGIN_HREF;
+  const privateLabel = isAuthed ? "Ma plateforme" : "Accès privé";
+  const privateAria = isAuthed
+    ? "Accéder à ma plateforme"
+    : "Accès privé — connexion à la plateforme";
 
   useEffect(() => {
     const onScroll = () => {
@@ -171,7 +205,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             </div>
           </div>
 
-          {/* ——— Étage 2 : navigation ——— */}
+          {/* ——— Étage 2 : navigation + accès privé ——— */}
           <div className={styles.tierNav}>
             <nav className={styles.nav} aria-label="Navigation principale">
               {NAV_ITEMS.map((item) => (
@@ -184,6 +218,15 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 </Link>
               ))}
             </nav>
+
+            <Link
+              href={privateHref}
+              className={styles.privateAccess}
+              aria-label={privateAria}
+            >
+              <LockIcon className={styles.privateAccessIcon} />
+              <span>{privateLabel}</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -206,6 +249,18 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               </Link>
             ))}
           </nav>
+
+          <div className={styles.mobilePrivateWrap}>
+            <Link
+              href={privateHref}
+              className={styles.mobilePrivateAccess}
+              aria-label={privateAria}
+              onClick={() => setMobileOpen(false)}
+            >
+              <LockIcon className={styles.privateAccessIcon} />
+              <span>{privateLabel}</span>
+            </Link>
+          </div>
 
           <div className={styles.mobileActions}>
             <Link

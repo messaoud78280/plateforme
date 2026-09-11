@@ -607,6 +607,8 @@
 .tierNav {
   display: none;
   position: relative;
+  align-items: center;
+  justify-content: center;
   min-height: 2.85rem;
   padding: 0.25rem 0.65rem 0.4rem;
   background: rgba(239, 246, 255, 0.28);
@@ -631,7 +633,7 @@
 
 @media (min-width: 768px) {
   .tierNav {
-    display: block;
+    display: flex;
   }
 }
 
@@ -658,6 +660,7 @@
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 0.1rem;
+  max-width: calc(100% - 8.5rem);
 }
 
 .nav::-webkit-scrollbar {
@@ -670,6 +673,7 @@
     overflow: visible;
     flex-wrap: wrap;
     gap: 0.2rem 0.15rem;
+    max-width: none;
   }
 }
 
@@ -713,6 +717,110 @@
 
 .navLink:focus-visible {
   outline: 2px solid rgba(39, 91, 232, 0.4);
+  outline-offset: 2px;
+}
+
+/* Accès privé — capsule discrète à droite */
+
+.privateAccess {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.15rem;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: rgba(255, 255, 255, 0.72);
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+@media (min-width: 1024px) {
+  .privateAccess {
+    right: 1.15rem;
+    height: 2.35rem;
+    padding: 0 0.95rem;
+    font-size: 0.84rem;
+  }
+}
+
+.privateAccessIcon {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex-shrink: 0;
+  color: currentColor;
+  opacity: 0.85;
+}
+
+.privateAccess:hover {
+  transform: translateY(calc(-50% - 1px));
+  background: rgba(239, 246, 255, 0.95);
+  border-color: rgba(39, 91, 232, 0.35);
+  color: #275be8;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 6px 14px rgba(39, 91, 232, 0.08);
+}
+
+.privateAccess:hover .privateAccessIcon {
+  opacity: 1;
+}
+
+.privateAccess:focus-visible {
+  outline: 2px solid rgba(39, 91, 232, 0.4);
+  outline-offset: 2px;
+}
+
+.mobilePrivateWrap {
+  margin-top: 0.35rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.mobilePrivateAccess {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 3rem;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(255, 255, 255, 0.88);
+  color: #334155;
+  font-size: 1rem;
+  font-weight: 650;
+  text-decoration: none;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.mobilePrivateAccess:hover {
+  background: rgba(239, 246, 255, 0.98);
+  border-color: rgba(39, 91, 232, 0.35);
+  color: #275be8;
+}
+
+.mobilePrivateAccess:focus-visible {
+  outline: 2px solid rgba(39, 91, 232, 0.45);
   outline-offset: 2px;
 }
 
@@ -833,13 +941,15 @@
   .cta,
   .ctaSecondary,
   .signature,
-  .accent {
+  .accent,
+  .privateAccess {
     transition: none;
     animation: none !important;
   }
 
   .cta:hover,
-  .ctaSecondary:hover {
+  .ctaSecondary:hover,
+  .privateAccess:hover {
     transform: none;
   }
 }

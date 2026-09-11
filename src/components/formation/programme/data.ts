@@ -1,9 +1,5 @@
 /** Données programme formation — source unique pour le panneau dynamique. */
 
-export type ProgramTool = {
-  label: string;
-};
-
 export type ProgramStep = {
   id: string;
   time: string;
@@ -15,7 +11,6 @@ export type ProgramStep = {
   result: string;
   /** Variantes de rendu (pause, climax, conclusion). */
   variant?: "default" | "pause" | "idea" | "close";
-  quote?: string;
   morningTrack?: readonly string[];
   afternoonTrack?: readonly string[];
   ideaQuestions?: readonly { label: string; text: string }[];
@@ -35,11 +30,11 @@ export const PROGRAM_STEPS: readonly ProgramStep[] = [
     actions: [
       "Voir des réalisations concrètes",
       "Comprendre le rôle de l’IA dans le développement",
-      "Voir ce qu’un non-développeur peut déjà construire",
+      "Voir ce qu’un non-développeur peut construire",
       "Identifier les limites à connaître",
     ],
     tools: ["Idée", "IA", "Interface", "Résultat"],
-    result: "Vous aurez une vision claire de ce que l’IA change réellement.",
+    result: "Une vision claire de ce que l’IA change réellement.",
     badge: "En découverte",
   },
   {
@@ -53,7 +48,7 @@ export const PROGRAM_STEPS: readonly ProgramStep[] = [
       "Comprendre ce qu’est une page",
       "Comprendre la différence entre interface et logique",
       "Voir comment un projet est organisé",
-      "Comprendre ce que fait l’IA quand elle génère du code",
+      "Comprendre ce que fait l’IA lorsqu’elle génère du code",
     ],
     tools: ["Pages", "Composants", "Données", "Navigation"],
     result: "Vous saurez vous repérer dans un projet sans devoir devenir développeur.",
@@ -64,17 +59,16 @@ export const PROGRAM_STEPS: readonly ProgramStep[] = [
     time: "10:15",
     module: "03",
     title: "Préparer",
-    subtitle: "Installer et préparer ensemble l’environnement qui servira pendant la journée.",
+    subtitle: "Installer et préparer ensemble l’environnement utilisé pendant la journée.",
     actions: [
       "Installer les outils nécessaires",
       "Ouvrir votre premier projet",
       "Connecter les services utiles",
-      "Vérifier que votre environnement fonctionne",
+      "Vérifier que l’environnement fonctionne",
     ],
     tools: ["Navigateur", "Éditeur de code", "Projet", "IA et services"],
-    result: "Votre environnement sera prêt et vous pourrez commencer à construire.",
+    result: "Votre environnement sera prêt pour commencer à construire.",
     badge: "En pratique",
-    quote: "Un bon départ, c’est déjà 50 % du chemin.",
   },
   {
     id: "premiere-creation",
@@ -182,10 +176,10 @@ export const PROGRAM_STEPS: readonly ProgramStep[] = [
     time: "16:00",
     module: "10",
     title: "Votre idée",
-    subtitle: "Maintenant, on commence à réfléchir à votre propre projet.",
+    subtitle: "Maintenant, nous commençons à réfléchir à votre propre projet.",
     actions: [],
     tools: [],
-    result: "Vous repartez avec une première vision structurée de votre projet.",
+    result: "Vous repartez avec une première vision structurée de votre propre projet.",
     variant: "idea",
     badge: "À vous",
     ideaQuestions: [
@@ -217,7 +211,7 @@ export const PROGRAM_STEPS: readonly ProgramStep[] = [
       "L’objectif n’est pas de tout apprendre en une journée, mais de savoir continuer.",
     actions: [
       "Reprendre votre projet seul",
-      "Continuer à dialoguer avec l’IA",
+      "Continuer à dialoguer efficacement avec l’IA",
       "Trouver une ressource",
       "Identifier ce qu’il faut apprendre ensuite",
       "Éviter de rester bloqué",
@@ -248,19 +242,4 @@ export const PROGRAM_STEPS: readonly ProgramStep[] = [
       note: "Vous ne repartez pas en sachant tout. Vous repartez en sachant comment avancer.",
     },
   },
-] as const;
-
-export const STEP_TIPS = [
-  "Voir ce qui est possible",
-  "Comprendre les briques essentielles",
-  "Installer votre environnement",
-  "Créer un premier résultat",
-  "Faire évoluer ce qui existe",
-  "Échanger et prendre du recul",
-  "Ajouter de vraies fonctions",
-  "Regarder sous le capot",
-  "Apprendre à débloquer un problème",
-  "Structurer votre propre projet",
-  "Devenir progressivement autonome",
-  "Faire le point et préparer la suite",
 ] as const;

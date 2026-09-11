@@ -84,6 +84,14 @@
   pointer-events: none;
 }
 
+.desktopBoard {
+  display: block;
+}
+
+.mobileBoard {
+  display: block;
+}
+
 .hot {
   position: absolute;
   margin: 0;
@@ -96,10 +104,10 @@
   -webkit-appearance: none;
   color: inherit;
   transition:
-    transform 0.35s var(--ease),
-    background 0.35s ease,
-    border-color 0.35s ease,
-    box-shadow 0.35s ease;
+    transform 0.3s var(--ease),
+    background 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .hot:focus {
@@ -116,40 +124,38 @@
 .hotStep {
   border-radius: 0.85rem;
   overflow: visible;
-  z-index: 3;
+  z-index: 7;
 }
 
 .hotStep:hover,
 .hotHover {
-  transform: translateX(4px);
+  transform: translateX(2px);
   background: linear-gradient(
     90deg,
-    rgba(39, 91, 232, 0.09) 0%,
-    rgba(118, 87, 246, 0.05) 55%,
-    rgba(255, 255, 255, 0.02) 100%
+    rgba(39, 91, 232, 0.07) 0%,
+    rgba(118, 87, 246, 0.035) 55%,
+    transparent 100%
   );
-  border-color: rgba(39, 91, 232, 0.16);
-  box-shadow:
-    0 10px 28px rgba(40, 60, 110, 0.06),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  border-color: rgba(39, 91, 232, 0.12);
+  box-shadow: none;
 }
 
 .hotActive {
   background: linear-gradient(
     90deg,
-    rgba(39, 91, 232, 0.11) 0%,
-    rgba(118, 87, 246, 0.06) 60%,
+    rgba(39, 91, 232, 0.1) 0%,
+    rgba(118, 87, 246, 0.045) 55%,
     transparent 100%
   );
-  border-color: rgba(39, 91, 232, 0.18);
+  border-color: rgba(39, 91, 232, 0.14);
   border-left: 2px solid #275be8;
-  box-shadow: 0 12px 30px rgba(40, 60, 110, 0.07);
-  transform: translateX(3px);
+  box-shadow: none;
+  transform: translateX(2px);
 }
 
 .stepDot {
   position: absolute;
-  left: 16.8%;
+  left: 19.5%;
   top: 50%;
   width: 0.42rem;
   height: 0.42rem;
@@ -257,14 +263,11 @@
   min-height: 0;
   border-radius: 1.15rem;
   overflow: hidden;
+  isolation: isolate;
   line-height: normal;
   pointer-events: auto;
-  transition: box-shadow 0.35s ease, transform 0.35s var(--ease);
-}
-
-.panelSlot:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 18px 42px rgba(40, 60, 110, 0.1);
+  background: #ffffff;
+  box-shadow: 0 18px 42px rgba(40, 60, 110, 0.08);
 }
 
 .panelCover {
@@ -272,17 +275,24 @@
   inset: 0;
   z-index: 0;
   border-radius: inherit;
-  background:
-    radial-gradient(
-      260px circle at var(--mx) var(--my),
-      rgba(60, 100, 255, 0.06),
-      transparent 62%
-    ),
-    linear-gradient(165deg, #ffffff 0%, #f8f9fc 100%);
+  background: #ffffff;
   border: 1px solid rgba(39, 91, 232, 0.1);
   box-shadow:
-    0 16px 36px rgba(40, 60, 110, 0.08),
-    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+    0 18px 40px rgba(40, 60, 110, 0.09),
+    0 1px 0 rgba(255, 255, 255, 1) inset;
+  pointer-events: none;
+}
+
+.panelCover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    280px circle at var(--mx) var(--my),
+    rgba(60, 100, 255, 0.045),
+    transparent 64%
+  );
   pointer-events: none;
 }
 
@@ -298,26 +308,25 @@
   overflow: auto;
   scrollbar-width: thin;
   color: #0b0d12;
+  background: #ffffff;
 }
 
 .panelInDown {
-  animation: panelInDown 0.42s var(--ease) both;
+  animation: panelInDown 0.38s var(--ease) both;
 }
 
 .panelInUp {
-  animation: panelInUp 0.42s var(--ease) both;
+  animation: panelInUp 0.38s var(--ease) both;
 }
 
 @keyframes panelInDown {
   from {
     opacity: 0;
     transform: translateY(8px);
-    filter: blur(3px);
   }
   to {
     opacity: 1;
     transform: none;
-    filter: none;
   }
 }
 
@@ -325,12 +334,10 @@
   from {
     opacity: 0;
     transform: translateY(-8px);
-    filter: blur(3px);
   }
   to {
     opacity: 1;
     transform: none;
-    filter: none;
   }
 }
 
@@ -652,38 +659,7 @@
   background: linear-gradient(145deg, rgba(118, 87, 246, 0.09), rgba(39, 91, 232, 0.05));
 }
 
-/* Tip */
-
-.tip {
-  position: absolute;
-  z-index: 8;
-  transform: translate(-50%, -110%);
-  max-width: 16rem;
-  padding: 0.45rem 0.7rem;
-  border-radius: 0.65rem;
-  border: 1px solid rgba(39, 91, 232, 0.14);
-  background: rgba(255, 255, 255, 0.94);
-  color: #1e293b;
-  font-size: 0.75rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
-  box-shadow: 0 12px 28px rgba(40, 60, 110, 0.12);
-  pointer-events: none;
-  white-space: nowrap;
-  animation: tipIn 0.22s var(--ease) both;
-}
-
-@keyframes tipIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -95%);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -110%);
-  }
-}
+/* Tip — retiré (pas de tooltips flottants) */
 
 @keyframes pulseDot {
   0%,
@@ -709,7 +685,106 @@
   color: #8492a8;
 }
 
-/* Mobile scroll */
+/* ——— Mobile board ——— */
+
+.mobileHead {
+  margin-bottom: 1rem;
+  padding-inline: 0.15rem;
+}
+
+.mobileEyebrow {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #275be8;
+}
+
+.mobileTitle {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-manrope), var(--font-heading-family), system-ui, sans-serif;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: #0b0d12;
+}
+
+.mobileTimeline {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.mobileStep {
+  display: grid;
+  grid-template-columns: 3.4rem 1.6rem 1fr;
+  gap: 0.45rem;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(39, 91, 232, 0.08);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.88);
+  color: #334155;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition:
+    background 0.28s ease,
+    border-color 0.28s ease,
+    box-shadow 0.28s ease;
+}
+
+.mobileStepActive {
+  border-color: rgba(39, 91, 232, 0.22);
+  background: linear-gradient(
+    90deg,
+    rgba(39, 91, 232, 0.1) 0%,
+    rgba(118, 87, 246, 0.05) 100%
+  );
+  box-shadow: 0 8px 20px rgba(40, 60, 110, 0.06);
+}
+
+.mobileTime {
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: #275be8;
+  font-variant-numeric: tabular-nums;
+}
+
+.mobileModule {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #8492a8;
+}
+
+.mobileStepTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: #0b0d12;
+}
+
+.mobilePanelWrap {
+  border-radius: 1.1rem;
+  border: 1px solid rgba(39, 91, 232, 0.1);
+  background: #ffffff;
+  box-shadow: 0 16px 36px rgba(40, 60, 110, 0.08);
+  overflow: hidden;
+  min-height: 22rem;
+}
+
+.mobilePanelWrap .panel {
+  min-height: 22rem;
+  padding: 1.15rem 1.1rem 1.2rem;
+}
+
+/* Mobile / tablette étroite */
 
 @media (max-width: 720px) {
   .shell {
@@ -717,50 +792,9 @@
     padding-inline: 0;
   }
 
-  .scroll {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
-    padding-inline: 0.75rem;
-  }
-
-  .scroll::-webkit-scrollbar {
-    display: none;
-  }
-
-  .stage {
-    width: auto;
-    min-width: 920px;
-    scroll-snap-align: start;
-  }
-
-  .scene {
-    width: 920px;
-    max-width: none;
-  }
-
-  .dragHint {
-    display: block;
-  }
-
-  .hotStep:hover,
-  .hotHover,
-  .hotActive {
-    transform: none;
-  }
-
-  .hotPeriod:hover,
-  .hotFooter:hover,
-  .panelSlot:hover,
-  .tool:hover {
-    transform: none;
-  }
-
-  .tip {
-    display: none;
+  .mobileBoard {
+    width: min(100% - 1.5rem, 40rem);
+    margin-inline: auto;
   }
 
   .tools {
@@ -773,41 +807,50 @@
   }
 }
 
+@media (min-width: 721px) and (max-width: 980px) {
+  .shell {
+    width: min(1560px, calc(100% - 1.5rem));
+  }
+}
+
 /* Reduced motion */
 
 .reduced .hot,
 .reduced .stepDot,
 .reduced .stepSheen,
 .reduced .periodArrow,
-.reduced .panelSlot,
-.reduced .tool {
+.reduced .tool,
+.reduced .mobileStep {
   transition: none !important;
   animation: none !important;
 }
 
 .reduced .panelInDown,
-.reduced .panelInUp,
-.reduced .tip {
-  animation: none !important;
+.reduced .panelInUp {
+  animation: fadeOnly 0.28s ease both !important;
+}
+
+@keyframes fadeOnly {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .reduced .hotStep:hover,
 .reduced .hotHover,
 .reduced .hotActive,
 .reduced .hotPeriod:hover,
-.reduced .hotFooter:hover,
-.reduced .panelSlot:hover {
+.reduced .hotFooter:hover {
   transform: none;
 }
 
 @media (hover: none) {
-  .panelSlot:hover {
+  .hotStep:hover,
+  .hotHover {
     transform: none;
-    box-shadow: none;
-  }
-
-  .tip {
-    display: none;
   }
 }
 

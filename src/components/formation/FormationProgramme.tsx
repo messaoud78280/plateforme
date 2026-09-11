@@ -11,13 +11,31 @@ import {
   type KeyboardEvent,
   type MouseEvent as ReactMouseEvent,
 } from "react";
-import { PROGRAM_STEPS, STEP_TIPS, type ProgramStep } from "./programme/data";
+import { PROGRAM_STEPS, type ProgramStep } from "./programme/data";
 import styles from "./FormationProgramme.module.css";
 
 type Rect = { left: number; top: number; width: number; height: number };
 
-const TIMELINE: Rect = { left: 2.4, top: 17.2, width: 33.2, height: 68.2 };
 const STEP_COUNT = PROGRAM_STEPS.length;
+
+/**
+ * Hotspots timeline — positions explicites (% du stage), calibrées sur l’image.
+ * Chaque index correspond 1:1 à PROGRAM_STEPS[index] (pas de formule index±1).
+ */
+const STEP_HOTSPOTS: readonly Rect[] = [
+  { left: 2.0, top: 22.87, width: 28.2, height: 5.5 }, // 09:00 Découvrir
+  { left: 2.0, top: 28.37, width: 28.2, height: 5.5 }, // 09:45 Comprendre
+  { left: 2.0, top: 33.87, width: 28.2, height: 5.5 }, // 10:15 Préparer
+  { left: 2.0, top: 39.37, width: 28.2, height: 5.5 }, // 10:45 Première création
+  { left: 2.0, top: 44.87, width: 28.2, height: 5.5 }, // 11:30 Modifier
+  { left: 2.0, top: 50.37, width: 28.2, height: 5.5 }, // 12:30 Pause
+  { left: 2.0, top: 55.87, width: 28.2, height: 5.5 }, // 13:30 Construire
+  { left: 2.0, top: 61.37, width: 28.2, height: 5.5 }, // 14:30 Comprendre construction
+  { left: 2.0, top: 66.87, width: 28.2, height: 5.5 }, // 15:15 Tester
+  { left: 2.0, top: 72.37, width: 28.2, height: 5.5 }, // 16:00 Votre idée
+  { left: 2.0, top: 77.87, width: 28.2, height: 5.5 }, // 16:40 Continuer
+  { left: 2.0, top: 83.37, width: 28.2, height: 5.5 }, // 17:00 Conclusion
+] as const;
 
 const PERIODS = [
   {
@@ -32,8 +50,8 @@ const PERIODS = [
   },
 ] as const;
 
-/** Zone du panneau imprimé dans l’image — couverte par le panneau HTML. */
-const PANEL: Rect = { left: 37.0, top: 22.6, width: 59.9, height: 58.8 };
+/** Zone du panneau imprimé — HTML opaque + asset blanchi (sous MATIN / APRÈS-MIDI). */
+const PANEL: Rect = { left: 32.2, top: 20.0, width: 66.6, height: 66.5 };
 
 const FOOTER = [
   {
@@ -59,16 +77,6 @@ function rectStyle(r: Rect): CSSProperties {
     top: `${r.top}%`,
     width: `${r.width}%`,
     height: `${r.height}%`,
-  };
-}
-
-function stepRect(index: number): Rect {
-  const h = TIMELINE.height / STEP_COUNT;
-  return {
-    left: TIMELINE.left,
-    top: TIMELINE.top + index * h,
-    width: TIMELINE.width,
-    height: h,
   };
 }
 
@@ -101,8 +109,8 @@ function ProgramPanel({
       <header className={styles.panelHead}>
         <div className={styles.panelMeta}>
           <p className={styles.panelKicker}>
-            Module {step.module}
-            <span className={styles.panelSep} aria-hidden />
+            {`Module ${step.module}`}
+            <span aria-hidden="true"> · </span>
             <time dateTime={`T${step.time}`}>{step.time}</time>
           </p>
           {step.badge ? <span className={styles.panelBadge}>{step.badge}</span> : null}
@@ -198,7 +206,6 @@ function ProgramPanel({
       <footer className={styles.outcome}>
         <p className={styles.outcomeLabel}>À la fin de cette étape</p>
         <p className={styles.outcomeText}>{step.result}</p>
-        {step.quote ? <p className={styles.outcomeQuote}>{step.quote}</p> : null}
       </footer>
     </article>
   );
@@ -207,14 +214,13 @@ function ProgramPanel({
 /** Programme — image de référence + panneau HTML dynamique. */
 export function FormationProgramme() {
   const rootRef = useRef<HTMLElement | null>(null);
-  const stageRef = useRef<HTMLDivElement | null>(null);
   const panelId = useId();
   const [ready, setReady] = useState(false);
   const [reduced, setReduced] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [active, setActive] = useState(2);
   const [prevActive, setPrevActive] = useState(2);
   const [hoverStep, setHoverStep] = useState<number | null>(null);
-  const [tip, setTip] = useState<{ text: string; x: number; y: number } | null>(null);
   const pointerRaf = useRef(0);
 
   const direction: 1 | -1 = active >= prevActive ? 1 : -1;
@@ -223,12 +229,20 @@ export function FormationProgramme() {
   useEffect(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     setReduced(prefersReduced);
+
+    const mq = window.matchMedia("(max-width: 720px)");
+    const syncMobile = () => setIsMobile(mq.matches);
+    syncMobile();
+    mq.addEventListener("change", syncMobile);
+
     const el = rootRef.current;
-    if (!el) return;
+    if (!el) {
+      return () => mq.removeEventListener("change", syncMobile);
+    }
 
     if (prefersReduced) {
       setReady(true);
-      return;
+      return () => mq.removeEventListener("change", syncMobile);
     }
 
     const io = new IntersectionObserver(
@@ -241,7 +255,10 @@ export function FormationProgramme() {
       { threshold: 0.12, rootMargin: "0px 0px -6% 0px" },
     );
     io.observe(el);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      mq.removeEventListener("change", syncMobile);
+    };
   }, []);
 
   const select = useCallback((index: number) => {
@@ -251,19 +268,6 @@ export function FormationProgramme() {
       return next;
     });
   }, []);
-
-  const showTip = useCallback((text: string, clientX: number, clientY: number) => {
-    const stage = stageRef.current;
-    if (!stage) return;
-    const r = stage.getBoundingClientRect();
-    setTip({
-      text,
-      x: Math.min(Math.max(clientX - r.left, 12), r.width - 12),
-      y: Math.min(Math.max(clientY - r.top - 12, 8), r.height - 8),
-    });
-  }, []);
-
-  const hideTip = useCallback(() => setTip(null), []);
 
   const onPanelMove = (e: ReactMouseEvent<HTMLDivElement>) => {
     if (reduced) return;
@@ -314,123 +318,140 @@ export function FormationProgramme() {
           Une journée. Plusieurs déclics.
         </h2>
 
-        <div className={styles.frame}>
-          <div className={styles.scroll}>
-            <div className={styles.stage} ref={stageRef}>
-              <Image
-                src="/marketing/formation-programme-scene.jpg"
-                alt="Programme de la journée de formation BeWork, de la découverte à la mise en pratique avec l’IA"
-                width={2048}
-                height={1364}
-                sizes="(max-width: 720px) 920px, (max-width: 1100px) 100vw, min(1560px, 96vw)"
-                className={styles.scene}
-                quality={90}
-                unoptimized
-                priority={false}
-                draggable={false}
-              />
+        {!isMobile ? (
+          <div className={styles.desktopBoard}>
+            <div className={styles.frame}>
+              <div className={styles.scroll}>
+                <div className={styles.stage}>
+                  <Image
+                    src="/marketing/formation-programme-scene.jpg?v=12"
+                    alt="Programme de la journée de formation BeWork, de la découverte à la mise en pratique avec l’IA"
+                    width={2048}
+                    height={1364}
+                    sizes="(max-width: 1100px) 100vw, min(1560px, 96vw)"
+                    className={styles.scene}
+                    quality={90}
+                    unoptimized
+                    priority={false}
+                    draggable={false}
+                  />
 
-              <div className={styles.overlay}>
-                {PROGRAM_STEPS.map((item, i) => {
-                  const selected = active === i;
-                  const hovered = hoverStep === i;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className={[
-                        styles.hot,
-                        styles.hotStep,
-                        selected ? styles.hotActive : "",
-                        hovered ? styles.hotHover : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                      style={rectStyle(stepRect(i))}
-                      aria-label={`${item.time} — ${item.title}. ${STEP_TIPS[i]}`}
-                      aria-pressed={selected}
-                      aria-selected={selected}
-                      aria-controls={panelId}
-                      onClick={() => select(i)}
-                      onMouseEnter={(e) => {
-                        setHoverStep(i);
-                        showTip(`${item.title} — ${STEP_TIPS[i]}`, e.clientX, e.clientY);
-                      }}
-                      onMouseMove={(e) => {
-                        if (!reduced) {
-                          showTip(`${item.title} — ${STEP_TIPS[i]}`, e.clientX, e.clientY);
-                        }
-                      }}
-                      onMouseLeave={() => {
-                        setHoverStep(null);
-                        hideTip();
-                      }}
-                      onFocus={() => setHoverStep(i)}
-                      onBlur={() => setHoverStep(null)}
-                      onKeyDown={(e) => onStepKeyDown(e, i)}
-                    >
-                      <span className={styles.stepDot} aria-hidden />
-                      <span className={styles.stepSheen} aria-hidden />
-                    </button>
-                  );
-                })}
+                  <div className={styles.overlay} role="listbox" aria-label="Étapes du programme">
+                    {PROGRAM_STEPS.map((item, i) => {
+                      const selected = active === i;
+                      const hovered = hoverStep === i;
+                      const hot = STEP_HOTSPOTS[i]!;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          role="option"
+                          className={[
+                            styles.hot,
+                            styles.hotStep,
+                            selected ? styles.hotActive : "",
+                            hovered ? styles.hotHover : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
+                          style={rectStyle(hot)}
+                          aria-label={`${item.time} — ${item.title}`}
+                          aria-selected={selected}
+                          aria-controls={panelId}
+                          onClick={() => select(i)}
+                          onMouseEnter={() => setHoverStep(i)}
+                          onMouseLeave={() => setHoverStep(null)}
+                          onFocus={() => setHoverStep(i)}
+                          onBlur={() => setHoverStep(null)}
+                          onKeyDown={(e) => onStepKeyDown(e, i)}
+                        >
+                          <span className={styles.stepDot} aria-hidden />
+                          <span className={styles.stepSheen} aria-hidden />
+                        </button>
+                      );
+                    })}
 
-                {PERIODS.map((period) => (
-                  <button
-                    key={period.id}
-                    type="button"
-                    className={`${styles.hot} ${styles.hotPeriod}`}
-                    style={rectStyle(period.rect)}
-                    aria-label={period.label}
+                    {PERIODS.map((period) => (
+                      <button
+                        key={period.id}
+                        type="button"
+                        className={`${styles.hot} ${styles.hotPeriod}`}
+                        style={rectStyle(period.rect)}
+                        aria-label={period.label}
+                      >
+                        <span className={styles.periodArrow} aria-hidden />
+                      </button>
+                    ))}
+
+                    {FOOTER.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`${styles.hot} ${styles.hotFooter}`}
+                        style={rectStyle(item.rect)}
+                        aria-label={item.label}
+                      />
+                    ))}
+                  </div>
+
+                  <div
+                    className={styles.panelSlot}
+                    style={rectStyle(PANEL)}
+                    onMouseMove={onPanelMove}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.setProperty("--mx", "50%");
+                      e.currentTarget.style.setProperty("--my", "38%");
+                    }}
                   >
-                    <span className={styles.periodArrow} aria-hidden />
-                  </button>
-                ))}
+                    <div className={styles.panelCover} aria-hidden />
+                    <ProgramPanel step={step} direction={direction} panelId={panelId} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className={styles.mobileBoard}>
+            <header className={styles.mobileHead}>
+              <p className={styles.mobileEyebrow}>Programme</p>
+              <p className={styles.mobileTitle}>Une journée. Plusieurs déclics.</p>
+            </header>
 
-                {FOOTER.map((item) => (
+            <div className={styles.mobileTimeline} role="listbox" aria-label="Étapes du programme">
+              {PROGRAM_STEPS.map((item, i) => {
+                const selected = active === i;
+                return (
                   <button
                     key={item.id}
                     type="button"
-                    className={`${styles.hot} ${styles.hotFooter}`}
-                    style={rectStyle(item.rect)}
-                    aria-label={item.label}
-                  />
-                ))}
-              </div>
+                    role="option"
+                    className={[styles.mobileStep, selected ? styles.mobileStepActive : ""]
+                      .filter(Boolean)
+                      .join(" ")}
+                    aria-label={`${item.time} — ${item.title}`}
+                    aria-selected={selected}
+                    aria-controls={panelId}
+                    onClick={() => select(i)}
+                    onKeyDown={(e) => onStepKeyDown(e, i)}
+                  >
+                    <span className={styles.mobileTime}>{item.time}</span>
+                    <span className={styles.mobileModule}>{item.module}</span>
+                    <span className={styles.mobileStepTitle}>{item.title}</span>
+                  </button>
+                );
+              })}
+            </div>
 
-              <div
-                className={styles.panelSlot}
-                style={rectStyle(PANEL)}
-                onMouseMove={onPanelMove}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.setProperty("--mx", "50%");
-                  e.currentTarget.style.setProperty("--my", "38%");
-                }}
-              >
-                <div className={styles.panelCover} aria-hidden />
-                <ProgramPanel step={step} direction={direction} panelId={panelId} />
-              </div>
-
-              {tip ? (
-                <div
-                  className={styles.tip}
-                  style={{ left: tip.x, top: tip.y }}
-                  role="status"
-                >
-                  {tip.text}
-                </div>
-              ) : null}
+            <div className={styles.mobilePanelWrap}>
+              <ProgramPanel step={step} direction={direction} panelId={panelId} />
             </div>
           </div>
-          <p className={styles.dragHint} aria-hidden>
-            Faites glisser pour explorer
-          </p>
-        </div>
+        )}
 
         <ol className={styles.srOnly}>
-          {PROGRAM_STEPS.map((item, i) => (
+          {PROGRAM_STEPS.map((item) => (
             <li key={item.id}>
-              {item.time} — {item.title}. {STEP_TIPS[i]}
+              {item.time} — {item.title}
             </li>
           ))}
         </ol>

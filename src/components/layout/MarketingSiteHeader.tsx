@@ -79,11 +79,42 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
     <header className={cx(styles.root, plainBg && styles.rootPlain)}>
       <div className={styles.shell}>
         <div className={cx(styles.panel, scrolled && styles.panelScrolled)}>
-          {/* ——— Étage 1 : marque + CTA ——— */}
+          {/* ——— Étage 1 : marque + signature + CTA ——— */}
           <div className={styles.tierBrand}>
-            <Link href="/" className={styles.brand} aria-label="BeWork — Accueil">
-              <BeWorkLogo size="md" priority imageClassName={styles.logoImg} />
-            </Link>
+            <div className={styles.brandCluster}>
+              <Link href="/" className={styles.brand} aria-label="BeWork — Accueil">
+                <BeWorkLogo size="md" priority imageClassName={styles.logoImg} />
+              </Link>
+
+              <span className={styles.brandDivider} aria-hidden />
+
+              <p
+                className={styles.signature}
+                aria-label="En une journée, apprenez à créer avec l’IA. Sites, applications, outils métiers : sans savoir coder."
+              >
+                <span className={styles.signatureBody}>
+                  <span className={styles.signaturePrimary}>
+                    <span className={styles.signaturePrimaryFull}>
+                      En une journée, apprenez à créer{" "}
+                      <span className={styles.accent}>avec l’IA</span>.
+                    </span>
+                    <span className={styles.signaturePrimaryShort}>
+                      Apprenez à créer{" "}
+                      <span className={styles.accent}>avec l’IA</span>.
+                    </span>
+                  </span>
+                  <span className={styles.signatureSecondary}>
+                    <span className={styles.signatureSecondaryFull}>
+                      Sites, applications, outils métiers :{" "}
+                      <span className={styles.accent}>sans savoir coder.</span>
+                    </span>
+                    <span className={styles.signatureSecondaryShort}>
+                      <span className={styles.accent}>Sans savoir coder.</span>
+                    </span>
+                  </span>
+                </span>
+              </p>
+            </div>
 
             <div className={styles.actions}>
               <Link

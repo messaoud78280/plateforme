@@ -115,14 +115,16 @@
 .brandCluster {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1.35rem;
   min-width: 0;
   flex: 1 1 auto;
+  padding-right: 0.75rem;
 }
 
 @media (min-width: 1024px) {
   .brandCluster {
-    gap: 1rem;
+    gap: 1.7rem;
+    padding-right: 0.85rem;
   }
 }
 
@@ -137,12 +139,13 @@
   display: none;
   flex-shrink: 0;
   width: 1px;
-  height: 2.35rem;
+  height: 2.15rem;
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(100, 116, 139, 0.28) 20%,
-    rgba(100, 116, 139, 0.28) 80%,
+    rgba(39, 91, 232, 0.18) 22%,
+    rgba(118, 87, 246, 0.16) 55%,
+    rgba(39, 91, 232, 0.12) 78%,
     transparent 100%
   );
 }
@@ -150,63 +153,197 @@
 @media (min-width: 768px) {
   .brandDivider {
     display: block;
+    height: 2.15rem;
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 900px) {
+  .brandDivider {
+    height: 2.35rem;
+  }
+}
+
+@media (min-width: 1100px) {
   .brandDivider {
     height: 2.65rem;
   }
 }
 
-.tagline {
+/* ——— Signature éditoriale (étage 1) ——— */
+
+.signature {
   display: none;
+  position: relative;
+  align-items: flex-start;
   margin: 0;
   min-width: 0;
-  flex-direction: column;
-  gap: 0.12rem;
-  line-height: 1.25;
+  max-width: min(26rem, 100%);
+  padding: 0.15rem 0.2rem 0.15rem 0;
+  pointer-events: none;
+  user-select: none;
 }
 
-@media (min-width: 768px) {
-  .tagline {
-    display: flex;
+.signature::before {
+  content: "";
+  position: absolute;
+  inset: -0.35rem -0.55rem -0.4rem -0.65rem;
+  border-radius: 1rem;
+  background: radial-gradient(
+    120% 90% at 12% 40%,
+    rgba(39, 91, 232, 0.055) 0%,
+    rgba(118, 87, 246, 0.03) 42%,
+    transparent 72%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes signatureIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
-.taglinePrimary {
-  color: #1e293b;
-  font-size: 0.82rem;
-  font-weight: 650;
-  letter-spacing: -0.02em;
+.signatureBody {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 0;
+  text-align: left;
 }
 
-.taglineSecondary {
-  color: #64748b;
+.signaturePrimary {
+  display: block;
+  color: #0f172a;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  line-height: 1.22;
+}
+
+.signatureSecondary {
+  display: block;
+  color: #5b6b82;
   font-size: 0.78rem;
   font-weight: 550;
   letter-spacing: -0.015em;
+  line-height: 1.35;
+}
+
+.signaturePrimaryFull,
+.signatureSecondaryFull {
+  display: inline;
+}
+
+.signaturePrimaryShort,
+.signatureSecondaryShort {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .signature {
+    display: flex;
+    max-width: 16.5rem;
+    animation: signatureIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .signaturePrimary {
+    font-size: 0.82rem;
+  }
+
+  .signatureSecondary {
+    font-size: 0.72rem;
+  }
+
+  .signaturePrimaryFull,
+  .signatureSecondaryFull {
+    display: none;
+  }
+
+  .signaturePrimaryShort,
+  .signatureSecondaryShort {
+    display: inline;
+  }
 }
 
 @media (min-width: 900px) {
-  .taglinePrimary {
-    font-size: 0.9rem;
+  .signature {
+    max-width: 22rem;
   }
 
-  .taglineSecondary {
-    font-size: 0.84rem;
+  .signaturePrimary {
+    font-size: 0.92rem;
+  }
+
+  .signatureSecondary {
+    font-size: 0.78rem;
   }
 }
 
 @media (min-width: 1100px) {
-  .taglinePrimary {
-    font-size: 0.98rem;
-    font-weight: 700;
+  .signature {
+    max-width: 28rem;
   }
 
-  .taglineSecondary {
-    font-size: 0.9rem;
+  .signaturePrimary {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.032em;
+  }
+
+  .signatureSecondary {
+    font-size: 0.86rem;
     font-weight: 550;
+  }
+
+  .signaturePrimaryFull,
+  .signatureSecondaryFull {
+    display: inline;
+  }
+
+  .signaturePrimaryShort,
+  .signatureSecondaryShort {
+    display: none;
+  }
+}
+
+@media (min-width: 1280px) {
+  .signature {
+    max-width: 30.5rem;
+  }
+
+  .signaturePrimary {
+    font-size: 1.12rem;
+  }
+
+  .signatureSecondary {
+    font-size: 0.9rem;
+  }
+}
+
+.accent {
+  background: linear-gradient(105deg, #275be8 0%, #4f6ef2 42%, #7657f6 100%);
+  background-size: 160% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+  animation: accentShimmer 1.1s ease 0.35s 1 both;
+}
+
+@keyframes accentShimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
@@ -694,8 +831,11 @@
   .tierNav,
   .logoImg,
   .cta,
-  .ctaSecondary {
+  .ctaSecondary,
+  .signature,
+  .accent {
     transition: none;
+    animation: none !important;
   }
 
   .cta:hover,

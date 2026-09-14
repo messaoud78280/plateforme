@@ -1,0 +1,72 @@
+/* Slogan officiel BeWork — hero homepage */
+
+.slogan {
+  margin: 0;
+  overflow: visible;
+  font-family: var(--font-manrope), var(--font-heading-family), system-ui, sans-serif;
+  letter-spacing: -0.045em;
+  line-height: 1.12;
+  animation: sloganIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.line1 {
+  display: block;
+  color: #0b0d12;
+  font-size: clamp(1.65rem, 4.2vw, 2.55rem);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+}
+
+.line2 {
+  display: inline-block;
+  max-width: 100%;
+  margin-top: 0.28em;
+  padding: 0.06em 0.08em 0.14em 0;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  font-size: clamp(1.85rem, 5vw, 3.05rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  overflow: visible;
+  background: linear-gradient(105deg, #0b0d12 0%, #1e3a8a 28%, #275be8 58%, #7657f6 100%);
+  background-size: 160% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: filter 0.3s ease, background-position 0.45s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .slogan:hover .line2 {
+    filter: brightness(1.06);
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes sloganIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slogan {
+    animation: none;
+  }
+
+  .line2 {
+    transition: none;
+  }
+
+  .slogan:hover .line2 {
+    filter: none;
+    background-position: 100% 50%;
+  }
+}

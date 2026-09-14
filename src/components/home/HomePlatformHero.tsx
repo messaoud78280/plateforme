@@ -4,6 +4,7 @@ import Link from "next/link";
 import { BwAtmosphere } from "@/components/home/BwAtmosphere";
 import { HomeHeroCollage } from "@/components/home/HomeHeroCollage";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
+import styles from "./HomePlatformHero.module.css";
 
 const TRUST = [
   {
@@ -44,7 +45,7 @@ const TRUST = [
   },
 ] as const;
 
-/** Hero maquette — promesse journée + collage projets créables. */
+/** Hero maquette — slogan officiel + promesse journée + collage. */
 export function HomePlatformHero() {
   return (
     <section
@@ -61,26 +62,23 @@ export function HomePlatformHero() {
               Une journée
             </p>
 
-            <h1
-              id="hero-heading"
-              className="mt-4 font-display text-[1.95rem] font-extrabold uppercase leading-[1.02] tracking-[-0.045em] text-[#0B0D12] sm:mt-5 sm:text-[2.55rem] md:text-[3.05rem] lg:text-[3.35rem]"
-            >
-              <span className="block">En une journée,</span>
-              <span className="mt-1 block">passez de l’idée</span>
-              <span className="mt-1 block text-[#275BE8]">à votre première création.</span>
-              <span className="mt-1 block text-[0.92em] font-bold tracking-[-0.04em] text-[#1a1f2a]">
-                sans savoir coder.
-              </span>
+            <h1 id="hero-heading" className={`mt-4 sm:mt-5 ${styles.slogan}`}>
+              <span className={styles.line1}>Sans savoir coder.</span>
+              <span className={styles.line2}>Créez ce que vous imaginez.</span>
             </h1>
 
-            <p className="mt-6 max-w-lg text-base leading-relaxed text-[#42526B] sm:mt-7 sm:text-[1.05rem] md:text-[1.125rem]">
+            <p className="mt-6 max-w-lg font-display text-[1.15rem] font-bold leading-snug tracking-[-0.03em] text-[#1a1f2a] sm:mt-7 sm:text-[1.3rem] md:text-[1.4rem]">
+              En une journée, passez de l’idée à votre première création.
+            </p>
+
+            <p className="mt-4 max-w-lg text-base leading-relaxed text-[#42526B] sm:mt-5 sm:text-[1.05rem] md:text-[1.125rem]">
               Aucune connaissance particulière en informatique n’est nécessaire.
               Nous vous transmettons les outils, les bons réflexes et les astuces
               pour transformer vos idées en sites, applications et outils
               numériques.
             </p>
 
-            <p className="mt-6 max-w-md font-display text-lg font-extrabold leading-snug tracking-tight text-[#0B0D12] sm:mt-7 sm:text-xl">
+            <p className="mt-5 max-w-md text-[0.95rem] font-semibold leading-snug tracking-tight text-[#5b6b82] sm:mt-6 sm:text-base">
               Vous partez de zéro.
               <br />
               Vous repartez en sachant comment commencer.

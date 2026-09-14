@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { BLOG_ARTICLES, BLOG_SLUGS } from "@/content/blog-articles";
-import { SITE_URL, absoluteUrl } from "@/lib/site";
+import { TRAINING_OFFERS } from "@/lib/bework-formation";
+import { absoluteUrl } from "@/lib/site";
 
 function escapeXml(s: string): string {
   return s
@@ -11,24 +11,43 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
-/** Flux RSS 2.0 — blog + annonce site (Google, Bing, Apple News, agrégateurs). */
-export async function GET() {
-  const channelTitle = "BeWork — Blog AO & administratif BTP";
-  const channelLink = absoluteUrl("/blog");
-  const channelDescription =
-    "Guides BeWork : candidatures, analyse DCE, suivi admin des marchés et organisation bureau-chantier pour le BTP.";
+const FEED_PAGES = [
+  {
+    path: "/formation",
+    title: "Formation BeWork — Créer avec l’IA sans savoir coder",
+    description: `Un parcours progressif de ${TRAINING_OFFERS.essential.hours} h ou ${TRAINING_OFFERS.complete.hours} h pour apprendre à commencer, puis construire plus loin.`,
+  },
+  {
+    path: "/tarifs",
+    title: "Parcours et tarifs BeWork",
+    description: `${TRAINING_OFFERS.essential.hours} h à ${TRAINING_OFFERS.essential.price} € ou ${TRAINING_OFFERS.complete.hours} h à ${TRAINING_OFFERS.complete.price} € par participant.`,
+  },
+  {
+    path: "/demonstrations",
+    title: "Démonstrations BeWork",
+    description: "Des exemples concrets de sites, applications et outils numériques pour comprendre les possibilités.",
+  },
+  {
+    path: "/faq",
+    title: "FAQ — Formation BeWork",
+    description: "Prérequis, déroulement, parcours, modalités et réponses utiles avant de participer.",
+  },
+] as const;
 
-  const items = BLOG_SLUGS.map((slug) => {
-    const article = BLOG_ARTICLES[slug];
-    if (!article) return "";
-    const link = absoluteUrl(`/blog/${slug}`);
-    const pubDate = new Date(article.publishedTime).toUTCString();
+/** Flux RSS 2.0 du site public — uniquement les ressources formation actives. */
+export function GET() {
+  const channelTitle = "BeWork — Formation création avec l’IA";
+  const channelLink = absoluteUrl("/");
+  const channelDescription =
+    "Apprendre à créer des sites, applications et outils numériques avec l’intelligence artificielle, sans prérequis en programmation.";
+
+  const items = FEED_PAGES.map((page) => {
+    const link = absoluteUrl(page.path);
     return `    <item>
-      <title>${escapeXml(article.title)}</title>
+      <title>${escapeXml(page.title)}</title>
       <link>${escapeXml(link)}</link>
       <guid isPermaLink="true">${escapeXml(link)}</guid>
-      <description>${escapeXml(article.description)}</description>
-      <pubDate>${pubDate}</pubDate>
+      <description>${escapeXml(page.description)}</description>
     </item>`;
   }).join("\n");
 
@@ -39,15 +58,7 @@ export async function GET() {
     <link>${escapeXml(channelLink)}</link>
     <description>${escapeXml(channelDescription)}</description>
     <language>fr-fr</language>
-    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${escapeXml(absoluteUrl("/feed.xml"))}" rel="self" type="application/rss+xml"/>
-    <item>
-      <title>BeWork — Renfort assistants travaux BTP</title>
-      <link>${escapeXml(SITE_URL)}</link>
-      <guid isPermaLink="true">${escapeXml(SITE_URL)}</guid>
-      <description>Assistants travaux spécialisés : préparation candidatures, analyse DCE et suivi administratif des marchés — sous validation du client.</description>
-      <pubDate>${new Date().toUTCString()}</pubDate>
-    </item>
 ${items}
   </channel>
 </rss>`;

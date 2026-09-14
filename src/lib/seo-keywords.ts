@@ -65,7 +65,8 @@ export const SEO_KEYWORDS_HOME: string[] = [
   ...SEO_KEYWORDS_FORMATION_IA,
   ...SEO_KEYWORDS_AUDIENCE,
   "BeWork formation IA",
-  "en une journée apprendre à créer",
+  "formation IA débutant 7 heures",
+  "formation IA pratique 14 heures",
 ];
 
 /**

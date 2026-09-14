@@ -619,6 +619,14 @@ export const FORMATION_FAQ = [
     a: "Tout le monde commence par la même première journée. Les 7 h vous apprennent à commencer et à continuer seul. Les 14 h ajoutent une deuxième journée pour pratiquer davantage et construire plus loin.",
   },
   {
+    q: "Est-ce que les 7 h suffisent pour apprendre ?",
+    a: "Les 7 h forment un parcours complet pour apprendre à commencer, créer une première version, tester, corriger et continuer seul. Elles ne prétendent pas faire de vous un développeur en une journée.",
+  },
+  {
+    q: "Les participants des parcours 7 h et 14 h sont-ils ensemble ?",
+    a: "Oui. La première journée est commune à tous. Les participants inscrits au parcours 14 h poursuivent ensuite avec la deuxième journée.",
+  },
+  {
     q: "Puis-je commencer par 1 jour et prolonger ensuite ?",
     a: `Oui. Commencez par la première journée à ${TRAINING_OFFERS.essential.price} €. Si vous souhaitez aller plus loin, ajoutez simplement le deuxième jour pour ${BEWORK_EXTENSION_PRICE_EUR} € supplémentaires.`,
   },
@@ -633,6 +641,10 @@ export const FORMATION_FAQ = [
   {
     q: "Puis-je venir avec une idée ?",
     a: "Oui. Une idée, même floue, permet justement de mieux comprendre comment structurer un besoin et avancer concrètement.",
+  },
+  {
+    q: "Puis-je suivre la formation en visio ?",
+    a: "Oui. BeWork privilégie le présentiel et propose aussi des sessions entièrement à distance, à des dates dédiées. Les parcours 7 h et 14 h peuvent être suivis selon la modalité prévue pour la session.",
   },
   {
     q: "Que vais-je savoir faire après ?",

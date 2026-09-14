@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FORMATION_CREATION_EXAMPLES } from "@/lib/bework-formation";
 import styles from "./formation.module.css";
 
-/** Showroom exemples + teaser familles d’agents (sans dupliquer la homepage). */
+/** Showroom exemples + aperçu des intelligences spécialisées. */
 export function FormationExamples() {
   return (
     <>
@@ -41,19 +41,19 @@ export function FormationExamples() {
         <div className={styles.shell}>
           <div className={`${styles.panel} ${styles.agentsTeaser}`}>
             <div>
-              <p className={styles.eyebrow}>Familles d’agents</p>
+              <p className={styles.eyebrow}>Intelligences spécialisées</p>
               <h2 id="agents-apercu-title" className={`${styles.display} ${styles.agentsTitle}`}>
                 Plusieurs intelligences.
                 <br />
-                Différentes forces.
+                Une progression coordonnée.
               </h2>
               <p className={styles.agentsLead}>
-                Selon la tâche, différents agents peuvent être plus adaptés au raisonnement, au
-                code, à la vision, à l’analyse ou à l’optimisation.
+                Selon l’étape, elles aident à concevoir, structurer, créer, vérifier ou améliorer.
+                Vous gardez la vision, les décisions et la validation.
               </p>
             </div>
             <Link href="/#agents" className={styles.ctaSecondary}>
-              Découvrir les familles d’agents →
+              Comprendre leur rôle →
             </Link>
           </div>
         </div>

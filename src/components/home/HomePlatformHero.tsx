@@ -45,7 +45,7 @@ const TRUST = [
   },
 ] as const;
 
-/** Hero maquette — slogan officiel + promesse + parcours discret. */
+/** Hero — slogan officiel + parcours 7 h / 14 h (maquette). */
 export function HomePlatformHero() {
   return (
     <section
@@ -68,32 +68,39 @@ export function HomePlatformHero() {
             </h1>
 
             <p className="mt-6 max-w-lg font-display text-[1.15rem] font-bold leading-snug tracking-[-0.03em] text-[#1a1f2a] sm:mt-7 sm:text-[1.3rem] md:text-[1.4rem]">
-              En une journée, apprenez à créer avec l’IA.
-              <span className="mt-1 block text-[0.95em] font-semibold text-[#42526B]">
-                Sites, applications, outils métiers : sans savoir coder.
-              </span>
+              En 1 ou 2 journées, apprenez à créer avec l’IA.
             </p>
 
-            <p className="mt-4 max-w-md text-[0.92rem] font-medium leading-snug tracking-tight text-[#64748b] sm:mt-5 sm:text-[0.98rem]">
-              1 journée pour apprendre à commencer.
-              <br />
-              2 journées pour construire plus loin.
+            <p className="mt-2 max-w-lg text-[0.95rem] font-medium leading-snug text-[#42526B] sm:text-base">
+              Sites, applications, outils métiers : sans savoir coder.
             </p>
 
-            <p className="mt-4 max-w-lg text-base leading-relaxed text-[#42526B] sm:mt-5 sm:text-[1.05rem] md:text-[1.125rem]">
+            <ul className="mt-5 max-w-lg space-y-2.5 text-[0.95rem] leading-snug text-[#64748b] sm:mt-6 sm:text-[1rem]">
+              <li>
+                <span className="font-bold text-[#0B0D12]">1 journée (7&nbsp;h)</span>
+                {" "}
+                pour découvrir la méthode, prendre les outils en main et lancer un premier projet.
+              </li>
+              <li>
+                <span className="font-bold text-[#0B0D12]">2 journées (14&nbsp;h)</span>
+                {" "}
+                pour aller plus loin, structurer votre approche et construire un projet plus complet.
+              </li>
+            </ul>
+
+            <p className="mt-5 max-w-lg text-base leading-relaxed text-[#42526B] sm:mt-6 sm:text-[1.05rem] md:text-[1.125rem]">
               Aucune connaissance particulière en informatique n’est nécessaire.
-              Nous vous transmettons les outils, les bons réflexes et les astuces
-              pour transformer vos idées en sites, applications et outils
-              numériques.
+              Nous vous transmettons les bons outils, les bons réflexes et une méthode
+              simple pour transformer vos idées en projets concrets.
             </p>
 
-            <p className="mt-5 max-w-md text-[0.95rem] font-semibold leading-snug tracking-tight text-[#5b6b82] sm:mt-6 sm:text-base">
+            <p className="mt-5 max-w-lg text-[0.95rem] font-semibold leading-snug tracking-tight text-[#1a1f2a] sm:mt-6 sm:text-base">
               Vous partez de zéro.
               <br />
-              Vous repartez en sachant comment commencer.
+              Vous repartez avec une méthode, des outils installés et un mini-projet fonctionnel.
             </p>
 
-            <div className="mt-8 flex flex-col gap-4 sm:mt-9 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap sm:items-stretch">
               <Link
                 href="/formation"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#275BE8] px-6 text-[0.95rem] font-semibold text-white shadow-[0_12px_28px_rgba(39,91,232,0.32)] transition hover:bg-[#1d4ed8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#275BE8]"
@@ -103,20 +110,14 @@ export function HomePlatformHero() {
                 <span aria-hidden>→</span>
               </Link>
               <Link
-                href="/demonstrations"
-                className="inline-flex items-center gap-3 text-[0.95rem] font-semibold text-[#0B0D12] transition hover:text-[#275BE8]"
+                href="/formation#programme"
+                className="inline-flex min-h-12 flex-col items-center justify-center rounded-full border border-[#c5d0e6] bg-white/80 px-6 py-2 text-center transition hover:border-[#275BE8]/45 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#275BE8] sm:items-start sm:text-left"
               >
-                <span
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-[#275BE8] shadow-sm"
-                  aria-hidden
-                >
-                  ▶
+                <span className="text-[0.95rem] font-semibold text-[#0B0D12]">
+                  Voir le programme
                 </span>
-                <span className="text-left leading-tight">
-                  Voir la vidéo
-                  <span className="block text-xs font-medium text-[#64748b]">
-                    2&nbsp;min pour tout comprendre
-                  </span>
+                <span className="text-xs font-medium text-[#64748b]">
+                  7&nbsp;h ou 14&nbsp;h selon votre besoin
                 </span>
               </Link>
             </div>

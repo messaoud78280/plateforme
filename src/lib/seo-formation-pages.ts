@@ -1,6 +1,6 @@
 /**
  * SEO BeWork V3 — metadata & JSON-LD du cœur formation.
- * Intention : créer avec l’IA / sans coder / journée pratique.
+ * Intention : créer avec l’IA / sans coder / parcours pratique.
  * Pas de stuffing ; titres ≤ ~60 car. ; descriptions ≈ 150–160 car.
  */
 
@@ -97,7 +97,6 @@ export function beworkSessionOfferJsonLd(path = "/contact#participer"): Record<s
     name: `${TRAINING_OFFERS.essential.title} — ${TRAINING_OFFERS.essential.hours} h`,
     price: String(TRAINING_OFFERS.essential.price),
     priceCurrency: "EUR",
-    availability: "https://schema.org/InStock",
     url: absoluteUrl(path),
     category: "Formation professionnelle",
   };
@@ -110,7 +109,6 @@ export function beworkCompleteOfferJsonLd(path = "/contact#participer"): Record<
     name: `${TRAINING_OFFERS.complete.title} — ${TRAINING_OFFERS.complete.hours} h`,
     price: String(TRAINING_OFFERS.complete.price),
     priceCurrency: "EUR",
-    availability: "https://schema.org/InStock",
     url: absoluteUrl(path),
     category: "Formation professionnelle",
   };
@@ -180,7 +178,7 @@ export const SEO_PAGES = {
     path: "/",
     absoluteTitle: "BeWork | Créer avec l’IA sans savoir coder",
     description:
-      `En une journée, apprenez à créer sites, apps et outils avec l’IA — sans coder. Parcours 7 h (${BEWORK_SESSION_PRICE_EUR} €) ou 14 h (${BEWORK_COMPLETE_PRICE_EUR} €).`,
+      `Apprenez à créer sites, apps et outils avec l’IA — sans coder. Parcours 7 h (${BEWORK_SESSION_PRICE_EUR} €) ou 14 h (${BEWORK_COMPLETE_PRICE_EUR} €).`,
     keywords: [
       "créer avec l'IA sans coder",
       "formation IA débutant",

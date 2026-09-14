@@ -1,4 +1,5 @@
 /** Maillage interne SEO — liens contextuels par page publique. */
+import { TRAINING_OFFERS } from "@/lib/bework-formation";
 
 export type SeoInternalLink = { href: string; label: string };
 
@@ -7,7 +8,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/formation", label: "La formation BeWork" },
     { href: "/demonstrations", label: "Démonstrations" },
     { href: "/pour-qui", label: "Pour qui ?" },
-    { href: "/tarifs", label: "Tarif de la journée" },
+    { href: "/tarifs", label: "Parcours et tarifs" },
     { href: "/faq", label: "FAQ" },
     { href: "/contact#participer", label: "Demander une place" },
     { href: "/demonstrations/messagerie", label: "Démo messagerie" },
@@ -24,7 +25,10 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
   ],
   "/contact": [
     { href: "/formation", label: "La formation" },
-    { href: "/tarifs", label: "Tarifs 300 € / 600 €" },
+    {
+      href: "/tarifs",
+      label: `Tarifs ${TRAINING_OFFERS.essential.price} € / ${TRAINING_OFFERS.complete.price} €`,
+    },
     { href: "/demonstrations", label: "Démonstrations" },
     { href: "/faq", label: "FAQ" },
   ],

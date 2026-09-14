@@ -56,7 +56,7 @@ const pourQuiJsonLd = {
 
 export default function PourQuiPage() {
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
+    <div className="min-h-screen bg-transparent">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(pourQuiJsonLd) }}

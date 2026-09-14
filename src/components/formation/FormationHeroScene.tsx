@@ -64,17 +64,16 @@ const FLOAT_CARDS = [
 type Props = {
   ready: boolean;
   ambient: boolean;
-  reduceMotion: boolean;
 };
 
 /** Scène droite — idée → chips → mini-app → résultat (données fictives). */
-export function FormationHeroScene({ ready, ambient, reduceMotion }: Props) {
+export function FormationHeroScene({ ready, ambient }: Props) {
   const [slot, setSlot] = useState<(typeof SLOTS)[number]>("10:30");
 
   const rootClass = [
     styles.scene,
-    ready || reduceMotion ? styles.ready : "",
-    ambient && !reduceMotion ? styles.ambient : "",
+    ready ? styles.ready : "",
+    ambient ? styles.ambient : "",
   ]
     .filter(Boolean)
     .join(" ");

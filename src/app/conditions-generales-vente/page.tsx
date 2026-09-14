@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BEWORK_PUBLIC_OFFERS, formatOfferPriceLabel } from "@/lib/bework-public-offers";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { CREDITS_VALIDITY_DAYS, CREDITS_VALIDITY_NOTICE } from "@/lib/subscription-plans";
+import {
+  BEWORK_EXTENSION_PRICE_EUR,
+  TRAINING_OFFERS,
+} from "@/lib/bework-formation";
 import { absoluteUrl } from "@/lib/site";
 
 const path = "/conditions-generales-vente";
@@ -11,7 +13,7 @@ const pageUrl = absoluteUrl(path);
 export const metadata: Metadata = {
   title: { absolute: "Conditions générales de vente | BeWork" },
   description:
-    "Conditions générales de vente BeWork : forfaits, crédits administratifs, validité 30 jours, paiement et prestations.",
+    "Conditions générales de vente de la formation BeWork : parcours, tarifs, inscription, exécution et responsabilités.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   robots: { index: true, follow: true },
   openGraph: {
@@ -21,26 +23,33 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "Conditions générales de vente | BeWork",
     description:
-      "CGV BeWork : modalités de vente des forfaits, validité des crédits (30 jours) et conditions d'utilisation.",
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "CGV — BeWork" }],
+      "Conditions applicables aux parcours de formation BeWork de 7 h et 14 h.",
+    images: [
+      {
+        url: absoluteUrl("/opengraph-image"),
+        width: 1200,
+        height: 630,
+        alt: "Conditions générales de vente — BeWork",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Conditions générales de vente | BeWork",
-    description:
-      "CGV BeWork : modalités de vente des forfaits, validité des crédits (30 jours) et conditions d'utilisation.",
+    description: "Conditions applicables aux parcours de formation BeWork de 7 h et 14 h.",
   },
 };
 
 export default function ConditionsGeneralesVentePage() {
   return (
     <SeoLandingPage
-      description="Conditions générales de vente des prestations et forfaits BeWork."
+      description="Conditions générales de vente applicables aux parcours de formation BeWork."
       h1="Conditions générales de vente"
       intro={
         <>
-          Les présentes conditions générales de vente (CGV) s&apos;appliquent à toute souscription ou achat de forfait BeWork
-          par un client professionnel. En validant une commande ou en signant le contrat d&apos;abonnement, le client les accepte sans réserve.
+          Les présentes conditions encadrent la vente des formations BeWork. Les modalités
+          particulières communiquées avant l’inscription complètent ces conditions et prévalent
+          en cas de disposition plus précise.
         </>
       }
       breadcrumbItems={[
@@ -48,124 +57,144 @@ export default function ConditionsGeneralesVentePage() {
         { name: "Conditions générales de vente", href: path },
       ]}
     >
-      <h2>1. Objet</h2>
+      <h2>1. Identité du prestataire</h2>
       <p>
-        BeWork commercialise des prestations d&apos;assistance administrative et d'accompagnement travaux (BTP et activités connexes),
-        facturées sous forme de forfaits mensuels incluant un quota de crédits administratifs.
+        La formation BeWork est proposée par <strong>OFC CREATION D’ENTREPRISE</strong>,
+        société éditrice du site BeWork. Les coordonnées complètes figurent dans les{" "}
+        <Link href="/mentions-legales" className="font-medium text-[#1d4ed8] underline hover:no-underline">
+          mentions légales
+        </Link>
+        .
       </p>
 
-      <h2>2. Offres et tarifs</h2>
+      <h2>2. Objet</h2>
       <p>
-        Les niveaux d&apos;accompagnement et les prix de départ HT sont présentés sur la page{" "}
-        <Link href="/tarifs" className="font-medium text-[#1d4ed8] underline hover:no-underline">
-          Tarifs
-        </Link>{" "}
-        du site (mission ponctuelle, accompagnement travaux mensuel, cellule externalisée, sur mesure).
+        BeWork propose une formation pratique pour apprendre à créer avec l’intelligence
+        artificielle sans prérequis en programmation. Elle est organisée selon un parcours
+        progressif&nbsp;: un Jour&nbsp;1 commun, puis un Jour&nbsp;2 d’approfondissement pour
+        les participants ayant choisi le parcours complet.
       </p>
-      <ul>
-        {BEWORK_PUBLIC_OFFERS.map((offer) => (
-          <li key={offer.key}>
-            <strong>{offer.name}</strong> — {formatOfferPriceLabel(offer)}
-          </li>
-        ))}
-      </ul>
       <p>
-        Le tarif définitif est établi sur devis selon le périmètre réel (nombre de chantiers, volume de dossiers,
-        livrables, fréquence de suivi). BeWork se réserve le droit de modifier ses tarifs publics pour les nouvelles
-        souscriptions ; les conditions contractuellement acceptées restent applicables jusqu&apos;au renouvellement ou à la
-        résiliation.
+        La formation transmet une méthode et accompagne la pratique. Elle ne constitue ni une
+        certification professionnelle, ni une promesse de devenir développeur ou expert en
+        quelques heures.
       </p>
 
-      <h2>3. Crédits administratifs (espace client)</h2>
-      <p>
-        Pour certains contrats conclus via l&apos;espace client, un quota de crédits administratifs peut s&apos;appliquer
-        selon les termes du contrat signé. Dans ce cas :
-      </p>
-      <p>
-        Un crédit correspond à une unité de traitement administrative (environ 12 minutes de travail, indicatif).
-        Le nombre de crédits consommés par mission dépend du temps réellement passé par l&apos;équipe BeWork, évalué à la clôture de la mission.
-      </p>
-
-      <h2>4. Validité des crédits — {CREDITS_VALIDITY_DAYS} jours</h2>
-      <p>
-        <strong>{CREDITS_VALIDITY_NOTICE}</strong>
-      </p>
+      <h2>3. Parcours et tarifs publics</h2>
       <ul>
         <li>
-          La validité de <strong>{CREDITS_VALIDITY_DAYS} jours</strong> s&apos;applique à <strong>tous les forfaits</strong>, sans exception.
+          <strong>Parcours essentiel</strong> — {TRAINING_OFFERS.essential.hours}&nbsp;h,
+          {` ${TRAINING_OFFERS.essential.price}`}&nbsp;€ par participant.
         </li>
         <li>
-          Le délai court à compter de la <strong>date d&apos;achat</strong>, de <strong>créditation</strong> ou de <strong>renouvellement</strong> du forfait.
+          <strong>Parcours complet</strong> — {TRAINING_OFFERS.complete.hours}&nbsp;h,
+          {` ${TRAINING_OFFERS.complete.price}`}&nbsp;€ par participant.
         </li>
         <li>
-          Les crédits non utilisés à l&apos;expiration sont <strong>définitivement perdus</strong> : ils ne sont ni remboursés, ni reportés, ni convertis.
-        </li>
-        <li>
-          Un nouvel achat ou renouvellement crédite un nouveau lot de crédits avec une nouvelle période de validité de {CREDITS_VALIDITY_DAYS} jours.
+          Prolongation après le Jour&nbsp;1&nbsp;: Jour&nbsp;2 à{" "}
+          {BEWORK_EXTENSION_PRICE_EUR}&nbsp;€ supplémentaires par participant.
         </li>
       </ul>
-
-      <h2>5. Commande et paiement</h2>
       <p>
-        Le paiement est exigible d&apos;avance, mensuellement, par les moyens proposés sur la plateforme (carte bancaire, prélèvement ou autre
-        modalité indiquée au checkout). L&apos;accès aux crédits est ouvert après encaissement effectif.
+        Les tarifs applicables sont ceux confirmés par écrit au moment de l’inscription. Toute
+        prestation complémentaire éventuelle fait l’objet d’une information et d’un accord
+        préalables.
       </p>
 
-      <h2>6. Exécution des prestations</h2>
+      <h2>4. Modalités de participation</h2>
       <p>
-        Les missions sont déposées par le client sur la plateforme (description, recommandations, pièces jointes).
-        BeWork évalue le volume de crédits nécessaire avant ou pendant le traitement. Les prestations sont réalisées à distance,
-        sous obligation de moyens, dans le cadre défini contractuellement.
+        Les sessions peuvent être organisées en présentiel ou en visioconférence. La modalité,
+        le lieu éventuel, les horaires et les prérequis pratiques sont précisés avant
+        l’inscription définitive. Le participant doit disposer d’un ordinateur compatible avec
+        les consignes communiquées.
       </p>
 
-      <h2>7. Droit de rétractation</h2>
+      <h2>5. Demande de place et inscription</h2>
       <p>
-        Le client professionnel ne bénéficie pas du droit de rétractation prévu pour les consommateurs (code de la consommation).
-        Toute souscription est ferme dès validation du paiement, sous réserve des conditions de résiliation prévues au contrat d&apos;abonnement.
+        Le formulaire du site constitue une demande de contact et non une inscription
+        automatique. L’inscription devient effective après confirmation écrite de BeWork et
+        acceptation par le client des informations propres à la session, notamment le parcours,
+        la modalité et les conditions de règlement.
+      </p>
+      <p>
+        Aucune date, place disponible ou priorité d’inscription n’est garantie par la seule
+        transmission du formulaire.
       </p>
 
-      <h2>8. Résiliation</h2>
+      <h2>6. Paiement</h2>
       <p>
-        La résiliation de l&apos;abonnement est régie par le{" "}
-        <Link href="/contract" className="font-medium text-[#1d4ed8] underline hover:no-underline">
-          contrat d&apos;abonnement
-        </Link>{" "}
-        (préavis de 30 jours). La résiliation n&apos;ouvre pas droit au remboursement des crédits non utilisés arrivés à expiration ou encore valides.
+        Le montant, l’échéance et le moyen de paiement sont indiqués sur le document transmis
+        avant la validation définitive. Aucun coût non annoncé ne doit être engagé sans accord
+        du client.
       </p>
 
-      <h2>9. Responsabilité</h2>
+      <h2>7. Modification, report ou annulation</h2>
       <p>
-        BeWork est soumis à une obligation de moyens. Sa responsabilité est limitée au montant des sommes effectivement versées par le client
-        au titre des prestations des douze (12) derniers mois, sauf faute lourde ou dolosive.
+        Les conditions de modification, de report ou d’annulation applicables à la session sont
+        communiquées avant l’inscription définitive. En cas d’empêchement, le participant doit
+        contacter BeWork dès que possible afin d’examiner les solutions disponibles.
       </p>
 
-      <h2>10. Données personnelles</h2>
+      <h2>8. Droit de rétractation</h2>
       <p>
-        Le traitement des données est décrit dans la{" "}
-        <Link href="/politique-confidentialite" className="font-medium text-[#1d4ed8] underline hover:no-underline">
+        Les droits applicables dépendent notamment de la qualité du client, des conditions de
+        conclusion du contrat et de la date prévue pour la prestation. Lorsque la réglementation
+        prévoit un droit de rétractation ou une information particulière, les modalités
+        correspondantes sont communiquées avant la conclusion du contrat.
+      </p>
+
+      <h2>9. Exécution de la formation</h2>
+      <p>
+        BeWork est tenue à une obligation de moyens. Le contenu peut être ajusté au rythme du
+        groupe sans dénaturer les objectifs annoncés. Le résultat obtenu dépend également de la
+        participation, du niveau de départ, du projet choisi et du temps de pratique de chaque
+        participant.
+      </p>
+
+      <h2>10. Responsabilité du participant</h2>
+      <p>
+        Le participant reste responsable des informations, fichiers et accès qu’il utilise, ainsi
+        que des décisions prises à partir de ses réalisations. Il lui appartient de ne pas
+        communiquer de données confidentielles ou personnelles qui ne seraient pas nécessaires à
+        la formation.
+      </p>
+
+      <h2>11. Propriété intellectuelle</h2>
+      <p>
+        Les supports, contenus pédagogiques et éléments de méthode BeWork restent protégés par les
+        droits applicables. Leur utilisation personnelle dans le cadre de l’apprentissage est
+        autorisée. Toute diffusion, reproduction commerciale ou transmission substantielle à un
+        tiers nécessite un accord préalable.
+      </p>
+
+      <h2>12. Données personnelles</h2>
+      <p>
+        Le traitement des données collectées lors d’une demande de place ou d’un contact est
+        décrit dans la{" "}
+        <Link
+          href="/politique-confidentialite"
+          className="font-medium text-[#1d4ed8] underline hover:no-underline"
+        >
           politique de confidentialité
         </Link>
         .
       </p>
 
-      <h2>11. Droit applicable et litiges</h2>
+      <h2>13. Droit applicable et règlement des litiges</h2>
       <p>
-        Les présentes CGV sont soumises au droit français. En cas de litige, les parties recherchent une solution amiable avant toute action judiciaire.
-        À défaut, les tribunaux compétents du ressort du siège social de BeWork seront seuls compétents, sauf disposition impérative contraire.
+        Les présentes conditions sont soumises au droit français. En cas de difficulté, les
+        parties recherchent d’abord une solution amiable. Les règles impératives relatives à la
+        compétence juridictionnelle restent applicables.
       </p>
 
       <p className="mt-8 text-sm text-slate-600">
-        Voir aussi :{" "}
-        <Link href="/mentions-legales" className="underline hover:no-underline">
-          Mentions légales
+        Une question sur ces conditions&nbsp;?{" "}
+        <Link href="/contact" className="underline hover:no-underline">
+          Contactez BeWork
         </Link>
         {" · "}
         <Link href="/tarifs" className="underline hover:no-underline">
-          Tarifs
-        </Link>
-        {" · "}
-        <Link href="/contact" className="underline hover:no-underline">
-          Contact
+          Voir les parcours et tarifs
         </Link>
       </p>
     </SeoLandingPage>

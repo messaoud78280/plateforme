@@ -2,352 +2,184 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import styles from "./HomeAgentsFamilies.module.css";
 
-type FamilyId = "gpt" | "claude" | "gemini" | "grok" | "kimi" | "glm";
+type AgentId = "conception" | "structure" | "creation" | "verification" | "improvement";
 
-type Family = {
-  id: FamilyId;
+type AgentProfile = {
+  id: AgentId;
   name: string;
-  models: string[];
   role: string;
-  keywords: string[];
-  logoSrc: string;
-  logoAlt: string;
+  strengths: readonly string[];
 };
 
-const FAMILIES: Family[] = [
+const AGENTS: readonly AgentProfile[] = [
   {
-    id: "gpt",
-    name: "Famille GPT",
-    models: ["GPT-5.6", "Codex 5.3"],
-    role: "Code, architecture, automatisation",
-    keywords: ["CODE", "ARCHITECTURE", "AUTOMATISATION"],
-    logoSrc: "/marketing/agents-logos/openai.svg",
-    logoAlt: "Logo OpenAI / GPT",
+    id: "conception",
+    name: "IA de conception",
+    role: "Clarifier l’ambition, les usages et les priorités.",
+    strengths: ["BESOIN", "IDÉES", "PRIORITÉS"],
   },
   {
-    id: "claude",
-    name: "Famille Claude",
-    models: ["Opus 5", "Sonnet 5", "Haiku 4.5"],
-    role: "Structure, stratégie, rédaction technique",
-    keywords: ["STRUCTURE", "STRATÉGIE", "RÉDACTION"],
-    logoSrc: "/marketing/agents-logos/claude.svg",
-    logoAlt: "Logo Claude / Anthropic",
+    id: "structure",
+    name: "IA de structuration",
+    role: "Organiser le projet pour avancer étape par étape.",
+    strengths: ["PARCOURS", "ÉCRANS", "FONCTIONS"],
   },
   {
-    id: "gemini",
-    name: "Famille Gemini",
-    models: ["Gemini 3.8 Flash", "Gemini 3.1 Pro"],
-    role: "Vision, analyse, variantes rapides",
-    keywords: ["VISION", "ANALYSE", "VARIANTES"],
-    logoSrc: "/marketing/agents-logos/gemini.svg",
-    logoAlt: "Logo Gemini",
+    id: "creation",
+    name: "IA de création",
+    role: "Transformer le plan en résultat visible et manipulable.",
+    strengths: ["INTERFACE", "CONTENU", "ACTIONS"],
   },
   {
-    id: "grok",
-    name: "Famille Grok",
-    models: ["Grok 4.6"],
-    role: "Approches alternatives, performance",
-    keywords: ["ALTERNATIVES", "PERFORMANCE"],
-    logoSrc: "/marketing/agents-logos/grok.svg",
-    logoAlt: "Logo Grok / xAI",
+    id: "verification",
+    name: "IA de vérification",
+    role: "Tester, repérer les incohérences et sécuriser les évolutions.",
+    strengths: ["TESTS", "COHÉRENCE", "CORRECTIONS"],
   },
   {
-    id: "kimi",
-    name: "Famille Kimi",
-    models: ["Kimi K3", "Kimi K2.7 Code"],
-    role: "Code alternatif, vitesse, exploration",
-    keywords: ["CODE", "VITESSE", "EXPLORATION"],
-    logoSrc: "/marketing/agents-logos/kimi.svg",
-    logoAlt: "Logo Kimi",
+    id: "improvement",
+    name: "IA d’amélioration",
+    role: "Affiner l’expérience et préparer les prochaines versions.",
+    strengths: ["CLARTÉ", "FLUIDITÉ", "PROGRESSION"],
   },
-  {
-    id: "glm",
-    name: "Famille GLM",
-    models: ["GLM 5.2"],
-    role: "Soutien technique, options complémentaires",
-    keywords: ["SOUTIEN", "OPTIONS"],
-    logoSrc: "/marketing/agents-logos/glm.svg",
-    logoAlt: "Logo GLM / Zhipu",
-  },
-];
-
-type Step = {
-  id: string;
-  label: string;
-  desc: string;
-  families: FamilyId[];
-};
-
-const STEPS: Step[] = [
-  { id: "idee", label: "Idée", desc: "Clarifier l’ambition et les besoins.", families: ["claude"] },
-  {
-    id: "cadrage",
-    label: "Cadrage",
-    desc: "Structurer, prioriser et définir la solution.",
-    families: ["claude", "gpt"],
-  },
-  {
-    id: "ui",
-    label: "UI / UX",
-    desc: "Explorer, concevoir et affiner l’interface.",
-    families: ["gemini"],
-  },
-  {
-    id: "code",
-    label: "Code",
-    desc: "Développer, intégrer et automatiser.",
-    families: ["gpt", "kimi"],
-  },
-  {
-    id: "tests",
-    label: "Tests",
-    desc: "Vérifier, corriger et sécuriser.",
-    families: ["gpt", "grok", "glm"],
-  },
-  {
-    id: "amelioration",
-    label: "Amélioration",
-    desc: "Optimiser, itérer et faire évoluer.",
-    families: ["claude", "gemini", "gpt"],
-  },
-];
-
-const POINTS = [
-  "La bonne famille au bon moment",
-  "Des agents complémentaires",
-  "Moins d’itérations, plus de précision",
 ] as const;
 
-function familyById(id: FamilyId) {
-  return FAMILIES.find((f) => f.id === id)!;
-}
+const STEPS = [
+  {
+    label: "Idée",
+    desc: "Clarifier le besoin et le résultat attendu.",
+    agents: ["conception"] satisfies AgentId[],
+  },
+  {
+    label: "Cadrage",
+    desc: "Choisir les priorités et organiser le projet.",
+    agents: ["conception", "structure"] satisfies AgentId[],
+  },
+  {
+    label: "Interface",
+    desc: "Donner une forme claire et cohérente à l’idée.",
+    agents: ["structure", "creation"] satisfies AgentId[],
+  },
+  {
+    label: "Construction",
+    desc: "Créer les écrans et les fonctions utiles.",
+    agents: ["creation"] satisfies AgentId[],
+  },
+  {
+    label: "Tests",
+    desc: "Vérifier le parcours et corriger les blocages.",
+    agents: ["verification"] satisfies AgentId[],
+  },
+  {
+    label: "Amélioration",
+    desc: "Affiner le résultat et organiser la suite.",
+    agents: ["verification", "improvement"] satisfies AgentId[],
+  },
+] as const;
 
-/** Section signature — orchestration des familles d’agents IA. */
+/** Section publique : valeur de l’orchestration, sans exposer la recette technique. */
 export function HomeAgentsFamilies() {
-  const rootRef = useRef<HTMLElement | null>(null);
-  const [entered, setEntered] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
-  const [hoveredFamily, setHoveredFamily] = useState<FamilyId | null>(null);
-  const [autoPlay, setAutoPlay] = useState(true);
-  const reduceMotion = useRef(false);
-
-  useEffect(() => {
-    reduceMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const el = rootRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) setEntered(true);
-      },
-      { threshold: 0.16 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!entered || !autoPlay || reduceMotion.current) return;
-    const id = window.setInterval(() => {
-      setActiveStep((s) => (s + 1) % STEPS.length);
-    }, 3200);
-    return () => window.clearInterval(id);
-  }, [entered, autoPlay]);
-
-  const litFamilies = new Set<FamilyId>(
-    hoveredFamily ? [hoveredFamily] : (STEPS[activeStep]?.families ?? []),
-  );
-
-  const litSteps = new Set(
-    hoveredFamily
-      ? STEPS.filter((s) => s.families.includes(hoveredFamily)).map((s) => s.id)
-      : [STEPS[activeStep]?.id],
-  );
-
-  const currentStep = STEPS[activeStep]!;
+  const currentStep = STEPS[activeStep] ?? STEPS[0];
+  const activeAgents = new Set<AgentId>(currentStep.agents);
 
   return (
-    <section
-      ref={rootRef}
-      id="agents"
-      className={`${styles.scene}${entered ? ` ${styles.entered}` : ""}`}
-      aria-labelledby="agents-heading"
-    >
+    <section id="agents" className={styles.scene} aria-labelledby="agents-heading">
       <div className={styles.bg} aria-hidden>
         <Image
           src="/marketing/agents-families-bg-2560.jpg"
           alt=""
           fill
           sizes="100vw"
-          quality={88}
+          quality={75}
           className={styles.bgImg}
         />
         <div className={styles.bgVeil} />
       </div>
 
       <div className={styles.shell}>
-        {/* A — Intro */}
-        <div className={styles.actIntro}>
-          <div className={styles.copy}>
+        <header className={styles.header}>
+          <div>
             <p className={styles.eyebrow}>Intelligence collective</p>
             <h2 id="agents-heading" className={styles.title}>
-              <span className={styles.titleLine}>Les familles d’agents IA</span>
-              <span className={styles.titleLine}>que nous activons</span>
-              <span className={`${styles.titleLine} ${styles.titleGradient}`}>
-                selon votre projet.
-              </span>
+              Plusieurs intelligences spécialisées.
+              <span>Une seule direction&nbsp;: votre projet.</span>
             </h2>
-
-            <p className={styles.lead}>
-              Nous ne mobilisons pas les mêmes intelligences pour tout faire.
-              Selon ce que vous voulez créer, nous activons les familles les plus
-              adaptées au cadrage, à l’interface, au développement, aux corrections
-              et à l’optimisation.
-            </p>
-
-            <ul className={styles.points}>
-              {POINTS.map((title) => (
-                <li key={title}>
-                  <span className={styles.pointMark} aria-hidden />
-                  <strong>{title}</strong>
-                </li>
-              ))}
-            </ul>
           </div>
+          <p className={styles.lead}>
+            Chaque étape ne demande pas la même expertise. BeWork vous apprend à mobiliser
+            la bonne intelligence pour concevoir, structurer, créer, vérifier et améliorer —
+            sans transformer la formation en cours technique.
+          </p>
+        </header>
 
-          {/* B — Familles */}
-          <div className={styles.grid} role="list">
-            {FAMILIES.map((family, i) => {
-              const lit = litFamilies.has(family.id);
-              return (
-                <article
-                  key={family.id}
-                  role="listitem"
-                  className={`${styles.card} ${styles[`card_${family.id}`]}${
-                    lit ? ` ${styles.cardLit}` : ""
-                  }`}
-                  style={{ ["--stagger" as string]: `${80 + i * 60}ms` }}
-                  onMouseEnter={() => {
-                    setHoveredFamily(family.id);
-                    setAutoPlay(false);
-                  }}
-                  onMouseLeave={() => setHoveredFamily(null)}
-                  onFocus={() => {
-                    setHoveredFamily(family.id);
-                    setAutoPlay(false);
-                  }}
-                  onBlur={() => setHoveredFamily(null)}
-                  tabIndex={0}
-                >
-                  <header className={styles.cardHead}>
-                    <span className={styles.cardLogo}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={family.logoSrc} alt={family.logoAlt} width={28} height={28} />
-                    </span>
-                    <h3 className={styles.cardName}>{family.name}</h3>
-                  </header>
-                  <div className={styles.pills}>
-                    {family.models.map((m) => (
-                      <span key={m} className={styles.pill}>
-                        {m}
-                      </span>
-                    ))}
-                  </div>
-                  <p className={styles.cardRole}>{family.role}</p>
-                  <p className={styles.cardKeys}>{family.keywords.join(" · ")}</p>
-                </article>
-              );
-            })}
-          </div>
+        <div className={styles.agentGrid} role="list">
+          {AGENTS.map((agent, index) => {
+            const active = activeAgents.has(agent.id);
+            return (
+              <article
+                key={agent.id}
+                role="listitem"
+                className={`${styles.agentCard}${active ? ` ${styles.agentCardActive}` : ""}`}
+              >
+                <span className={styles.agentIndex} aria-hidden>
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3>{agent.name}</h3>
+                <p>{agent.role}</p>
+                <ul aria-label={`Points forts — ${agent.name}`}>
+                  {agent.strengths.map((strength) => (
+                    <li key={strength}>{strength}</li>
+                  ))}
+                </ul>
+              </article>
+            );
+          })}
         </div>
 
-        {/* C — Orchestration */}
-        <div className={styles.actOrch}>
-          <div className={styles.orchHeader}>
-            <p className={styles.orchEyebrow}>Orchestration</p>
-            <h3 className={styles.orchTitle}>
-              Un projet, plusieurs étapes,
-              <br />
-              les bonnes familles.
-            </h3>
-            <p className={styles.orchHint} aria-live="polite">
+        <div className={styles.orchestration}>
+          <div className={styles.orchestrationHead}>
+            <div>
+              <p className={styles.orchestrationEyebrow}>Une progression lisible</p>
+              <h3>Les bonnes intelligences, au bon moment.</h3>
+            </div>
+            <p className={styles.currentStep} aria-live="polite">
               <strong>{currentStep.label}</strong>
               <span>{currentStep.desc}</span>
             </p>
           </div>
 
-          <div className={styles.timelineWrap}>
-            <div className={styles.timelineTrack} aria-hidden>
-              <span
-                className={styles.timelineProgress}
-                style={{ ["--progress" as string]: `${(activeStep / (STEPS.length - 1)) * 100}%` }}
-              />
-            </div>
-            <ol className={styles.timeline} aria-label="Parcours pédagogique">
-              {STEPS.map((step, i) => {
-                const linked = litSteps.has(step.id);
-                const selected = activeStep === i;
-                return (
-                  <li key={step.id} className={styles.step}>
-                    <button
-                      type="button"
-                      className={`${styles.stepBtn}${linked ? ` ${styles.stepLinked}` : ""}${
-                        selected ? ` ${styles.stepSelected}` : ""
-                      }`}
-                      aria-pressed={selected}
-                      onClick={() => {
-                        setActiveStep(i);
-                        setAutoPlay(false);
-                      }}
-                    >
-                      <span className={styles.stepNum}>{String(i + 1).padStart(2, "0")}</span>
-                      <span className={styles.stepDot} aria-hidden />
-                      <span className={styles.stepLabel}>{step.label}</span>
-                      <span className={styles.stepFamilies}>
-                        {step.families.map((fid) => {
-                          const fam = familyById(fid);
-                          return (
-                            <span
-                              key={fid}
-                              className={`${styles.miniLogo}${
-                                litFamilies.has(fid) ? ` ${styles.miniLit}` : ""
-                              }`}
-                            >
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={fam.logoSrc} alt="" width={14} height={14} />
-                            </span>
-                          );
-                        })}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
+          <ol className={styles.timeline} aria-label="Étapes d’un projet">
+            {STEPS.map((step, index) => {
+              const selected = activeStep === index;
+              return (
+                <li key={step.label}>
+                  <button
+                    type="button"
+                    aria-pressed={selected}
+                    className={`${styles.stepButton}${selected ? ` ${styles.stepButtonActive}` : ""}`}
+                    onClick={() => setActiveStep(index)}
+                  >
+                    <span className={styles.stepNumber}>{String(index + 1).padStart(2, "0")}</span>
+                    <span className={styles.stepDot} aria-hidden />
+                    <span>{step.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
         </div>
 
-        <div className={styles.statement}>
-          <div className={styles.statementBody}>
-            <p className={styles.statementLead}>
-              Nous n’utilisons pas un seul agent pour tout faire.
-            </p>
-            <p className={styles.statementAccent}>
-              Nous activons la bonne famille selon la nature de ce que vous voulez créer.
-            </p>
-          </div>
-          <ul className={styles.statementAside}>
-            <li>Bons agents</li>
-            <li>Bonnes étapes</li>
-            <li>Meilleurs résultats</li>
-          </ul>
-        </div>
-
-        <p className={styles.secondaryLink}>
-          <Link href="/demonstrations">Découvrir ce qu’il est possible de créer →</Link>
-        </p>
+        <footer className={styles.footer}>
+          <p>
+            Vous gardez la vision et les décisions.
+            <strong> Les intelligences spécialisées vous aident à avancer avec méthode.</strong>
+          </p>
+          <Link href="/demonstrations">Voir des résultats concrets →</Link>
+        </footer>
       </div>
     </section>
   );

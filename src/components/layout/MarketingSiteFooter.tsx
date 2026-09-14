@@ -104,7 +104,7 @@ export function MarketingSiteFooter() {
                 </li>
                 <li>
                   <Link href="/tarifs" className={COL_LINK}>
-                    Tarif de la session
+                    Parcours et tarifs
                   </Link>
                 </li>
                 <li>
@@ -142,8 +142,8 @@ export function MarketingSiteFooter() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blog" className={COL_LINK}>
-                    Blog
+                  <Link href="/formation#programme" className={COL_LINK}>
+                    Programme
                   </Link>
                 </li>
               </ul>

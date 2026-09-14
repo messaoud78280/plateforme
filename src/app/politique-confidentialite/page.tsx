@@ -135,38 +135,31 @@ export default function PolitiqueConfidentialitePage() {
         gestion des formulaires, à la prise de contact ou au suivi commercial. Aucune donnée personnelle n’est vendue à des tiers.
       </p>
 
-      <h2>7. Outils techniques</h2>
+      <h2>7. Prestataires techniques</h2>
       <p>
-        Les données peuvent être traitées via des prestataires techniques strictement nécessaires au fonctionnement du site et des services associés,
-        selon la configuration effectivement déployée.
+        Les données peuvent être traitées par des prestataires strictement nécessaires au fonctionnement du site et
+        des services associés, dans la limite de leurs missions.
       </p>
-      <p>
-        Selon la configuration effectivement déployée en production, les traitements techniques peuvent notamment
-        impliquer&nbsp;:
-      </p>
+      <p>Selon les fonctionnalités utilisées, ces traitements peuvent notamment concerner&nbsp;:</p>
       <ul>
         <li>
-          <strong>Base de données</strong> (comptes, données métier)&nbsp;: PostgreSQL (Prisma). Lorsque les variables
-          d&apos;environnement pointent vers ce prestataire, l&apos;hébergement de base peut être assuré via{" "}
-          <strong>Supabase</strong>.
+          <strong>l’hébergement et le stockage sécurisé</strong> des comptes, demandes et données nécessaires au
+          service&nbsp;;
         </li>
         <li>
-          <strong>Envoi d&apos;e-mails transactionnels</strong>&nbsp;: <strong>Brevo</strong> (API), lorsque les clés et
-          paramètres d&apos;expéditeur sont configurés.
+          <strong>l’envoi d’e-mails transactionnels</strong> et de notifications liées à une demande&nbsp;;
         </li>
         <li>
-          <strong>Formulaire de contact</strong>&nbsp;: les demandes saisies sur le site sont enregistrées dans la base
-          BeWork et traitées par l&apos;équipe (voir finalités ci-dessus).
+          <strong>la gestion des formulaires</strong>, dont les informations sont enregistrées puis traitées par
+          l’équipe BeWork&nbsp;;
         </li>
         <li>
-          <strong>Authentification</strong> des espaces connectés&nbsp;: <strong>NextAuth.js</strong> (cookies de
-          session).
+          <strong>l’authentification et la sécurisation</strong> des espaces connectés&nbsp;;
         </li>
         <li>
-          <strong>Fonctions d&apos;intelligence artificielle</strong> (lorsque activées)&nbsp;: appels à des API de
-          modèles de langage (notamment OpenAI) pour certaines fonctionnalités métier de la plateforme. Les données
-          transmises dépendent de la fonction utilisée ; les utilisateurs restent responsables de ne pas y inclure de
-          données inutiles.
+          <strong>certaines fonctions d’intelligence artificielle</strong>, lorsqu’elles sont activées. Seules les
+          données utiles à la fonction demandée doivent être transmises&nbsp;; les utilisateurs restent responsables
+          de ne pas y inclure d’informations inutiles.
         </li>
       </ul>
       <p>

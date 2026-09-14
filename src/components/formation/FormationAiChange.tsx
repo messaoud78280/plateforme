@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import styles from "./FormationAiChange.module.css";
+import { useFormationReveal } from "./useFormationReveal";
 
 const ACTIONS: { label: string; tone: string; icon: ReactNode }[] = [
   {
@@ -151,46 +152,15 @@ const BENEFITS = [
 
 /** Ce que l’IA change — composition premium + animations. */
 export function FormationAiChange() {
-  const rootRef = useRef<HTMLElement | null>(null);
-  const [ready, setReady] = useState(false);
-  const [ambient, setAmbient] = useState(false);
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setReduced(prefersReduced);
-    const el = rootRef.current;
-    if (!el) return;
-
-    if (prefersReduced) {
-      setReady(true);
-      return;
-    }
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setReady(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.16 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!ready || reduced) return;
-    const t = window.setTimeout(() => setAmbient(true), 800);
-    return () => window.clearTimeout(t);
-  }, [ready, reduced]);
+  const { rootRef, ready, ambient } = useFormationReveal({
+    threshold: 0.16,
+    ambientDelayMs: 800,
+  });
 
   const rootClass = [
     styles.section,
     ready ? styles.ready : "",
     ambient ? styles.ambient : "",
-    reduced ? styles.reduced : "",
   ]
     .filter(Boolean)
     .join(" ");

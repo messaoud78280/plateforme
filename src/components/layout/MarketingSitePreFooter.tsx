@@ -108,7 +108,7 @@ export function MarketingSitePreFooter() {
           fill
           priority={false}
           sizes="100vw"
-          quality={90}
+          quality={75}
           className={styles.bgImg}
         />
       </div>
@@ -125,10 +125,9 @@ export function MarketingSitePreFooter() {
               <span className={styles.titleAccent}>une vraie forme.</span>
             </h2>
             <p className={styles.lead}>
-              En une journée, découvrez comment transformer une idée en premier projet
-              concret&nbsp;: site, application, outil interne ou système de réservation.
-              Sans savoir coder, vous repartez avec une méthode claire, des bases solides
-              et une direction pour continuer.
+              En 7&nbsp;h, apprenez à transformer une idée en premier projet concret.
+              Prolongez à 14&nbsp;h si vous souhaitez pratiquer davantage et construire plus loin.
+              Dans les deux cas, vous repartez avec une méthode claire pour continuer.
             </p>
 
             <div className={styles.ctaRow}>
@@ -137,7 +136,7 @@ export function MarketingSitePreFooter() {
                 className={styles.ctaPrimary}
                 {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "prefooter-participer")}
               >
-                Découvrir la journée <span aria-hidden>→</span>
+                Découvrir la formation <span aria-hidden>→</span>
               </Link>
               <Link href="/demonstrations" className={styles.ctaSecondary}>
                 Voir les démonstrations <span aria-hidden>→</span>
@@ -152,8 +151,8 @@ export function MarketingSitePreFooter() {
                   </svg>
                 </span>
                 <span className={styles.reassureText}>
-                  <strong>Une journée</strong>
-                  <span>100&nbsp;% pratique</span>
+                  <strong>7 h ou 14 h</strong>
+                  <span>Un parcours progressif</span>
                 </span>
               </div>
               <div className={styles.reassureItem}>

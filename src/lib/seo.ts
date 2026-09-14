@@ -2,6 +2,7 @@
  * Constantes et helpers SEO / GEO / AEO partagés (titres, définitions citables par les IA, métadonnées).
  */
 import { BEWORK_AEO_DEFINITION, BEWORK_BRAND_SIGNATURE } from "@/lib/seo-keywords";
+import { TRAINING_OFFERS } from "@/lib/bework-formation";
 export { BEWORK_VALUE_PILLAR_LABELS, BEWORK_VALUE_PILLARS } from "@/lib/bework-value-pillars";
 export { buildTarifsPageJsonLd, buildLlmsTarifsOffersSection, TARIFS_SEO_DESCRIPTION, TARIFS_SEO_TITLE } from "@/lib/seo-tarifs";
 export type { BeWorkValuePillar } from "@/lib/bework-value-pillars";
@@ -54,7 +55,7 @@ export type GeoAeoBriefItem = { question: string; answer: string };
 export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBriefItem[] {
   const priceHint = priceFromLabel
     ? ` Tarifs publics : à partir de ${priceFromLabel} € / participant (7 h), parcours 14 h disponible.`
-    : " Tarifs publics : 300 € (7 h) ou 600 € (14 h) par participant.";
+    : ` Tarifs publics : ${TRAINING_OFFERS.essential.price} € (${TRAINING_OFFERS.essential.hours} h) ou ${TRAINING_OFFERS.complete.price} € (${TRAINING_OFFERS.complete.hours} h) par participant.`;
 
   return [
     {
@@ -79,7 +80,7 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
     {
       question: "Pourquoi faire confiance à BeWork ?",
       answer:
-        "Promesse claire et bornée : une journée pour apprendre à créer, pas pour vendre un logiciel. Démos en données fictives. Aucun avis, note ou volume clients inventé. La méthode détaillée se transmet en session, pas en page publique.",
+        "Promesse claire et bornée : 7 h pour apprendre à commencer, 14 h pour pratiquer davantage — pas pour devenir expert instantanément. Démos en données fictives. Aucun avis, note ou volume clients inventé.",
     },
     {
       question: "Combien coûte BeWork ?",
@@ -93,7 +94,7 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
     {
       question: "Faut-il savoir coder pour BeWork ?",
       answer:
-        "Non. La journée est conçue pour des débutants. Vous apprenez à créer avec l’IA ; vous ne suivez pas une formation développeur.",
+        "Non. Les deux parcours sont conçus pour des débutants. Vous apprenez à créer avec l’IA ; vous ne suivez pas une formation développeur.",
     },
   ] as const;
 }

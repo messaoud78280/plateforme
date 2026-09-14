@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useRef, useState, type KeyboardEvent } from "react";
 import {
   BW_CARD,
   BW_EYEBROW,
@@ -14,7 +14,33 @@ export function HomeMetierSelector() {
   const [activeId, setActiveId] = useState<(typeof METIER_SELECTOR)[number]["id"]>(
     METIER_SELECTOR[0].id,
   );
+  const tabsId = useId();
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const active = METIER_SELECTOR.find((m) => m.id === activeId) ?? METIER_SELECTOR[0];
+
+  const selectByIndex = (index: number) => {
+    const next = (index + METIER_SELECTOR.length) % METIER_SELECTOR.length;
+    const item = METIER_SELECTOR[next];
+    if (!item) return;
+    setActiveId(item.id);
+    window.requestAnimationFrame(() => tabRefs.current[next]?.focus());
+  };
+
+  const onTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      event.preventDefault();
+      selectByIndex(index + 1);
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      event.preventDefault();
+      selectByIndex(index - 1);
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      selectByIndex(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      selectByIndex(METIER_SELECTOR.length - 1);
+    }
+  };
 
   return (
     <section
@@ -41,16 +67,23 @@ export function HomeMetierSelector() {
           role="tablist"
           aria-label="Choisir un métier"
         >
-          {METIER_SELECTOR.map((m) => {
+          {METIER_SELECTOR.map((m, index) => {
             const selected = m.id === activeId;
             return (
               <button
                 key={m.id}
+                ref={(node) => {
+                  tabRefs.current[index] = node;
+                }}
+                id={`${tabsId}-${m.id}-tab`}
                 type="button"
                 role="tab"
                 aria-selected={selected}
+                aria-controls={`${tabsId}-panel`}
+                tabIndex={selected ? 0 : -1}
                 onClick={() => setActiveId(m.id)}
-                className={`rounded-full border px-3.5 py-2 text-xs font-semibold transition sm:text-sm ${
+                onKeyDown={(event) => onTabKeyDown(event, index)}
+                className={`min-h-11 rounded-full border px-3.5 py-2 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb] sm:text-sm ${
                   selected
                     ? "border-[#2563eb] bg-[#2563eb] text-white shadow-[0_8px_20px_rgba(37,99,235,0.25)]"
                     : "border-slate-200 bg-white/80 text-slate-600 hover:border-slate-300 hover:text-slate-900"
@@ -63,19 +96,20 @@ export function HomeMetierSelector() {
         </div>
 
         <div
+          id={`${tabsId}-panel`}
           role="tabpanel"
+          aria-labelledby={`${tabsId}-${active.id}-tab`}
           key={active.id}
-          className={`${BW_CARD} mt-6 p-5 motion-safe:animate-[home-fade-up_0.45s_ease-out_both] sm:mt-8 sm:p-7`}
+          className={`${BW_CARD} mt-6 min-h-[15rem] p-5 motion-safe:animate-[home-fade-up_0.32s_ease-out_both] motion-reduce:animate-none sm:mt-8 sm:min-h-[13rem] sm:p-7`}
         >
           <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
             {active.label} — pistes possibles
           </p>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {active.ideas.map((idea, i) => (
+            {active.ideas.map((idea) => (
               <li
                 key={idea}
                 className="rounded-2xl border border-slate-100 bg-[#f8fafc] px-4 py-4"
-                style={{ animationDelay: `${i * 40}ms` }}
               >
                 <span className="mb-2 block h-1.5 w-8 rounded-full bg-[#2563eb]/70" aria-hidden />
                 <span className="text-sm font-bold text-slate-900">{idea}</span>

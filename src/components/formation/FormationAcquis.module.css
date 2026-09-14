@@ -318,3 +318,16 @@
     margin-inline: auto;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .fromRight {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .visualPhoto {
+    animation: none !important;
+  }
+}

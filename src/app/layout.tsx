@@ -24,7 +24,6 @@ import {
   SEO_OG_LOCALE_PRIMARY,
   hreflangFrancophonieLanguages,
 } from "@/lib/seo-francophonie";
-import { beworkCourseJsonLd } from "@/lib/seo-formation-pages";
 import { absoluteUrl, getOrgSameAs, SITE_URL } from "@/lib/site";
 const defaultOgImage = absoluteUrl("/opengraph-image");
 const defaultLogoImage = absoluteUrl("/icon-512.png");
@@ -240,7 +239,6 @@ const jsonLd = {
           "Entrepreneurs, artisans, indépendants, TPE/PME, porteurs de projet et professionnels curieux de l’IA qui veulent apprendre à créer sans prérequis en programmation",
       },
     },
-    beworkCourseJsonLd({ description: BEWORK_AEO_DEFINITION }),
   ],
 };
 

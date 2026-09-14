@@ -62,7 +62,7 @@ export function DemoShell({ title, description, children, marketingChrome = true
             href="/formation"
             className="mt-4 inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#2458E8,#1760FF)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(39,91,232,0.22)]"
           >
-            Découvrir la journée BeWork →
+            Découvrir la formation →
           </Link>
         </div>
 

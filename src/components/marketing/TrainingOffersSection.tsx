@@ -15,20 +15,31 @@ type Props = {
   analyticsPrefix?: string;
   /** Lien CTA cartes (défaut /contact#participer). */
   ctaHref?: string;
+  /** Niveau du titre principal selon le contexte de page. */
+  headingLevel?: "h1" | "h2";
 };
+
+function withOfferSelection(href: string, offerId: TrainingOfferId): string {
+  const [pathAndQuery, hash] = href.split("#");
+  const separator = pathAndQuery?.includes("?") ? "&" : "?";
+  return `${pathAndQuery ?? href}${separator}parcours=${offerId}${hash ? `#${hash}` : ""}`;
+}
 
 function OfferCard({
   offer,
   featured,
   href,
   analyticsPrefix,
+  headingLevel,
 }: {
   offer: TrainingOffer;
   featured?: boolean;
   href: string;
   analyticsPrefix: string;
+  headingLevel: "h2" | "h3";
 }) {
-  const offerId = offer.id as TrainingOfferId;
+  const offerId: TrainingOfferId = offer.id;
+  const Heading = headingLevel;
   return (
     <article
       className={`${styles.card}${featured ? ` ${styles.cardFeatured}` : ""}`}
@@ -39,9 +50,9 @@ function OfferCard({
       ) : null}
 
       <p className={styles.cardLabel}>{offer.label}</p>
-      <h3 id={`offer-${offerId}-title`} className={styles.cardTitle}>
+      <Heading id={`offer-${offerId}-title`} className={styles.cardTitle}>
         {offer.title}
-      </h3>
+      </Heading>
 
       <div className={styles.meta}>
         <p className={styles.hours}>
@@ -88,7 +99,11 @@ export function TrainingOffersSection({
   id = "tarif",
   analyticsPrefix = "tarif",
   ctaHref = "/contact#participer",
+  headingLevel = "h2",
 }: Props) {
+  const Heading = headingLevel;
+  const cardHeadingLevel = headingLevel === "h1" ? "h2" : "h3";
+
   return (
     <section id={id} className={styles.section} aria-labelledby="parcours-heading">
       <div className={styles.haloA} aria-hidden />
@@ -97,12 +112,12 @@ export function TrainingOffersSection({
       <div className={styles.shell}>
         <header className={styles.head}>
           <p className={styles.eyebrow}>Choisissez votre parcours</p>
-          <h2 id="parcours-heading" className={styles.title}>
+          <Heading id="parcours-heading" className={styles.title}>
             <span className={styles.titleLine}>Un même point de départ.</span>
             <span className={`${styles.titleLine} ${styles.titleAccent}`}>
               À vous de choisir jusqu’où aller.
             </span>
-          </h2>
+          </Heading>
           <p className={styles.lead}>
             Commencez tous par la même première journée, puis poursuivez si vous souhaitez
             approfondir et construire davantage.
@@ -112,14 +127,16 @@ export function TrainingOffersSection({
         <div className={styles.grid}>
           <OfferCard
             offer={TRAINING_OFFERS.essential}
-            href={ctaHref}
+            href={withOfferSelection(ctaHref, "essential")}
             analyticsPrefix={analyticsPrefix}
+            headingLevel={cardHeadingLevel}
           />
           <OfferCard
             offer={TRAINING_OFFERS.complete}
             featured
-            href={ctaHref}
+            href={withOfferSelection(ctaHref, "complete")}
             analyticsPrefix={analyticsPrefix}
+            headingLevel={cardHeadingLevel}
           />
         </div>
 

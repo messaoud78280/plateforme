@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
 import styles from "./FormationWhy.module.css";
+import { useFormationReveal } from "./useFormationReveal";
 
 const BEFORE = [
   "J’ai une idée",
@@ -24,46 +24,15 @@ const TODAY = [
 
 /** Pourquoi cette journée — scène visuelle + entrée animée (comme Formats). */
 export function FormationWhy() {
-  const rootRef = useRef<HTMLElement | null>(null);
-  const [ready, setReady] = useState(false);
-  const [ambient, setAmbient] = useState(false);
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setReduced(prefersReduced);
-    const el = rootRef.current;
-    if (!el) return;
-
-    if (prefersReduced) {
-      setReady(true);
-      return;
-    }
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setReady(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.18 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!ready || reduced) return;
-    const t = window.setTimeout(() => setAmbient(true), 900);
-    return () => window.clearTimeout(t);
-  }, [ready, reduced]);
+  const { rootRef, ready, ambient } = useFormationReveal({
+    threshold: 0.18,
+    ambientDelayMs: 900,
+  });
 
   const rootClass = [
     styles.section,
     ready ? styles.ready : "",
     ambient ? styles.ambient : "",
-    reduced ? styles.reduced : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -88,7 +57,6 @@ export function FormationWhy() {
               height={2728}
               sizes="(max-width: 768px) 96vw, min(1180px, 92vw)"
               className={styles.scene}
-              unoptimized
               aria-hidden
             />
           </div>

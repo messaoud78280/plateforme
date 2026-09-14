@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { BwAtmosphere } from "@/components/home/BwAtmosphere";
 import { HomeHeroCollage } from "@/components/home/HomeHeroCollage";
@@ -8,8 +6,8 @@ import styles from "./HomePlatformHero.module.css";
 
 const TRUST = [
   {
-    title: "Des outils concrets",
-    subtitle: "Testés et approuvés",
+    title: "Une pratique concrète",
+    subtitle: "Vous manipulez",
     icon: (
       <path
         strokeLinecap="round"
@@ -20,8 +18,8 @@ const TRUST = [
     ),
   },
   {
-    title: "Un accompagnement",
-    subtitle: "Par des experts terrain",
+    title: "Un accompagnement direct",
+    subtitle: "En petit groupe",
     icon: (
       <path
         strokeLinecap="round"
@@ -32,8 +30,8 @@ const TRUST = [
     ),
   },
   {
-    title: "Des résultats réels",
-    subtitle: "Dès la fin de la journée",
+    title: "Une première création",
+    subtitle: "Dès le Jour 1",
     icon: (
       <path
         strokeLinecap="round"
@@ -78,29 +76,17 @@ export function HomePlatformHero() {
             <ul className="mt-5 max-w-lg space-y-2.5 text-[0.95rem] leading-snug text-[#64748b] sm:mt-6 sm:text-[1rem]">
               <li>
                 <span className="font-bold text-[#0B0D12]">1 journée (7&nbsp;h)</span>
-                {" "}
-                pour découvrir la méthode, prendre les outils en main et lancer un premier projet.
+                {" — "}
+                apprendre à commencer et lancer un premier projet.
               </li>
               <li>
                 <span className="font-bold text-[#0B0D12]">2 journées (14&nbsp;h)</span>
-                {" "}
-                pour aller plus loin, structurer votre approche et construire un projet plus complet.
+                {" — "}
+                approfondir et construire plus loin.
               </li>
             </ul>
 
-            <p className="mt-5 max-w-lg text-base leading-relaxed text-[#42526B] sm:mt-6 sm:text-[1.05rem] md:text-[1.125rem]">
-              Aucune connaissance particulière en informatique n’est nécessaire.
-              Nous vous transmettons les bons outils, les bons réflexes et une méthode
-              simple pour transformer vos idées en projets concrets.
-            </p>
-
-            <p className="mt-5 max-w-lg text-[0.95rem] font-semibold leading-snug tracking-tight text-[#1a1f2a] sm:mt-6 sm:text-base">
-              Vous partez de zéro.
-              <br />
-              Vous repartez avec une méthode, des outils installés et un mini-projet fonctionnel.
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap sm:items-stretch">
+            <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-stretch">
               <Link
                 href="/formation"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#275BE8] px-6 text-[0.95rem] font-semibold text-white shadow-[0_12px_28px_rgba(39,91,232,0.32)] transition hover:bg-[#1d4ed8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#275BE8]"
@@ -121,6 +107,11 @@ export function HomePlatformHero() {
                 </span>
               </Link>
             </div>
+
+            <p className="mt-5 max-w-lg text-[0.92rem] leading-relaxed text-[#42526B] sm:mt-6 sm:text-base">
+              Aucun prérequis en programmation. Vous partez de zéro et repartez avec une
+              méthode, un environnement prêt et une première création fonctionnelle.
+            </p>
           </div>
 
           <HomeHeroCollage />

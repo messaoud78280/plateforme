@@ -7,19 +7,7 @@ import {
   BW_SECTION,
 } from "@/components/home/homeSectionStyles";
 import { BwAtmosphere } from "@/components/home/BwAtmosphere";
-import { FORMATION_FAQ } from "@/lib/bework-formation";
-
-const HOME_FAQ = FORMATION_FAQ.filter((item) =>
-  [
-    "Faut-il savoir coder ?",
-    "Est-ce adapté aux débutants ?",
-    "Quelle différence entre 7 h et 14 h ?",
-    "Puis-je commencer par 1 jour et prolonger ensuite ?",
-    "Que peut-on créer ?",
-    "Dois-je venir avec mon ordinateur ?",
-    "Que vais-je savoir faire après ?",
-  ].includes(item.q),
-);
+import { HOME_FORMATION_FAQ } from "@/lib/bework-formation";
 
 /** FAQ homepage — accordéons premium, 2 colonnes. */
 export function HomeFaqAccordion() {
@@ -52,7 +40,7 @@ export function HomeFaqAccordion() {
           </div>
 
           <div className="space-y-3">
-            {HOME_FAQ.map((item, i) => {
+            {HOME_FORMATION_FAQ.map((item, i) => {
               const isOpen = open === i;
               return (
                 <div

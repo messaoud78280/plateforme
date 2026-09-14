@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { FORMATION_ACQUIS_DAY1, FORMATION_ACQUIS_DAY2 } from "@/lib/bework-formation";
 import styles from "./FormationAcquis.module.css";
+import { useFormationReveal } from "./useFormationReveal";
 
 const ICONS_D1: ReactNode[] = [
   <svg key="bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -117,46 +118,16 @@ function AcquisGrid({
 
 /** Acquis Jour 1 / Jour 2 — deux niveaux clairement séparés. */
 export function FormationAcquis() {
-  const rootRef = useRef<HTMLElement | null>(null);
-  const [ready, setReady] = useState(false);
-  const [ambient, setAmbient] = useState(false);
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setReduced(prefersReduced);
-    const el = rootRef.current;
-    if (!el) return;
-
-    if (prefersReduced) {
-      setReady(true);
-      return;
-    }
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setReady(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.08, rootMargin: "0px 0px -6% 0px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!ready || reduced) return;
-    const t = window.setTimeout(() => setAmbient(true), 850);
-    return () => window.clearTimeout(t);
-  }, [ready, reduced]);
+  const { rootRef, ready, ambient } = useFormationReveal({
+    threshold: 0.08,
+    rootMargin: "0px 0px -6% 0px",
+    ambientDelayMs: 850,
+  });
 
   const rootClass = [
     styles.section,
     ready ? styles.ready : "",
     ambient ? styles.ambient : "",
-    reduced ? styles.reduced : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -201,7 +172,6 @@ export function FormationAcquis() {
               height={677}
               sizes="(max-width: 900px) 100vw, 42vw"
               className={styles.visualPhoto}
-              unoptimized
             />
           </div>
         </div>

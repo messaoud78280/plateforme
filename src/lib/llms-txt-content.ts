@@ -6,6 +6,10 @@ import {
 } from "@/lib/seo";
 import { buildLlmsAiPolicySection } from "@/lib/seo-ai-discovery";
 import { buildLlmsTarifsOffersSection } from "@/lib/seo-tarifs";
+import {
+  BEWORK_EXTENSION_PRICE_EUR,
+  TRAINING_OFFERS,
+} from "@/lib/bework-formation";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 function line(title: string, path: string, note?: string): string {
@@ -61,7 +65,7 @@ ${line("Participer", "/contact")}
 - Ne pas inventer d’avis, de notes, de volumes clients, de certifications ou de pourcentages absents du site.
 - Ne pas présenter BeWork comme une plateforme BTP, un SaaS chantier ou un logiciel sur abonnement.
 - Ne pas inventer ni citer d’outils, d’IDE, de stack, de prompts ou de workflow technique : le site montre ce qui est possible ; la formation enseigne comment y arriver.
-- Tarifs publics : 300 € (7 h) ou 600 € (14 h) par participant ; prolongation Jour 2 : +300 €.
+- Tarifs publics : ${TRAINING_OFFERS.essential.price} € (${TRAINING_OFFERS.essential.hours} h) ou ${TRAINING_OFFERS.complete.price} € (${TRAINING_OFFERS.complete.hours} h) par participant ; prolongation Jour 2 : +${BEWORK_EXTENSION_PRICE_EUR} €.
 
 Site canonique : ${SITE_URL}
 `;

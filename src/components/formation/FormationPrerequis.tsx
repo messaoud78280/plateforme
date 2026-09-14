@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import styles from "./FormationPrerequis.module.css";
+import { useFormationReveal } from "./useFormationReveal";
 
 const BRING = [
   "Ordinateur portable",
@@ -66,46 +67,16 @@ function CardIcon({ children, tone }: { children: ReactNode; tone: string }) {
 
 /** Prérequis — composition premium + animations. */
 export function FormationPrerequis() {
-  const rootRef = useRef<HTMLElement | null>(null);
-  const [ready, setReady] = useState(false);
-  const [ambient, setAmbient] = useState(false);
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setReduced(prefersReduced);
-    const el = rootRef.current;
-    if (!el) return;
-
-    if (prefersReduced) {
-      setReady(true);
-      return;
-    }
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setReady(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.08, rootMargin: "0px 0px -8% 0px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!ready || reduced) return;
-    const t = window.setTimeout(() => setAmbient(true), 850);
-    return () => window.clearTimeout(t);
-  }, [ready, reduced]);
+  const { rootRef, ready, ambient } = useFormationReveal({
+    threshold: 0.08,
+    rootMargin: "0px 0px -8% 0px",
+    ambientDelayMs: 850,
+  });
 
   const rootClass = [
     styles.section,
     ready ? styles.ready : "",
     ambient ? styles.ambient : "",
-    reduced ? styles.reduced : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -141,7 +112,6 @@ export function FormationPrerequis() {
               height={1752}
               sizes="(max-width: 900px) 100vw, 42vw"
               className={styles.heroPhoto}
-              unoptimized
               priority={false}
             />
           </div>
@@ -267,7 +237,6 @@ export function FormationPrerequis() {
               height={1752}
               sizes="(max-width: 900px) 100vw, 42vw"
               className={styles.visioPhoto}
-              unoptimized
             />
           </div>
 

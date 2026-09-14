@@ -7,12 +7,14 @@ import { HomeAgentsFamilies } from "@/components/home/HomeAgentsFamilies";
 import { HomeDayProgression } from "@/components/home/HomeDayProgression";
 import { HomeJourneeBlock } from "@/components/home/HomeJourneeBlock";
 import { HomeMetierSelector } from "@/components/home/HomeMetierSelector";
+import { HomeModalities } from "@/components/home/HomeModalities";
 import { HomePlatformHero } from "@/components/home/HomePlatformHero";
 import { HomePossibilitiesBento } from "@/components/home/HomePossibilitiesBento";
 import { HomePricingSession } from "@/components/home/HomePricingSession";
 import { HomeSkillsAfter } from "@/components/home/HomeSkillsAfter";
-import { FORMATION_FAQ } from "@/lib/bework-formation";
+import { HOME_FORMATION_FAQ } from "@/lib/bework-formation";
 import {
+  beworkCompleteOfferJsonLd,
   beworkCourseJsonLd,
   beworkSessionOfferJsonLd,
   breadcrumbJsonLd,
@@ -22,8 +24,6 @@ import {
 import { SITE_URL } from "@/lib/site";
 
 const home = SEO_PAGES.home;
-const HOME_FAQ_ITEMS = FORMATION_FAQ.slice(0, 7);
-
 export const metadata: Metadata = buildMarketingPageMetadata({
   path: home.path,
   title: home.absoluteTitle,
@@ -61,18 +61,18 @@ const homeJsonLd = {
     {
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#service-home`,
-      name: "BeWork — journées pratiques créer avec l’IA",
+      name: "BeWork — formation pratique pour créer avec l’IA",
       description: home.description,
       provider: { "@id": `${SITE_URL}/#organization` },
       url: SITE_URL,
-      offers: beworkSessionOfferJsonLd(),
+      offers: [beworkSessionOfferJsonLd(), beworkCompleteOfferJsonLd()],
     },
     {
       "@type": "FAQPage",
       "@id": `${SITE_URL}/#faq`,
       url: SITE_URL,
       inLanguage: "fr-FR",
-      mainEntity: HOME_FAQ_ITEMS.map((item) => ({
+      mainEntity: HOME_FORMATION_FAQ.map((item) => ({
         "@type": "Question",
         name: item.q,
         acceptedAnswer: { "@type": "Answer", text: item.a },
@@ -100,6 +100,7 @@ export default function HomePage() {
         <HomeJourneeBlock />
         <HomeDayProgression />
         <HomeSkillsAfter />
+        <HomeModalities />
         <HomePricingSession />
         <HomeFaqAccordion />
         <HomeFinalCta />

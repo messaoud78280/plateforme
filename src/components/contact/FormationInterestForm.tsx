@@ -4,6 +4,8 @@ import { useState, type FormEvent } from "react";
 import {
   IT_LEVEL_OPTIONS,
   LEARN_INTENT_OPTIONS,
+  TRAINING_OFFERS,
+  type TrainingOfferId,
 } from "@/lib/bework-formation";
 
 const INPUT_CLASS =
@@ -13,9 +15,14 @@ const CHOICE_CLASS =
   "flex cursor-pointer items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 has-[:checked]:border-[#1d4ed8]/40 has-[:checked]:bg-[#eff6ff]";
 
 /** Formulaire d’intérêt formation — POST `/api/contact` avec source `formation_interest`. */
-export function FormationInterestForm() {
+export function FormationInterestForm({
+  initialOfferId = "essential",
+}: {
+  initialOfferId?: TrainingOfferId;
+}) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [intents, setIntents] = useState<string[]>([]);
+  const [offerId, setOfferId] = useState<TrainingOfferId>(initialOfferId);
 
   function toggleIntent(value: string) {
     setIntents((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
@@ -27,6 +34,11 @@ export function FormationInterestForm() {
 
     const form = e.currentTarget;
     const data = new FormData(form);
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
     const prenom = String(data.get("prenom") ?? "").trim();
     const nom = String(data.get("nom") ?? "").trim();
     const contactName = [prenom, nom].filter(Boolean).join(" ");
@@ -35,9 +47,11 @@ export function FormationInterestForm() {
     const projectDesc = String(data.get("projectDesc") ?? "").trim();
     const intentLabels = LEARN_INTENT_OPTIONS.filter((o) => intents.includes(o.value)).map((o) => o.label);
     const itLabel = IT_LEVEL_OPTIONS.find((o) => o.value === itLevel)?.label ?? itLevel;
+    const selectedOffer = TRAINING_OFFERS[offerId];
 
     const messageParts = [
-      "Demande de place — journée BeWork",
+      "Demande de place — formation BeWork",
+      `Parcours souhaité : ${selectedOffer.label} · ${selectedOffer.hours} h · ${selectedOffer.price} €`,
       `Niveau informatique : ${itLabel || "—"}`,
       `A une idée de projet : ${hasIdea === "oui" ? "Oui" : hasIdea === "non" ? "Non" : "—"}`,
       intentLabels.length ? `Souhaite apprendre à créer : ${intentLabels.join(", ")}` : null,
@@ -75,6 +89,7 @@ export function FormationInterestForm() {
       setStatus("success");
       form.reset();
       setIntents([]);
+      setOfferId("essential");
     } catch {
       setStatus("error");
     }
@@ -95,7 +110,11 @@ export function FormationInterestForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="relative space-y-6" noValidate>
+    <form
+      onSubmit={onSubmit}
+      className="relative space-y-6"
+      aria-busy={status === "loading"}
+    >
       <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden>
         <label htmlFor="website">Site web</label>
         <input type="text" id="website" name="website" tabIndex={-1} autoComplete="off" />
@@ -143,6 +162,34 @@ export function FormationInterestForm() {
           placeholder="Ex. artisan, indépendant, dirigeant TPE…"
         />
       </div>
+
+      <fieldset>
+        <legend className={`${LABEL_CLASS} mb-3`}>
+          Parcours souhaité <span className="text-red-600">*</span>
+        </legend>
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          {Object.values(TRAINING_OFFERS).map((offer) => (
+              <label key={offer.id} className={CHOICE_CLASS}>
+                <input
+                  type="radio"
+                  name="trainingOffer"
+                  value={offer.id}
+                  checked={offerId === offer.id}
+                  onChange={() => setOfferId(offer.id)}
+                  required
+                  className="h-4 w-4 border-slate-300 text-[#1d4ed8] focus:ring-[#1d4ed8]"
+                />
+                <span>
+                  <strong className="block text-slate-900">{offer.label} · {offer.hours}&nbsp;h</strong>
+                  <span className="text-xs text-slate-500">{offer.price}&nbsp;€ par participant</span>
+                </span>
+              </label>
+            ))}
+        </div>
+        <p className="mt-2 text-xs leading-relaxed text-slate-500">
+          Vous pourrez prolonger le parcours 7&nbsp;h par une deuxième journée, sans pénalité.
+        </p>
+      </fieldset>
 
       <fieldset>
         <legend className={`${LABEL_CLASS} mb-3`}>
@@ -216,6 +263,8 @@ export function FormationInterestForm() {
             >
               <input
                 type="checkbox"
+                name="learningIntent"
+                value={o.value}
                 checked={intents.includes(o.value)}
                 onChange={() => toggleIntent(o.value)}
                 className="h-4 w-4 rounded border-slate-300 text-[#1d4ed8] focus:ring-[#1d4ed8]"

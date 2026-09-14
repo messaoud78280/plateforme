@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FormationInterestForm } from "@/components/contact/FormationInterestForm";
 import { BwAtmosphere } from "@/components/home/BwAtmosphere";
+import { TrainingOffersSection } from "@/components/marketing/TrainingOffersSection";
 import {
   HOME_BG_SOFT,
   HOME_BG_WHITE,
@@ -14,7 +15,7 @@ import {
 import {
   BEWORK_COMPLETE_PRICE_EUR,
   BEWORK_SESSION_PRICE_EUR,
-  TRAINING_OFFERS,
+  type TrainingOfferId,
 } from "@/lib/bework-formation";
 
 const LEARN_BLOCKS = [
@@ -144,25 +145,16 @@ const AUDIENCE = [
   "vous êtes simplement curieux de découvrir cette nouvelle façon de travailler",
 ] as const;
 
-const INCLUDES = [
-  "une journée complète de formation",
-  "accompagnement en petit groupe",
-  "préparation de votre environnement de travail",
-  "démonstrations en direct",
-  "exercices pratiques",
-  "travail directement sur votre ordinateur",
-  "découverte de plusieurs types de projets",
-  "accompagnement sur vos questions",
-  "réflexion autour de votre propre idée",
-  "méthode de travail réutilisable après la journée",
-] as const;
-
-/** Contenu long — présentation de la journée puis formulaire. */
-export function ParticiperPageContent() {
+/** Contenu long — présentation de la formation puis formulaire. */
+export function ParticiperPageContent({
+  initialOfferId,
+}: {
+  initialOfferId?: TrainingOfferId;
+}) {
   return (
     <>
       {/* 1. Intro */}
-      <section className={`${HOME_SECTION} ${HOME_BG_WHITE} relative overflow-hidden border-b border-[rgba(45,75,130,0.08)]`}>
+      <section className={`${HOME_SECTION} ${HOME_BG_WHITE} relative overflow-hidden`}>
         <BwAtmosphere variant="hero" />
         <div
           className="pointer-events-none absolute -left-20 top-8 h-72 w-72 rounded-full bg-[rgba(39,91,232,0.10)] blur-3xl"
@@ -170,7 +162,7 @@ export function ParticiperPageContent() {
         />
         <div className="container-site relative z-[1]">
           <div className="max-w-3xl">
-            <p className={HOME_EYEBROW}>La journée BeWork</p>
+            <p className={HOME_EYEBROW}>Formation progressive</p>
             <h1 className="mt-5 font-display text-[2.15rem] font-extrabold leading-[1.05] tracking-[-0.045em] text-[#0a0a0a] sm:text-[3rem] md:text-[3.65rem]">
               Une formation pour passer
               <br />
@@ -223,7 +215,7 @@ export function ParticiperPageContent() {
               id="apprendre-heading"
               className="mt-4 font-display text-[1.85rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0a0a0a] sm:text-[2.5rem]"
             >
-              Cette journée n’est pas
+              Cette formation n’est pas
               <br />
               un cours de programmation.
             </h2>
@@ -299,14 +291,14 @@ export function ParticiperPageContent() {
       >
         <div className="container-site">
           <div className="max-w-3xl">
-            <p className={HOME_EYEBROW}>Déroulement indicatif</p>
+            <p className={HOME_EYEBROW}>Jour 1 · parcours commun</p>
             <h2
               id="timeline-heading"
               className="mt-4 font-display text-[1.85rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0a0a0a] sm:text-[2.5rem]"
             >
               Comment se passe
               <br />
-              <span className="text-[#1d4ed8]">la journée.</span>
+              <span className="text-[#1d4ed8]">la première journée.</span>
             </h2>
           </div>
 
@@ -349,7 +341,7 @@ export function ParticiperPageContent() {
       >
         <div className="container-site">
           <div className="max-w-3xl">
-            <p className={HOME_EYEBROW}>À la fin de la journée</p>
+            <p className={HOME_EYEBROW}>Après 7 h</p>
             <h2
               id="fin-heading"
               className="mt-4 font-display text-[1.85rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0a0a0a] sm:text-[2.5rem] md:text-[3rem]"
@@ -370,7 +362,7 @@ export function ParticiperPageContent() {
 
           <div className={`${HOME_CONTENT} mx-auto max-w-3xl`}>
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
-              À la fin de la journée, vous saurez
+              À la fin du Jour 1, vous saurez
             </p>
             <ul className="mt-5 grid gap-3 sm:grid-cols-2">
               {OUTCOMES.map((item) => (
@@ -457,7 +449,7 @@ export function ParticiperPageContent() {
               id="pour-qui-heading"
               className="mt-4 font-display text-[1.85rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0a0a0a] sm:text-[2.5rem]"
             >
-              Cette journée est faite
+              Cette formation est faite
               <br />
               pour vous si…
             </h2>
@@ -487,83 +479,7 @@ export function ParticiperPageContent() {
       </section>
 
       {/* 8. Tarif */}
-      <section
-        id="tarif-journee"
-        className={`${HOME_SECTION} ${HOME_BG_SOFT}`}
-        aria-labelledby="tarif-journee-heading"
-      >
-        <div className="container-site">
-          <div className="bw-surface-tarif relative mx-auto max-w-3xl overflow-hidden rounded-[1.75rem] px-6 py-12 sm:px-10 sm:py-14">
-            <div className="relative text-center">
-              <p className={HOME_EYEBROW}>Choisissez votre parcours</p>
-              <h2
-                id="tarif-journee-heading"
-                className="mt-4 font-display text-[1.85rem] font-extrabold tracking-tight text-[#0a0a0a] sm:text-[2.5rem]"
-              >
-                Un même point de départ
-              </h2>
-              <div className="mt-8 grid gap-6 sm:grid-cols-2 sm:gap-4 text-left">
-                <div className="rounded-2xl border border-slate-200 bg-white/80 p-5">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                    {TRAINING_OFFERS.essential.label}
-                  </p>
-                  <p className="mt-2 font-display text-3xl font-extrabold tracking-tight text-[#0a0a0a]">
-                    {TRAINING_OFFERS.essential.price}&nbsp;€
-                  </p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {TRAINING_OFFERS.essential.hours}&nbsp;h · {TRAINING_OFFERS.essential.title}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-[#2563eb]/25 bg-white p-5 shadow-sm">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#2563eb]">
-                    {TRAINING_OFFERS.complete.label}
-                  </p>
-                  <p className="mt-2 font-display text-3xl font-extrabold tracking-tight text-[#0a0a0a]">
-                    {TRAINING_OFFERS.complete.price}&nbsp;€
-                  </p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {TRAINING_OFFERS.complete.hours}&nbsp;h · {TRAINING_OFFERS.complete.title}
-                  </p>
-                </div>
-              </div>
-              <p className="mt-6 text-sm leading-relaxed text-slate-600">
-                Vous pouvez commencer par 1 journée et ajouter le Jour 2 plus tard pour{" "}
-                {BEWORK_SESSION_PRICE_EUR}&nbsp;€ supplémentaires.
-              </p>
-            </div>
-
-            <div className="relative mt-12">
-              <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                Ce qui est compris
-              </p>
-              <ul className="mx-auto mt-6 max-w-lg space-y-3">
-                {INCLUDES.map((line) => (
-                  <li
-                    key={line}
-                    className="flex items-start gap-3 text-sm leading-relaxed text-slate-700 sm:text-[15px]"
-                  >
-                    <span
-                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#2563eb]"
-                      aria-hidden
-                    />
-                    {line}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-8 text-center text-[11px] font-bold uppercase tracking-[0.16em] text-[#1d4ed8]">
-                Aucun prérequis en programmation.
-              </p>
-              <p className="mx-auto mt-8 max-w-md text-center font-display text-xl font-extrabold leading-snug tracking-tight text-[#0a0a0a] sm:text-2xl">
-                Vous venez avec vos idées.
-                <br />
-                Vous repartez en sachant comment
-                <br />
-                commencer à les construire.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <TrainingOffersSection id="tarif" analyticsPrefix="contact-tarif" />
 
       {/* 9. Objectif réaliste */}
       <section
@@ -609,7 +525,7 @@ export function ParticiperPageContent() {
             >
               Participez à une prochaine
               <br />
-              journée BeWork.
+              formation BeWork.
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-slate-600 sm:text-lg">
               Indiquez-nous simplement qui vous êtes et ce que vous aimeriez
@@ -626,7 +542,7 @@ export function ParticiperPageContent() {
               Quelques informations suffisent pour un premier contact.
             </p>
             <div className="mt-8">
-              <FormationInterestForm />
+              <FormationInterestForm initialOfferId={initialOfferId} />
             </div>
           </div>
 

@@ -10,11 +10,9 @@ import { FormationHeroScene } from "./FormationHeroScene";
 export function FormationHero() {
   const [ready, setReady] = useState(false);
   const [ambient, setAmbient] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setReduceMotion(reduced);
     const start = window.requestAnimationFrame(() => setReady(true));
     let ambientTimer: number | undefined;
     if (!reduced) {
@@ -26,7 +24,7 @@ export function FormationHero() {
     };
   }, []);
 
-  const copyReady = ready || reduceMotion;
+  const copyReady = ready;
 
   return (
     <section className={styles.hero} aria-labelledby="formation-hero-title">
@@ -147,12 +145,11 @@ export function FormationHero() {
             <FormationHeroScene
               ready={ready}
               ambient={ambient}
-              reduceMotion={reduceMotion}
             />
           </div>
         </div>
 
-        <a href="#formats" className={styles.scrollHint}>
+        <a href="#modalites" className={styles.scrollHint}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
             <rect x="9" y="3" width="6" height="10" rx="3" />
             <path d="M12 6v2M8 16l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />

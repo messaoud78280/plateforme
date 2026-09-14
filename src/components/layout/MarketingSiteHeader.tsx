@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import styles from "./MarketingSiteHeader.module.css";
@@ -14,14 +13,13 @@ type Props = {
 
 const NAV_ITEMS = [
   { href: "/#hero", label: "Découvrir", match: "home" },
-  { href: "/#possibilites", label: "Possibilités", match: "possibilites" },
-  { href: "/#demonstrations", label: "Démonstrations", match: "demonstrations" },
+  { href: "/#demonstrations", label: "Possibilités", match: "demonstrations" },
+  { href: "/demonstrations", label: "Démonstrations", match: "/demonstrations" },
   { href: "/formation#programme", label: "Programme", match: "programme" },
   { href: "/#faq", label: "FAQ", match: "faq" },
 ] as const;
 
 const PLATFORM_HREF = "/dashboard";
-const LOGIN_HREF = `/connexion?callbackUrl=${encodeURIComponent(PLATFORM_HREF)}`;
 
 function cx(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -62,6 +60,9 @@ function useActiveNav() {
   }, [pathname]);
 
   return (match: (typeof NAV_ITEMS)[number]["match"]) => {
+    if (match.startsWith("/")) {
+      return pathname.startsWith(match);
+    }
     if (match === "programme") {
       return pathname.startsWith("/formation");
     }
@@ -75,14 +76,12 @@ function useActiveNav() {
 export function MarketingSiteHeader({ plainBg = false }: Props) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobilePanelRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const isActive = useActiveNav();
-  const { data: session, status } = useSession();
-  const isAuthed = status === "authenticated" && Boolean(session?.user);
-  const privateHref = isAuthed ? PLATFORM_HREF : LOGIN_HREF;
-  const privateLabel = isAuthed ? "Ma plateforme" : "Accès privé";
-  const privateAria = isAuthed
-    ? "Accéder à ma plateforme"
-    : "Accès privé — connexion à la plateforme";
+  const privateHref = PLATFORM_HREF;
+  const privateLabel = "Accès privé";
+  const privateAria = "Accès privé — connexion à la plateforme";
 
   useEffect(() => {
     const onScroll = () => {
@@ -95,19 +94,60 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
   }, []);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMobileOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+    if (!mobileOpen) return;
 
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    const panel = mobilePanelRef.current;
+    const previouslyFocused = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    const panelFocusable = panel
+      ? Array.from(
+          panel.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          ),
+        )
+      : [];
+    const focusable = menuButtonRef.current
+      ? [...panelFocusable, menuButtonRef.current]
+      : panelFocusable;
+
+    document.body.style.overflow = "hidden";
+    const focusFrame = window.requestAnimationFrame(() => panelFocusable[0]?.focus());
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+
+    window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = "";
+      window.cancelAnimationFrame(focusFrame);
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+      if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
     };
   }, [mobileOpen]);
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1180px)");
+    const closeOnDesktop = () => {
+      if (desktop.matches) setMobileOpen(false);
+    };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
+  }, []);
 
   return (
     <header className={cx(styles.root, plainBg && styles.rootPlain)}>
@@ -124,12 +164,12 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
 
               <p
                 className={styles.signature}
-                aria-label="En une journée, apprenez à créer avec l’IA. Sites, applications, outils métiers : sans savoir coder."
+                aria-label="En 1 ou 2 journées, apprenez à créer avec l’IA. Sites, applications, outils métiers : sans savoir coder."
               >
                 <span className={styles.signatureBody}>
                   <span className={styles.signaturePrimary}>
                     <span className={styles.signaturePrimaryFull}>
-                      En une journée, apprenez à créer{" "}
+                      En 1 ou 2 journées, apprenez à créer{" "}
                       <span className={styles.accent}>avec l’IA</span>.
                     </span>
                     <span className={styles.signaturePrimaryShort}>
@@ -183,6 +223,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 Participer
               </Link>
               <button
+                ref={menuButtonRef}
                 type="button"
                 className={styles.menuBtn}
                 aria-expanded={mobileOpen}
@@ -232,7 +273,11 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       </div>
 
       <div
+        ref={mobilePanelRef}
         id="marketing-mobile-nav"
+        role="dialog"
+        aria-modal={mobileOpen || undefined}
+        aria-label="Menu principal"
         className={cx(styles.mobilePanel, mobileOpen && styles.mobileOpen)}
         aria-hidden={!mobileOpen}
       >

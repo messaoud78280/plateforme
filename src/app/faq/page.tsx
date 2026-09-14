@@ -118,24 +118,6 @@ export default function FaqPage() {
             </dl>
           </div>
 
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "FAQPage",
-                "@id": `${faqUrl}#faq`,
-                url: faqUrl,
-                inLanguage: "fr-FR",
-                mainEntity: FORMATION_FAQ.map((item) => ({
-                  "@type": "Question",
-                  name: item.q,
-                  acceptedAnswer: { "@type": "Answer", text: item.a },
-                })),
-              }),
-            }}
-          />
-
           <div className="mt-16 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
             <h2 className="text-xl font-bold text-black">Une question reste en suspens&nbsp;?</h2>
             <p className="mt-3 text-slate-700">
@@ -149,7 +131,7 @@ export default function FaqPage() {
                 Voir la formation
               </Link>
               <Link href="/tarifs" className={CTA_SECONDARY}>
-                Tarif de la session
+                Comparer les parcours
               </Link>
             </div>
           </div>

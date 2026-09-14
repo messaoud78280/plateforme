@@ -110,6 +110,7 @@ export async function POST(request: NextRequest) {
   const stageLine = projectStage ? `Étape : ${labelProjectStage(projectStage)}` : "";
   const message = [stageLine, rawMessage].filter(Boolean).join("\n\n").slice(0, 2000);
   const source = String(body.source ?? "homepage_contact_form").trim().slice(0, 120) || "homepage_contact_form";
+  const isTrainingInterest = source === "formation_interest";
   const consent = body.consent === true;
   const contactName = contactNameRaw || companyName;
 
@@ -166,20 +167,20 @@ export async function POST(request: NextRequest) {
   const html = `
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Nouvelle demande de contact BeWork</title></head>
+<head><meta charset="utf-8"><title>${isTrainingInterest ? "Nouvelle demande de place BeWork" : "Nouvelle demande de contact BeWork"}</title></head>
 <body style="font-family: sans-serif; line-height: 1.5; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <h1 style="color: #0f172a;">Nouvelle demande de contact</h1>
-  <p>Une demande a été envoyée depuis le formulaire BeWork.</p>
+  <h1 style="color: #0f172a;">${isTrainingInterest ? "Nouvelle demande de place" : "Nouvelle demande de contact"}</h1>
+  <p>${isTrainingInterest ? "Une demande concerne la formation BeWork." : "Une demande a été envoyée depuis le formulaire BeWork."}</p>
 
   <ul style="list-style: none; padding: 0;">
-    <li><strong>Entreprise :</strong> ${escapeHtml(companyName)}</li>
+    ${isTrainingInterest ? "" : `<li><strong>Entreprise :</strong> ${escapeHtml(companyName)}</li>`}
     <li><strong>Contact :</strong> ${escapeHtml(contactName)}</li>
     <li><strong>Email :</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></li>
     ${phone ? `<li><strong>Téléphone :</strong> ${escapeHtml(phone)}</li>` : ""}
-    <li><strong>Effectif :</strong> ${escapeHtml(labelMarketType(marketType))}</li>
-    <li><strong>Activité :</strong> ${escapeHtml(tradeActivity || "—")}</li>
-    <li><strong>Besoin principal :</strong> ${escapeHtml(labelMainNeed(mainNeed))}</li>
-    ${projectStage ? `<li><strong>Outils actuels :</strong> ${escapeHtml(labelProjectStage(projectStage))}</li>` : ""}
+    ${isTrainingInterest ? "" : `<li><strong>Effectif :</strong> ${escapeHtml(labelMarketType(marketType))}</li>`}
+    ${tradeActivity ? `<li><strong>Activité :</strong> ${escapeHtml(tradeActivity)}</li>` : ""}
+    ${isTrainingInterest ? "" : `<li><strong>Besoin principal :</strong> ${escapeHtml(labelMainNeed(mainNeed))}</li>`}
+    ${projectStage && !isTrainingInterest ? `<li><strong>Avancement du projet :</strong> ${escapeHtml(labelProjectStage(projectStage))}</li>` : ""}
     <li><strong>Date de demande :</strong> ${escapeHtml(dateLabel)}</li>
     <li><strong>Source :</strong> ${escapeHtml(source)}</li>
   </ul>
@@ -208,7 +209,9 @@ export async function POST(request: NextRequest) {
       const r = await sendEmail({
         to: contactRecipients,
         replyTo: email,
-        subject: `[BeWork] Demande de contact – ${companyName}`,
+        subject: isTrainingInterest
+          ? `[BeWork] Demande de place – ${contactName}`
+          : `[BeWork] Demande de contact – ${companyName}`,
         html,
       });
       if (!r.ok) {

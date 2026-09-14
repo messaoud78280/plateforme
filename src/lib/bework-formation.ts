@@ -56,6 +56,24 @@ export const BEWORK_COMPLETE_PRICE_EUR = TRAINING_OFFERS.complete.price;
 /** Prolongation Jour 2 après inscription 7 h. */
 export const BEWORK_EXTENSION_PRICE_EUR = TRAINING_OFFERS.essential.price;
 
+/** Source commune des modes de participation, indépendante du parcours choisi. */
+export const TRAINING_MODALITIES = {
+  onsite: {
+    id: "onsite",
+    name: "Présentiel",
+    badge: "Recommandé",
+    description:
+      "Une expérience directe, en petit groupe, avec un accompagnement attentif tout au long de la pratique.",
+  },
+  remote: {
+    id: "remote",
+    name: "Visio",
+    badge: "Sessions dédiées",
+    description:
+      "Le même parcours pédagogique à distance, lors de sessions prévues pour faciliter les échanges et le partage d’écran.",
+  },
+} as const;
+
 /** Constante facilement modifiable — non affichée tant que non figée. */
 export const BEWORK_SESSION_MAX_PARTICIPANTS: number | null = null;
 
@@ -506,7 +524,7 @@ export const FORMATION_CHECKLIST_VISIO = [
 
 export const FORMATION_NAV = [
   { href: "#presentation", label: "Présentation" },
-  { href: "#formats", label: "Formats" },
+  { href: "#modalites", label: "Modalités" },
   { href: "#prerequis", label: "Prérequis" },
   { href: "#programme", label: "Programme" },
   { href: "#acquis", label: "Acquis" },
@@ -629,6 +647,21 @@ export const FORMATION_FAQ = [
     a: "Parce que BeWork est avant tout une formation pratique. Le site vous montre ce qu’il est possible de réaliser ; la formation vous apprend comment y parvenir.",
   },
 ] as const;
+
+const HOME_FAQ_QUESTIONS = new Set<string>([
+  "Faut-il savoir coder ?",
+  "Est-ce adapté aux débutants ?",
+  "Quelle différence entre 7 h et 14 h ?",
+  "Puis-je commencer par 1 jour et prolonger ensuite ?",
+  "Que peut-on créer ?",
+  "Dois-je venir avec mon ordinateur ?",
+  "Que vais-je savoir faire après ?",
+]);
+
+/** FAQ réellement affichée sur l’accueil — réutilisée par le JSON-LD. */
+export const HOME_FORMATION_FAQ = FORMATION_FAQ.filter((item) =>
+  HOME_FAQ_QUESTIONS.has(item.q),
+);
 
 export const LEARN_INTENT_OPTIONS = [
   { value: "site_internet", label: "Site internet" },

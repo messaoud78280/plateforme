@@ -26,11 +26,14 @@ export function HomePossibilitiesBento() {
           <p className={BW_EYEBROW}>Des exemples concrets</p>
           <h2 id="bento-heading" className={`mt-3 ${BW_H2}`}>
             Ce que vous pourrez créer{" "}
-            <span className="text-[#2563eb]">pendant la journée.</span>
+            <span className="text-[#2563eb]">pendant la formation.</span>
           </h2>
           <p className={BW_LEAD}>
             Des projets utiles, concrets et adaptés à vos besoins — guidés pas à
             pas.
+          </p>
+          <p className="mt-3 text-xs font-medium text-slate-500">
+            Interfaces et données présentées à titre illustratif.
           </p>
         </div>
 

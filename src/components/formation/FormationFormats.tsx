@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { TRAINING_MODALITIES } from "@/lib/bework-formation";
 import styles from "./FormationFormats.module.css";
+import { useFormationReveal } from "./useFormationReveal";
 
 const PRESENTIEL_BENEFITS = [
   {
@@ -96,7 +97,6 @@ function WorkshopScene() {
         height={2304}
         sizes="(max-width: 900px) 100vw, 40vw"
         className={styles.scenePhoto}
-        unoptimized
       />
     </div>
   );
@@ -112,7 +112,6 @@ function VisioScene() {
         height={2304}
         sizes="(max-width: 900px) 100vw, 40vw"
         className={styles.scenePhoto}
-        unoptimized
       />
     </div>
   );
@@ -120,38 +119,11 @@ function VisioScene() {
 
 /** Formats — présentiel recommandé + visio dédiée, même ambition. */
 export function FormationFormats() {
-  const rootRef = useRef<HTMLElement | null>(null);
-  const [ready, setReady] = useState(false);
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setReduced(prefersReduced);
-    const el = rootRef.current;
-    if (!el) return;
-
-    if (prefersReduced) {
-      setReady(true);
-      return;
-    }
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setReady(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.22 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+  const { rootRef, ready } = useFormationReveal({ threshold: 0.22 });
 
   const rootClass = [
     styles.section,
     ready ? styles.ready : "",
-    reduced ? styles.reduced : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -159,9 +131,9 @@ export function FormationFormats() {
   return (
     <section
       ref={rootRef}
-      id="formats"
+      id="modalites"
       className={rootClass}
-      aria-labelledby="formats-title"
+      aria-labelledby="modalites-title"
     >
       <div className={styles.bg} aria-hidden>
         <Image
@@ -181,7 +153,7 @@ export function FormationFormats() {
             <span className={styles.eyebrowDot} aria-hidden />
             Comment participer ?
           </p>
-          <h2 id="formats-title" className={styles.title}>
+          <h2 id="modalites-title" className={styles.title}>
             Deux façons de participer.
             <br />
             <span className={styles.gradient}>En présentiel ou à distance.</span>
@@ -198,8 +170,10 @@ export function FormationFormats() {
             style={{ ["--d" as string]: "120ms" }}
           >
             <div className={styles.cardTop}>
-              <p className={styles.optionLabel}>Option 1 — Présentiel</p>
-              <span className={styles.badge}>★ Recommandé</span>
+              <p className={styles.optionLabel}>
+                Option 1 — {TRAINING_MODALITIES.onsite.name}
+              </p>
+              <span className={styles.badge}>★ {TRAINING_MODALITIES.onsite.badge}</span>
             </div>
             <h3 className={styles.cardTitle}>
               Ensemble, ordinateur ouvert.
@@ -232,7 +206,9 @@ export function FormationFormats() {
             style={{ ["--d" as string]: "200ms" }}
           >
             <div className={styles.cardTop}>
-              <p className={styles.optionLabel}>Option 2 — Visio</p>
+              <p className={styles.optionLabel}>
+                Option 2 — {TRAINING_MODALITIES.remote.name}
+              </p>
             </div>
             <h3 className={styles.cardTitle}>
               Le même parcours.
@@ -283,7 +259,7 @@ export function FormationFormats() {
               </p>
               <p className={styles.bandSub}>
                 Vous aider à comprendre comment commencer à créer et continuer à progresser
-                après la journée.
+                après la formation.
               </p>
             </div>
           </div>

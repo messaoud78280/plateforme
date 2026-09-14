@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { CTA_GROUP, CTA_PRIMARY, CTA_SECONDARY, CTA_SOFT } from "@/components/marketing/marketingCtaStyles";
@@ -80,32 +79,31 @@ export function SeoLandingPage({
           <div className="mt-14 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
             <h2 className="font-heading text-[1.35rem] font-bold leading-snug text-black md:text-2xl">Passer à l’action</h2>
             <p className="mt-3 text-base leading-relaxed text-slate-700">
-              BeWork conçoit et fait évoluer des plateformes internes pour artisans, conducteurs de travaux et dirigeants BTP
-              en France, Belgique, Suisse et Luxembourg. Vos équipes utilisent la plateforme au quotidien ; BeWork assure
-              configuration, hébergement, sécurité et évolution.
+              BeWork vous apprend à créer avec l’IA sans savoir coder. Commencez avec le
+              parcours essentiel de 7&nbsp;h, puis poursuivez à 14&nbsp;h si vous souhaitez
+              pratiquer davantage et construire plus loin.
             </p>
             <div className={`mt-6 ${CTA_GROUP}`}>
-              <CalendlyBookingLink className={CTA_PRIMARY}>
-                <span className="sm:hidden">Demander une démo</span>
-                <span className="hidden sm:inline">Demander une démonstration</span>
-              </CalendlyBookingLink>
-              <Link href="/#plateforme" className={CTA_SECONDARY}>
-                Découvrir la plateforme
+              <Link href="/contact#participer" className={CTA_PRIMARY}>
+                Demander une place
+              </Link>
+              <Link href="/formation" className={CTA_SECONDARY}>
+                Découvrir la formation
               </Link>
               <Link href="/tarifs" className={CTA_SOFT}>
-                Voir la tarification
+                Comparer les parcours
               </Link>
-              <Link href="/notre-facon-de-travailler" className={CTA_SECONDARY}>
-                Notre façon de travailler
+              <Link href="/formation#programme" className={CTA_SECONDARY}>
+                Voir le programme
               </Link>
             </div>
             <p className="mt-5 text-sm text-slate-600">
-              <Link href="/contact#formulaire" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">
-                Demander une étude
+              <Link href="/contact" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">
+                Poser une question
               </Link>
               {" · "}
               <Link href="/connexion" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">
-                Accès client
+                Accès privé
               </Link>
             </p>
           </div>

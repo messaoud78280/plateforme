@@ -28,7 +28,7 @@ export function FormationInteractive() {
             <div className={styles.interactPhoto}>
               <Image
                 src="/marketing/journee-bework.jpg"
-                alt="Participants à une journée BeWork, ordinateurs ouverts, en train d’essayer."
+                alt="Participants à la formation BeWork, ordinateurs ouverts, en train d’essayer."
                 fill
                 sizes="(max-width: 900px) 100vw, 48vw"
                 className={styles.interactImg}

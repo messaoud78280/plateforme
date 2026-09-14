@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { TrainingOffersSection } from "@/components/marketing/TrainingOffersSection";
+import { BEWORK_EXTENSION_PRICE_EUR } from "@/lib/bework-formation";
 import {
   beworkCourseJsonLd,
   breadcrumbJsonLd,
@@ -28,7 +29,7 @@ const FAQ_TARIFS = [
   },
   {
     q: "Puis-je commencer par 7 h et prolonger ensuite ?",
-    a: "Oui. Commencez par la première journée. Si vous souhaitez continuer, ajoutez le deuxième jour pour 300 € supplémentaires.",
+    a: `Oui. Commencez par la première journée. Si vous souhaitez continuer, ajoutez le deuxième jour pour ${BEWORK_EXTENSION_PRICE_EUR} € supplémentaires.`,
   },
   {
     q: "Le prix inclut-il le matériel ?",
@@ -66,7 +67,7 @@ const tarifsJsonLd = {
 
 export default function TarifsPage() {
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
+    <div className="min-h-screen bg-transparent">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(tarifsJsonLd) }}
@@ -74,7 +75,7 @@ export default function TarifsPage() {
       <MarketingSiteHeader plainBg />
 
       <main className="pb-16 pt-6 sm:pt-8">
-        <TrainingOffersSection id="tarif" analyticsPrefix="tarifs" />
+        <TrainingOffersSection id="tarif" analyticsPrefix="tarifs" headingLevel="h1" />
 
         <section className="mx-auto mt-6 max-w-3xl px-4" aria-labelledby="faq-tarifs">
           <h2 id="faq-tarifs" className="text-2xl font-bold text-[#0f172a]">

@@ -3,6 +3,7 @@
  * formation pratique à la création avec l’intelligence artificielle.
  * Google utilise surtout le contenu et les titres ; `keywords` reste un signal secondaire.
  */
+import { TRAINING_OFFERS } from "@/lib/bework-formation";
 
 /** Niche principale : apprendre à créer avec l’IA (intentions de recherche). */
 export const SEO_KEYWORDS_FORMATION_IA = [
@@ -57,7 +58,7 @@ export const SEO_KEYWORDS_GLOBAL: string[] = [
   ...SEO_KEYWORDS_GEO_SCOPE,
   "BeWork",
   "formation BeWork",
-  "journée BeWork",
+  "parcours BeWork",
 ];
 
 export const SEO_KEYWORDS_HOME: string[] = [
@@ -80,11 +81,11 @@ export const BEWORK_SLOGAN = "Vous avez une idée. Nous vous apprenons à la con
 
 /** Accroche complémentaire (home / AEO). */
 export const BEWORK_SLOGAN_DECISION =
-  "Une journée pratique, en petit groupe : comprendre ce qu’il est possible de créer, expérimenter, et repartir capable de commencer — sans devenir développeur.";
+  "Un parcours pratique de 7 h ou 14 h, en petit groupe : apprendre à commencer, puis approfondir si vous le souhaitez — sans devenir développeur.";
 
 /** Phrase de positionnement citables par les IA / extraits AEO. */
 export const BEWORK_AEO_DEFINITION =
-  "BeWork propose une formation pratique d’une journée pour apprendre à créer sites, applications et outils numériques avec l’intelligence artificielle, sans prérequis en programmation. Le site montre ce qu’il est possible de réaliser ; la journée enseigne comment structurer un besoin, guider la création, tester et continuer.";
+  "BeWork propose une formation progressive de 7 h ou 14 h pour apprendre à créer sites, applications et outils numériques avec l’intelligence artificielle, sans prérequis en programmation. Le Jour 1 apprend à commencer et continuer seul ; le Jour 2 permet de pratiquer davantage et de construire plus loin.";
 
 /** Title SEO / OG racine (aligné home). */
 export const SEO_SITE_TITLE_DEFAULT = "BeWork | Créer avec l’IA sans savoir coder";
@@ -93,11 +94,11 @@ export const SEO_SITE_TITLE_OG = "BeWork — Créer avec l’IA sans savoir code
 
 /** Meta description site (layout racine) — ≤160 car. */
 export const SEO_VALUE_PROPOSITION =
-  "En une journée, apprenez à créer avec l’IA — sans coder. Parcours 7 h (300 €) ou 14 h (600 €). Demandez une place BeWork.";
+  `Apprenez à créer avec l’IA sans coder. Parcours ${TRAINING_OFFERS.essential.hours} h (${TRAINING_OFFERS.essential.price} €) ou ${TRAINING_OFFERS.complete.hours} h (${TRAINING_OFFERS.complete.price} €). Demandez une place BeWork.`;
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Formation progressive : créer avec l’IA sans savoir coder. 7 h ou 14 h, petits groupes, dès 300 €.";
+  `Formation progressive pour créer avec l’IA sans coder : ${TRAINING_OFFERS.essential.hours} h ou ${TRAINING_OFFERS.complete.hours} h, dès ${TRAINING_OFFERS.essential.price} €.`;
 
 /** Tagline institutionnelle (OG image, footer). */
 export const BEWORK_TECH_AROUND_YOU = "Sans savoir coder. Créez ce que vous imaginez.";

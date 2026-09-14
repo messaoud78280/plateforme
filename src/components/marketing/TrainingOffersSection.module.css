@@ -313,7 +313,7 @@
   justify-content: center;
   gap: 0.45rem;
   margin-top: auto;
-  padding-top: 1.35rem;
+  padding: 0.75rem 1.25rem;
   min-height: 48px;
   width: 100%;
   border-radius: 999px;
@@ -323,7 +323,8 @@
   transition:
     background 0.2s ease,
     color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .ctaPrimary {
@@ -334,6 +335,7 @@
 
 .ctaPrimary:hover {
   background: #1d4ed8;
+  transform: translateY(-1px);
 }
 
 .ctaSecondary {
@@ -345,6 +347,7 @@
 .ctaSecondary:hover {
   border-color: rgba(39, 91, 232, 0.35);
   color: var(--to-blue);
+  transform: translateY(-1px);
 }
 
 .ctaPrimary:focus-visible,
@@ -394,5 +397,17 @@
 
   .reassure {
     padding: 1.75rem 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctaPrimary,
+  .ctaSecondary {
+    transition: none;
+  }
+
+  .ctaPrimary:hover,
+  .ctaSecondary:hover {
+    transform: none;
   }
 }

@@ -60,7 +60,7 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
   return [
     {
       question: "Qui est BeWork ?",
-      answer: `BeWork — ${BEWORK_BRAND_SIGNATURE}. ${BEWORK_AEO_DEFINITION} Société française (Guyancourt), sessions pour la francophonie.`,
+      answer: `BeWork — ${BEWORK_BRAND_SIGNATURE}. ${BEWORK_AEO_DEFINITION} Société française établie à Guyancourt ; formation proposée en français.`,
     },
     {
       question: "À qui s’adresse BeWork ?",

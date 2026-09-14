@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useId, useRef, useState, type KeyboardEvent } from "react";
 import {
   BW_CARD,
@@ -121,6 +122,14 @@ export function HomeMetierSelector() {
             créer&nbsp;?
           </p>
         </div>
+        <p className="mt-6 text-center">
+          <Link
+            href="/pour-qui"
+            className="inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold text-[#2563eb] transition hover:bg-[#eff6ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb]"
+          >
+            Voir à qui s’adresse la formation&nbsp;→
+          </Link>
+        </p>
       </div>
     </section>
   );

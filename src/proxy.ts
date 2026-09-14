@@ -193,6 +193,8 @@ export async function proxy(request: NextRequest) {
   if (blocked) return blocked;
 
   const pathname = request.nextUrl.pathname;
+  const canonicalHost = getCanonicalHost();
+  const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
 
   // BeWork V3 — contenus confidentiels (prompts / outils / PDF) : plus accessibles.
   if (isBeworkV3ConfidentialPath(pathname)) {
@@ -209,15 +211,14 @@ export async function proxy(request: NextRequest) {
   // BeWork V3 — landings SaaS / BTP : redirection vers la formation.
   if (isBeworkV3LegacyBtpPath(pathname)) {
     const url = request.nextUrl.clone();
+    if (!host || !PASSTHROUGH_HOSTS.has(host)) {
+      url.protocol = "https:";
+      url.host = canonicalHost;
+    }
     url.pathname = "/formation";
     url.search = "";
-    const res = NextResponse.redirect(url, 308);
-    res.headers.set("X-Robots-Tag", "noindex, nofollow");
-    return res;
+    return NextResponse.redirect(url, 308);
   }
-
-  const canonicalHost = getCanonicalHost();
-  const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
 
   if (host && host !== canonicalHost && !PASSTHROUGH_HOSTS.has(host)) {
     if (APEX_REDIRECT_HOSTS.has(host)) {

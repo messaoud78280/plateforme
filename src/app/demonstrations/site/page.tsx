@@ -12,6 +12,7 @@ export const metadata: Metadata = demoPageMetadata(
 export default function DemoSitePage() {
   return (
     <DemoShell
+      slug="site"
       title="Site professionnel"
       description="Construisez une véritable présence en ligne adaptée à votre entreprise et à vos objectifs."
     >

@@ -3,7 +3,11 @@ import Link from "next/link";
 import { MarketingSitePreFooter } from "@/components/layout/MarketingSitePreFooter";
 import { DEMO_PROJECTS, BEWORK_FORMATION_TAGLINE } from "@/lib/bework-formation";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
-import { SITE_URL, getOrgSameAs } from "@/lib/site";
+import {
+  BEWORK_FOUNDER_LINKEDIN_URL,
+  SITE_URL,
+  getOrgSameAs,
+} from "@/lib/site";
 
 const COL_LINK =
   "text-base text-slate-400 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70";
@@ -67,7 +71,10 @@ function SocialIcon({ type }: { type: ReturnType<typeof socialLabel> }) {
 /** Pied de page marketing — positionnement formation création IA. */
 export function MarketingSiteFooter() {
   const year = new Date().getFullYear();
-  const sameAs = getOrgSameAs();
+  const organizationProfiles = getOrgSameAs();
+  const socialProfiles = organizationProfiles.length
+    ? organizationProfiles
+    : [BEWORK_FOUNDER_LINKEDIN_URL];
   const demoLinks = DEMO_PROJECTS.slice(0, 5);
 
   return (
@@ -197,11 +204,12 @@ export function MarketingSiteFooter() {
             <p className="text-sm text-slate-500 sm:text-base">© {year} BeWork. Tous droits réservés.</p>
 
             <div className="flex flex-wrap items-center gap-5 md:justify-end">
-              {sameAs.length > 0 ? (
+              {socialProfiles.length > 0 ? (
                 <>
                   <div className="flex items-center gap-2">
-                    {sameAs.map((url) => {
+                    {socialProfiles.map((url) => {
                       const t = socialLabel(url);
+                      const isFounderProfile = url === BEWORK_FOUNDER_LINKEDIN_URL;
                       return (
                         <a
                           key={url}
@@ -209,7 +217,13 @@ export function MarketingSiteFooter() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-600 text-slate-400 transition-colors hover:border-slate-400 hover:text-white"
-                          aria-label={t === "other" ? "BeWork — lien externe" : `BeWork sur ${t}`}
+                          aria-label={
+                            isFounderProfile
+                              ? `Laure Olivie, fondatrice de BeWork, sur ${t}`
+                              : t === "other"
+                                ? "BeWork — lien externe"
+                                : `BeWork sur ${t}`
+                          }
                         >
                           <SocialIcon type={t} />
                         </a>

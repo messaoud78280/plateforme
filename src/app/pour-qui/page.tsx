@@ -29,7 +29,6 @@ export const metadata: Metadata = buildMarketingPageMetadata({
   path: seo.path,
   title: seo.title,
   description: seo.description,
-  keywords: [...seo.keywords],
 });
 
 const pourQuiJsonLd = {

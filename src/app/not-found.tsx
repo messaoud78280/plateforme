@@ -1,6 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { SEO_NOINDEX_ROBOTS } from "@/lib/seo-search-engines";
+
+export const metadata: Metadata = {
+  title: { absolute: "Page introuvable | BeWork" },
+  description:
+    "Cette page BeWork n’existe pas. Revenez à l’accueil ou consultez le programme de la formation.",
+  robots: SEO_NOINDEX_ROBOTS,
+};
 
 export default function NotFound() {
   return (

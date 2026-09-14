@@ -5,7 +5,6 @@ import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { TrainingOffersSection } from "@/components/marketing/TrainingOffersSection";
 import { BEWORK_EXTENSION_PRICE_EUR } from "@/lib/bework-formation";
 import {
-  beworkCourseJsonLd,
   breadcrumbJsonLd,
   buildMarketingPageMetadata,
   SEO_PAGES,
@@ -19,7 +18,6 @@ export const metadata: Metadata = buildMarketingPageMetadata({
   path: seo.path,
   title: seo.title,
   description: seo.description,
-  keywords: [...seo.keywords],
 });
 
 const FAQ_TARIFS = [
@@ -48,7 +46,6 @@ const tarifsJsonLd = {
       description: seo.description,
       isPartOf: { "@id": `${SITE_URL}/#website` },
     },
-    beworkCourseJsonLd(),
     {
       "@type": "FAQPage",
       "@id": `${pageUrl}#faq`,

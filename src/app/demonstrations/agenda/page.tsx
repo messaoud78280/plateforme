@@ -12,6 +12,7 @@ export const metadata: Metadata = demoPageMetadata(
 export default function DemoAgendaPage() {
   return (
     <DemoShell
+      slug="agenda"
       title="Agenda professionnel"
       description="Organisez rendez-vous, interventions, réunions ou tâches dans un agenda adapté."
     >

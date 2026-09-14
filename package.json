@@ -16,6 +16,7 @@
     "postbuild": "npm run --silent seo:ping-indexnow || true",
     "start": "bash scripts/start-production.sh",
     "lint": "eslint",
+    "test:seo-public": "npx tsx scripts/test-public-seo.ts",
     "db:bootstrap-platform-admin": "npx tsx scripts/bootstrap-platform-admin.ts",
     "db:seed": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx prisma/seed.ts",
     "db:seed:equipe": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx prisma/seed-equipe-bework.ts",

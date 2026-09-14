@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Architects_Daughter, Geist_Mono, Inter, Manrope, Rajdhani } from "next/font/google";
+import { Architects_Daughter, Geist_Mono, Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { PlausibleScript } from "@/components/analytics/PlausibleScript";
 import { Providers } from "@/components/Providers";
 import {
-  SEO_KEYWORDS_GLOBAL,
   SEO_VALUE_PROPOSITION,
   SEO_VALUE_PROPOSITION_SHORT,
   BEWORK_BRAND_SIGNATURE,
@@ -14,44 +13,37 @@ import {
   SEO_SITE_TITLE_DEFAULT,
   SEO_SITE_TITLE_OG,
 } from "@/lib/seo-keywords";
-import { jsonLdCountriesServed, jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
 import {
   buildSearchEngineVerification,
   SEO_PUBLIC_ROBOTS,
 } from "@/lib/seo-search-engines";
+import { SEO_OG_LOCALE_PRIMARY } from "@/lib/seo-francophonie";
 import {
-  SEO_OG_ALTERNATE_LOCALES,
-  SEO_OG_LOCALE_PRIMARY,
-  hreflangFrancophonieLanguages,
-} from "@/lib/seo-francophonie";
-import { absoluteUrl, getOrgSameAs, SITE_URL } from "@/lib/site";
+  absoluteUrl,
+  BEWORK_FOUNDER_LINKEDIN_URL,
+  getOrgSameAs,
+  SITE_URL,
+} from "@/lib/site";
 const defaultOgImage = absoluteUrl("/opengraph-image");
 const defaultLogoImage = absoluteUrl("/icon-512.png");
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
 });
 
 /** Interface & textes courants — lisibilité maximale */
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-/** Titres, cartes fortes, chiffres — esprit bureau d’études / plan technique */
-const rajdhani = Rajdhani({
-  variable: "--font-rajdhani",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  preload: false,
 });
 
 /** Grands titres premium (refonte accueil) — usage ciblé, n’affecte pas --font-heading-family global. */
 const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
 });
 
 /** Micro-annotations façon « note sur plan » — usage très limité */
@@ -59,11 +51,13 @@ const architectsDaughter = Architects_Daughter({
   variable: "--font-blueprint-note",
   subsets: ["latin"],
   weight: ["400"],
+  preload: false,
 });
 
 const searchEngineVerification = buildSearchEngineVerification();
 const llmsTxtUrl = absoluteUrl("/llms.txt");
 const aiTxtUrl = absoluteUrl("/ai.txt");
+const feedUrl = absoluteUrl("/feed.xml");
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -83,19 +77,10 @@ export const metadata: Metadata = {
   creator: "BeWork",
   publisher: "BeWork",
   category: "business",
-  keywords: [
-    BEWORK_BRAND_SIGNATURE,
-    ...SEO_KEYWORDS_GLOBAL,
-    "apprendre à créer avec l'IA",
-    "formation création IA débutant",
-    "créer application sans coder",
-    "formation BeWork",
-  ],
   robots: SEO_PUBLIC_ROBOTS,
   openGraph: {
     type: "website",
     locale: SEO_OG_LOCALE_PRIMARY,
-    alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: SITE_URL,
     siteName: "BeWork",
     title: SEO_SITE_TITLE_OG,
@@ -113,16 +98,13 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: SEO_SITE_TITLE_OG,
     description: `${SEO_VALUE_PROPOSITION_SHORT} ${BEWORK_SLOGAN}`,
+    images: [defaultOgImage],
     ...(process.env.NEXT_PUBLIC_TWITTER_SITE?.trim()
       ? { site: process.env.NEXT_PUBLIC_TWITTER_SITE.trim() }
       : {}),
     ...(process.env.NEXT_PUBLIC_TWITTER_CREATOR?.trim()
       ? { creator: process.env.NEXT_PUBLIC_TWITTER_CREATOR.trim() }
       : {}),
-  },
-  alternates: {
-    canonical: SITE_URL,
-    languages: hreflangFrancophonieLanguages("/"),
   },
   icons: {
     icon: [
@@ -165,11 +147,6 @@ const jsonLd = {
       inLanguage: "fr-FR",
       publisher: { "@id": `${SITE_URL}/#organization` },
       image: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
-      potentialAction: {
-        "@type": "ContactAction",
-        name: "Demander une place à une session BeWork",
-        target: absoluteUrl("/contact#participer"),
-      },
     },
     {
       "@type": "Organization",
@@ -188,11 +165,11 @@ const jsonLd = {
         addressLocality: "Guyancourt",
         addressCountry: "FR",
       },
-      areaServed: jsonLdExpandedAreaServed(),
       founder: {
         "@type": "Person",
         name: "Laure Olivie",
         jobTitle: "Fondatrice",
+        sameAs: BEWORK_FOUNDER_LINKEDIN_URL,
         knowsAbout: [
           "Formation création avec l’intelligence artificielle",
           "Autonomie numérique professionnelle",
@@ -206,7 +183,6 @@ const jsonLd = {
           contactType: "sales",
           url: absoluteUrl("/contact"),
           availableLanguage: ["French"],
-          areaServed: jsonLdCountriesServed(),
         },
       ],
       ...(orgSameAs.length ? { sameAs: orgSameAs } : {}),
@@ -219,26 +195,6 @@ const jsonLd = {
         "Formation pratique petit groupe",
       ],
     },
-    {
-      "@type": "ProfessionalService",
-      "@id": `${SITE_URL}/#service`,
-      name: `BeWork — ${BEWORK_BRAND_SIGNATURE}`,
-      description: `${BEWORK_AEO_DEFINITION} ${BEWORK_SLOGAN} ${BEWORK_SLOGAN_DECISION}`,
-      url: SITE_URL,
-      provider: { "@id": `${SITE_URL}/#organization` },
-      areaServed: jsonLdExpandedAreaServed(),
-      serviceType: [
-        BEWORK_BRAND_SIGNATURE,
-        "Formation pratique création avec l’IA",
-        "Accompagnement à la création d’outils numériques",
-        "Démonstrations de projets créables",
-      ],
-      audience: {
-        "@type": "Audience",
-        audienceType:
-          "Entrepreneurs, artisans, indépendants, TPE/PME, porteurs de projet et professionnels curieux de l’IA qui veulent apprendre à créer sans prérequis en programmation",
-      },
-    },
   ],
 };
 
@@ -250,12 +206,13 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <head>
+        <link rel="alternate" type="application/rss+xml" href={feedUrl} title="BeWork — pages publiques" />
         <link rel="alternate" type="text/plain" href={llmsTxtUrl} title="Index pour assistants IA (llms.txt)" />
         <link rel="alternate" type="text/plain" href={aiTxtUrl} title="Politique indexation moteurs IA (ai.txt)" />
         <PlausibleScript />
       </head>
       <body
-        className={`${inter.variable} ${rajdhani.variable} ${manrope.variable} ${architectsDaughter.variable} ${geistMono.variable} min-w-0 overflow-x-clip antialiased text-base text-black`}
+        className={`${inter.variable} ${manrope.variable} ${architectsDaughter.variable} ${geistMono.variable} min-w-0 overflow-x-clip antialiased text-base text-black`}
       >
         <script
           type="application/ld+json"

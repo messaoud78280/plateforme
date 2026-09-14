@@ -8,13 +8,13 @@ import { absoluteUrl } from "@/lib/site";
 /** Locale Open Graph principale (contenu rédigé en français). */
 export const SEO_OG_LOCALE_PRIMARY = "fr_FR" as const;
 
-/** Locales Open Graph secondaires (ciblage francophonie sans URLs dédiées). */
-export const SEO_OG_ALTERNATE_LOCALES = ["fr_BE", "fr_CH", "fr_LU"] as const;
+/** Aucune version régionale distincte : ne pas déclarer de fausses alternatives. */
+export const SEO_OG_ALTERNATE_LOCALES = [] as const;
 
 /** Mention courte pour meta descriptions et extraits. */
-export const SEO_GEO_SCOPE_SHORT = "France, Belgique, Suisse, Luxembourg";
+export const SEO_GEO_SCOPE_SHORT = "France";
 
-export const SEO_GEO_SCOPE_TAG = "FR · BE · CH · LU";
+export const SEO_GEO_SCOPE_TAG = "FR";
 
 /** Longueur cible Google (desktop/mobile snippets). */
 export const SEO_META_DESCRIPTION_MAX = 160;
@@ -114,17 +114,13 @@ export function metaDescriptionFrancophonie(
 }
 
 /**
- * Hreflang pour une page unique (même URL pour tous les marchés francophones).
- * Signal : contenu FR pertinent pour FR, BE, CH, LU ; x-default = France.
+ * Hreflang de la version française unique.
+ * Les variantes régionales ne seront ajoutées que si des URLs dédiées existent.
  */
 export function hreflangFrancophonieLanguages(canonicalPath: string): Record<string, string> {
   const url = absoluteUrl(canonicalPath);
   return {
     "fr-FR": url,
-    "fr-BE": url,
-    "fr-CH": url,
-    "fr-LU": url,
-    fr: url,
     "x-default": url,
   };
 }

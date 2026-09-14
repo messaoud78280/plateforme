@@ -12,6 +12,7 @@ export const metadata: Metadata = demoPageMetadata(
 export default function DemoMessageriePage() {
   return (
     <DemoShell
+      slug="messagerie"
       title="Messagerie interne"
       description="Centralisez les échanges d’une équipe dans votre propre interface."
     >

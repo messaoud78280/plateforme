@@ -4,7 +4,7 @@ import { SITE_URL } from "@/lib/site";
 type ChangeFreq = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
 
 /** Date de contenu vitrine V3. */
-const SITEMAP_STATIC_LASTMOD = new Date("2026-09-10T00:00:00.000Z");
+const SITEMAP_STATIC_LASTMOD = new Date("2026-09-14T00:00:00.000Z");
 
 function entry(
   path: string,

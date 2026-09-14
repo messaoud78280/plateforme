@@ -125,7 +125,7 @@ ${priorityPages}
 créer avec l’IA, créer sans savoir coder, formation IA débutant, créer une application avec l’IA, créer un site avec l’IA, outils professionnels avec IA, IA pour entrepreneur, IA pour indépendant, parcours BeWork
 
 ## Geographic scope
-France et francophonie — formation pratique en petit groupe.
+Société établie en France. Formation proposée en français, en présentiel ou en visio.
 
 Canonical site: ${SITE_URL}
 `;

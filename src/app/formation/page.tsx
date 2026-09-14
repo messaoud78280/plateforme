@@ -23,7 +23,6 @@ import { FormationReorientation } from "@/components/formation/FormationReorient
 import { FormationStickyNav } from "@/components/formation/FormationStickyNav";
 import { FormationWhy } from "@/components/formation/FormationWhy";
 import styles from "@/components/formation/formation.module.css";
-import { FORMATION_PAGE_FAQ } from "@/lib/bework-formation";
 import {
   beworkCourseJsonLd,
   breadcrumbJsonLd,
@@ -40,7 +39,6 @@ export const metadata: Metadata = buildMarketingPageMetadata({
   title: seo.title,
   absoluteTitle: seo.absoluteTitle,
   description: seo.description,
-  keywords: [...seo.keywords],
 });
 
 const formationJsonLd = {
@@ -53,24 +51,16 @@ const formationJsonLd = {
       name: seo.absoluteTitle ?? `${seo.title} | BeWork`,
       description: seo.description,
       isPartOf: { "@id": `${SITE_URL}/#website` },
-      mainEntity: { "@id": `${SITE_URL}/#course` },
+      mainEntity: { "@id": `${pageUrl}#course` },
     },
     beworkCourseJsonLd({
       description: seo.description,
+      url: pageUrl,
     }),
     breadcrumbJsonLd([
       { name: "Accueil", path: "/" },
       { name: "Formation", path: "/formation" },
     ]),
-    {
-      "@type": "FAQPage",
-      "@id": `${pageUrl}#faq`,
-      mainEntity: FORMATION_PAGE_FAQ.map((item) => ({
-        "@type": "Question",
-        name: item.q,
-        acceptedAnswer: { "@type": "Answer", text: item.a },
-      })),
-    },
   ],
 };
 

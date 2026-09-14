@@ -91,13 +91,8 @@ export function publicAppOriginForEmails(preferredFromRequest?: string): string 
   return "https://www.bework.fr";
 }
 
-/**
- * Profils par défaut pour JSON-LD Organization.sameAs, si NEXT_PUBLIC_ORG_SAME_AS
- * n’est pas défini en prod. À remplacer/compléter dès qu’une page LinkedIn dédiée
- * « BeWork » (entreprise) existe — en attendant, profil de la fondatrice qui se
- * présente publiquement comme dirigeante BeWork.
- */
-const DEFAULT_ORG_SAME_AS = ["https://www.linkedin.com/in/laure-olivie"] as const;
+/** Profil public de la fondatrice — à rattacher à Person, pas à Organization.sameAs. */
+export const BEWORK_FOUNDER_LINKEDIN_URL = "https://www.linkedin.com/in/laure-olivie";
 
 /**
  * URLs pour JSON-LD Organization.sameAs (LinkedIn, profil Google Business, annuaires…).
@@ -106,10 +101,10 @@ const DEFAULT_ORG_SAME_AS = ["https://www.linkedin.com/in/laure-olivie"] as cons
  */
 export function getOrgSameAs(): string[] {
   const raw = process.env.NEXT_PUBLIC_ORG_SAME_AS?.trim();
-  if (!raw) return [...DEFAULT_ORG_SAME_AS];
+  if (!raw) return [];
   const fromEnv = raw
     .split(/[\n,]+/)
     .map((s) => s.trim())
     .filter((s) => s.startsWith("http"));
-  return fromEnv.length ? fromEnv : [...DEFAULT_ORG_SAME_AS];
+  return fromEnv;
 }

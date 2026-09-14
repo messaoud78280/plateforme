@@ -553,7 +553,7 @@ export const FORMATION_PAGE_FAQ = [
   },
   {
     q: "Faut-il savoir coder ?",
-    a: "Non.",
+    a: "Non. La formation est conçue pour des débutants et des personnes qui ne viennent pas du développement informatique.",
   },
   {
     q: "Faut-il être bon en informatique ?",
@@ -597,7 +597,7 @@ export const FORMATION_PAGE_FAQ = [
   },
   {
     q: "Est-ce que je pourrai continuer après ?",
-    a: "Oui. C’est l’un des principaux objectifs du parcours.",
+    a: "Oui. Vous apprenez une démarche réutilisable pour reprendre votre projet, le tester et continuer à progresser après la session.",
   },
   {
     q: "Les outils utilisés sont-ils gratuits ?",
@@ -613,6 +613,10 @@ export const FORMATION_FAQ = [
   {
     q: "Est-ce adapté aux débutants ?",
     a: "Oui. BeWork part du principe que vous n’avez pas besoin d’être développeur. Le parcours est pensé pour débuter clairement, sans jargon inutile.",
+  },
+  {
+    q: "Est-ce une formation de développement informatique ?",
+    a: "Non. Vous apprenez à guider une création assistée par l’IA, à tester le résultat et à l’améliorer, sans suivre un cursus de programmation ni prétendre devenir développeur en une journée.",
   },
   {
     q: "Quelle différence entre 7 h et 14 h ?",

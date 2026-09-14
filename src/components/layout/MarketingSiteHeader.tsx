@@ -16,7 +16,7 @@ const NAV_ITEMS = [
   { href: "/#demonstrations", label: "Possibilités", match: "demonstrations" },
   { href: "/demonstrations", label: "Démonstrations", match: "/demonstrations" },
   { href: "/formation#programme", label: "Programme", match: "programme" },
-  { href: "/#faq", label: "FAQ", match: "faq" },
+  { href: "/faq", label: "FAQ", match: "/faq" },
 ] as const;
 
 const PLATFORM_HREF = "/dashboard";

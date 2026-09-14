@@ -61,7 +61,7 @@ export function HomePlatformHero() {
             </p>
 
             <h1 id="hero-heading" className={`mt-4 sm:mt-5 ${styles.slogan}`}>
-              <span className={styles.line1}>Sans savoir coder.</span>
+              <span className={styles.line1}>Sans savoir coder.{" "}</span>
               <span className={styles.line2}>Créez ce que vous imaginez.</span>
             </h1>
 

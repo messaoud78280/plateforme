@@ -4,8 +4,11 @@ import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { BwAtmosphere } from "@/components/home/BwAtmosphere";
 import { CTA_SECONDARY } from "@/components/marketing/marketingCtaStyles";
+import { breadcrumbJsonLd } from "@/lib/seo-formation-pages";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 type DemoShellProps = {
+  slug: string;
   title: string;
   description?: string;
   children: ReactNode;
@@ -13,9 +16,39 @@ type DemoShellProps = {
 };
 
 /** Enveloppe commune des démonstrations interactives BeWork. */
-export function DemoShell({ title, description, children, marketingChrome = true }: DemoShellProps) {
+export function DemoShell({
+  slug,
+  title,
+  description,
+  children,
+  marketingChrome = true,
+}: DemoShellProps) {
+  const pageUrl = absoluteUrl(`/demonstrations/${slug}`);
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${pageUrl}#webpage`,
+        url: pageUrl,
+        name: `${title} — démonstration BeWork`,
+        ...(description ? { description } : {}),
+        isPartOf: { "@id": `${SITE_URL}/#website` },
+      },
+      breadcrumbJsonLd([
+        { name: "Accueil", path: "/" },
+        { name: "Démonstrations", path: "/demonstrations" },
+        { name: title, path: `/demonstrations/${slug}` },
+      ]),
+    ],
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-transparent">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <BwAtmosphere variant="creation" />
       {marketingChrome ? <MarketingSiteHeader plainBg /> : null}
 

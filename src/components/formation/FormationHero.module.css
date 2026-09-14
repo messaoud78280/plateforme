@@ -308,13 +308,8 @@
 /* ——— Text reveal ——— */
 
 .reveal {
-  opacity: 0;
-  transform: translate3d(0, 16px, 0);
-}
-
-.ready .reveal {
-  animation: fadeUp 0.55s var(--ease) forwards;
-  animation-delay: var(--d, 0ms);
+  opacity: 1;
+  transform: none;
 }
 
 @keyframes fadeUp {

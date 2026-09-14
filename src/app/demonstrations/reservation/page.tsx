@@ -12,6 +12,7 @@ export const metadata: Metadata = demoPageMetadata(
 export default function DemoReservationPage() {
   return (
     <DemoShell
+      slug="reservation"
       title="Système de réservation"
       description="Permettez à vos clients de sélectionner une prestation, une date et d’envoyer leur demande."
     >

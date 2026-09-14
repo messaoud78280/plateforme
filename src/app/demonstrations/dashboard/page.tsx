@@ -12,6 +12,7 @@ export const metadata: Metadata = demoPageMetadata(
 export default function DemoDashboardPage() {
   return (
     <DemoShell
+      slug="dashboard"
       title="Tableau de bord"
       description="Transformez vos données en une interface claire pour suivre votre activité."
     >

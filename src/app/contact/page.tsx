@@ -3,9 +3,6 @@ import { ParticiperPageContent } from "@/components/contact/ParticiperPageConten
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import {
-  beworkCompleteOfferJsonLd,
-  beworkCourseJsonLd,
-  beworkSessionOfferJsonLd,
   breadcrumbJsonLd,
   buildMarketingPageMetadata,
   SEO_PAGES,
@@ -20,7 +17,6 @@ export const metadata: Metadata = buildMarketingPageMetadata({
   path: seo.path,
   title: seo.title,
   description: seo.description,
-  keywords: [...seo.keywords],
 });
 
 const contactJsonLd = {
@@ -35,15 +31,6 @@ const contactJsonLd = {
       isPartOf: { "@id": `${SITE_URL}/#website` },
       description: seo.description,
       mainEntity: { "@id": `${SITE_URL}/#organization` },
-    },
-    beworkCourseJsonLd(),
-    {
-      ...beworkSessionOfferJsonLd(),
-      "@id": `${pageUrl}#offer-7h`,
-    },
-    {
-      ...beworkCompleteOfferJsonLd(),
-      "@id": `${pageUrl}#offer-14h`,
     },
     breadcrumbJsonLd([
       { name: "Accueil", path: "/" },

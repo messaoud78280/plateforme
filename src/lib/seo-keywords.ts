@@ -1,7 +1,7 @@
 /**
  * Expressions cibles SEO / AEO — positionnement BeWork :
  * formation pratique à la création avec l’intelligence artificielle.
- * Google utilise surtout le contenu et les titres ; `keywords` reste un signal secondaire.
+ * Cette liste guide le contenu ; elle n’est pas émise en meta keywords (ignorée par Google).
  */
 import { TRAINING_OFFERS } from "@/lib/bework-formation";
 
@@ -44,10 +44,7 @@ export const SEO_KEYWORDS_AUDIENCE = [
 /** Signaux géographiques francophones (conservés, reformulés). */
 export const SEO_KEYWORDS_GEO_SCOPE = [
   "formation IA France",
-  "formation créer avec IA Belgique",
-  "formation IA Suisse romande",
-  "formation IA Luxembourg",
-  "formation création numérique francophone",
+  "formation création numérique en français",
 ] as const;
 
 /** Liste fusionnée layout racine. */

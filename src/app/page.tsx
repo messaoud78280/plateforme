@@ -12,12 +12,7 @@ import { HomePlatformHero } from "@/components/home/HomePlatformHero";
 import { HomePossibilitiesBento } from "@/components/home/HomePossibilitiesBento";
 import { HomePricingSession } from "@/components/home/HomePricingSession";
 import { HomeSkillsAfter } from "@/components/home/HomeSkillsAfter";
-import { HOME_FORMATION_FAQ } from "@/lib/bework-formation";
 import {
-  beworkCompleteOfferJsonLd,
-  beworkCourseJsonLd,
-  beworkSessionOfferJsonLd,
-  breadcrumbJsonLd,
   buildMarketingPageMetadata,
   SEO_PAGES,
 } from "@/lib/seo-formation-pages";
@@ -29,7 +24,6 @@ export const metadata: Metadata = buildMarketingPageMetadata({
   title: home.absoluteTitle,
   absoluteTitle: home.absoluteTitle,
   description: home.description,
-  keywords: [...home.keywords],
 });
 
 const homeJsonLd = {
@@ -51,34 +45,7 @@ const homeJsonLd = {
         { "@type": "Thing", name: "Créer sans savoir coder" },
         { "@type": "Thing", name: "Formation IA débutant" },
       ],
-      speakable: {
-        "@type": "SpeakableSpecification",
-        cssSelector: ["h1"],
-      },
-      mainEntity: { "@id": `${SITE_URL}/#course` },
     },
-    beworkCourseJsonLd(),
-    {
-      "@type": "ProfessionalService",
-      "@id": `${SITE_URL}/#service-home`,
-      name: "BeWork — formation pratique pour créer avec l’IA",
-      description: home.description,
-      provider: { "@id": `${SITE_URL}/#organization` },
-      url: SITE_URL,
-      offers: [beworkSessionOfferJsonLd(), beworkCompleteOfferJsonLd()],
-    },
-    {
-      "@type": "FAQPage",
-      "@id": `${SITE_URL}/#faq`,
-      url: SITE_URL,
-      inLanguage: "fr-FR",
-      mainEntity: HOME_FORMATION_FAQ.map((item) => ({
-        "@type": "Question",
-        name: item.q,
-        acceptedAnswer: { "@type": "Answer", text: item.a },
-      })),
-    },
-    breadcrumbJsonLd([{ name: "Accueil", path: "/" }]),
   ],
 };
 

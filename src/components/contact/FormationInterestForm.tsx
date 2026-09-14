@@ -115,9 +115,14 @@ export function FormationInterestForm({
       className="relative space-y-6"
       aria-busy={status === "loading"}
     >
-      <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden>
-        <label htmlFor="website">Site web</label>
-        <input type="text" id="website" name="website" tabIndex={-1} autoComplete="off" />
+      <div hidden aria-hidden>
+        <input
+          type="text"
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden
+        />
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">

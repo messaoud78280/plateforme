@@ -33,6 +33,13 @@ body {
   position: relative;
   z-index: 1;
 }
+
+@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+  body {
+    background-attachment: scroll;
+  }
+}
+
 :root {
   /* BeWork signature visuelle — backgrounds / marque */
   --bw-blue: #275be8;
@@ -105,14 +112,14 @@ body {
 
   /*
    * Typographie — stack système d’abord (lisibilité native), Inter en fallback.
-   * Titres : Inter / système (Rajdhani conservé via .font-heading si besoin marketing).
+   * Titres : pile système lisible ; Manrope reste réservé aux grands titres marketing.
    */
   --font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", var(--font-inter), ui-sans-serif, system-ui,
     sans-serif;
   --font-heading-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", var(--font-inter), var(--font-rajdhani),
-    ui-sans-serif, system-ui, sans-serif;
+    -apple-system, BlinkMacSystemFont, "Segoe UI", var(--font-inter), ui-sans-serif, system-ui,
+    sans-serif;
   --font-blueprint-note-family: var(--font-blueprint-note), cursive;
   --heading-1: 1.875rem; /* 30px */
   --heading-2: 1.25rem; /* 20px */
@@ -595,7 +602,7 @@ body {
   }
 }
 
-/** Titres & zones fortes — Rajdhani */
+  /** Titres & zones fortes — pile système */
   .font-heading {
     font-family: var(--font-heading-family);
   }

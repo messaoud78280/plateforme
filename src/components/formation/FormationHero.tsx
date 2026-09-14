@@ -24,8 +24,6 @@ export function FormationHero() {
     };
   }, []);
 
-  const copyReady = ready;
-
   return (
     <section className={styles.hero} aria-labelledby="formation-hero-title">
       <div className={styles.bg} aria-hidden>
@@ -44,46 +42,42 @@ export function FormationHero() {
 
       <div className={styles.shell}>
         <div className={styles.grid}>
-          <div className={`${styles.copy}${copyReady ? ` ${styles.ready}` : ""}`}>
-            <p className={`${styles.eyebrow} ${styles.reveal}`} style={{ ["--d" as string]: "0ms" }}>
+          <div className={styles.copy}>
+            <p className={`${styles.eyebrow} ${styles.reveal}`}>
               La formation BeWork
             </p>
 
             <h1 id="formation-hero-title" className={styles.title}>
               <span
                 className={`${styles.titleLine} ${styles.reveal}`}
-                style={{ ["--d" as string]: "80ms" }}
               >
-                Vous n’avez pas
+                Vous n’avez pas{" "}
               </span>
               <span
                 className={`${styles.titleLine} ${styles.reveal}`}
-                style={{ ["--d" as string]: "120ms" }}
               >
-                appris à coder.
+                appris à coder.{" "}
               </span>
               <span
                 className={`${styles.titleLine} ${styles.reveal}`}
-                style={{ ["--d" as string]: "180ms" }}
               >
-                <span className={styles.gradient}>Ce n’est plus une barrière</span>
+                <span className={styles.gradient}>Ce n’est plus une barrière</span>{" "}
               </span>
               <span
                 className={`${styles.titleLine} ${styles.reveal}`}
-                style={{ ["--d" as string]: "220ms" }}
               >
                 pour commencer.
               </span>
             </h1>
 
-            <p className={`${styles.lead} ${styles.reveal}`} style={{ ["--d" as string]: "300ms" }}>
-              Commencez par apprendre à créer. Puis choisissez jusqu’où vous voulez aller — une
-              journée pour commencer, deux pour construire plus loin.
+            <p className={`${styles.lead} ${styles.reveal}`}>
+              Apprenez à créer des sites, applications et outils avec l’IA. Puis choisissez
+              jusqu’où vous voulez aller — une journée pour commencer, deux pour construire
+              plus loin.
             </p>
 
             <p
               className={`${styles.reassure} ${styles.reveal}`}
-              style={{ ["--d" as string]: "380ms" }}
             >
               <span className={styles.reassureIcon} aria-hidden>
                 <svg viewBox="0 0 12 12" fill="none">
@@ -101,7 +95,6 @@ export function FormationHero() {
 
             <div
               className={`${styles.formatStrip} ${styles.reveal}`}
-              style={{ ["--d" as string]: "460ms" }}
               aria-label="Formats de participation"
             >
               <span className={`${styles.formatChip} ${styles.formatChipPresentiel}`}>
@@ -121,7 +114,6 @@ export function FormationHero() {
 
             <p
               className={`${styles.formatNote} ${styles.reveal}`}
-              style={{ ["--d" as string]: "520ms" }}
             >
               Nous privilégions le présentiel pour vous accompagner au plus près pendant les
               installations, les essais et vos premières créations. Des sessions entièrement en
@@ -130,7 +122,6 @@ export function FormationHero() {
 
             <div
               className={`${styles.ctaRow} ${styles.reveal}`}
-              style={{ ["--d" as string]: "600ms" }}
             >
               <a href="#programme" className={styles.ctaPrimary}>
                 Découvrir le programme ↓

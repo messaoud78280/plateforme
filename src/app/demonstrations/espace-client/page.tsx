@@ -12,6 +12,7 @@ export const metadata: Metadata = demoPageMetadata(
 export default function DemoEspaceClientPage() {
   return (
     <DemoShell
+      slug="espace-client"
       title="Espace client"
       description="Créez un espace privé dans lequel vos clients retrouvent informations, documents ou suivi."
     >

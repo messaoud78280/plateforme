@@ -12,6 +12,7 @@ export const metadata: Metadata = demoPageMetadata(
 export default function DemoCrmPage() {
   return (
     <DemoShell
+      slug="crm"
       title="CRM / suivi commercial"
       description="Suivez prospects, clients, opportunités et prochaines actions dans votre propre outil."
     >

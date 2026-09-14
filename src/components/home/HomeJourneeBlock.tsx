@@ -70,7 +70,7 @@ function cx(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-/** Section « La journée BeWork » — bloc premium équilibré. */
+/** Section « première journée du parcours » — bloc premium équilibré. */
 export function HomeJourneeBlock() {
   const rootRef = useRef<HTMLElement>(null);
   const [inView, setInView] = useState(false);

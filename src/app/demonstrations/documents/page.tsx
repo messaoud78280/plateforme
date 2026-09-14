@@ -12,6 +12,7 @@ export const metadata: Metadata = demoPageMetadata(
 export default function DemoDocumentsPage() {
   return (
     <DemoShell
+      slug="documents"
       title="Gestion de documents"
       description="Classez et retrouvez les informations importantes dans une interface adaptée à votre métier."
     >

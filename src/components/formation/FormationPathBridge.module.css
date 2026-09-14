@@ -1,0 +1,210 @@
+.section {
+  position: relative;
+  padding: 2.75rem 0 1.5rem;
+  scroll-margin-top: 7rem;
+}
+
+.shell {
+  width: min(1100px, calc(100% - 1.75rem));
+  margin-inline: auto;
+}
+
+.head {
+  max-width: 40rem;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #275be8;
+}
+
+.title {
+  margin: 0.75rem 0 0;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(1.55rem, 3vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+  color: #0f172a;
+}
+
+.accent {
+  background: linear-gradient(105deg, #275be8 0%, #6d4aff 60%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lead {
+  margin: 0.9rem 0 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: #64748b;
+}
+
+.levels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+  max-width: 42rem;
+}
+
+@media (min-width: 700px) {
+  .levels {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 0.85rem;
+  }
+}
+
+.level {
+  flex: 1;
+  padding: 1.15rem 1.2rem;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.levelAccent {
+  border-color: rgba(39, 91, 232, 0.22);
+  background:
+    radial-gradient(ellipse 70% 50% at 100% 0%, rgba(196, 181, 253, 0.18) 0%, transparent 55%),
+    #fff;
+}
+
+.levelMeta {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.levelTitle {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-display, inherit);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+}
+
+.plus {
+  display: none;
+  align-self: center;
+  color: #94a3b8;
+  font-size: 1.25rem;
+}
+
+@media (min-width: 700px) {
+  .plus {
+    display: block;
+  }
+}
+
+.ctaRow {
+  margin: 1.25rem 0 0;
+}
+
+.link {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #275be8;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.link:focus-visible {
+  outline: 2px solid #275be8;
+  outline-offset: 3px;
+}
+
+/* Bridge Jour 1 → Jour 2 */
+
+.bridge {
+  position: relative;
+  padding: 2.5rem 0 1.5rem;
+}
+
+.bridgeTitle {
+  margin: 0;
+  max-width: 28rem;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  color: #0f172a;
+}
+
+.bridgeLead {
+  margin: 0.75rem 0 0;
+  max-width: 34rem;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: #64748b;
+}
+
+.arc {
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+@media (min-width: 640px) {
+  .arc {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.arc li:not(.arcSep) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  background: #fff;
+  min-width: 8.5rem;
+}
+
+.arcNum {
+  font-family: var(--font-display, inherit);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: #275be8;
+}
+
+.arcLabel {
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: #334155;
+}
+
+.arcSep {
+  color: #94a3b8;
+  font-size: 1.1rem;
+  padding: 0 0.15rem;
+}
+
+@media (min-width: 640px) {
+  .arcSep {
+    transform: rotate(-90deg);
+  }
+}

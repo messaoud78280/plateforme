@@ -7,22 +7,16 @@ export function FormationFinalCta() {
     <section id="cta-final" className={styles.finalSection} aria-labelledby="final-title">
       <div className={styles.shell}>
         <div className={`${styles.panel} ${styles.finalPanel}`}>
-          <p className={styles.eyebrow}>Conclusion</p>
+          <p className={styles.eyebrow}>Prêt à commencer&nbsp;?</p>
           <h2 id="final-title" className={`${styles.display} ${styles.finalTitle}`}>
-            Pendant longtemps,
+            Une journée pour apprendre à commencer.
             <br />
-            ne pas savoir coder
-            <br />
-            pouvait vous empêcher
-            <br />
-            de commencer.
-            <br />
-            <span className={styles.gradientText}>Ce n’est plus aussi vrai qu’avant.</span>
+            <span className={styles.gradientText}>Deux pour construire plus loin.</span>
           </h2>
 
           <p className={styles.finalLead}>
-            L’IA ne supprime pas l’apprentissage. Elle vous donne un moyen complètement nouveau
-            d’apprendre pendant que vous créez.
+            Choisissez le parcours qui vous correspond aujourd’hui. Vous pourrez toujours décider
+            d’aller plus loin ensuite.
           </p>
           <p className={styles.finalAccent}>
             Votre prochaine idée mérite peut-être simplement une première tentative.
@@ -30,10 +24,10 @@ export function FormationFinalCta() {
 
           <div className={styles.finalCtas}>
             <Link href="/contact#participer" className={styles.ctaPrimary}>
-              Demander une place →
+              Découvrir les prochaines sessions →
             </Link>
-            <Link href="/contact#participer" className={styles.ctaSecondary}>
-              Voir les prochaines sessions →
+            <Link href="#tarif" className={styles.ctaSecondary}>
+              Comparer les parcours →
             </Link>
           </div>
         </div>

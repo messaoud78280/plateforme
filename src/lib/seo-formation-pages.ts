@@ -12,7 +12,11 @@ import {
   hreflangFrancophonieLanguages,
 } from "@/lib/seo";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
-import { BEWORK_SESSION_PRICE_EUR } from "@/lib/bework-formation";
+import {
+  BEWORK_COMPLETE_PRICE_EUR,
+  BEWORK_SESSION_PRICE_EUR,
+  TRAINING_OFFERS,
+} from "@/lib/bework-formation";
 
 const OG_IMAGE = absoluteUrl("/opengraph-image");
 
@@ -86,12 +90,25 @@ export function breadcrumbJsonLd(
   };
 }
 
-/** Offre journée BeWork — réutilisable Course / Product. */
+/** Offre parcours 7 h — réutilisable Course / Product. */
 export function beworkSessionOfferJsonLd(path = "/contact#participer"): Record<string, unknown> {
   return {
     "@type": "Offer",
-    name: "Journée BeWork",
-    price: String(BEWORK_SESSION_PRICE_EUR),
+    name: `${TRAINING_OFFERS.essential.title} — ${TRAINING_OFFERS.essential.hours} h`,
+    price: String(TRAINING_OFFERS.essential.price),
+    priceCurrency: "EUR",
+    availability: "https://schema.org/InStock",
+    url: absoluteUrl(path),
+    category: "Formation professionnelle",
+  };
+}
+
+/** Offre parcours 14 h. */
+export function beworkCompleteOfferJsonLd(path = "/contact#participer"): Record<string, unknown> {
+  return {
+    "@type": "Offer",
+    name: `${TRAINING_OFFERS.complete.title} — ${TRAINING_OFFERS.complete.hours} h`,
+    price: String(TRAINING_OFFERS.complete.price),
     priceCurrency: "EUR",
     availability: "https://schema.org/InStock",
     url: absoluteUrl(path),
@@ -107,10 +124,10 @@ export function beworkCourseJsonLd(overrides?: {
   return {
     "@type": "Course",
     "@id": `${SITE_URL}/#course`,
-    name: overrides?.name ?? "Journée BeWork — Créer avec l’IA sans savoir coder",
+    name: overrides?.name ?? "Formation BeWork — Créer avec l’IA sans savoir coder",
     description:
       overrides?.description ??
-      "Formation pratique d’une journée pour apprendre à créer sites, applications et outils numériques avec l’intelligence artificielle, sans prérequis en programmation.",
+      `Formation progressive : ${TRAINING_OFFERS.essential.hours} h pour apprendre à commencer (${TRAINING_OFFERS.essential.price} €), ou ${TRAINING_OFFERS.complete.hours} h pour construire plus loin (${TRAINING_OFFERS.complete.price} €). Sans prérequis en programmation.`,
     provider: { "@id": `${SITE_URL}/#organization` },
     url: overrides?.url ?? absoluteUrl("/formation"),
     inLanguage: "fr-FR",
@@ -127,19 +144,31 @@ export function beworkCourseJsonLd(overrides?: {
       { "@type": "Thing", name: "Créer sans savoir coder" },
       { "@type": "Thing", name: "Formation IA débutant" },
     ],
-    offers: beworkSessionOfferJsonLd(),
+    offers: [beworkSessionOfferJsonLd(), beworkCompleteOfferJsonLd()],
     hasCourseInstance: [
       {
         "@type": "CourseInstance",
         courseMode: "onsite",
-        courseWorkload: "PT1D",
+        courseWorkload: "PT7H",
+        offers: beworkSessionOfferJsonLd(),
+      },
+      {
+        "@type": "CourseInstance",
+        courseMode: "onsite",
+        courseWorkload: "PT14H",
+        offers: beworkCompleteOfferJsonLd(),
+      },
+      {
+        "@type": "CourseInstance",
+        courseMode: "online",
+        courseWorkload: "PT7H",
         offers: beworkSessionOfferJsonLd(),
       },
       {
         "@type": "CourseInstance",
         courseMode: "online",
-        courseWorkload: "PT1D",
-        offers: beworkSessionOfferJsonLd(),
+        courseWorkload: "PT14H",
+        offers: beworkCompleteOfferJsonLd(),
       },
     ],
   };
@@ -151,13 +180,14 @@ export const SEO_PAGES = {
     path: "/",
     absoluteTitle: "BeWork | Créer avec l’IA sans savoir coder",
     description:
-      "En une journée, apprenez à créer sites, apps et outils avec l’IA — sans coder. Méthode pratique, petit groupe, 200 €. Demandez une place.",
+      `En une journée, apprenez à créer sites, apps et outils avec l’IA — sans coder. Parcours 7 h (${BEWORK_SESSION_PRICE_EUR} €) ou 14 h (${BEWORK_COMPLETE_PRICE_EUR} €).`,
     keywords: [
       "créer avec l'IA sans coder",
       "formation IA débutant",
       "créer application sans programmer",
       "formation créer site avec IA",
-      "journée BeWork",
+      "formation IA 7 heures",
+      "formation IA 2 jours",
       "apprendre à créer avec l'intelligence artificielle",
     ],
   },
@@ -166,16 +196,16 @@ export const SEO_PAGES = {
     title: "Formation IA débutant — Créer sans savoir coder",
     absoluteTitle: "Formation IA débutant — Créer sans savoir coder | BeWork",
     description:
-      "Une journée pratique pour découvrir comment créer sites, applications et outils numériques avec l’IA, sans savoir coder. Présentiel principalement, sessions visio disponibles.",
+      "Formation progressive : 1 jour (7 h) pour apprendre à commencer, 2 jours (14 h) pour construire plus loin. Présentiel ou visio, sans savoir coder.",
     keywords: [
       "formation IA débutant",
       "créer avec intelligence artificielle",
       "créer sans coder",
+      "formation IA 1 jour",
+      "formation IA 2 jours",
       "formation IA pratique",
       "créer un site avec IA",
-      "créer une application avec IA",
-      "IA entrepreneur",
-      "IA demandeur d’emploi",
+      "présentiel visio formation IA",
     ],
   },
   demonstrations: {
@@ -204,32 +234,34 @@ export const SEO_PAGES = {
   },
   tarifs: {
     path: "/tarifs",
-    title: `Tarif formation IA — ${BEWORK_SESSION_PRICE_EUR} €`,
-    description: `Tarif unique BeWork : ${BEWORK_SESSION_PRICE_EUR} € / participant pour une journée pratique. Inclus : démos, accompagnement, méthode. Pas d’abonnement.`,
+    title: `Tarifs formation IA — ${BEWORK_SESSION_PRICE_EUR} € ou ${BEWORK_COMPLETE_PRICE_EUR} €`,
+    description: `Parcours BeWork : ${BEWORK_SESSION_PRICE_EUR} € (7 h) ou ${BEWORK_COMPLETE_PRICE_EUR} € (14 h) par participant. Même point de départ, prolongation possible. Pas d’abonnement.`,
     keywords: [
       "tarif formation IA",
       "prix formation créer avec IA",
-      "formation IA 200 euros",
+      `formation IA ${BEWORK_SESSION_PRICE_EUR} euros`,
+      `formation IA ${BEWORK_COMPLETE_PRICE_EUR} euros`,
     ],
   },
   faq: {
     path: "/faq",
     title: "FAQ — Formation créer avec l’IA",
     description:
-      "Faut-il savoir coder ? Débutants bienvenus ? Que créer ? Ordinateur ? Outils ? Réponses claires sur la journée BeWork — sans promesse irréaliste.",
+      "Différence 7 h / 14 h, prolongation, débutants, ordinateur, visio… Réponses claires sur la formation BeWork — sans promesse irréaliste.",
     keywords: [
       "faut-il savoir coder formation IA",
       "formation IA débutant FAQ",
+      "différence formation 7h 14h",
       "que créer avec l'IA",
     ],
   },
   contact: {
     path: "/contact",
     title: "Participer — Demander une place BeWork",
-    description: `Demandez une place à la journée BeWork (${BEWORK_SESSION_PRICE_EUR} €) : créer sites et outils avec l’IA, sans savoir coder. Petit groupe, pratique.`,
+    description: `Demandez une place BeWork : parcours 7 h (${BEWORK_SESSION_PRICE_EUR} €) ou 14 h (${BEWORK_COMPLETE_PRICE_EUR} €). Créer avec l’IA, sans savoir coder.`,
     keywords: [
       "inscription formation IA",
-      "participer journée BeWork",
+      "participer formation BeWork",
       "demander une place formation créer avec IA",
     ],
   },

@@ -21,9 +21,43 @@
   margin-inline: auto;
 }
 
+.programHead {
+  max-width: 40rem;
+  margin: 0 0 1.5rem;
+}
+
+@media (max-width: 720px) {
+  .programHead {
+    display: none;
+  }
+}
+
+.programEyebrow {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #275be8;
+}
+
+.programTitle {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(1.55rem, 3vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+  color: #0f172a;
+}
+
 @media (min-width: 768px) {
   .shell {
     width: min(1560px, calc(100% - 2.5rem));
+  }
+
+  .programHead {
+    margin-bottom: 1.75rem;
   }
 }
 

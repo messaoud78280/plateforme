@@ -13,11 +13,11 @@ const HOME_FAQ = FORMATION_FAQ.filter((item) =>
   [
     "Faut-il savoir coder ?",
     "Est-ce adapté aux débutants ?",
+    "Quelle différence entre 7 h et 14 h ?",
+    "Puis-je commencer par 1 jour et prolonger ensuite ?",
     "Que peut-on créer ?",
     "Dois-je venir avec mon ordinateur ?",
-    "Puis-je venir avec une idée ?",
     "Que vais-je savoir faire après ?",
-    "Quels outils utilisez-vous ?",
   ].includes(item.q),
 );
 

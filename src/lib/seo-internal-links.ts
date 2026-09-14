@@ -24,7 +24,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
   ],
   "/contact": [
     { href: "/formation", label: "La formation" },
-    { href: "/tarifs", label: "Tarif 200 €" },
+    { href: "/tarifs", label: "Tarifs 300 € / 600 €" },
     { href: "/demonstrations", label: "Démonstrations" },
     { href: "/faq", label: "FAQ" },
   ],

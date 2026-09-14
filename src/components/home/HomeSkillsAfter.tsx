@@ -49,7 +49,7 @@ const STEPS = [
   {
     id: "06",
     title: "Continuer",
-    desc: "Être capable de poursuivre son projet après la journée.",
+    desc: "Être capable de poursuivre son projet après la formation.",
     tone: "indigo",
     variant: "featured",
     ui: "continuer",

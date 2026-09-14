@@ -11,7 +11,11 @@ import {
   HOME_EYEBROW,
   HOME_SECTION,
 } from "@/components/home/homeSectionStyles";
-import { BEWORK_SESSION_PRICE_EUR } from "@/lib/bework-formation";
+import {
+  BEWORK_COMPLETE_PRICE_EUR,
+  BEWORK_SESSION_PRICE_EUR,
+  TRAINING_OFFERS,
+} from "@/lib/bework-formation";
 
 const LEARN_BLOCKS = [
   {
@@ -168,7 +172,7 @@ export function ParticiperPageContent() {
           <div className="max-w-3xl">
             <p className={HOME_EYEBROW}>La journée BeWork</p>
             <h1 className="mt-5 font-display text-[2.15rem] font-extrabold leading-[1.05] tracking-[-0.045em] text-[#0a0a0a] sm:text-[3rem] md:text-[3.65rem]">
-              Une journée pour passer
+              Une formation pour passer
               <br />
               <span className="text-[#1d4ed8]">de l’idée à la construction.</span>
             </h1>
@@ -178,19 +182,22 @@ export function ParticiperPageContent() {
                 pourrait vous être utile, mais vous ne savez pas coder&nbsp;?
               </p>
               <p>
-                Pendant une journée, BeWork vous montre comment utiliser
-                l’intelligence artificielle pour commencer à transformer vos
-                idées en projets numériques concrets.
+                BeWork vous montre comment utiliser l’intelligence artificielle pour
+                commencer à transformer vos idées en projets numériques concrets —
+                en 7&nbsp;h ou 14&nbsp;h.
               </p>
             </div>
             <p className="mt-7 text-[11px] font-bold uppercase tracking-[0.16em] text-[#1d4ed8]">
               Aucune connaissance en programmation n’est nécessaire.
             </p>
             <p className="mt-5 font-display text-xl font-extrabold tracking-tight text-[#0a0a0a] sm:text-2xl">
-              {BEWORK_SESSION_PRICE_EUR}&nbsp;€{" "}
+              Dès {BEWORK_SESSION_PRICE_EUR}&nbsp;€{" "}
               <span className="text-base font-semibold text-slate-500">
-                / participant
+                / participant · 7&nbsp;h
               </span>
+            </p>
+            <p className="mt-2 text-sm text-slate-500">
+              Parcours 14&nbsp;h : {BEWORK_COMPLETE_PRICE_EUR}&nbsp;€ — prolongation possible après le Jour&nbsp;1.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a href="#participer" className={HOME_BTN_PRIMARY}>
@@ -488,18 +495,40 @@ export function ParticiperPageContent() {
         <div className="container-site">
           <div className="bw-surface-tarif relative mx-auto max-w-3xl overflow-hidden rounded-[1.75rem] px-6 py-12 sm:px-10 sm:py-14">
             <div className="relative text-center">
-              <p className={HOME_EYEBROW}>Une formule simple</p>
+              <p className={HOME_EYEBROW}>Choisissez votre parcours</p>
               <h2
                 id="tarif-journee-heading"
                 className="mt-4 font-display text-[1.85rem] font-extrabold tracking-tight text-[#0a0a0a] sm:text-[2.5rem]"
               >
-                La journée BeWork
+                Un même point de départ
               </h2>
-              <p className="mt-8 font-display text-5xl font-extrabold tracking-tight text-[#0a0a0a] sm:text-6xl">
-                {BEWORK_SESSION_PRICE_EUR}&nbsp;€
-              </p>
-              <p className="mt-2 text-sm font-medium uppercase tracking-[0.14em] text-slate-500">
-                Par participant
+              <div className="mt-8 grid gap-6 sm:grid-cols-2 sm:gap-4 text-left">
+                <div className="rounded-2xl border border-slate-200 bg-white/80 p-5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                    {TRAINING_OFFERS.essential.label}
+                  </p>
+                  <p className="mt-2 font-display text-3xl font-extrabold tracking-tight text-[#0a0a0a]">
+                    {TRAINING_OFFERS.essential.price}&nbsp;€
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {TRAINING_OFFERS.essential.hours}&nbsp;h · {TRAINING_OFFERS.essential.title}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-[#2563eb]/25 bg-white p-5 shadow-sm">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#2563eb]">
+                    {TRAINING_OFFERS.complete.label}
+                  </p>
+                  <p className="mt-2 font-display text-3xl font-extrabold tracking-tight text-[#0a0a0a]">
+                    {TRAINING_OFFERS.complete.price}&nbsp;€
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {TRAINING_OFFERS.complete.hours}&nbsp;h · {TRAINING_OFFERS.complete.title}
+                  </p>
+                </div>
+              </div>
+              <p className="mt-6 text-sm leading-relaxed text-slate-600">
+                Vous pouvez commencer par 1 journée et ajouter le Jour 2 plus tard pour{" "}
+                {BEWORK_SESSION_PRICE_EUR}&nbsp;€ supplémentaires.
               </p>
             </div>
 

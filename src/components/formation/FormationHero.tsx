@@ -48,7 +48,7 @@ export function FormationHero() {
         <div className={styles.grid}>
           <div className={`${styles.copy}${copyReady ? ` ${styles.ready}` : ""}`}>
             <p className={`${styles.eyebrow} ${styles.reveal}`} style={{ ["--d" as string]: "0ms" }}>
-              La journée BeWork
+              La formation BeWork
             </p>
 
             <h1 id="formation-hero-title" className={styles.title}>
@@ -79,9 +79,8 @@ export function FormationHero() {
             </h1>
 
             <p className={`${styles.lead} ${styles.reveal}`} style={{ ["--d" as string]: "300ms" }}>
-              Une journée pratique pour découvrir comment transformer vos idées en sites,
-              applications et outils numériques avec l’intelligence artificielle — même si vous
-              partez de zéro.
+              Commencez par apprendre à créer. Puis choisissez jusqu’où vous voulez aller — une
+              journée pour commencer, deux pour construire plus loin.
             </p>
 
             <p
@@ -158,7 +157,7 @@ export function FormationHero() {
             <rect x="9" y="3" width="6" height="10" rx="3" />
             <path d="M12 6v2M8 16l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          Découvrir la journée
+          Découvrir la formation
         </a>
       </div>
     </section>

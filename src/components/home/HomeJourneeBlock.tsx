@@ -141,7 +141,7 @@ export function HomeJourneeBlock() {
                 sizes="(max-width:1024px) 100vw, 48vw"
                 priority={false}
               />
-              <span className={styles.capsule}>Journée pratique</span>
+              <span className={styles.capsule}>Jour 1 · Parcours commun</span>
             </div>
 
             <div className={cx(styles.ideaCard, reveal)}>
@@ -160,7 +160,7 @@ export function HomeJourneeBlock() {
           </div>
 
           <div className={cx(styles.content, reveal)}>
-            <p className={styles.eyebrow}>La journée BeWork</p>
+            <p className={styles.eyebrow}>Jour 1 · Parcours commun</p>
             <h2 id="journee-home-heading" className={styles.title}>
               <span className={styles.titleLine}>Pas une journée à écouter.</span>
               <span className={cx(styles.titleLine, styles.titleAccent)}>
@@ -190,7 +190,7 @@ export function HomeJourneeBlock() {
 
             <div className={styles.ctas}>
               <Link href="/formation" className={styles.btnPrimary}>
-                Découvrir le déroulement
+                Découvrir la formation
                 <span aria-hidden>→</span>
               </Link>
               <Link href="/demonstrations" className={styles.btnSecondary}>

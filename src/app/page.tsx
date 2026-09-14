@@ -4,6 +4,7 @@ import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { HomeFaqAccordion } from "@/components/home/HomeFaqAccordion";
 import { HomeFinalCta } from "@/components/home/HomeFinalCta";
 import { HomeAgentsFamilies } from "@/components/home/HomeAgentsFamilies";
+import { HomeDayProgression } from "@/components/home/HomeDayProgression";
 import { HomeJourneeBlock } from "@/components/home/HomeJourneeBlock";
 import { HomeMetierSelector } from "@/components/home/HomeMetierSelector";
 import { HomePlatformHero } from "@/components/home/HomePlatformHero";
@@ -97,6 +98,7 @@ export default function HomePage() {
         <HomeMetierSelector />
         <HomeAgentsFamilies />
         <HomeJourneeBlock />
+        <HomeDayProgression />
         <HomeSkillsAfter />
         <HomePricingSession />
         <HomeFaqAccordion />

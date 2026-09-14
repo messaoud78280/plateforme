@@ -93,11 +93,11 @@ export const SEO_SITE_TITLE_OG = "BeWork — Créer avec l’IA sans savoir code
 
 /** Meta description site (layout racine) — ≤160 car. */
 export const SEO_VALUE_PROPOSITION =
-  "En une journée, apprenez à créer sites, apps et outils avec l’IA — sans coder. Méthode pratique, petit groupe, 200 €. Demandez une place BeWork.";
+  "En une journée, apprenez à créer avec l’IA — sans coder. Parcours 7 h (300 €) ou 14 h (600 €). Demandez une place BeWork.";
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Formation pratique : créer avec l’IA sans savoir coder. Une journée, petits groupes, 200 €.";
+  "Formation progressive : créer avec l’IA sans savoir coder. 7 h ou 14 h, petits groupes, dès 300 €.";
 
 /** Tagline institutionnelle (OG image, footer). */
 export const BEWORK_TECH_AROUND_YOU = "Sans savoir coder. Créez ce que vous imaginez.";

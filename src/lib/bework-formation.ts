@@ -3,7 +3,58 @@
  * Aucun outil, stack, prompt ou workflow technique détaillé ici.
  */
 
-export const BEWORK_SESSION_PRICE_EUR = 200;
+/** Source unique des parcours — 7 h / 14 h. */
+export const TRAINING_OFFERS = {
+  essential: {
+    id: "essential",
+    days: 1,
+    hours: 7,
+    price: 300,
+    label: "1 jour",
+    title: "Apprendre à commencer",
+    description:
+      "Une journée complète pour comprendre la méthode, préparer votre environnement, créer une première version, apprendre à modifier, tester et corriger.",
+    promise: "Vous repartez en sachant comment commencer.",
+    ctaLabel: "Choisir 1 journée",
+    benefits: [
+      "Parcours complet du Jour 1",
+      "Mise en pratique guidée",
+      "Première création fonctionnelle",
+      "Méthode pour tester et corriger",
+      "Plan pour continuer après la journée",
+    ],
+  },
+  complete: {
+    id: "complete",
+    days: 2,
+    hours: 14,
+    price: 600,
+    label: "2 jours",
+    title: "Construire plus loin",
+    description:
+      "Le parcours du Jour 1, puis une deuxième journée pour pratiquer davantage, approfondir votre projet et gagner en autonomie.",
+    promise: "Vous avez le temps de construire, tester, corriger et aller plus loin.",
+    ctaLabel: "Choisir 2 journées",
+    badge: "Recommandé pour aller plus loin",
+    benefits: [
+      "Tout le parcours 7 h",
+      "Une journée supplémentaire de pratique",
+      "Projet plus approfondi",
+      "Fonctionnalités supplémentaires",
+      "Tests, corrections et accompagnement renforcé",
+    ],
+  },
+} as const;
+
+export type TrainingOfferId = keyof typeof TRAINING_OFFERS;
+export type TrainingOffer = (typeof TRAINING_OFFERS)[TrainingOfferId];
+
+/** Prix Jour 1 (alias historique — préférer TRAINING_OFFERS). */
+export const BEWORK_SESSION_PRICE_EUR = TRAINING_OFFERS.essential.price;
+/** Prix parcours 14 h. */
+export const BEWORK_COMPLETE_PRICE_EUR = TRAINING_OFFERS.complete.price;
+/** Prolongation Jour 2 après inscription 7 h. */
+export const BEWORK_EXTENSION_PRICE_EUR = TRAINING_OFFERS.essential.price;
 
 /** Constante facilement modifiable — non affichée tant que non figée. */
 export const BEWORK_SESSION_MAX_PARTICIPANTS: number | null = null;
@@ -191,13 +242,13 @@ export const METIER_IDEAS = [
 ] as const;
 
 export const FORMATION_INCLUDES = [
-  "Une journée complète de formation pratique",
+  "Parcours Jour 1 complet (7 h)",
   "Accompagnement en petit groupe",
   "Installation et prise en main de l’environnement nécessaire",
   "Démonstrations concrètes",
   "Exercices pratiques",
   "Méthode de travail réutilisable",
-  "Accompagnement pendant la journée",
+  "Possibilité de prolonger avec le Jour 2",
 ] as const;
 
 /** Programme horaire indicatif — page /formation. */
@@ -308,19 +359,33 @@ export const FORMATION_SCHEDULE = [
   },
 ] as const;
 
-/** Acquis — verbes d’action, pas « maîtriser ». */
-export const FORMATION_ACQUIS = [
-  { verb: "Transformer", text: "une idée en besoin plus clair" },
-  { verb: "Structurer", text: "les premières fonctions d’un projet" },
-  { verb: "Demander", text: "précisément quelque chose à une IA" },
+/** Acquis Jour 1 — verbes d’action, pas « maîtriser ». */
+export const FORMATION_ACQUIS_DAY1 = [
+  { verb: "Transformer", text: "une idée en demande claire" },
+  { verb: "Structurer", text: "les premières fonctions" },
   { verb: "Créer", text: "une première version" },
   { verb: "Modifier", text: "un résultat" },
   { verb: "Tester", text: "ce que vous avez créé" },
-  { verb: "Corriger", text: "un problème avec l’aide de l’IA" },
-  { verb: "Améliorer", text: "progressivement" },
-  { verb: "Comprendre", text: "les grandes briques d’un projet numérique" },
-  { verb: "Continuer", text: "à apprendre après la journée" },
+  { verb: "Corriger", text: "avec l’aide de l’IA" },
+  { verb: "Comprendre", text: "suffisamment pour continuer" },
+  { verb: "Dialoguer", text: "plus efficacement avec l’IA" },
 ] as const;
+
+/** Acquis Jour 2 — approfondissement, pas expertise complète. */
+export const FORMATION_ACQUIS_DAY2 = [
+  { verb: "Structurer", text: "davantage un projet" },
+  { verb: "Ajouter", text: "des fonctionnalités" },
+  { verb: "Faire évoluer", text: "plusieurs parties" },
+  { verb: "Tester", text: "plus méthodiquement" },
+  { verb: "Identifier", text: "un problème" },
+  { verb: "Corriger", text: "et améliorer" },
+  { verb: "Travailler", text: "plus longuement sur votre projet" },
+  { verb: "Organiser", text: "la suite" },
+  { verb: "Gagner", text: "en autonomie" },
+] as const;
+
+/** @deprecated Préférer FORMATION_ACQUIS_DAY1 */
+export const FORMATION_ACQUIS = FORMATION_ACQUIS_DAY1;
 
 export const FORMATION_INTERACTIVE_BEATS = [
   "Vous regardez",
@@ -411,9 +476,9 @@ export const FORMATION_CREATION_EXAMPLES = [
   "Prototype",
 ] as const;
 
-/** Inclus tarif — page /formation. */
+/** Inclus tarif — page /formation (parcours commun Jour 1). */
 export const FORMATION_TARIF_INCLUDES = [
-  "Journée complète",
+  "Parcours Jour 1 (7 h)",
   "Petit groupe",
   "Démonstrations",
   "Installation / préparation guidée",
@@ -453,12 +518,28 @@ export const FORMATION_NAV = [
 /** FAQ pratique complète — page /formation. */
 export const FORMATION_PAGE_FAQ = [
   {
+    q: "Quelle différence entre la formation 7 h et 14 h ?",
+    a: "La première journée est commune à tous. Elle vous apprend à comprendre la méthode, préparer votre environnement, créer, modifier, tester et corriger. Le parcours de 14 h ajoute une deuxième journée consacrée à davantage de pratique, à l’approfondissement et à un projet plus avancé.",
+  },
+  {
+    q: "Puis-je commencer par 7 h et décider ensuite de continuer ?",
+    a: `Oui. Vous pouvez commencer par la première journée à ${TRAINING_OFFERS.essential.price} €. Si vous souhaitez poursuivre, vous pouvez ajouter la deuxième journée pour ${BEWORK_EXTENSION_PRICE_EUR} € supplémentaires.`,
+  },
+  {
+    q: "Est-ce que les 7 h suffisent pour apprendre ?",
+    a: "Les 7 h sont conçues comme une formation complète pour apprendre à commencer et acquérir une méthode. Elles ne prétendent pas faire de vous un développeur en une journée. Le parcours de 14 h permet surtout de pratiquer davantage et d’aller plus loin.",
+  },
+  {
+    q: "Est-ce que les participants des parcours 7 h et 14 h sont ensemble ?",
+    a: "Oui. La première journée est commune. Les participants inscrits au parcours 14 h poursuivent ensuite avec la deuxième journée.",
+  },
+  {
     q: "Faut-il savoir coder ?",
     a: "Non.",
   },
   {
     q: "Faut-il être bon en informatique ?",
-    a: "Non. La journée est conçue pour des personnes qui partent de zéro ou qui se sentent peu à l’aise.",
+    a: "Non. La formation est conçue pour des personnes qui partent de zéro ou qui se sentent peu à l’aise.",
   },
   {
     q: "Puis-je venir sans idée ?",
@@ -485,8 +566,8 @@ export const FORMATION_PAGE_FAQ = [
     a: "Les instructions nécessaires seront indiquées avant la session. Une grande partie de la mise en place pourra être faite ensemble.",
   },
   {
-    q: "Peut-on suivre la journée à distance ?",
-    a: "Oui. BeWork privilégie le présentiel, mais organise également des sessions en visioconférence pour les personnes qui ne peuvent pas se déplacer.",
+    q: "Puis-je suivre la formation en visio ?",
+    a: "Oui. BeWork privilégie le présentiel, mais organise également des sessions en visioconférence pour les personnes qui ne peuvent pas se déplacer. Les deux durées (7 h et 14 h) peuvent s’inscrire dans le mode prévu par la session.",
   },
   {
     q: "La visio se déroule-t-elle en même temps que le présentiel ?",
@@ -498,7 +579,7 @@ export const FORMATION_PAGE_FAQ = [
   },
   {
     q: "Est-ce que je pourrai continuer après ?",
-    a: "Oui. C’est l’un des principaux objectifs de la journée.",
+    a: "Oui. C’est l’un des principaux objectifs du parcours.",
   },
   {
     q: "Les outils utilisés sont-ils gratuits ?",
@@ -513,7 +594,15 @@ export const FORMATION_FAQ = [
   },
   {
     q: "Est-ce adapté aux débutants ?",
-    a: "Oui. BeWork part du principe que vous n’avez pas besoin d’être développeur. La journée est pensée pour débuter clairement, sans jargon inutile.",
+    a: "Oui. BeWork part du principe que vous n’avez pas besoin d’être développeur. Le parcours est pensé pour débuter clairement, sans jargon inutile.",
+  },
+  {
+    q: "Quelle différence entre 7 h et 14 h ?",
+    a: "Tout le monde commence par la même première journée. Les 7 h vous apprennent à commencer et à continuer seul. Les 14 h ajoutent une deuxième journée pour pratiquer davantage et construire plus loin.",
+  },
+  {
+    q: "Puis-je commencer par 1 jour et prolonger ensuite ?",
+    a: `Oui. Commencez par la première journée à ${TRAINING_OFFERS.essential.price} €. Si vous souhaitez aller plus loin, ajoutez simplement le deuxième jour pour ${BEWORK_EXTENSION_PRICE_EUR} € supplémentaires.`,
   },
   {
     q: "Que peut-on créer ?",
@@ -521,7 +610,7 @@ export const FORMATION_FAQ = [
   },
   {
     q: "Dois-je venir avec mon ordinateur ?",
-    a: "Oui. La journée est pratique et doit idéalement être suivie depuis votre propre ordinateur.",
+    a: "Oui. La formation est pratique et doit idéalement être suivie depuis votre propre ordinateur.",
   },
   {
     q: "Puis-je venir avec une idée ?",
@@ -529,15 +618,15 @@ export const FORMATION_FAQ = [
   },
   {
     q: "Que vais-je savoir faire après ?",
-    a: "Structurer un besoin, lancer une première création, demander des modifications, tester, corriger et continuer votre projet. Vous ne repartirez pas développeur — vous repartirez capable de commencer.",
+    a: "Après 7 h : structurer un besoin, lancer une première création, modifier, tester, corriger et continuer. Après 14 h : davantage de pratique et un projet plus abouti. Vous ne repartirez pas développeur — vous repartirez capable de progresser.",
   },
   {
     q: "Quels outils utilisez-vous ?",
-    a: "Nous utilisons pendant la journée un environnement de création assisté par intelligence artificielle, choisi pour être accessible aux débutants. Les outils sont présentés aux participants — pas détaillés sur le site.",
+    a: "Nous utilisons pendant la formation un environnement de création assisté par intelligence artificielle, choisi pour être accessible aux débutants. Les outils sont présentés aux participants — pas détaillés sur le site.",
   },
   {
     q: "Pourquoi ne présentez-vous pas toute la méthode sur le site ?",
-    a: "Parce que BeWork est avant tout une formation pratique. Le site vous montre ce qu’il est possible de réaliser ; la journée vous apprend comment y parvenir.",
+    a: "Parce que BeWork est avant tout une formation pratique. Le site vous montre ce qu’il est possible de réaliser ; la formation vous apprend comment y parvenir.",
   },
 ] as const;
 

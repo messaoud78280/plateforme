@@ -182,13 +182,13 @@ export function FormationFormats() {
             Comment participer ?
           </p>
           <h2 id="formats-title" className={styles.title}>
-            Deux formats.
+            Deux façons de participer.
             <br />
-            <span className={styles.gradient}>Une même ambition.</span>
+            <span className={styles.gradient}>En présentiel ou à distance.</span>
           </h2>
           <p className={styles.lead}>
-            Choisissez le format qui vous convient. Le programme, la pratique et
-            l’accompagnement restent les mêmes, pour une expérience tout aussi complète.
+            Choisissez le mode qui vous convient. Le parcours (7&nbsp;h ou 14&nbsp;h), la pratique
+            et l’accompagnement restent les mêmes, pour une expérience tout aussi complète.
           </p>
         </div>
 
@@ -202,9 +202,9 @@ export function FormationFormats() {
               <span className={styles.badge}>★ Recommandé</span>
             </div>
             <h3 className={styles.cardTitle}>
-              Une journée ensemble.
+              Ensemble, ordinateur ouvert.
               <br />
-              <span className={styles.accentBlue}>Ordinateur ouvert.</span>
+              <span className={styles.accentBlue}>Au plus près de vous.</span>
             </h3>
             <p className={styles.cardLead}>
               Nous privilégions ce format pour pouvoir regarder avec vous ce qui se passe sur
@@ -235,7 +235,7 @@ export function FormationFormats() {
               <p className={styles.optionLabel}>Option 2 — Visio</p>
             </div>
             <h3 className={styles.cardTitle}>
-              La même journée.
+              Le même parcours.
               <br />
               <span className={styles.accentViolet}>Depuis chez vous.</span>
             </h3>

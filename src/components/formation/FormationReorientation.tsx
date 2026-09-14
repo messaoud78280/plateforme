@@ -20,12 +20,19 @@ export function FormationReorientation() {
             </h2>
             <div className={styles.reorientCopy}>
               <p>
-                Une journée ne suffit évidemment pas à apprendre un nouveau métier. Mais elle peut
-                suffire pour découvrir un nouvel univers.
+                Une journée ne suffit évidemment pas à apprendre un nouveau métier.
               </p>
-              <p>Elle peut provoquer un déclic.</p>
-              <p>Elle peut vous donner envie d’approfondir.</p>
-              <p>Elle peut vous faire découvrir une capacité que vous ne pensiez pas avoir.</p>
+              <p>
+                Mais elle peut suffire pour comprendre une nouvelle manière de créer, provoquer un
+                déclic et vous donner une méthode pour commencer.
+              </p>
+              <p>
+                Et si vous souhaitez transformer ce premier déclic en davantage de pratique, vous
+                pouvez poursuivre avec une deuxième journée.
+              </p>
+              <p>
+                <strong>Commencez. Testez. Puis décidez si vous voulez aller plus loin.</strong>
+              </p>
             </div>
           </div>
 

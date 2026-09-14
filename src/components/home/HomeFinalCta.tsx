@@ -108,28 +108,29 @@ export function HomeFinalCta() {
       <div className={styles.inner}>
         <div className={styles.halo} aria-hidden />
 
+        <p className={cx(styles.eyebrow, reveal)}>Prêt à commencer&nbsp;?</p>
+
         <h2 id="final-cta-heading" className={cx(styles.title, reveal)}>
-          <span className={styles.lineInk}>Une idée.</span>
-          <span className={styles.lineInk}>Un projet.</span>
-          <span className={styles.lineBlue}>Une nouvelle autonomie.</span>
+          <span className={styles.lineInk}>Une journée pour apprendre à commencer.</span>
+          <span className={styles.lineBlue}>Deux pour construire plus loin.</span>
         </h2>
 
         <p className={cx(styles.lead, reveal)}>
-          Vous venez avec une idée. Vous repartez en sachant comment commencer à
-          la construire — sans savoir coder.
+          Choisissez le parcours qui vous correspond aujourd’hui.
+          Vous pourrez toujours décider d’aller plus loin ensuite.
         </p>
 
         <div className={cx(styles.actions, reveal)}>
           <Link
             href="/contact#participer"
             className={styles.btnPrimary}
-            {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-final-participer")}
+            {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-final-sessions")}
           >
-            Demander une place
+            Découvrir les prochaines sessions
             <span aria-hidden>→</span>
           </Link>
-          <Link href="/#demonstrations" className={styles.btnSecondary}>
-            Revoir les démonstrations
+          <Link href="/#tarif" className={styles.btnSecondary}>
+            Comparer les parcours
           </Link>
         </div>
       </div>

@@ -45,7 +45,7 @@ const TRUST = [
   },
 ] as const;
 
-/** Hero maquette — slogan officiel + promesse journée + collage. */
+/** Hero maquette — slogan officiel + promesse + parcours discret. */
 export function HomePlatformHero() {
   return (
     <section
@@ -59,7 +59,7 @@ export function HomePlatformHero() {
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-10 xl:gap-14">
           <div className="max-w-xl lg:max-w-none">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#64748b]">
-              Une journée
+              Formation progressive
             </p>
 
             <h1 id="hero-heading" className={`mt-4 sm:mt-5 ${styles.slogan}`}>
@@ -68,7 +68,16 @@ export function HomePlatformHero() {
             </h1>
 
             <p className="mt-6 max-w-lg font-display text-[1.15rem] font-bold leading-snug tracking-[-0.03em] text-[#1a1f2a] sm:mt-7 sm:text-[1.3rem] md:text-[1.4rem]">
-              En une journée, passez de l’idée à votre première création.
+              En une journée, apprenez à créer avec l’IA.
+              <span className="mt-1 block text-[0.95em] font-semibold text-[#42526B]">
+                Sites, applications, outils métiers : sans savoir coder.
+              </span>
+            </p>
+
+            <p className="mt-4 max-w-md text-[0.92rem] font-medium leading-snug tracking-tight text-[#64748b] sm:mt-5 sm:text-[0.98rem]">
+              1 journée pour apprendre à commencer.
+              <br />
+              2 journées pour construire plus loin.
             </p>
 
             <p className="mt-4 max-w-lg text-base leading-relaxed text-[#42526B] sm:mt-5 sm:text-[1.05rem] md:text-[1.125rem]">
@@ -86,11 +95,11 @@ export function HomePlatformHero() {
 
             <div className="mt-8 flex flex-col gap-4 sm:mt-9 sm:flex-row sm:flex-wrap sm:items-center">
               <Link
-                href="/contact#participer"
+                href="/formation"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#275BE8] px-6 text-[0.95rem] font-semibold text-white shadow-[0_12px_28px_rgba(39,91,232,0.32)] transition hover:bg-[#1d4ed8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#275BE8]"
-                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-participer")}
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-formation")}
               >
-                Participer à la journée
+                Découvrir la formation
                 <span aria-hidden>→</span>
               </Link>
               <Link

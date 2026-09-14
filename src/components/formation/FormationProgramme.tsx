@@ -314,9 +314,12 @@ export function FormationProgramme() {
       aria-labelledby="programme-title"
     >
       <div className={styles.shell}>
-        <h2 id="programme-title" className={styles.srOnly}>
-          Une journée. Plusieurs déclics.
-        </h2>
+        <header className={styles.programHead}>
+          <p className={styles.programEyebrow}>Jour 1 · 7 h · Parcours commun</p>
+          <h2 id="programme-title" className={styles.programTitle}>
+            Une journée. Plusieurs déclics.
+          </h2>
+        </header>
 
         {!isMobile ? (
           <div className={styles.desktopBoard}>
@@ -413,7 +416,7 @@ export function FormationProgramme() {
         ) : (
           <div className={styles.mobileBoard}>
             <header className={styles.mobileHead}>
-              <p className={styles.mobileEyebrow}>Programme</p>
+              <p className={styles.mobileEyebrow}>Jour 1 · 7 h · Parcours commun</p>
               <p className={styles.mobileTitle}>Une journée. Plusieurs déclics.</p>
             </header>
 

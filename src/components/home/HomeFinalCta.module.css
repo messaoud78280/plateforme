@@ -98,6 +98,15 @@
   letter-spacing: -0.045em;
 }
 
+.eyebrow {
+  margin: 0 0 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fc-blue);
+}
+
 .lineInk,
 .lineBlue {
   display: block;
@@ -270,13 +279,15 @@
 
 /* Reveal */
 .title,
+.eyebrow,
 .lead,
 .actions {
   opacity: 0;
   transform: translateY(14px);
 }
 
-.isIn.title {
+.isIn.title,
+.isIn.eyebrow {
   opacity: 1;
   transform: none;
   transition: opacity 0.7s ease, transform 0.7s ease;
@@ -296,9 +307,11 @@
 
 @media (prefers-reduced-motion: reduce) {
   .title,
+  .eyebrow,
   .lead,
   .actions,
   .isIn.title,
+  .isIn.eyebrow,
   .isIn.lead,
   .isIn.actions {
     opacity: 1;

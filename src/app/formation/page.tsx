@@ -5,6 +5,7 @@ import { FormationAcquis } from "@/components/formation/FormationAcquis";
 import { FormationAiChange } from "@/components/formation/FormationAiChange";
 import { FormationAudience } from "@/components/formation/FormationAudience";
 import { FormationChecklist } from "@/components/formation/FormationChecklist";
+import { FormationDayTwo } from "@/components/formation/FormationDayTwo";
 import { FormationEntrepreneur } from "@/components/formation/FormationEntrepreneur";
 import { FormationEvolves } from "@/components/formation/FormationEvolves";
 import { FormationExamples } from "@/components/formation/FormationExamples";
@@ -15,6 +16,10 @@ import { FormationHero } from "@/components/formation/FormationHero";
 import { FormationInteractive } from "@/components/formation/FormationInteractive";
 import { FormationLearnToLearn } from "@/components/formation/FormationLearnToLearn";
 import { FormationOwnProject } from "@/components/formation/FormationOwnProject";
+import {
+  FormationDayBridge,
+  FormationPathIntro,
+} from "@/components/formation/FormationPathBridge";
 import { FormationPrerequis } from "@/components/formation/FormationPrerequis";
 import { FormationPricing } from "@/components/formation/FormationPricing";
 import { FormationProgramme } from "@/components/formation/FormationProgramme";
@@ -86,12 +91,15 @@ export default function FormationPage() {
 
       <main className={styles.flow}>
         <FormationHero />
+        <FormationPathIntro />
         <FormationFormats />
         <FormationWhy />
         <FormationAiChange />
         <FormationPrerequis />
         <FormationInteractive />
         <FormationProgramme />
+        <FormationDayBridge />
+        <FormationDayTwo />
         <FormationAcquis />
         <FormationOwnProject />
         <FormationLearnToLearn />

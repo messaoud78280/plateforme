@@ -1,0 +1,122 @@
+.section {
+  position: relative;
+  padding: 1.5rem 0 3.5rem;
+  scroll-margin-top: 7rem;
+}
+
+.shell {
+  width: min(1100px, calc(100% - 1.75rem));
+  margin-inline: auto;
+}
+
+.head {
+  max-width: 36rem;
+  margin-bottom: 2rem;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+.isIn {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(1.45rem, 3vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  color: #0f172a;
+}
+
+.lead {
+  margin: 0.85rem 0 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: #64748b;
+}
+
+.tracks {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 800px) {
+  .tracks {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+}
+
+.track {
+  padding: 1.35rem 1.25rem;
+  border-radius: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 12px 36px rgba(50, 70, 120, 0.06);
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.5s ease 80ms,
+    transform 0.5s ease 80ms;
+}
+
+.trackAccent {
+  border-color: rgba(39, 91, 232, 0.18);
+  background:
+    radial-gradient(ellipse 70% 50% at 100% 0%, rgba(196, 181, 253, 0.2) 0%, transparent 55%),
+    rgba(255, 255, 255, 0.92);
+  transition-delay: 160ms;
+}
+
+.trackLabel {
+  margin: 0 0 0.85rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #275be8;
+}
+
+.flow {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.15rem;
+}
+
+.flowItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.flowText {
+  font-size: 0.92rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.arrow {
+  margin: 0 0.15rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .head,
+  .track {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

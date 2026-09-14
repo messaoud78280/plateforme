@@ -53,8 +53,8 @@ export type GeoAeoBriefItem = { question: string; answer: string };
 /** Réponses courtes aux questions GEO/AEO — alignées formation V3 (pas de BTP / SaaS). */
 export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBriefItem[] {
   const priceHint = priceFromLabel
-    ? ` Tarif public : ${priceFromLabel} € / participant pour la journée.`
-    : " Tarif public : 200 € / participant pour la journée.";
+    ? ` Tarifs publics : à partir de ${priceFromLabel} € / participant (7 h), parcours 14 h disponible.`
+    : " Tarifs publics : 300 € (7 h) ou 600 € (14 h) par participant.";
 
   return [
     {
@@ -74,7 +74,7 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
     {
       question: "Quels services BeWork propose-t-il ?",
       answer:
-        "Une journée pratique en petit groupe pour apprendre à créer avec l’IA, des démonstrations illustratives sur le site, et une méthode réutilisable après la session. Pas de plateforme SaaS ni de catalogue d’outils imposé.",
+        "Une formation progressive en petit groupe pour apprendre à créer avec l’IA (7 h ou 14 h), des démonstrations illustratives sur le site, et une méthode réutilisable après la session. Pas de plateforme SaaS ni de catalogue d’outils imposé.",
     },
     {
       question: "Pourquoi faire confiance à BeWork ?",
@@ -83,7 +83,7 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
     },
     {
       question: "Combien coûte BeWork ?",
-      answer: `Journée BeWork : tarif unique publié sur bework.fr/tarifs.${priceHint} Pas d’abonnement lié à cette offre.`,
+      answer: `Formation BeWork : parcours 7 h ou 14 h, tarifs publiés sur bework.fr/tarifs.${priceHint} Pas d’abonnement lié à cette offre.`,
     },
     {
       question: "Comment commencer avec BeWork ?",

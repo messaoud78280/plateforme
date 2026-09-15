@@ -7,7 +7,7 @@ import styles from "./FormationProgramme.module.css";
 
 type ProgramDayId = (typeof PROGRAM_DAYS)[number]["id"];
 
-/** Programme BeWork — deux jours dans un même explorateur accessible. */
+/** Programme BeWork — deux jours centrés sur le projet du participant. */
 export function FormationProgramme() {
   const [activeDayId, setActiveDayId] = useState<ProgramDayId>("day1");
   const tabsId = useId();
@@ -48,12 +48,22 @@ export function FormationProgramme() {
         <header className={styles.header}>
           <p className={styles.eyebrow}>Programme</p>
           <h2 id="programme-title" className={styles.title}>
-            Un parcours progressif.
-            <span>7 h ou 14 h.</span>
+            Votre projet.{" "}
+            <span>Deux journées pour le construire.</span>
           </h2>
           <p className={styles.intro}>
-            Tout le monde commence par la même première journée.
-            Choisissez ensuite jusqu’où vous souhaitez aller.
+            Vous ne venez pas simplement apprendre des outils. Vous les utilisez directement pour
+            construire votre propre projet.
+          </p>
+          <p className={styles.intro}>
+            Site internet, application, outil métier, réservation, espace client ou autre idée
+            numérique : nous partons de votre besoin et avançons étape par étape. La première
+            journée vous permet de préparer votre environnement, organiser votre méthode et
+            commencer à construire. La deuxième permet d’aller plus loin : renforcer, publier,
+            référencer et auditer votre projet.
+          </p>
+          <p className={styles.highlight}>
+            Vous apprenez en construisant quelque chose qui vous appartient.
           </p>
         </header>
 
@@ -81,7 +91,7 @@ export function FormationProgramme() {
               >
                 <span className={styles.tabTop}>
                   <strong>{day.tabLabel}</strong>
-                  <span>{day.included}</span>
+                  <span className={styles.tabBadge}>{day.included}</span>
                 </span>
                 <span className={styles.tabTitle}>{day.eyebrow}</span>
                 <span className={styles.tabNote}>{day.note}</span>
@@ -100,23 +110,80 @@ export function FormationProgramme() {
           <div className={styles.dayHead}>
             <p>{activeDay.tabLabel}</p>
             <h3>{activeDay.title}</h3>
+            <p className={styles.dayDescription}>{activeDay.description}</p>
           </div>
+
           <ProgramTimeline
             key={activeDay.id}
             steps={activeDay.steps}
             dayLabel={activeDay.tabLabel}
           />
+
+          <div className={styles.dayClose} aria-label={`Bilan ${activeDay.tabLabel}`}>
+            <p className={styles.dayCloseEyebrow}>À la fin du {activeDay.id === "day1" ? "Jour 1" : "Jour 2"}</p>
+            <p className={styles.dayCloseLead}>
+              {activeDay.id === "day1"
+                ? "Vous ne repartez pas seulement avec des notions. Vous avez :"
+                : "Vous avez appris à :"}
+            </p>
+            <ul className={styles.dayOutcomes}>
+              {activeDay.outcomes.map((item) => (
+                <li key={item}>
+                  <span className={styles.check} aria-hidden>
+                    <svg viewBox="0 0 12 12" fill="none">
+                      <path
+                        d="M2.5 6.2 4.8 8.5 9.5 3.5"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <p className={styles.dayCloseLine}>{activeDay.closingLine}</p>
+          </div>
         </div>
+
+        <aside className={styles.summary} aria-label="Résumé visuel des deux journées">
+          {PROGRAM_DAYS.map((day) => (
+            <div
+              key={day.id}
+              className={`${styles.summaryCard}${day.id === activeDay.id ? ` ${styles.summaryCardActive}` : ""}`}
+            >
+              <p className={styles.summaryLabel}>{day.summaryLabel}</p>
+              <ol className={styles.summaryFlow}>
+                {day.summaryFlow.map((node, index) => (
+                  <li key={node}>
+                    <span>{node}</span>
+                    {index < day.summaryFlow.length - 1 ? (
+                      <span className={styles.summaryArrow} aria-hidden>
+                        ↓
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </aside>
 
         <aside className={styles.progression} aria-label="Progression de la formation">
           <div>
-            <strong>Après 7 h</strong>
-            <span>Une méthode pour commencer et continuer seul.</span>
+            <strong>Parcours 7 h — 300 €</strong>
+            <span>Jour 1 inclus : environnement, méthode et première version de votre projet.</span>
           </div>
-          <span className={styles.progressionArrow} aria-hidden>→</span>
+          <span className={styles.progressionArrow} aria-hidden>
+            →
+          </span>
           <div>
-            <strong>Après 14 h</strong>
-            <span>Davantage de pratique et un projet plus abouti.</span>
+            <strong>Parcours 14 h — 600 €</strong>
+            <span>
+              Jour 1 + Jour 2 : renforcer, publier, référencer et auditer le même projet.
+            </span>
           </div>
         </aside>
       </div>

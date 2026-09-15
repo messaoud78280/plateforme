@@ -14,6 +14,23 @@ type Props = {
   dayLabel: string;
 };
 
+function ProgramFlow({ nodes }: { nodes: readonly string[] }) {
+  return (
+    <ol className={styles.flow} aria-label="Enchaînement de cette étape">
+      {nodes.map((node, index) => (
+        <li key={`${node}-${index}`}>
+          <span className={styles.flowNode}>{node}</span>
+          {index < nodes.length - 1 ? (
+            <span className={styles.flowArrow} aria-hidden>
+              →
+            </span>
+          ) : null}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 function ProgramPanel({
   step,
   panelId,
@@ -45,6 +62,13 @@ function ProgramPanel({
         <p className={styles.panelLead}>{step.subtitle}</p>
       </header>
 
+      {step.flow && step.flow.length > 0 ? (
+        <section className={styles.panelBlock}>
+          <h4 className={styles.blockLabel}>Enchaînement</h4>
+          <ProgramFlow nodes={step.flow} />
+        </section>
+      ) : null}
+
       {step.actions.length > 0 ? (
         <section className={styles.panelBlock}>
           <h4 className={styles.blockLabel}>Pendant cette étape</h4>
@@ -71,7 +95,7 @@ function ProgramPanel({
 
       {step.tools.length > 0 ? (
         <section className={styles.panelBlock}>
-          <h4 className={styles.blockLabel}>Vous allez manipuler</h4>
+          <h4 className={styles.blockLabel}>Ce que vous utilisez</h4>
           <ul className={styles.tools}>
             {step.tools.map((tool) => (
               <li key={tool}>{tool}</li>
@@ -133,6 +157,7 @@ export function ProgramTimeline({ steps, dayLabel }: Props) {
         className={styles.timeline}
         role="listbox"
         aria-label={`Programme ${dayLabel}`}
+        aria-activedescendant={`${optionId}-${active}`}
       >
         {steps.map((step, index) => {
           const selected = index === active;
@@ -175,7 +200,7 @@ export function ProgramTimeline({ steps, dayLabel }: Props) {
       </div>
 
       <div className={styles.desktopPanel}>
-        <ProgramPanel step={activeStep} panelId={panelId} />
+        <ProgramPanel key={activeStep.id} step={activeStep} panelId={panelId} />
       </div>
     </div>
   );

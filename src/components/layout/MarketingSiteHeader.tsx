@@ -164,26 +164,33 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
 
               <p
                 className={styles.signature}
-                aria-label="En 1 ou 2 journées, apprenez à créer avec l’IA. Sites, applications, outils métiers : sans savoir coder."
+                aria-label="En une journée, passez de l’idée au projet. Créez avec l’IA, sans savoir coder."
               >
                 <span className={styles.signatureBody}>
                   <span className={styles.signaturePrimary}>
                     <span className={styles.signaturePrimaryFull}>
-                      En 1 ou 2 journées, apprenez à créer{" "}
-                      <span className={styles.accent}>avec l’IA</span>.
+                      En{"\u00a0"}une{"\u00a0"}journée, passez{" "}
+                      <span className={styles.accent}>
+                        de{"\u00a0"}l’idée au{"\u00a0"}projet
+                      </span>
+                      .
                     </span>
                     <span className={styles.signaturePrimaryShort}>
-                      Apprenez à créer{" "}
-                      <span className={styles.accent}>avec l’IA</span>.
+                      Passez{" "}
+                      <span className={styles.accent}>
+                        de{"\u00a0"}l’idée au{"\u00a0"}projet
+                      </span>
+                      .
                     </span>
                   </span>
                   <span className={styles.signatureSecondary}>
                     <span className={styles.signatureSecondaryFull}>
-                      Sites, applications, outils métiers :{" "}
-                      <span className={styles.accent}>sans savoir coder.</span>
+                      Créez <span className={styles.accent}>avec{"\u00a0"}l’IA</span>,{" "}
+                      <span className={styles.accent}>sans{"\u00a0"}savoir{"\u00a0"}coder</span>.
                     </span>
                     <span className={styles.signatureSecondaryShort}>
-                      <span className={styles.accent}>Sans savoir coder.</span>
+                      Créez <span className={styles.accent}>avec{"\u00a0"}l’IA</span>,{" "}
+                      <span className={styles.accent}>sans{"\u00a0"}savoir{"\u00a0"}coder</span>.
                     </span>
                   </span>
                 </span>

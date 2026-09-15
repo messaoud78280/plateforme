@@ -65,12 +65,14 @@ export function HomePlatformHero() {
               <span className={styles.line2}>Créez ce que vous imaginez.</span>
             </h1>
 
-            <p className="mt-6 max-w-lg font-display text-[1.15rem] font-bold leading-snug tracking-[-0.03em] text-[#1a1f2a] sm:mt-7 sm:text-[1.3rem] md:text-[1.4rem]">
-              En 1 ou 2 journées, apprenez à créer avec l’IA.
+            <p className="mt-6 max-w-2xl font-display text-[1.15rem] font-bold leading-snug tracking-[-0.03em] text-[#1a1f2a] sm:mt-7 sm:text-[1.3rem] md:text-[1.4rem]">
+              Donnez vie à votre idée <span className="text-[#275BE8]">avec{"\u00a0"}l’IA</span>.
             </p>
 
-            <p className="mt-2 max-w-lg text-[0.95rem] font-medium leading-snug text-[#42526B] sm:text-base">
-              Sites, applications, outils métiers : sans savoir coder.
+            <p className="mt-2 max-w-2xl text-[0.95rem] font-medium leading-[1.45] text-[#42526B] sm:text-base">
+              Apprenez à construire{" "}
+              <span className="text-[#275BE8]">votre propre projet</span>, étape par étape,
+              sans connaissances en programmation.
             </p>
 
             <ul className="mt-5 max-w-lg space-y-2.5 text-[0.95rem] leading-snug text-[#64748b] sm:mt-6 sm:text-[1rem]">

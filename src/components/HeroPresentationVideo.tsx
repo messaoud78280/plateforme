@@ -10,10 +10,26 @@ type HeroPresentationVideoProps = {
   className?: string;
   /** Par défaut léger décalage vertical ; désactiver quand la vidéo est empilée sous un autre bloc hero */
   verticalShift?: boolean;
+  /** Source MP4 (défaut : ancienne présentation). */
+  src?: string;
+  /** Poster optionnel. */
+  poster?: string;
+  /** Libellé accessible. */
+  title?: string;
 };
 
+const DEFAULT_SRC = "/video/presentation.mp4";
+const DEFAULT_POSTER = "/opengraph-image";
+const DEFAULT_TITLE = "Présentation BeWork";
+
 /** Hero vidéo — cadre type smartphone pro, contour métallique léger + ligne bleue */
-export function HeroPresentationVideo({ className = "", verticalShift = true }: HeroPresentationVideoProps) {
+export function HeroPresentationVideo({
+  className = "",
+  verticalShift = true,
+  src = DEFAULT_SRC,
+  poster = DEFAULT_POSTER,
+  title = DEFAULT_TITLE,
+}: HeroPresentationVideoProps) {
   const ref = useRef<HTMLVideoElement>(null);
   const [paused, setPaused] = useState(false);
 
@@ -49,13 +65,14 @@ export function HeroPresentationVideo({ className = "", verticalShift = true }: 
     const t = window.setTimeout(syncPaused, 400);
     return () => {
       window.clearTimeout(t);
+      v.pause();
       mq.removeEventListener("change", tryPlay);
       v.removeEventListener("loadeddata", onLoadedData);
       v.removeEventListener("play", syncPaused);
       v.removeEventListener("pause", syncPaused);
       v.removeEventListener("ended", syncPaused);
     };
-  }, []);
+  }, [src]);
 
   return (
     <div
@@ -64,13 +81,11 @@ export function HeroPresentationVideo({ className = "", verticalShift = true }: 
       aria-label="Vidéo de présentation BeWork — lecture automatique, son désactivé par défaut"
       className={`relative isolate mx-auto flex w-full max-w-full shrink-0 justify-center ${verticalShift ? "translate-y-[36px] lg:translate-y-[44px]" : ""} ${className}`}
     >
-      {/* Halo radial */}
       <div
         className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[min(420px,95vw)] w-[min(420px,95vw)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.14)_0%,transparent_68%)] motion-reduce:hidden"
         aria-hidden
       />
 
-      {/* Traits techniques discrets */}
       <div className="pointer-events-none absolute -left-6 top-[28%] hidden lg:block" aria-hidden>
         <svg width="72" height="48" viewBox="0 0 72 48" fill="none" className="text-slate-400/70">
           <path d="M0 24h48M48 12v24" stroke="currentColor" strokeWidth="1" strokeDasharray="3 4" />
@@ -88,7 +103,6 @@ export function HeroPresentationVideo({ className = "", verticalShift = true }: 
       </div>
 
       <div className="group relative mx-auto w-full max-w-[290px] transition-transform duration-300 ease-out will-change-transform group-hover:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100 lg:mx-0 lg:max-h-[524px] lg:max-w-[300px]">
-        {/* Anneau métallique simulé + filet bleu */}
         <div
           className="rounded-[32px] bg-gradient-to-br from-slate-200 via-white to-slate-300 p-[3px]"
           style={{ boxShadow: FRAME_SHADOW }}
@@ -105,13 +119,13 @@ export function HeroPresentationVideo({ className = "", verticalShift = true }: 
                 controls
                 controlsList="nodownload"
                 preload="auto"
-                poster="/opengraph-image"
-                title="Présentation BeWork"
-                src="/video/presentation.mp4"
+                poster={poster}
+                title={title}
+                src={src}
                 onPlay={() => setPaused(false)}
                 onPause={() => setPaused(true)}
               >
-                <source src="/video/presentation.mp4" type="video/mp4" />
+                <source src={src} type="video/mp4" />
                 Votre navigateur ne prend pas en charge la lecture de cette vidéo.
               </video>
 
@@ -131,16 +145,6 @@ export function HeroPresentationVideo({ className = "", verticalShift = true }: 
                   </span>
                 </button>
               ) : null}
-
-              {/* Barre de progression décorative (maquette) */}
-              <div
-                className="pointer-events-none absolute inset-x-0 bottom-[2.75rem] z-[3] flex justify-center px-4 sm:bottom-[2.85rem]"
-                aria-hidden
-              >
-                <div className="h-[3px] w-full max-w-[200px] rounded-full bg-black/45">
-                  <div className="h-full w-[40%] rounded-full bg-gradient-to-r from-[#1d4ed8] via-[#3b82f6] to-[#60a5fa] shadow-[0_0_12px_rgba(37,99,235,0.55)]" />
-                </div>
-              </div>
             </div>
           </div>
         </div>

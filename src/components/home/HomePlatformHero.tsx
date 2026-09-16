@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BwAtmosphere } from "@/components/home/BwAtmosphere";
-import { HomeHeroCollage } from "@/components/home/HomeHeroCollage";
+import { HomeHeroMedia } from "@/components/home/HomeHeroMedia";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import styles from "./HomePlatformHero.module.css";
 
@@ -116,7 +116,7 @@ export function HomePlatformHero() {
             </p>
           </div>
 
-          <HomeHeroCollage />
+          <HomeHeroMedia />
         </div>
 
         <ul className="mt-14 grid gap-6 pt-2 sm:mt-16 sm:grid-cols-3 sm:gap-8">

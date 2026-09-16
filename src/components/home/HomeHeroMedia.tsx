@@ -3,8 +3,18 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { HomeHeroCollage } from "@/components/home/HomeHeroCollage";
 
-const VIDEO_SRC = "/video/bework-hero-pub.mp4";
-const VIDEO_POSTER = "/marketing/bework-hero-pub-poster.png";
+const INTRO_VIDEOS = [
+  {
+    src: "/video/bework-hero-pub.mp4",
+    poster: "/marketing/bework-hero-pub-poster.png",
+    title: "Présentation BeWork — Au départ, une idée",
+  },
+  {
+    src: "/video/bework-hero-artisan.mp4",
+    poster: "/marketing/bework-hero-artisan-poster.png",
+    title: "Présentation BeWork — Artisan",
+  },
+] as const;
 
 const FRAME_SHADOW =
   "0 0 52px -14px rgba(37, 99, 235, 0.42), 0 28px 56px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255,255,255,0.35)";
@@ -29,10 +39,8 @@ function hasUserActivation() {
 }
 
 /**
- * Intro hero : vidéo avec voix, puis collage à la fin.
- * — Au rechargement, Chrome bloque le son sans geste : on part en muet
- *   et le premier clic (logo, lien, page…) relance avec le son depuis le début.
- * — Si un geste vient d’avoir lieu (ex. clic logo), le son part tout de suite.
+ * Intro hero : vidéo 1 → vidéo 2 → collage animé.
+ * Son dès qu’un geste le permet (politique navigateur).
  */
 export function HomeHeroMedia() {
   const reduceMotion = useSyncExternalStore(subscribeReduceMotion, getReduceMotion, () => false);
@@ -48,7 +56,13 @@ export function HomeHeroMedia() {
 function HomeHeroIntroVideo({ onEnded }: { onEnded: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const onEndedRef = useRef(onEnded);
+  const indexRef = useRef(0);
+  /** Conservé d’une vidéo à l’autre (ne pas re-couper le son en chaîne). */
+  const soundConfirmedRef = useRef(false);
+  const [index, setIndex] = useState(0);
   const [muted, setMuted] = useState(true);
+
+  const current = INTRO_VIDEOS[index] ?? INTRO_VIDEOS[0]!;
 
   useEffect(() => {
     onEndedRef.current = onEnded;
@@ -59,22 +73,14 @@ function HomeHeroIntroVideo({ onEnded }: { onEnded: () => void }) {
     if (!v) return;
 
     let cancelled = false;
-    let soundConfirmed = false;
     let unlocking = false;
     let started = false;
+
+    indexRef.current = index;
 
     v.loop = false;
     v.playsInline = true;
     v.volume = 1;
-    v.defaultMuted = true;
-    v.muted = true;
-    setMuted(true);
-
-    const finish = () => {
-      if (cancelled) return;
-      v.pause();
-      onEndedRef.current();
-    };
 
     const removeGestureListeners = () => {
       window.removeEventListener("pointerdown", onGesture, true);
@@ -83,34 +89,39 @@ function HomeHeroIntroVideo({ onEnded }: { onEnded: () => void }) {
     };
 
     const confirmSound = () => {
-      soundConfirmed = true;
+      soundConfirmedRef.current = true;
       setMuted(false);
       removeGestureListeners();
     };
 
+    const playCurrent = async (withSound: boolean) => {
+      v.defaultMuted = !withSound;
+      v.muted = !withSound;
+      setMuted(!withSound);
+      v.volume = 1;
+      v.currentTime = 0;
+      await v.play();
+    };
+
     const enableSoundFromStart = async () => {
-      if (cancelled || soundConfirmed || unlocking) return;
+      if (cancelled || soundConfirmedRef.current || unlocking) return;
       unlocking = true;
       try {
-        v.defaultMuted = false;
-        v.muted = false;
-        setMuted(false);
-        v.volume = 1;
-        v.currentTime = 0;
-        await v.play();
-        /* Vérifier que le navigateur n’a pas re-coupé le son en silence */
+        await playCurrent(true);
         await new Promise<void>((resolve) => {
           window.setTimeout(resolve, 40);
         });
         if (!cancelled && !v.paused && !v.muted) {
           confirmSound();
         } else {
-          v.muted = true;
-          setMuted(true);
+          await playCurrent(false);
         }
       } catch {
-        v.muted = true;
-        setMuted(true);
+        try {
+          await playCurrent(false);
+        } catch {
+          /* ignore */
+        }
       } finally {
         unlocking = false;
       }
@@ -120,40 +131,52 @@ function HomeHeroIntroVideo({ onEnded }: { onEnded: () => void }) {
       void enableSoundFromStart();
     }
 
-    const startMutedVisual = async () => {
-      v.defaultMuted = true;
-      v.muted = true;
-      setMuted(true);
-      try {
-        await v.play();
-      } catch {
-        /* ignore */
+    const goNextOrFinish = () => {
+      if (cancelled) return;
+      const next = indexRef.current + 1;
+      if (next < INTRO_VIDEOS.length) {
+        setIndex(next);
+        return;
       }
+      v.pause();
+      onEndedRef.current();
     };
 
     const start = async () => {
       if (cancelled || started) return;
       started = true;
 
-      await startMutedVisual();
-      if (cancelled) return;
-
-      /*
-       * Son auto uniquement si un geste utilisateur est déjà actif
-       * (ex. navigation via clic logo). Sinon on attend le premier clic.
-       */
-      if (hasUserActivation()) {
-        await enableSoundFromStart();
+      const wantSound = soundConfirmedRef.current || hasUserActivation();
+      try {
+        await playCurrent(wantSound);
+        if (wantSound) {
+          await new Promise<void>((resolve) => {
+            window.setTimeout(resolve, 40);
+          });
+          if (!cancelled && !v.paused && !v.muted) {
+            confirmSound();
+          } else if (!soundConfirmedRef.current) {
+            await playCurrent(false);
+          }
+        }
+      } catch {
+        try {
+          await playCurrent(false);
+        } catch {
+          /* ignore */
+        }
       }
 
-      if (!soundConfirmed) {
+      if (!soundConfirmedRef.current) {
         window.addEventListener("pointerdown", onGesture, true);
         window.addEventListener("keydown", onGesture, true);
         window.addEventListener("touchstart", onGesture, true);
       }
     };
 
-    v.addEventListener("ended", finish);
+    v.addEventListener("ended", goNextOrFinish);
+    v.src = current.src;
+    v.load();
     if (v.readyState >= 2) {
       void start();
     } else {
@@ -163,16 +186,16 @@ function HomeHeroIntroVideo({ onEnded }: { onEnded: () => void }) {
     return () => {
       cancelled = true;
       v.pause();
-      v.removeEventListener("ended", finish);
+      v.removeEventListener("ended", goNextOrFinish);
       removeGestureListeners();
     };
-  }, []);
+  }, [index, current.src]);
 
   return (
     <div
       id="presentation"
       role="region"
-      aria-label="Vidéo de présentation BeWork"
+      aria-label="Vidéos de présentation BeWork"
       className="relative isolate mx-auto flex w-full max-w-full shrink-0 justify-center"
     >
       <div
@@ -192,13 +215,10 @@ function HomeHeroIntroVideo({ onEnded }: { onEnded: () => void }) {
                 className="absolute inset-0 z-[1] block h-full w-full rounded-[26px] object-cover object-center"
                 playsInline
                 preload="auto"
-                poster={VIDEO_POSTER}
-                title="Présentation BeWork — Au départ, une idée"
-                src={VIDEO_SRC}
+                poster={current.poster}
+                title={current.title}
                 muted={muted}
-              >
-                <source src={VIDEO_SRC} type="video/mp4" />
-              </video>
+              />
             </div>
           </div>
         </div>

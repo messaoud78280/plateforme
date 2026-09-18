@@ -771,7 +771,7 @@ export async function updateQuoteMeta(
   return updated;
 }
 
-async function assertEditableVersion(orgId: string, quoteId: string) {
+export async function assertEditableVersion(orgId: string, quoteId: string) {
   const quote = await prisma.commercialQuote.findFirst({
     where: { id: quoteId, organizationId: orgId },
     include: { currentVersion: true },

@@ -28,6 +28,7 @@ import { QuoteDepositPanel } from "@/components/commercial/QuoteDepositPanel";
 import { QuoteProrataPanel } from "@/components/commercial/QuoteProrataPanel";
 import { LibraryPickerModal } from "@/components/commercial/LibraryPickerModal";
 import { ChatGptBundleImportModal } from "@/components/commercial/ChatGptBundleImportModal";
+import { ChatGptPatchImportModal } from "@/components/commercial/ChatGptPatchImportModal";
 import { QuoteClientNotesPreview } from "@/components/commercial/QuoteClientNotesPreview";
 import { IssuerEditModal } from "@/components/commercial/IssuerEditModal";
 import { ClientCoordsEditModal } from "@/components/commercial/ClientCoordsEditModal";
@@ -230,6 +231,10 @@ export function QuoteEditor({
   const [chatgptImportOpen, setChatgptImportOpen] = useState(false);
   const [chatgptImportUndo, setChatgptImportUndo] = useState(false);
   const [chatgptUndoBusy, setChatgptUndoBusy] = useState(false);
+  const [chatgptPatchOpen, setChatgptPatchOpen] = useState(false);
+  const [chatgptPatchUndo, setChatgptPatchUndo] = useState(false);
+  const [chatgptPatchUndoBusy, setChatgptPatchUndoBusy] = useState(false);
+  const [chatgptToast, setChatgptToast] = useState<string | null>(null);
   const [issuerEditOpen, setIssuerEditOpen] = useState(false);
   const [clientCoordsOpen, setClientCoordsOpen] = useState(false);
   const [lineNumericDrafts, setLineNumericDrafts] = useState<
@@ -1042,6 +1047,41 @@ export function QuoteEditor({
             ) : null}
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {canEdit ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setChatgptPatchOpen(true)}
+                  className="rounded-lg border border-indigo-200 bg-indigo-50/80 px-2.5 py-2 text-xs font-semibold text-indigo-900 hover:bg-indigo-50"
+                >
+                  ✨ Modifier avec ChatGPT
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void (async () => {
+                      try {
+                        const res = await fetch(
+                          `/api/commercial/quotes/${quote.id}/chatgpt-patch/context`,
+                        );
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || "Contexte indisponible");
+                        await navigator.clipboard.writeText(data.text);
+                        setChatgptToast("Contexte copié pour ChatGPT.");
+                        window.setTimeout(() => setChatgptToast(null), 3500);
+                      } catch (e) {
+                        setError(
+                          e instanceof Error ? e.message : "Copie impossible",
+                        );
+                      }
+                    })();
+                  }}
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Copier le contexte ChatGPT
+                </button>
+              </>
+            ) : null}
             <button
               type="button"
               onClick={() => setMarginOpen((v) => !v)}
@@ -1063,6 +1103,11 @@ export function QuoteEditor({
 
       {error ? (
         <p className="mx-auto mb-3 max-w-[1500px] text-sm text-red-700">{error}</p>
+      ) : null}
+      {chatgptToast && !chatgptPatchUndo ? (
+        <p className="mx-auto mb-3 max-w-[1500px] rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2 text-sm text-emerald-900">
+          {chatgptToast}
+        </p>
       ) : null}
       {linePersistError ? (
         <div className="mx-auto mb-3 flex max-w-[1500px] flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
@@ -1525,6 +1570,44 @@ export function QuoteEditor({
                 </button>
               </div>
             ) : null}
+            {canEdit && chatgptPatchUndo ? (
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-indigo-200 bg-indigo-50/80 px-3 py-2">
+                <p className="text-xs font-medium text-indigo-950">
+                  {chatgptToast ?? "Modifications ChatGPT appliquées."}
+                </p>
+                <button
+                  type="button"
+                  disabled={chatgptPatchUndoBusy}
+                  onClick={() => {
+                    void (async () => {
+                      setChatgptPatchUndoBusy(true);
+                      try {
+                        const res = await fetch(
+                          `/api/commercial/quotes/${quote.id}/chatgpt-patch/undo`,
+                          { method: "POST" },
+                        );
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || "Annulation impossible");
+                        setChatgptPatchUndo(false);
+                        setChatgptToast(null);
+                        await refreshQuote();
+                      } catch (e) {
+                        setError(
+                          e instanceof Error ? e.message : "Annulation impossible",
+                        );
+                      } finally {
+                        setChatgptPatchUndoBusy(false);
+                      }
+                    })();
+                  }}
+                  className="text-[11px] font-semibold text-[#1e3a5f] underline-offset-2 hover:underline disabled:opacity-50"
+                >
+                  {chatgptPatchUndoBusy
+                    ? "Annulation…"
+                    : "Annuler la dernière modification ChatGPT"}
+                </button>
+              </div>
+            ) : null}
             {/* En-tête table desktop */}
             <div className="mb-1 hidden grid-cols-[72px_minmax(0,1fr)_56px_48px_72px_48px_80px_56px] gap-1 border-b border-slate-100 px-2 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 md:grid">
               <div>Réf</div>
@@ -1638,6 +1721,37 @@ export function QuoteEditor({
                   className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#1e3a5f] shadow-sm hover:bg-slate-50"
                 >
                   ✨ Importer depuis ChatGPT
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setChatgptPatchOpen(true)}
+                  className="rounded-lg border border-indigo-200 bg-indigo-50/80 px-3 py-2 text-xs font-semibold text-indigo-900 shadow-sm hover:bg-indigo-50"
+                >
+                  ✨ Modifier avec ChatGPT
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void (async () => {
+                      try {
+                        const res = await fetch(
+                          `/api/commercial/quotes/${quote.id}/chatgpt-patch/context`,
+                        );
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || "Contexte indisponible");
+                        await navigator.clipboard.writeText(data.text);
+                        setChatgptToast("Contexte copié pour ChatGPT.");
+                        window.setTimeout(() => setChatgptToast(null), 3500);
+                      } catch (e) {
+                        setError(
+                          e instanceof Error ? e.message : "Copie impossible",
+                        );
+                      }
+                    })();
+                  }}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+                >
+                  Copier le contexte pour ChatGPT
                 </button>
                 {addMenuFor === "__footer__" ? (
                   <AddMenu onSelect={runAddAction} />
@@ -1946,6 +2060,25 @@ export function QuoteEditor({
         onClose={() => setChatgptImportOpen(false)}
         onImported={({ canUndo }) => {
           setChatgptImportUndo(canUndo);
+          const seq = ++mutationSeq.current;
+          void refreshQuote(seq).then(() => {
+            if (seq === mutationSeq.current) setSaveState("saved");
+          });
+        }}
+      />
+      <ChatGptPatchImportModal
+        quoteId={quote.id}
+        quoteNumber={quote.number}
+        open={chatgptPatchOpen}
+        onClose={() => setChatgptPatchOpen(false)}
+        onApplied={({ canUndo }) => {
+          setChatgptPatchUndo(canUndo);
+          setChatgptToast("Modifications ChatGPT appliquées.");
+          window.setTimeout(() => {
+            setChatgptToast((t) =>
+              t === "Modifications ChatGPT appliquées." ? null : t,
+            );
+          }, 8000);
           const seq = ++mutationSeq.current;
           void refreshQuote(seq).then(() => {
             if (seq === mutationSeq.current) setSaveState("saved");

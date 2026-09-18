@@ -670,6 +670,7 @@ model Organization {
   commercialEquipmentResources CommercialEquipmentResource[]
   commercialStatusEvents    CommercialStatusEvent[]
   commercialQuoteSnapshots  CommercialQuoteSnapshot[]
+  commercialQuoteChatgptPatches CommercialQuoteChatgptPatch[]
   commercialProgressStatements CommercialProgressStatement[]
   commercialRetentionGuarantees CommercialRetentionGuarantee[]
   commercialSubcontracts        CommercialSubcontract[]
@@ -4154,12 +4155,39 @@ model CommercialQuote {
   projectBudgets       ProjectBudget[]
   siteVisit            SiteVisit?
   commercialLeads      CommercialLead[]
+  chatgptPatches       CommercialQuoteChatgptPatch[]
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
   @@index([organizationId, updatedAt])
   @@index([projectId])
   @@index([clientExternalOrgId])
+}
+
+/// Historique des patches ChatGPT (bework_quote_patch_v1) — idempotence + undo.
+model CommercialQuoteChatgptPatch {
+  id                 String   @id @default(cuid())
+  organizationId     String
+  quoteId            String
+  /// Identifiant stable fourni par le JSON (patch_id).
+  patchId            String
+  versionNumber      Int
+  /// APPLIED | UNDONE
+  status             String   @default("APPLIED")
+  summaryJson        Json
+  snapshotBeforeJson Json
+  /// Empreinte des lignes après application — pour détecter modifications manuelles avant undo.
+  fingerprintAfter   String
+  appliedAt          DateTime @default(now())
+  undoneAt           DateTime?
+  appliedById        String?
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  quote        CommercialQuote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@unique([quoteId, patchId])
+  @@index([organizationId, quoteId])
+  @@index([quoteId, status, appliedAt])
 }
 
 model CommercialQuoteVersion {

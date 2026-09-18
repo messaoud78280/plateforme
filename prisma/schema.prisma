@@ -679,6 +679,7 @@ model Organization {
   chantierFiles                 ChantierFile[]
   annualServiceContracts        AnnualServiceContract[]
   siteVisits                    SiteVisit[]
+  siteDocuments                 SiteDocument[]
   platformAdminAuditEvents      PlatformAdminAuditEvent[]
   platformSupportSessions       PlatformSupportSession[]
 
@@ -942,6 +943,7 @@ model Project {
   annualServiceContracts AnnualServiceContract[]
   siteVisits             SiteVisit[]
   commercialLeads        CommercialLead[]
+  siteDocuments          SiteDocument[]
 
   @@index([organizationId])
 }
@@ -5102,4 +5104,85 @@ model SiteVisitMedia {
   @@index([organizationId])
   @@index([measurementId])
   @@index([chantierFileId])
+}
+
+/// Documents de chantier assistés ChatGPT (CR + PPSPS) — sans API IA.
+enum SiteDocumentKind {
+  COMPTE_RENDU
+  PPSPS
+}
+
+model SiteDocument {
+  id             String           @id @default(cuid())
+  organizationId String
+  projectId      String
+  kind           SiteDocumentKind
+  /// CR-001, PPSPS-001…
+  number         String
+  versionNumber  Int              @default(1)
+  status         String           @default("DRAFT") // DRAFT | FINALIZED | ARCHIVED
+  title          String
+  visitDate      DateTime?        @db.Date
+  visitTime      String?
+  weather        String?
+  authorName     String?
+  /// Notes brutes (saisie rapide formation / terrain)
+  quickNotes     String?          @db.Text
+  /// Structure métier complète (sections éditables)
+  payloadJson    Json
+  pdfStoragePath String?
+  sourceFormat   String?
+  createdById    String?
+  updatedById    String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project                   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  media        SiteDocumentMedia[]
+  chatgptImports SiteDocumentChatgptImport[]
+
+  @@unique([projectId, kind, number])
+  @@index([organizationId, projectId])
+  @@index([projectId, kind, updatedAt])
+  @@index([status])
+}
+
+model SiteDocumentMedia {
+  id             String   @id @default(cuid())
+  organizationId String
+  siteDocumentId String
+  caption        String?
+  /// avant | travaux | anomalie | apres | autre
+  category       String   @default("autre")
+  storagePath    String
+  mimeType       String?
+  fileSize       Int?
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  document SiteDocument @relation(fields: [siteDocumentId], references: [id], onDelete: Cascade)
+
+  @@index([siteDocumentId, sortOrder])
+  @@index([organizationId])
+}
+
+model SiteDocumentChatgptImport {
+  id                 String   @id @default(cuid())
+  organizationId     String
+  siteDocumentId     String
+  importId           String
+  format             String
+  status             String   @default("APPLIED") // APPLIED | UNDONE
+  summaryJson        Json
+  snapshotBeforeJson Json
+  appliedAt          DateTime @default(now())
+  undoneAt           DateTime?
+  appliedById        String?
+
+  document SiteDocument @relation(fields: [siteDocumentId], references: [id], onDelete: Cascade)
+
+  @@unique([siteDocumentId, importId])
+  @@index([siteDocumentId, status, appliedAt])
+  @@index([organizationId])
 }

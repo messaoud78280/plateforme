@@ -14,6 +14,7 @@ import { MessageForm } from "@/components/MessageForm";
 import { ProjectAssignAgent } from "@/components/projects/ProjectAssignAgent";
 import { ProjectPpspsSection } from "@/components/projects/ProjectPpspsSection";
 import { ProjectReportsSection } from "@/components/projects/ProjectReportsSection";
+import { SiteDocumentsEntryCard } from "@/components/site-documents/SiteDocumentsEntryCard";
 import { ChantierDossierSection } from "@/components/chantier/ChantierDossierSection";
 import { ChantierCockpit } from "@/components/chantier/ChantierCockpit";
 import { ChantierSharePanel } from "@/components/chantier/ChantierSharePanel";
@@ -557,6 +558,7 @@ export default async function ProjetDetailPage({
           entreprise restent masqués.
         </p>
       ) : null}
+      {!isExternalViewer ? <SiteDocumentsEntryCard projectId={project.id} /> : null}
       {syncBanner ? (
         <p className="rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800">
           {syncBanner.synced} pièce{syncBanner.synced > 1 ? "s" : ""} importée
@@ -663,6 +665,7 @@ export default async function ProjetDetailPage({
 
   const organisationPanel = (
     <div className="space-y-4">
+      <SiteDocumentsEntryCard projectId={project.id} />
       <ProjectAssignAgent
         projectId={project.id}
         assignedToId={project.assignedToId ?? null}

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireCommercialApiSession } from "@/lib/commercial/access";
+import { deleteQuote } from "@/lib/commercial/delete-quote";
 import { getQuoteDetail, newVersion, updateQuoteMeta } from "@/lib/commercial/quotes";
 import { loadDealFinancialSummary } from "@/lib/commercial/deal-summary";
 
@@ -135,4 +136,36 @@ export async function PATCH(req: Request, ctx: Ctx) {
       { status: 400 },
     );
   }
+}
+
+export async function DELETE(_req: Request, ctx: Ctx) {
+  const auth = await requireCommercialApiSession({
+    requiredHref: "/dashboard/devis-facturation",
+    requireWrite: true,
+  });
+  if (auth.error || !auth.session) {
+    return NextResponse.json(
+      { error: auth.error, code: auth.code },
+      { status: auth.status },
+    );
+  }
+
+  const { id } = await ctx.params;
+  const result = await deleteQuote(auth.orgId, id);
+
+  if (!result.ok) {
+    const status =
+      result.code === "NOT_FOUND"
+        ? 404
+        : result.code === "HAS_DEPENDENCIES" || result.code === "FORBIDDEN_STATUS"
+          ? 409
+          : 500;
+    return NextResponse.json({ error: result.error, code: result.code }, { status });
+  }
+
+  return NextResponse.json({
+    ok: true,
+    number: result.number,
+    message: `Devis ${result.number} supprimé.`,
+  });
 }

@@ -25,6 +25,7 @@ import {
 import { HeaderDropdown } from "@/components/ui/HeaderDropdown";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { QuoteRowActions } from "@/components/commercial/QuoteRowActions";
 import { cn } from "@/lib/cn";
 import {
   COMMERCIAL_INVOICE_STATUS_LABELS,
@@ -975,6 +976,11 @@ function DocList({
   className?: string;
   rows: CommercialDashboardMetrics["recentQuotes"];
 }) {
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => new Set());
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const visibleRows = rows.filter((r) => !hiddenIds.has(r.id));
+
   return (
     <section
       className={cn(
@@ -988,13 +994,21 @@ function DocList({
           Tout voir
         </Link>
       </div>
-      {rows.length === 0 ? (
+      {notice && kind === "quote" ? (
+        <p
+          role="status"
+          className="border-b border-bework-navy/8 bg-bework-soft-navy/50 px-4 py-2 text-[12.5px] font-medium text-bework-navy"
+        >
+          {notice}
+        </p>
+      ) : null}
+      {visibleRows.length === 0 ? (
         <p className="px-4 py-8 text-center text-sm text-bework-muted">
           Aucun document pour le moment.
         </p>
       ) : (
         <ul className="divide-y divide-bework-navy/8">
-          {rows.map((r) => {
+          {visibleRows.map((r) => {
             const tone = resolveTone(
               kind === "quote" ? DEVIS_STATUS_TONE : FACTURE_STATUS_TONE,
               r.status,
@@ -1004,44 +1018,63 @@ function DocList({
                 ? (COMMERCIAL_QUOTE_STATUS_LABELS[r.status] ?? r.status)
                 : (COMMERCIAL_INVOICE_STATUS_LABELS[r.status] ?? r.status);
             return (
-              <li key={r.id}>
-                <Link
-                  href={r.href}
+              <li key={r.id} className="group">
+                <div
                   className={cn(
-                    "block px-4 py-3 transition hover:bg-white/80",
+                    "flex items-stretch gap-1 px-2 transition hover:bg-white/80 sm:px-3",
                     r.overdue && "bg-bework-critical/[0.04]",
                   )}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-[13px] font-semibold text-bework-navy">{r.number}</p>
-                        <span className={badgeClassForTone(tone.tone)}>{statusLabel}</span>
-                      </div>
-                      <p className="mt-0.5 truncate text-[12px] text-bework-muted">
-                        {r.client || "—"}
-                        {r.project ? ` · ${r.project}` : ""}
-                      </p>
-                      <p className="text-[11px] text-bework-muted">
-                        {fmtDate(r.date)}
-                        {r.action ? ` · ${r.action}` : ""}
-                        {r.overdue ? ` · ${r.daysLate} j de retard` : ""}
-                      </p>
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <p className="text-[14px] font-semibold tabular-nums text-bework-ink">
-                        {kind === "quote"
-                          ? `${fmtMoney(r.amountHt ?? 0)} € HT`
-                          : `${fmtMoney(r.amountTtc ?? 0)} € TTC`}
-                      </p>
-                      {kind === "invoice" && r.amountDue != null ? (
-                        <p className="text-[11px] tabular-nums text-bework-muted">
-                          Payé {fmtMoney(r.amountPaid ?? 0)} · reste {fmtMoney(r.amountDue)}
+                  <Link
+                    href={r.href}
+                    className="min-w-0 flex-1 py-3 pl-2 pr-1 sm:pl-1"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-[13px] font-semibold text-bework-navy">{r.number}</p>
+                          <span className={badgeClassForTone(tone.tone)}>{statusLabel}</span>
+                        </div>
+                        <p className="mt-0.5 truncate text-[12px] text-bework-muted">
+                          {r.client || "—"}
+                          {r.project ? ` · ${r.project}` : ""}
                         </p>
-                      ) : null}
+                        <p className="text-[11px] text-bework-muted">
+                          {fmtDate(r.date)}
+                          {r.action ? ` · ${r.action}` : ""}
+                          {r.overdue ? ` · ${r.daysLate} j de retard` : ""}
+                        </p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className="text-[14px] font-semibold tabular-nums text-bework-ink">
+                          {kind === "quote"
+                            ? `${fmtMoney(r.amountHt ?? 0)} € HT`
+                            : `${fmtMoney(r.amountTtc ?? 0)} € TTC`}
+                        </p>
+                        {kind === "invoice" && r.amountDue != null ? (
+                          <p className="text-[11px] tabular-nums text-bework-muted">
+                            Payé {fmtMoney(r.amountPaid ?? 0)} · reste {fmtMoney(r.amountDue)}
+                          </p>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                  {kind === "quote" ? (
+                    <div className="flex items-center pr-1">
+                      <QuoteRowActions
+                        quoteId={r.id}
+                        quoteNumber={r.number}
+                        clientLabel={r.client || "client non renseigné"}
+                        href={r.href}
+                        onDeleted={(id, number) => {
+                          setHiddenIds((prev) => new Set(prev).add(id));
+                          setNotice(`Devis ${number} supprimé.`);
+                          window.setTimeout(() => setNotice(null), 4000);
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                </div>
               </li>
             );
           })}

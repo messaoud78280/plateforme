@@ -194,4 +194,46 @@ assert(lf.bundle.quote.vatSuggestedRate === 10, "tva 10%");
 assert(lf.bundle.quote.validityDays === 30, "duree_validite");
 assert(lf.bundle.quote.description === "Chiffrage estimatif.", "observations");
 
+{
+  const surveyFragment = JSON.stringify({
+    missing_information: [],
+    photos: [],
+    rules: {
+      no_invented_measures: true,
+      no_invented_prices: true,
+      distinguish_sources: ["measured", "calculated"],
+    },
+  });
+  const bad = parseBeworkQuoteBundle(surveyFragment);
+  assert(!bad.ok, "refuse extrait survey");
+  if (!bad.ok) {
+    assert(
+      bad.errors[0]!.message.includes("relevé") ||
+        bad.errors[0]!.message.includes("visite") ||
+        bad.errors[0]!.message.includes("devis"),
+      "message survey clair",
+    );
+  }
+}
+
+{
+  const wrapped = `Voici le devis demandé.\n\`\`\`json\n${JSON.stringify(sample)}\n\`\`\`\nBonne journée.`;
+  const w = parseBeworkQuoteBundle(wrapped);
+  assert(w.ok, "extrait fence markdown");
+}
+
+{
+  const promptLike = [
+    "Analyse ce compte rendu de visite de chantier BeWork (format bework_site_survey_v1).",
+    "DONNÉES DE VISITE (bework_site_survey_v1) :",
+    JSON.stringify({
+      format: "bework_site_survey_v1",
+      field_notes: "Terrasse 40 m²",
+      rules: { no_invented_measures: true, distinguish_sources: ["measured"] },
+    }),
+  ].join("\n");
+  const p = parseBeworkQuoteBundle(promptLike);
+  assert(!p.ok, "refuse prompt visite");
+}
+
 console.log("selftest-chatgpt-bundle: OK");

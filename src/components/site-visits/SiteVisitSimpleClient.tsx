@@ -1395,7 +1395,8 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
             ) : null}
             <p className="mt-3 text-[12px] text-slate-500">
               Ensuite : collez dans ChatGPT → récupérez un JSON{" "}
-              <code>bework_quote_bundle_v1</code> → importez-le dans Devis.
+              <code>bework_quote_bundle_v1</code> → importez-le dans Devis
+              (pas ce prompt, pas le compte rendu de visite).
             </p>
           </div>
         </div>

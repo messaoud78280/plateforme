@@ -115,8 +115,12 @@ export function ChatGptBundleImportModal({
         });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setErrorBanner(data.error || "Le dossier n’a pas pu être interprété.");
-        setErrors(Array.isArray(data.errors) ? data.errors : []);
+        const first =
+          Array.isArray(data.errors) && data.errors[0]?.message
+            ? String(data.errors[0].message)
+            : null;
+        setErrorBanner(first || data.error || "Le dossier n’a pas pu être interprété.");
+        setErrors(Array.isArray(data.errors) ? data.errors.slice(first ? 1 : 0) : []);
         return;
       }
       const b = data.bundle as BeworkQuoteBundleV1;
@@ -290,9 +294,9 @@ export function ChatGptBundleImportModal({
                 Importer un dossier depuis ChatGPT
               </p>
               <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                Collez le bloc généré après votre analyse de chantier. BeWork
-                détectera le client, le chantier, le chiffrage et les
-                informations techniques.
+                Collez le JSON devis généré par ChatGPT (
+                <span className="font-mono">bework_quote_bundle_v1</span>
+                ) — pas le compte rendu de visite ni le prompt BeWork.
               </p>
             </div>
             <button
@@ -330,7 +334,12 @@ export function ChatGptBundleImportModal({
                 value={rawText}
                 onChange={(e) => setRawText(e.target.value)}
                 rows={14}
-                placeholder="Collez ici le bloc BeWork généré par ChatGPT…"
+                placeholder={`Collez ici le JSON devis ChatGPT, par exemple :
+{
+  "format": "bework_quote_bundle_v1",
+  "client": { "nom_complet": "…" },
+  "sections": [ { "title": "Lot", "items": [ … ] } ]
+}`}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-3 font-mono text-xs leading-relaxed text-slate-800 outline-none ring-[#1e3a5f] focus:bg-white focus:ring-2"
               />
               <button
@@ -341,12 +350,26 @@ export function ChatGptBundleImportModal({
                 Comment demander le bon format à ChatGPT ?
               </button>
               {helpOpen ? (
-                <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                  Après votre échange, demandez :{" "}
-                  <span className="font-semibold text-[#1e3a5f]">
-                    Génère le bloc BeWork.
-                  </span>
-                </p>
+                <div className="space-y-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                  <p>
+                    1. Depuis la visite : <strong>Préparer pour ChatGPT</strong> →
+                    collez le prompt dans ChatGPT.
+                  </p>
+                  <p>
+                    2. ChatGPT analyse et génère un devis JSON.
+                  </p>
+                  <p>
+                    3. Dans ChatGPT, demandez :{" "}
+                    <span className="font-semibold text-[#1e3a5f]">
+                      Génère uniquement le JSON bework_quote_bundle_v1
+                    </span>
+                    .
+                  </p>
+                  <p>
+                    4. Collez <strong>cette réponse</strong> ici (pas le prompt,
+                    pas le compte rendu de visite).
+                  </p>
+                </div>
               ) : null}
             </div>
           ) : preview && bundle ? (

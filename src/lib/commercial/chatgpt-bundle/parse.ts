@@ -2,6 +2,8 @@ import { createHash } from "crypto";
 import {
   asBool,
   asString,
+  detectMistakenSiteSurveyPaste,
+  extractBeworkQuoteBundleText,
   normalizeEmail,
   normalizeMoneyOrQty,
   normalizePhone,
@@ -220,20 +222,47 @@ export function parseBeworkQuoteBundle(rawText: string): BundleParseResult {
     };
   }
 
-  let json: unknown;
+  let json: unknown = null;
+  const candidate = extractBeworkQuoteBundleText(rawText);
   try {
-    json = JSON.parse(stripCodeFences(rawText));
+    json = JSON.parse(candidate);
   } catch {
-    return {
-      ok: false,
-      errors: [
-        issue(
-          "root",
-          "JSON illisible. Demandez à ChatGPT : « Génère le bloc BeWork » (format bework_quote_bundle_v1).",
-        ),
-      ],
-      rawKept: true,
-    };
+    try {
+      json = JSON.parse(stripCodeFences(rawText));
+    } catch {
+      json = null;
+    }
+  }
+
+  // Collage survey / prompt sans devis exploitable
+  const looksLikeQuote =
+    json &&
+    typeof json === "object" &&
+    (asString((json as Record<string, unknown>).format) ===
+      BEWORK_QUOTE_BUNDLE_FORMAT ||
+      Array.isArray((json as Record<string, unknown>).sections));
+
+  if (!looksLikeQuote) {
+    const mistaken = detectMistakenSiteSurveyPaste(rawText);
+    if (mistaken) {
+      return {
+        ok: false,
+        errors: [issue("root", mistaken)],
+        rawKept: true,
+      };
+    }
+    if (!json) {
+      return {
+        ok: false,
+        errors: [
+          issue(
+            "root",
+            "JSON illisible. Collez uniquement la réponse ChatGPT au format bework_quote_bundle_v1 (pas le compte rendu de visite). Demandez : « Génère uniquement le JSON bework_quote_bundle_v1 ».",
+          ),
+        ],
+        rawKept: true,
+      };
+    }
   }
 
   if (!json || typeof json !== "object") {
@@ -245,6 +274,30 @@ export function parseBeworkQuoteBundle(rawText: string): BundleParseResult {
   }
 
   const root = json as Record<string, unknown>;
+
+  // Survey passé le filtre texte mais parsé comme objet
+  const rootFormat = asString(root.format) ?? asString(root.type);
+  if (
+    rootFormat === "bework_site_survey_v1" ||
+    (root.rules &&
+      typeof root.rules === "object" &&
+      (root.rules as { no_invented_measures?: unknown }).no_invented_measures ===
+        true &&
+      !Array.isArray(root.sections))
+  ) {
+    return {
+      ok: false,
+      errors: [
+        issue(
+          "root",
+          "Vous avez collé un compte rendu de visite, pas un devis. " +
+            "Demandez à ChatGPT : « Génère uniquement le JSON bework_quote_bundle_v1 ».",
+        ),
+      ],
+      rawKept: true,
+    };
+  }
+
   const format = asString(root.format);
   if (format !== BEWORK_QUOTE_BUNDLE_FORMAT) {
     errors.push(

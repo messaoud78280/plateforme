@@ -40,7 +40,9 @@ export async function POST(req: Request, ctx: Ctx) {
     return NextResponse.json(
       {
         ok: false,
-        error: "Le dossier n’a pas pu être interprété.",
+        error:
+          parsed.errors[0]?.message ||
+          "Le dossier n’a pas pu être interprété.",
         errors: parsed.errors,
         rawKept: true,
       },

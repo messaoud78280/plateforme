@@ -104,6 +104,13 @@ export function buildVisitCompleteness(opts: {
   const done = items.filter((i) => i.done).length;
   const total = items.length;
   const missingLabels = items.filter((i) => !i.done).map((i) => i.label);
+  const photos = opts.photoCount ?? 0;
+  const metres = opts.measurementCount;
+  const doneCore =
+    Boolean(opts.clientName?.trim()) &&
+    Boolean(opts.siteAddress?.trim() || opts.siteName?.trim()) &&
+    metres > 0;
+
   return {
     done,
     total,
@@ -111,10 +118,11 @@ export function buildVisitCompleteness(opts: {
       | "ok"
       | "watch"
       | "accent",
-    label:
-      done === total
-        ? `${done} / ${total} préparé`
-        : `${total - done} élément${total - done > 1 ? "s" : ""} à compléter`,
+    label: doneCore
+      ? `${metres} métré${metres > 1 ? "s" : ""} · ${photos} photo${photos > 1 ? "s" : ""}`
+      : metres === 0 && photos === 0
+        ? "Dossier à compléter"
+        : `${metres} métré${metres > 1 ? "s" : ""} · ${photos} photo${photos > 1 ? "s" : ""}`,
     items,
     missingLabels,
     readyChecks: items.filter((i) => i.required || i.id === "lots" || i.id === "constraints"),

@@ -713,7 +713,7 @@ export function SiteVisitsWorkspace({
                     <div className="flex shrink-0 flex-col items-end gap-1.5 lg:w-[200px]">
                       <span className={visitStatusBadgeClass(v.status)}>{v.statusLabel}</span>
                       {v.completeness ? (
-                        <Link href={`/dashboard/visites-metres/${v.id}?tab=missing`} className="w-full max-w-[11rem]">
+                        <Link href={`/dashboard/visites-metres/${v.id}`} className="w-full max-w-[11rem]">
                           <p className="text-[11px] font-medium text-slate-600">{v.completeness.label}</p>
                           <div className="mt-0.5 h-1.5 overflow-hidden rounded-full bg-slate-100">
                             <div

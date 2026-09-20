@@ -22,6 +22,8 @@ export type BundleAddress = {
 };
 
 export type BundleClient = {
+  /** M. / Mme / Société … */
+  civility: string | null;
   firstName: string | null;
   lastName: string | null;
   /** Nom complet (ex. nom_complet) — priorité d’affichage si présent. */

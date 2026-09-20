@@ -9,6 +9,7 @@ import {
 } from "../src/lib/site-visits/survey-export";
 import { buildVisitQuality } from "../src/lib/site-visits/quality";
 import { buildMeasurementCoherence } from "../src/lib/site-visits/coherence";
+import { parseBeworkQuoteBundle } from "../src/lib/commercial/chatgpt-bundle/parse";
 import { BEWORK_QUOTE_BUNDLE_FORMAT } from "../src/lib/commercial/chatgpt-bundle/types";
 
 let failed = 0;
@@ -129,6 +130,118 @@ const visit = {
   const prompt = buildChatgptQuoteInstructions(survey);
   assert(prompt.includes("field_notes"), "prompt mentionne field_notes");
   assert(prompt.includes("N'invente aucune dimension") || prompt.includes("N'invente aucune"), "prompt no invent dims");
+}
+
+{
+  const morelNotes =
+    "Terrasse 8 × 5 m, soit 40 m². Carrelage fissuré. Accès 95 cm.";
+  const morelVisit = {
+    ...visit,
+    clientName: "Monsieur Marc MOREL",
+    contactPhone: "06 11 21 22 45",
+    contactEmail: "marc.morel@example.com",
+    contactName: null as string | null,
+    siteName: "Réfection terrasse Morel",
+    siteAddress: "3 rue de la Liberté",
+    zipCode: "78190",
+    city: "Montigny-le-Bretonneux",
+    clientCivility: "M.",
+    clientFirstName: "Marc",
+    clientLastName: "MOREL",
+    clientPhone: "06 11 21 22 45",
+    clientEmail: "marc.morel@example.com",
+    billingSameAsSite: true,
+    siteCountry: "France",
+    clientCountry: "France",
+    fieldNotes: morelNotes,
+    measurements: [] as typeof visit.measurements,
+  };
+  const morelSurvey = buildSiteSurveyJson(morelVisit);
+  const client = morelSurvey.client as Record<string, unknown>;
+  assert(client.civilite === "M.", "Morel civilité");
+  assert(client.prenom === "Marc", "Morel prénom");
+  assert(client.nom === "MOREL", "Morel nom");
+  assert(client.telephone === "06 11 21 22 45", "Morel téléphone");
+  assert(client.email === "marc.morel@example.com", "Morel email");
+  const addr = client.adresse as Record<string, unknown>;
+  assert(addr.ligne1 === "3 rue de la Liberté", "Morel adresse");
+  assert(addr.code_postal === "78190", "Morel CP");
+  assert(addr.ville === "Montigny-le-Bretonneux", "Morel ville");
+  assert(addr.pays === "France", "Morel pays");
+  assert(client.adresse_identique_chantier === true, "Morel même adresse");
+  const chantier = (morelSurvey as { chantier?: Record<string, unknown> }).chantier;
+  assert(chantier?.nom === "Réfection terrasse Morel", "Morel chantier nom");
+  const cAddr = chantier?.adresse as Record<string, unknown>;
+  assert(cAddr?.ligne1 === "3 rue de la Liberté", "Morel chantier adresse");
+  assert(cAddr?.code_postal === "78190", "Morel chantier CP");
+
+  const morelPrompt = buildChatgptQuoteInstructions(morelSurvey);
+  assert(morelPrompt.includes("marc.morel@example.com"), "prompt email Morel");
+  assert(morelPrompt.includes("78190"), "prompt CP Morel");
+  assert(morelPrompt.includes("COORDONNÉES CLIENT"), "prompt insiste coords");
+
+  const morelBundle = {
+    format: BEWORK_QUOTE_BUNDLE_FORMAT,
+    client: {
+      civilite: "M.",
+      prenom: "Marc",
+      nom: "MOREL",
+      nom_complet: "Marc MOREL",
+      telephone: "06 11 21 22 45",
+      email: "marc.morel@example.com",
+      adresse: {
+        ligne1: "3 rue de la Liberté",
+        code_postal: "78190",
+        ville: "Montigny-le-Bretonneux",
+        pays: "France",
+      },
+    },
+    chantier: {
+      nom: "Réfection terrasse Morel",
+      adresse: {
+        ligne1: "3 rue de la Liberté",
+        code_postal: "78190",
+        ville: "Montigny-le-Bretonneux",
+        pays: "France",
+      },
+    },
+    devis: { objet: "Réfection terrasse", tva: { taux: 20 } },
+    sections: [
+      {
+        title: "Terrasse",
+        items: [
+          {
+            designation: "Réfection terrasse",
+            quantity: 40,
+            unit: "m²",
+            unit_price_ht: 85,
+            vat_rate: 20,
+          },
+        ],
+      },
+    ],
+  };
+  const parsedMorel = parseBeworkQuoteBundle(JSON.stringify(morelBundle));
+  assert(parsedMorel.ok, "parse bundle Morel");
+  if (parsedMorel.ok) {
+    assert(parsedMorel.bundle.client.civility === "M.", "bundle civilité");
+    assert(parsedMorel.bundle.client.firstName === "Marc", "bundle prénom");
+    assert(parsedMorel.bundle.client.lastName === "MOREL", "bundle nom");
+    assert(parsedMorel.bundle.client.phone === "06 11 21 22 45", "bundle tél");
+    assert(
+      parsedMorel.bundle.client.emails[0]?.email === "marc.morel@example.com",
+      "bundle email",
+    );
+    assert(
+      parsedMorel.bundle.client.address.line1 === "3 rue de la Liberté",
+      "bundle adresse",
+    );
+    assert(parsedMorel.bundle.client.address.postalCode === "78190", "bundle CP");
+    assert(
+      parsedMorel.bundle.client.address.city === "Montigny-le-Bretonneux",
+      "bundle ville",
+    );
+  }
 }
 
 {

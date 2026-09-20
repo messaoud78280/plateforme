@@ -26,6 +26,21 @@ export type SurveyVisitInput = {
   companyName?: string | null;
   zipCode?: string | null;
   city?: string | null;
+  /** Coordonnées client enrichies (prep + fiche ExternalOrganization). */
+  clientCivility?: string | null;
+  clientFirstName?: string | null;
+  clientLastName?: string | null;
+  clientCompany?: string | null;
+  clientPhone?: string | null;
+  clientEmail?: string | null;
+  clientAddress?: string | null;
+  clientZipCode?: string | null;
+  clientCity?: string | null;
+  clientCountry?: string | null;
+  billingSameAsSite?: boolean;
+  siteCountry?: string | null;
+  siteContactEmail?: string | null;
+  siteContactPhone?: string | null;
   subject: string;
   clientNeed: string | null;
   scheduledAt: string | null;
@@ -79,6 +94,38 @@ export type SurveyVisitInput = {
   }>;
 };
 
+/** Découpe « Monsieur Marc MOREL » → civilité / prénom / nom. */
+export function splitClientDisplayName(raw: string): {
+  civility: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  fullName: string;
+} {
+  let s = raw.trim();
+  let civility: string | null = null;
+  const civMatch = s.match(
+    /^(M\.|Mme\.?|Monsieur|Madame|Mademoiselle|Mlle\.?|Société|Sarl|SAS|EURL)\s+/i,
+  );
+  if (civMatch) {
+    const c = civMatch[1]!;
+    if (/^Mme|^Madame/i.test(c)) civility = "Mme";
+    else if (/^Mlle|^Mademoiselle/i.test(c)) civility = "Mlle";
+    else if (/Société|Sarl|SAS|EURL/i.test(c)) civility = "Société";
+    else civility = "M.";
+    s = s.slice(civMatch[0].length).trim();
+  }
+  const parts = s.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return {
+      civility,
+      firstName: parts[0]!,
+      lastName: parts.slice(1).join(" "),
+      fullName: s,
+    };
+  }
+  return { civility, firstName: null, lastName: parts[0] || null, fullName: s };
+}
+
 function qtySource(m: SurveyVisitInput["measurements"][0]): string {
   if (m.lengthM != null && m.widthM != null && m.measureType === "SURFACE") return "calculated";
   if (m.lengthM != null && m.widthM != null && m.heightM != null && m.measureType === "VOLUME")
@@ -88,8 +135,76 @@ function qtySource(m: SurveyVisitInput["measurements"][0]): string {
   return "to_confirm";
 }
 
+function resolveBillingAddress(visit: SurveyVisitInput): {
+  line1: string | null;
+  postalCode: string | null;
+  city: string | null;
+  country: string;
+  sameAsSite: boolean;
+} {
+  const siteLine = visit.siteAddress?.trim() || null;
+  const siteZip = visit.zipCode?.trim() || null;
+  const siteCity = visit.city?.trim() || null;
+  const hasClientAddr = Boolean(
+    visit.clientAddress?.trim() ||
+      visit.clientZipCode?.trim() ||
+      visit.clientCity?.trim(),
+  );
+  const sameAsSite =
+    visit.billingSameAsSite === true ||
+    (visit.billingSameAsSite !== false && !hasClientAddr);
+  if (sameAsSite) {
+    return {
+      line1: siteLine,
+      postalCode: siteZip,
+      city: siteCity,
+      country: visit.clientCountry?.trim() || visit.siteCountry?.trim() || "France",
+      sameAsSite: true,
+    };
+  }
+  return {
+    line1: visit.clientAddress?.trim() || null,
+    postalCode: visit.clientZipCode?.trim() || null,
+    city: visit.clientCity?.trim() || null,
+    country: visit.clientCountry?.trim() || "France",
+    sameAsSite: false,
+  };
+}
+
 export function buildSiteSurveyJson(visit: SurveyVisitInput) {
   const photos = visit.medias.filter((m) => m.kind === "PHOTO");
+  const parsed = splitClientDisplayName(visit.clientName || "");
+  const civility = visit.clientCivility?.trim() || parsed.civility;
+  const firstName = visit.clientFirstName?.trim() || parsed.firstName;
+  const lastName = visit.clientLastName?.trim() || parsed.lastName;
+  const company = visit.clientCompany?.trim() || visit.companyName?.trim() || null;
+  const fullName =
+    [firstName, lastName].filter(Boolean).join(" ") ||
+    parsed.fullName ||
+    visit.clientName?.trim() ||
+    null;
+  const clientPhone =
+    visit.clientPhone?.trim() ||
+    (visit.contactName &&
+    visit.contactName.trim() &&
+    visit.contactName.trim() !== visit.clientName.trim()
+      ? null
+      : visit.contactPhone?.trim()) ||
+    visit.contactPhone?.trim() ||
+    null;
+  const clientEmail = visit.clientEmail?.trim() || visit.contactEmail?.trim() || null;
+  const billing = resolveBillingAddress(visit);
+
+  const onSiteName =
+    visit.contactName?.trim() &&
+    visit.contactName.trim() !== (fullName || visit.clientName || "").trim()
+      ? visit.contactName.trim()
+      : null;
+  const onSitePhone = onSiteName
+    ? visit.siteContactPhone?.trim() || visit.contactPhone?.trim() || null
+    : visit.siteContactPhone?.trim() || null;
+  const onSiteEmail = visit.siteContactEmail?.trim() || null;
+
   return {
     type: BEWORK_SITE_SURVEY_FORMAT,
     format: BEWORK_SITE_SURVEY_FORMAT,
@@ -102,15 +217,51 @@ export function buildSiteSurveyJson(visit: SurveyVisitInput) {
       client_need: visit.clientNeed,
     },
     client: {
-      name: visit.clientName,
+      // Compat rétro
+      name: fullName || visit.clientName,
       contact_name: visit.contactName,
-      contact_phone: visit.contactPhone,
+      contact_phone: clientPhone,
+      // Coordonnées structurées pour ChatGPT / devis
+      civilite: civility,
+      prenom: firstName,
+      nom: lastName,
+      nom_complet: fullName,
+      raison_sociale: company,
+      telephone: clientPhone,
+      email: clientEmail,
+      adresse: {
+        ligne1: billing.line1,
+        code_postal: billing.postalCode,
+        ville: billing.city,
+        pays: billing.country,
+      },
+      adresse_identique_chantier: billing.sameAsSite,
     },
+    chantier: {
+      nom: visit.siteName,
+      adresse: {
+        ligne1: visit.siteAddress?.trim() || null,
+        code_postal: visit.zipCode?.trim() || null,
+        ville: visit.city?.trim() || null,
+        pays: visit.siteCountry?.trim() || "France",
+      },
+      description: visit.clientNeed,
+      lots: visit.lots,
+    },
+    /** Alias rétrocompat (anciens prompts). */
     project: {
       name: visit.siteName,
       address: visit.siteAddress,
+      postal_code: visit.zipCode?.trim() || null,
+      city: visit.city?.trim() || null,
+      country: visit.siteCountry?.trim() || "France",
       description: visit.clientNeed,
       lots: visit.lots,
+    },
+    contact_sur_place: {
+      nom: onSiteName,
+      telephone: onSitePhone,
+      email: onSiteEmail,
     },
     zones: visit.zones.map((zoneName) => {
       const zoneMeasures = visit.measurements.filter((m) => (m.zone || "") === zoneName);
@@ -226,11 +377,19 @@ export function buildChatgptQuoteInstructions(survey: ReturnType<typeof buildSit
     "Puis génère UNIQUEMENT un devis estimatif structuré",
     `au format ${BEWORK_QUOTE_BUNDLE_FORMAT}, compatible avec l'import BeWork.`,
     "",
+    "IMPORTANT — COORDONNÉES CLIENT / CHANTIER :",
+    "- Reprends EXACTEMENT les champs client, chantier et contact_sur_place du survey.",
+    "- Ne laisse pas vides prenom, nom, telephone, email, adresse si présents dans le survey.",
+    "- Si adresse_identique_chantier = true, copie l'adresse chantier dans client.adresse",
+    "  et mets same_as_client_address / adresse_identique_chantier à true.",
+    "- N'invente aucune coordonnée manquante : laisse null / vide et signale dans warnings.",
+    "",
     "Schéma attendu (propriétés reconnues par le parser BeWork) :",
     JSON.stringify(
       {
         format: BEWORK_QUOTE_BUNDLE_FORMAT,
         client: {
+          civilite: "",
           prenom: "",
           nom: "",
           nom_complet: "",
@@ -242,6 +401,7 @@ export function buildChatgptQuoteInstructions(survey: ReturnType<typeof buildSit
         chantier: {
           nom: "",
           adresse: { ligne1: "", code_postal: "", ville: "", pays: "France" },
+          same_as_client_address: false,
         },
         devis: {
           objet: "",
@@ -279,6 +439,7 @@ export function buildChatgptQuoteInstructions(survey: ReturnType<typeof buildSit
     "- Si une quantité est ambiguë, mets-la dans warnings / reservations, ne l'invente pas.",
     "- Le champ field_notes est le récit terrain de l'artisan : respecte-le intégralement.",
     "- Photos : référence les photo_id dans les descriptions si utile.",
+    "- Client : ne remplace jamais une coordonnée renseignée par une chaîne vide.",
     "",
     "DONNÉES DE VISITE (bework_site_survey_v1) :",
     JSON.stringify(survey, null, 2),
@@ -361,13 +522,37 @@ export function generateSiteSurveyPdf(
   doc.setTextColor(...INK);
 
   let y = 36;
+  const billing = resolveBillingAddress(visit);
+  const parsedName = splitClientDisplayName(visit.clientName || "");
   y = section(doc, y, "Informations client");
   y = lines(doc, y, [
-    `Nom : ${visit.clientName}`,
-    `Téléphone : ${visit.contactPhone || "—"}`,
-    `Email : ${visit.contactEmail || "—"}`,
+    visit.clientCivility || parsedName.civility
+      ? `Civilité : ${visit.clientCivility || parsedName.civility}`
+      : null,
+    `Nom : ${
+      [visit.clientFirstName || parsedName.firstName, visit.clientLastName || parsedName.lastName]
+        .filter(Boolean)
+        .join(" ") || visit.clientName
+    }`,
+    visit.clientCompany ? `Raison sociale : ${visit.clientCompany}` : null,
+    `Téléphone : ${visit.clientPhone || visit.contactPhone || "—"}`,
+    `Email : ${visit.clientEmail || visit.contactEmail || "—"}`,
+    `Adresse facturation : ${
+      [
+        billing.line1,
+        [billing.postalCode, billing.city].filter(Boolean).join(" "),
+        billing.country,
+      ]
+        .filter(Boolean)
+        .join(", ") || "—"
+    }`,
+    billing.sameAsSite ? "Adresse facturation = adresse chantier" : null,
     visit.contactName && visit.contactName !== visit.clientName
-      ? `Contact sur place : ${visit.contactName}`
+      ? `Contact sur place : ${visit.contactName}${
+          visit.siteContactPhone || visit.contactPhone
+            ? ` · ${visit.siteContactPhone || visit.contactPhone}`
+            : ""
+        }${visit.siteContactEmail ? ` · ${visit.siteContactEmail}` : ""}`
       : null,
   ].filter(Boolean) as string[]);
 
@@ -377,6 +562,7 @@ export function generateSiteSurveyPdf(
     visit.zipCode || visit.city
       ? `CP / Ville : ${[visit.zipCode, visit.city].filter(Boolean).join(" ")}`
       : null,
+    `Pays : ${visit.siteCountry?.trim() || "France"}`,
     visit.siteName ? `Nom du site : ${visit.siteName}` : null,
   ].filter(Boolean) as string[]);
 

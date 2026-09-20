@@ -126,6 +126,7 @@ export async function createCommercialClientFromImport(opts: {
   const matches = await matchClientsInOrganization(opts.orgId, opts.customer);
   const best = matches[0];
   if (best && best.score >= 70) {
+    await mergeClientCoordsIfEmpty(best.id, opts.customer);
     return { id: best.id, name: best.name };
   }
 
@@ -149,7 +150,10 @@ export async function createCommercialClientFromImport(opts: {
     },
     select: { id: true, name: true },
   });
-  if (existing) return existing;
+  if (existing) {
+    await mergeClientCoordsIfEmpty(existing.id, opts.customer);
+    return existing;
+  }
 
   const created = await prisma.externalOrganization.create({
     data: {
@@ -167,4 +171,56 @@ export async function createCommercialClientFromImport(opts: {
     select: { id: true, name: true },
   });
   return created;
+}
+
+/** Ne remplit que les champs vides — n’écrase jamais une info existante par du vide. */
+export async function mergeClientCoordsIfEmpty(
+  clientId: string,
+  customer: ImportedCustomer,
+): Promise<void> {
+  const existing = await prisma.externalOrganization.findUnique({
+    where: { id: clientId },
+    select: {
+      email: true,
+      phone: true,
+      address: true,
+      zipCode: true,
+      city: true,
+      tradeName: true,
+    },
+  });
+  if (!existing) return;
+
+  const richer = (cur: string | null | undefined, next: string | null | undefined) => {
+    const c = cur?.trim() || "";
+    const n = next?.trim() || "";
+    if (!n) return undefined; // ne pas écrire vide
+    if (!c) return n;
+    // Ne pas remplacer une adresse plus complète par une plus courte
+    if (n.length > c.length + 8 && c.length < 12) return n;
+    return undefined;
+  };
+
+  const data: {
+    email?: string;
+    phone?: string;
+    address?: string;
+    zipCode?: string;
+    city?: string;
+    tradeName?: string;
+  } = {};
+  const email = richer(existing.email, customer.email);
+  const phone = richer(existing.phone, customer.phone);
+  const address = richer(existing.address, customer.addressLine1);
+  const zipCode = richer(existing.zipCode, customer.postalCode);
+  const city = richer(existing.city, customer.city);
+  const tradeName = richer(existing.tradeName, customer.company);
+  if (email) data.email = email;
+  if (phone) data.phone = phone;
+  if (address) data.address = address;
+  if (zipCode) data.zipCode = zipCode;
+  if (city) data.city = city;
+  if (tradeName) data.tradeName = tradeName;
+  if (Object.keys(data).length === 0) return;
+  await prisma.externalOrganization.update({ where: { id: clientId }, data });
 }

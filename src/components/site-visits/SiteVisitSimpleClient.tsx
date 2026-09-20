@@ -18,6 +18,7 @@ type ClientOpt = {
   id: string;
   name: string;
   phone: string | null;
+  email: string | null;
   address: string | null;
   city: string | null;
   zipCode: string | null;
@@ -34,6 +35,7 @@ type UserOpt = { id: string; name: string | null; email: string };
 type Visit = {
   id: string;
   clientName: string;
+  clientExternalOrgId?: string | null;
   siteName: string | null;
   siteAddress: string;
   contactName: string | null;
@@ -196,16 +198,43 @@ export function SiteVisitSimpleClient({
   const galleryRef = useRef<HTMLInputElement>(null);
 
   const [clientName, setClientName] = useState(initial.clientName);
-  const [phone, setPhone] = useState(initial.contactPhone ?? "");
+  const [clientCivility, setClientCivility] = useState(initial.prep?.clientCivility ?? "");
+  const [linkedClientId, setLinkedClientId] = useState(initial.clientExternalOrgId ?? "");
+  const [phone, setPhone] = useState(() => {
+    // Si contact sur place distinct, le tél. visite était parfois le contact :
+    // on privilégie le téléphone client côté fiche liée, sinon contactPhone.
+    if (initial.contactName && initial.contactName !== initial.clientName) {
+      return initial.contactPhone ?? "";
+    }
+    return initial.contactPhone ?? "";
+  });
   const [email, setEmail] = useState(initial.prep?.contactEmail ?? "");
   const [address, setAddress] = useState(initial.siteAddress);
   const [zipCode, setZipCode] = useState(initial.prep?.zipCode ?? "");
   const [city, setCity] = useState(initial.prep?.city ?? "");
-  const [contactName, setContactName] = useState(initial.contactName ?? "");
-  const [contactPhone, setContactPhone] = useState(
+  const [billingSameAsSite, setBillingSameAsSite] = useState(
+    initial.prep?.billingSameAsSite !== false &&
+      !initial.prep?.clientAddress?.trim(),
+  );
+  const [clientAddress, setClientAddress] = useState(initial.prep?.clientAddress ?? "");
+  const [clientZipCode, setClientZipCode] = useState(initial.prep?.clientZipCode ?? "");
+  const [clientCity, setClientCity] = useState(initial.prep?.clientCity ?? "");
+  const [clientCountry, setClientCountry] = useState(
+    initial.prep?.clientCountry ?? "France",
+  );
+  const [contactName, setContactName] = useState(
     initial.contactName && initial.contactName !== initial.clientName
-      ? (initial.contactPhone ?? "")
+      ? (initial.contactName ?? "")
       : "",
+  );
+  const [contactPhone, setContactPhone] = useState(
+    initial.prep?.siteContactPhone ??
+      (initial.contactName && initial.contactName !== initial.clientName
+        ? (initial.contactPhone ?? "")
+        : ""),
+  );
+  const [siteContactEmail, setSiteContactEmail] = useState(
+    initial.prep?.siteContactEmail ?? "",
   );
   const [scheduledAt, setScheduledAt] = useState(
     initial.scheduledAt ? initial.scheduledAt.slice(0, 16) : "",
@@ -267,6 +296,18 @@ export function SiteVisitSimpleClient({
       zipCode: zipCode.trim() || null,
       city: city.trim() || null,
       fieldNotes: fieldNotes.trim() || null,
+      clientCivility: clientCivility.trim() || null,
+      clientCompany: null,
+      clientAddress: billingSameAsSite ? null : clientAddress.trim() || null,
+      clientZipCode: billingSameAsSite ? null : clientZipCode.trim() || null,
+      clientCity: billingSameAsSite ? null : clientCity.trim() || null,
+      clientCountry: clientCountry.trim() || "France",
+      billingSameAsSite,
+      siteCountry: "France",
+      siteContactEmail: siteContactEmail.trim() || null,
+      siteContactPhone: contactName.trim()
+        ? contactPhone.trim() || null
+        : null,
     };
     const commercial: SiteVisitCommercialInfo = {
       ...(visit.commercial ?? emptyCommercial()),
@@ -277,8 +318,9 @@ export function SiteVisitSimpleClient({
     return {
       clientName: clientName.trim(),
       siteAddress: address.trim(),
-      contactName: contactName.trim() || clientName.trim() || null,
-      contactPhone: (contactPhone.trim() || phone.trim()) || null,
+      contactName: contactName.trim() || null,
+      contactPhone: phone.trim() || null,
+      clientExternalOrgId: linkedClientId || null,
       subject,
       clientNeed: works.trim() || null,
       comments: observations.trim() || null,
@@ -291,20 +333,28 @@ export function SiteVisitSimpleClient({
     };
   }, [
     address,
+    billingSameAsSite,
     budget,
     city,
+    clientAddress,
+    clientCity,
+    clientCivility,
+    clientCountry,
     clientName,
+    clientZipCode,
     contactName,
     contactPhone,
     delay,
     email,
     fieldNotes,
+    linkedClientId,
     lots,
     materials,
     observations,
     phone,
     responsibleId,
     scheduledAt,
+    siteContactEmail,
     visit.commercial,
     visit.prep,
     visit.subject,
@@ -347,13 +397,21 @@ export function SiteVisitSimpleClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     clientName,
+    clientCivility,
+    linkedClientId,
     phone,
     email,
     address,
     zipCode,
     city,
+    billingSameAsSite,
+    clientAddress,
+    clientZipCode,
+    clientCity,
+    clientCountry,
     contactName,
     contactPhone,
+    siteContactEmail,
     scheduledAt,
     responsibleId,
     works,
@@ -402,12 +460,24 @@ export function SiteVisitSimpleClient({
   function pickClient(c: ClientOpt) {
     const primary = c.contacts.find((x) => x.isPrimary) ?? c.contacts[0];
     markDirty();
+    setLinkedClientId(c.id);
     setClientName(c.name);
     setPhone(c.phone || primary?.phone || "");
-    setEmail(primary?.email || "");
-    setAddress(c.address || address);
-    setZipCode(c.zipCode || "");
-    setCity(c.city || "");
+    setEmail(c.email || primary?.email || "");
+    const addr = c.address || "";
+    const zip = c.zipCode || "";
+    const ville = c.city || "";
+    if (!address.trim()) {
+      setAddress(addr);
+      setZipCode(zip);
+      setCity(ville);
+      setBillingSameAsSite(true);
+    } else {
+      setClientAddress(addr);
+      setClientZipCode(zip);
+      setClientCity(ville);
+      setBillingSameAsSite(false);
+    }
     setClientQuery("");
   }
 
@@ -718,7 +788,24 @@ export function SiteVisitSimpleClient({
               ) : null}
             </div>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <label className="sm:col-span-2">
+              <label>
+                <span className={label}>Civilité</span>
+                <select
+                  className={field}
+                  value={clientCivility}
+                  onChange={(e) => {
+                    markDirty();
+                    setClientCivility(e.target.value);
+                  }}
+                >
+                  <option value="">—</option>
+                  <option value="M.">M.</option>
+                  <option value="Mme">Mme</option>
+                  <option value="Mlle">Mlle</option>
+                  <option value="Société">Société</option>
+                </select>
+              </label>
+              <label>
                 <span className={label}>Nom du client / société</span>
                 <input
                   className={field}
@@ -726,6 +813,7 @@ export function SiteVisitSimpleClient({
                   onChange={(e) => {
                     markDirty();
                     setClientName(e.target.value);
+                    if (linkedClientId) setLinkedClientId("");
                   }}
                 />
               </label>
@@ -785,6 +873,73 @@ export function SiteVisitSimpleClient({
                   }}
                 />
               </label>
+              <label className="sm:col-span-2 flex items-start gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={billingSameAsSite}
+                  onChange={(e) => {
+                    markDirty();
+                    setBillingSameAsSite(e.target.checked);
+                    if (e.target.checked) {
+                      setClientAddress("");
+                      setClientZipCode("");
+                      setClientCity("");
+                    }
+                  }}
+                />
+                <span className="text-[13px] text-slate-700">
+                  L’adresse du client est identique à celle du chantier
+                </span>
+              </label>
+              {!billingSameAsSite ? (
+                <>
+                  <label className="sm:col-span-2">
+                    <span className={label}>Adresse de facturation</span>
+                    <input
+                      className={field}
+                      value={clientAddress}
+                      onChange={(e) => {
+                        markDirty();
+                        setClientAddress(e.target.value);
+                      }}
+                    />
+                  </label>
+                  <label>
+                    <span className={label}>CP facturation</span>
+                    <input
+                      className={field}
+                      value={clientZipCode}
+                      onChange={(e) => {
+                        markDirty();
+                        setClientZipCode(e.target.value);
+                      }}
+                    />
+                  </label>
+                  <label>
+                    <span className={label}>Ville facturation</span>
+                    <input
+                      className={field}
+                      value={clientCity}
+                      onChange={(e) => {
+                        markDirty();
+                        setClientCity(e.target.value);
+                      }}
+                    />
+                  </label>
+                  <label className="sm:col-span-2">
+                    <span className={label}>Pays</span>
+                    <input
+                      className={field}
+                      value={clientCountry}
+                      onChange={(e) => {
+                        markDirty();
+                        setClientCountry(e.target.value);
+                      }}
+                    />
+                  </label>
+                </>
+              ) : null}
               <label>
                 <span className={label}>Contact sur place (facultatif)</span>
                 <input
@@ -805,6 +960,18 @@ export function SiteVisitSimpleClient({
                   onChange={(e) => {
                     markDirty();
                     setContactPhone(e.target.value);
+                  }}
+                />
+              </label>
+              <label className="sm:col-span-2">
+                <span className={label}>Email contact sur place (facultatif)</span>
+                <input
+                  className={field}
+                  type="email"
+                  value={siteContactEmail}
+                  onChange={(e) => {
+                    markDirty();
+                    setSiteContactEmail(e.target.value);
                   }}
                 />
               </label>

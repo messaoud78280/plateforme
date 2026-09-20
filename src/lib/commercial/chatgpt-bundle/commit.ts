@@ -12,6 +12,7 @@ import {
 import {
   createCommercialClientFromImport,
   matchClientsInOrganization,
+  mergeClientCoordsIfEmpty,
 } from "@/lib/commercial/import/match-client";
 import type { ImportedCustomer } from "@/lib/commercial/import/types";
 import type { BeworkQuoteBundleV1 } from "@/lib/commercial/chatgpt-bundle/types";
@@ -144,7 +145,10 @@ async function resolveClientId(opts: {
 
   const matches = await matchClientsInOrganization(opts.orgId, customer);
   const best = matches[0];
-  if (best && best.score >= 70) return best.id;
+  if (best && best.score >= 70) {
+    await mergeClientCoordsIfEmpty(best.id, customer);
+    return best.id;
+  }
 
   // Création auto dès qu’un client exploitable est dans le JSON
   if (opts.selection.createClientIfMissing || clientIsExploitable(opts.bundle)) {
@@ -374,6 +378,16 @@ export async function buildBundleImportPreview(opts: {
       ...(bundle.quote.vatRequiresConfirmation && bundle.quote.vatSuggestedRate != null
         ? [`TVA proposée : ${bundle.quote.vatSuggestedRate} % — à confirmer`]
         : []),
+      ...(!bundle.client.emails.length
+        ? ["Email du client non renseigné"]
+        : []),
+      ...(!bundle.client.address.line1
+        ? ["Adresse de facturation à compléter"]
+        : []),
+      ...(!bundle.client.address.postalCode || !bundle.client.address.city
+        ? ["Code postal / ville client à compléter"]
+        : []),
+      ...(!bundle.client.phone ? ["Téléphone du client non renseigné"] : []),
       ...bundle.warnings.map((w) => `⚠ ${w}`),
     ],
     sections,

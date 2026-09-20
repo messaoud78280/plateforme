@@ -24,6 +24,7 @@ import type {
 export const dynamic = "force-dynamic";
 
 function toSurveyInput(visit: NonNullable<Awaited<ReturnType<typeof getSiteVisit>>>): SurveyVisitInput {
+  const prep = visit.prep ?? {};
   return {
     id: visit.id,
     clientName: visit.clientName,
@@ -31,10 +32,30 @@ function toSurveyInput(visit: NonNullable<Awaited<ReturnType<typeof getSiteVisit
     siteAddress: visit.siteAddress,
     contactName: visit.contactName,
     contactPhone: visit.contactPhone,
-    contactEmail: visit.prep?.contactEmail ?? null,
+    contactEmail: prep.contactEmail ?? null,
     responsibleName: visit.responsibleName ?? null,
-    zipCode: visit.prep?.zipCode ?? null,
-    city: visit.prep?.city ?? null,
+    zipCode: prep.zipCode ?? null,
+    city: prep.city ?? null,
+    clientCivility: prep.clientCivility ?? null,
+    clientFirstName: prep.clientFirstName ?? null,
+    clientLastName: prep.clientLastName ?? null,
+    clientCompany: prep.clientCompany ?? null,
+    clientPhone: visit.contactPhone,
+    clientEmail: prep.contactEmail ?? null,
+    clientAddress: prep.clientAddress ?? null,
+    clientZipCode: prep.clientZipCode ?? null,
+    clientCity: prep.clientCity ?? null,
+    clientCountry: prep.clientCountry ?? null,
+    billingSameAsSite: prep.billingSameAsSite,
+    siteCountry: prep.siteCountry ?? "France",
+    siteContactEmail: prep.siteContactEmail ?? null,
+    siteContactPhone:
+      prep.siteContactPhone ??
+      (visit.contactName &&
+      visit.contactName.trim() &&
+      visit.contactName.trim() !== visit.clientName.trim()
+        ? visit.contactPhone
+        : null),
     subject: visit.subject,
     clientNeed: visit.clientNeed,
     scheduledAt: visit.scheduledAt,
@@ -45,9 +66,9 @@ function toSurveyInput(visit: NonNullable<Awaited<ReturnType<typeof getSiteVisit
     findings: (visit.findings ?? []) as SiteVisitFinding[],
     proposedWorks: (visit.proposedWorks ?? []) as SiteVisitProposedWork[],
     commercial: (visit.commercial ?? {}) as SiteVisitCommercialInfo,
-    lotSheets: visit.prep?.lotSheets ?? {},
+    lotSheets: prep.lotSheets ?? {},
     comments: visit.comments ?? null,
-    fieldNotes: visit.prep?.fieldNotes ?? null,
+    fieldNotes: prep.fieldNotes ?? null,
     measurements: visit.measurements.map((m) => ({
       id: m.id,
       zone: m.zone,
@@ -84,6 +105,76 @@ function toSurveyInput(visit: NonNullable<Awaited<ReturnType<typeof getSiteVisit
       fileUrl: m.fileUrl,
       storagePath: m.storagePath ?? null,
     })),
+  };
+}
+
+/** Complète les trous depuis la fiche client liée — sans écraser une saisie visite. */
+async function enrichFromLinkedClient(
+  visit: NonNullable<Awaited<ReturnType<typeof getSiteVisit>>>,
+  base: SurveyVisitInput,
+): Promise<SurveyVisitInput> {
+  if (!visit.clientExternalOrgId) return base;
+  const org = await prisma.externalOrganization.findFirst({
+    where: { id: visit.clientExternalOrgId },
+    select: {
+      name: true,
+      tradeName: true,
+      email: true,
+      phone: true,
+      address: true,
+      zipCode: true,
+      city: true,
+      contacts: {
+        take: 3,
+        orderBy: { isPrimary: "desc" },
+        select: {
+          firstName: true,
+          lastName: true,
+          phone: true,
+          email: true,
+          isPrimary: true,
+        },
+      },
+    },
+  });
+  if (!org) return base;
+
+  const primary = org.contacts.find((c) => c.isPrimary) ?? org.contacts[0];
+  const fill = (cur: string | null | undefined, next: string | null | undefined) =>
+    cur?.trim() ? cur : next?.trim() || null;
+
+  const firstName = fill(
+    base.clientFirstName,
+    primary?.firstName ?? null,
+  );
+  const lastName = fill(base.clientLastName, primary?.lastName ?? null);
+  const company = fill(base.clientCompany, org.tradeName);
+  const phone = fill(base.clientPhone, org.phone || primary?.phone);
+  const email = fill(base.clientEmail, org.email || primary?.email);
+  const clientAddress = fill(base.clientAddress, org.address);
+  const clientZip = fill(base.clientZipCode, org.zipCode);
+  const clientCity = fill(base.clientCity, org.city);
+
+  // Si pas d'adresse chantier, reprendre la fiche client
+  const siteAddress = fill(base.siteAddress, org.address) || base.siteAddress;
+  const zipCode = fill(base.zipCode, org.zipCode);
+  const city = fill(base.city, org.city);
+
+  return {
+    ...base,
+    clientName: fill(base.clientName, org.name) || base.clientName,
+    clientFirstName: firstName,
+    clientLastName: lastName,
+    clientCompany: company,
+    clientPhone: phone,
+    clientEmail: email,
+    contactEmail: fill(base.contactEmail, email),
+    clientAddress,
+    clientZipCode: clientZip,
+    clientCity,
+    siteAddress,
+    zipCode,
+    city,
   };
 }
 
@@ -141,7 +232,7 @@ export async function GET(
   }
 
   const format = new URL(req.url).searchParams.get("format") || "json";
-  const input = toSurveyInput(visit);
+  const input = await enrichFromLinkedClient(visit, toSurveyInput(visit));
   const survey = buildSiteSurveyJson(input);
   const prompt = buildChatgptQuoteInstructions(survey);
 

@@ -439,17 +439,131 @@ export function ChatGptBundleImportModal({
                 onToggle={(v) => setSel((s) => ({ ...s, importClient: v }))}
               >
                 <p className="font-semibold text-slate-900">{preview.clientName}</p>
-                {preview.clientPhone ? (
-                  <p className="text-slate-600">{preview.clientPhone}</p>
-                ) : null}
-                {preview.clientEmails.map((em) => (
-                  <p key={em} className="text-slate-600">
-                    {em}
-                  </p>
-                ))}
-                {preview.clientAddress ? (
-                  <p className="text-slate-600">{preview.clientAddress}</p>
-                ) : null}
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  <label className="text-[11px] text-slate-500">
+                    Téléphone
+                    <input
+                      className="mt-0.5 w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs text-slate-800"
+                      value={bundle.client.phone ?? ""}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setBundle((cur) =>
+                          cur
+                            ? {
+                                ...cur,
+                                client: { ...cur.client, phone: v.trim() || null },
+                              }
+                            : cur,
+                        );
+                      }}
+                    />
+                  </label>
+                  <label className="text-[11px] text-slate-500">
+                    Email
+                    <input
+                      className="mt-0.5 w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs text-slate-800"
+                      value={
+                        primaryEmail ??
+                        bundle.client.emails[0]?.email ??
+                        ""
+                      }
+                      onChange={(e) => {
+                        const v = e.target.value.trim();
+                        setPrimaryEmail(v || null);
+                        setBundle((cur) => {
+                          if (!cur) return cur;
+                          const emails = v
+                            ? [
+                                {
+                                  email: v,
+                                  role: "primary" as const,
+                                },
+                                ...cur.client.emails.filter(
+                                  (em) => em.email !== v && em.role !== "primary",
+                                ),
+                              ]
+                            : cur.client.emails.filter((em) => em.role !== "primary");
+                          return {
+                            ...cur,
+                            client: { ...cur.client, emails },
+                          };
+                        });
+                      }}
+                    />
+                  </label>
+                  <label className="sm:col-span-2 text-[11px] text-slate-500">
+                    Adresse de facturation
+                    <input
+                      className="mt-0.5 w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs text-slate-800"
+                      value={bundle.client.address.line1 ?? ""}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setBundle((cur) =>
+                          cur
+                            ? {
+                                ...cur,
+                                client: {
+                                  ...cur.client,
+                                  address: {
+                                    ...cur.client.address,
+                                    line1: v.trim() || null,
+                                  },
+                                },
+                              }
+                            : cur,
+                        );
+                      }}
+                    />
+                  </label>
+                  <label className="text-[11px] text-slate-500">
+                    Code postal
+                    <input
+                      className="mt-0.5 w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs text-slate-800"
+                      value={bundle.client.address.postalCode ?? ""}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setBundle((cur) =>
+                          cur
+                            ? {
+                                ...cur,
+                                client: {
+                                  ...cur.client,
+                                  address: {
+                                    ...cur.client.address,
+                                    postalCode: v.trim() || null,
+                                  },
+                                },
+                              }
+                            : cur,
+                        );
+                      }}
+                    />
+                  </label>
+                  <label className="text-[11px] text-slate-500">
+                    Ville
+                    <input
+                      className="mt-0.5 w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs text-slate-800"
+                      value={bundle.client.address.city ?? ""}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setBundle((cur) =>
+                          cur
+                            ? {
+                                ...cur,
+                                client: {
+                                  ...cur.client,
+                                  address: {
+                                    ...cur.client.address,
+                                    city: v.trim() || null,
+                                  },
+                                },
+                              }
+                            : cur,
+                        );
+                      }}
+                    />
+                  </label>
+                </div>
 
                 {preview.clientEmails.length > 1 ? (
                   <div className="mt-2">

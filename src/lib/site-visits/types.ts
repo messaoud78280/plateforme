@@ -390,6 +390,25 @@ export type SiteVisitPrep = {
    * Prioritaire par rapport aux mesures structurées pour le CR / ChatGPT.
    */
   fieldNotes?: string | null;
+  /** Civilité client (M. / Mme / Société). */
+  clientCivility?: string | null;
+  clientFirstName?: string | null;
+  clientLastName?: string | null;
+  /** Raison sociale si distincte du nom affiché. */
+  clientCompany?: string | null;
+  /** Adresse de facturation (distincte du chantier si billingSameAsSite = false). */
+  clientAddress?: string | null;
+  clientZipCode?: string | null;
+  clientCity?: string | null;
+  clientCountry?: string | null;
+  /** Si true, adresse client = adresse chantier à l’export. */
+  billingSameAsSite?: boolean;
+  /** Pays du chantier. */
+  siteCountry?: string | null;
+  /** Email du contact sur place (si différent du client). */
+  siteContactEmail?: string | null;
+  /** Téléphone du contact sur place. */
+  siteContactPhone?: string | null;
 };
 
 export function parseVisitPrep(raw: unknown): SiteVisitPrep {
@@ -428,6 +447,18 @@ export function parseVisitPrep(raw: unknown): SiteVisitPrep {
     addToAgenda: p.addToAgenda !== false,
     lotSheets: parseLotSheets(p.lotSheets),
     fieldNotes: typeof p.fieldNotes === "string" ? p.fieldNotes : null,
+    clientCivility: typeof p.clientCivility === "string" ? p.clientCivility : null,
+    clientFirstName: typeof p.clientFirstName === "string" ? p.clientFirstName : null,
+    clientLastName: typeof p.clientLastName === "string" ? p.clientLastName : null,
+    clientCompany: typeof p.clientCompany === "string" ? p.clientCompany : null,
+    clientAddress: typeof p.clientAddress === "string" ? p.clientAddress : null,
+    clientZipCode: typeof p.clientZipCode === "string" ? p.clientZipCode : null,
+    clientCity: typeof p.clientCity === "string" ? p.clientCity : null,
+    clientCountry: typeof p.clientCountry === "string" ? p.clientCountry : null,
+    billingSameAsSite: typeof p.billingSameAsSite === "boolean" ? p.billingSameAsSite : undefined,
+    siteCountry: typeof p.siteCountry === "string" ? p.siteCountry : null,
+    siteContactEmail: typeof p.siteContactEmail === "string" ? p.siteContactEmail : null,
+    siteContactPhone: typeof p.siteContactPhone === "string" ? p.siteContactPhone : null,
   };
 }
 

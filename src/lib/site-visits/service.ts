@@ -685,6 +685,12 @@ export async function updateSiteVisit(opts: {
       typeof d0.responsibleId === "string"
         ? { connect: { id: d0.responsibleId } }
         : { disconnect: true };
+  if (typeof d0.clientExternalOrgId === "string" || d0.clientExternalOrgId === null) {
+    patch.clientExternalOrg =
+      typeof d0.clientExternalOrgId === "string" && d0.clientExternalOrgId
+        ? { connect: { id: d0.clientExternalOrgId } }
+        : { disconnect: true };
+  }
   if (typeof d0.scheduledAt === "string" || d0.scheduledAt === null) {
     patch.scheduledAt =
       typeof d0.scheduledAt === "string" && d0.scheduledAt

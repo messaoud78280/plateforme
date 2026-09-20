@@ -341,6 +341,13 @@ export function parseBeworkQuoteBundle(rawText: string): BundleParseResult {
       clientRaw.societe,
   );
 
+  const civility = asString(
+    clientRaw.civility ??
+      clientRaw.civilite ??
+      clientRaw.title ??
+      clientRaw.titre,
+  );
+
   // Si seul nom_complet : tenter de découper prénom / nom
   let resolvedFirst = firstName;
   let resolvedLast = lastName;
@@ -353,6 +360,7 @@ export function parseBeworkQuoteBundle(rawText: string): BundleParseResult {
   }
 
   const client = {
+    civility,
     firstName: resolvedFirst,
     lastName: resolvedLast,
     fullName,
@@ -579,6 +587,26 @@ export function parseBeworkQuoteBundle(rawText: string): BundleParseResult {
 
   if (!client.firstName && !client.lastName && !client.fullName && !client.company) {
     warnings.push(issue("client", "Client peu renseigné — à compléter", "warn"));
+  }
+  if (!client.emails.length) {
+    warnings.push(issue("client.email", "Email du client non renseigné", "warn"));
+  }
+  if (!client.address.line1) {
+    warnings.push(
+      issue("client.address", "Adresse de facturation à compléter", "warn"),
+    );
+  }
+  if (!client.address.postalCode || !client.address.city) {
+    warnings.push(
+      issue(
+        "client.address",
+        "Code postal / ville client à compléter",
+        "warn",
+      ),
+    );
+  }
+  if (!client.phone) {
+    warnings.push(issue("client.phone", "Téléphone du client non renseigné", "warn"));
   }
   if (quote.vatRequiresConfirmation && quote.vatSuggestedRate != null) {
     warnings.push(

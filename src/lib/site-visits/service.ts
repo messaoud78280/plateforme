@@ -15,6 +15,12 @@ import { buildVisitSummary } from "@/lib/site-visits/summary";
 import { buildQuoteImpactPoints } from "@/lib/site-visits/impact";
 import { buildVisitCompleteness, hasVisitConstraints } from "@/lib/site-visits/completeness";
 import { syncSiteVisitAgenda } from "@/lib/site-visits/agenda-sync";
+import {
+  parseCommercial,
+  parseFindings,
+  parseProposedWorks,
+} from "@/lib/site-visits/survey-types";
+import { buildVisitQuality } from "@/lib/site-visits/quality";
 
 export type CreateSiteVisitInput = {
   organizationId: string;
@@ -110,6 +116,11 @@ export function serializeVisit(
     zonesJson?: unknown;
     prepJson?: unknown;
     preparedAt?: Date | null;
+    findingsJson?: unknown;
+    proposedWorksJson?: unknown;
+    commercialJson?: unknown;
+    surveyStage?: string | null;
+    surveyExportedAt?: Date | null;
     estimatedCrewCount: number | null;
     estimatedDuration: string | null;
     status: SiteVisitStatus;
@@ -143,6 +154,8 @@ export function serializeVisit(
       id: string;
       label: string;
       comment?: string | null;
+      category?: string | null;
+      checkStatus?: string | null;
       dueAt?: Date | null;
       resolvedAt: Date | null;
     }>;
@@ -153,8 +166,12 @@ export function serializeVisit(
       kind: string;
       name: string;
       caption: string | null;
+      category?: string | null;
+      observation?: string | null;
+      hypothesis?: string | null;
       fileUrl: string | null;
       mimeType: string | null;
+      storagePath?: string | null;
       createdAt?: Date;
     }>;
     responsible?: { id: string; name: string | null; email: string } | null;
@@ -196,6 +213,9 @@ export function serializeVisit(
   const lots = parseStringList(v.lotsJson);
   const zones = parseStringList(v.zonesJson);
   const prep = parseVisitPrep(v.prepJson);
+  const findings = parseFindings(v.findingsJson);
+  const proposedWorks = parseProposedWorks(v.proposedWorksJson);
+  const commercial = parseCommercial(v.commercialJson);
   const uniqueZones = [
     ...new Set([...zones, ...measurements.map((m) => m.zone?.trim() || "").filter(Boolean)]),
   ];
@@ -241,6 +261,22 @@ export function serializeVisit(
     photoCount: photos.length,
     documentCount: docs.length,
   });
+  const quality = buildVisitQuality({
+    clientName: v.clientName,
+    siteAddress: v.siteAddress,
+    subject: v.subject,
+    contactName: v.contactName,
+    zones: uniqueZones,
+    lots: uniqueLots,
+    measurementCount: measurements.length,
+    photoCount: photos.length,
+    constraints,
+    findings,
+    proposedWorks,
+    commercial,
+    missingOpenCount: missingOpen.length,
+    measurements,
+  });
   const quoteHref = v.commercialQuoteId
     ? `/dashboard/devis-facturation/devis/${v.commercialQuoteId}?fromVisit=${v.id}`
     : null;
@@ -269,6 +305,12 @@ export function serializeVisit(
     zones: uniqueZones,
     prep,
     preparedAt: v.preparedAt?.toISOString() ?? null,
+    findings,
+    proposedWorks,
+    commercial,
+    surveyStage: v.surveyStage ?? null,
+    surveyExportedAt: v.surveyExportedAt?.toISOString() ?? null,
+    quality,
     estimatedCrewCount: v.estimatedCrewCount,
     estimatedDuration: v.estimatedDuration,
     status: v.status,
@@ -287,6 +329,8 @@ export function serializeVisit(
       id: i.id,
       label: i.label,
       comment: i.comment ?? null,
+      category: i.category ?? null,
+      checkStatus: i.checkStatus ?? (i.resolvedAt ? "CONFIRME" : "A_VERIFIER"),
       dueAt: i.dueAt?.toISOString() ?? null,
       resolvedAt: i.resolvedAt?.toISOString() ?? null,
       open: !i.resolvedAt,
@@ -298,8 +342,12 @@ export function serializeVisit(
       kind: m.kind,
       name: m.name,
       caption: m.caption,
+      category: m.category ?? null,
+      observation: m.observation ?? null,
+      hypothesis: m.hypothesis ?? null,
       fileUrl: m.fileUrl,
       mimeType: m.mimeType,
+      storagePath: m.storagePath ?? null,
       createdAt: m.createdAt?.toISOString() ?? null,
     })),
     impactPoints,
@@ -609,6 +657,20 @@ export async function updateSiteVisit(opts: {
   if (d0.prep != null && typeof d0.prep === "object") {
     patch.prepJson = parseVisitPrep(d0.prep) as Prisma.InputJsonValue;
   }
+  if (Array.isArray(d0.findings)) {
+    patch.findingsJson = d0.findings as Prisma.InputJsonValue;
+  }
+  if (Array.isArray(d0.proposedWorks)) {
+    patch.proposedWorksJson = d0.proposedWorks as Prisma.InputJsonValue;
+  }
+  if (d0.commercial != null && typeof d0.commercial === "object") {
+    patch.commercialJson = parseCommercial(d0.commercial) as Prisma.InputJsonValue;
+  }
+  if (typeof d0.surveyStage === "string" || d0.surveyStage === null) {
+    patch.surveyStage =
+      typeof d0.surveyStage === "string" ? d0.surveyStage.trim() || null : null;
+  }
+  if (d0.surveyExportedAt === true) patch.surveyExportedAt = new Date();
   if (typeof d0.projectId === "string" || d0.projectId === null) {
     patch.project =
       typeof d0.projectId === "string" && d0.projectId

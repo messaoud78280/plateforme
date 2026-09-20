@@ -76,10 +76,12 @@ export const SITE_VISIT_STATE_FILTERS = [
 
 export const VISIT_DETAIL_TABS = [
   { id: "resume", label: "Résumé" },
+  { id: "prep", label: "Préparation" },
   { id: "metres", label: "Métré" },
-  { id: "terrain", label: "Terrain" },
+  { id: "terrain", label: "Relevé terrain" },
   { id: "medias", label: "Photos & documents" },
-  { id: "missing", label: "Points à compléter" },
+  { id: "chiffrage", label: "CR & chiffrage" },
+  { id: "missing", label: "Points à confirmer" },
   { id: "historique", label: "Historique" },
 ] as const;
 
@@ -369,6 +371,8 @@ export type SiteVisitPrep = {
   customConstraints?: string[];
   docsToRequest?: string[];
   addToAgenda?: boolean;
+  /** Réponses fiches techniques par lot (persistées, export survey). */
+  lotSheets?: Record<string, Record<string, string>>;
 };
 
 export function parseVisitPrep(raw: unknown): SiteVisitPrep {
@@ -405,6 +409,21 @@ export function parseVisitPrep(raw: unknown): SiteVisitPrep {
       ? p.docsToRequest.filter((x): x is string => typeof x === "string")
       : [],
     addToAgenda: p.addToAgenda !== false,
+    lotSheets: parseLotSheets(p.lotSheets),
   };
+}
+
+function parseLotSheets(raw: unknown): Record<string, Record<string, string>> {
+  if (!raw || typeof raw !== "object") return {};
+  const out: Record<string, Record<string, string>> = {};
+  for (const [lot, fields] of Object.entries(raw as Record<string, unknown>)) {
+    if (!fields || typeof fields !== "object") continue;
+    const row: Record<string, string> = {};
+    for (const [k, v] of Object.entries(fields as Record<string, unknown>)) {
+      if (typeof v === "string") row[k] = v;
+    }
+    out[lot] = row;
+  }
+  return out;
 }
 

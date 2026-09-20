@@ -32,6 +32,16 @@ import {
   type VisitDetailTabId,
 } from "@/lib/site-visits/types";
 import { computeMeasurement, formatMeasureDims, MEASURE_UNITS, type MeasureDeduction, type MeasureType } from "@/lib/site-visits/measurements";
+import { VisitChiffragePanel } from "@/components/site-visits/VisitChiffragePanel";
+import { VisitPhotoGallery } from "@/components/site-visits/VisitPhotoGallery";
+import type { LotSheets } from "@/components/site-visits/VisitLotSheetsPanel";
+import type {
+  SiteVisitCommercialInfo,
+  SiteVisitFinding,
+  SiteVisitProposedWork,
+} from "@/lib/site-visits/survey-types";
+import { emptyCommercial } from "@/lib/site-visits/survey-types";
+import { buildMeasurementCoherence } from "@/lib/site-visits/coherence";
 
 type Visit = {
   id: string;
@@ -111,10 +121,24 @@ type Visit = {
     kind: string;
     name: string;
     caption: string | null;
+    category?: string | null;
+    observation?: string | null;
+    hypothesis?: string | null;
     fileUrl: string | null;
     createdAt?: string | null;
   }>;
   impactPoints?: Array<{ id: string; label: string; severity: "info" | "warn" }>;
+  findings?: SiteVisitFinding[];
+  proposedWorks?: SiteVisitProposedWork[];
+  commercial?: SiteVisitCommercialInfo;
+  surveyStage?: string | null;
+  surveyExportedAt?: string | null;
+  quality?: {
+    items: Array<{ id: string; label: string; status: string; detail: string }>;
+    readyForQuote: boolean;
+    label: string;
+    openConfirmCount: number;
+  };
   summary?: {
     title: string;
     completenessLabel: string;
@@ -198,8 +222,21 @@ export function SiteVisitDetailClient({
   const [activeZone, setActiveZone] = useState("");
   const [workQuery, setWorkQuery] = useState("");
   const [mediaCaption, setMediaCaption] = useState("");
+  const [mediaCategory, setMediaCategory] = useState("");
+  const [mediaObservation, setMediaObservation] = useState("");
   const [mediaMeasurementId, setMediaMeasurementId] = useState("");
   const [mediaZone, setMediaZone] = useState("");
+  const [findings, setFindings] = useState<SiteVisitFinding[]>(initial.findings ?? []);
+  const [proposedWorks, setProposedWorks] = useState<SiteVisitProposedWork[]>(
+    initial.proposedWorks ?? [],
+  );
+  const [commercial, setCommercial] = useState<SiteVisitCommercialInfo>(
+    initial.commercial ?? emptyCommercial(),
+  );
+  const [lotSheets, setLotSheets] = useState<LotSheets>(initial.prep?.lotSheets ?? {});
+  const surveyDirty = useRef(false);
+  const visitRef = useRef(visit);
+  visitRef.current = visit;
   const photoRef = useRef<HTMLInputElement>(null);
   const docRef = useRef<HTMLInputElement>(null);
   const [mForm, setMForm] = useState(emptyMeasureForm);
@@ -258,6 +295,24 @@ export function SiteVisitDetailClient({
     return () => window.clearTimeout(t);
   }, [measureOpen, workQuery]);
 
+  useEffect(() => {
+    if (!surveyDirty.current) return;
+    const t = window.setTimeout(() => {
+      surveyDirty.current = false;
+      void patch({
+        findings,
+        proposedWorks,
+        commercial,
+        prep: {
+          ...(visitRef.current.prep ?? {}),
+          lotSheets,
+        } satisfies SiteVisitPrep,
+      });
+    }, 1400);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- autosave only when dirty survey fields change
+  }, [findings, proposedWorks, commercial, lotSheets]);
+
   async function patch(data: Record<string, unknown>) {
     setBusy(true);
     setSaveState("saving");
@@ -271,6 +326,10 @@ export function SiteVisitDetailClient({
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Échec");
       setVisit(json.visit);
+      if (json.visit.findings) setFindings(json.visit.findings);
+      if (json.visit.proposedWorks) setProposedWorks(json.visit.proposedWorks);
+      if (json.visit.commercial) setCommercial(json.visit.commercial);
+      if (json.visit.prep?.lotSheets) setLotSheets(json.visit.prep.lotSheets);
       setSaveState("saved");
       window.setTimeout(() => setSaveState("idle"), 1600);
     } catch (e) {
@@ -395,6 +454,8 @@ export function SiteVisitDetailClient({
       fd.set("file", file);
       fd.set("kind", kind);
       if (mediaCaption.trim()) fd.set("caption", mediaCaption.trim());
+      if (mediaCategory) fd.set("category", mediaCategory);
+      if (mediaObservation.trim()) fd.set("observation", mediaObservation.trim());
       if (mediaMeasurementId) fd.set("measurementId", mediaMeasurementId);
       if (mediaZone) fd.set("zone", mediaZone);
       const res = await fetch(`/api/site-visits/${visit.id}/media`, {
@@ -405,6 +466,7 @@ export function SiteVisitDetailClient({
       if (!res.ok) throw new Error(json.error || "Échec");
       setVisit(json.visit);
       setMediaCaption("");
+      setMediaObservation("");
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Erreur");
     } finally {
@@ -437,6 +499,13 @@ export function SiteVisitDetailClient({
   const photos = visit.medias.filter((m) => m.kind === "PHOTO");
   const docs = visit.medias.filter((m) => m.kind === "DOCUMENT");
   const missingOpen = visit.missingInfos.filter((i) => i.open);
+  const coherenceAlerts = buildMeasurementCoherence(visit.measurements);
+  const autosaveHint =
+    saveState === "saving"
+      ? "Enregistrement automatique…"
+      : saveState === "saved"
+        ? "Enregistré"
+        : null;
 
   return (
     <div className="mx-auto max-w-[1100px] space-y-4 px-3 py-4 pb-44 sm:px-6 lg:pb-32">
@@ -545,6 +614,30 @@ export function SiteVisitDetailClient({
 
       {message ? (
         <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-800">{message}</p>
+      ) : null}
+
+      {step === "resume" && visit.quality ? (
+        <div
+          className={cn(
+            "rounded-xl border px-4 py-3 text-sm",
+            visit.quality.readyForQuote
+              ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+              : "border-amber-200 bg-amber-50 text-amber-950",
+          )}
+        >
+          <p className="font-bold">{visit.quality.label}</p>
+          <p className="mt-0.5 text-xs opacity-80">
+            Dossier de visite — distinct de la préparation RDV (
+            {visit.completeness?.label ?? "—"})
+          </p>
+          <button
+            type="button"
+            className="mt-2 text-xs font-semibold underline"
+            onClick={() => setStep("chiffrage")}
+          >
+            Ouvrir CR & chiffrage →
+          </button>
+        </div>
       ) : null}
 
       {step === "resume" ? (
@@ -805,6 +898,19 @@ export function SiteVisitDetailClient({
 
       {step === "metres" ? (
         <Section tone="cyan" icon={Ruler} title="Métré" hint="Lot, zone, dimensions et quantité nette.">
+          {coherenceAlerts.length > 0 ? (
+            <ul className="mb-3 space-y-1 rounded-xl border border-amber-200/80 bg-amber-50/80 px-3 py-2.5 text-[12px]">
+              {coherenceAlerts.map((a) => (
+                <li
+                  key={a.id}
+                  className={a.severity === "warn" ? "text-amber-900" : "text-slate-600"}
+                >
+                  {a.severity === "warn" ? "⚠ " : "· "}
+                  {a.label}
+                </li>
+              ))}
+            </ul>
+          ) : null}
           <div className="mb-3 flex flex-wrap gap-2">
             {(visit.zones ?? []).map((z) => (
               <button
@@ -1100,94 +1206,35 @@ export function SiteVisitDetailClient({
 
       {step === "medias" ? (
         <>
-          <Section title="Photos">
-            <Field label="Légende / contexte">
-              <input
-                value={mediaCaption}
-                onChange={(e) => setMediaCaption(e.target.value)}
-                placeholder="Ex. Décollement membrane en pied d’acrotère"
-                className={fieldClass}
-              />
-            </Field>
-            {(visit.zones ?? []).length > 0 ? (
-              <Field label="Zone">
-                <select
-                  value={mediaZone}
-                  onChange={(e) => setMediaZone(e.target.value)}
-                  className={fieldClass}
-                >
-                  <option value="">Visite entière</option>
-                  {(visit.zones ?? []).map((z) => (
-                    <option key={z} value={z}>
-                      {z}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            ) : null}
-            <Field label="Lier à un relevé">
-              <select
-                value={mediaMeasurementId}
-                onChange={(e) => setMediaMeasurementId(e.target.value)}
-                className={fieldClass}
-              >
-                <option value="">Photo générale</option>
-                {visit.measurements.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.zone ? `${m.zone} — ` : ""}
-                    {m.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <input
-              ref={photoRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) void upload(f, "PHOTO");
-                e.target.value = "";
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => photoRef.current?.click()}
-              className="mt-2 flex h-12 w-full items-center justify-center rounded-xl border border-slate-200 bg-white text-[14px] font-semibold text-[#1e3a5f]"
-            >
-              + Ajouter une photo
-            </button>
-            <ul className="mt-4 grid grid-cols-2 gap-2">
-              {photos.map((p) => (
-                <li
-                  key={p.id}
-                  className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50"
-                >
-                  {p.fileUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={p.fileUrl}
-                      alt={p.caption || p.name}
-                      className="aspect-square w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex aspect-square items-center justify-center text-[11px] text-slate-400">
-                      Photo
-                    </div>
-                  )}
-                  <p className="truncate px-2 py-1.5 text-[11px] text-slate-600">
-                    {p.caption || p.name}
-                    {p.zone ? ` · ${p.zone}` : ""}
-                    {p.createdAt
-                      ? ` · ${new Date(p.createdAt).toLocaleDateString("fr-FR")}`
-                      : ""}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </Section>
+          <VisitPhotoGallery
+            photos={photos}
+            zones={visit.zones ?? []}
+            caption={mediaCaption}
+            category={mediaCategory}
+            observation={mediaObservation}
+            zone={mediaZone}
+            measurementId={mediaMeasurementId}
+            measurements={visit.measurements}
+            onCaption={setMediaCaption}
+            onCategory={setMediaCategory}
+            onObservation={setMediaObservation}
+            onZone={setMediaZone}
+            onMeasurementId={setMediaMeasurementId}
+            onCapture={() => photoRef.current?.click()}
+            busy={busy}
+          />
+          <input
+            ref={photoRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void upload(f, "PHOTO");
+              e.target.value = "";
+            }}
+          />
           <Section title="Plans & documents">
             <input
               ref={docRef}
@@ -1224,6 +1271,95 @@ export function SiteVisitDetailClient({
             ) : null}
           </Section>
         </>
+      ) : null}
+
+      {step === "prep" ? (
+        <Section title="Préparation de la visite">
+          <p className="mb-3 text-sm text-slate-600">
+            Étape A — informations renseignées avant le rendez-vous. Modifiez-les depuis le
+            résumé ou lors de la création.
+          </p>
+          <ul className="space-y-2 text-sm text-slate-700">
+            <li>
+              <strong>Client :</strong> {visit.clientName}
+            </li>
+            <li>
+              <strong>Adresse :</strong> {visit.siteAddress}
+            </li>
+            <li>
+              <strong>Objet :</strong> {visit.subject}
+            </li>
+            <li>
+              <strong>Contact :</strong>{" "}
+              {[visit.contactName, visit.contactPhone].filter(Boolean).join(" · ") ||
+                "Non renseigné"}
+            </li>
+            <li>
+              <strong>Lots :</strong> {(visit.lots ?? []).join(", ") || "—"}
+            </li>
+            <li>
+              <strong>Zones prévues :</strong> {(visit.zones ?? []).join(", ") || "—"}
+            </li>
+            <li>
+              <strong>Relevés prévus :</strong>{" "}
+              {(visit.prep?.plannedMeasures ?? []).join(", ") || "—"}
+            </li>
+            <li>
+              <strong>RDV :</strong>{" "}
+              {visit.scheduledAt
+                ? new Date(visit.scheduledAt).toLocaleString("fr-FR")
+                : "À planifier"}
+            </li>
+          </ul>
+          {visit.clientNeed ? (
+            <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+              <strong>Demande client :</strong> {visit.clientNeed}
+            </p>
+          ) : null}
+        </Section>
+      ) : null}
+
+      {step === "chiffrage" ? (
+        <VisitChiffragePanel
+          visitId={visit.id}
+          canCreateQuote={canCreateQuote}
+          quoteHref={visit.commercialQuoteHref}
+          quoteNumber={visit.commercialQuoteNumber}
+          quality={visit.quality ?? null}
+          surveyStage={visit.surveyStage ?? null}
+          findings={findings}
+          proposedWorks={proposedWorks}
+          commercial={commercial}
+          zones={visit.zones ?? []}
+          lots={visit.lots ?? []}
+          lotSheets={lotSheets}
+          busy={busy}
+          autosaveHint={autosaveHint}
+          onChange={(p) => {
+            surveyDirty.current = true;
+            if (p.findings) setFindings(p.findings);
+            if (p.proposedWorks) setProposedWorks(p.proposedWorks);
+            if (p.commercial) setCommercial(p.commercial);
+            if (p.lotSheets) setLotSheets(p.lotSheets);
+            if (p.surveyStage) {
+              void patch({ surveyStage: p.surveyStage });
+            }
+          }}
+          onSave={async () => {
+            surveyDirty.current = false;
+            await patch({
+              findings,
+              proposedWorks,
+              commercial,
+              surveyStage: "SYNTHESIS",
+              prep: {
+                ...(visit.prep ?? {}),
+                lotSheets,
+              },
+            });
+          }}
+          onCreateQuote={createQuote}
+        />
       ) : null}
 
       {step === "missing" ? (
@@ -1324,6 +1460,11 @@ export function SiteVisitDetailClient({
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/95 px-3 py-3 backdrop-blur lg:hidden">
         <div className="mx-auto grid max-w-lg grid-cols-2 gap-2">
+          {saveState !== "idle" ? (
+            <p className="col-span-2 text-center text-[11px] font-medium text-slate-500">
+              {saveState === "saving" ? "Enregistrement…" : "Enregistré"}
+            </p>
+          ) : null}
           <button
             type="button"
             onClick={() => {

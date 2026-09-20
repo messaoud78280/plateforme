@@ -17,6 +17,9 @@ export async function uploadSiteVisitMedia(opts: {
   measurementId?: string | null;
   zone?: string | null;
   name?: string | null;
+  category?: string | null;
+  observation?: string | null;
+  hypothesis?: string | null;
 }) {
   const visit = await prisma.siteVisit.findFirst({
     where: { id: opts.visitId, organizationId: opts.organizationId },
@@ -62,6 +65,9 @@ export async function uploadSiteVisitMedia(opts: {
       kind: opts.kind,
       name: safeName,
       caption: opts.caption?.trim() || null,
+      category: opts.category?.trim() || null,
+      observation: opts.observation?.trim() || null,
+      hypothesis: opts.hypothesis?.trim() || null,
       fileUrl,
       mimeType: opts.file.type || null,
       fileSize: opts.file.size,

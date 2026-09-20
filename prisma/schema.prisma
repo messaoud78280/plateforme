@@ -4996,6 +4996,15 @@ model SiteVisit {
   /// Préparation visite (nature, relevés prévus, accès, contacts étendus).
   prepJson             Json?
   preparedAt           DateTime?
+  /// Constats terrain (faits / hypothèses) — JSON versionné côté app.
+  findingsJson         Json?
+  /// Prestations / travaux à chiffrer.
+  proposedWorksJson    Json?
+  /// Contexte commercial (budget, délais — pas de prix devis).
+  commercialJson       Json?
+  /// PREP | ON_SITE | SYNTHESIS | QUOTE_READY | EXPORTED
+  surveyStage          String?
+  surveyExportedAt     DateTime?
   status               SiteVisitStatus @default(TO_PLAN)
   agendaEventId        String?
   /// Devis Commercial lié — idempotence « Créer le devis ».
@@ -5068,6 +5077,10 @@ model SiteVisitMissingInfo {
   organizationId String
   label          String
   comment        String?
+  /// DOC | ACCESS | MEASURE | COMMERCIAL | TECH | OTHER
+  category       String?
+  /// A_VERIFIER | CONFIRME | NON_APPLICABLE
+  checkStatus    String?   @default("A_VERIFIER")
   dueAt          DateTime?
   resolvedAt     DateTime?
   createdAt      DateTime  @default(now())
@@ -5088,6 +5101,12 @@ model SiteVisitMedia {
   kind           SiteVisitMediaKind @default(PHOTO)
   name           String
   caption        String?
+  /// VUE_GENERALE | ETAT_EXISTANT | DEFAUT | MESURE | ACCES | RESEAUX | SUPPORT | DETAIL | CONTRAINTE | AUTRE
+  category       String?
+  /// Observation factuelle liée à la photo.
+  observation    String?           @db.Text
+  /// Hypothèse technique à confirmer (distincte du constat).
+  hypothesis     String?           @db.Text
   fileUrl        String?
   mimeType       String?
   fileSize       Int?

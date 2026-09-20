@@ -338,6 +338,18 @@ export const PREP_CONSTRAINT_GROUPS: { id: string; label: string; items: string[
   },
 ];
 
+export const SIMPLE_WORK_TYPES = [
+  "Maçonnerie",
+  "Terrassement",
+  "Aménagement extérieur",
+  "VRD",
+  "Extension",
+  "Rénovation",
+  "Couverture",
+  "Étanchéité",
+  "Autre",
+] as const;
+
 export const DOCS_TO_REQUEST = [
   "Plans",
   "Diagnostic amiante",

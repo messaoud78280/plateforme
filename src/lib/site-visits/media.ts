@@ -131,3 +131,62 @@ export async function uploadSiteVisitMedia(opts: {
 
   return getSiteVisit(opts.organizationId, visit.id);
 }
+
+export async function updateSiteVisitMedia(opts: {
+  organizationId: string;
+  visitId: string;
+  mediaId: string;
+  caption?: string | null;
+  observation?: string | null;
+}) {
+  const media = await prisma.siteVisitMedia.findFirst({
+    where: {
+      id: opts.mediaId,
+      visitId: opts.visitId,
+      organizationId: opts.organizationId,
+    },
+    select: { id: true },
+  });
+  if (!media) throw new Error("Média introuvable");
+  await prisma.siteVisitMedia.update({
+    where: { id: media.id },
+    data: {
+      ...(opts.caption !== undefined
+        ? { caption: opts.caption?.trim() || null }
+        : {}),
+      ...(opts.observation !== undefined
+        ? { observation: opts.observation?.trim() || null }
+        : {}),
+    },
+  });
+  return getSiteVisit(opts.organizationId, opts.visitId);
+}
+
+export async function deleteSiteVisitMedia(opts: {
+  organizationId: string;
+  visitId: string;
+  mediaId: string;
+}) {
+  const media = await prisma.siteVisitMedia.findFirst({
+    where: {
+      id: opts.mediaId,
+      visitId: opts.visitId,
+      organizationId: opts.organizationId,
+    },
+  });
+  if (!media) throw new Error("Média introuvable");
+
+  if (media.storagePath) {
+    try {
+      const supabase = createServiceRoleClient();
+      if (supabase) {
+        await supabase.storage.from("documents").remove([media.storagePath]);
+      }
+    } catch (e) {
+      console.error("Suppression stockage photo visite:", e);
+    }
+  }
+
+  await prisma.siteVisitMedia.delete({ where: { id: media.id } });
+  return getSiteVisit(opts.organizationId, opts.visitId);
+}

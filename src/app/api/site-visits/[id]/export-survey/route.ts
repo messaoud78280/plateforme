@@ -31,6 +31,10 @@ function toSurveyInput(visit: NonNullable<Awaited<ReturnType<typeof getSiteVisit
     siteAddress: visit.siteAddress,
     contactName: visit.contactName,
     contactPhone: visit.contactPhone,
+    contactEmail: visit.prep?.contactEmail ?? null,
+    responsibleName: visit.responsibleName ?? null,
+    zipCode: visit.prep?.zipCode ?? null,
+    city: visit.prep?.city ?? null,
     subject: visit.subject,
     clientNeed: visit.clientNeed,
     scheduledAt: visit.scheduledAt,
@@ -42,6 +46,7 @@ function toSurveyInput(visit: NonNullable<Awaited<ReturnType<typeof getSiteVisit
     proposedWorks: (visit.proposedWorks ?? []) as SiteVisitProposedWork[],
     commercial: (visit.commercial ?? {}) as SiteVisitCommercialInfo,
     lotSheets: visit.prep?.lotSheets ?? {},
+    comments: visit.comments ?? null,
     measurements: visit.measurements.map((m) => ({
       id: m.id,
       zone: m.zone,

@@ -522,6 +522,12 @@ export function SiteVisitDetailClient({
           ) : saveState === "saved" ? (
             <span className="text-[12px] text-emerald-700">Enregistré</span>
           ) : null}
+          <Link
+            href={`/dashboard/visites-metres/${visit.id}`}
+            className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-200"
+          >
+            Vue simple
+          </Link>
           <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
             {visit.statusLabel}
           </span>

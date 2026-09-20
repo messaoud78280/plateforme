@@ -21,6 +21,11 @@ export type SurveyVisitInput = {
   siteAddress: string;
   contactName: string | null;
   contactPhone: string | null;
+  contactEmail?: string | null;
+  responsibleName?: string | null;
+  companyName?: string | null;
+  zipCode?: string | null;
+  city?: string | null;
   subject: string;
   clientNeed: string | null;
   scheduledAt: string | null;
@@ -33,6 +38,7 @@ export type SurveyVisitInput = {
   commercial: SiteVisitCommercialInfo;
   /** Fiches techniques lot (réponses terrain). */
   lotSheets?: Record<string, Record<string, string>>;
+  comments?: string | null;
   measurements: Array<{
     id: string;
     zone: string | null;
@@ -320,12 +326,12 @@ export function generateSiteSurveyPdf(
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text("COMPTE RENDU DE VISITE / MÉTRÉ", 16, 12);
+  doc.text("COMPTE RENDU DE VISITE DE CHANTIER", 16, 12);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.text(
     pdfSafe(
-      `${visit.subject} · ${visit.scheduledAt ? fmtDate(new Date(visit.scheduledAt)) : "Date à confirmer"}`,
+      `${visit.companyName || "BeWork"} · ${visit.scheduledAt ? fmtDate(new Date(visit.scheduledAt)) : "Date à confirmer"}${visit.responsibleName ? ` · ${visit.responsibleName}` : ""}`,
     ),
     16,
     20,
@@ -333,43 +339,45 @@ export function generateSiteSurveyPdf(
   doc.setTextColor(...INK);
 
   let y = 36;
-  y = section(doc, y, "Identification");
+  y = section(doc, y, "Informations client");
   y = lines(doc, y, [
-    `Client : ${visit.clientName}`,
-    `Chantier : ${visit.siteName || "—"}`,
+    `Nom : ${visit.clientName}`,
+    `Téléphone : ${visit.contactPhone || "—"}`,
+    `Email : ${visit.contactEmail || "—"}`,
+    visit.contactName && visit.contactName !== visit.clientName
+      ? `Contact sur place : ${visit.contactName}`
+      : null,
+  ].filter(Boolean) as string[]);
+
+  y = section(doc, y, "Chantier");
+  y = lines(doc, y, [
     `Adresse : ${visit.siteAddress}`,
-    `Contact : ${[visit.contactName, visit.contactPhone].filter(Boolean).join(" · ") || "Non renseigné"}`,
-    `Objet : ${visit.subject}`,
+    visit.zipCode || visit.city
+      ? `CP / Ville : ${[visit.zipCode, visit.city].filter(Boolean).join(" ")}`
+      : null,
+    visit.siteName ? `Nom du site : ${visit.siteName}` : null,
+  ].filter(Boolean) as string[]);
+
+  y = section(doc, y, "Objet de la visite");
+  y = lines(doc, y, [
+    visit.clientNeed || visit.subject || "Non renseigné",
+    ...(visit.lots.length ? [`Type de travaux : ${visit.lots.join(", ")}`] : []),
   ]);
 
-  if (visit.clientNeed) {
-    y = section(doc, y, "Demande du client");
-    y = lines(doc, y, [visit.clientNeed]);
-  }
-
-  if (visit.lots.length || visit.zones.length) {
-    y = section(doc, y, "Lots & zones");
-    y = lines(doc, y, [
-      ...(visit.lots.length ? [`Lots : ${visit.lots.join(", ")}`] : []),
-      ...(visit.zones.length ? [`Zones : ${visit.zones.join(", ")}`] : []),
-    ]);
-  }
-
   if (visit.measurements.length) {
-    y = section(doc, y, "Relevés dimensionnels");
+    y = section(doc, y, "Relevés & métrés");
     y = lines(
       doc,
       y,
       visit.measurements.map((m) => {
         const dims = [
-          m.lengthM != null ? `L=${m.lengthM}` : null,
-          m.widthM != null ? `l=${m.widthM}` : null,
-          m.heightM != null ? `H=${m.heightM}` : null,
+          m.lengthM != null ? `L ${m.lengthM} m` : null,
+          m.widthM != null ? `l ${m.widthM} m` : null,
+          m.heightM != null ? `H/P ${m.heightM} m` : null,
         ]
           .filter(Boolean)
           .join(" × ");
-        const src = qtySource(m);
-        return `${m.zone ? `[${m.zone}] ` : ""}${m.label} : ${m.computedQuantity} ${m.unit} (${src})${dims ? ` [${dims}]` : ""}${m.lot ? ` · ${m.lot}` : ""}`;
+        return `${m.label} — ${dims || "dimensions non saisies"} → ${m.computedQuantity > 0 ? `${m.computedQuantity} ${m.unit}` : "quantité à confirmer"}${m.observation ? ` · ${m.observation}` : ""}`;
       }),
     );
   }
@@ -403,29 +411,34 @@ export function generateSiteSurveyPdf(
     );
   }
 
-  const c = visit.constraints;
-  const constraintLines = [
-    c.accessLevel && `Accès : ${c.accessLevel}`,
-    ...(c.access ?? []).map((x) => `Accès · ${x}`),
-    ...(c.occupation ?? []).map((x) => `Occupation · ${x}`),
-    c.supportState && `Support : ${c.supportState}`,
-    ...(c.supportObservations ?? []).map((x) => `Support · ${x}`),
-    c.asbestosStatus && `Amiante / diagnostic : ${c.asbestosStatus}`,
-    ...(c.waste ?? []).map((x) => `Déchets · ${x}`),
-    ...(c.means ?? []).map((x) => `Moyens · ${x}`),
-    c.estimatedDifficulty && `Difficulté estimée : ${c.estimatedDifficulty}`,
-    c.otherComment && `Autre : ${c.otherComment}`,
+  const obsLines = [
+    visit.comments?.trim() || null,
+    ...[
+      visit.constraints.accessLevel && `Accès : ${visit.constraints.accessLevel}`,
+      ...(visit.constraints.access ?? []).map((x) => `Accès · ${x}`),
+      ...(visit.constraints.occupation ?? []).map((x) => `Occupation · ${x}`),
+      visit.constraints.supportState && `Support : ${visit.constraints.supportState}`,
+      ...(visit.constraints.supportObservations ?? []).map((x) => `Support · ${x}`),
+      visit.constraints.asbestosStatus && `Amiante / diagnostic : ${visit.constraints.asbestosStatus}`,
+      ...(visit.constraints.waste ?? []).map((x) => `Déchets · ${x}`),
+      ...(visit.constraints.means ?? []).map((x) => `Moyens · ${x}`),
+      visit.constraints.estimatedDifficulty && `Difficulté estimée : ${visit.constraints.estimatedDifficulty}`,
+      visit.constraints.otherComment && `Autre : ${visit.constraints.otherComment}`,
+    ].filter(Boolean),
   ].filter(Boolean) as string[];
-  if (constraintLines.length) {
-    y = section(doc, y, "Contraintes");
-    y = lines(doc, y, constraintLines);
+  if (obsLines.length) {
+    y = section(doc, y, "Observations techniques");
+    y = lines(doc, y, obsLines);
   }
 
-  const commercialLines = Object.entries(visit.commercial)
-    .filter(([, v]) => v && String(v).trim())
-    .map(([k, v]) => `${k} : ${v}`);
+  const commercialLines = [
+    visit.commercial.supplyByClient && `Matériaux souhaités : ${visit.commercial.supplyByClient}`,
+    visit.commercial.budgetAnnounced && `Budget communiqué : ${visit.commercial.budgetAnnounced}`,
+    visit.commercial.desiredDelay && `Délai souhaité : ${visit.commercial.desiredDelay}`,
+    visit.commercial.specialExpectations && `Attentes : ${visit.commercial.specialExpectations}`,
+  ].filter(Boolean) as string[];
   if (commercialLines.length) {
-    y = section(doc, y, "Informations commerciales");
+    y = section(doc, y, "Informations complémentaires");
     y = lines(doc, y, commercialLines);
   }
 
@@ -433,16 +446,16 @@ export function generateSiteSurveyPdf(
     (i) => i.open && i.checkStatus !== "CONFIRME" && i.checkStatus !== "NON_APPLICABLE",
   );
   if (missing.length) {
-    y = section(doc, y, "Points à confirmer avant chiffrage");
+    y = section(doc, y, "Points à confirmer");
     y = lines(
       doc,
       y,
-      missing.map((i) => `${i.label}${i.comment ? ` — ${i.comment}` : ""} [${i.checkStatus || "A_VERIFIER"}]`),
+      missing.map((i) => `${i.label}${i.comment ? ` — ${i.comment}` : ""}`),
     );
   }
 
   if (opts?.photoBytes?.length) {
-    y = section(doc, y, "Photos");
+    y = section(doc, y, "Photographies");
     for (const ph of opts.photoBytes) {
       y = ensureSpace(doc, y, 55);
       try {
@@ -457,7 +470,7 @@ export function generateSiteSurveyPdf(
       }
     }
   } else if (visit.medias.some((m) => m.kind === "PHOTO")) {
-    y = section(doc, y, "Photos (légendes)");
+    y = section(doc, y, "Photographies (légendes)");
     y = lines(
       doc,
       y,
@@ -465,7 +478,7 @@ export function generateSiteSurveyPdf(
         .filter((m) => m.kind === "PHOTO")
         .map(
           (m, i) =>
-            `PHOTO-${String(i + 1).padStart(3, "0")} · ${m.zone || "Zone ?"} · ${m.caption || m.name}${m.observation ? ` — ${m.observation}` : ""}`,
+            `PHOTO-${String(i + 1).padStart(3, "0")} · ${m.caption || m.name}${m.observation ? ` — ${m.observation}` : ""}`,
         ),
     );
   }
@@ -476,7 +489,7 @@ export function generateSiteSurveyPdf(
   doc.setDrawColor(...RULE);
   doc.line(16, y, w - 16, y);
   doc.text(
-    "Document basé uniquement sur les données saisies. Aucune mesure inventée. À vérifier avant devis.",
+    "Document basé uniquement sur les données saisies. Aucune mesure ni prix inventés. À vérifier avant devis.",
     16,
     y + 6,
   );

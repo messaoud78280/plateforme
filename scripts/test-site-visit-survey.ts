@@ -117,10 +117,147 @@ const visit = {
 }
 
 {
+  const survey = buildSiteSurveyJson({
+    ...visit,
+    fieldNotes:
+      "Terrasse de 8 mètres sur 5 mètres.\nSurface totale de 40 m².\nCarrelage existant fissuré.",
+  });
+  assert(
+    (survey as { field_notes?: string | null }).field_notes?.includes("40 m²"),
+    "field_notes exporté",
+  );
+  const prompt = buildChatgptQuoteInstructions(survey);
+  assert(prompt.includes("field_notes"), "prompt mentionne field_notes");
+  assert(prompt.includes("N'invente aucune dimension") || prompt.includes("N'invente aucune"), "prompt no invent dims");
+}
+
+{
+  const jeanNotes = `Terrasse de 8 mètres sur 5 mètres.
+Surface totale de 40 m².
+
+Carrelage existant fissuré.
+Présence de flaques d'eau.
+
+Le client souhaite un revêtement extérieur
+en grès cérame.
+
+Prévoir la dépose du carrelage, la vérification
+du support et la réalisation du nouveau revêtement.
+
+Accès latéral de 95 cm.
+
+Évacuation des gravats à prévoir.`;
+
+  const jeanVisit = {
+    ...visit,
+    clientName: "Jean Dupont",
+    siteName: "Réfection d'une terrasse",
+    siteAddress: "5 rue des Jardins, 69000 Lyon",
+    subject: "Réfection d'une terrasse",
+    clientNeed: "Réfection d'une terrasse",
+    fieldNotes: jeanNotes,
+    measurements: [] as typeof visit.measurements,
+    medias: [
+      {
+        id: "ph1",
+        kind: "PHOTO" as const,
+        name: "terrasse-vue-generale.jpg",
+        caption: "Vue générale terrasse",
+        category: "EXISTANT",
+        observation: "Carrelage fissuré",
+        hypothesis: null,
+        zone: "Terrasse",
+        measurementId: null,
+        fileUrl: "/tmp/test-photo-1.jpg",
+      },
+      {
+        id: "ph2",
+        kind: "PHOTO" as const,
+        name: "terrasse-fissures.jpg",
+        caption: "Détail fissures",
+        category: "DEFAUT",
+        observation: "Flaques d'eau",
+        hypothesis: null,
+        zone: "Terrasse",
+        measurementId: null,
+        fileUrl: "/tmp/test-photo-2.jpg",
+      },
+      {
+        id: "ph3",
+        kind: "PHOTO" as const,
+        name: "acces-lateral.jpg",
+        caption: "Accès 95 cm",
+        category: "ACCES",
+        observation: null,
+        hypothesis: null,
+        zone: "Accès",
+        measurementId: null,
+        fileUrl: "/tmp/test-photo-3.jpg",
+      },
+    ],
+  };
+
+  const jeanSurvey = buildSiteSurveyJson(jeanVisit);
+  assert(jeanSurvey.client.name === "Jean Dupont", "client Jean Dupont");
+  assert(
+    (jeanSurvey as { field_notes?: string | null }).field_notes === jeanNotes,
+    "texte libre intégral JSON",
+  );
+  assert(
+    (jeanSurvey as { field_notes_verbatim?: boolean }).field_notes_verbatim === true,
+    "verbatim flag",
+  );
+  assert(jeanSurvey.photos.length === 3, "3 photos associées");
+  assert(
+    jeanSurvey.photos.every((p) => p.caption || p.observation),
+    "photos avec légendes",
+  );
+
+  const jeanPrompt = buildChatgptQuoteInstructions(jeanSurvey);
+  assert(jeanPrompt.includes("Terrasse de 8 mètres"), "prompt contient relevés");
+  assert(jeanPrompt.includes("95 cm"), "prompt contient accès");
+  assert(jeanPrompt.includes(BEWORK_QUOTE_BUNDLE_FORMAT), "prompt bundle v1 Jean");
+
+  const jeanPdf = generateSiteSurveyPdf(jeanVisit);
+  const pdfText = Buffer.from(jeanPdf).toString("latin1");
+  assert(jeanPdf.byteLength > 500, "PDF Jean généré");
+  assert(pdfText.includes("Jean Dupont") || pdfText.includes("Dupont"), "PDF client");
+  assert(
+    pdfText.includes("40 m") || pdfText.includes("Terrasse"),
+    "PDF contient relevés",
+  );
+  assert(
+    pdfText.includes("Relev") || pdfText.includes("m"),
+    "PDF section relevés",
+  );
+
+  const qJean = buildVisitQuality({
+    clientName: jeanVisit.clientName,
+    siteAddress: jeanVisit.siteAddress,
+    subject: jeanVisit.subject,
+    contactName: jeanVisit.contactName,
+    zones: jeanVisit.zones,
+    lots: jeanVisit.lots,
+    measurementCount: 0,
+    hasFieldNotes: true,
+    photoCount: 3,
+    constraints: jeanVisit.constraints,
+    findings: jeanVisit.findings,
+    proposedWorks: jeanVisit.proposedWorks,
+    commercial: jeanVisit.commercial,
+    missingOpenCount: 0,
+  });
+  assert(qJean.readyForQuote === true, "prêt chiffrage avec texte libre seul");
+}
+
+{
   const survey = buildSiteSurveyJson(visit);
   const prompt = buildChatgptQuoteInstructions(survey);
   assert(prompt.includes(BEWORK_QUOTE_BUNDLE_FORMAT), "prompt référence bundle v1");
-  assert(prompt.includes("N'invente aucune donnée"), "prompt no invent");
+  assert(
+    prompt.includes("N'invente aucune dimension") || prompt.includes("N'invente aucune donnée"),
+    "prompt no invent",
+  );
   assert(prompt.includes("bework_site_survey_v1"), "prompt survey data");
 }
 

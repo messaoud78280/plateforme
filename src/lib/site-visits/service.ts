@@ -244,6 +244,7 @@ export function serializeVisit(
     estimatedCrewCount: v.estimatedCrewCount,
     estimatedDuration: v.estimatedDuration,
   });
+  const hasFieldNotes = Boolean(prep.fieldNotes?.trim());
   const completeness = buildVisitCompleteness({
     clientName: v.clientName,
     siteAddress: v.siteAddress,
@@ -255,6 +256,7 @@ export function serializeVisit(
     subject: v.subject,
     lots,
     measurementCount: measurements.length,
+    hasFieldNotes,
     measurementLots: measurements.map((m) => m.lot).filter((x): x is string => Boolean(x)),
     hasConstraints: hasVisitConstraints(constraints),
     missingOpenCount: missingOpen.length,
@@ -269,6 +271,7 @@ export function serializeVisit(
     zones: uniqueZones,
     lots: uniqueLots,
     measurementCount: measurements.length,
+    hasFieldNotes,
     photoCount: photos.length,
     constraints,
     findings,

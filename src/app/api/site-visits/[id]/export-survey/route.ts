@@ -47,6 +47,7 @@ function toSurveyInput(visit: NonNullable<Awaited<ReturnType<typeof getSiteVisit
     commercial: (visit.commercial ?? {}) as SiteVisitCommercialInfo,
     lotSheets: visit.prep?.lotSheets ?? {},
     comments: visit.comments ?? null,
+    fieldNotes: visit.prep?.fieldNotes ?? null,
     measurements: visit.measurements.map((m) => ({
       id: m.id,
       zone: m.zone,

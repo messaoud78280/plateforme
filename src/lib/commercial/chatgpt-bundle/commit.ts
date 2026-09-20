@@ -19,10 +19,13 @@ import {
   buildClientNotesFromBundle,
   buildInternalNotesFromBundle,
   clientDisplayName,
+  clientIsExploitable,
   computeBundleTotals,
   mergeNotes,
   primaryEmail,
 } from "@/lib/commercial/chatgpt-bundle/notes";
+import { mapChantierToProjectStatus } from "@/lib/chantier-lifecycle";
+import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
 
 export type BundleImportSelection = {
   importClient: boolean;
@@ -89,33 +92,174 @@ function toImportedCustomer(
   primaryOverride: string | null,
 ): ImportedCustomer {
   const email = primaryOverride ?? primaryEmail(bundle);
-  const name = clientDisplayName(bundle);
+  const display = clientDisplayName(bundle);
+  const company = bundle.client.company?.trim() || null;
+  const name =
+    display !== "Client à préciser"
+      ? display
+      : company;
+  const trade =
+    company && name && normSoft(company) !== normSoft(name) ? company : null;
   return {
-    name: name === "Client à préciser" ? null : name,
+    name: name || null,
+    company: trade,
     addressLine1: bundle.client.address.line1,
     postalCode: bundle.client.address.postalCode,
     city: bundle.client.address.city,
     email,
     phone: bundle.client.phone,
-    confidence: name !== "Client à préciser" ? "ok" : "warn",
+    confidence: clientIsExploitable(bundle) ? "ok" : "warn",
   };
 }
 
-function siteAddressLabel(bundle: BeworkQuoteBundleV1): string | null {
+function normSoft(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function fixCustomerName(
+  customer: ImportedCustomer,
+  bundle: BeworkQuoteBundleV1,
+): ImportedCustomer {
+  return toImportedCustomer(bundle, customer.email);
+}
+
+async function resolveClientId(opts: {
+  orgId: string;
+  bundle: BeworkQuoteBundleV1;
+  selection: BundleImportSelection;
+}): Promise<string | null> {
+  if (!opts.selection.importClient) return null;
+  if (opts.selection.clientExternalOrgId) return opts.selection.clientExternalOrgId;
+
+  const customer = fixCustomerName(
+    toImportedCustomer(opts.bundle, opts.selection.primaryEmailOverride),
+    opts.bundle,
+  );
+  if (!customer.name) return null;
+
+  const matches = await matchClientsInOrganization(opts.orgId, customer);
+  const best = matches[0];
+  if (best && best.score >= 70) return best.id;
+
+  // Création auto dès qu’un client exploitable est dans le JSON
+  if (opts.selection.createClientIfMissing || clientIsExploitable(opts.bundle)) {
+    const created = await createCommercialClientFromImport({
+      orgId: opts.orgId,
+      customer,
+    });
+    const secondaryEmails = opts.bundle.client.emails
+      .map((e) => e.email)
+      .filter((e) => e && e !== customer.email);
+    if (secondaryEmails.length) {
+      await prisma.externalOrganization.update({
+        where: { id: created.id },
+        data: {
+          notes: [
+            "Emails complémentaires (import ChatGPT) :",
+            ...secondaryEmails,
+          ].join("\n"),
+        },
+      });
+    }
+    return created.id;
+  }
+  return null;
+}
+
+function siteAddressParts(bundle: BeworkQuoteBundleV1): {
+  line1: string | null;
+  postalCode: string | null;
+  city: string | null;
+  label: string | null;
+} {
   const addr = bundle.site.sameAsClientAddress
     ? bundle.client.address
     : bundle.site.address ?? bundle.client.address;
-  const parts = [
-    addr.line1,
-    [addr.postalCode, addr.city].filter(Boolean).join(" "),
-  ].filter(Boolean);
-  const base = parts.join(", ") || null;
+  const label =
+    [addr.line1, [addr.postalCode, addr.city].filter(Boolean).join(" ")]
+      .filter(Boolean)
+      .join(", ") || null;
+  return {
+    line1: addr.line1,
+    postalCode: addr.postalCode,
+    city: addr.city,
+    label,
+  };
+}
+
+function siteTitle(bundle: BeworkQuoteBundleV1): string | null {
+  return (
+    bundle.site.name?.trim() ||
+    bundle.site.projectType?.trim() ||
+    bundle.quote.title?.trim() ||
+    null
+  );
+}
+
+async function resolveProjectId(opts: {
+  orgId: string;
+  bundle: BeworkQuoteBundleV1;
+  selection: BundleImportSelection;
+  actorUserId: string;
+}): Promise<string | null> {
+  if (!opts.selection.importSite) return null;
+  if (opts.selection.projectId) return opts.selection.projectId;
+
+  const title = siteTitle(opts.bundle);
+  const addr = siteAddressParts(opts.bundle);
+  if (!title && !addr.city && !addr.label) return null;
+
+  if (title) {
+    const existing = await prisma.project.findFirst({
+      where: {
+        organizationId: opts.orgId,
+        title: { equals: title, mode: "insensitive" },
+        ...(addr.city
+          ? { siteCity: { equals: addr.city, mode: "insensitive" } }
+          : {}),
+      },
+      select: { id: true },
+    });
+    if (existing) return existing.id;
+  }
+
+  const org = await prisma.organization.findFirst({
+    where: { id: opts.orgId },
+    select: { ownerUserId: true },
+  });
+  const clientUserId = org?.ownerUserId ?? opts.actorUserId;
+  const projectTitle = title || `Chantier ${addr.city || "import ChatGPT"}`;
+
+  const project = await prisma.project.create({
+    data: {
+      title: projectTitle,
+      clientId: clientUserId,
+      organizationId: opts.orgId,
+      siteAddress: addr.label,
+      siteCity: addr.city,
+      chantierStatus: "ETUDE",
+      status: mapChantierToProjectStatus("ETUDE"),
+      description: "Créé depuis import ChatGPT (bework_quote_bundle_v1).",
+    },
+    select: { id: true },
+  });
+  await ensureChantierFolders(project.id).catch(() => null);
+  return project.id;
+}
+
+function siteAddressLabel(bundle: BeworkQuoteBundleV1): string | null {
+  const addr = siteAddressParts(bundle);
   const surface =
     bundle.site.surfaceValue != null
       ? `${bundle.site.surfaceValue} ${bundle.site.surfaceUnit ?? "M²"}`
       : null;
-  const type = bundle.site.projectType;
-  return [type, surface, base].filter(Boolean).join(" — ") || null;
+  const type = bundle.site.name || bundle.site.projectType;
+  return [type, surface, addr.label].filter(Boolean).join(" — ") || null;
 }
 
 export async function buildBundleImportPreview(opts: {
@@ -141,26 +285,31 @@ export async function buildBundleImportPreview(opts: {
     );
   }
 
-  const city = bundle.site.sameAsClientAddress
-    ? bundle.client.address.city
-    : bundle.site.address?.city ?? bundle.client.address.city;
+  const city = siteAddressParts(bundle).city;
+  const siteName = siteTitle(bundle);
 
-  const projectMatches = city
-    ? await prisma.project.findMany({
-        where: {
-          organizationId: opts.orgId,
-          OR: [
-            { siteCity: { contains: city, mode: "insensitive" } },
-            { title: { contains: city, mode: "insensitive" } },
-          ],
-        },
-        select: { id: true, title: true, siteCity: true },
-        take: 8,
-        orderBy: { updatedAt: "desc" },
-      })
-    : [];
+  const projectMatches =
+    city || siteName
+      ? await prisma.project.findMany({
+          where: {
+            organizationId: opts.orgId,
+            OR: [
+              ...(city
+                ? [{ siteCity: { contains: city, mode: "insensitive" as const } }]
+                : []),
+              ...(siteName
+                ? [{ title: { contains: siteName.slice(0, 40), mode: "insensitive" as const } }]
+                : []),
+            ],
+          },
+          select: { id: true, title: true, siteCity: true },
+          take: 8,
+          orderBy: { updatedAt: "desc" },
+        })
+      : [];
 
-  const defaultVat = bundle.quote.vatSuggestedRate ?? 20;
+  // Totaux d’aperçu : TVA JSON si présente, sinon 20 uniquement pour l’estimation visuelle
+  const defaultVat = bundle.quote.vatSuggestedRate;
   const totals = computeBundleTotals(bundle);
   const sections = bundle.sections.map((sec) => ({
     title: sec.title,
@@ -175,7 +324,7 @@ export async function buildBundleImportPreview(opts: {
         quantity: item.quantity,
         unit: item.unit,
         unitPriceHt: item.unitPriceHt,
-        vatRate: item.vatRate ?? defaultVat,
+        vatRate: item.vatRate ?? defaultVat ?? null,
         lineHt,
       };
     }),
@@ -273,33 +422,18 @@ export async function commitBundleIntoQuote(opts: {
   const createdLineIds: string[] = [];
   const createdSectionIds: string[] = [];
 
-  let clientId = selection.clientExternalOrgId;
-  if (selection.importClient) {
-    if (!clientId && selection.createClientIfMissing) {
-      const customer = toImportedCustomer(bundle, selection.primaryEmailOverride);
-      if (customer.name) {
-        const secondaryEmails = bundle.client.emails
-          .map((e) => e.email)
-          .filter((e) => e && e !== customer.email);
-        const created = await createCommercialClientFromImport({
-          orgId: opts.orgId,
-          customer,
-        });
-        clientId = created.id;
-        if (secondaryEmails.length) {
-          await prisma.externalOrganization.update({
-            where: { id: created.id },
-            data: {
-              notes: [
-                "Emails complémentaires (import ChatGPT) :",
-                ...secondaryEmails,
-              ].join("\n"),
-            },
-          });
-        }
-      }
-    }
-  }
+  const clientId = await resolveClientId({
+    orgId: opts.orgId,
+    bundle,
+    selection,
+  });
+
+  const projectId = await resolveProjectId({
+    orgId: opts.orgId,
+    bundle,
+    selection,
+    actorUserId: opts.userId,
+  });
 
   const clientNotesParts: string[] = [];
   if (selection.importAdvice || selection.importReservations || selection.importWorkStages) {
@@ -334,30 +468,26 @@ export async function commitBundleIntoQuote(opts: {
   }
 
   const siteAddr = selection.importSite
-    ? (() => {
-        const addr = bundle.site.sameAsClientAddress
-          ? bundle.client.address
-          : bundle.site.address ?? bundle.client.address;
-        return (
-          [addr.line1, [addr.postalCode, addr.city].filter(Boolean).join(" ")]
-            .filter(Boolean)
-            .join(", ") || null
-        );
-      })()
+    ? siteAddressParts(bundle).label
     : undefined;
 
   const subject =
-    bundle.quote.title?.trim() || quote.subject;
+    bundle.quote.title?.trim() ||
+    bundle.site.name?.trim() ||
+    quote.subject ||
+    "Devis import ChatGPT";
 
+  const customerSnap = toImportedCustomer(bundle, selection.primaryEmailOverride);
   const clientSnapshotJson: Prisma.InputJsonValue | undefined =
-    selection.importClient && !clientId
+    selection.importClient && !clientId && customerSnap.name
       ? {
-          name: clientDisplayName(bundle),
-          email: selection.primaryEmailOverride ?? primaryEmail(bundle),
-          phone: bundle.client.phone,
-          addressLine1: bundle.client.address.line1,
-          postalCode: bundle.client.address.postalCode,
-          city: bundle.client.address.city,
+          name: customerSnap.name,
+          tradeName: customerSnap.company,
+          email: customerSnap.email,
+          phone: customerSnap.phone,
+          addressLine1: customerSnap.addressLine1,
+          postalCode: customerSnap.postalCode,
+          city: customerSnap.city,
           emails: bundle.client.emails,
         }
       : undefined;
@@ -367,9 +497,7 @@ export async function commitBundleIntoQuote(opts: {
     ...(selection.importClient && clientId
       ? { clientExternalOrgId: clientId }
       : {}),
-    ...(selection.importSite && selection.projectId
-      ? { projectId: selection.projectId }
-      : {}),
+    ...(selection.importSite && projectId ? { projectId } : {}),
     ...(siteAddr !== undefined ? { siteAddressSnapshot: siteAddr } : {}),
     ...(bundle.quote.validityDays != null
       ? {
@@ -378,21 +506,17 @@ export async function commitBundleIntoQuote(opts: {
           ),
         }
       : {}),
+    ...(bundle.quote.vatSuggestedRate != null
+      ? { defaultVatRate: bundle.quote.vatSuggestedRate }
+      : {}),
     clientNotes: mergeNotes(quote.clientNotes, clientNotesParts.join("\n\n")),
     internalNotes: mergeNotes(quote.internalNotes, internalExtra),
   });
 
-  if (bundle.quote.vatSuggestedRate != null || clientSnapshotJson) {
+  if (clientSnapshotJson) {
     await prisma.commercialQuote.update({
       where: { id: opts.quoteId },
-      data: {
-        ...(bundle.quote.vatSuggestedRate != null
-          ? { defaultVatRate: bundle.quote.vatSuggestedRate }
-          : {}),
-        ...(clientSnapshotJson && !clientId
-          ? { clientSnapshotJson }
-          : {}),
-      },
+      data: { clientSnapshotJson },
     });
   }
   if (selection.importPricing) {
@@ -405,7 +529,7 @@ export async function commitBundleIntoQuote(opts: {
       });
     }
 
-    const defaultVat = bundle.quote.vatSuggestedRate ?? 20;
+    const defaultVat = bundle.quote.vatSuggestedRate;
     for (const sec of bundle.sections) {
       if (!sec.items.length) continue;
       const section = await addSection(opts.orgId, opts.quoteId, sec.title);
@@ -420,7 +544,8 @@ export async function commitBundleIntoQuote(opts: {
           unit: item.unit,
           unitSellHt: item.unitPriceHt,
           discountPercent: item.discountPercent ?? 0,
-          vatRate: item.vatRate ?? defaultVat,
+          // Priorité : TVA ligne → TVA devis JSON → 20 uniquement en dernier recours moteur
+          vatRate: item.vatRate ?? defaultVat ?? 20,
         });
         createdLineIds.push(line.id);
       }
@@ -479,6 +604,7 @@ export async function createQuoteFromChatgptBundle(opts: {
 
   const subject =
     bundle.quote.title?.trim() ||
+    bundle.site.name?.trim() ||
     bundle.site.projectType?.trim() ||
     "Devis import ChatGPT";
 
@@ -488,61 +614,45 @@ export async function createQuoteFromChatgptBundle(opts: {
       : null;
 
   const siteAddr = selection.importSite
-    ? (() => {
-        const addr = bundle.site.sameAsClientAddress
-          ? bundle.client.address
-          : bundle.site.address ?? bundle.client.address;
-        return (
-          [addr.line1, [addr.postalCode, addr.city].filter(Boolean).join(" ")]
-            .filter(Boolean)
-            .join(", ") || null
-        );
-      })()
+    ? siteAddressParts(bundle).label
     : null;
 
-  // Client résolu avant create pour éviter un devis orphelin puis rattachement flou
-  let clientId = selection.clientExternalOrgId;
-  if (selection.importClient && !clientId && selection.createClientIfMissing) {
-    const customer = toImportedCustomer(bundle, selection.primaryEmailOverride);
-    if (customer.name) {
-      const created = await createCommercialClientFromImport({
-        orgId: opts.orgId,
-        customer,
-      });
-      clientId = created.id;
-      const secondaryEmails = bundle.client.emails
-        .map((e) => e.email)
-        .filter((e) => e && e !== customer.email);
-      if (secondaryEmails.length) {
-        await prisma.externalOrganization.update({
-          where: { id: created.id },
-          data: {
-            notes: [
-              "Emails complémentaires (import ChatGPT) :",
-              ...secondaryEmails,
-            ].join("\n"),
-          },
-        });
-      }
-    }
-  }
+  const clientId = await resolveClientId({
+    orgId: opts.orgId,
+    bundle,
+    selection,
+  });
+
+  const projectId = await resolveProjectId({
+    orgId: opts.orgId,
+    bundle,
+    selection,
+    actorUserId: opts.userId,
+  });
 
   const quote = await createQuote({
     orgId: opts.orgId,
     userId: opts.userId,
     subject,
     clientExternalOrgId: selection.importClient ? clientId : null,
-    projectId: selection.importSite ? selection.projectId : null,
+    projectId: selection.importSite ? projectId : null,
     siteAddressSnapshot: siteAddr,
     validityDate,
   });
+
+  if (bundle.quote.vatSuggestedRate != null) {
+    await prisma.commercialQuote.update({
+      where: { id: quote.id },
+      data: { defaultVatRate: bundle.quote.vatSuggestedRate },
+    });
+  }
 
   // Sur devis neuf : REPLACE pour retirer la section vide « Ouvrages » par défaut
   const commitSelection: BundleImportSelection = {
     ...selection,
     pricingMode: selection.importPricing ? "REPLACE" : selection.pricingMode,
-    // Client déjà créé / rattaché
     clientExternalOrgId: clientId,
+    projectId,
     createClientIfMissing: false,
     forceDuplicate: true,
   };

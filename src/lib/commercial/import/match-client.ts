@@ -1,3 +1,6 @@
+/**
+ * Matching / création client commercial (ExternalOrganization CLIENT_EXT).
+ */
 import { prisma } from "@/lib/prisma";
 import type { ClientMatchOption, ImportedCustomer } from "@/lib/commercial/import/types";
 
@@ -12,6 +15,11 @@ function normName(s: string): string {
     .toLowerCase()
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function namesEqual(a: string | null | undefined, b: string | null | undefined): boolean {
+  if (!a?.trim() || !b?.trim()) return false;
+  return normName(a) === normName(b);
 }
 
 /** Matching client dans l’organisation courante uniquement. */
@@ -35,13 +43,14 @@ export async function matchClientsInOrganization(
       zipCode: true,
       address: true,
     },
-    take: 200,
+    take: 300,
   });
 
   const results: ClientMatchOption[] = [];
   const email = customer.email?.trim().toLowerCase() ?? "";
   const phone = normalizePhone(customer.phone);
   const name = customer.name ? normName(customer.name) : "";
+  const company = customer.company ? normName(customer.company) : "";
 
   for (const c of clients) {
     let score = 0;
@@ -53,7 +62,7 @@ export async function matchClientsInOrganization(
     } else if (phone && normalizePhone(c.phone) === phone && phone.length >= 8) {
       score = 85;
       reason = "Téléphone";
-    } else if (name && normName(c.name) === name) {
+    } else if (name && namesEqual(c.name, customer.name)) {
       score = 70;
       reason = "Nom exact";
       if (
@@ -65,8 +74,25 @@ export async function matchClientsInOrganization(
         reason = "Nom + code postal";
       }
     } else if (
+      company &&
+      (namesEqual(c.tradeName, customer.company) || namesEqual(c.name, customer.company))
+    ) {
+      score = 75;
+      reason = "Raison sociale";
+      if (
+        customer.postalCode &&
+        c.zipCode &&
+        customer.postalCode === c.zipCode
+      ) {
+        score = 88;
+        reason = "Raison sociale + code postal";
+      }
+    } else if (
       name &&
-      (normName(c.name).includes(name) || name.includes(normName(c.name)))
+      (normName(c.name).includes(name) ||
+        name.includes(normName(c.name)) ||
+        (c.tradeName &&
+          (normName(c.tradeName).includes(name) || name.includes(normName(c.tradeName)))))
     ) {
       score = 45;
       reason = "Nom similaire";
@@ -96,11 +122,30 @@ export async function createCommercialClientFromImport(opts: {
   const name = opts.customer.name?.trim();
   if (!name) throw new Error("Nom client requis pour la création");
 
+  // Anti-doublon : re-match avant création
+  const matches = await matchClientsInOrganization(opts.orgId, opts.customer);
+  const best = matches[0];
+  if (best && best.score >= 70) {
+    return { id: best.id, name: best.name };
+  }
+
   const existing = await prisma.externalOrganization.findFirst({
     where: {
       hostOrganizationId: opts.orgId,
-      name: { equals: name, mode: "insensitive" },
       type: { in: ["CLIENT_EXT", "CLIENT"] },
+      OR: [
+        { name: { equals: name, mode: "insensitive" } },
+        ...(opts.customer.company?.trim()
+          ? [
+              {
+                tradeName: {
+                  equals: opts.customer.company.trim(),
+                  mode: "insensitive" as const,
+                },
+              },
+            ]
+          : []),
+      ],
     },
     select: { id: true, name: true },
   });
@@ -110,6 +155,7 @@ export async function createCommercialClientFromImport(opts: {
     data: {
       hostOrganizationId: opts.orgId,
       name,
+      tradeName: opts.customer.company?.trim() || null,
       type: "CLIENT_EXT",
       status: "ACTIVE",
       email: opts.customer.email,

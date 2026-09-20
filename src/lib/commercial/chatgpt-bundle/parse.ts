@@ -36,11 +36,17 @@ function parseAddress(raw: unknown, path: string, issues: BundleParseIssue[]): B
     return { line1: null, postalCode: null, city: null, country: null };
   }
   const o = raw as Record<string, unknown>;
+  const line1 =
+    asString(o.line1 ?? o.ligne1 ?? o.address_line1 ?? o.street ?? o.rue) ??
+    null;
+  const complement = asString(o.complement ?? o.address_line2 ?? o.ligne2);
   return {
-    line1: asString(o.line1 ?? o.address_line1 ?? o.street),
-    postalCode: asString(o.postal_code ?? o.postalCode ?? o.zip),
-    city: asString(o.city),
-    country: asString(o.country) ?? "France",
+    line1: [line1, complement].filter(Boolean).join(", ") || null,
+    postalCode: asString(
+      o.postal_code ?? o.postalCode ?? o.code_postal ?? o.zip ?? o.cp,
+    ),
+    city: asString(o.city ?? o.ville),
+    country: asString(o.country ?? o.pays) ?? "France",
   };
 }
 
@@ -261,16 +267,56 @@ export function parseBeworkQuoteBundle(rawText: string): BundleParseResult {
     emails = [{ ...emails[0]!, role: "primary" }, ...emails.slice(1)];
   }
 
+  const firstName = asString(
+    clientRaw.first_name ?? clientRaw.firstName ?? clientRaw.prenom,
+  );
+  const lastName = asString(
+    clientRaw.last_name ?? clientRaw.lastName ?? clientRaw.nom,
+  );
+  const fullName = asString(
+    clientRaw.full_name ??
+      clientRaw.fullName ??
+      clientRaw.nom_complet ??
+      clientRaw.nomComplet,
+  );
+  const company = asString(
+    clientRaw.company ??
+      clientRaw.company_name ??
+      clientRaw.companyName ??
+      clientRaw.raison_sociale ??
+      clientRaw.raisonSociale ??
+      clientRaw.societe,
+  );
+
+  // Si seul nom_complet : tenter de découper prénom / nom
+  let resolvedFirst = firstName;
+  let resolvedLast = lastName;
+  if (!resolvedFirst && !resolvedLast && fullName) {
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      resolvedFirst = parts.slice(0, -1).join(" ");
+      resolvedLast = parts[parts.length - 1] ?? null;
+    }
+  }
+
   const client = {
-    firstName: asString(clientRaw.first_name ?? clientRaw.firstName),
-    lastName: asString(clientRaw.last_name ?? clientRaw.lastName),
-    company: asString(clientRaw.company ?? clientRaw.company_name ?? clientRaw.societe),
-    phone: normalizePhone(clientRaw.phone ?? clientRaw.telephone),
+    firstName: resolvedFirst,
+    lastName: resolvedLast,
+    fullName,
+    company,
+    phone: normalizePhone(
+      clientRaw.phone ?? clientRaw.telephone ?? clientRaw.tel,
+    ),
     emails,
-    address: parseAddress(clientRaw.address ?? clientRaw.adresse, "client.address", warnings),
+    address: parseAddress(
+      clientRaw.address ?? clientRaw.adresse,
+      "client.address",
+      warnings,
+    ),
+    type: asString(clientRaw.type),
   };
 
-  const siteRaw = (root.site ?? {}) as Record<string, unknown>;
+  const siteRaw = (root.site ?? root.chantier ?? {}) as Record<string, unknown>;
   const surfaceRaw = siteRaw.surface;
   let surfaceValue: number | null = null;
   let surfaceUnit: string | null = null;
@@ -280,37 +326,79 @@ export function parseBeworkQuoteBundle(rawText: string): BundleParseResult {
     surfaceUnit = normalizeUnit(s.unit ?? "M²");
   } else {
     surfaceValue = normalizeMoneyOrQty(siteRaw.surface_value ?? siteRaw.surface);
-    surfaceUnit = siteRaw.surface_unit ? normalizeUnit(siteRaw.surface_unit) : surfaceValue != null ? "M²" : null;
+    surfaceUnit = siteRaw.surface_unit
+      ? normalizeUnit(siteRaw.surface_unit)
+      : surfaceValue != null
+        ? "M²"
+        : null;
   }
 
+  const siteAddressRaw =
+    siteRaw.address ?? siteRaw.adresse ?? null;
   const site = {
+    name: asString(siteRaw.name ?? siteRaw.nom ?? siteRaw.title ?? siteRaw.titre),
     sameAsClientAddress: asBool(
       siteRaw.same_as_client_address ?? siteRaw.sameAsClientAddress,
-      true,
+      !siteAddressRaw,
     ),
-    address: siteRaw.address
-      ? parseAddress(siteRaw.address, "site.address", warnings)
+    address: siteAddressRaw
+      ? parseAddress(siteAddressRaw, "site.address", warnings)
       : null,
-    projectType: asString(siteRaw.project_type ?? siteRaw.projectType ?? siteRaw.type),
+    projectType: asString(
+      siteRaw.project_type ?? siteRaw.projectType ?? siteRaw.type ?? siteRaw.nature,
+    ),
     surfaceValue,
     surfaceUnit,
     accessNotes: asString(siteRaw.access_notes ?? siteRaw.accessNotes ?? siteRaw.acces),
     constraints: asString(siteRaw.constraints ?? siteRaw.contraintes),
   };
 
-  const quoteRaw = (root.quote ?? {}) as Record<string, unknown>;
-  const vatRaw = (quoteRaw.vat ?? {}) as Record<string, unknown>;
+  const quoteRaw = (root.quote ?? root.devis ?? {}) as Record<string, unknown>;
+  const vatRaw = (quoteRaw.vat ?? quoteRaw.tva ?? {}) as Record<string, unknown>;
+  const vatFromObject =
+    typeof quoteRaw.vat === "number" || typeof quoteRaw.tva === "number"
+      ? normalizeMoneyOrQty(quoteRaw.vat ?? quoteRaw.tva)
+      : null;
   const quote = {
-    title: asString(quoteRaw.title ?? quoteRaw.objet ?? quoteRaw.subject),
-    description: asString(quoteRaw.description ?? quoteRaw.desc),
-    validityDays: normalizeMoneyOrQty(quoteRaw.validity_days ?? quoteRaw.validityDays),
+    title: asString(
+      quoteRaw.title ??
+        quoteRaw.objet ??
+        quoteRaw.subject ??
+        quoteRaw.object ??
+        root.objet,
+    ),
+    description: asString(
+      quoteRaw.description ??
+        quoteRaw.desc ??
+        quoteRaw.observations ??
+        quoteRaw.notes ??
+        root.observations,
+    ),
+    validityDays: normalizeMoneyOrQty(
+      quoteRaw.validity_days ??
+        quoteRaw.validityDays ??
+        quoteRaw.duree_validite ??
+        quoteRaw.dureeValidite ??
+        quoteRaw.validite_jours,
+    ),
     pricingStrategy: asString(quoteRaw.pricing_strategy ?? quoteRaw.pricingStrategy),
     vatSuggestedRate:
-      normalizeMoneyOrQty(vatRaw.suggested_rate ?? vatRaw.suggestedRate ?? vatRaw.rate) ??
-      normalizeMoneyOrQty(quoteRaw.vat_rate ?? quoteRaw.default_vat),
+      normalizeMoneyOrQty(
+        vatRaw.suggested_rate ??
+          vatRaw.suggestedRate ??
+          vatRaw.rate ??
+          vatRaw.taux,
+      ) ??
+      vatFromObject ??
+      normalizeMoneyOrQty(
+        quoteRaw.vat_rate ??
+          quoteRaw.default_vat ??
+          quoteRaw.taux_tva ??
+          quoteRaw.tauxTva,
+      ),
     vatRequiresConfirmation: asBool(
       vatRaw.requires_confirmation ?? vatRaw.requiresConfirmation,
-      true,
+      quoteRaw.vat == null && quoteRaw.tva == null,
     ),
   };
 
@@ -436,7 +524,7 @@ export function parseBeworkQuoteBundle(rawText: string): BundleParseResult {
     mediaManifest,
   };
 
-  if (!client.firstName && !client.lastName && !client.company) {
+  if (!client.firstName && !client.lastName && !client.fullName && !client.company) {
     warnings.push(issue("client", "Client peu renseigné — à compléter", "warn"));
   }
   if (quote.vatRequiresConfirmation && quote.vatSuggestedRate != null) {

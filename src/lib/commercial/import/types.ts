@@ -6,6 +6,8 @@ export type ImportConfidence = "ok" | "warn" | "missing";
 
 export type ImportedCustomer = {
   name: string | null;
+  /** Raison sociale / nom commercial (tradeName). */
+  company?: string | null;
   addressLine1: string | null;
   postalCode: string | null;
   city: string | null;

@@ -237,7 +237,10 @@ export function ChatGptBundleImportModal({
         pricingMode: isCreate ? "REPLACE" : pricingMode,
         clientExternalOrgId:
           sel.importClient && clientChoice === "match" ? matchedClientId : null,
-        createClientIfMissing: sel.importClient && clientChoice === "new",
+        createClientIfMissing:
+          sel.importClient &&
+          (clientChoice === "new" ||
+            (clientChoice === "match" && !matchedClientId)),
         primaryEmailOverride: primaryEmail,
         projectId: sel.importSite ? projectId : null,
         forceDuplicate: isCreate ? true : forceDuplicate,

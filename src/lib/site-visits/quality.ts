@@ -27,6 +27,8 @@ export function buildVisitQuality(opts: {
   zones: string[];
   lots: string[];
   measurementCount: number;
+  /** Relevés libres — suffisent pour marquer les métrés comme OK. */
+  hasFieldNotes?: boolean;
   photoCount: number;
   constraints: SiteVisitConstraints;
   findings: SiteVisitFinding[];
@@ -51,6 +53,15 @@ export function buildVisitQuality(opts: {
       }
     }
   }
+
+  const hasMetres = opts.measurementCount > 0 || Boolean(opts.hasFieldNotes);
+  const metresDetail = opts.hasFieldNotes
+    ? opts.measurementCount
+      ? `Texte libre + ${opts.measurementCount} mesure(s)`
+      : "Texte libre renseigné"
+    : opts.measurementCount
+      ? coherenceIssues[0] || `${opts.measurementCount} relevé(s)`
+      : "À compléter";
 
   const items: QualityItem[] = [
     {
@@ -83,11 +94,9 @@ export function buildVisitQuality(opts: {
     },
     {
       id: "metres",
-      label: "Métrés",
-      status: opts.measurementCount ? (coherenceIssues.length ? "watch" : "ok") : "missing",
-      detail: opts.measurementCount
-        ? coherenceIssues[0] || `${opts.measurementCount} relevé(s)`
-        : "À compléter",
+      label: "Relevés / métrés",
+      status: hasMetres ? (coherenceIssues.length ? "watch" : "ok") : "missing",
+      detail: metresDetail,
     },
     {
       id: "photos",
@@ -133,7 +142,7 @@ export function buildVisitQuality(opts: {
   ).length;
   const readyForQuote =
     criticalMissing === 0 &&
-    opts.measurementCount > 0 &&
+    hasMetres &&
     Boolean(opts.clientName?.trim()) &&
     Boolean(opts.subject?.trim());
 

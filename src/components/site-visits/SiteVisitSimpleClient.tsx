@@ -213,7 +213,9 @@ export function SiteVisitSimpleClient({
   const [responsibleId, setResponsibleId] = useState(initial.responsibleId ?? "");
   const [works, setWorks] = useState(initial.clientNeed ?? "");
   const [lots, setLots] = useState<string[]>(initial.lots ?? []);
+  const [fieldNotes, setFieldNotes] = useState(initial.prep?.fieldNotes ?? "");
   const [observations, setObservations] = useState(initial.comments ?? "");
+  const fieldNotesRef = useRef<HTMLTextAreaElement>(null);
   const [materials, setMaterials] = useState(initial.commercial?.supplyByClient ?? "");
   const [budget, setBudget] = useState(initial.commercial?.budgetAnnounced ?? "");
   const [delay, setDelay] = useState(initial.commercial?.desiredDelay ?? "");
@@ -245,6 +247,7 @@ export function SiteVisitSimpleClient({
     client: Boolean(clientName.trim() && address.trim()),
     works: Boolean(works.trim()),
     measures: visit.measurements.length,
+    fieldNotes: Boolean(fieldNotes.trim()),
     photos: photos.length,
     observations: Boolean(observations.trim()),
   };
@@ -263,6 +266,7 @@ export function SiteVisitSimpleClient({
       contactEmail: email.trim() || null,
       zipCode: zipCode.trim() || null,
       city: city.trim() || null,
+      fieldNotes: fieldNotes.trim() || null,
     };
     const commercial: SiteVisitCommercialInfo = {
       ...(visit.commercial ?? emptyCommercial()),
@@ -294,6 +298,7 @@ export function SiteVisitSimpleClient({
     contactPhone,
     delay,
     email,
+    fieldNotes,
     lots,
     materials,
     observations,
@@ -353,6 +358,7 @@ export function SiteVisitSimpleClient({
     responsibleId,
     works,
     lots,
+    fieldNotes,
     observations,
     materials,
     budget,
@@ -363,10 +369,25 @@ export function SiteVisitSimpleClient({
     markDirty();
     setWorks((w) => (w ? `${w.trim()} ${chunk}` : chunk));
   });
+  const fieldNotesSpeech = useSpeechDictation((chunk) => {
+    markDirty();
+    setFieldNotes((n) => (n ? `${n.trim()} ${chunk}` : chunk));
+  });
   const obsSpeech = useSpeechDictation((chunk) => {
     markDirty();
     setObservations((o) => (o ? `${o.trim()} ${chunk}` : chunk));
   });
+
+  function autoGrowFieldNotes() {
+    const el = fieldNotesRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.max(220, el.scrollHeight)}px`;
+  }
+
+  useEffect(() => {
+    autoGrowFieldNotes();
+  }, [fieldNotes]);
 
   const filteredClients = clients.filter((c) => {
     const q = clientQuery.trim().toLowerCase();
@@ -633,8 +654,19 @@ export function SiteVisitSimpleClient({
           >
             Travaux {dossier.works ? "OK" : "…"}
           </span>
-          <span className="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700">
-            {dossier.measures} métré{dossier.measures > 1 ? "s" : ""}
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-1 font-medium",
+              dossier.fieldNotes || dossier.measures > 0
+                ? "bg-emerald-50 text-emerald-800"
+                : "bg-amber-50 text-amber-900",
+            )}
+          >
+            {dossier.fieldNotes
+              ? "Relevés OK"
+              : dossier.measures > 0
+                ? `${dossier.measures} mesure${dossier.measures > 1 ? "s" : ""}`
+                : "Relevés …"}
           </span>
           <span className="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700">
             {dossier.photos} photo{dossier.photos > 1 ? "s" : ""}
@@ -858,58 +890,95 @@ export function SiteVisitSimpleClient({
             id="bloc-metres"
             className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5"
           >
-            <h2 className="text-[16px] font-semibold text-[#1e3a5f]">3. Métrés</h2>
-            <p className="mt-1 text-[13px] text-slate-500">
-              Ajoutez uniquement ce qui a été mesuré — aucune quantité inventée.
-            </p>
-            <ul className="mt-3 space-y-2">
-              {visit.measurements.map((m) => (
-                <li
-                  key={m.id}
-                  className="flex items-start justify-between gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5"
-                >
-                  <div>
-                    <p className="text-[14px] font-semibold text-slate-800">{m.label}</p>
-                    <p className="text-[13px] text-slate-600">
-                      {[
-                        m.lengthM != null ? `L ${m.lengthM}` : null,
-                        m.widthM != null ? `l ${m.widthM}` : null,
-                        m.heightM != null ? `H/P ${m.heightM}` : null,
-                      ]
-                        .filter(Boolean)
-                        .join(" × ") || "—"}
-                      {" → "}
-                      <strong>
-                        {m.computedQuantity > 0
-                          ? `${m.quantityLabel || `${m.computedQuantity} ${m.unit}`}`
-                          : "à confirmer"}
-                      </strong>
-                    </p>
-                    {m.observation ? (
-                      <p className="mt-0.5 text-[12px] text-slate-500">{m.observation}</p>
-                    ) : null}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => void deleteMeasurement(m.id)}
-                    className="rounded-lg p-2 text-slate-400 hover:bg-white hover:text-red-600"
-                    aria-label="Supprimer"
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h2 className="text-[16px] font-semibold text-[#1e3a5f]">
+                  3. Relevés & métrés de chantier
+                </h2>
+                <p className="mt-1 text-[13px] text-slate-500">
+                  Décrivez simplement ce que vous avez relevé : dimensions, surfaces,
+                  ouvrages existants et travaux à prévoir.
+                </p>
+              </div>
+              <MicButton
+                supported={fieldNotesSpeech.supported}
+                listening={fieldNotesSpeech.listening}
+                onClick={fieldNotesSpeech.toggle}
+              />
+            </div>
+
+            <label className="mt-3 block">
+              <span className={label}>Vos relevés sur le chantier</span>
+              <textarea
+                ref={fieldNotesRef}
+                className={cn(field, "min-h-[220px] resize-none overflow-hidden")}
+                value={fieldNotes}
+                onChange={(e) => {
+                  markDirty();
+                  setFieldNotes(e.target.value);
+                }}
+                placeholder={`Exemple : La terrasse mesure 8 m de long sur 5 m de large, soit 40 m². La dalle existante présente plusieurs fissures. Le client souhaite remplacer le carrelage par un revêtement extérieur adapté.
+
+Prévoir la dépose du revêtement, la préparation du support et la pose du nouveau revêtement.
+
+L'accès au chantier se fait par un passage de 95 cm de large…`}
+              />
+            </label>
+
+            {visit.measurements.length > 0 ? (
+              <ul className="mt-3 space-y-2">
+                {visit.measurements.map((m) => (
+                  <li
+                    key={m.id}
+                    className="flex items-start justify-between gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5"
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </li>
-              ))}
-            </ul>
+                    <div>
+                      <p className="text-[14px] font-semibold text-slate-800">{m.label}</p>
+                      <p className="text-[13px] text-slate-600">
+                        {[
+                          m.lengthM != null ? `L ${m.lengthM}` : null,
+                          m.widthM != null ? `l ${m.widthM}` : null,
+                          m.heightM != null ? `H/P ${m.heightM}` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" × ") || "—"}
+                        {" → "}
+                        <strong>
+                          {m.computedQuantity > 0
+                            ? `${m.quantityLabel || `${m.computedQuantity} ${m.unit}`}`
+                            : "à confirmer"}
+                        </strong>
+                      </p>
+                      {m.observation ? (
+                        <p className="mt-0.5 text-[12px] text-slate-500">{m.observation}</p>
+                      ) : null}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void deleteMeasurement(m.id)}
+                      className="rounded-lg p-2 text-slate-400 hover:bg-white hover:text-red-600"
+                      aria-label="Supprimer"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
             {!measureOpen ? (
               <button
                 type="button"
                 onClick={() => setMeasureOpen(true)}
-                className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#1e3a5f]/30 bg-[#1e3a5f]/5 text-[14px] font-semibold text-[#1e3a5f]"
+                className="mt-3 text-[13px] font-semibold text-[#1e3a5f] hover:underline"
               >
-                <Plus className="h-4 w-4" /> Ajouter une mesure
+                + Ajouter une mesure détaillée
               </button>
             ) : (
               <div className="mt-3 space-y-3 rounded-xl border border-[#1e3a5f]/15 bg-slate-50 p-3">
+                <p className="text-[12px] font-medium text-slate-600">
+                  Mesure structurée (facultatif) — calcul automatique si dimensions renseignées
+                </p>
                 <label>
                   <span className={label}>Désignation</span>
                   <input
@@ -976,32 +1045,11 @@ export function SiteVisitSimpleClient({
                     />
                   </label>
                 </div>
-                <label>
-                  <span className={label}>Unité (si autre)</span>
-                  <input
-                    className={field}
-                    value={mForm.unit}
-                    onChange={(e) => setMForm({ ...mForm, unit: e.target.value })}
-                    placeholder="auto selon le type"
-                  />
-                </label>
-                <label>
-                  <span className={label}>Observation (facultatif)</span>
-                  <input
-                    className={field}
-                    value={mForm.observation}
-                    onChange={(e) => setMForm({ ...mForm, observation: e.target.value })}
-                  />
-                </label>
                 {previewCalc.computedQuantity > 0 ? (
                   <p className="text-[14px] font-semibold text-emerald-800">
                     Calculé : {previewCalc.computedQuantity} {previewCalc.unit}
                   </p>
-                ) : (
-                  <p className="text-[12px] text-slate-500">
-                    Renseignez les dimensions nécessaires — rien n’est inventé.
-                  </p>
-                )}
+                ) : null}
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -1218,8 +1266,13 @@ export function SiteVisitSimpleClient({
               <li className={dossier.works ? "text-emerald-700" : "text-amber-800"}>
                 Travaux : {dossier.works ? "renseignés" : "à compléter"}
               </li>
-              <li className="text-slate-700">
-                Métrés : {dossier.measures} mesure{dossier.measures > 1 ? "s" : ""}
+              <li className={dossier.fieldNotes || dossier.measures > 0 ? "text-emerald-700" : "text-amber-800"}>
+                Relevés :{" "}
+                {dossier.fieldNotes
+                  ? "texte renseigné"
+                  : dossier.measures > 0
+                    ? `${dossier.measures} mesure${dossier.measures > 1 ? "s" : ""}`
+                    : "à compléter"}
               </li>
               <li className="text-slate-700">
                 Photos : {dossier.photos} photo{dossier.photos > 1 ? "s" : ""}
@@ -1256,12 +1309,12 @@ export function SiteVisitSimpleClient({
             type="button"
             onClick={() => {
               document.getElementById("bloc-metres")?.scrollIntoView({ behavior: "smooth" });
-              setMeasureOpen(true);
+              window.setTimeout(() => fieldNotesRef.current?.focus(), 300);
             }}
             className="flex h-12 flex-col items-center justify-center rounded-xl border border-slate-200 text-[11px] font-semibold text-slate-700"
           >
             <Plus className="mb-0.5 h-4 w-4" />
-            Mesure
+            Relevés
           </button>
           <button
             type="button"
@@ -1292,8 +1345,15 @@ export function SiteVisitSimpleClient({
               </p>
               <p>{[address, zipCode, city].filter(Boolean).join(", ")}</p>
               {works ? <p className="whitespace-pre-wrap">{works.slice(0, 280)}{works.length > 280 ? "…" : ""}</p> : null}
+              {fieldNotes ? (
+                <p className="whitespace-pre-wrap text-slate-700">
+                  {fieldNotes.slice(0, 320)}
+                  {fieldNotes.length > 320 ? "…" : ""}
+                </p>
+              ) : null}
               <p>
-                {visit.measurements.length} métré(s) · {photos.length} photo(s)
+                {fieldNotes ? "Relevés texte · " : ""}
+                {visit.measurements.length} mesure(s) · {photos.length} photo(s)
               </p>
               {observations ? (
                 <p className="text-slate-600">{observations.slice(0, 160)}{observations.length > 160 ? "…" : ""}</p>

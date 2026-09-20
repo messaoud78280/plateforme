@@ -3,9 +3,18 @@ import { buildCleanClientNotes } from "@/lib/commercial/client-notes-structure";
 import { calculateLine, roundMoney } from "@/lib/commercial/money";
 
 export function clientDisplayName(bundle: BeworkQuoteBundleV1): string {
-  const parts = [bundle.client.firstName, bundle.client.lastName].filter(Boolean);
+  const full = bundle.client.fullName?.trim();
+  if (full) return full;
+  const parts = [bundle.client.firstName, bundle.client.lastName]
+    .map((x) => x?.trim())
+    .filter(Boolean);
   if (parts.length) return parts.join(" ");
   return bundle.client.company?.trim() || "Client à préciser";
+}
+
+/** True si le JSON fournit assez d’identité pour créer / rattacher un client. */
+export function clientIsExploitable(bundle: BeworkQuoteBundleV1): boolean {
+  return clientDisplayName(bundle) !== "Client à préciser";
 }
 
 export function primaryEmail(bundle: BeworkQuoteBundleV1): string | null {

@@ -992,11 +992,16 @@ export function QuoteEditor({
   }, [clients, clientSearch]);
 
   const clientDisplay =
-    quote.clientExternalOrg?.tradeName ||
     quote.clientExternalOrg?.name ||
-    clientSnap?.tradeName ||
     clientSnap?.name ||
+    quote.clientExternalOrg?.tradeName ||
+    clientSnap?.tradeName ||
     null;
+  const clientTradeSecondary =
+    (quote.clientExternalOrg?.tradeName || clientSnap?.tradeName || null) &&
+    (quote.clientExternalOrg?.tradeName || clientSnap?.tradeName) !== clientDisplay
+      ? quote.clientExternalOrg?.tradeName || clientSnap?.tradeName
+      : null;
 
   const saveLabel =
     saveState === "saving"
@@ -1218,6 +1223,11 @@ export function QuoteEditor({
                   <p className="font-bold text-[#1e3a5f]">
                     {clientDisplay || "Sélectionner un client"}
                   </p>
+                  {clientTradeSecondary ? (
+                    <p className="text-xs font-medium text-slate-700">
+                      {clientTradeSecondary}
+                    </p>
+                  ) : null}
                   {quote.clientExternalOrg?.siret || clientSnap?.siret ? (
                     <p className="text-xs text-slate-500">
                       SIRET {quote.clientExternalOrg?.siret || clientSnap?.siret}
@@ -1258,6 +1268,11 @@ export function QuoteEditor({
                   <p className="font-bold text-[#1e3a5f]">
                     {clientDisplay || "Client à préciser"}
                   </p>
+                  {clientTradeSecondary ? (
+                    <p className="text-xs font-medium text-slate-700">
+                      {clientTradeSecondary}
+                    </p>
+                  ) : null}
                   {snapshotAddress(clientSnap).map((l) => (
                     <p key={l} className="text-xs text-slate-600">
                       {l}

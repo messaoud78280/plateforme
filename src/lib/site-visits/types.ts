@@ -385,6 +385,11 @@ export type SiteVisitPrep = {
   addToAgenda?: boolean;
   /** Réponses fiches techniques par lot (persistées, export survey). */
   lotSheets?: Record<string, Record<string, string>>;
+  /**
+   * Relevés libres de chantier (carnet / dictée).
+   * Prioritaire par rapport aux mesures structurées pour le CR / ChatGPT.
+   */
+  fieldNotes?: string | null;
 };
 
 export function parseVisitPrep(raw: unknown): SiteVisitPrep {
@@ -422,6 +427,7 @@ export function parseVisitPrep(raw: unknown): SiteVisitPrep {
       : [],
     addToAgenda: p.addToAgenda !== false,
     lotSheets: parseLotSheets(p.lotSheets),
+    fieldNotes: typeof p.fieldNotes === "string" ? p.fieldNotes : null,
   };
 }
 

@@ -39,6 +39,8 @@ export type SurveyVisitInput = {
   /** Fiches techniques lot (réponses terrain). */
   lotSheets?: Record<string, Record<string, string>>;
   comments?: string | null;
+  /** Relevés libres (carnet / dictée) — texte intégral. */
+  fieldNotes?: string | null;
   measurements: Array<{
     id: string;
     zone: string | null;
@@ -162,6 +164,9 @@ export function buildSiteSurveyJson(visit: SurveyVisitInput) {
     proposed_works: visit.proposedWorks,
     commercial: visit.commercial,
     lot_technical_sheets: visit.lotSheets ?? {},
+    /** Texte libre des relevés terrain — source principale pour ChatGPT. */
+    field_notes: visit.fieldNotes?.trim() || null,
+    field_notes_verbatim: true,
     missing_information: visit.missingInfos
       .filter((i) => i.open && i.checkStatus !== "NON_APPLICABLE" && i.checkStatus !== "CONFIRME")
       .map((i) => ({
@@ -199,48 +204,50 @@ export function buildChatgptQuoteInstructions(survey: ReturnType<typeof buildSit
   return [
     "Analyse ce compte rendu de visite de chantier BeWork (format bework_site_survey_v1).",
     "",
-    "Examine les informations techniques, les relevés et les photographies (légendes / observations).",
-    "Identifie les prestations nécessaires pour répondre à la demande du client.",
-    "Vérifie la cohérence des quantités (ex. longueur × largeur ≈ surface).",
-    "Distingue les données mesurées, calculées, déclarées, estimées et les informations manquantes.",
+    "Analyse les relevés de chantier fournis.",
+    "Identifie les ouvrages existants, les travaux demandés, les dimensions, les quantités,",
+    "les matériaux et les contraintes.",
     "",
-    "Propose une décomposition des travaux par lots et par postes.",
-    "N'invente aucune donnée technique manquante (épaisseur, profondeur, réseaux, etc.).",
-    "Signale clairement les hypothèses nécessaires.",
+    "Utilise les valeurs effectivement renseignées.",
+    "Lorsque des dimensions permettent un calcul simple et non ambigu, vérifie leur cohérence.",
+    "Exemple : 8 m × 5 m = 40 m².",
     "",
-    "Si les informations sont suffisantes, prépare un devis estimatif détaillé.",
-    "Génère ensuite UNIQUEMENT un bloc JSON compatible avec l'import BeWork.",
+    "Distingue les mesures réellement relevées, les quantités calculées et les hypothèses.",
+    "Si une quantité est manquante ou ambiguë, indique qu'elle doit être confirmée.",
     "",
-    `Utilise exclusivement le format ${BEWORK_QUOTE_BUNDLE_FORMAT}.`,
+    "Examine également les photos de chantier et leurs légendes.",
+    "",
+    "Prépare une décomposition des travaux par lots et par postes.",
+    "",
+    "N'invente aucune dimension.",
+    "Ne considère pas qu'une proposition technique est une mesure réellement effectuée.",
+    "Ne confonds pas une épaisseur existante et une épaisseur envisagée.",
+    "",
+    "Puis génère UNIQUEMENT un devis estimatif structuré",
+    `au format ${BEWORK_QUOTE_BUNDLE_FORMAT}, compatible avec l'import BeWork.`,
     "",
     "Schéma attendu (propriétés reconnues par le parser BeWork) :",
     JSON.stringify(
       {
         format: BEWORK_QUOTE_BUNDLE_FORMAT,
         client: {
-          first_name: "",
-          last_name: "",
-          company: "",
-          phone: "",
-          emails: [{ email: "", role: "primary" }],
-          address: { line1: "", postal_code: "", city: "", country: "FR" },
+          prenom: "",
+          nom: "",
+          nom_complet: "",
+          raison_sociale: "",
+          telephone: "",
+          email: "",
+          adresse: { ligne1: "", code_postal: "", ville: "", pays: "France" },
         },
-        site: {
-          same_as_client_address: false,
-          address: { line1: "", postal_code: "", city: "", country: "FR" },
-          project_type: "",
-          surface_value: null,
-          surface_unit: "m²",
-          access_notes: "",
-          constraints: "",
+        chantier: {
+          nom: "",
+          adresse: { ligne1: "", code_postal: "", ville: "", pays: "France" },
         },
-        quote: {
-          title: "",
-          description: "",
-          validity_days: 30,
-          pricing_strategy: "",
-          vat_suggested_rate: 20,
-          vat_requires_confirmation: true,
+        devis: {
+          objet: "",
+          observations: "",
+          duree_validite: 30,
+          tva: { taux: 20, requires_confirmation: true },
         },
         sections: [
           {
@@ -269,7 +276,8 @@ export function buildChatgptQuoteInstructions(survey: ReturnType<typeof buildSit
     "Règles :",
     "- Chaque ligne doit avoir designation, quantity ≥ 0, unit_price_ht ≥ 0.",
     "- Les totaux du JSON ne sont PAS une source de vérité (BeWork recalcule).",
-    "- Si une quantité est « to_confirm », mets-la dans warnings / reservations, ne l'invente pas.",
+    "- Si une quantité est ambiguë, mets-la dans warnings / reservations, ne l'invente pas.",
+    "- Le champ field_notes est le récit terrain de l'artisan : respecte-le intégralement.",
     "- Photos : référence les photo_id dans les descriptions si utile.",
     "",
     "DONNÉES DE VISITE (bework_site_survey_v1) :",
@@ -311,6 +319,20 @@ function lines(doc: jsPDF, y: number, items: string[]): number {
       doc.text(row, 18, y);
       y += 4.5;
     }
+  }
+  return y + 2;
+}
+
+function prose(doc: jsPDF, y: number, text: string): number {
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...SLATE);
+  const maxW = doc.internal.pageSize.getWidth() - 36;
+  const wrapped = doc.splitTextToSize(pdfSafe(text), maxW) as string[];
+  for (const row of wrapped) {
+    y = ensureSpace(doc, y, 5);
+    doc.text(row, 18, y);
+    y += 4.5;
   }
   return y + 2;
 }
@@ -364,8 +386,13 @@ export function generateSiteSurveyPdf(
     ...(visit.lots.length ? [`Type de travaux : ${visit.lots.join(", ")}`] : []),
   ]);
 
+  if (visit.fieldNotes?.trim()) {
+    y = section(doc, y, "Relevés et métrés de chantier");
+    y = prose(doc, y, visit.fieldNotes.trim());
+  }
+
   if (visit.measurements.length) {
-    y = section(doc, y, "Relevés & métrés");
+    y = section(doc, y, "Mesures structurées (facultatif)");
     y = lines(
       doc,
       y,
@@ -380,6 +407,9 @@ export function generateSiteSurveyPdf(
         return `${m.label} — ${dims || "dimensions non saisies"} → ${m.computedQuantity > 0 ? `${m.computedQuantity} ${m.unit}` : "quantité à confirmer"}${m.observation ? ` · ${m.observation}` : ""}`;
       }),
     );
+  } else if (!visit.fieldNotes?.trim()) {
+    y = section(doc, y, "Relevés et métrés de chantier");
+    y = lines(doc, y, ["Aucun relevé saisi."]);
   }
 
   if (visit.findings.length) {

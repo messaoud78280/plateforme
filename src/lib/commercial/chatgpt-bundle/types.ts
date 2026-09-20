@@ -24,13 +24,19 @@ export type BundleAddress = {
 export type BundleClient = {
   firstName: string | null;
   lastName: string | null;
+  /** Nom complet (ex. nom_complet) — priorité d’affichage si présent. */
+  fullName: string | null;
   company: string | null;
   phone: string | null;
   emails: BundleClientEmail[];
   address: BundleAddress;
+  /** particulier | professionnel | … */
+  type: string | null;
 };
 
 export type BundleSite = {
+  /** Nom du chantier (chantier.nom). */
+  name: string | null;
   sameAsClientAddress: boolean;
   address: BundleAddress | null;
   projectType: string | null;

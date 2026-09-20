@@ -34,6 +34,8 @@ export function buildVisitCompleteness(opts: {
   subject?: string | null;
   lots?: unknown;
   measurementCount: number;
+  /** Relevés libres (carnet / dictée) — comptent comme métrés. */
+  hasFieldNotes?: boolean;
   measurementLots?: string[];
   hasConstraints: boolean;
   missingOpenCount: number;
@@ -45,6 +47,7 @@ export function buildVisitCompleteness(opts: {
     ...(opts.measurementLots ?? []).filter(Boolean),
   ];
   const uniqueLots = [...new Set(lots)];
+  const hasMetres = opts.measurementCount > 0 || Boolean(opts.hasFieldNotes);
   const items: CompletenessItem[] = [
     {
       id: "client",
@@ -85,7 +88,7 @@ export function buildVisitCompleteness(opts: {
     {
       id: "metres",
       label: "Relevés / métrés",
-      done: opts.measurementCount > 0,
+      done: hasMetres,
       required: true,
     },
     {
@@ -109,7 +112,13 @@ export function buildVisitCompleteness(opts: {
   const doneCore =
     Boolean(opts.clientName?.trim()) &&
     Boolean(opts.siteAddress?.trim() || opts.siteName?.trim()) &&
-    metres > 0;
+    hasMetres;
+
+  const metresLabel = opts.hasFieldNotes
+    ? metres > 0
+      ? `Relevés + ${metres} mesure${metres > 1 ? "s" : ""}`
+      : "Relevés saisis"
+    : `${metres} métré${metres > 1 ? "s" : ""}`;
 
   return {
     done,
@@ -119,10 +128,10 @@ export function buildVisitCompleteness(opts: {
       | "watch"
       | "accent",
     label: doneCore
-      ? `${metres} métré${metres > 1 ? "s" : ""} · ${photos} photo${photos > 1 ? "s" : ""}`
-      : metres === 0 && photos === 0
+      ? `${metresLabel} · ${photos} photo${photos > 1 ? "s" : ""}`
+      : !hasMetres && photos === 0
         ? "Dossier à compléter"
-        : `${metres} métré${metres > 1 ? "s" : ""} · ${photos} photo${photos > 1 ? "s" : ""}`,
+        : `${metresLabel} · ${photos} photo${photos > 1 ? "s" : ""}`,
     items,
     missingLabels,
     readyChecks: items.filter((i) => i.required || i.id === "lots" || i.id === "constraints"),

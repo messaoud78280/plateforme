@@ -7,25 +7,26 @@ import {
   type BibliothequeUniverse,
 } from "@/components/ged/BibliothequeUniverseSwitcher";
 import {
-  LibraryHub,
   type LibraryHubRow,
   type LibraryHubStats,
 } from "@/components/commercial/LibraryHub";
+import { LibraryWorkspace } from "@/components/commercial/library/LibraryWorkspace";
 import { GED_SHELL_CLASS, GedPageHeader } from "@/components/ged/GedUi";
+
+type FamilyNode = {
+  family: string;
+  count: number;
+  subFamilies: Array<{ name: string; count: number }>;
+};
 
 type Props = {
   initialItems: LibraryHubRow[];
+  initialTotal: number;
   stats: LibraryHubStats;
-  materialsPreview: Parameters<typeof LibraryHub>[0]["materialsPreview"];
-  laborPreview: Parameters<typeof LibraryHub>[0]["laborPreview"];
-  equipmentPreview?: Array<{
-    id: string;
-    name: string;
-    unit: string;
-    kind: string;
-    hourlyCostHt: number | null;
-    dailyCostHt: number | null;
-  }>;
+  families: FamilyNode[];
+  materialsPreview: Parameters<typeof LibraryWorkspace>[0]["materialsPreview"];
+  laborPreview: Parameters<typeof LibraryWorkspace>[0]["laborPreview"];
+  equipmentPreview?: Parameters<typeof LibraryWorkspace>[0]["equipmentPreview"];
   minMarginPercent: number | null;
   targetMarginPercent: number | null;
   canAccessOuvrages: boolean;
@@ -39,7 +40,9 @@ function OuvragesPrixUniverseInner(props: Props) {
 
   const {
     initialItems,
+    initialTotal,
     stats,
+    families,
     materialsPreview,
     laborPreview,
     equipmentPreview,
@@ -53,7 +56,7 @@ function OuvragesPrixUniverseInner(props: Props) {
       <div className={GED_SHELL_CLASS}>
         <GedPageHeader
           title="Bibliothèque"
-          subtitle="Ce qui est rangé, ce qui attend une action, et où retrouver chaque pièce."
+          subtitle="Votre catalogue d’ouvrages, matériaux, matériels et main-d’œuvre."
         />
         <BibliothequeUniverseSwitcher
           value="ouvrages"
@@ -74,7 +77,7 @@ function OuvragesPrixUniverseInner(props: Props) {
       <div className="space-y-3">
         <GedPageHeader
           title="Bibliothèque"
-          subtitle="Ce qui est rangé, ce qui attend une action, et où retrouver chaque pièce."
+          subtitle="Votre catalogue d’ouvrages, matériaux, matériels et main-d’œuvre."
         />
         <BibliothequeUniverseSwitcher
           value="ouvrages"
@@ -85,11 +88,12 @@ function OuvragesPrixUniverseInner(props: Props) {
           }}
         />
       </div>
-      <LibraryHub
-        embedded
+      <LibraryWorkspace
         initialCreateOpen={createOpen}
         initialItems={initialItems}
+        initialTotal={initialTotal}
         stats={stats}
+        families={families}
         materialsPreview={materialsPreview}
         laborPreview={laborPreview}
         equipmentPreview={equipmentPreview}
@@ -107,7 +111,7 @@ export function OuvragesPrixUniverse(props: Props) {
         <div className={GED_SHELL_CLASS}>
           <GedPageHeader
             title="Bibliothèque"
-            subtitle="Ce qui est rangé, ce qui attend une action, et où retrouver chaque pièce."
+            subtitle="Votre catalogue d’ouvrages, matériaux, matériels et main-d’œuvre."
           />
           <p className="text-sm text-bework-muted">Chargement du référentiel…</p>
         </div>

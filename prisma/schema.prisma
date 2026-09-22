@@ -138,6 +138,8 @@ model User {
   commercialPaymentsRecorded   CommercialPayment[] @relation("CommercialPaymentRecordedBy")
   commercialPaymentsCancelled  CommercialPayment[] @relation("CommercialPaymentCancelledBy")
   commercialWorkItemsCreated   CommercialWorkItem[] @relation("CommercialWorkItemCreatedBy")
+  commercialLibraryAttachmentsCreated CommercialLibraryAttachment[] @relation("CommercialLibraryAttachmentCreatedBy")
+  commercialLibraryNotesCreated CommercialLibraryNote[] @relation("CommercialLibraryNoteCreatedBy")
   commercialStatusEvents       CommercialStatusEvent[] @relation("CommercialStatusEventActor")
   commercialProgressStatementsCreated CommercialProgressStatement[] @relation("CommercialProgressStatementCreatedBy")
   commercialProgressStatementsValidated CommercialProgressStatement[] @relation("CommercialProgressStatementValidatedBy")
@@ -668,6 +670,8 @@ model Organization {
   commercialMaterials       CommercialMaterial[]
   commercialLaborResources  CommercialLaborResource[]
   commercialEquipmentResources CommercialEquipmentResource[]
+  commercialLibraryAttachments CommercialLibraryAttachment[]
+  commercialLibraryNotes    CommercialLibraryNote[]
   commercialStatusEvents    CommercialStatusEvent[]
   commercialQuoteSnapshots  CommercialQuoteSnapshot[]
   commercialQuoteChatgptPatches CommercialQuoteChatgptPatch[]
@@ -4662,6 +4666,8 @@ model CommercialWorkItem {
   organizationId   String
   reference        String?
   name             String
+  /// Description courte (listes / recherche) — nullable, non destructif
+  shortDescription String?  @db.Text
   description      String?  @db.Text
   family           String?
   subFamily        String?
@@ -4679,8 +4685,22 @@ model CommercialWorkItem {
   feesAmountHt     Decimal  @default(0) @db.Decimal(14, 4)
   /// MARGIN = PV depuis marge cible · FIXED_SELL = marge depuis PV saisi
   sellMode         String   @default("MARGIN")
+  /// true = coût de revient saisi/calculé fiable ; false = non renseigné (≠ coût réellement 0)
+  costKnown        Boolean  @default(false)
   /// Lien optionnel vers biblio BeWork (lecture seule, pas de couplage fort)
   sourceWorkItemId String?
+  /// Variante : ouvrage parent (null = fiche principale)
+  parentWorkItemId String?
+  /// TECHNICAL | COMMERCIAL | CUSTOM
+  variantKind      String?
+  /// Propriétés techniques souples (épaisseur, dimensions…)
+  technicalAttributes Json?
+  /// Notes internes entreprise (jamais exposées aux devis sans action explicite)
+  internalNotes        String? @db.Text
+  /// Conseils de mise en œuvre
+  implementationTips   String? @db.Text
+  /// Points de vigilance avant chiffrage / exécution
+  vigilancePoints      String? @db.Text
   /// Prix matière/MO changés — à recalculer en biblio (devis non touchés)
   needsPriceRecalc Boolean  @default(false)
   /// DF Bibliothèque V2 — favori org
@@ -4692,14 +4712,73 @@ model CommercialWorkItem {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   createdBy    User?        @relation("CommercialWorkItemCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  parent       CommercialWorkItem?  @relation("CommercialWorkItemVariants", fields: [parentWorkItemId], references: [id], onDelete: SetNull)
+  variants     CommercialWorkItem[] @relation("CommercialWorkItemVariants")
   components   CommercialWorkItemComponent[]
   quoteLines   CommercialQuoteLine[]
+  attachments  CommercialLibraryAttachment[]
+  notes        CommercialLibraryNote[]
 
   @@index([organizationId, name])
   @@index([organizationId, family])
   @@index([organizationId, reference])
   @@index([organizationId, isFavorite])
+  @@index([organizationId, parentWorkItemId])
+  @@index([organizationId, updatedAt])
   @@index([sourceWorkItemId])
+  @@index([createdById])
+  @@index([parentWorkItemId])
+}
+
+/// Photos / PDF / fiches techniques liés à un ouvrage commercial (stockage bucket documents).
+model CommercialLibraryAttachment {
+  id             String   @id @default(cuid())
+  organizationId String
+  workItemId     String
+  name           String
+  storagePath    String
+  fileUrl        String?
+  mimeType       String?
+  sizeBytes      Int?
+  /// photo | pdf | fiche_technique | plan | notice | fournisseur | autre
+  category       String   @default("autre")
+  caption        String?
+  isPrimary      Boolean  @default(false)
+  /// false = usage interne uniquement (défaut)
+  clientVisible  Boolean  @default(false)
+  sortOrder      Int      @default(0)
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workItem     CommercialWorkItem @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  createdBy    User?              @relation("CommercialLibraryAttachmentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, workItemId])
+  @@index([workItemId, sortOrder])
+  @@index([workItemId, isPrimary])
+  @@index([createdById])
+}
+
+/// Notes datées sur un ouvrage (distinctes des champs texte longs).
+model CommercialLibraryNote {
+  id             String   @id @default(cuid())
+  organizationId String
+  workItemId     String
+  /// INTERNAL | IMPLEMENTATION | VIGILANCE | COMMENT
+  kind           String   @default("COMMENT")
+  body           String   @db.Text
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workItem     CommercialWorkItem @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  createdBy    User?              @relation("CommercialLibraryNoteCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, workItemId])
+  @@index([workItemId, createdAt])
   @@index([createdById])
 }
 

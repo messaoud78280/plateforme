@@ -132,6 +132,45 @@ export function marginPercentFromCostSell(costHt: number, sellHt: number): numbe
   return roundMoney(((sellHt - costHt) / sellHt) * 100, 2);
 }
 
+/**
+ * Distingue coût réellement 0 / coût non renseigné / coût connu.
+ * Un coût inconnu ne doit jamais s’afficher comme une rentabilité de 100 %.
+ */
+export type CostKnowledge = "known_zero" | "unknown" | "known";
+
+export function resolveCostKnowledge(input: {
+  unitCostHt: number;
+  costKnown?: boolean | null;
+  componentCount?: number;
+}): CostKnowledge {
+  const cost = Number(input.unitCostHt) || 0;
+  const comps = Number(input.componentCount) || 0;
+  if (input.costKnown === true) {
+    return cost === 0 ? "known_zero" : "known";
+  }
+  if (input.costKnown === false) return "unknown";
+  // Héritage : sans flag, un coût 0 sans composition = non renseigné
+  if (cost === 0 && comps === 0) return "unknown";
+  if (cost === 0) return "known_zero";
+  return "known";
+}
+
+/** Marque affichable : null si le coût n’est pas renseigné. */
+export function displayMarquePercent(input: {
+  unitCostHt: number;
+  unitSellHt: number;
+  marginPercent?: number;
+  costKnown?: boolean | null;
+  componentCount?: number;
+}): number | null {
+  const knowledge = resolveCostKnowledge(input);
+  if (knowledge === "unknown") return null;
+  if (input.marginPercent != null && Number.isFinite(input.marginPercent) && input.marginPercent !== 0) {
+    return roundMoney(Number(input.marginPercent), 2);
+  }
+  return marginPercentFromCostSell(Number(input.unitCostHt) || 0, Number(input.unitSellHt) || 0);
+}
+
 export type WorkItemComponentInput = {
   type: string;
   quantityPerUnit: number;

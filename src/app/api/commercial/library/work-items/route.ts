@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { requireCommercialApiSession } from "@/lib/commercial/access";
 import {
+  bulkUpdateWorkItems,
   createWorkItem,
   duplicateWorkItem,
+  listLibraryFamilyTree,
   listWorkItems,
+  searchLibraryWorkItems,
   workItemsToCsv,
 } from "@/lib/commercial/library";
 
@@ -21,16 +24,62 @@ export async function GET(req: Request) {
     kindParam === "SIMPLE" || kindParam === "COMPOSITE" ? kindParam : undefined;
   const favorite = url.searchParams.get("favorite") === "1";
   const needsPriceRecalc = url.searchParams.get("needsPriceRecalc") === "1";
-  const items = await listWorkItems(auth.orgId, {
+  const family = url.searchParams.get("family") ?? undefined;
+  const subFamily = url.searchParams.get("subFamily") ?? undefined;
+  const sellModeParam = url.searchParams.get("sellMode");
+  const sellMode =
+    sellModeParam === "MARGIN" || sellModeParam === "FIXED_SELL"
+      ? sellModeParam
+      : undefined;
+  const priceMinRaw = url.searchParams.get("priceMin");
+  const priceMaxRaw = url.searchParams.get("priceMax");
+  const priceMin = priceMinRaw != null && priceMinRaw !== "" ? Number(priceMinRaw) : undefined;
+  const priceMax = priceMaxRaw != null && priceMaxRaw !== "" ? Number(priceMaxRaw) : undefined;
+  const sortParam = url.searchParams.get("sort");
+  const sort =
+    sortParam === "name" ||
+    sortParam === "reference" ||
+    sortParam === "price" ||
+    sortParam === "updatedAt" ||
+    sortParam === "family"
+      ? sortParam
+      : "updatedAt";
+  const sortDir = url.searchParams.get("sortDir") === "asc" ? "asc" : "desc";
+  const page = Math.max(1, Number(url.searchParams.get("page") || 1) || 1);
+  const pageSize = Math.min(
+    100,
+    Math.max(10, Number(url.searchParams.get("pageSize") || 50) || 50),
+  );
+  const skip = (page - 1) * pageSize;
+  const includeVariants = url.searchParams.get("includeVariants") === "1";
+  const meta = url.searchParams.get("meta");
+
+  if (meta === "families") {
+    const families = await listLibraryFamilyTree(auth.orgId);
+    return NextResponse.json({ families });
+  }
+
+  const listOpts: Parameters<typeof listWorkItems>[1] = {
     q,
-    take: format === "csv" ? 2000 : 150,
+    take: format === "csv" ? 2000 : pageSize,
+    skip: format === "csv" ? 0 : skip,
     active: view === "archived" ? false : true,
     kind,
     favorite: favorite || undefined,
     needsPriceRecalc: needsPriceRecalc || undefined,
+    family,
+    subFamily,
+    sellMode,
+    priceMin: priceMin != null && Number.isFinite(priceMin) ? priceMin : undefined,
+    priceMax: priceMax != null && Number.isFinite(priceMax) ? priceMax : undefined,
+    sort,
+    sortDir,
+    rootsOnly: !includeVariants,
     includeComponents: format === "csv",
-  });
+  };
+
   if (format === "csv") {
+    const items = await listWorkItems(auth.orgId, listOpts);
     const csv = workItemsToCsv(items);
     return new NextResponse(csv, {
       headers: {
@@ -39,7 +88,15 @@ export async function GET(req: Request) {
       },
     });
   }
-  return NextResponse.json({ workItems: items });
+
+  const { items, total } = await searchLibraryWorkItems(auth.orgId, listOpts);
+  return NextResponse.json({
+    workItems: items,
+    total,
+    page,
+    pageSize,
+    pageCount: Math.max(1, Math.ceil(total / pageSize)),
+  });
 }
 
 export async function POST(req: Request) {
@@ -59,6 +116,22 @@ export async function POST(req: Request) {
         auth.session.user.id,
       );
       return NextResponse.json({ workItem }, { status: 201 });
+    }
+    if (body.action === "bulk" && Array.isArray(body.ids)) {
+      const result = await bulkUpdateWorkItems(
+        auth.orgId,
+        body.ids.map(String),
+        {
+          family: body.family !== undefined ? (body.family as string | null) : undefined,
+          subFamily:
+            body.subFamily !== undefined ? (body.subFamily as string | null) : undefined,
+          isFavorite:
+            typeof body.isFavorite === "boolean" ? body.isFavorite : undefined,
+          isActive: typeof body.isActive === "boolean" ? body.isActive : undefined,
+          tagsAppend: body.tagsAppend ? String(body.tagsAppend) : undefined,
+        },
+      );
+      return NextResponse.json(result);
     }
     const workItem = await createWorkItem(auth.orgId, {
       name: String(body.name ?? ""),

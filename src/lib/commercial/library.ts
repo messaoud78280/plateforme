@@ -162,42 +162,96 @@ export async function listWorkItems(
     kind?: "SIMPLE" | "COMPOSITE";
     favorite?: boolean;
     needsPriceRecalc?: boolean;
+    family?: string;
+    subFamily?: string;
+    sellMode?: "MARGIN" | "FIXED_SELL";
+    priceMin?: number;
+    priceMax?: number;
+    /** Principales seulement (exclut les variantes) — défaut true pour listes hub. */
+    rootsOnly?: boolean;
+    parentWorkItemId?: string;
+    sort?: "name" | "reference" | "price" | "updatedAt" | "family";
+    sortDir?: "asc" | "desc";
     /** Inclure composants (coûteux) — défaut false pour listes. */
     includeComponents?: boolean;
   },
 ) {
   const q = opts?.q?.trim();
   const active = opts?.active ?? true;
+  const tokens = q
+    ? q
+        .split(/\s+/)
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0)
+        .slice(0, 8)
+    : [];
+
   const where: Prisma.CommercialWorkItemWhereInput = {
     organizationId: orgId,
     isActive: active,
     ...(opts?.kind ? { kind: opts.kind } : {}),
     ...(opts?.favorite ? { isFavorite: true } : {}),
     ...(opts?.needsPriceRecalc ? { needsPriceRecalc: true } : {}),
-    ...(q
+    ...(opts?.family ? { family: opts.family } : {}),
+    ...(opts?.subFamily ? { subFamily: opts.subFamily } : {}),
+    ...(opts?.sellMode ? { sellMode: opts.sellMode } : {}),
+    ...(opts?.parentWorkItemId
+      ? { parentWorkItemId: opts.parentWorkItemId }
+      : opts?.rootsOnly === false
+        ? {}
+        : { parentWorkItemId: null }),
+    ...(opts?.priceMin != null || opts?.priceMax != null
       ? {
-          OR: [
-            { name: { contains: q, mode: "insensitive" } },
-            { reference: { contains: q, mode: "insensitive" } },
-            { family: { contains: q, mode: "insensitive" } },
-            { subFamily: { contains: q, mode: "insensitive" } },
-            { description: { contains: q, mode: "insensitive" } },
-            { tags: { contains: q, mode: "insensitive" } },
-          ],
+          unitSellHt: {
+            ...(opts.priceMin != null ? { gte: opts.priceMin } : {}),
+            ...(opts.priceMax != null ? { lte: opts.priceMax } : {}),
+          },
+        }
+      : {}),
+    ...(tokens.length
+      ? {
+          AND: tokens.map((token) => ({
+            OR: [
+              { name: { contains: token, mode: "insensitive" as const } },
+              { reference: { contains: token, mode: "insensitive" as const } },
+              { family: { contains: token, mode: "insensitive" as const } },
+              { subFamily: { contains: token, mode: "insensitive" as const } },
+              { description: { contains: token, mode: "insensitive" as const } },
+              { shortDescription: { contains: token, mode: "insensitive" as const } },
+              { tags: { contains: token, mode: "insensitive" as const } },
+            ],
+          })),
         }
       : {}),
   };
+
+  const sort = opts?.sort ?? "updatedAt";
+  const sortDir = opts?.sortDir ?? "desc";
+  const orderBy: Prisma.CommercialWorkItemOrderByWithRelationInput[] = [
+    { isFavorite: "desc" },
+    ...(sort === "name"
+      ? [{ name: sortDir } as const]
+      : sort === "reference"
+        ? [{ reference: sortDir } as const]
+        : sort === "price"
+          ? [{ unitSellHt: sortDir } as const]
+          : sort === "family"
+            ? [{ family: sortDir } as const, { subFamily: "asc" as const }]
+            : [{ updatedAt: sortDir } as const]),
+    { name: "asc" },
+  ];
+
   const includeComponents = opts?.includeComponents === true;
   const rows = await prisma.commercialWorkItem.findMany({
     where,
-    orderBy: [{ isFavorite: "desc" }, { updatedAt: "desc" }, { name: "asc" }],
+    orderBy,
     take: opts?.take ?? 100,
     skip: opts?.skip ?? 0,
     include: {
       ...(includeComponents
         ? { components: { orderBy: { sortOrder: "asc" as const } } }
         : {}),
-      _count: { select: { components: true, quoteLines: true } },
+      _count: { select: { components: true, quoteLines: true, attachments: true, variants: true } },
     },
   });
   return rows.map((w) => {
@@ -213,6 +267,8 @@ export async function listWorkItems(
       feesAmountHt: d(w.feesAmountHt),
       quoteLineCount: w._count.quoteLines,
       componentCount: w._count.components,
+      attachmentCount: w._count.attachments,
+      variantCount: w._count.variants,
       components: includeComponents
         ? (withComp.components ?? []).map(mapComponent)
         : [],
@@ -220,34 +276,236 @@ export async function listWorkItems(
   });
 }
 
-export async function getLibraryHubStats(orgId: string) {
-  const [ouvrages, materiaux, labor, needsRecalc, favorites] = await Promise.all([
-    prisma.commercialWorkItem.count({
-      where: { organizationId: orgId, isActive: true },
-    }),
-    prisma.commercialMaterial.count({
-      where: { organizationId: orgId, isActive: true },
-    }),
-    prisma.commercialLaborResource.count({
-      where: { organizationId: orgId, isActive: true },
-    }),
-    prisma.commercialWorkItem.count({
-      where: {
-        organizationId: orgId,
-        isActive: true,
-        needsPriceRecalc: true,
-      },
-    }),
-    prisma.commercialWorkItem.count({
-      where: { organizationId: orgId, isActive: true, isFavorite: true },
-    }),
+/** Liste paginée avec total (hub bibliothèque). */
+export async function searchLibraryWorkItems(
+  orgId: string,
+  opts?: Parameters<typeof listWorkItems>[1],
+) {
+  const q = opts?.q?.trim();
+  const active = opts?.active ?? true;
+  const tokens = q
+    ? q
+        .split(/\s+/)
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0)
+        .slice(0, 8)
+    : [];
+
+  const where: Prisma.CommercialWorkItemWhereInput = {
+    organizationId: orgId,
+    isActive: active,
+    ...(opts?.kind ? { kind: opts.kind } : {}),
+    ...(opts?.favorite ? { isFavorite: true } : {}),
+    ...(opts?.needsPriceRecalc ? { needsPriceRecalc: true } : {}),
+    ...(opts?.family ? { family: opts.family } : {}),
+    ...(opts?.subFamily ? { subFamily: opts.subFamily } : {}),
+    ...(opts?.sellMode ? { sellMode: opts.sellMode } : {}),
+    ...(opts?.parentWorkItemId
+      ? { parentWorkItemId: opts.parentWorkItemId }
+      : opts?.rootsOnly === false
+        ? {}
+        : { parentWorkItemId: null }),
+    ...(opts?.priceMin != null || opts?.priceMax != null
+      ? {
+          unitSellHt: {
+            ...(opts.priceMin != null ? { gte: opts.priceMin } : {}),
+            ...(opts.priceMax != null ? { lte: opts.priceMax } : {}),
+          },
+        }
+      : {}),
+    ...(tokens.length
+      ? {
+          AND: tokens.map((token) => ({
+            OR: [
+              { name: { contains: token, mode: "insensitive" as const } },
+              { reference: { contains: token, mode: "insensitive" as const } },
+              { family: { contains: token, mode: "insensitive" as const } },
+              { subFamily: { contains: token, mode: "insensitive" as const } },
+              { description: { contains: token, mode: "insensitive" as const } },
+              { shortDescription: { contains: token, mode: "insensitive" as const } },
+              { tags: { contains: token, mode: "insensitive" as const } },
+            ],
+          })),
+        }
+      : {}),
+  };
+
+  const [items, total] = await Promise.all([
+    listWorkItems(orgId, opts),
+    prisma.commercialWorkItem.count({ where }),
   ]);
+  return { items, total };
+}
+
+export async function listLibraryFamilyTree(orgId: string) {
+  const rows = await prisma.commercialWorkItem.groupBy({
+    by: ["family", "subFamily"],
+    where: { organizationId: orgId, isActive: true, parentWorkItemId: null },
+    _count: { _all: true },
+  });
+  const map = new Map<string, { family: string; count: number; subFamilies: Array<{ name: string; count: number }> }>();
+  for (const r of rows) {
+    const family = (r.family ?? "Sans famille").trim() || "Sans famille";
+    const sub = r.subFamily?.trim() || null;
+    const cur = map.get(family) ?? { family, count: 0, subFamilies: [] };
+    cur.count += r._count._all;
+    if (sub) {
+      const existing = cur.subFamilies.find((s) => s.name === sub);
+      if (existing) existing.count += r._count._all;
+      else cur.subFamilies.push({ name: sub, count: r._count._all });
+    }
+    map.set(family, cur);
+  }
+  return Array.from(map.values())
+    .map((f) => ({
+      ...f,
+      subFamilies: f.subFamilies.sort((a, b) => a.name.localeCompare(b.name, "fr")),
+    }))
+    .sort((a, b) => a.family.localeCompare(b.family, "fr"));
+}
+
+export async function bulkUpdateWorkItems(
+  orgId: string,
+  ids: string[],
+  data: {
+    family?: string | null;
+    subFamily?: string | null;
+    isFavorite?: boolean;
+    isActive?: boolean;
+    tagsAppend?: string;
+  },
+) {
+  const uniqueIds = Array.from(new Set(ids.map((id) => id.trim()).filter(Boolean))).slice(0, 500);
+  if (uniqueIds.length === 0) return { updated: 0 };
+
+  const owned = await prisma.commercialWorkItem.findMany({
+    where: { organizationId: orgId, id: { in: uniqueIds } },
+    select: { id: true, tags: true },
+  });
+  if (owned.length !== uniqueIds.length) {
+    throw new Error("Une ou plusieurs références sont introuvables dans votre entreprise.");
+  }
+
+  if (data.tagsAppend) {
+    const tag = data.tagsAppend.trim();
+    await prisma.$transaction(
+      owned.map((row) => {
+        const tags = row.tags
+          ? Array.from(new Set([...row.tags.split(",").map((t) => t.trim()), tag].filter(Boolean))).join(", ")
+          : tag;
+        return prisma.commercialWorkItem.update({
+          where: { id: row.id },
+          data: {
+            ...(data.family !== undefined ? { family: data.family } : {}),
+            ...(data.subFamily !== undefined ? { subFamily: data.subFamily } : {}),
+            ...(data.isFavorite !== undefined ? { isFavorite: data.isFavorite } : {}),
+            ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+            tags,
+          },
+        });
+      }),
+    );
+    return { updated: owned.length };
+  }
+
+  const result = await prisma.commercialWorkItem.updateMany({
+    where: { organizationId: orgId, id: { in: uniqueIds } },
+    data: {
+      ...(data.family !== undefined ? { family: data.family } : {}),
+      ...(data.subFamily !== undefined ? { subFamily: data.subFamily } : {}),
+      ...(data.isFavorite !== undefined ? { isFavorite: data.isFavorite } : {}),
+      ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+    },
+  });
+  return { updated: result.count };
+}
+
+export async function recordLibraryHistoryEvent(
+  orgId: string,
+  workItemId: string,
+  input: {
+    label: string;
+    detail?: string | null;
+    fromStatus?: string | null;
+    toStatus?: string;
+    actorUserId?: string | null;
+  },
+) {
+  return prisma.commercialStatusEvent.create({
+    data: {
+      organizationId: orgId,
+      entityType: "CommercialWorkItem",
+      entityId: workItemId,
+      fromStatus: input.fromStatus ?? null,
+      toStatus: input.toStatus ?? "updated",
+      label: input.label,
+      detail: input.detail ?? null,
+      actorUserId: input.actorUserId ?? null,
+    },
+  });
+}
+
+export async function listLibraryHistory(orgId: string, workItemId: string, take = 50) {
+  return prisma.commercialStatusEvent.findMany({
+    where: {
+      organizationId: orgId,
+      entityType: "CommercialWorkItem",
+      entityId: workItemId,
+    },
+    orderBy: { createdAt: "desc" },
+    take,
+    include: { actor: { select: { id: true, name: true } } },
+  });
+}
+
+export async function getLibraryHubStats(orgId: string) {
+  const [ouvrages, materiaux, labor, equipment, needsRecalc, favorites, families] =
+    await Promise.all([
+      prisma.commercialWorkItem.count({
+        where: { organizationId: orgId, isActive: true, parentWorkItemId: null },
+      }),
+      prisma.commercialMaterial.count({
+        where: { organizationId: orgId, isActive: true },
+      }),
+      prisma.commercialLaborResource.count({
+        where: { organizationId: orgId, isActive: true },
+      }),
+      prisma.commercialEquipmentResource.count({
+        where: { organizationId: orgId, isActive: true },
+      }),
+      prisma.commercialWorkItem.count({
+        where: {
+          organizationId: orgId,
+          isActive: true,
+          needsPriceRecalc: true,
+          parentWorkItemId: null,
+        },
+      }),
+      prisma.commercialWorkItem.count({
+        where: {
+          organizationId: orgId,
+          isActive: true,
+          isFavorite: true,
+          parentWorkItemId: null,
+        },
+      }),
+      prisma.commercialWorkItem.findMany({
+        where: { organizationId: orgId, isActive: true, parentWorkItemId: null },
+        select: { family: true },
+        distinct: ["family"],
+      }),
+    ]);
+  const familyCount = families.filter((f) => (f.family ?? "").trim().length > 0).length;
   return {
     ouvrages,
     materiaux,
     mainOeuvre: labor,
+    materiel: equipment,
     needsRecalc,
     favorites,
+    families: familyCount,
+    total:
+      ouvrages + materiaux + labor + equipment,
   };
 }
 
@@ -296,6 +554,31 @@ export async function getWorkItem(orgId: string, id: string) {
         },
       },
       createdBy: { select: { id: true, name: true } },
+      parent: { select: { id: true, name: true, reference: true } },
+      variants: {
+        where: { isActive: true },
+        orderBy: { name: "asc" },
+        select: {
+          id: true,
+          name: true,
+          reference: true,
+          saleUnit: true,
+          unitSellHt: true,
+          unitCostHt: true,
+          variantKind: true,
+          kind: true,
+          isFavorite: true,
+        },
+      },
+      attachments: {
+        orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }, { createdAt: "desc" }],
+      },
+      notes: {
+        orderBy: { createdAt: "desc" },
+        take: 40,
+        include: { createdBy: { select: { id: true, name: true } } },
+      },
+      _count: { select: { quoteLines: true, components: true, attachments: true, variants: true } },
     },
   });
   if (!w) return null;
@@ -319,6 +602,15 @@ export async function getWorkItem(orgId: string, id: string) {
     marginPercent: d(w.marginPercent),
     feesPercent: d(w.feesPercent),
     feesAmountHt: d(w.feesAmountHt),
+    quoteLineCount: w._count.quoteLines,
+    componentCount: w._count.components,
+    attachmentCount: w._count.attachments,
+    variantCount: w._count.variants,
+    variants: w.variants.map((v) => ({
+      ...v,
+      unitSellHt: d(v.unitSellHt),
+      unitCostHt: d(v.unitCostHt),
+    })),
     components: w.components.map((c) => ({
       ...mapComponent(c),
       material: c.material
@@ -338,6 +630,7 @@ export async function getWorkItem(orgId: string, id: string) {
             dailyCostHt: c.equipment.dailyCostHt != null ? d(c.equipment.dailyCostHt) : null,
           }
         : null,
+      subcontractor: c.subcontractor,
     })),
     costing,
   };

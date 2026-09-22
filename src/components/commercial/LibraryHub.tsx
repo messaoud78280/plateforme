@@ -36,6 +36,9 @@ export type LibraryHubStats = {
   mainOeuvre: number;
   needsRecalc: number;
   favorites: number;
+  materiel?: number;
+  families?: number;
+  total?: number;
 };
 
 type Tab = "tous" | "ouvrages" | "materiaux" | "maindoeuvre" | "materiel" | "favoris";

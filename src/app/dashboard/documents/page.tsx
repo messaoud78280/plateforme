@@ -21,8 +21,9 @@ import {
   getLibraryHubStats,
   listEquipmentResources,
   listLaborResources,
+  listLibraryFamilyTree,
   listMaterials,
-  listWorkItems,
+  searchLibraryWorkItems,
 } from "@/lib/commercial/library";
 import { ensureCommercialOrgSettings } from "@/lib/commercial/settings";
 import { d } from "@/lib/commercial/decimal";
@@ -144,18 +145,24 @@ export default async function DocumentsPage({
         console.error("[documents] seed library:", e);
       }
 
-      const [activeItems, archivedItems, stats, materials, labor, equipment, settings] =
+      const [search, stats, families, materials, labor, equipment, settings] =
         await Promise.all([
-          listWorkItems(orgId, { take: 300, active: true }),
-          listWorkItems(orgId, { take: 100, active: false }),
+          searchLibraryWorkItems(orgId, {
+            take: 50,
+            skip: 0,
+            active: true,
+            sort: "updatedAt",
+            sortDir: "desc",
+          }),
           getLibraryHubStats(orgId),
+          listLibraryFamilyTree(orgId),
           listMaterials(orgId, { take: 80 }),
           listLaborResources(orgId),
           listEquipmentResources(orgId),
           ensureCommercialOrgSettings(orgId),
         ]);
 
-      const rows: LibraryHubRow[] = [...activeItems, ...archivedItems].map((w) => ({
+      const rows: LibraryHubRow[] = search.items.map((w) => ({
         id: w.id,
         name: w.name,
         reference: w.reference,
@@ -178,7 +185,9 @@ export default async function DocumentsPage({
         <OuvragesPrixUniverse
           canAccessOuvrages
           initialItems={rows}
+          initialTotal={search.total}
           stats={stats}
+          families={families}
           materialsPreview={materials.map((m) => ({
             id: m.id,
             name: m.name,

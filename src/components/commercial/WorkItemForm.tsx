@@ -709,6 +709,7 @@ export function WorkItemForm({
                   setSellMode("FIXED_SELL");
                   setUnitSellHt(v);
                 }}
+                componentCount={components.length}
               />
             ) : null}
           </div>
@@ -890,6 +891,7 @@ function CostSummary({
   sellMode,
   unitSellHt,
   onSellChange,
+  componentCount = 0,
 }: {
   costing: ReturnType<typeof calculateWorkItemCosting>;
   unit: string;
@@ -898,7 +900,9 @@ function CostSummary({
   sellMode: "FIXED_SELL" | "MARGIN";
   unitSellHt: string;
   onSellChange: (v: string) => void;
+  componentCount?: number;
 }) {
+  const costKnown = costing.costPriceHt > 0 || componentCount > 0;
   return (
     <div className="space-y-4 border-t border-slate-100 pt-5">
       <div>
@@ -906,7 +910,7 @@ function CostSummary({
           Coût de revient
         </p>
         <p className="mt-1 text-lg font-medium tabular-nums tracking-tight text-slate-600">
-          {fmt(costing.costPriceHt)} € / {unit}
+          {costKnown ? `${fmt(costing.costPriceHt)} € / ${unit}` : "Non renseigné"}
         </p>
       </div>
       <div>
@@ -915,7 +919,7 @@ function CostSummary({
         </label>
         {sellMode === "FIXED_SELL" ? (
           <p className="text-sm tabular-nums text-slate-700">
-            {fmt(costing.marquePercent)} %
+            {costKnown ? `${fmt(costing.marquePercent)} %` : "—"}
           </p>
         ) : (
           <div className="relative max-w-[8.5rem]">
@@ -933,6 +937,11 @@ function CostSummary({
             </span>
           </div>
         )}
+        {!costKnown ? (
+          <p className="mt-1 text-[11px] text-slate-400">
+            Taux de marque non calculable tant que le coût n’est pas renseigné.
+          </p>
+        ) : null}
       </div>
       {sellMode === "FIXED_SELL" ? (
         <div>

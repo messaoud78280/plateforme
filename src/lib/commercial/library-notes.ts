@@ -1,42 +1,22 @@
 /**
- * Notes datées sur ouvrages commerciaux.
+ * Notes datées sur ouvrages commerciaux (serveur uniquement).
  * Les notes INTERNAL ne doivent jamais être poussées automatiquement dans un devis.
  */
 import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { recordLibraryHistoryEvent } from "@/lib/commercial/library";
+import {
+  LIBRARY_NOTE_KIND_LABELS,
+  assertLibraryNoteKind,
+} from "@/lib/commercial/library-notes-shared";
 
-export const LIBRARY_NOTE_KINDS = [
-  "INTERNAL",
-  "IMPLEMENTATION",
-  "VIGILANCE",
-  "SUPPLIER",
-  "COMMENT",
-  "OTHER",
-] as const;
-
-export type LibraryNoteKind = (typeof LIBRARY_NOTE_KINDS)[number];
-
-export const LIBRARY_NOTE_KIND_LABELS: Record<LibraryNoteKind, string> = {
-  INTERNAL: "Note interne",
-  IMPLEMENTATION: "Conseil de mise en œuvre",
-  VIGILANCE: "Point de vigilance",
-  SUPPLIER: "Information fournisseur",
-  COMMENT: "Commentaire",
-  OTHER: "Autre",
-};
-
-/** Ne jamais inclure dans snapshots devis / PDF client. */
-export function isClientSafeNoteKind(kind: string): boolean {
-  return kind !== "INTERNAL";
-}
-
-function assertKind(kind: string): LibraryNoteKind {
-  if ((LIBRARY_NOTE_KINDS as readonly string[]).includes(kind)) {
-    return kind as LibraryNoteKind;
-  }
-  throw new Error("Catégorie de note invalide");
-}
+export {
+  LIBRARY_NOTE_KINDS,
+  LIBRARY_NOTE_KIND_LABELS,
+  isClientSafeNoteKind,
+  assertLibraryNoteKind,
+  type LibraryNoteKind,
+} from "@/lib/commercial/library-notes-shared";
 
 async function assertWorkItem(orgId: string, workItemId: string) {
   const wi = await prisma.commercialWorkItem.findFirst({
@@ -63,7 +43,7 @@ export async function createLibraryNote(opts: {
   createdById?: string | null;
 }) {
   await assertWorkItem(opts.orgId, opts.workItemId);
-  const kind = assertKind(opts.kind);
+  const kind = assertLibraryNoteKind(opts.kind);
   const body = opts.body.trim();
   if (!body) throw new Error("Contenu de la note requis");
 
@@ -107,7 +87,7 @@ export async function updateLibraryNote(opts: {
   });
   if (!existing) throw new Error("Note introuvable");
 
-  const kind = opts.kind !== undefined ? assertKind(opts.kind) : undefined;
+  const kind = opts.kind !== undefined ? assertLibraryNoteKind(opts.kind) : undefined;
   const body = opts.body !== undefined ? opts.body.trim() : undefined;
   if (body !== undefined && !body) throw new Error("Contenu de la note requis");
 

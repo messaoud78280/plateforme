@@ -7,7 +7,7 @@ import {
   LIBRARY_NOTE_KINDS,
   LIBRARY_NOTE_KIND_LABELS,
   type LibraryNoteKind,
-} from "@/lib/commercial/library-notes";
+} from "@/lib/commercial/library-notes-shared";
 
 type Note = {
   id: string;

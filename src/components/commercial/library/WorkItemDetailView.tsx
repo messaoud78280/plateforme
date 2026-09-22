@@ -78,6 +78,7 @@ export type WorkItemDetailData = {
     clientVisible: boolean;
     caption: string | null;
     sortOrder?: number;
+    createdAt?: string | Date;
   }>;
   notes: Array<{
     id: string;

@@ -71,6 +71,7 @@ export default async function BibliothequeDetailPage({
       clientVisible: a.clientVisible,
       caption: a.caption,
       sortOrder: a.sortOrder,
+      createdAt: a.createdAt,
     })),
     notes: workItem.notes.map((n) => ({
       id: n.id,

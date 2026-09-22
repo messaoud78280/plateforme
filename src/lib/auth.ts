@@ -322,6 +322,14 @@ export const authOptions: NextAuthOptions = {
         token.demoExpired = undefined;
         token.demoRootUserId = undefined;
         token.demoViewAs = undefined;
+        // SaaS / orgs clientes : resynchroniser le nom (sinon header JWT reste sur l’ancien)
+        if (token.id) {
+          const liveUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { name: true },
+          });
+          if (liveUser?.name) token.name = liveUser.name;
+        }
       }
 
       return token;

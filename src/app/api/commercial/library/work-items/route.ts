@@ -52,11 +52,29 @@ export async function GET(req: Request) {
   );
   const skip = (page - 1) * pageSize;
   const includeVariants = url.searchParams.get("includeVariants") === "1";
+  const withVariants = url.searchParams.get("withVariants") === "1";
   const meta = url.searchParams.get("meta");
 
   if (meta === "families") {
     const families = await listLibraryFamilyTree(auth.orgId);
     return NextResponse.json({ families });
+  }
+
+  if (withVariants) {
+    const { listWorkItemsWithVariantMeta } = await import(
+      "@/lib/commercial/library-variants"
+    );
+    const workItems = await listWorkItemsWithVariantMeta(auth.orgId, {
+      q,
+      take: pageSize,
+    });
+    return NextResponse.json({
+      workItems,
+      total: workItems.length,
+      page: 1,
+      pageSize,
+      pageCount: 1,
+    });
   }
 
   const listOpts: Parameters<typeof listWorkItems>[1] = {

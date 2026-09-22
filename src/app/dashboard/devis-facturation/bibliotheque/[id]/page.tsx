@@ -59,15 +59,18 @@ export default async function BibliothequeDetailPage({
     attachmentCount: workItem.attachmentCount,
     variantCount: workItem.variantCount,
     parent: workItem.parent,
+    parentWorkItemId: workItem.parentWorkItemId,
     variants: workItem.variants,
     attachments: workItem.attachments.map((a) => ({
       id: a.id,
       name: a.name,
       category: a.category,
       mimeType: a.mimeType,
+      sizeBytes: a.sizeBytes,
       isPrimary: a.isPrimary,
       clientVisible: a.clientVisible,
       caption: a.caption,
+      sortOrder: a.sortOrder,
     })),
     notes: workItem.notes.map((n) => ({
       id: n.id,

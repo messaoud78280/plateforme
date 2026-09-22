@@ -16,6 +16,9 @@ import {
   Layers,
 } from "lucide-react";
 import { WorkItemForm } from "@/components/commercial/WorkItemForm";
+import { WorkItemAttachmentsPanel } from "@/components/commercial/library/WorkItemAttachmentsPanel";
+import { WorkItemNotesPanel } from "@/components/commercial/library/WorkItemNotesPanel";
+import { WorkItemVariantsPanel } from "@/components/commercial/library/WorkItemVariantsPanel";
 import { displayMarquePercent, roundMoney } from "@/lib/commercial/money";
 import { cn } from "@/lib/cn";
 
@@ -56,6 +59,7 @@ export type WorkItemDetailData = {
   attachmentCount: number;
   variantCount: number;
   parent?: { id: string; name: string; reference: string | null } | null;
+  parentWorkItemId?: string | null;
   variants: Array<{
     id: string;
     name: string;
@@ -69,9 +73,11 @@ export type WorkItemDetailData = {
     name: string;
     category: string;
     mimeType: string | null;
+    sizeBytes?: number | null;
     isPrimary: boolean;
     clientVisible: boolean;
     caption: string | null;
+    sortOrder?: number;
   }>;
   notes: Array<{
     id: string;
@@ -404,126 +410,46 @@ export function WorkItemDetailView({ item }: { item: WorkItemDetailData }) {
       ) : null}
 
       {tab === "variantes" ? (
-        <section className="rounded-2xl border border-[#1e3a5f]/10 bg-white p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-sm font-semibold text-[#1e3a5f]">Variantes</h2>
-            <p className="text-xs text-slate-500">
-              Parent / variante — les devis figent le prix au moment de l’ajout.
-            </p>
-          </div>
-          {item.parent ? (
-            <p className="mt-3 text-sm text-slate-600">
-              Variante de{" "}
-              <Link
-                href={`/dashboard/devis-facturation/bibliotheque/${item.parent.id}`}
-                className="font-medium text-[#1e3a5f] underline-offset-2 hover:underline"
-              >
-                {item.parent.name}
-              </Link>
-            </p>
-          ) : null}
-          {item.variants.length === 0 ? (
-            <p className="mt-6 text-sm text-slate-500">
-              Aucune variante pour le moment. La duplication crée une fiche indépendante ;
-              liez-la ensuite en variante depuis l’édition (champ parent).
-            </p>
-          ) : (
-            <ul className="mt-4 divide-y divide-[#1e3a5f]/8">
-              {item.variants.map((v) => (
-                <li key={v.id}>
-                  <Link
-                    href={`/dashboard/devis-facturation/bibliotheque/${v.id}?from=${encodeURIComponent(backHref)}`}
-                    className="flex items-center justify-between gap-3 py-3 hover:bg-slate-50"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-[#1e3a5f]">{v.name}</p>
-                      <p className="text-[11px] text-slate-400">
-                        {v.reference || "Sans réf."}
-                        {v.variantKind ? ` · ${v.variantKind}` : ""}
-                      </p>
-                    </div>
-                    <span className="text-sm tabular-nums text-slate-600">
-                      {v.unitSellHt > 0 ? `${fmt(v.unitSellHt)} € / ${v.saleUnit}` : "—"}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <WorkItemVariantsPanel
+          workItemId={item.id}
+          isVariant={Boolean(item.parent || item.parentWorkItemId)}
+          parent={item.parent ?? null}
+          initialVariants={item.variants}
+          backHref={backHref}
+        />
       ) : null}
 
       {tab === "documents" ? (
-        <section className="rounded-2xl border border-[#1e3a5f]/10 bg-white p-5">
-          <h2 className="text-sm font-semibold text-[#1e3a5f]">Photos & documents</h2>
-          {item.attachments.length === 0 ? (
-            <div className="mt-8 rounded-xl border border-dashed border-[#1e3a5f]/15 px-4 py-12 text-center">
-              <ImageIcon className="mx-auto h-8 w-8 text-slate-300" />
-              <p className="mt-3 text-sm font-medium text-[#1e3a5f]">Aucun document</p>
-              <p className="mt-1 text-xs text-slate-500">
-                L’upload (photos, PDF, fiches techniques) sera disponible ici — les fichiers
-                resteront internes par défaut.
-              </p>
-            </div>
-          ) : (
-            <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {item.attachments.map((a) => (
-                <li
-                  key={a.id}
-                  className="rounded-xl border border-[#1e3a5f]/10 p-3 text-sm"
-                >
-                  <p className="font-medium text-[#1e3a5f]">{a.name}</p>
-                  <p className="mt-1 text-[11px] text-slate-400">
-                    {a.category}
-                    {a.isPrimary ? " · Principale" : ""}
-                    {a.clientVisible ? " · Client" : " · Interne"}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <WorkItemAttachmentsPanel
+          workItemId={item.id}
+          initialAttachments={item.attachments}
+        />
       ) : null}
 
       {tab === "notes" ? (
-        <div className="grid gap-4 lg:grid-cols-2">
-          <NoteCard
-            icon={<NotebookPen className="h-4 w-4" />}
-            title="Notes internes"
-            empty="Aucune note interne."
-            body={item.internalNotes}
-            hint="Réservées à l’entreprise — jamais dans les devis sans action explicite."
-          />
-          <NoteCard
-            icon={<FileText className="h-4 w-4" />}
-            title="Conseils de mise en œuvre"
-            empty="Aucun conseil renseigné."
-            body={item.implementationTips}
-          />
-          <NoteCard
-            icon={<History className="h-4 w-4" />}
-            title="Points de vigilance"
-            empty="Aucun point de vigilance."
-            body={item.vigilancePoints}
-          />
-          <section className="rounded-2xl border border-[#1e3a5f]/10 bg-white p-5">
-            <h2 className="text-sm font-semibold text-[#1e3a5f]">Commentaires</h2>
-            {item.notes.length === 0 ? (
-              <p className="mt-4 text-sm text-slate-500">Aucun commentaire daté.</p>
-            ) : (
-              <ul className="mt-4 space-y-3">
-                {item.notes.map((n) => (
-                  <li key={n.id} className="rounded-xl bg-slate-50 px-3 py-2.5">
-                    <p className="text-sm text-slate-700 whitespace-pre-wrap">{n.body}</p>
-                    <p className="mt-1 text-[11px] text-slate-400">
-                      {n.createdBy?.name || "Utilisateur"} ·{" "}
-                      {new Date(n.createdAt).toLocaleString("fr-FR")} · {n.kind}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+        <div className="space-y-5">
+          <div className="grid gap-4 lg:grid-cols-3">
+            <NoteCard
+              icon={<NotebookPen className="h-4 w-4" />}
+              title="Champ notes internes (fiche)"
+              empty="Non renseigné."
+              body={item.internalNotes}
+              hint="Texte long sur la fiche — distinct des notes datées ci-dessous."
+            />
+            <NoteCard
+              icon={<FileText className="h-4 w-4" />}
+              title="Conseils de mise en œuvre"
+              empty="Non renseigné."
+              body={item.implementationTips}
+            />
+            <NoteCard
+              icon={<History className="h-4 w-4" />}
+              title="Points de vigilance"
+              empty="Non renseigné."
+              body={item.vigilancePoints}
+            />
+          </div>
+          <WorkItemNotesPanel workItemId={item.id} initialNotes={item.notes} />
         </div>
       ) : null}
 

@@ -4030,6 +4030,8 @@ model CommercialOrgSettings {
   accentColor          String?
   /// DEVIS PDF V2 — paramètres documents (CGV, déchets, banque, conformité…)
   quoteDocumentSettingsJson Json?
+  /// Taxonomie bibliothèque (familles / sous-familles / ordre) — null = dérivée des ouvrages
+  libraryTaxonomyJson Json?
   quotePrefix          String   @default("DEV")
   invoicePrefix        String   @default("FAC")
   amendmentPrefix      String   @default("AV")

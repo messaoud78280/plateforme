@@ -14,10 +14,12 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  FolderTree,
 } from "lucide-react";
 import { Drawer } from "@/components/ui/Drawer";
 import { WorkItemForm, type WorkItemFormRow } from "@/components/commercial/WorkItemForm";
 import { MaterialDetailDrawer } from "@/components/commercial/MaterialDetailDrawer";
+import { LibraryFamiliesManager } from "@/components/commercial/library/LibraryFamiliesManager";
 import {
   DataTable,
   DataTableBody,
@@ -127,6 +129,7 @@ export function LibraryWorkspace({
     initialCreateOpen ? { mode: "create" } : null,
   );
   const [materialDrawerId, setMaterialDrawerId] = useState<string | null>(null);
+  const [familiesOpen, setFamiliesOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [pending, startTransition] = useTransition();
 
@@ -379,6 +382,14 @@ export function LibraryWorkspace({
           >
             <Filter className="h-4 w-4" />
             Filtres
+          </button>
+          <button
+            type="button"
+            onClick={() => setFamiliesOpen(true)}
+            className="inline-flex h-11 items-center gap-2 rounded-xl border border-[#1e3a5f]/12 bg-white px-3.5 text-sm font-medium text-[#1e3a5f] transition hover:bg-[#f7f9fc]"
+          >
+            <FolderTree className="h-4 w-4" />
+            Familles
           </button>
           <a
             href="/api/commercial/library/work-items?format=csv"
@@ -916,6 +927,15 @@ export function LibraryWorkspace({
         open={Boolean(materialDrawerId)}
         onClose={() => setMaterialDrawerId(null)}
         onChanged={() => router.refresh()}
+      />
+
+      <LibraryFamiliesManager
+        open={familiesOpen}
+        onClose={() => setFamiliesOpen(false)}
+        onChanged={() => {
+          void fetchItems();
+          router.refresh();
+        }}
       />
     </div>
   );

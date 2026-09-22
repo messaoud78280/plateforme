@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { marginPercentFromCostSell, roundMoney } from "@/lib/commercial/money";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 function fmt(n: number) {
   return roundMoney(n, 2).toLocaleString("fr-FR", {
@@ -9,6 +10,17 @@ function fmt(n: number) {
     maximumFractionDigits: 2,
   });
 }
+
+type VariantResult = {
+  id: string;
+  name: string;
+  reference: string | null;
+  saleUnit: string;
+  unitSellHt: number;
+  unitCostHt: number;
+  marginPercent: number;
+  variantKind: string | null;
+};
 
 type WorkItemResult = {
   id: string;
@@ -18,6 +30,7 @@ type WorkItemResult = {
   unitSellHt: number;
   unitCostHt: number;
   marginPercent: number;
+  variants?: VariantResult[];
 };
 
 export function LibraryPickerModal({
@@ -40,6 +53,7 @@ export function LibraryPickerModal({
   const [error, setError] = useState<string | null>(null);
   const [qtyById, setQtyById] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const t = window.setTimeout(() => setDebouncedQ(q.trim()), 300);
@@ -52,6 +66,8 @@ export function LibraryPickerModal({
     try {
       const url = new URL("/api/commercial/library/work-items", window.location.origin);
       if (query) url.searchParams.set("q", query);
+      url.searchParams.set("withVariants", "1");
+      url.searchParams.set("pageSize", "80");
       const res = await fetch(url.pathname + url.search);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur");
@@ -102,6 +118,15 @@ export function LibraryPickerModal({
     }
   }
 
+  function toggleExpand(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   if (!open) return null;
 
   return (
@@ -133,7 +158,7 @@ export function LibraryPickerModal({
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Rechercher un ouvrage…"
+            placeholder="Rechercher un ouvrage ou une variante…"
             className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-[#1e3a5f] focus:outline-none"
           />
         </div>
@@ -155,41 +180,102 @@ export function LibraryPickerModal({
                 const marque =
                   w.marginPercent ||
                   marginPercentFromCostSell(w.unitCostHt, w.unitSellHt);
+                const hasVariants = (w.variants?.length ?? 0) > 0;
+                const isOpen = expanded.has(w.id);
                 return (
-                  <li
-                    key={w.id}
-                    className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-slate-900">{w.name}</p>
-                      <p className="text-[11px] text-slate-500">
-                        {[w.reference, w.saleUnit].filter(Boolean).join(" · ") || "—"}
-                        {" · "}
-                        vente {fmt(w.unitSellHt)} € · coût {fmt(w.unitCostHt)} € · marque{" "}
-                        {fmt(marque)} %
-                      </p>
+                  <li key={w.id} className="px-4 py-3">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex min-w-0 flex-1 items-start gap-2">
+                        {hasVariants ? (
+                          <button
+                            type="button"
+                            onClick={() => toggleExpand(w.id)}
+                            className="mt-0.5 rounded p-0.5 text-slate-400 hover:bg-slate-50"
+                            aria-label="Variantes"
+                          >
+                            {isOpen ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </button>
+                        ) : (
+                          <span className="w-5" />
+                        )}
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-slate-900">
+                            {w.name}
+                          </p>
+                          <p className="text-[11px] text-slate-500">
+                            {[w.reference, w.saleUnit].filter(Boolean).join(" · ") || "—"}
+                            {" · "}
+                            vente {fmt(w.unitSellHt)} € · marque {fmt(marque)} %
+                            {hasVariants ? ` · ${w.variants!.length} variante(s)` : ""}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          className="w-16 rounded-lg border border-slate-200 px-2 py-1.5 text-xs tabular-nums"
+                          value={qtyById[w.id] ?? "1"}
+                          onChange={(e) =>
+                            setQtyById((m) => ({ ...m, [w.id]: e.target.value }))
+                          }
+                          aria-label="Quantité"
+                        />
+                        <button
+                          type="button"
+                          disabled={busyId === w.id}
+                          onClick={() => void add(w.id)}
+                          className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+                        >
+                          Ajouter
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        className="w-16 rounded-lg border border-slate-200 px-2 py-1.5 text-xs tabular-nums"
-                        value={qtyById[w.id] ?? "1"}
-                        onChange={(e) =>
-                          setQtyById((m) => ({ ...m, [w.id]: e.target.value }))
-                        }
-                        aria-label="Quantité"
-                      />
-                      <button
-                        type="button"
-                        disabled={busyId === w.id}
-                        onClick={() => void add(w.id)}
-                        className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
-                      >
-                        Ajouter
-                      </button>
-                    </div>
+                    {hasVariants && isOpen ? (
+                      <ul className="mt-2 ml-7 space-y-2 border-l border-slate-100 pl-3">
+                        {w.variants!.map((v) => (
+                          <li
+                            key={v.id}
+                            className="flex flex-wrap items-center justify-between gap-2"
+                          >
+                            <div className="min-w-0">
+                              <p className="truncate text-xs font-medium text-slate-800">
+                                {v.name}
+                              </p>
+                              <p className="text-[10px] text-slate-400">
+                                {v.reference || "Sans réf."} · {fmt(v.unitSellHt)} € /{" "}
+                                {v.saleUnit}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                min="0.01"
+                                step="0.01"
+                                className="w-14 rounded-lg border border-slate-200 px-2 py-1 text-[11px] tabular-nums"
+                                value={qtyById[v.id] ?? "1"}
+                                onChange={(e) =>
+                                  setQtyById((m) => ({ ...m, [v.id]: e.target.value }))
+                                }
+                              />
+                              <button
+                                type="button"
+                                disabled={busyId === v.id}
+                                onClick={() => void add(v.id)}
+                                className="rounded-lg border border-[#1e3a5f]/20 px-2.5 py-1 text-[11px] font-semibold text-[#1e3a5f] disabled:opacity-50"
+                              >
+                                Variante
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
                   </li>
                 );
               })}

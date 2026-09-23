@@ -6,13 +6,14 @@ import styles from "./FormationPrerequis.module.css";
 import { useFormationReveal } from "./useFormationReveal";
 
 const BRING = [
-  "Ordinateur portable",
-  "Chargeur",
+  "Ordinateur portable et chargeur",
   "Accès à votre email",
   "Navigateur récent (Chrome, Edge, Safari…)",
   "Droits d’installation sur la machine",
+  "Abonnement payant actif ChatGPT ou Claude AI (non inclus dans le tarif)",
+  "Compte IA créé et accès vérifiés avant la session",
   "Éventuellement une idée de projet",
-  "Connexion Internet (session visio)",
+  "Connexion Internet stable (session visio)",
 ] as const;
 
 const COMPUTER = [
@@ -96,8 +97,9 @@ export function FormationPrerequis() {
               Pas besoin d’un ordinateur de développeur.
             </h2>
             <p className={styles.lead}>
-              Un simple ordinateur suffit pour suivre la formation et mettre en pratique, pas à
-              pas, avec l’accompagnement de l’IA.
+              Un ordinateur portable suffit pour suivre la formation. En revanche, un abonnement
+              payant à un outil d’IA générative compatible (ChatGPT ou Claude AI) est requis — il
+              n’est pas compris dans le tarif de 300&nbsp;€ ou 600&nbsp;€.
             </p>
           </div>
 

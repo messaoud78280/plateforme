@@ -1,7 +1,14 @@
 /**
  * Positionnement BeWork — formation pratique « créer avec l’IA ».
- * Aucun outil, stack, prompt ou workflow technique détaillé ici.
+ * Contenu public aligné sur les programmes officiels (PDF).
+ * Aucun détail de stack, prompts ou procédures internes.
  */
+
+/** Chemins publics des programmes officiels (téléchargement libre). */
+export const TRAINING_PROGRAM_PDF = {
+  essential: "/programmes/programme-bework-7h.pdf",
+  complete: "/programmes/programme-bework-14h.pdf",
+} as const;
 
 /** Source unique des parcours — 7 h / 14 h. */
 export const TRAINING_OFFERS = {
@@ -10,18 +17,25 @@ export const TRAINING_OFFERS = {
     days: 1,
     hours: 7,
     price: 300,
-    label: "1 jour",
-    title: "Apprendre à commencer",
+    label: "Parcours 1 — 1 journée",
+    title: "De l’idée à votre première création.",
     description:
-      "Une journée complète pour comprendre la méthode, préparer votre environnement, créer une première version, apprendre à modifier, tester et corriger.",
-    promise: "Vous repartez en sachant comment commencer.",
-    ctaLabel: "Choisir 1 journée",
+      "Apprenez à transformer votre idée en un premier projet fonctionnel grâce à l’intelligence artificielle.",
+    promise: "JOUR 1 — Je construis ma première version.",
+    ctaLabel: "Demander une place — 300 €",
+    discoverLabel: "Découvrir le parcours 7 h",
+    discoverHref: "/formation#programme",
+    pdfHref: TRAINING_PROGRAM_PDF.essential,
+    pdfLabel: "Télécharger le programme de formation BeWork 7 heures",
+    groupSize: "6 à 8 participants",
+    practiceShare: "70 % de pratique",
     benefits: [
-      "Parcours complet du Jour 1",
-      "Mise en pratique guidée",
-      "Première création fonctionnelle",
-      "Méthode pour tester et corriger",
-      "Plan pour continuer après la journée",
+      "Cadrer votre projet",
+      "Préparer votre environnement",
+      "Apprendre à guider l’IA",
+      "Construire une première version",
+      "Tester et corriger votre création",
+      "Repartir avec une méthode pour continuer",
     ],
   },
   complete: {
@@ -29,19 +43,28 @@ export const TRAINING_OFFERS = {
     days: 2,
     hours: 14,
     price: 600,
-    label: "2 jours",
-    title: "Construire plus loin",
+    label: "Parcours 2 — 2 journées",
+    title: "De votre idée à votre projet en ligne.",
     description:
-      "Le parcours du Jour 1, puis une deuxième journée pour pratiquer davantage, approfondir votre projet et gagner en autonomie.",
-    promise: "Vous avez le temps de construire, tester, corriger et aller plus loin.",
-    ctaLabel: "Choisir 2 journées",
-    badge: "Recommandé pour aller plus loin",
+      "Construisez votre première version, améliorez-la et apprenez à la publier pour la rendre accessible.",
+    promise: "JOUR 2 — Je finalise et je mets mon projet en ligne.",
+    ctaLabel: "Demander une place — 600 €",
+    discoverLabel: "Découvrir le parcours 14 h",
+    discoverHref: "/formation#programme",
+    pdfHref: TRAINING_PROGRAM_PDF.complete,
+    pdfLabel: "Télécharger le programme de formation BeWork 14 heures",
+    groupSize: "6 à 8 participants",
+    practiceShare: "70 % de pratique",
+    badge: "Comprend le parcours 7 h",
     benefits: [
-      "Tout le parcours 7 h",
-      "Une journée supplémentaire de pratique",
-      "Projet plus approfondi",
-      "Fonctionnalités supplémentaires",
-      "Tests, corrections et accompagnement renforcé",
+      "L’intégralité du parcours de 7 heures",
+      "Amélioration des fonctionnalités",
+      "Adaptation aux différents écrans",
+      "Préparation de la publication",
+      "Mise en ligne du projet",
+      "Bases du référencement web (si pertinent)",
+      "Tests de la version publiée",
+      "Feuille de route pour continuer",
     ],
   },
 } as const;
@@ -389,17 +412,17 @@ export const FORMATION_ACQUIS_DAY1 = [
   { verb: "Dialoguer", text: "plus efficacement avec l’IA" },
 ] as const;
 
-/** Acquis Jour 2 — approfondissement, pas expertise complète. */
+/** Acquis Jour 2 — aligné programme officiel (publication + SEO si pertinent). */
 export const FORMATION_ACQUIS_DAY2 = [
-  { verb: "Structurer", text: "davantage un projet" },
-  { verb: "Ajouter", text: "des fonctionnalités" },
-  { verb: "Faire évoluer", text: "plusieurs parties" },
-  { verb: "Tester", text: "plus méthodiquement" },
-  { verb: "Identifier", text: "un problème" },
-  { verb: "Corriger", text: "et améliorer" },
-  { verb: "Travailler", text: "plus longuement sur votre projet" },
-  { verb: "Organiser", text: "la suite" },
-  { verb: "Gagner", text: "en autonomie" },
+  { verb: "Diagnostiquer", text: "votre première version" },
+  { verb: "Prioriser", text: "les améliorations" },
+  { verb: "Corriger", text: "et enrichir le projet" },
+  { verb: "Adapter", text: "l’affichage aux écrans" },
+  { verb: "Préparer", text: "la mise en ligne" },
+  { verb: "Publier", text: "pour rendre le projet accessible" },
+  { verb: "Appliquer", text: "les bases du référencement si pertinent" },
+  { verb: "Contrôler", text: "la version publiée" },
+  { verb: "Organiser", text: "la suite en autonomie" },
 ] as const;
 
 /** @deprecated Préférer FORMATION_ACQUIS_DAY1 */
@@ -507,11 +530,11 @@ export const FORMATION_TARIF_INCLUDES = [
 ] as const;
 
 export const FORMATION_CHECKLIST_ONSITE = [
-  "Ordinateur portable",
-  "Chargeur",
+  "Ordinateur portable et chargeur",
   "Accès email",
   "Navigateur récent",
   "Droits d’installation",
+  "Abonnement IA payant actif (non inclus)",
   "Idée éventuelle",
 ] as const;
 
@@ -526,9 +549,9 @@ export const FORMATION_NAV = [
   { href: "#presentation", label: "Présentation" },
   { href: "#modalites", label: "Modalités" },
   { href: "#prerequis", label: "Prérequis" },
-  { href: "#programme", label: "Programme" },
+  { href: "#programmes-officiels", label: "Programmes" },
+  { href: "#programme", label: "Déroulé" },
   { href: "#acquis", label: "Acquis" },
-  { href: "#pour-qui", label: "Pour qui" },
   { href: "#tarif", label: "Tarif" },
   { href: "#faq", label: "FAQ" },
 ] as const;
@@ -537,15 +560,27 @@ export const FORMATION_NAV = [
 export const FORMATION_PAGE_FAQ = [
   {
     q: "Quelle différence entre la formation 7 h et 14 h ?",
-    a: "La première journée est commune à tous. Elle vous apprend à comprendre la méthode, préparer votre environnement, créer, modifier, tester et corriger. Le parcours de 14 h ajoute une deuxième journée consacrée à davantage de pratique, à l’approfondissement et à un projet plus avancé.",
+    a: "La première journée est commune : cadrer, préparer l’environnement, guider l’IA, construire une première version, tester et corriger. Le parcours 14 h ajoute une deuxième journée pour améliorer le projet, le publier, appliquer les bases du référencement lorsque cela est pertinent, contrôler la version en ligne et préparer la suite.",
   },
   {
     q: "Puis-je commencer par 7 h et décider ensuite de continuer ?",
     a: `Oui. Vous pouvez commencer par la première journée à ${TRAINING_OFFERS.essential.price} €. Si vous souhaitez poursuivre, vous pouvez ajouter la deuxième journée pour ${BEWORK_EXTENSION_PRICE_EUR} € supplémentaires.`,
   },
   {
+    q: "Que vais-je savoir faire après la première journée ?",
+    a: "Vous disposez d’un environnement opérationnel, d’un projet cadré, d’une première version fonctionnelle, d’une méthode pour tester et corriger, d’un projet sauvegardé et d’une feuille de route pour continuer.",
+  },
+  {
+    q: "Mon projet sera-t-il en ligne après 7 h ?",
+    a: "Non. La journée de 7 h vise une première version fonctionnelle et une méthode pour continuer. La mise en ligne fait partie du parcours de 14 heures (deuxième journée).",
+  },
+  {
+    q: "Que vais-je apprendre à publier après 14 h ?",
+    a: "Vous apprenez à préparer et publier votre projet pour le rendre accessible en ligne, à contrôler la version publiée, et — pour les projets destinés à être référencés — à appliquer les bases du référencement et à vérifier l’indexation. Aucune position dans les résultats de recherche n’est garantie.",
+  },
+  {
     q: "Est-ce que les 7 h suffisent pour apprendre ?",
-    a: "Les 7 h sont conçues comme une formation complète pour apprendre à commencer et acquérir une méthode. Elles ne prétendent pas faire de vous un développeur en une journée. Le parcours de 14 h permet surtout de pratiquer davantage et d’aller plus loin.",
+    a: "Les 7 h forment un parcours complet pour apprendre à commencer et acquérir une méthode. Elles ne prétendent pas faire de vous un développeur en une journée. Le parcours de 14 h permet d’aller jusqu’à la publication et de consolider votre autonomie.",
   },
   {
     q: "Est-ce que les participants des parcours 7 h et 14 h sont ensemble ?",
@@ -553,11 +588,11 @@ export const FORMATION_PAGE_FAQ = [
   },
   {
     q: "Faut-il savoir coder ?",
-    a: "Non. La formation est conçue pour des débutants et des personnes qui ne viennent pas du développement informatique.",
+    a: "Non. Aucun prérequis en programmation n’est nécessaire. La formation s’adresse aux personnes qui ne viennent pas du développement informatique.",
   },
   {
     q: "Faut-il être bon en informatique ?",
-    a: "Non. La formation est conçue pour des personnes qui partent de zéro ou qui se sentent peu à l’aise.",
+    a: "Non. Il faut savoir utiliser un ordinateur, naviguer sur Internet et utiliser une messagerie. Le reste se construit pendant la formation.",
   },
   {
     q: "Puis-je venir sans idée ?",
@@ -569,39 +604,47 @@ export const FORMATION_PAGE_FAQ = [
   },
   {
     q: "Quel ordinateur faut-il ?",
-    a: "Windows ou Mac relativement récent. 8 Go de RAM recommandés minimum. 16 Go = plus confortable.",
+    a: "Un ordinateur portable personnel avec chargeur, navigateur récent, droits d’installation, et idéalement au moins 8 Go de mémoire vive. Quelques gigaoctets d’espace disque sont nécessaires.",
   },
   {
     q: "Faut-il un ordinateur très puissant ?",
     a: "Non. Pas besoin d’une machine haut de gamme ni d’un ordinateur gaming.",
   },
   {
-    q: "Faut-il une carte graphique spéciale ?",
-    a: "Non pour les activités prévues.",
+    q: "Faut-il un abonnement IA ?",
+    a: "Oui. Un abonnement payant actif à un outil d’intelligence artificielle générative compatible (ChatGPT ou Claude AI) est requis, avec compte créé et accès vérifiés avant la formation.",
+  },
+  {
+    q: "L’abonnement IA est-il inclus dans le tarif ?",
+    a: `Non. L’abonnement à l’outil d’intelligence artificielle n’est pas compris dans les ${TRAINING_OFFERS.essential.price} € ni dans les ${TRAINING_OFFERS.complete.price} €. Son coût est communiqué avant l’inscription.`,
   },
   {
     q: "Dois-je installer quelque chose avant ?",
-    a: "Les instructions nécessaires seront indiquées avant la session. Une grande partie de la mise en place pourra être faite ensemble.",
+    a: "Les consignes nécessaires sont indiquées avant la session. Une partie de la mise en place est réalisée ensemble pendant la formation.",
   },
   {
     q: "Puis-je suivre la formation en visio ?",
-    a: "Oui. BeWork privilégie le présentiel, mais organise également des sessions en visioconférence pour les personnes qui ne peuvent pas se déplacer. Les deux durées (7 h et 14 h) peuvent s’inscrire dans le mode prévu par la session.",
+    a: "Oui. Le présentiel est privilégié. Des classes virtuelles à dates dédiées sont également organisées. Horaires et effectif identiques. Connexion Internet stable, micro et partage d’écran sont nécessaires.",
   },
   {
     q: "La visio se déroule-t-elle en même temps que le présentiel ?",
     a: "Non. Les sessions distancielles sont des sessions dédiées.",
   },
   {
+    q: "Une prise en charge OPCO est-elle possible ?",
+    a: "Oui, selon l’éligibilité de l’entreprise et du dossier. Contactez-nous pour étudier votre situation.",
+  },
+  {
+    q: "Une attestation est-elle remise ?",
+    a: "Oui. Une attestation individuelle de fin de formation est remise à l’issue de la session.",
+  },
+  {
     q: "Est-ce que je deviendrai développeur ?",
-    a: "Non. Vous repartirez capable de commencer, de demander, de tester et de continuer à apprendre — pas développeur en une journée.",
+    a: "Non. Vous repartez capable de commencer, de guider l’IA, de tester et de continuer à apprendre — pas développeur professionnel en une ou deux journées.",
   },
   {
     q: "Est-ce que je pourrai continuer après ?",
-    a: "Oui. Vous apprenez une démarche réutilisable pour reprendre votre projet, le tester et continuer à progresser après la session.",
-  },
-  {
-    q: "Les outils utilisés sont-ils gratuits ?",
-    a: "Certains disposent d’offres gratuites, d’autres peuvent avoir des abonnements ou coûts propres. Nous restons transparents pendant la session.",
+    a: "Oui. Vous emportez une méthode réutilisable et une feuille de route pour poursuivre votre projet en autonomie.",
   },
 ] as const;
 
@@ -620,7 +663,7 @@ export const FORMATION_FAQ = [
   },
   {
     q: "Quelle différence entre 7 h et 14 h ?",
-    a: "Tout le monde commence par la même première journée. Les 7 h vous apprennent à commencer et à continuer seul. Les 14 h ajoutent une deuxième journée pour pratiquer davantage et construire plus loin.",
+    a: "Tout le monde commence par la même première journée. Les 7 h mènent à une première version fonctionnelle. Les 14 h ajoutent la finalisation, la publication et les bases du référencement lorsque le projet s’y prête.",
   },
   {
     q: "Est-ce que les 7 h suffisent pour apprendre ?",
@@ -652,7 +695,7 @@ export const FORMATION_FAQ = [
   },
   {
     q: "Que vais-je savoir faire après ?",
-    a: "Après 7 h : structurer un besoin, lancer une première création, modifier, tester, corriger et continuer. Après 14 h : davantage de pratique et un projet plus abouti. Vous ne repartirez pas développeur — vous repartirez capable de progresser.",
+    a: "Après 7 h : environnement prêt, projet cadré, première version, méthode de test/correction et feuille de route. Après 14 h : projet amélioré, publié et contrôlé, avec bases du référencement si pertinentes. Vous ne repartez pas développeur — vous repartez capable de progresser.",
   },
   {
     q: "Quels outils utilisez-vous ?",
@@ -678,6 +721,165 @@ const HOME_FAQ_QUESTIONS = new Set<string>([
 export const HOME_FORMATION_FAQ = FORMATION_FAQ.filter((item) =>
   HOME_FAQ_QUESTIONS.has(item.q),
 );
+
+
+
+/** Modules officiels Jour 1 — présentation publique (sans procédures internes). */
+export const OFFICIAL_PROGRAM_MODULES_DAY1 = [
+  {
+    number: "01",
+    title: "Cadrer et préparer son projet",
+    objective: "Clarifier le besoin, installer l’environnement et comprendre le rôle de chaque outil.",
+    skills: [
+      "Identifier utilisateurs et fonctionnalités principales",
+      "Préparer et vérifier les accès nécessaires",
+      "Savoir à quelle étape utiliser chaque outil",
+    ],
+    result: "Un projet cadré et un environnement opérationnel pour démarrer la production.",
+  },
+  {
+    number: "02",
+    title: "Structurer son projet et guider efficacement l’IA",
+    objective: "Organiser le périmètre et formuler des instructions claires pour progresser étape par étape.",
+    skills: [
+      "Décomposer le projet en étapes",
+      "Hiérarchiser les fonctionnalités de la première version",
+      "Rédiger des consignes structurées et les ajuster",
+    ],
+    result: "Un périmètre fonctionnel défini et une méthode pour dialoguer efficacement avec l’IA.",
+  },
+  {
+    number: "03",
+    title: "Construire une première version du projet",
+    objective: "Passer de l’idée structurée à une première version utilisable.",
+    skills: [
+      "Organiser l’ordre de construction",
+      "Générer puis faire évoluer une première version",
+      "Relier écrans, formulaires et données essentielles",
+    ],
+    result: "Une première version construite avec ses premières connexions fonctionnelles.",
+  },
+  {
+    number: "04",
+    title: "Tester, corriger et pérenniser son projet",
+    objective: "Vérifier le résultat, corriger les écarts et préparer la suite.",
+    skills: [
+      "Construire un scénario de test simple",
+      "Décrire un problème et demander une correction",
+      "Sauvegarder le travail et formaliser une feuille de route",
+    ],
+    result: "Une méthode de test/correction, un projet sauvegardé et une feuille de route personnelle.",
+  },
+] as const;
+
+/** Modules officiels Jour 2 — parcours 14 h. */
+export const OFFICIAL_PROGRAM_MODULES_DAY2 = [
+  {
+    number: "01",
+    title: "Diagnostiquer et prioriser les améliorations",
+    objective: "Reprendre la version du Jour 1 et décider quoi corriger en priorité.",
+    skills: [
+      "Tester les fonctionnalités existantes",
+      "Repérer écarts et manques",
+      "Classer corrections nécessaires et améliorations secondaires",
+    ],
+    result: "Un diagnostic clair et un plan de travail pour la journée.",
+  },
+  {
+    number: "02",
+    title: "Améliorer et enrichir le projet",
+    objective: "Corriger, adapter aux écrans et ajouter des fonctionnalités sans casser l’existant.",
+    skills: [
+      "Corriger les dysfonctionnements",
+      "Adapter l’affichage ordinateurs, tablettes et mobiles",
+      "Ajouter une fonctionnalité à la fois et tester",
+    ],
+    result: "Un projet plus fiable, plus complet et mieux adapté aux différents écrans.",
+  },
+  {
+    number: "03",
+    title: "Préparer et publier le projet",
+    objective: "Rendre le projet accessible en ligne en appliquant les précautions essentielles.",
+    skills: [
+      "Contrôler liens, formulaires et contenus avant publication",
+      "Configurer la publication et vérifier l’accès en ligne",
+      "Protéger les informations personnelles ou sensibles",
+    ],
+    result: "Une version publiée et accessible, avec premiers contrôles réalisés.",
+  },
+  {
+    number: "04",
+    title: "Améliorer la visibilité et contrôler le projet publié",
+    objective: "Appliquer les bases du référencement lorsque le projet s’y prête, sans promesse de classement.",
+    skills: [
+      "Travailler titres, descriptions et structure des pages",
+      "Optimiser images et adresses de pages",
+      "Comprendre l’indexation et vérifier les premiers éléments disponibles",
+    ],
+    result: "Les bases du référencement appliquées si pertinentes, et un contrôle de la version publiée.",
+  },
+  {
+    number: "05",
+    title: "Tester la version publiée et préparer la suite",
+    objective: "Contrôler le projet en ligne et organiser la poursuite en autonomie.",
+    skills: [
+      "Parcourir le projet de bout en bout sur la version publiée",
+      "Consigner les anomalies restantes",
+      "Élaborer une feuille de route personnelle",
+    ],
+    result: "Un relevé d’améliorations et un plan pour continuer après la formation.",
+  },
+] as const;
+
+export const FORMATION_TAKEAWAYS_7H = [
+  "Un environnement de travail opérationnel",
+  "Un projet cadré et structuré",
+  "Une première version fonctionnelle",
+  "Une méthode pour tester et corriger",
+  "Un projet sauvegardé",
+  "Une feuille de route personnelle",
+] as const;
+
+export const FORMATION_TAKEAWAYS_14H = [
+  "Projet testé et amélioré",
+  "Fonctionnalités enrichies",
+  "Adaptation aux principaux formats d’écran",
+  "Version publiée et accessible en ligne",
+  "Bases du référencement appliquées si pertinentes",
+  "Contrôle de la version publiée",
+  "Plan de progression pour continuer en autonomie",
+] as const;
+
+export const FORMATION_PRACTICAL_POINTS = [
+  "70 % de pratique",
+  "6 à 8 participants par session",
+  "Présentiel privilégié",
+  "Classes virtuelles à dates dédiées",
+  "Intra-entreprise sur devis",
+  "Attestation individuelle de fin de formation",
+  "Espace pédagogique individuel BeWork",
+  "Supports et ressources pédagogiques",
+  "Évaluation des acquis par cas pratique",
+  "Questionnaire de positionnement avant la formation",
+  "Possibilité de prise en charge OPCO selon éligibilité",
+] as const;
+
+/** Mentions administratives — fidèles aux programmes officiels. */
+export const FORMATION_ORGANISM = {
+  brand: "BeWork",
+  legalName: "OFC Création d’Entreprise — SASU",
+  relation: "BeWork est une marque d’OFC Création d’Entreprise.",
+  siret: "905 244 281 00010",
+  nda: "11788515078",
+  region: "Île-de-France",
+  vatNote: "Exonéré de TVA — art. 261-4-4°-a du CGI",
+  ndaDisclaimer: "Cet enregistrement ne vaut pas agrément de l’État.",
+  qualiopi: "Certifié Qualiopi — Actions de formation",
+  pedagogicalLead: "Laure OLIVIÉ",
+  contactEmail: "laureolivie@yahoo.fr",
+  contactPhone: "06 95 66 18 18",
+  schedule: "9h00–12h30 / 13h30–17h00",
+} as const;
 
 export const LEARN_INTENT_OPTIONS = [
   { value: "site_internet", label: "Site internet" },

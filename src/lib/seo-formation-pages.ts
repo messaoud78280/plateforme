@@ -128,7 +128,7 @@ export function beworkCourseJsonLd(overrides?: {
     name: overrides?.name ?? "Formation BeWork — Créer avec l’IA sans savoir coder",
     description:
       overrides?.description ??
-      `Formation progressive : ${TRAINING_OFFERS.essential.hours} h pour apprendre à commencer (${TRAINING_OFFERS.essential.price} €), ou ${TRAINING_OFFERS.complete.hours} h pour construire plus loin (${TRAINING_OFFERS.complete.price} €). Sans prérequis en programmation.`,
+      `Formation progressive : ${TRAINING_OFFERS.essential.hours} h pour une première version (${TRAINING_OFFERS.essential.price} €), ou ${TRAINING_OFFERS.complete.hours} h jusqu’à la publication (${TRAINING_OFFERS.complete.price} €). Sans prérequis en programmation.`,
     provider: { "@id": `${SITE_URL}/#organization` },
     url: courseUrl,
     inLanguage: "fr-FR",

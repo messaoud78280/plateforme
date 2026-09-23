@@ -10,37 +10,38 @@ export function FormationPathIntro() {
         <header className={styles.head}>
           <p className={styles.eyebrow}>Le parcours BeWork</p>
           <h2 id="path-intro-title" className={styles.title}>
-            Commencez par apprendre à créer.
+            Commencez par construire votre première version.
             <br />
-            <span className={styles.accent}>Puis choisissez jusqu’où vous voulez aller.</span>
+            <span className={styles.accent}>Puis allez jusqu’à la mise en ligne.</span>
           </h2>
           <p className={styles.lead}>
-            Une même première journée pour tous. Ensuite, poursuivez si vous souhaitez
-            pratiquer davantage et construire plus loin.
+            Une même première journée pour tous. Ensuite, poursuivez pour finaliser, publier et
+            contrôler votre projet.
           </p>
         </header>
 
         <div className={styles.levels}>
           <article className={styles.level}>
             <p className={styles.levelMeta}>
-              {TRAINING_OFFERS.essential.days} jour · {TRAINING_OFFERS.essential.hours} h
+              JOUR 1 · {TRAINING_OFFERS.essential.hours} h · {TRAINING_OFFERS.essential.price} €
             </p>
-            <h3 className={styles.levelTitle}>{TRAINING_OFFERS.essential.title}</h3>
+            <h3 className={styles.levelTitle}>Je construis ma première version.</h3>
           </article>
           <span className={styles.plus} aria-hidden>
             →
           </span>
           <article className={`${styles.level} ${styles.levelAccent}`}>
             <p className={styles.levelMeta}>
-              {TRAINING_OFFERS.complete.days} jours · {TRAINING_OFFERS.complete.hours} h
+              JOUR 2 · +{TRAINING_OFFERS.essential.hours} h · parcours{" "}
+              {TRAINING_OFFERS.complete.hours} h
             </p>
-            <h3 className={styles.levelTitle}>{TRAINING_OFFERS.complete.title}</h3>
+            <h3 className={styles.levelTitle}>Je finalise et je mets mon projet en ligne.</h3>
           </article>
         </div>
 
         <p className={styles.ctaRow}>
-          <Link href="#tarif" className={styles.link}>
-            Comparer les parcours →
+          <Link href="#programmes-officiels" className={styles.link}>
+            Comparer les programmes officiels →
           </Link>
         </p>
       </div>

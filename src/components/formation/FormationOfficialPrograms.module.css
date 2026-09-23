@@ -1,0 +1,428 @@
+.section {
+  position: relative;
+  padding: 3.25rem 0 3.5rem;
+  scroll-margin-top: 7rem;
+}
+
+.shell {
+  width: min(1100px, calc(100% - 1.75rem));
+  margin-inline: auto;
+}
+
+.head {
+  max-width: 42rem;
+  margin-bottom: 2rem;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #275be8;
+}
+
+.title {
+  margin: 0.75rem 0 0;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(1.6rem, 3.1vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+  color: #0f172a;
+}
+
+.accent {
+  background: linear-gradient(105deg, #275be8 0%, #6d4aff 60%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lead {
+  margin: 0.9rem 0 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: #64748b;
+}
+
+.trackTabs {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 720px) {
+  .trackTabs {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.trackTab {
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+  padding: 1.15rem 1.25rem;
+  border-radius: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #fff;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.trackTabActive {
+  border-color: rgba(39, 91, 232, 0.4);
+  background:
+    radial-gradient(ellipse 70% 50% at 0% 0%, rgba(39, 91, 232, 0.1) 0%, transparent 55%),
+    #fff;
+  box-shadow: 0 14px 36px rgba(39, 91, 232, 0.1);
+}
+
+.trackNum {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #275be8;
+}
+
+.trackLabel {
+  font-family: var(--font-display, inherit);
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+}
+
+.trackHint {
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
+.panel {
+  margin-top: 1.5rem;
+  padding: 1.5rem 1.25rem 1.75rem;
+  border-radius: 28px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background:
+    linear-gradient(180deg, rgba(248, 250, 252, 0.9) 0%, #fff 35%);
+  box-shadow: 0 16px 40px rgba(50, 70, 120, 0.06);
+  animation: fadeIn 0.28s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.metaGrid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 800px) {
+  .metaGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.metaItem {
+  padding: 0.85rem 0.95rem;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.metaLabel {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.metaValue {
+  margin: 0.35rem 0 0;
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: #1e3a5f;
+  line-height: 1.35;
+}
+
+.objective {
+  margin: 1.25rem 0 0;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #334155;
+}
+
+.dayBridge {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: rgba(39, 91, 232, 0.05);
+  border: 1px solid rgba(39, 91, 232, 0.12);
+}
+
+@media (min-width: 720px) {
+  .dayBridge {
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+  }
+}
+
+.dayTag {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #275be8;
+}
+
+.dayTitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: #0f172a;
+  line-height: 1.4;
+}
+
+.dayLink,
+.ctaLink {
+  margin-top: 0.55rem;
+  border: 0;
+  background: none;
+  padding: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #275be8;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.dayArrow {
+  text-align: center;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.modulesTitle {
+  margin: 1.75rem 0 0.85rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.modules {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.module {
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+  overflow: hidden;
+}
+
+.module summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.95rem 1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.module summary::-webkit-details-marker {
+  display: none;
+}
+
+.moduleNum {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #275be8;
+  background: rgba(39, 91, 232, 0.08);
+}
+
+.moduleTitle {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+  padding-top: 0.25rem;
+}
+
+.moduleBody {
+  padding: 0 1rem 1rem 3.5rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.moduleBody ul {
+  margin: 0.45rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.skillsLabel {
+  margin: 0.75rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.result {
+  margin: 0.75rem 0 0;
+  color: #1e3a5f;
+}
+
+.seoNote {
+  margin: 1rem 0 0;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px dashed rgba(15, 23, 42, 0.1);
+}
+
+.takeaways {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.2rem;
+  border-radius: 22px;
+  border: 1px solid rgba(39, 91, 232, 0.16);
+  background:
+    linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%);
+}
+
+.takeaways h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.takeawaysLead {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.takeaways ul {
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.takeaways li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: 0.92rem;
+  color: #334155;
+}
+
+.takeaways li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: #275be8;
+}
+
+.ctaRow {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1.35rem;
+}
+
+@media (min-width: 640px) {
+  .ctaRow {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ctaLink {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+.ctaPrimary,
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.75rem 1.2rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.ctaPrimary {
+  background: #275be8;
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(39, 91, 232, 0.28);
+}
+
+.ctaSecondary {
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+.ctaPrimary:focus-visible,
+.ctaSecondary:focus-visible,
+.ctaLink:focus-visible,
+.dayLink:focus-visible,
+.trackTab:focus-visible {
+  outline: 2px solid #275be8;
+  outline-offset: 3px;
+}
+
+@media (min-width: 640px) {
+  .panel {
+    padding: 1.75rem 1.6rem 1.9rem;
+  }
+}

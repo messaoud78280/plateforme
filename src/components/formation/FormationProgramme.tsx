@@ -46,21 +46,18 @@ export function FormationProgramme() {
 
       <div className={styles.shell}>
         <header className={styles.header}>
-          <p className={styles.eyebrow}>Programme</p>
+          <p className={styles.eyebrow}>Déroulé indicatif</p>
           <h2 id="programme-title" className={styles.title}>
             Votre projet.{" "}
             <span>Deux journées pour le construire.</span>
           </h2>
           <p className={styles.intro}>
-            Vous ne venez pas simplement apprendre des outils. Vous les utilisez directement pour
-            construire votre propre projet.
+            Chronologie indicative de la session. Le détail pédagogique officiel figure dans les
+            programmes PDF et dans la section programmes ci-dessus.
           </p>
           <p className={styles.intro}>
-            Site internet, application, outil métier, réservation, espace client ou autre idée
-            numérique : nous partons de votre besoin et avançons étape par étape. La première
-            journée vous permet de préparer votre environnement, organiser votre méthode et
-            commencer à construire. La deuxième permet d’aller plus loin : renforcer, publier,
-            référencer et auditer votre projet.
+            Jour 1 : de l’idée à une première version fonctionnelle. Jour 2 : finaliser, publier et
+            contrôler le projet — avec les bases du référencement lorsque le projet s’y prête.
           </p>
           <p className={styles.highlight}>
             Vous apprenez en construisant quelque chose qui vous appartient.

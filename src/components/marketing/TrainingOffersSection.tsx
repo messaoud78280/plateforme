@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   BEWORK_EXTENSION_PRICE_EUR,
@@ -54,6 +56,8 @@ function OfferCard({
         {offer.title}
       </Heading>
 
+      <p className={styles.desc}>{offer.description}</p>
+
       <div className={styles.meta}>
         <p className={styles.hours}>
           <span className={styles.hoursNum}>{offer.hours}</span>
@@ -69,7 +73,10 @@ function OfferCard({
         <span className={styles.priceLabel}>par participant</span>
       </p>
 
-      <p className={styles.desc}>{offer.description}</p>
+      <ul className={styles.stats} aria-label="Informations pratiques">
+        <li>{offer.groupSize}</li>
+        <li>{offer.practiceShare}</li>
+      </ul>
 
       <ul className={styles.benefits}>
         {offer.benefits.map((b) => (
@@ -79,22 +86,37 @@ function OfferCard({
 
       <p className={styles.promise}>{offer.promise}</p>
 
-      <Link
-        href={href}
-        className={featured ? styles.ctaPrimary : styles.ctaSecondary}
-        {...plausibleTrackProps(
-          PLAUSIBLE_EVENTS.CTA_CONTACT,
-          `${analyticsPrefix}-offer-${offerId}`,
-        )}
-      >
-        {offer.ctaLabel}
-        <span aria-hidden>→</span>
-      </Link>
+      <div className={styles.actions}>
+        <Link
+          href={href}
+          className={featured ? styles.ctaPrimary : styles.ctaSecondary}
+          {...plausibleTrackProps(
+            PLAUSIBLE_EVENTS.CTA_CONTACT,
+            `${analyticsPrefix}-offer-${offerId}`,
+          )}
+        >
+          {offer.ctaLabel}
+          <span aria-hidden>→</span>
+        </Link>
+        <Link href={offer.discoverHref} className={styles.ctaGhost}>
+          {offer.discoverLabel}
+        </Link>
+        <a
+          href={offer.pdfHref}
+          className={styles.pdfLink}
+          download
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={offer.pdfLabel}
+        >
+          Télécharger le programme PDF
+        </a>
+      </div>
     </article>
   );
 }
 
-/** Section parcours 7 h / 14 h — homepage & /formation. */
+/** Section parcours 7 h / 14 h — homepage, /formation, /tarifs. */
 export function TrainingOffersSection({
   id = "tarif",
   analyticsPrefix = "tarif",
@@ -119,8 +141,8 @@ export function TrainingOffersSection({
             </span>
           </Heading>
           <p className={styles.lead}>
-            Commencez tous par la même première journée, puis poursuivez si vous souhaitez
-            approfondir et construire davantage.
+            Une première journée commune pour construire votre projet. Une deuxième pour le
+            finaliser et le mettre en ligne.
           </p>
         </header>
 
@@ -142,14 +164,19 @@ export function TrainingOffersSection({
 
         <aside className={styles.reassure} aria-labelledby="prolong-heading">
           <h3 id="prolong-heading" className={styles.reassureTitle}>
-            Pas encore sûr de vouloir faire 2 jours&nbsp;?
+            Une première journée commune.
+            <br />
+            Une deuxième pour aller jusqu’à la mise en ligne.
           </h3>
           <p className={styles.reassureText}>
-            Commencez par la première journée à {TRAINING_OFFERS.essential.price}&nbsp;€.
-            Si vous souhaitez continuer, ajoutez simplement le deuxième jour pour{" "}
-            {BEWORK_EXTENSION_PRICE_EUR}&nbsp;€ supplémentaires.
+            Commencez par 7&nbsp;h à {TRAINING_OFFERS.essential.price}&nbsp;€ et poursuivez avec
+            une deuxième journée pour {BEWORK_EXTENSION_PRICE_EUR}&nbsp;€ supplémentaires — ou
+            choisissez directement le parcours 14&nbsp;h à {TRAINING_OFFERS.complete.price}
+            &nbsp;€.
           </p>
-          <p className={styles.reassureNote}>Vous ne perdez rien à commencer par 1 journée.</p>
+          <p className={styles.reassureNote}>
+            Le parcours 14&nbsp;h comprend intégralement la première journée de 7&nbsp;h.
+          </p>
         </aside>
       </div>
     </section>

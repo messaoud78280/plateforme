@@ -14,8 +14,10 @@ import { FormationFormats } from "@/components/formation/FormationFormats";
 import { FormationHero } from "@/components/formation/FormationHero";
 import { FormationInteractive } from "@/components/formation/FormationInteractive";
 import { FormationLearnToLearn } from "@/components/formation/FormationLearnToLearn";
+import { FormationOfficialPrograms } from "@/components/formation/FormationOfficialPrograms";
 import { FormationOwnProject } from "@/components/formation/FormationOwnProject";
 import { FormationPathIntro } from "@/components/formation/FormationPathBridge";
+import { FormationPractical } from "@/components/formation/FormationPractical";
 import { FormationPrerequis } from "@/components/formation/FormationPrerequis";
 import { FormationPricing } from "@/components/formation/FormationPricing";
 import { FormationProgramme } from "@/components/formation/FormationProgramme";
@@ -83,6 +85,7 @@ export default function FormationPage() {
         <FormationAiChange />
         <FormationPrerequis />
         <FormationInteractive />
+        <FormationOfficialPrograms />
         <FormationProgramme />
         <FormationAcquis />
         <FormationOwnProject />
@@ -93,6 +96,7 @@ export default function FormationPage() {
         <FormationExamples />
         <FormationEvolves />
         <FormationPricing />
+        <FormationPractical />
         <FormationFaq />
         <FormationChecklist />
         <FormationFinalCta />

@@ -27,6 +27,7 @@ const FORMATION_CORE = [
   "/tarifs",
   "/faq",
   "/contact",
+  "/organisme-formation",
   "/demonstrations",
   "/demonstrations/messagerie",
   "/demonstrations/agenda",
@@ -47,6 +48,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     if (path === "/formation" || path === "/demonstrations" || path === "/contact") {
       return entry(path, 0.95, "weekly");
     }
+    if (path === "/organisme-formation") return entry(path, 0.85, "monthly");
     if (path.startsWith("/demonstrations/")) return entry(path, 0.88);
     if (
       path === "/mentions-legales" ||

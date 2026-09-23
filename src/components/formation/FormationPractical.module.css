@@ -77,11 +77,28 @@
   margin-top: 1.75rem;
   padding: 1.25rem 1.2rem;
   border-radius: 20px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(39, 91, 232, 0.12);
   background: #f8fafc;
   font-size: 0.88rem;
   line-height: 1.55;
   color: #64748b;
+}
+
+.organismMark {
+  margin-bottom: 0.75rem;
+}
+
+.orgLink {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #275be8;
+  text-decoration: none;
+}
+
+.orgLink:hover {
+  text-decoration: underline;
 }
 
 .organismTitle {

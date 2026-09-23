@@ -198,6 +198,13 @@ export const SEO_PAGES = {
     title: "Participer à la formation — Demander une place",
     description: `Demandez une place pour la formation BeWork, en présentiel ou en visio. Parcours 7 h (${BEWORK_SESSION_PRICE_EUR} €) ou 14 h (${BEWORK_COMPLETE_PRICE_EUR} €) par participant.`,
   },
+  organismeFormation: {
+    path: "/organisme-formation",
+    title: "Organisme de formation Qualiopi",
+    absoluteTitle: "Organisme de formation Qualiopi | BeWork",
+    description:
+      "Découvrez OFC Création d’entreprise, l’organisme certifié Qualiopi qui porte les formations BeWork au développement web assisté par intelligence artificielle.",
+  },
 } as const;
 
 export function demoPageMetadata(slug: string, title: string, usage: string): Metadata {

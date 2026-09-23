@@ -1,7 +1,13 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { MarketingSitePreFooter } from "@/components/layout/MarketingSitePreFooter";
+import { QualiopiMark } from "@/components/qualiopi/QualiopiMark";
 import { DEMO_PROJECTS, BEWORK_FORMATION_TAGLINE } from "@/lib/bework-formation";
+import {
+  FORMATION_LEGAL_ENTITY,
+  QUALIOPI_CERTIFICATION,
+  QUALIOPI_COPY,
+} from "@/lib/formation-organism";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import {
   BEWORK_FOUNDER_LINKEDIN_URL,
@@ -92,8 +98,24 @@ export function MarketingSiteFooter() {
                   Be<span className="text-[color:var(--accent-500)]">Work</span>
                 </span>
               </Link>
-              <p className="mt-3 text-sm font-medium leading-snug text-slate-300">{BEWORK_FORMATION_TAGLINE}</p>
-              <p className="mt-4 text-xs leading-relaxed text-slate-500">Société française — Formation pratique.</p>
+              <p className="mt-3 text-sm font-medium leading-snug text-slate-300">
+                {BEWORK_FORMATION_TAGLINE}
+              </p>
+              <p className="mt-4 text-xs leading-relaxed text-slate-400">
+                Une marque d’{FORMATION_LEGAL_ENTITY.legalNameDisplay}.
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                Organisme de formation certifié Qualiopi au titre des actions de
+                formation.
+              </p>
+              <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
+                SIREN&nbsp;: {FORMATION_LEGAL_ENTITY.siren}
+                <br />
+                NDA&nbsp;: {FORMATION_LEGAL_ENTITY.nda}
+              </p>
+              <div className="mt-4 max-w-[16rem] rounded-xl border border-slate-700/80 bg-white/95 p-3">
+                <QualiopiMark variant="compact" />
+              </div>
             </div>
 
             <div className="flex flex-col gap-4">
@@ -152,6 +174,26 @@ export function MarketingSiteFooter() {
                   <Link href="/formation#programme" className={COL_LINK}>
                     Programme
                   </Link>
+                </li>
+                <li>
+                  <Link href={QUALIOPI_COPY.learnMoreHref} className={COL_LINK}>
+                    Notre organisme de formation
+                  </Link>
+                </li>
+                <li>
+                  <Link href={`${QUALIOPI_COPY.learnMoreHref}#certification`} className={COL_LINK}>
+                    Certification Qualiopi
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href={QUALIOPI_CERTIFICATION.certificatePdfHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={COL_LINK}
+                  >
+                    Consulter notre certificat
+                  </a>
                 </li>
               </ul>
             </div>

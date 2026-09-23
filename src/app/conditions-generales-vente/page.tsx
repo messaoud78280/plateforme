@@ -59,10 +59,16 @@ export default function ConditionsGeneralesVentePage() {
     >
       <h2>1. Identité du prestataire</h2>
       <p>
-        La formation BeWork est proposée par <strong>OFC CREATION D’ENTREPRISE</strong>,
-        société éditrice du site BeWork. Les coordonnées complètes figurent dans les{" "}
+        La formation BeWork est proposée par <strong>OFC Création d’entreprise</strong>,
+        organisme de formation certifié Qualiopi au titre des actions de formation.
+        BeWork est une marque commerciale d’OFC Création d’entreprise. Les coordonnées
+        complètes figurent dans les{" "}
         <Link href="/mentions-legales" className="font-medium text-[#1d4ed8] underline hover:no-underline">
           mentions légales
+        </Link>
+        . Voir aussi la page{" "}
+        <Link href="/organisme-formation" className="font-medium text-[#1d4ed8] underline hover:no-underline">
+          organisme de formation
         </Link>
         .
       </p>

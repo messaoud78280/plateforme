@@ -1,0 +1,70 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.logo {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  /* Ne jamais animer ni déformer le logo officiel. */
+}
+
+.textMark {
+  margin: 0;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(39, 91, 232, 0.18);
+  background: rgba(239, 246, 255, 0.85);
+  width: fit-content;
+}
+
+.textBrand {
+  font-family: var(--font-display, inherit);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #1e3a5f;
+}
+
+.textSub {
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.mention,
+.mentionShort {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.compact .mention {
+  max-width: 18rem;
+}
+
+.card .mention {
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.inline .mention,
+.inline .mentionShort {
+  max-width: 22rem;
+}

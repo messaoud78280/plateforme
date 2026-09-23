@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BwAtmosphere } from "@/components/home/BwAtmosphere";
 import { HomeHeroMedia } from "@/components/home/HomeHeroMedia";
+import { QualiopiCapsule } from "@/components/qualiopi/QualiopiCapsule";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import styles from "./HomePlatformHero.module.css";
 
@@ -114,6 +115,8 @@ export function HomePlatformHero() {
               Aucun prérequis en programmation. Vous partez de zéro et repartez avec une
               méthode, un environnement prêt et une première création fonctionnelle.
             </p>
+
+            <QualiopiCapsule />
           </div>
 
           <HomeHeroMedia />

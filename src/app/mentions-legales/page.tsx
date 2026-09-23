@@ -50,9 +50,11 @@ export default function MentionsLegalesPage() {
       <h2>1. Éditeur du site</h2>
       <p>Le site BeWork est édité par&nbsp;:</p>
       <p>
-        <strong>OFC CREATION D’ENTREPRISE</strong>
+        <strong>OFC Création d’entreprise</strong>
         <br />
-        SAS
+        BeWork est une marque commerciale d’OFC Création d’entreprise.
+        <br />
+        SASU
         <br />
         Siège social&nbsp;: 6 rue Henri Dunant, 78280 Guyancourt, France
         <br />
@@ -62,7 +64,22 @@ export default function MentionsLegalesPage() {
         <br />
         RCS&nbsp;: 905&nbsp;244&nbsp;281 R.C.S. Versailles
         <br />
+        Numéro de déclaration d’activité (NDA)&nbsp;: 11788515078
+        <br />
         TVA intracommunautaire&nbsp;: FR90905244281
+      </p>
+      <p>
+        Organisme de formation certifié Qualiopi au titre des actions de formation
+        (certificat n°&nbsp;520911-1, délivré par CERTIFOPAC). Validité indiquée sur le
+        certificat&nbsp;: du 16&nbsp;janvier&nbsp;2025 au 15&nbsp;janvier&nbsp;2028, sous
+        réserve de la surveillance du cycle de certification.{" "}
+        <Link href="/organisme-formation" className="font-medium text-[#1d4ed8] underline-offset-2 hover:underline">
+          En savoir plus sur l’organisme de formation
+        </Link>
+        .
+      </p>
+      <p className="text-sm text-slate-600">
+        Cet enregistrement ne vaut pas agrément de l’État.
       </p>
       <p>
         Présidente et directrice de la publication&nbsp;: <strong>Laure Olivie</strong>

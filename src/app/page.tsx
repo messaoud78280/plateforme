@@ -12,6 +12,7 @@ import { HomePlatformHero } from "@/components/home/HomePlatformHero";
 import { HomePossibilitiesBento } from "@/components/home/HomePossibilitiesBento";
 import { HomePricingSession } from "@/components/home/HomePricingSession";
 import { HomeSkillsAfter } from "@/components/home/HomeSkillsAfter";
+import { QualiopiTrustSection } from "@/components/qualiopi/QualiopiTrustSection";
 import {
   buildMarketingPageMetadata,
   SEO_PAGES,
@@ -68,6 +69,7 @@ export default function HomePage() {
         <HomeDayProgression />
         <HomeSkillsAfter />
         <HomeModalities />
+        <QualiopiTrustSection />
         <HomePricingSession />
         <HomeFaqAccordion />
         <HomeFinalCta />

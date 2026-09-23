@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { TrainingOffersSection } from "@/components/marketing/TrainingOffersSection";
+import { QualiopiInlineNote } from "@/components/qualiopi/QualiopiInlineNote";
 import { BEWORK_EXTENSION_PRICE_EUR } from "@/lib/bework-formation";
 import {
   breadcrumbJsonLd,
@@ -73,6 +74,10 @@ export default function TarifsPage() {
 
       <main className="pb-16 pt-6 sm:pt-8">
         <TrainingOffersSection id="tarif" analyticsPrefix="tarifs" headingLevel="h1" />
+
+        <div className="mx-auto mt-2 max-w-3xl px-4">
+          <QualiopiInlineNote />
+        </div>
 
         <section className="mx-auto mt-6 max-w-3xl px-4" aria-labelledby="faq-tarifs">
           <h2 id="faq-tarifs" className="text-2xl font-bold text-[#0f172a]">

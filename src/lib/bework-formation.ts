@@ -646,6 +646,14 @@ export const FORMATION_PAGE_FAQ = [
     q: "Est-ce que je pourrai continuer après ?",
     a: "Oui. Vous emportez une méthode réutilisable et une feuille de route pour poursuivre votre projet en autonomie.",
   },
+  {
+    q: "Les formations BeWork sont-elles proposées par un organisme certifié Qualiopi ?",
+    a: "Oui. Les formations BeWork sont proposées par OFC Création d’entreprise, organisme de formation certifié Qualiopi au titre des actions de formation. La certification a été délivrée par CERTIFOPAC. Vous pouvez consulter notre certificat depuis la page dédiée à notre organisme de formation.",
+  },
+  {
+    q: "La certification Qualiopi garantit-elle la prise en charge de ma formation ?",
+    a: "Non. La certification Qualiopi ne garantit pas automatiquement un financement. Une prise en charge par un OPCO peut être envisagée selon l’éligibilité de l’entreprise, de la formation et du dossier.",
+  },
 ] as const;
 
 export const FORMATION_FAQ = [
@@ -705,6 +713,14 @@ export const FORMATION_FAQ = [
     q: "Pourquoi ne présentez-vous pas toute la méthode sur le site ?",
     a: "Parce que BeWork est avant tout une formation pratique. Le site vous montre ce qu’il est possible de réaliser ; la formation vous apprend comment y parvenir.",
   },
+  {
+    q: "Les formations BeWork sont-elles proposées par un organisme certifié Qualiopi ?",
+    a: "Oui. Les formations BeWork sont proposées par OFC Création d’entreprise, organisme de formation certifié Qualiopi au titre des actions de formation. La certification a été délivrée par CERTIFOPAC. Vous pouvez consulter notre certificat depuis la page dédiée à notre organisme de formation.",
+  },
+  {
+    q: "La certification Qualiopi garantit-elle la prise en charge de ma formation ?",
+    a: "Non. La certification Qualiopi ne garantit pas automatiquement un financement. Une prise en charge par un OPCO peut être envisagée selon l’éligibilité de l’entreprise, de la formation et du dossier.",
+  },
 ] as const;
 
 const HOME_FAQ_QUESTIONS = new Set<string>([
@@ -715,6 +731,7 @@ const HOME_FAQ_QUESTIONS = new Set<string>([
   "Que peut-on créer ?",
   "Dois-je venir avec mon ordinateur ?",
   "Que vais-je savoir faire après ?",
+  "Les formations BeWork sont-elles proposées par un organisme certifié Qualiopi ?",
 ]);
 
 /** FAQ réellement affichée sur l’accueil — réutilisée par le JSON-LD. */
@@ -864,22 +881,7 @@ export const FORMATION_PRACTICAL_POINTS = [
   "Possibilité de prise en charge OPCO selon éligibilité",
 ] as const;
 
-/** Mentions administratives — fidèles aux programmes officiels. */
-export const FORMATION_ORGANISM = {
-  brand: "BeWork",
-  legalName: "OFC Création d’Entreprise — SASU",
-  relation: "BeWork est une marque d’OFC Création d’Entreprise.",
-  siret: "905 244 281 00010",
-  nda: "11788515078",
-  region: "Île-de-France",
-  vatNote: "Exonéré de TVA — art. 261-4-4°-a du CGI",
-  ndaDisclaimer: "Cet enregistrement ne vaut pas agrément de l’État.",
-  qualiopi: "Certifié Qualiopi — Actions de formation",
-  pedagogicalLead: "Laure OLIVIÉ",
-  contactEmail: "laureolivie@yahoo.fr",
-  contactPhone: "06 95 66 18 18",
-  schedule: "9h00–12h30 / 13h30–17h00",
-} as const;
+export { FORMATION_ORGANISM } from "@/lib/formation-organism";
 
 export const LEARN_INTENT_OPTIONS = [
   { value: "site_internet", label: "Site internet" },

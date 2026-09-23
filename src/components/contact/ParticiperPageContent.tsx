@@ -10,10 +10,12 @@ import {
   HOME_EYEBROW,
   HOME_SECTION,
 } from "@/components/home/homeSectionStyles";
+import { QualiopiInlineNote } from "@/components/qualiopi/QualiopiInlineNote";
 import {
   TRAINING_OFFERS,
   type TrainingOfferId,
 } from "@/lib/bework-formation";
+import { QUALIOPI_CERTIFICATION } from "@/lib/formation-organism";
 
 const PREPARATION_POINTS = [
   {
@@ -81,6 +83,20 @@ export function ParticiperPageContent({
             <p className="mt-5 text-sm text-slate-500">
               Cette demande n’est pas une inscription définitive.
             </p>
+
+            <div className="mx-auto mt-8 max-w-xl text-left">
+              <QualiopiInlineNote />
+              <p className="mt-3 text-center text-sm">
+                <a
+                  href={QUALIOPI_CERTIFICATION.certificatePdfHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-[#1d4ed8] underline-offset-2 hover:underline"
+                >
+                  Consulter notre certificat
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </section>

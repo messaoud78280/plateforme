@@ -151,8 +151,13 @@ const jsonLd = {
     {
       "@type": "Organization",
       "@id": `${SITE_URL}/#organization`,
-      name: "BeWork",
-      legalName: "OFC CREATION D’ENTREPRISE",
+      name: "OFC Création d’entreprise",
+      alternateName: ["BeWork", "OFC CREATION D’ENTREPRISE"],
+      legalName: "OFC Création d’entreprise",
+      brand: {
+        "@type": "Brand",
+        name: "BeWork",
+      },
       url: SITE_URL,
       logo: { "@type": "ImageObject", url: defaultLogoImage, width: 512, height: 512 },
       image: defaultOgImage,

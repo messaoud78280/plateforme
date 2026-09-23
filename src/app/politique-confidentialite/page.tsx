@@ -50,9 +50,11 @@ export default function PolitiqueConfidentialitePage() {
       <h2>1. Responsable du traitement</h2>
       <p>Les données personnelles collectées sur le site BeWork sont traitées par&nbsp;:</p>
       <p>
-        <strong>OFC CREATION D’ENTREPRISE</strong>
+        <strong>OFC Création d’entreprise</strong>
         <br />
-        SAS
+        BeWork est une marque commerciale d’OFC Création d’entreprise.
+        <br />
+        SASU
         <br />
         Siège social&nbsp;: 6 rue Henri Dunant, 78280 Guyancourt, France
         <br />

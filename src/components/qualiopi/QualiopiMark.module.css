@@ -68,3 +68,27 @@
 .inline .mentionShort {
   max-width: 22rem;
 }
+
+.header {
+  gap: 0;
+}
+
+.header .logo {
+  width: auto;
+  height: 2.15rem;
+  max-width: 7.25rem;
+}
+
+@media (min-width: 640px) {
+  .header .logo {
+    height: 2.45rem;
+    max-width: 8.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .header .logo {
+    height: 2.65rem;
+    max-width: 9rem;
+  }
+}

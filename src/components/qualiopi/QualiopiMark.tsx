@@ -6,8 +6,8 @@ import { QUALIOPI_CERTIFICATION } from "@/lib/formation-organism";
 import styles from "./QualiopiMark.module.css";
 
 type Props = {
-  /** Compact = footer / capsule ; card = bloc institutionnel. */
-  variant?: "compact" | "card" | "inline";
+  /** Compact = footer / capsule ; card = bloc institutionnel ; header = sous le logo BeWork. */
+  variant?: "compact" | "card" | "inline" | "header";
   className?: string;
   showCategoryMention?: boolean;
 };
@@ -16,6 +16,7 @@ const LOGO_SIZE = {
   card: { width: 220, height: 109 },
   compact: { width: 148, height: 74 },
   inline: { width: 132, height: 66 },
+  header: { width: 118, height: 59 },
 } as const;
 
 /**

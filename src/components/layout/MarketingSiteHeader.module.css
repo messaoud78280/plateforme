@@ -117,14 +117,14 @@
   align-items: center;
   gap: 1.35rem;
   min-width: 0;
-  flex: 1 1 auto;
-  padding-right: 0.75rem;
+  flex: 0 1 auto;
+  padding-right: 0.5rem;
 }
 
 @media (min-width: 1024px) {
   .brandCluster {
     gap: 1.7rem;
-    padding-right: 0.85rem;
+    padding-right: 0.65rem;
   }
 }
 
@@ -133,6 +133,40 @@
   flex-shrink: 0;
   align-items: center;
   text-decoration: none;
+}
+
+/* Qualiopi — entre le slogan et les CTA, dans l’espace libre. */
+.qualiopiSlot {
+  display: none;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding-inline: 0.5rem 0.75rem;
+}
+
+@media (min-width: 1100px) {
+  .qualiopiSlot {
+    display: flex;
+  }
+}
+
+.qualiopiBrand {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 10px;
+  text-decoration: none;
+  opacity: 0.94;
+  transition: opacity 0.2s ease;
+}
+
+.qualiopiBrand:hover {
+  opacity: 1;
+}
+
+.qualiopiBrand:focus-visible {
+  outline: 2px solid #275be8;
+  outline-offset: 3px;
 }
 
 .brandDivider {

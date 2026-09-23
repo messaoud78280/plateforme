@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { QualiopiMark } from "@/components/qualiopi/QualiopiMark";
+import { QUALIOPI_COPY } from "@/lib/formation-organism";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import styles from "./MarketingSiteHeader.module.css";
 
@@ -195,6 +197,17 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   </span>
                 </span>
               </p>
+            </div>
+
+            <div className={styles.qualiopiSlot}>
+              <Link
+                href={QUALIOPI_COPY.learnMoreHref}
+                className={styles.qualiopiBrand}
+                aria-label="Organisme de formation certifié Qualiopi — OFC Création d’entreprise"
+                title="Organisme certifié Qualiopi"
+              >
+                <QualiopiMark variant="header" showCategoryMention={false} />
+              </Link>
             </div>
 
             <div className={styles.actions}>

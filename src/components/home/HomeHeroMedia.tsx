@@ -199,20 +199,21 @@ function HomeHeroIntroVideo({ onEnded }: { onEnded: () => void }) {
       className="relative isolate mx-auto flex w-full max-w-full shrink-0 justify-center"
     >
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[min(420px,95vw)] w-[min(420px,95vw)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.14)_0%,transparent_68%)] motion-reduce:hidden"
+        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[min(640px,95vw)] w-[min(640px,95vw)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.14)_0%,transparent_68%)] motion-reduce:hidden"
         aria-hidden
       />
 
-      <div className="relative mx-auto w-full max-w-[290px] lg:mx-0 lg:max-h-[524px] lg:max-w-[300px]">
+      {/* Cadre portrait — desktop +25 % vs 360×646 (ratio 290/520 conservé). */}
+      <div className="relative mx-auto w-full max-w-[300px] sm:max-w-[320px] lg:mx-auto lg:max-h-[808px] lg:max-w-[450px]">
         <div
-          className="rounded-[32px] bg-gradient-to-br from-slate-200 via-white to-slate-300 p-[3px]"
+          className="rounded-[32px] bg-gradient-to-br from-slate-200 via-white to-slate-300 p-[3px] lg:rounded-[40px] lg:p-[4px]"
           style={{ boxShadow: FRAME_SHADOW }}
         >
-          <div className="rounded-[29px] bg-gradient-to-b from-slate-800 via-slate-950 to-black p-[2px] ring-1 ring-[#2563eb]/25">
-            <div className="relative aspect-[290/520] w-full overflow-hidden rounded-[26px] bg-black lg:aspect-auto lg:h-[520px] lg:w-[290px]">
+          <div className="rounded-[29px] bg-gradient-to-b from-slate-800 via-slate-950 to-black p-[2px] ring-1 ring-[#2563eb]/25 lg:rounded-[36px]">
+            <div className="relative aspect-[290/520] w-full overflow-hidden rounded-[26px] bg-black lg:aspect-auto lg:h-[808px] lg:w-[450px] lg:rounded-[32px]">
               <video
                 ref={videoRef}
-                className="absolute inset-0 z-[1] block h-full w-full rounded-[26px] object-cover object-center"
+                className="absolute inset-0 z-[1] block h-full w-full rounded-[26px] object-cover object-center lg:rounded-[32px]"
                 playsInline
                 preload="auto"
                 poster={current.poster}

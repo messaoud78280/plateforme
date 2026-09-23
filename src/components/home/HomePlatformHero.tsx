@@ -55,7 +55,7 @@ export function HomePlatformHero() {
       <BwAtmosphere variant="hero" />
 
       <div className="container-site relative z-[1] pb-12 pt-10 sm:pb-16 sm:pt-12 lg:pb-20 lg:pt-14">
-        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-10 xl:gap-14">
+        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-8 xl:gap-10 2xl:gap-12">
           <div className="max-w-xl lg:max-w-none">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#64748b]">
               Formation progressive

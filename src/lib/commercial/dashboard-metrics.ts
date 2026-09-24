@@ -5,6 +5,7 @@
 import type { CommercialQuoteStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { mapPool } from "@/lib/db/map-pool";
+import { getCached, setCached } from "@/lib/db/read-cache";
 import { withTransientDbRetry } from "@/lib/db/transient-retry";
 import { d } from "@/lib/commercial/decimal";
 import { roundMoney } from "@/lib/commercial/money";
@@ -31,6 +32,9 @@ import {
   getApplicableFiscalAlerts,
   type FiscalThresholdAlert,
 } from "@/lib/commercial/fiscal-thresholds";
+
+/** TTL court : évite de recalculer le cockpit à chaque navigation / filtre. */
+const DASHBOARD_CACHE_TTL_MS = 25_000;
 
 const ISSUED: Array<"ISSUED" | "PARTIALLY_PAID" | "PAID" | "OVERDUE"> = [
   "ISSUED",
@@ -249,12 +253,28 @@ function issuedWhere(
 export async function getCommercialDashboardMetrics(
   input: DashboardMetricsInput,
 ): Promise<CommercialDashboardMetrics> {
+  const cacheKey = [
+    "dash",
+    input.orgId,
+    input.period.preset,
+    input.period.from.toISOString(),
+    input.period.toExclusive.toISOString(),
+    input.clientId?.trim() || "",
+    input.projectId?.trim() || "",
+    input.canSeePurchases ? "1" : "0",
+  ].join("|");
+
+  const cached = getCached<CommercialDashboardMetrics>(cacheKey);
+  if (cached) return cached;
+
   // Lecture seule — retry autorisé uniquement pour erreurs transitoires pool/DB.
-  return withTransientDbRetry(
+  const metrics = await withTransientDbRetry(
     "commercial-dashboard-metrics",
     () => loadCommercialDashboardMetrics(input),
     { maxAttempts: 2, context: { orgId: input.orgId } },
   );
+  setCached(cacheKey, metrics, DASHBOARD_CACHE_TTL_MS);
+  return metrics;
 }
 
 async function loadCommercialDashboardMetrics(
@@ -502,7 +522,7 @@ async function loadCommercialDashboardMetrics(
               take: 1,
             },
           },
-          take: 400,
+          take: 120,
         }),
       () =>
         prisma.commercialQuote.findMany({

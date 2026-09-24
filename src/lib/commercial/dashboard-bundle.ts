@@ -3,6 +3,7 @@
  */
 import type { CommercialQuoteStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { mapPool } from "@/lib/db/map-pool";
 import { d } from "@/lib/commercial/decimal";
 import { roundMoney } from "@/lib/commercial/money";
 import { listCollectionsInvoices } from "@/lib/commercial/collections";
@@ -49,68 +50,75 @@ export async function loadCommercialDashboardBundle(
   relanceBefore.setDate(relanceBefore.getDate() - 7);
 
   const [kpis, factureAgg, quotesRelance, draftInvoices, overdue, recentInvoices] =
-    await Promise.all([
-      loadCommercialDashboardKpis(orgId),
-      prisma.commercialInvoice.aggregate({
-        where: {
-          organizationId: orgId,
-          type: { not: "CREDIT" },
-          status: { in: ["ISSUED", "PARTIALLY_PAID", "PAID", "OVERDUE"] },
-          issueDate: { gte: monthStart },
-        },
-        _sum: { totalSellHt: true },
-      }),
-      prisma.commercialQuote.findMany({
-        where: {
-          organizationId: orgId,
-          status: { in: ["SENT", "VIEWED"] satisfies CommercialQuoteStatus[] },
-          OR: [
-            { sentAt: { lte: relanceBefore } },
-            { AND: [{ sentAt: null }, { updatedAt: { lte: relanceBefore } }] },
-          ],
-        },
-        orderBy: { updatedAt: "asc" },
-        take: 3,
-        select: {
-          id: true,
-          number: true,
-          totalSellHt: true,
-          status: true,
-          sentAt: true,
-          updatedAt: true,
-          clientExternalOrg: { select: { name: true, tradeName: true } },
-        },
-      }),
-      prisma.commercialInvoice.findMany({
-        where: {
-          organizationId: orgId,
-          status: "DRAFT",
-          type: { not: "CREDIT" },
-        },
-        orderBy: { updatedAt: "desc" },
-        take: 2,
-        select: {
-          id: true,
-          number: true,
-          totalTtc: true,
-          clientExternalOrg: { select: { name: true, tradeName: true } },
-        },
-      }),
-      listCollectionsInvoices(orgId, { filter: "overdue" }),
-      prisma.commercialInvoice.findMany({
-        where: { organizationId: orgId, type: { not: "CREDIT" } },
-        orderBy: { updatedAt: "desc" },
-        take: 5,
-        select: {
-          id: true,
-          number: true,
-          status: true,
-          totalTtc: true,
-          issueDate: true,
-          clientExternalOrg: { select: { name: true, tradeName: true } },
-        },
-      }),
-    ]);
+    await mapPool(
+      [
+        () => loadCommercialDashboardKpis(orgId),
+        () =>
+          prisma.commercialInvoice.aggregate({
+            where: {
+              organizationId: orgId,
+              type: { not: "CREDIT" },
+              status: { in: ["ISSUED", "PARTIALLY_PAID", "PAID", "OVERDUE"] },
+              issueDate: { gte: monthStart },
+            },
+            _sum: { totalSellHt: true },
+          }),
+        () =>
+          prisma.commercialQuote.findMany({
+            where: {
+              organizationId: orgId,
+              status: { in: ["SENT", "VIEWED"] satisfies CommercialQuoteStatus[] },
+              OR: [
+                { sentAt: { lte: relanceBefore } },
+                { AND: [{ sentAt: null }, { updatedAt: { lte: relanceBefore } }] },
+              ],
+            },
+            orderBy: { updatedAt: "asc" },
+            take: 3,
+            select: {
+              id: true,
+              number: true,
+              totalSellHt: true,
+              status: true,
+              sentAt: true,
+              updatedAt: true,
+              clientExternalOrg: { select: { name: true, tradeName: true } },
+            },
+          }),
+        () =>
+          prisma.commercialInvoice.findMany({
+            where: {
+              organizationId: orgId,
+              status: "DRAFT",
+              type: { not: "CREDIT" },
+            },
+            orderBy: { updatedAt: "desc" },
+            take: 2,
+            select: {
+              id: true,
+              number: true,
+              totalTtc: true,
+              clientExternalOrg: { select: { name: true, tradeName: true } },
+            },
+          }),
+        () => listCollectionsInvoices(orgId, { filter: "overdue" }),
+        () =>
+          prisma.commercialInvoice.findMany({
+            where: { organizationId: orgId, type: { not: "CREDIT" } },
+            orderBy: { updatedAt: "desc" },
+            take: 5,
+            select: {
+              id: true,
+              number: true,
+              status: true,
+              totalTtc: true,
+              issueDate: true,
+              clientExternalOrg: { select: { name: true, tradeName: true } },
+            },
+          }),
+      ],
+      3,
+    );
 
   const todos: CommercialTodoItem[] = [];
 

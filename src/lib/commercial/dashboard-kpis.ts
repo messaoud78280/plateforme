@@ -3,6 +3,7 @@
  */
 import type { CommercialQuoteStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { mapPool } from "@/lib/db/map-pool";
 import { d } from "@/lib/commercial/decimal";
 import { roundMoney } from "@/lib/commercial/money";
 
@@ -94,20 +95,25 @@ export async function loadCommercialDashboardKpis(
   orgId: string,
 ): Promise<CommercialDashboardKpis> {
   const { loadCollectionsKpis } = await import("@/lib/commercial/collections");
-  const [quoteCount, grouped, avenantsSum, collections] = await Promise.all([
-    prisma.commercialQuote.count({ where: { organizationId: orgId } }),
-    prisma.commercialQuote.groupBy({
-      by: ["status"],
-      where: { organizationId: orgId },
-      _count: true,
-      _sum: { totalSellHt: true },
-    }),
-    prisma.commercialAmendment.aggregate({
-      where: { organizationId: orgId, status: "ACCEPTED" },
-      _sum: { totalSellHt: true },
-    }),
-    loadCollectionsKpis(orgId),
-  ]);
+  const [quoteCount, grouped, avenantsSum, collections] = await mapPool(
+    [
+      () => prisma.commercialQuote.count({ where: { organizationId: orgId } }),
+      () =>
+        prisma.commercialQuote.groupBy({
+          by: ["status"],
+          where: { organizationId: orgId },
+          _count: true,
+          _sum: { totalSellHt: true },
+        }),
+      () =>
+        prisma.commercialAmendment.aggregate({
+          where: { organizationId: orgId, status: "ACCEPTED" },
+          _sum: { totalSellHt: true },
+        }),
+      () => loadCollectionsKpis(orgId),
+    ],
+    3,
+  );
 
   const counts = aggregateQuoteStatusCounts(grouped);
   const avenantsAcceptesHt = roundMoney(d(avenantsSum._sum.totalSellHt), 2);

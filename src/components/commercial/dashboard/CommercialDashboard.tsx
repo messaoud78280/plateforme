@@ -1,18 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
-import {
-  Area,
-  CartesianGrid,
-  ComposedChart,
-  Legend,
-  Line,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import {
   AlertTriangle,
   Banknote,
@@ -26,6 +15,7 @@ import { HeaderDropdown } from "@/components/ui/HeaderDropdown";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { QuoteRowActions } from "@/components/commercial/QuoteRowActions";
+import { CommercialDashboardChartLazy } from "@/components/commercial/dashboard/CommercialDashboardChartLazy";
 import { cn } from "@/lib/cn";
 import {
   COMMERCIAL_INVOICE_STATUS_LABELS,
@@ -144,12 +134,6 @@ export function CommercialDashboard({
   });
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  /** Recharts ResponsiveContainer plante au SSR (width/height -1) — monter après hydratation. */
-  const [chartReady, setChartReady] = useState(false);
-
-  useEffect(() => {
-    setChartReady(true);
-  }, []);
 
   const load = useCallback(
     (next: {
@@ -190,11 +174,11 @@ export function CommercialDashboard({
     load({ preset: next, from, to, clientId, projectId });
   }
 
-  const agingTotal = Math.max(metrics.receivablesAging.totalTtc, 0.0001);
-  const pipelineMax = Math.max(
-    ...metrics.quotePipeline.stages.map((s) => s.amountHt),
-    1,
+  const agingTotal = Math.max(Number(metrics.receivablesAging.totalTtc) || 0, 0.0001);
+  const pipelineAmounts = metrics.quotePipeline.stages.map((s) =>
+    Number.isFinite(s.amountHt) ? s.amountHt : 0,
   );
+  const pipelineMax = Math.max(...pipelineAmounts, 1);
 
   const performanceItems = useMemo(() => {
     const p = metrics.salesPerformance;
@@ -603,80 +587,13 @@ export function CommercialDashboard({
             </div>
           </div>
           <div className="mt-4 h-[280px]">
-            {pending || !chartReady ? (
+            {pending ? (
               <Skeleton className="h-full w-full" />
-            ) : metrics.revenueSeries.every(
-                (p) => p.billedHt === 0 && p.collectedTtc === 0 && p.acceptedHt === 0,
-              ) ? (
-              <p className="flex h-full items-center justify-center text-sm text-bework-muted">
-                Pas encore d’activité sur cette période.
-              </p>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={metrics.revenueSeries}>
-                  <CartesianGrid stroke="#e8eef5" vertical={false} />
-                  <XAxis
-                    dataKey="label"
-                    tick={{ fill: "#64748b", fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fill: "#64748b", fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(v: number) =>
-                      Math.abs(v) >= 1000
-                        ? `${Math.round(v / 1000)} k`
-                        : `${Math.round(v)}`
-                    }
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 12,
-                      border: "1px solid #e2e8f0",
-                      fontSize: 12,
-                    }}
-                    formatter={(value, name) => [
-                      `${fmtMoney(Number(value) || 0)} €`,
-                      String(name),
-                    ]}
-                  />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  {series.billed ? (
-                    <Area
-                      type="monotone"
-                      dataKey="billedHt"
-                      name="CA facturé HT"
-                      stroke="#2563eb"
-                      fill="#2563eb"
-                      fillOpacity={0.12}
-                      strokeWidth={2}
-                    />
-                  ) : null}
-                  {series.collected ? (
-                    <Line
-                      type="monotone"
-                      dataKey="collectedTtc"
-                      name="Encaissé TTC"
-                      stroke="#059669"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  ) : null}
-                  {series.accepted ? (
-                    <Line
-                      type="monotone"
-                      dataKey="acceptedHt"
-                      name="Devis acceptés HT"
-                      stroke="#7c3aed"
-                      strokeWidth={2}
-                      dot={false}
-                      strokeDasharray="4 4"
-                    />
-                  ) : null}
-                </ComposedChart>
-              </ResponsiveContainer>
+              <CommercialDashboardChartLazy
+                seriesData={metrics.revenueSeries}
+                series={series}
+              />
             )}
           </div>
         </section>

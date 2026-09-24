@@ -4,6 +4,8 @@
  */
 import type { CommercialQuoteStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { mapPool } from "@/lib/db/map-pool";
+import { withTransientDbRetry } from "@/lib/db/transient-retry";
 import { d } from "@/lib/commercial/decimal";
 import { roundMoney } from "@/lib/commercial/money";
 import { daysOverdue } from "@/lib/commercial/invoice-status";
@@ -242,51 +244,17 @@ function issuedWhere(
  * Évite EMAXCONNSESSION (pooler Supabase ~15 slots session) quand ~27
  * requêtes partent en Promise.all sur le cockpit.
  */
-async function mapPool<const T extends readonly unknown[]>(
-  factories: { readonly [K in keyof T]: () => Promise<T[K]> },
-  concurrency = 4,
-): Promise<{ -readonly [K in keyof T]: T[K] }> {
-  const list = factories as ReadonlyArray<() => Promise<unknown>>;
-  const results = new Array<unknown>(list.length);
-  let next = 0;
-  const workers = Array.from(
-    { length: Math.min(concurrency, list.length) },
-    async () => {
-      while (true) {
-        const i = next++;
-        if (i >= list.length) return;
-        results[i] = await list[i]!();
-      }
-    },
-  );
-  await Promise.all(workers);
-  return results as { -readonly [K in keyof T]: T[K] };
-}
-
-function isPoolExhaustedError(err: unknown): boolean {
-  const msg = err instanceof Error ? err.message : String(err ?? "");
-  return (
-    /EMAXCONNSESSION/i.test(msg) ||
-    /max clients reached/i.test(msg) ||
-    /Can't reach database server/i.test(msg) ||
-    /P1001|P2024/i.test(msg)
-  );
-}
+// mapPool : src/lib/db/map-pool.ts
 
 export async function getCommercialDashboardMetrics(
   input: DashboardMetricsInput,
 ): Promise<CommercialDashboardMetrics> {
-  try {
-    return await loadCommercialDashboardMetrics(input);
-  } catch (err) {
-    if (!isPoolExhaustedError(err)) throw err;
-    console.warn(
-      "[dashboard-metrics] pool saturé — nouvel essai après pause courte",
-      { orgId: input.orgId },
-    );
-    await new Promise((r) => setTimeout(r, 350));
-    return loadCommercialDashboardMetrics(input);
-  }
+  // Lecture seule — retry autorisé uniquement pour erreurs transitoires pool/DB.
+  return withTransientDbRetry(
+    "commercial-dashboard-metrics",
+    () => loadCommercialDashboardMetrics(input),
+    { maxAttempts: 2, context: { orgId: input.orgId } },
+  );
 }
 
 async function loadCommercialDashboardMetrics(
@@ -307,6 +275,7 @@ async function loadCommercialDashboardMetrics(
   const relanceBefore = new Date(now);
   relanceBefore.setDate(relanceBefore.getDate() - 7);
 
+  // ~23 requêtes max, concurrence 3 (compatible connection_limit=3).
   const [
     quoteCount,
     groupedQuotes,
@@ -316,8 +285,6 @@ async function loadCommercialDashboardMetrics(
     creditPrev,
     collectedNow,
     collectedPrev,
-    billedVatNow,
-    creditVatNow,
     purchaseVat,
     openInvoices,
     seriesInvoices,
@@ -325,7 +292,6 @@ async function loadCommercialDashboardMetrics(
     seriesAccepted,
     decidedNow,
     decidedPrev,
-    acceptedTiming,
     paidTiming,
     quotesRelance,
     draftInvoices,
@@ -354,7 +320,7 @@ async function loadCommercialDashboardMetrics(
             ...extra,
             type: { not: "CREDIT" },
           }),
-          _sum: { totalSellHt: true, totalTtc: true },
+          _sum: { totalSellHt: true, totalTtc: true, totalVat: true },
           _count: true,
         }),
       () =>
@@ -409,22 +375,6 @@ async function loadCommercialDashboardMetrics(
             invoice: { type: { not: "CREDIT" }, ...extra },
           },
           _sum: { amount: true },
-        }),
-      () =>
-        prisma.commercialInvoice.aggregate({
-          where: issuedWhere(orgId, period.from, period.toExclusive, {
-            ...extra,
-            type: { not: "CREDIT" },
-          }),
-          _sum: { totalVat: true },
-        }),
-      () =>
-        prisma.commercialInvoice.aggregate({
-          where: issuedWhere(orgId, period.from, period.toExclusive, {
-            ...extra,
-            type: "CREDIT",
-          }),
-          _sum: { totalVat: true },
         }),
       () =>
         input.canSeePurchases
@@ -532,17 +482,6 @@ async function loadCommercialDashboardMetrics(
             ...quoteExtra,
           },
           _count: true,
-        }),
-      () =>
-        prisma.commercialQuote.findMany({
-          where: {
-            organizationId: orgId,
-            status: "ACCEPTED",
-            acceptedAt: { gte: period.from, lt: period.toExclusive },
-            sentAt: { not: null },
-            ...quoteExtra,
-          },
-          select: { acceptedAt: true, sentAt: true, totalSellHt: true },
         }),
       () =>
         prisma.commercialInvoice.findMany({
@@ -710,8 +649,13 @@ async function loadCommercialDashboardMetrics(
           take: 60,
         }),
     ],
-    4,
+    3,
   );
+
+  // Anciennes requêtes TVA séparées fusionnées dans billedNow / creditNow.
+  const billedVatNow = { _sum: { totalVat: billedNow._sum.totalVat } };
+  const creditVatNow = { _sum: { totalVat: creditNow._sum.totalVat } };
+  const acceptedTiming = seriesAccepted.filter((q) => q.sentAt != null);
 
   const invoiceCount = billedNow._count + recentInvoices.length;
   const empty = quoteCount === 0 && invoiceCount === 0 && openInvoices.length === 0;

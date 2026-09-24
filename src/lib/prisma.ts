@@ -3,28 +3,91 @@ import { isPerfLogEnabled, recordPerfQuery } from "@/lib/perf/server-timing";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
+export type PrismaPoolDiagnostics = {
+  hostKind: "supabase_pooler" | "supabase_direct" | "other" | "missing";
+  port: string | null;
+  pgbouncer: boolean;
+  connectionLimit: number | null;
+  /** Mode pooler détecté / forcé par le code. */
+  mode: "transaction" | "session" | "direct" | "unknown";
+  rewrittenToTransaction: boolean;
+};
+
+let lastDiagnostics: PrismaPoolDiagnostics = {
+  hostKind: "missing",
+  port: null,
+  pgbouncer: false,
+  connectionLimit: null,
+  mode: "unknown",
+  rewrittenToTransaction: false,
+};
+
+export function getPrismaPoolDiagnostics(): PrismaPoolDiagnostics {
+  return { ...lastDiagnostics };
+}
+
 /**
- * Pooler Supabase (session 5432 / transaction 6543) : plafonner le pool Prisma
- * pour éviter EMAXCONNSESSION (max ~15 clients session mode partagés).
+ * Pooler Supabase :
+ * - Session (5432) ≈ 15 slots partagés → EMAXCONNSESSION sous charge.
+ * - Transaction (6543 + pgbouncer=true) : recommandé pour Prisma runtime.
+ *
+ * Escape hatches :
+ * - BEWORK_FORCE_SESSION_POOLER=1 → ne pas réécrire 5432→6543
+ * - BEWORK_PRISMA_CONNECTION_LIMIT=N → override du plafond
  */
 function hardenDatabaseUrl(raw: string): string {
   try {
     const u = new URL(raw);
-    const isPooler =
-      /pooler\.supabase\.com/i.test(u.hostname) ||
-      u.port === "6543" ||
-      u.searchParams.get("pgbouncer") === "true";
-    if (!isPooler) return raw;
+    const host = u.hostname.toLowerCase();
+    const isPooler = host.includes("pooler.supabase.com");
+    const isDirect = host.startsWith("db.") && host.endsWith(".supabase.co");
+    const forceSession = process.env.BEWORK_FORCE_SESSION_POOLER === "1";
+    let rewrittenToTransaction = false;
 
-    if (u.port === "6543" && !u.searchParams.has("pgbouncer")) {
-      u.searchParams.set("pgbouncer", "true");
+    if (isPooler && !forceSession && (u.port === "5432" || u.port === "")) {
+      u.port = "6543";
+      rewrittenToTransaction = true;
     }
+
+    if ((isPooler || u.port === "6543") && !u.searchParams.has("pgbouncer")) {
+      if (u.port === "6543") u.searchParams.set("pgbouncer", "true");
+    }
+
+    const limitRaw = (process.env.BEWORK_PRISMA_CONNECTION_LIMIT ?? "").trim();
+    const limitFromEnv = Number.parseInt(limitRaw, 10);
     if (!u.searchParams.has("connection_limit")) {
-      u.searchParams.set("connection_limit", "4");
+      const limit =
+        Number.isFinite(limitFromEnv) && limitFromEnv > 0
+          ? Math.min(10, limitFromEnv)
+          : 3;
+      u.searchParams.set("connection_limit", String(limit));
     }
     if (!u.searchParams.has("pool_timeout")) {
       u.searchParams.set("pool_timeout", "20");
     }
+
+    const connectionLimit = Number.parseInt(
+      u.searchParams.get("connection_limit") || "",
+      10,
+    );
+    const pgbouncer = u.searchParams.get("pgbouncer") === "true";
+    const mode: PrismaPoolDiagnostics["mode"] = isDirect
+      ? "direct"
+      : u.port === "6543" || pgbouncer
+        ? "transaction"
+        : isPooler
+          ? "session"
+          : "unknown";
+
+    lastDiagnostics = {
+      hostKind: isPooler ? "supabase_pooler" : isDirect ? "supabase_direct" : "other",
+      port: u.port || null,
+      pgbouncer,
+      connectionLimit: Number.isFinite(connectionLimit) ? connectionLimit : null,
+      mode,
+      rewrittenToTransaction,
+    };
+
     return u.toString();
   } catch {
     return raw;
@@ -49,6 +112,11 @@ const connectionUrl = getConnectionUrl();
 if (!connectionUrl && process.env.NODE_ENV === "production") {
   console.error(
     "[Prisma] DATABASE_URL (ou DIRECT_URL) manquant. Vérifiez les variables d'environnement Railway.",
+  );
+} else if (connectionUrl) {
+  const d = lastDiagnostics;
+  console.info(
+    `[Prisma] pool mode=${d.mode} port=${d.port ?? "?"} pgbouncer=${d.pgbouncer} connection_limit=${d.connectionLimit ?? "?"} rewrittenTx=${d.rewrittenToTransaction}`,
   );
 }
 
@@ -105,4 +173,5 @@ function withPerfExtension(client: PrismaClient): PrismaClient {
 
 export const prisma: PrismaClient = withPerfExtension(baseClient);
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = baseClient;
+/** Toujours mémoriser : évite des multi-instances sous hot-reload / bundling Next. */
+globalForPrisma.prisma = baseClient;

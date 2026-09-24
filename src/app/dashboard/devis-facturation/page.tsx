@@ -109,7 +109,7 @@ export default async function DevisFacturationDashboardPage({
       });
       const msg = err instanceof Error ? err.message : String(err ?? "");
       const poolSaturated =
-        /EMAXCONNSESSION|max clients reached|Can't reach database server|P1001|P2024/i.test(
+        /EMAXCONNSESSION|max clients reached|Can't reach database server|Too many connections|P1001|P2024|pool/i.test(
           msg,
         );
       return (

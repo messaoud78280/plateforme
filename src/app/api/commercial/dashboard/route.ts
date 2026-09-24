@@ -10,35 +10,46 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
-  const url = req.nextUrl;
-  const period = resolveDashboardPeriod({
-    preset: url.searchParams.get("period"),
-    from: url.searchParams.get("from"),
-    to: url.searchParams.get("to"),
-  });
-  const clientId = url.searchParams.get("clientId");
-  const projectId = url.searchParams.get("projectId");
+  try {
+    const url = req.nextUrl;
+    const period = resolveDashboardPeriod({
+      preset: url.searchParams.get("period"),
+      from: url.searchParams.get("from"),
+      to: url.searchParams.get("to"),
+    });
+    const clientId = url.searchParams.get("clientId");
+    const projectId = url.searchParams.get("projectId");
 
-  const metrics = await getCommercialDashboardMetrics({
-    orgId: auth.orgId,
-    period,
-    clientId,
-    projectId,
-    canSeePurchases: canShowCommercialPurchases({
-      personType: auth.session.user.personType,
-      permissionProfile: auth.session.user.permissionProfile,
-    }),
-  });
+    const metrics = await getCommercialDashboardMetrics({
+      orgId: auth.orgId,
+      period,
+      clientId,
+      projectId,
+      canSeePurchases: canShowCommercialPurchases({
+        personType: auth.session.user.personType,
+        permissionProfile: auth.session.user.permissionProfile,
+      }),
+    });
 
-  return NextResponse.json({
-    metrics,
-    kpis: {
-      quoteCount: metrics.summary.pipelineCount,
-      pipelineDevisHt: metrics.summary.pipelineHt,
-      aEncaisserTtc: metrics.summary.outstandingTtc,
-      enRetardTtc: metrics.summary.overdueTtc,
-      contratAccepteHt: metrics.quotePipeline.stages.find((s) => s.key === "accepted")
-        ?.amountHt,
-    },
-  });
+    const safe = JSON.parse(JSON.stringify(metrics));
+
+    return NextResponse.json({
+      metrics: safe,
+      kpis: {
+        quoteCount: safe.summary.pipelineCount,
+        pipelineDevisHt: safe.summary.pipelineHt,
+        aEncaisserTtc: safe.summary.outstandingTtc,
+        enRetardTtc: safe.summary.overdueTtc,
+        contratAccepteHt: safe.quotePipeline.stages.find(
+          (s: { key: string }) => s.key === "accepted",
+        )?.amountHt,
+      },
+    });
+  } catch (err) {
+    console.error("[api/commercial/dashboard] failed", err);
+    return NextResponse.json(
+      { error: "Impossible de charger les indicateurs." },
+      { status: 500 },
+    );
+  }
 }

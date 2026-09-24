@@ -9,8 +9,9 @@ export const runtime = "nodejs";
 /**
  * SSE Messagerie — SECOURS / resynchronisation du badge unread.
  * Chemin principal client = Supabase Broadcast (immédiat).
- * Ici : tick serveur 2,5 s uniquement quand le client ouvre ce flux
+ * Ici : tick serveur 8 s uniquement quand le client ouvre ce flux
  * (Broadcast indisponible ou en attente de SUBSCRIBED).
+ * Cache TTL 20 s partagé avec /api/messagerie/unread-count.
  */
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -65,7 +66,7 @@ export async function GET() {
               ...payload,
               conversations: payload.total,
               messages: 0,
-            }, 5_000);
+            }, 20_000);
           }
           if (payload.total !== lastTotal) {
             lastTotal = payload.total;
@@ -79,7 +80,7 @@ export async function GET() {
       }
 
       void tick();
-      timer = setInterval(() => void tick(), 2500);
+          timer = setInterval(() => void tick(), 8000);
     },
     cancel() {
       closed = true;

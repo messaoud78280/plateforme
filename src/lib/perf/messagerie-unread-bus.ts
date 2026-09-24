@@ -13,6 +13,9 @@
 import { createBrowserClient } from "@/lib/supabase";
 import type { MessagerieRealtimePayload } from "@/lib/messagerie/broadcast";
 import type { RealtimeChannel } from "@supabase/supabase-js";
+import {
+  startVisibilityAwareInterval,
+} from "@/lib/perf/visibility-poll";
 
 type UnreadListener = (total: number) => void;
 type EventListener = (ev: MessagerieRealtimePayload) => void;
@@ -24,7 +27,7 @@ const unreadListeners = new Set<UnreadListener>();
 const eventListeners = new Set<EventListener>();
 
 let sse: EventSource | null = null;
-let pollTimer: number | null = null;
+let stopPoll: (() => void) | null = null;
 let supabaseChannel: RealtimeChannel | null = null;
 let subscribedUserId: string | null = null;
 /** Broadcast connecté → SSE ne doit pas être le chemin principal. */
@@ -32,7 +35,7 @@ let broadcastReady = false;
 
 const seenEventKeys = new Set<string>();
 const FALLBACK_POLL_MS = 90_000;
-const SSE_INTERVAL_HINT_MS = 2_500;
+const SSE_INTERVAL_HINT_MS = 8_000;
 const STALE_MS = 5_000;
 
 async function fetchUnread(): Promise<number> {
@@ -117,9 +120,12 @@ function startSse() {
 
 function ensurePollFallback() {
   if (typeof window === "undefined") return;
-  if (pollTimer == null) {
-    pollTimer = window.setInterval(() => void getMessagerieUnread(true), FALLBACK_POLL_MS);
-  }
+  if (stopPoll) return;
+  stopPoll = startVisibilityAwareInterval(
+    () => void getMessagerieUnread(true),
+    FALLBACK_POLL_MS,
+    { runImmediately: false },
+  );
 }
 
 /**
@@ -204,10 +210,8 @@ export function resetMessagerieUnreadCache() {
  */
 export function resetMessagerieUnreadForPersonaSwitch() {
   stopSse();
-  if (pollTimer != null) {
-    window.clearInterval(pollTimer);
-    pollTimer = null;
-  }
+  stopPoll?.();
+  stopPoll = null;
   if (supabaseChannel) {
     const sb = createBrowserClient();
     if (sb) void sb.removeChannel(supabaseChannel);
@@ -245,10 +249,8 @@ export function subscribeMessagerieEvents(listener: EventListener): () => void {
 
 function teardown() {
   stopSse();
-  if (pollTimer != null) {
-    window.clearInterval(pollTimer);
-    pollTimer = null;
-  }
+  stopPoll?.();
+  stopPoll = null;
   if (supabaseChannel) {
     const sb = createBrowserClient();
     if (sb) void sb.removeChannel(supabaseChannel);

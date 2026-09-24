@@ -5,6 +5,11 @@ import Link from "next/link";
 import { Bell } from "lucide-react";
 import { HeaderDropdown } from "@/components/ui/HeaderDropdown";
 import { FollowUpInlineActions } from "@/components/follow-up/FollowUpInlineActions";
+import {
+  getNotificationsUnread,
+  setNotificationsUnreadOptimistic,
+  subscribeNotificationsUnread,
+} from "@/lib/perf/notifications-unread-bus";
 
 type InboxItem = {
   id: string;
@@ -125,14 +130,8 @@ export function NotificationsDropdown({ userId }: { userId?: string }) {
   }, []);
 
   const loadUnreadOnly = useCallback(async () => {
-    try {
-      const res = await fetch("/api/notifications/unread-count", { cache: "no-store" });
-      if (!res.ok) return;
-      const data = (await res.json()) as { unreadCount?: number };
-      setUnreadCount(typeof data.unreadCount === "number" ? data.unreadCount : 0);
-    } catch {
-      // ignore
-    }
+    const n = await getNotificationsUnread(true);
+    setUnreadCount(n);
   }, []);
 
   const resetForPersona = useCallback(() => {
@@ -142,10 +141,8 @@ export function NotificationsDropdown({ userId }: { userId?: string }) {
   }, [loadUnreadOnly]);
 
   useEffect(() => {
-    void loadUnreadOnly();
-    const interval = setInterval(() => void loadUnreadOnly(), 60_000);
-    return () => clearInterval(interval);
-  }, [loadUnreadOnly, userId]);
+    return subscribeNotificationsUnread(setUnreadCount);
+  }, [userId]);
 
   useEffect(() => {
     const onPersona = () => resetForPersona();
@@ -181,7 +178,11 @@ export function NotificationsDropdown({ userId }: { userId?: string }) {
     if (item.read) return;
     // Optimistic UI
     setItems((prev) => prev.map((i) => (i.id === item.id && i.source === item.source ? { ...i, read: true } : i)));
-    setUnreadCount((c) => Math.max(0, c - 1));
+    setUnreadCount((c) => {
+      const next = Math.max(0, c - 1);
+      setNotificationsUnreadOptimistic(next);
+      return next;
+    });
     const url =
       item.source === "alert"
         ? `/api/alerts/${item.id}`
@@ -194,6 +195,7 @@ export function NotificationsDropdown({ userId }: { userId?: string }) {
     setLoading(true);
     setItems((prev) => prev.map((i) => ({ ...i, read: true })));
     setUnreadCount(0);
+    setNotificationsUnreadOptimistic(0);
     try {
       await Promise.all([
         fetch("/api/notifications/read-all", { method: "POST" }),

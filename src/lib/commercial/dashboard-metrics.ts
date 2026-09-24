@@ -5,8 +5,8 @@
 import type { CommercialQuoteStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { mapPool } from "@/lib/db/map-pool";
-import { getCached, setCached } from "@/lib/db/read-cache";
 import { withTransientDbRetry } from "@/lib/db/transient-retry";
+import { ttlGet, ttlSet } from "@/lib/perf/ttl-cache";
 import { d } from "@/lib/commercial/decimal";
 import { roundMoney } from "@/lib/commercial/money";
 import { daysOverdue } from "@/lib/commercial/invoice-status";
@@ -264,7 +264,7 @@ export async function getCommercialDashboardMetrics(
     input.canSeePurchases ? "1" : "0",
   ].join("|");
 
-  const cached = getCached<CommercialDashboardMetrics>(cacheKey);
+  const cached = ttlGet<CommercialDashboardMetrics>(cacheKey);
   if (cached) return cached;
 
   // Lecture seule — retry autorisé uniquement pour erreurs transitoires pool/DB.
@@ -273,7 +273,7 @@ export async function getCommercialDashboardMetrics(
     () => loadCommercialDashboardMetrics(input),
     { maxAttempts: 2, context: { orgId: input.orgId } },
   );
-  setCached(cacheKey, metrics, DASHBOARD_CACHE_TTL_MS);
+  ttlSet(cacheKey, metrics, DASHBOARD_CACHE_TTL_MS);
   return metrics;
 }
 

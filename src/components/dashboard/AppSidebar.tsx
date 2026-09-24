@@ -38,6 +38,7 @@ import { cn } from "@/lib/cn";
 import { isNavHrefAllowedForDemo } from "@/lib/demo-environment/nav-modules";
 import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 import { MessagerieNavBadge } from "@/components/dashboard/MessagerieNavBadge";
+import { useATraiterCount } from "@/hooks/useATraiterCount";
 
 type RoleKey = "CLIENT" | "MANAGER" | "AGENT" | "AGENCE";
 type FamTone = "navy" | "cyan" | "watch" | "violet" | "ok" | "magenta" | "neutral";
@@ -573,46 +574,6 @@ export function AppSidebar({
       </aside>
     </>
   );
-}
-
-function useATraiterCount() {
-  const [total, setTotal] = useState(0);
-  const [capped, setCapped] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const res = await fetch("/api/a-traiter/count", { cache: "no-store" });
-        if (!res.ok) return;
-        const data = (await res.json()) as { total?: number; capped?: boolean };
-        if (!cancelled) {
-          setTotal(typeof data.total === "number" ? data.total : 0);
-          setCapped(Boolean(data.capped));
-        }
-      } catch {
-        /* silencieux */
-      }
-    }
-    void load();
-    const timer = window.setInterval(() => void load(), 45_000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(timer);
-    };
-  }, []);
-
-  const visible = total > 0 || capped;
-  const label =
-    total <= 0 && !capped
-      ? null
-      : capped
-        ? `${total <= 0 ? "200" : total > 99 ? "99" : total}+`
-        : total > 99
-          ? "99+"
-          : String(total);
-
-  return { visible, label };
 }
 
 function ATraiterCountBadge() {

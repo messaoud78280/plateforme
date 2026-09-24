@@ -5,21 +5,33 @@ const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefi
 
 export type PrismaPoolDiagnostics = {
   hostKind: "supabase_pooler" | "supabase_direct" | "other" | "missing";
-  port: string | null;
+  /** Port lu dans DATABASE_URL avant toute réécriture. */
+  configuredPort: string | null;
+  /** Port effectivement utilisé par PrismaClient. */
+  effectivePort: string | null;
   pgbouncer: boolean;
   connectionLimit: number | null;
-  /** Mode pooler détecté / forcé par le code. */
   mode: "transaction" | "session" | "direct" | "unknown";
+  /** true si le code a changé le port (5432→6543). */
   rewrittenToTransaction: boolean;
+  /**
+   * Politique active :
+   * - off : aucune réécriture (défaut recommandé une fois DATABASE_URL en 6543)
+   * - prefer_tx : réécriture autorisée via BEWORK_PREFER_TX_POOLER=1
+   * - forced_session : BEWORK_FORCE_SESSION_POOLER=1
+   */
+  rewritePolicy: "off" | "prefer_tx" | "forced_session";
 };
 
 let lastDiagnostics: PrismaPoolDiagnostics = {
   hostKind: "missing",
-  port: null,
+  configuredPort: null,
+  effectivePort: null,
   pgbouncer: false,
   connectionLimit: null,
   mode: "unknown",
   rewrittenToTransaction: false,
+  rewritePolicy: "off",
 };
 
 export function getPrismaPoolDiagnostics(): PrismaPoolDiagnostics {
@@ -27,13 +39,22 @@ export function getPrismaPoolDiagnostics(): PrismaPoolDiagnostics {
 }
 
 /**
- * Pooler Supabase :
- * - Session (5432) ≈ 15 slots partagés → EMAXCONNSESSION sous charge.
- * - Transaction (6543 + pgbouncer=true) : recommandé pour Prisma runtime.
+ * Durcit l’URL runtime Prisma.
  *
- * Escape hatches :
- * - BEWORK_FORCE_SESSION_POOLER=1 → ne pas réécrire 5432→6543
- * - BEWORK_PRISMA_CONNECTION_LIMIT=N → override du plafond
+ * Contexte : Railway a encore DATABASE_URL en pooler session (5432, ~15 slots).
+ * Prisma + SaaS → mode transaction 6543 + pgbouncer=true recommandé.
+ *
+ * Réécriture 5432→6543 : active par défaut tant que l’URL Railway n’est pas
+ * corrigée. Toujours visible via health-db (configuredPort vs effectivePort).
+ *
+ * Désactiver :
+ * - BEWORK_DISABLE_PORT_REWRITE=1
+ * - ou BEWORK_FORCE_SESSION_POOLER=1
+ *
+ * Une fois DATABASE_URL Railway passé en 6543?pgbouncer=true, la réécriture
+ * devient un no-op (configuredPort === effectivePort).
+ *
+ * DIRECT_URL (migrations) n’est PAS modifié ici.
  */
 function hardenDatabaseUrl(raw: string): string {
   try {
@@ -41,16 +62,26 @@ function hardenDatabaseUrl(raw: string): string {
     const host = u.hostname.toLowerCase();
     const isPooler = host.includes("pooler.supabase.com");
     const isDirect = host.startsWith("db.") && host.endsWith(".supabase.co");
+    const configuredPort = u.port || (isPooler ? "5432" : null);
     const forceSession = process.env.BEWORK_FORCE_SESSION_POOLER === "1";
+    const disableRewrite = process.env.BEWORK_DISABLE_PORT_REWRITE === "1";
     let rewrittenToTransaction = false;
+    let rewritePolicy: PrismaPoolDiagnostics["rewritePolicy"] = "prefer_tx";
 
-    if (isPooler && !forceSession && (u.port === "5432" || u.port === "")) {
+    if (forceSession) {
+      rewritePolicy = "forced_session";
+    } else if (disableRewrite) {
+      rewritePolicy = "off";
+    } else if (isPooler && (u.port === "5432" || u.port === "")) {
       u.port = "6543";
       rewrittenToTransaction = true;
+      rewritePolicy = "prefer_tx";
+    } else {
+      rewritePolicy = "off";
     }
 
-    if ((isPooler || u.port === "6543") && !u.searchParams.has("pgbouncer")) {
-      if (u.port === "6543") u.searchParams.set("pgbouncer", "true");
+    if (u.port === "6543" && !u.searchParams.has("pgbouncer")) {
+      u.searchParams.set("pgbouncer", "true");
     }
 
     const limitRaw = (process.env.BEWORK_PRISMA_CONNECTION_LIMIT ?? "").trim();
@@ -81,11 +112,13 @@ function hardenDatabaseUrl(raw: string): string {
 
     lastDiagnostics = {
       hostKind: isPooler ? "supabase_pooler" : isDirect ? "supabase_direct" : "other",
-      port: u.port || null,
+      configuredPort,
+      effectivePort: u.port || null,
       pgbouncer,
       connectionLimit: Number.isFinite(connectionLimit) ? connectionLimit : null,
       mode,
       rewrittenToTransaction,
+      rewritePolicy,
     };
 
     return u.toString();
@@ -94,14 +127,13 @@ function hardenDatabaseUrl(raw: string): string {
   }
 }
 
-// Prisma Client (requêtes runtime) : DATABASE_URL (pooler Supabase 6543 recommandé avec ?pgbouncer=true).
-// DIRECT_URL sert surtout aux migrations / db push via `schema.prisma` `directUrl`.
 function getConnectionUrl(): string {
   const pool = (process.env.DATABASE_URL ?? "").trim();
   const direct = (process.env.DIRECT_URL ?? "").trim();
   const isPg = (u: string) =>
     u.startsWith("postgresql://") || u.startsWith("postgres://");
 
+  // Runtime : DATABASE_URL uniquement (ne pas détourner DIRECT_URL migrations).
   if (pool && isPg(pool)) return hardenDatabaseUrl(pool);
   if (direct && isPg(direct)) return hardenDatabaseUrl(direct);
   return "";
@@ -116,8 +148,21 @@ if (!connectionUrl && process.env.NODE_ENV === "production") {
 } else if (connectionUrl) {
   const d = lastDiagnostics;
   console.info(
-    `[Prisma] pool mode=${d.mode} port=${d.port ?? "?"} pgbouncer=${d.pgbouncer} connection_limit=${d.connectionLimit ?? "?"} rewrittenTx=${d.rewrittenToTransaction}`,
+    `[Prisma] pool mode=${d.mode} configuredPort=${d.configuredPort ?? "?"} effectivePort=${d.effectivePort ?? "?"} pgbouncer=${d.pgbouncer} connection_limit=${d.connectionLimit ?? "?"} rewritePolicy=${d.rewritePolicy} rewrittenTx=${d.rewrittenToTransaction}`,
   );
+  if (d.mode === "session" && d.hostKind === "supabase_pooler") {
+    console.warn(
+      "[Prisma] DATABASE_URL est en mode session (port 5432). Risque EMAXCONNSESSION (~15 slots). " +
+        "Recommandé : URL Transaction 6543?pgbouncer=true dans Railway.",
+    );
+  }
+  if (d.rewrittenToTransaction) {
+    console.warn(
+      `[Prisma] DIAGNOSTIC: port Railway configuré=${d.configuredPort} → effectif=${d.effectivePort} (réécriture runtime). ` +
+        `Corrigez DATABASE_URL Railway en 6543?pgbouncer=true pour supprimer cette réécriture. ` +
+        `Désactiver: BEWORK_DISABLE_PORT_REWRITE=1`,
+    );
+  }
 }
 
 const enablePerfQuery = isPerfLogEnabled();
@@ -129,10 +174,6 @@ const baseClient =
     log: ["error"],
   });
 
-/**
- * PERF_DEBUG : extension dans le même AsyncLocalStorage que l’appelant
- * ($on('query') sortait du contexte ALS → compteur à 0).
- */
 function withPerfExtension(client: PrismaClient): PrismaClient {
   if (!enablePerfQuery) return client;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -173,5 +214,4 @@ function withPerfExtension(client: PrismaClient): PrismaClient {
 
 export const prisma: PrismaClient = withPerfExtension(baseClient);
 
-/** Toujours mémoriser : évite des multi-instances sous hot-reload / bundling Next. */
 globalForPrisma.prisma = baseClient;

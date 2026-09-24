@@ -1,5 +1,6 @@
 import type { CommercialInvoiceType, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { invalidateCommercialDashboardCache } from "@/lib/commercial/dashboard-metrics";
 import {
   calculateLine,
   calculateDocumentTotals,
@@ -696,6 +697,7 @@ export async function issueInvoice(orgId: string, invoiceId: string, actorUserId
     )
     .catch((e) => console.error("Contrats annuels sync émission:", e));
 
+  invalidateCommercialDashboardCache(orgId);
   return updated;
 }
 
@@ -788,6 +790,7 @@ export async function recordPayment(input: {
         input.userId,
       );
     }
+    invalidateCommercialDashboardCache(input.orgId);
     return payment;
   });
 }

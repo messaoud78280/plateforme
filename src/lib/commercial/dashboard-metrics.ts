@@ -6,7 +6,7 @@ import type { CommercialQuoteStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { mapPool } from "@/lib/db/map-pool";
 import { withTransientDbRetry } from "@/lib/db/transient-retry";
-import { ttlGet, ttlSet } from "@/lib/perf/ttl-cache";
+import { ttlGet, ttlSet, ttlInvalidatePrefix } from "@/lib/perf/ttl-cache";
 import { d } from "@/lib/commercial/decimal";
 import { roundMoney } from "@/lib/commercial/money";
 import { daysOverdue } from "@/lib/commercial/invoice-status";
@@ -35,6 +35,15 @@ import {
 
 /** TTL court : évite de recalculer le cockpit à chaque navigation / filtre. */
 const DASHBOARD_CACHE_TTL_MS = 25_000;
+
+function dashboardCachePrefix(orgId: string) {
+  return `dash|${orgId}|`;
+}
+
+export function invalidateCommercialDashboardCache(orgId: string) {
+  if (!orgId) return;
+  ttlInvalidatePrefix(dashboardCachePrefix(orgId));
+}
 
 const ISSUED: Array<"ISSUED" | "PARTIALLY_PAID" | "PAID" | "OVERDUE"> = [
   "ISSUED",
@@ -254,8 +263,7 @@ export async function getCommercialDashboardMetrics(
   input: DashboardMetricsInput,
 ): Promise<CommercialDashboardMetrics> {
   const cacheKey = [
-    "dash",
-    input.orgId,
+    dashboardCachePrefix(input.orgId).slice(0, -1),
     input.period.preset,
     input.period.from.toISOString(),
     input.period.toExclusive.toISOString(),

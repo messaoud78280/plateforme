@@ -1,6 +1,7 @@
 import type { CommercialLineKind, CommercialQuoteStatus } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { invalidateCommercialDashboardCache } from "@/lib/commercial/dashboard-metrics";
 import { calculateDocumentTotals, calculateLine, roundMoney } from "@/lib/commercial/money";
 import { d } from "@/lib/commercial/decimal";
 import {
@@ -245,9 +246,9 @@ export async function createQuote(input: {
     input.clientSnapshotJson ??
     (await buildClientSnapshot(input.clientExternalOrgId ?? null));
 
-  return prisma.$transaction(async (tx) => {
+  const quote = await prisma.$transaction(async (tx) => {
     const number = await nextQuoteNumber(input.orgId, tx);
-    const quote = await tx.commercialQuote.create({
+    const created = await tx.commercialQuote.create({
       data: {
         organizationId: input.orgId,
         number,
@@ -275,15 +276,15 @@ export async function createQuote(input: {
     const version = await tx.commercialQuoteVersion.create({
       data: {
         organizationId: input.orgId,
-        quoteId: quote.id,
+        quoteId: created.id,
         versionNumber: 1,
         label: "V1",
         lockState: "DRAFT",
         clientSnapshotJson: clientSnapshotJson ?? undefined,
         issuerSnapshotJson,
-        paymentTerms: quote.paymentTerms,
+        paymentTerms: created.paymentTerms,
         paymentScheduleJson: scheduleNorm ?? undefined,
-        clientNotes: quote.clientNotes,
+        clientNotes: created.clientNotes,
       },
     });
 
@@ -297,7 +298,7 @@ export async function createQuote(input: {
     });
 
     await tx.commercialQuote.update({
-      where: { id: quote.id },
+      where: { id: created.id },
       data: { currentVersionId: version.id },
     });
 
@@ -305,7 +306,7 @@ export async function createQuote(input: {
       data: {
         organizationId: input.orgId,
         entityType: "QUOTE",
-        entityId: quote.id,
+        entityId: created.id,
         fromStatus: null,
         toStatus: "DRAFT",
         label: "Création du devis",
@@ -313,8 +314,11 @@ export async function createQuote(input: {
       },
     });
 
-    return tx.commercialQuote.findUniqueOrThrow({ where: { id: quote.id } });
+    return tx.commercialQuote.findUniqueOrThrow({ where: { id: created.id } });
   });
+
+  invalidateCommercialDashboardCache(input.orgId);
+  return quote;
 }
 
 export async function listQuotes(

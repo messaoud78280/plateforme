@@ -237,7 +237,59 @@ function issuedWhere(
   };
 }
 
+/**
+ * Exécute des factories avec une concurrence plafonnée.
+ * Évite EMAXCONNSESSION (pooler Supabase ~15 slots session) quand ~27
+ * requêtes partent en Promise.all sur le cockpit.
+ */
+async function mapPool<const T extends readonly unknown[]>(
+  factories: { readonly [K in keyof T]: () => Promise<T[K]> },
+  concurrency = 4,
+): Promise<{ -readonly [K in keyof T]: T[K] }> {
+  const list = factories as ReadonlyArray<() => Promise<unknown>>;
+  const results = new Array<unknown>(list.length);
+  let next = 0;
+  const workers = Array.from(
+    { length: Math.min(concurrency, list.length) },
+    async () => {
+      while (true) {
+        const i = next++;
+        if (i >= list.length) return;
+        results[i] = await list[i]!();
+      }
+    },
+  );
+  await Promise.all(workers);
+  return results as { -readonly [K in keyof T]: T[K] };
+}
+
+function isPoolExhaustedError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err ?? "");
+  return (
+    /EMAXCONNSESSION/i.test(msg) ||
+    /max clients reached/i.test(msg) ||
+    /Can't reach database server/i.test(msg) ||
+    /P1001|P2024/i.test(msg)
+  );
+}
+
 export async function getCommercialDashboardMetrics(
+  input: DashboardMetricsInput,
+): Promise<CommercialDashboardMetrics> {
+  try {
+    return await loadCommercialDashboardMetrics(input);
+  } catch (err) {
+    if (!isPoolExhaustedError(err)) throw err;
+    console.warn(
+      "[dashboard-metrics] pool saturé — nouvel essai après pause courte",
+      { orgId: input.orgId },
+    );
+    await new Promise((r) => setTimeout(r, 350));
+    return loadCommercialDashboardMetrics(input);
+  }
+}
+
+async function loadCommercialDashboardMetrics(
   input: DashboardMetricsInput,
 ): Promise<CommercialDashboardMetrics> {
   const { orgId, period } = input;
@@ -283,338 +335,383 @@ export async function getCommercialDashboardMetrics(
     recentInvoices,
     clients,
     projects,
-  ] = await Promise.all([
-    prisma.commercialQuote.count({
-      where: { organizationId: orgId, ...quoteExtra },
-    }),
-    prisma.commercialQuote.groupBy({
-      by: ["status"],
-      where: { organizationId: orgId, ...quoteExtra },
-      _count: true,
-      _sum: { totalSellHt: true },
-    }),
-    prisma.commercialInvoice.aggregate({
-      where: issuedWhere(orgId, period.from, period.toExclusive, {
-        ...extra,
-        type: { not: "CREDIT" },
-      }),
-      _sum: { totalSellHt: true, totalTtc: true },
-      _count: true,
-    }),
-    prisma.commercialInvoice.aggregate({
-      where: issuedWhere(orgId, period.previousFrom, period.previousToExclusive, {
-        ...extra,
-        type: { not: "CREDIT" },
-      }),
-      _sum: { totalSellHt: true },
-      _count: true,
-    }),
-    prisma.commercialInvoice.aggregate({
-      where: issuedWhere(orgId, period.from, period.toExclusive, {
-        ...extra,
-        type: "CREDIT",
-      }),
-      _sum: { totalSellHt: true, totalVat: true },
-    }),
-    prisma.commercialInvoice.aggregate({
-      where: issuedWhere(orgId, period.previousFrom, period.previousToExclusive, {
-        ...extra,
-        type: "CREDIT",
-      }),
-      _sum: { totalSellHt: true },
-    }),
-    prisma.commercialPayment.aggregate({
-      where: {
-        organizationId: orgId,
-        cancelledAt: null,
-        paidAt: { gte: period.from, lt: period.toExclusive },
-        invoice: { type: { not: "CREDIT" }, ...extra },
-      },
-      _sum: { amount: true },
-      _count: true,
-    }),
-    prisma.commercialPayment.aggregate({
-      where: {
-        organizationId: orgId,
-        cancelledAt: null,
-        paidAt: { gte: period.previousFrom, lt: period.previousToExclusive },
-        invoice: { type: { not: "CREDIT" }, ...extra },
-      },
-      _sum: { amount: true },
-    }),
-    prisma.commercialInvoice.aggregate({
-      where: issuedWhere(orgId, period.from, period.toExclusive, {
-        ...extra,
-        type: { not: "CREDIT" },
-      }),
-      _sum: { totalVat: true },
-    }),
-    prisma.commercialInvoice.aggregate({
-      where: issuedWhere(orgId, period.from, period.toExclusive, {
-        ...extra,
-        type: "CREDIT",
-      }),
-      _sum: { totalVat: true },
-    }),
-    input.canSeePurchases
-      ? prisma.supplierInvoice.aggregate({
+  ] = await mapPool(
+    [
+      () =>
+        prisma.commercialQuote.count({
+          where: { organizationId: orgId, ...quoteExtra },
+        }),
+      () =>
+        prisma.commercialQuote.groupBy({
+          by: ["status"],
+          where: { organizationId: orgId, ...quoteExtra },
+          _count: true,
+          _sum: { totalSellHt: true },
+        }),
+      () =>
+        prisma.commercialInvoice.aggregate({
+          where: issuedWhere(orgId, period.from, period.toExclusive, {
+            ...extra,
+            type: { not: "CREDIT" },
+          }),
+          _sum: { totalSellHt: true, totalTtc: true },
+          _count: true,
+        }),
+      () =>
+        prisma.commercialInvoice.aggregate({
+          where: issuedWhere(
+            orgId,
+            period.previousFrom,
+            period.previousToExclusive,
+            { ...extra, type: { not: "CREDIT" } },
+          ),
+          _sum: { totalSellHt: true },
+          _count: true,
+        }),
+      () =>
+        prisma.commercialInvoice.aggregate({
+          where: issuedWhere(orgId, period.from, period.toExclusive, {
+            ...extra,
+            type: "CREDIT",
+          }),
+          _sum: { totalSellHt: true, totalVat: true },
+        }),
+      () =>
+        prisma.commercialInvoice.aggregate({
+          where: issuedWhere(
+            orgId,
+            period.previousFrom,
+            period.previousToExclusive,
+            { ...extra, type: "CREDIT" },
+          ),
+          _sum: { totalSellHt: true },
+        }),
+      () =>
+        prisma.commercialPayment.aggregate({
           where: {
             organizationId: orgId,
-            status: "RECORDED",
-            kind: { not: "CREDIT" },
             cancelledAt: null,
-            invoiceDate: { gte: period.from, lt: period.toExclusive },
-            ...(projectId ? { projectId } : {}),
+            paidAt: { gte: period.from, lt: period.toExclusive },
+            invoice: { type: { not: "CREDIT" }, ...extra },
           },
-          _sum: { amountVat: true },
-        })
-      : Promise.resolve(null),
-    prisma.commercialInvoice.findMany({
-      where: {
-        organizationId: orgId,
-        status: { in: OPEN },
-        type: { not: "CREDIT" },
-        amountDue: { gt: 0 },
-        ...extra,
-      },
-      select: {
-        id: true,
-        number: true,
-        status: true,
-        amountDue: true,
-        amountPaid: true,
-        totalTtc: true,
-        dueDate: true,
-        clientExternalOrg: { select: { name: true, tradeName: true } },
-      },
-    }),
-    prisma.commercialInvoice.findMany({
-      where: issuedWhere(orgId, period.from, period.toExclusive, {
-        ...extra,
-        type: { not: "CREDIT" },
-      }),
-      select: { issueDate: true, totalSellHt: true },
-    }),
-    prisma.commercialPayment.findMany({
-      where: {
-        organizationId: orgId,
-        cancelledAt: null,
-        paidAt: { gte: period.from, lt: period.toExclusive },
-        invoice: { type: { not: "CREDIT" }, ...extra },
-      },
-      select: { paidAt: true, amount: true },
-    }),
-    prisma.commercialQuote.findMany({
-      where: {
-        organizationId: orgId,
-        status: "ACCEPTED",
-        acceptedAt: { gte: period.from, lt: period.toExclusive },
-        ...quoteExtra,
-      },
-      select: { acceptedAt: true, totalSellHt: true, sentAt: true },
-    }),
-    prisma.commercialQuote.groupBy({
-      by: ["status"],
-      where: {
-        organizationId: orgId,
-        status: { in: DECIDED },
-        OR: [
-          { acceptedAt: { gte: period.from, lt: period.toExclusive } },
-          {
-            acceptedAt: null,
-            status: "REFUSED",
-            updatedAt: { gte: period.from, lt: period.toExclusive },
-          },
-        ],
-        ...quoteExtra,
-      },
-      _count: true,
-      _sum: { totalSellHt: true },
-    }),
-    prisma.commercialQuote.groupBy({
-      by: ["status"],
-      where: {
-        organizationId: orgId,
-        status: { in: DECIDED },
-        OR: [
-          {
-            acceptedAt: {
+          _sum: { amount: true },
+          _count: true,
+        }),
+      () =>
+        prisma.commercialPayment.aggregate({
+          where: {
+            organizationId: orgId,
+            cancelledAt: null,
+            paidAt: {
               gte: period.previousFrom,
               lt: period.previousToExclusive,
             },
+            invoice: { type: { not: "CREDIT" }, ...extra },
           },
-          {
-            acceptedAt: null,
-            status: "REFUSED",
-            updatedAt: {
-              gte: period.previousFrom,
-              lt: period.previousToExclusive,
-            },
+          _sum: { amount: true },
+        }),
+      () =>
+        prisma.commercialInvoice.aggregate({
+          where: issuedWhere(orgId, period.from, period.toExclusive, {
+            ...extra,
+            type: { not: "CREDIT" },
+          }),
+          _sum: { totalVat: true },
+        }),
+      () =>
+        prisma.commercialInvoice.aggregate({
+          where: issuedWhere(orgId, period.from, period.toExclusive, {
+            ...extra,
+            type: "CREDIT",
+          }),
+          _sum: { totalVat: true },
+        }),
+      () =>
+        input.canSeePurchases
+          ? prisma.supplierInvoice.aggregate({
+              where: {
+                organizationId: orgId,
+                status: "RECORDED",
+                kind: { not: "CREDIT" },
+                cancelledAt: null,
+                invoiceDate: { gte: period.from, lt: period.toExclusive },
+                ...(projectId ? { projectId } : {}),
+              },
+              _sum: { amountVat: true },
+            })
+          : Promise.resolve(null),
+      () =>
+        prisma.commercialInvoice.findMany({
+          where: {
+            organizationId: orgId,
+            status: { in: OPEN },
+            type: { not: "CREDIT" },
+            amountDue: { gt: 0 },
+            ...extra,
           },
-        ],
-        ...quoteExtra,
-      },
-      _count: true,
-    }),
-    prisma.commercialQuote.findMany({
-      where: {
-        organizationId: orgId,
-        status: "ACCEPTED",
-        acceptedAt: { gte: period.from, lt: period.toExclusive },
-        sentAt: { not: null },
-        ...quoteExtra,
-      },
-      select: { acceptedAt: true, sentAt: true, totalSellHt: true },
-    }),
-    prisma.commercialInvoice.findMany({
-      where: {
-        organizationId: orgId,
-        status: "PAID",
-        type: { not: "CREDIT" },
-        issueDate: { gte: period.from, lt: period.toExclusive },
-        ...extra,
-      },
-      select: {
-        issueDate: true,
-        dueDate: true,
-        payments: {
-          where: { cancelledAt: null },
-          select: { paidAt: true },
-          orderBy: { paidAt: "desc" },
-          take: 1,
-        },
-      },
-      take: 400,
-    }),
-    prisma.commercialQuote.findMany({
-      where: {
-        organizationId: orgId,
-        status: { in: ["SENT", "VIEWED"] },
-        OR: [
-          { sentAt: { lte: relanceBefore } },
-          { AND: [{ sentAt: null }, { updatedAt: { lte: relanceBefore } }] },
-        ],
-        ...quoteExtra,
-      },
-      orderBy: { updatedAt: "asc" },
-      take: 4,
-      select: {
-        id: true,
-        number: true,
-        totalSellHt: true,
-        sentAt: true,
-        updatedAt: true,
-        clientExternalOrg: { select: { name: true, tradeName: true } },
-      },
-    }),
-    prisma.commercialInvoice.findMany({
-      where: {
-        organizationId: orgId,
-        status: "DRAFT",
-        type: { not: "CREDIT" },
-        ...extra,
-      },
-      orderBy: { updatedAt: "desc" },
-      take: 3,
-      select: {
-        id: true,
-        number: true,
-        totalTtc: true,
-        clientExternalOrg: { select: { name: true, tradeName: true } },
-      },
-    }),
-    prisma.commercialInvoice.findMany({
-      where: {
-        organizationId: orgId,
-        status: { in: ["PARTIALLY_PAID", "OVERDUE"] },
-        type: { not: "CREDIT" },
-        amountPaid: { gt: 0 },
-        amountDue: { gt: 0 },
-        ...extra,
-      },
-      orderBy: { updatedAt: "desc" },
-      take: 3,
-      select: {
-        id: true,
-        number: true,
-        amountPaid: true,
-        amountDue: true,
-        totalTtc: true,
-        clientExternalOrg: { select: { name: true, tradeName: true } },
-      },
-    }),
-    prisma.commercialProgressStatement.findMany({
-      where: {
-        organizationId: orgId,
-        status: "VALIDATED",
-        invoice: null,
-        ...(projectId ? { projectId } : {}),
-      },
-      orderBy: { updatedAt: "desc" },
-      take: 3,
-      select: {
-        id: true,
-        number: true,
-        label: true,
-        periodSellHt: true,
-        quote: {
           select: {
+            id: true,
             number: true,
+            status: true,
+            amountDue: true,
+            amountPaid: true,
+            totalTtc: true,
+            dueDate: true,
             clientExternalOrg: { select: { name: true, tradeName: true } },
           },
-        },
-      },
-    }),
-    prisma.commercialQuote.findMany({
-      where: { organizationId: orgId, ...quoteExtra },
-      orderBy: { updatedAt: "desc" },
-      take: 6,
-      select: {
-        id: true,
-        number: true,
-        status: true,
-        totalSellHt: true,
-        issueDate: true,
-        projectId: true,
-        validityDate: true,
-        clientExternalOrg: { select: { name: true, tradeName: true } },
-        project: { select: { title: true } },
-      },
-    }),
-    prisma.commercialInvoice.findMany({
-      where: { organizationId: orgId, type: { not: "CREDIT" }, ...extra },
-      orderBy: { updatedAt: "desc" },
-      take: 6,
-      select: {
-        id: true,
-        number: true,
-        status: true,
-        totalTtc: true,
-        amountPaid: true,
-        amountDue: true,
-        issueDate: true,
-        dueDate: true,
-        clientExternalOrg: { select: { name: true, tradeName: true } },
-        project: { select: { title: true } },
-      },
-    }),
-    prisma.externalOrganization.findMany({
-      where: {
-        hostOrganizationId: orgId,
-        type: { in: ["CLIENT_EXT", "CLIENT"] },
-        status: "ACTIVE",
-      },
-      select: { id: true, name: true, tradeName: true },
-      orderBy: { name: "asc" },
-      take: 80,
-    }),
-    prisma.project.findMany({
-      where: { organizationId: orgId },
-      select: { id: true, title: true },
-      orderBy: { updatedAt: "desc" },
-      take: 60,
-    }),
-  ]);
+        }),
+      () =>
+        prisma.commercialInvoice.findMany({
+          where: issuedWhere(orgId, period.from, period.toExclusive, {
+            ...extra,
+            type: { not: "CREDIT" },
+          }),
+          select: { issueDate: true, totalSellHt: true },
+        }),
+      () =>
+        prisma.commercialPayment.findMany({
+          where: {
+            organizationId: orgId,
+            cancelledAt: null,
+            paidAt: { gte: period.from, lt: period.toExclusive },
+            invoice: { type: { not: "CREDIT" }, ...extra },
+          },
+          select: { paidAt: true, amount: true },
+        }),
+      () =>
+        prisma.commercialQuote.findMany({
+          where: {
+            organizationId: orgId,
+            status: "ACCEPTED",
+            acceptedAt: { gte: period.from, lt: period.toExclusive },
+            ...quoteExtra,
+          },
+          select: { acceptedAt: true, totalSellHt: true, sentAt: true },
+        }),
+      () =>
+        prisma.commercialQuote.groupBy({
+          by: ["status"],
+          where: {
+            organizationId: orgId,
+            status: { in: DECIDED },
+            OR: [
+              { acceptedAt: { gte: period.from, lt: period.toExclusive } },
+              {
+                acceptedAt: null,
+                status: "REFUSED",
+                updatedAt: { gte: period.from, lt: period.toExclusive },
+              },
+            ],
+            ...quoteExtra,
+          },
+          _count: true,
+          _sum: { totalSellHt: true },
+        }),
+      () =>
+        prisma.commercialQuote.groupBy({
+          by: ["status"],
+          where: {
+            organizationId: orgId,
+            status: { in: DECIDED },
+            OR: [
+              {
+                acceptedAt: {
+                  gte: period.previousFrom,
+                  lt: period.previousToExclusive,
+                },
+              },
+              {
+                acceptedAt: null,
+                status: "REFUSED",
+                updatedAt: {
+                  gte: period.previousFrom,
+                  lt: period.previousToExclusive,
+                },
+              },
+            ],
+            ...quoteExtra,
+          },
+          _count: true,
+        }),
+      () =>
+        prisma.commercialQuote.findMany({
+          where: {
+            organizationId: orgId,
+            status: "ACCEPTED",
+            acceptedAt: { gte: period.from, lt: period.toExclusive },
+            sentAt: { not: null },
+            ...quoteExtra,
+          },
+          select: { acceptedAt: true, sentAt: true, totalSellHt: true },
+        }),
+      () =>
+        prisma.commercialInvoice.findMany({
+          where: {
+            organizationId: orgId,
+            status: "PAID",
+            type: { not: "CREDIT" },
+            issueDate: { gte: period.from, lt: period.toExclusive },
+            ...extra,
+          },
+          select: {
+            issueDate: true,
+            dueDate: true,
+            payments: {
+              where: { cancelledAt: null },
+              select: { paidAt: true },
+              orderBy: { paidAt: "desc" },
+              take: 1,
+            },
+          },
+          take: 400,
+        }),
+      () =>
+        prisma.commercialQuote.findMany({
+          where: {
+            organizationId: orgId,
+            status: { in: ["SENT", "VIEWED"] },
+            OR: [
+              { sentAt: { lte: relanceBefore } },
+              {
+                AND: [{ sentAt: null }, { updatedAt: { lte: relanceBefore } }],
+              },
+            ],
+            ...quoteExtra,
+          },
+          orderBy: { updatedAt: "asc" },
+          take: 4,
+          select: {
+            id: true,
+            number: true,
+            totalSellHt: true,
+            sentAt: true,
+            updatedAt: true,
+            clientExternalOrg: { select: { name: true, tradeName: true } },
+          },
+        }),
+      () =>
+        prisma.commercialInvoice.findMany({
+          where: {
+            organizationId: orgId,
+            status: "DRAFT",
+            type: { not: "CREDIT" },
+            ...extra,
+          },
+          orderBy: { updatedAt: "desc" },
+          take: 3,
+          select: {
+            id: true,
+            number: true,
+            totalTtc: true,
+            clientExternalOrg: { select: { name: true, tradeName: true } },
+          },
+        }),
+      () =>
+        prisma.commercialInvoice.findMany({
+          where: {
+            organizationId: orgId,
+            status: { in: ["PARTIALLY_PAID", "OVERDUE"] },
+            type: { not: "CREDIT" },
+            amountPaid: { gt: 0 },
+            amountDue: { gt: 0 },
+            ...extra,
+          },
+          orderBy: { updatedAt: "desc" },
+          take: 3,
+          select: {
+            id: true,
+            number: true,
+            amountPaid: true,
+            amountDue: true,
+            totalTtc: true,
+            clientExternalOrg: { select: { name: true, tradeName: true } },
+          },
+        }),
+      () =>
+        prisma.commercialProgressStatement.findMany({
+          where: {
+            organizationId: orgId,
+            status: "VALIDATED",
+            invoice: null,
+            ...(projectId ? { projectId } : {}),
+          },
+          orderBy: { updatedAt: "desc" },
+          take: 3,
+          select: {
+            id: true,
+            number: true,
+            label: true,
+            periodSellHt: true,
+            quote: {
+              select: {
+                number: true,
+                clientExternalOrg: {
+                  select: { name: true, tradeName: true },
+                },
+              },
+            },
+          },
+        }),
+      () =>
+        prisma.commercialQuote.findMany({
+          where: { organizationId: orgId, ...quoteExtra },
+          orderBy: { updatedAt: "desc" },
+          take: 6,
+          select: {
+            id: true,
+            number: true,
+            status: true,
+            totalSellHt: true,
+            issueDate: true,
+            projectId: true,
+            validityDate: true,
+            clientExternalOrg: { select: { name: true, tradeName: true } },
+            project: { select: { title: true } },
+          },
+        }),
+      () =>
+        prisma.commercialInvoice.findMany({
+          where: {
+            organizationId: orgId,
+            type: { not: "CREDIT" },
+            ...extra,
+          },
+          orderBy: { updatedAt: "desc" },
+          take: 6,
+          select: {
+            id: true,
+            number: true,
+            status: true,
+            totalTtc: true,
+            amountPaid: true,
+            amountDue: true,
+            issueDate: true,
+            dueDate: true,
+            clientExternalOrg: { select: { name: true, tradeName: true } },
+            project: { select: { title: true } },
+          },
+        }),
+      () =>
+        prisma.externalOrganization.findMany({
+          where: {
+            hostOrganizationId: orgId,
+            type: { in: ["CLIENT_EXT", "CLIENT"] },
+            status: "ACTIVE",
+          },
+          select: { id: true, name: true, tradeName: true },
+          orderBy: { name: "asc" },
+          take: 80,
+        }),
+      () =>
+        prisma.project.findMany({
+          where: { organizationId: orgId },
+          select: { id: true, title: true },
+          orderBy: { updatedAt: "desc" },
+          take: 60,
+        }),
+    ],
+    4,
+  );
 
   const invoiceCount = billedNow._count + recentInvoices.length;
   const empty = quoteCount === 0 && invoiceCount === 0 && openInvoices.length === 0;

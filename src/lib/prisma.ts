@@ -3,6 +3,34 @@ import { isPerfLogEnabled, recordPerfQuery } from "@/lib/perf/server-timing";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
+/**
+ * Pooler Supabase (session 5432 / transaction 6543) : plafonner le pool Prisma
+ * pour éviter EMAXCONNSESSION (max ~15 clients session mode partagés).
+ */
+function hardenDatabaseUrl(raw: string): string {
+  try {
+    const u = new URL(raw);
+    const isPooler =
+      /pooler\.supabase\.com/i.test(u.hostname) ||
+      u.port === "6543" ||
+      u.searchParams.get("pgbouncer") === "true";
+    if (!isPooler) return raw;
+
+    if (u.port === "6543" && !u.searchParams.has("pgbouncer")) {
+      u.searchParams.set("pgbouncer", "true");
+    }
+    if (!u.searchParams.has("connection_limit")) {
+      u.searchParams.set("connection_limit", "4");
+    }
+    if (!u.searchParams.has("pool_timeout")) {
+      u.searchParams.set("pool_timeout", "20");
+    }
+    return u.toString();
+  } catch {
+    return raw;
+  }
+}
+
 // Prisma Client (requêtes runtime) : DATABASE_URL (pooler Supabase 6543 recommandé avec ?pgbouncer=true).
 // DIRECT_URL sert surtout aux migrations / db push via `schema.prisma` `directUrl`.
 function getConnectionUrl(): string {
@@ -11,8 +39,8 @@ function getConnectionUrl(): string {
   const isPg = (u: string) =>
     u.startsWith("postgresql://") || u.startsWith("postgres://");
 
-  if (pool && isPg(pool)) return pool;
-  if (direct && isPg(direct)) return direct;
+  if (pool && isPg(pool)) return hardenDatabaseUrl(pool);
+  if (direct && isPg(direct)) return hardenDatabaseUrl(direct);
   return "";
 }
 

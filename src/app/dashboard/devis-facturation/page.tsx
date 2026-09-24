@@ -107,8 +107,19 @@ export default async function DevisFacturationDashboardPage({
         period: period.preset,
         err,
       });
+      const msg = err instanceof Error ? err.message : String(err ?? "");
+      const poolSaturated =
+        /EMAXCONNSESSION|max clients reached|Can't reach database server|P1001|P2024/i.test(
+          msg,
+        );
       return (
-        <DashboardLoadFallback message="Le calcul des indicateurs a échoué. Réessayez dans un instant. Les listes Devis et Factures restent accessibles." />
+        <DashboardLoadFallback
+          message={
+            poolSaturated
+              ? "La base est temporairement saturée. Réessayez dans quelques secondes — les listes Devis et Factures restent accessibles."
+              : "Le calcul des indicateurs a échoué. Réessayez dans un instant. Les listes Devis et Factures restent accessibles."
+          }
+        />
       );
     }
 

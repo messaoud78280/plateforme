@@ -733,10 +733,12 @@ export async function getCommercialDashboardMetrics(
   const collectedMap = new Map<string, number>();
   const acceptedMap = new Map<string, number>();
   for (const inv of seriesInvoices) {
+    if (!inv.issueDate) continue;
     const key = bucketKey(inv.issueDate, granularity);
     billedMap.set(key, (billedMap.get(key) ?? 0) + d(inv.totalSellHt));
   }
   for (const pay of seriesPayments) {
+    if (!pay.paidAt) continue;
     const key = bucketKey(pay.paidAt, granularity);
     collectedMap.set(key, (collectedMap.get(key) ?? 0) + d(pay.amount));
   }
@@ -773,7 +775,7 @@ export async function getCommercialDashboardMetrics(
   let timed = 0;
   for (const inv of paidTiming) {
     const paidAt = inv.payments[0]?.paidAt;
-    if (!paidAt) continue;
+    if (!paidAt || !inv.issueDate) continue;
     const days = (paidAt.getTime() - inv.issueDate.getTime()) / 86_400_000;
     if (days >= 0) collectionDays.push(days);
     if (inv.dueDate) {

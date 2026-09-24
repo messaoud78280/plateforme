@@ -13,10 +13,10 @@ type Props = {
 };
 
 const LOGO_SIZE = {
-  card: { width: 220, height: 109 },
-  compact: { width: 148, height: 74 },
-  inline: { width: 132, height: 66 },
-  header: { width: 118, height: 59 },
+  card: { width: 240, height: 101 },
+  compact: { width: 160, height: 67 },
+  inline: { width: 140, height: 59 },
+  header: { width: 128, height: 54 },
 } as const;
 
 /**

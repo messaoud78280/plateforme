@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import {
   Area,
   CartesianGrid,
@@ -144,6 +144,12 @@ export function CommercialDashboard({
   });
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  /** Recharts ResponsiveContainer plante au SSR (width/height -1) — monter après hydratation. */
+  const [chartReady, setChartReady] = useState(false);
+
+  useEffect(() => {
+    setChartReady(true);
+  }, []);
 
   const load = useCallback(
     (next: {
@@ -597,7 +603,7 @@ export function CommercialDashboard({
             </div>
           </div>
           <div className="mt-4 h-[280px]">
-            {pending ? (
+            {pending || !chartReady ? (
               <Skeleton className="h-full w-full" />
             ) : metrics.revenueSeries.every(
                 (p) => p.billedHt === 0 && p.collectedTtc === 0 && p.acceptedHt === 0,

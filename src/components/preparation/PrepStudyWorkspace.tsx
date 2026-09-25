@@ -33,6 +33,10 @@ import {
   type LineStatus,
 } from "./prep-ui";
 import { PrepImportModal, type PrepProjectOption } from "./PrepImportModal";
+import { PrepLineTechSheetPanel } from "./PrepLineTechSheetPanel";
+import {
+  studyNeedsC01TextEnrichment,
+} from "@/lib/preparation/enrichment/c01-fondations-texts";
 
 type Tab = "metre" | "params" | "hypotheses" | "preparation" | "historique";
 type Flash = { tone: "ok" | "error" | "conflict"; text: string } | null;
@@ -75,6 +79,7 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
   const [roleFilter, setRoleFilter] = useState<"all" | LineRole>("all");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [sheetCode, setSheetCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [flash, setFlash] = useState<Flash>(null);
   const [importOpen, setImportOpen] = useState(false);
@@ -281,6 +286,81 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
     }
   }
 
+  async function enrichTexts() {
+    setBusy(true);
+    setFlash(null);
+    try {
+      const { res, data } = await callApi(`/api/prep-studies/${study.id}/enrich-texts`, "POST", {
+        expectedVersion: study.version,
+        source: "c01-fondations",
+      });
+      if (res.status === 409) {
+        setFlash({ tone: "conflict", text: data?.error ?? "Conflit de version" });
+        return;
+      }
+      if (!res.ok || !data?.study) {
+        setFlash({ tone: "error", text: data?.error ?? "Enrichissement impossible" });
+        return;
+      }
+      setStudy(data.study);
+      setFlash({
+        tone: "ok",
+        text: `Fiches techniques enrichies — ${data.updated ?? 0} ligne(s) mise(s) à jour, quantités inchangées.`,
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveLineTexts(
+    code: string,
+    texts: {
+      designation: string;
+      description: string | null;
+      includedServices: string[];
+      technicalReferences: NonNullable<PrepLineDTO["technicalReferences"]>;
+      executionNotes: string | null;
+      qualityControls: string[];
+      technicalReservations: string[];
+    },
+  ) {
+    setBusy(true);
+    setFlash(null);
+    try {
+      const { res, data } = await callApi(`/api/prep-studies/${study.id}`, "PATCH", {
+        expectedVersion: study.version,
+        lines: [{ code, texts }],
+      });
+      if (res.status === 409) {
+        setFlash({ tone: "conflict", text: data?.error ?? "Conflit de version" });
+        return;
+      }
+      if (!res.ok || !data?.study) {
+        setFlash({ tone: "error", text: data?.error ?? "Enregistrement de la fiche impossible" });
+        return;
+      }
+      setStudy(data.study);
+      setFlash({ tone: "ok", text: `Fiche ${code} enregistrée — quantités inchangées.` });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const needsEnrichment = studyNeedsC01TextEnrichment(study);
+  const sheetLine = sheetCode ? lines.find((l) => l.code === sheetCode) : null;
+
+  function lineCharacteristics(line: PrepLineDTO): { label: string; value: string }[] {
+    const keys = line.formula ? inputParamsOf(engine, line.code) : [];
+    return keys
+      .map((k) => paramByKey.get(k))
+      .filter((p): p is PrepParamDTO => !!p && p.value !== null)
+      .slice(0, 8)
+      .map((p) => ({
+        label: p.label,
+        value: `${formatQty(p.value)} ${displayUnit(p.unit)}`,
+      }));
+  }
+
   const kpis = useMemo(() => {
     let quote = 0, indicator = 0, hypo = 0, verify = 0, revalidate = 0, errors = 0, validated = 0;
     for (const l of lines) {
@@ -408,6 +488,25 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
       </header>
 
       {study.mode === "DEMONSTRATION" ? <DemoBanner /> : null}
+      {needsEnrichment ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.04] px-4 py-3">
+          <div className="min-w-0 text-[13px] text-slate-700">
+            <p className="font-medium text-[#1e3a5f]">Désignations professionnelles disponibles</p>
+            <p className="mt-0.5 text-slate-600">
+              Enrichit les intitulés et fiches techniques du scénario C-01 sans modifier les quantités, formules ni paramètres.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={busy || dirty}
+            onClick={() => void enrichTexts()}
+            className="shrink-0 rounded-xl bg-[#1e3a5f] px-3.5 py-2 text-[13px] font-medium text-white disabled:opacity-40"
+            title={dirty ? "Enregistrez ou annulez vos modifications de quantités avant" : undefined}
+          >
+            Enrichir les fiches techniques
+          </button>
+        </div>
+      ) : null}
 
       {confirmUndo && study.lastImport ? (
         <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-900">
@@ -589,6 +688,7 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
                               valueOf={valueOf}
                               expanded={expanded === l.code}
                               onToggle={() => setExpanded((c) => (c === l.code ? null : l.code))}
+                              onOpenSheet={() => setSheetCode(l.code)}
                               onEditParam={editParam}
                               onEditLine={editLine}
                               onRestoreLine={restoreLine}
@@ -681,6 +781,19 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
           onImported={() => window.location.reload()}
         />
       ) : null}
+
+      {sheetLine ? (
+        <PrepLineTechSheetPanel
+          line={sheetLine}
+          quantity={engine.nodes.get(sheetLine.code)?.value ?? null}
+          characteristics={lineCharacteristics(sheetLine)}
+          busy={busy}
+          onClose={() => setSheetCode(null)}
+          onSave={async (texts) => {
+            await saveLineTexts(sheetLine.code, texts);
+          }}
+        />
+      ) : null}
     </div>
   );
 }
@@ -759,6 +872,7 @@ function LineRow({
   valueOf,
   expanded,
   onToggle,
+  onOpenSheet,
   onEditParam,
   onEditLine,
   onRestoreLine,
@@ -777,6 +891,7 @@ function LineRow({
   valueOf: (ref: string) => number | null;
   expanded: boolean;
   onToggle: () => void;
+  onOpenSheet: () => void;
   onEditParam: (key: string, v: number) => void;
   onEditLine: (code: string, v: number) => void;
   onRestoreLine: (code: string) => void;
@@ -821,7 +936,7 @@ function LineRow({
         </td>
         <td className="max-w-[18rem] px-3 py-2">
           <p className="text-slate-900">{line.designation}</p>
-          <div className="mt-1 flex flex-wrap gap-1">
+          <div className="mt-1 flex flex-wrap items-center gap-1">
             <RoleBadge role={line.role} />
             <NatureBadge nature={line.nature} />
             {linkedDecisions.length ? (
@@ -829,6 +944,13 @@ function LineRow({
                 {linkedDecisions.length} décision(s) ouverte(s)
               </Chip>
             ) : null}
+            <button
+              type="button"
+              onClick={onOpenSheet}
+              className="rounded-md px-1.5 py-0.5 text-[11px] font-medium text-[#1e3a5f] underline-offset-2 hover:bg-[#1e3a5f]/5 hover:underline"
+            >
+              Fiche technique
+            </button>
           </div>
         </td>
         <td className="px-3 py-2">
@@ -932,7 +1054,19 @@ function LineRow({
                     {line.justification}
                   </p>
                 ) : null}
-                {line.description ? <p className="text-slate-600">{line.description}</p> : null}
+                {line.description ? (
+                  <p className="line-clamp-3 text-slate-600">
+                    <span className="font-medium text-slate-800">Description : </span>
+                    {line.description}
+                  </p>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={onOpenSheet}
+                  className="rounded-lg bg-white px-2.5 py-1.5 text-[12px] font-medium text-[#1e3a5f] ring-1 ring-[#1e3a5f]/20 hover:bg-[#1e3a5f]/5"
+                >
+                  Ouvrir la fiche technique
+                </button>
                 {line.notes ? <p className="text-slate-500">Note : {line.notes}</p> : null}
                 {line.formula && line.declaredQuantity !== null ? (
                   <p className="text-slate-500">

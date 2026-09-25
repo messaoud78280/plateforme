@@ -75,13 +75,38 @@ export type PrepParamDTO = {
   modifiedAt: string | null;
 };
 
+/** Nature d'une référence technique rattachée à une ligne de métré. */
+export type TechRefKind = "INDICATIVE" | "DOSSIER" | "TO_VERIFY";
+export const TECH_REF_KINDS: TechRefKind[] = ["INDICATIVE", "DOSSIER", "TO_VERIFY"];
+export const TECH_REF_KIND_LABELS: Record<TechRefKind, string> = {
+  INDICATIVE: "Référence technique indicative",
+  DOSSIER: "Prescription du dossier d'exécution",
+  TO_VERIFY: "Point restant à vérifier",
+};
+
+export type PrepTechnicalReference = {
+  label: string;
+  kind: TechRefKind;
+  note: string | null;
+};
+
 /** Ligne de métré telle que consommée par le moteur et l'interface. */
 export type PrepLineDTO = {
   code: string;
   lot: string;
   subLot: string | null;
   designation: string;
+  /** Description technique développée (alias JSON : technical_description). */
   description: string | null;
+  includedServices: string[];
+  technicalReferences: PrepTechnicalReference[];
+  executionNotes: string | null;
+  qualityControls: string[];
+  technicalReservations: string[];
+  /** Désignation d'origine à l'import — sert à détecter une retouche manuelle. */
+  originalDesignation: string | null;
+  /** true si l'utilisateur a modifié manuellement la fiche technique. */
+  textsUserEdited: boolean;
   unit: string;
   elementIds: string[];
   formula: string | null;
@@ -98,6 +123,17 @@ export type PrepLineDTO = {
   originalProvenance: StoredProvenance | null;
   validatedQuantity: number | null;
   validatedAt: string | null;
+};
+
+/** Champs texte d'une fiche technique (indépendants du calcul). */
+export type PrepLineTextFields = {
+  designation?: string;
+  description?: string | null;
+  includedServices?: string[];
+  technicalReferences?: PrepTechnicalReference[];
+  executionNotes?: string | null;
+  qualityControls?: string[];
+  technicalReservations?: string[];
 };
 
 export type PrepLot = { code: string; label: string };

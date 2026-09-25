@@ -55,8 +55,13 @@ RÈGLES ABSOLUES
    qui servira de contrôle. BeWork recalcule et signale tout écart.
 
 6. Désignations exploitables sur chantier : nature, localisation, limites de prestation.
-   Précise dans "description" ou "notes" ce qui est compris et non compris lorsqu'un flou
-   pourrait créer une plus-value ou un litige.
+   Utilise une désignation courte dans "designation" et développe dans "technical_description"
+   (ou "description") : objet des travaux, prestations comprises ("included_services"),
+   méthode, contrôles ("quality_controls"), réserves ("technical_reservations").
+   Références techniques dans "technical_references" : { "label", "kind", "note" }
+   avec kind = "INDICATIVE" | "DOSSIER" | "TO_VERIFY".
+   N'invente pas d'article précis de norme. Distingue l'indicatif du prescrit et du « à vérifier ».
+   Ne place jamais une quantité dans la description : le moteur de calcul reste indépendant.
 
 7. Mode opératoire ("workflow.steps") : une intervention par étape, de l'installation jusqu'au repli.
    Pour chaque étape : "kind" ("work" | "control" | "wait"), "takeoff_ids", "duration",

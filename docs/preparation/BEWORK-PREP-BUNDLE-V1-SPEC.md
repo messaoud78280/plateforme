@@ -182,8 +182,14 @@ BeWork calcule lui-même la liste des paramètres et lignes affectés, via `hypo
 | `id` | oui | Identifiant de ligne (§3.1). |
 | `lot` | oui | Code de lot existant. |
 | `sub_lot` | non | Sous-lot libre. |
-| `designation` | oui | Libellé exploitable sur chantier et en devis. |
-| `description` | non | Précisions (compris, limites de prestation). |
+| `designation` | oui | Libellé court exploitable sur chantier et en devis. |
+| `description` | non | Alias historique de `technical_description`. |
+| `technical_description` | non | Description technique développée (fiche poste / type CCTP). |
+| `included_services` | non | Prestations comprises (`string[]` ou texte multiligne). |
+| `technical_references` | non | Références techniques : `{ label, kind, note? }` avec `kind` = `INDICATIVE` \| `DOSSIER` \| `TO_VERIFY`. |
+| `execution_notes` | non | Notes d'exécution. |
+| `quality_controls` | non | Contrôles à effectuer (`string[]`). |
+| `technical_reservations` | non | Points restant à confirmer (`string[]`). |
 | `unit` | oui | Unité canonique. |
 | `element_ids` | non | Ouvrages concernés. |
 | `formula` | non | Expression. Si présente, la quantité est **toujours** recalculée. |

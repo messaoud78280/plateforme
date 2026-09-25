@@ -5372,7 +5372,18 @@ model PrepTakeoffLine {
   lot                    String
   subLot                 String?
   designation            String
+  /// Description technique développée (fiche poste).
   description            String?   @db.Text
+  /// Prestations comprises (liste).
+  includedServicesJson   Json?
+  /// Références techniques { label, kind, note }.
+  technicalReferencesJson Json?
+  executionNotes         String?   @db.Text
+  qualityControlsJson    Json?
+  technicalReservationsJson Json?
+  /// Désignation à l'import — non écrasée si l'utilisateur a retouché la fiche.
+  originalDesignation    String?
+  textsUserEdited        Boolean   @default(false)
   unit                   String
   elementIdsJson         Json?
   formula                String?   @db.Text

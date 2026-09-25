@@ -22,8 +22,11 @@ import {
   type PrepIssue,
   type PrepLot,
   type PrepSource,
+  type PrepTechnicalReference,
   type StoredProvenance,
   type StudyMode,
+  type TechRefKind,
+  TECH_REF_KINDS,
 } from "@/lib/preparation/types";
 
 export const PREP_LIMITS = {
@@ -31,6 +34,8 @@ export const PREP_LIMITS = {
   parameters: 2000,
   lines: 5000,
   text: 4000,
+  /** Descriptions techniques développées (CCTP / fiche poste). */
+  techText: 8000,
 };
 
 export type BundleParam = {
@@ -53,6 +58,11 @@ export type BundleLine = {
   subLot: string | null;
   designation: string;
   description: string | null;
+  includedServices: string[];
+  technicalReferences: PrepTechnicalReference[];
+  executionNotes: string | null;
+  qualityControls: string[];
+  technicalReservations: string[];
   unit: string;
   elementIds: string[];
   formula: string | null;
@@ -107,8 +117,59 @@ function num(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
 
-function strList(v: unknown): string[] {
-  return Array.isArray(v) ? v.map((x) => str(x, 200)).filter((x): x is string => !!x) : [];
+function strList(v: unknown, max = 200): string[] {
+  return Array.isArray(v) ? v.map((x) => str(x, max)).filter((x): x is string => !!x) : [];
+}
+
+function readStringList(v: unknown, maxItem = 500): string[] {
+  if (typeof v === "string") {
+    const t = v.trim();
+    if (!t) return [];
+    return t
+      .split(/\n|;/)
+      .map((x) => x.replace(/^[-•*]\s*/, "").trim())
+      .filter(Boolean)
+      .map((x) => x.slice(0, maxItem));
+  }
+  return strList(v, maxItem);
+}
+
+function readTechnicalReferences(v: unknown, path: string, warn: (p: string, m: string) => void): PrepTechnicalReference[] {
+  if (!Array.isArray(v)) {
+    if (v !== undefined && v !== null) warn(path, "technical_references doit être un tableau — ignoré");
+    return [];
+  }
+  const out: PrepTechnicalReference[] = [];
+  v.forEach((item, i) => {
+    if (typeof item === "string") {
+      const label = str(item, 200);
+      if (label) out.push({ label, kind: "INDICATIVE", note: null });
+      return;
+    }
+    if (!isObj(item)) {
+      warn(`${path}[${i}]`, "référence technique invalide ignorée");
+      return;
+    }
+    const label = str(item.label ?? item.name ?? item.ref, 200);
+    if (!label) {
+      warn(`${path}[${i}]`, "référence sans libellé ignorée");
+      return;
+    }
+    let kind: TechRefKind = "INDICATIVE";
+    const rawKind = str(item.kind ?? item.type, 40)?.toUpperCase().replace(/-/g, "_");
+    if (rawKind && (TECH_REF_KINDS as string[]).includes(rawKind)) kind = rawKind as TechRefKind;
+    else if (rawKind === "PRESCRIPTION" || rawKind === "EXECUTION") kind = "DOSSIER";
+    else if (rawKind === "VERIFY" || rawKind === "A_VERIFIER") kind = "TO_VERIFY";
+    else if (item.kind !== undefined && item.kind !== null) {
+      warn(`${path}[${i}].kind`, `nature « ${String(item.kind)} » inconnue — indicative par défaut`);
+    }
+    out.push({
+      label,
+      kind,
+      note: str(item.note ?? item.comment, PREP_LIMITS.techText),
+    });
+  });
+  return out;
 }
 
 const ROOT_KEYS = new Set([
@@ -494,12 +555,24 @@ export function parsePrepBundle(input: unknown): PrepParseResult {
     const deps = strList(it.depends_on_decisions);
     for (const d of deps) if (!decisionIds.has(d)) warn(path, `${code} : décision inconnue ${d}`);
 
+    const technicalDescription =
+      str(it.technical_description, PREP_LIMITS.techText) ?? str(it.description, PREP_LIMITS.techText);
+
     lines.push({
       code,
       lot: lot ?? "?",
       subLot: str(it.sub_lot, 120),
       designation: designation ?? code,
-      description: str(it.description),
+      description: technicalDescription,
+      includedServices: readStringList(it.included_services ?? it.prestations_comprises, 500),
+      technicalReferences: readTechnicalReferences(
+        it.technical_references ?? it.references_techniques,
+        `${path}.technical_references`,
+        warn,
+      ),
+      executionNotes: str(it.execution_notes ?? it.notes_execution, PREP_LIMITS.techText),
+      qualityControls: readStringList(it.quality_controls ?? it.controles, 500),
+      technicalReservations: readStringList(it.technical_reservations ?? it.reservations_techniques, 500),
       unit: normalized.unit,
       elementIds: els,
       formula,

@@ -18,12 +18,20 @@ import type {
   PrepHypothesis,
   PrepIssue,
   PrepLineDTO,
+  PrepLineTextFields,
   PrepLot,
   PrepParamDTO,
   PrepSource,
+  PrepTechnicalReference,
   StoredProvenance,
   StudyMode,
+  TechRefKind,
 } from "@/lib/preparation/types";
+import {
+  C01_ENRICHMENT_BUNDLE_ID,
+  C01_LINE_TEXT_ENRICHMENTS,
+  type PrepLineTextEnrichment,
+} from "@/lib/preparation/enrichment/c01-fondations-texts";
 
 type Db = PrismaClient | Prisma.TransactionClient;
 
@@ -123,6 +131,34 @@ function paramRowToDTO(r: ParamRow): PrepParamDTO {
   };
 }
 
+function asStringList(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  return v.map((x) => (typeof x === "string" ? x.trim() : "")).filter(Boolean);
+}
+
+function asTechRefs(v: unknown): PrepTechnicalReference[] {
+  if (!Array.isArray(v)) return [];
+  const out: PrepTechnicalReference[] = [];
+  for (const item of v) {
+    if (typeof item === "string" && item.trim()) {
+      out.push({ label: item.trim(), kind: "INDICATIVE", note: null });
+      continue;
+    }
+    if (!item || typeof item !== "object") continue;
+    const o = item as Record<string, unknown>;
+    const label = typeof o.label === "string" ? o.label.trim() : "";
+    if (!label) continue;
+    const kindRaw = typeof o.kind === "string" ? o.kind : "INDICATIVE";
+    const kind = (["INDICATIVE", "DOSSIER", "TO_VERIFY"].includes(kindRaw) ? kindRaw : "INDICATIVE") as TechRefKind;
+    out.push({
+      label,
+      kind,
+      note: typeof o.note === "string" ? o.note : null,
+    });
+  }
+  return out;
+}
+
 function lineRowToDTO(r: LineRow): PrepLineDTO {
   return {
     code: r.code,
@@ -130,6 +166,13 @@ function lineRowToDTO(r: LineRow): PrepLineDTO {
     subLot: r.subLot,
     designation: r.designation,
     description: r.description,
+    includedServices: asStringList(r.includedServicesJson),
+    technicalReferences: asTechRefs(r.technicalReferencesJson),
+    executionNotes: r.executionNotes,
+    qualityControls: asStringList(r.qualityControlsJson),
+    technicalReservations: asStringList(r.technicalReservationsJson),
+    originalDesignation: r.originalDesignation,
+    textsUserEdited: r.textsUserEdited,
     unit: r.unit,
     elementIds: asArray<string>(r.elementIdsJson),
     formula: r.formula,
@@ -204,6 +247,8 @@ const EVENT_LABELS: Record<string, string> = {
   IMPORT_CREATE: "Import initial",
   IMPORT_REPLACE: "Import de remplacement",
   EDIT: "Modification",
+  EDIT_TEXTS: "Modification des fiches techniques",
+  ENRICH_TEXTS: "Enrichissement des désignations techniques",
   VALIDATE_LINES: "Validation de quantités",
   UNVALIDATE_LINES: "Retrait de validation",
   UNDO_IMPORT: "Annulation d'import",
@@ -213,6 +258,12 @@ function eventSummary(kind: string, detail: unknown): string {
   const base = EVENT_LABELS[kind] ?? kind;
   if (detail && typeof detail === "object") {
     const o = detail as Record<string, unknown>;
+    if (typeof o.updated === "number") {
+      return `${base} — ${o.updated} ligne(s)`;
+    }
+    if (Array.isArray(o.texts) && !asArray(o.params).length && !asArray(o.lines).length) {
+      return `${base} — ${asArray(o.texts).length} fiche(s)`;
+    }
     if (Array.isArray(o.params) || Array.isArray(o.lines)) {
       const n = asArray(o.params).length + asArray(o.lines).length;
       return `${base} — ${n} valeur(s), ${Number(o.impacted ?? 0)} quantité(s) recalculée(s)`;
@@ -342,6 +393,8 @@ function bundleParamsToDTO(b: NormalizedPrepBundle): PrepParamDTO[] {
 function bundleLinesToDTO(b: NormalizedPrepBundle): PrepLineDTO[] {
   return b.lines.map((l) => ({
     ...l,
+    originalDesignation: l.designation,
+    textsUserEdited: false,
     originalDeclared: l.declaredQuantity,
     originalProvenance: l.provenance,
     validatedQuantity: null,
@@ -539,6 +592,13 @@ function lineCreateRows(studyId: string, orgId: string, lines: PrepLineDTO[], en
       subLot: l.subLot,
       designation: l.designation,
       description: l.description,
+      includedServicesJson: jsonOrNull(l.includedServices),
+      technicalReferencesJson: jsonOrNull(l.technicalReferences),
+      executionNotes: l.executionNotes,
+      qualityControlsJson: jsonOrNull(l.qualityControls),
+      technicalReservationsJson: jsonOrNull(l.technicalReservations),
+      originalDesignation: l.originalDesignation ?? l.designation,
+      textsUserEdited: l.textsUserEdited,
       unit: l.unit,
       elementIdsJson: jsonOrNull(l.elementIds),
       formula: l.formula,
@@ -735,7 +795,12 @@ export type PrepEditInput = {
   userId: string;
   expectedVersion: number;
   params?: { key: string; value?: number | null; restore?: boolean }[];
-  lines?: { code: string; quantity?: number | null; restore?: boolean }[];
+  lines?: {
+    code: string;
+    quantity?: number | null;
+    restore?: boolean;
+    texts?: PrepLineTextFields;
+  }[];
 };
 
 const MAX_ABS_VALUE = 1e12;
@@ -745,6 +810,45 @@ function assertEditableNumber(v: unknown, label: string): number {
     throw new PrepError(`${label} : valeur numérique invalide`);
   }
   return v;
+}
+
+function clipText(v: unknown, max: number): string | null {
+  if (typeof v !== "string") return null;
+  const t = v.trim();
+  return t ? t.slice(0, max) : null;
+}
+
+function normalizeTextFields(raw: PrepLineTextFields): PrepLineTextFields {
+  const out: PrepLineTextFields = {};
+  if (raw.designation !== undefined) {
+    const d = clipText(raw.designation, 500);
+    if (!d) throw new PrepError("La désignation ne peut pas être vide");
+    out.designation = d;
+  }
+  if (raw.description !== undefined) out.description = clipText(raw.description, 8000);
+  if (raw.executionNotes !== undefined) out.executionNotes = clipText(raw.executionNotes, 8000);
+  if (raw.includedServices !== undefined) {
+    out.includedServices = (raw.includedServices ?? [])
+      .map((x) => (typeof x === "string" ? x.trim().slice(0, 500) : ""))
+      .filter(Boolean)
+      .slice(0, 40);
+  }
+  if (raw.qualityControls !== undefined) {
+    out.qualityControls = (raw.qualityControls ?? [])
+      .map((x) => (typeof x === "string" ? x.trim().slice(0, 500) : ""))
+      .filter(Boolean)
+      .slice(0, 40);
+  }
+  if (raw.technicalReservations !== undefined) {
+    out.technicalReservations = (raw.technicalReservations ?? [])
+      .map((x) => (typeof x === "string" ? x.trim().slice(0, 500) : ""))
+      .filter(Boolean)
+      .slice(0, 40);
+  }
+  if (raw.technicalReferences !== undefined) {
+    out.technicalReferences = asTechRefs(raw.technicalReferences).slice(0, 20);
+  }
+  return out;
 }
 
 async function loadForEdit(tx: Prisma.TransactionClient, orgId: string, studyId: string, expectedVersion: number) {
@@ -778,6 +882,7 @@ export async function savePrepStudyEdits(input: PrepEditInput, db: Db = prisma) 
     const now = new Date().toISOString();
     const paramLog: { key: string; from: number | null; to: number | null; restore: boolean }[] = [];
     const lineLog: { code: string; from: number | null; to: number | null; restore: boolean }[] = [];
+    const textLog: { code: string; fields: string[] }[] = [];
 
     for (const e of paramEdits) {
       const p = pByKey.get(e.key);
@@ -798,16 +903,57 @@ export async function savePrepStudyEdits(input: PrepEditInput, db: Db = prisma) 
     for (const e of lineEdits) {
       const l = lByCode.get(e.code);
       if (!l) throw new PrepError(`Ligne inconnue : ${e.code}`);
-      if (l.formula) throw new PrepError(`${e.code} est calculée par formule : modifiez ses paramètres`);
-      const from = l.declaredQuantity;
-      if (e.restore) {
-        l.declaredQuantity = l.originalDeclared;
-        l.provenance = l.originalProvenance;
-      } else {
-        l.declaredQuantity = assertEditableNumber(e.quantity, l.designation);
-        l.provenance = "SAISIE_MANUELLE";
+      const hasQty = e.restore || e.quantity !== undefined;
+      if (hasQty) {
+        if (l.formula && !e.restore) {
+          throw new PrepError(`${e.code} est calculée par formule : modifiez ses paramètres`);
+        }
+        const from = l.declaredQuantity;
+        if (e.restore) {
+          l.declaredQuantity = l.originalDeclared;
+          l.provenance = l.originalProvenance;
+        } else {
+          l.declaredQuantity = assertEditableNumber(e.quantity, l.designation);
+          l.provenance = "SAISIE_MANUELLE";
+        }
+        lineLog.push({ code: l.code, from, to: l.declaredQuantity, restore: !!e.restore });
       }
-      lineLog.push({ code: l.code, from, to: l.declaredQuantity, restore: !!e.restore });
+      if (e.texts) {
+        const texts = normalizeTextFields(e.texts);
+        const fields: string[] = [];
+        if (texts.designation !== undefined) {
+          l.designation = texts.designation;
+          fields.push("designation");
+        }
+        if (texts.description !== undefined) {
+          l.description = texts.description;
+          fields.push("description");
+        }
+        if (texts.includedServices !== undefined) {
+          l.includedServices = texts.includedServices;
+          fields.push("includedServices");
+        }
+        if (texts.technicalReferences !== undefined) {
+          l.technicalReferences = texts.technicalReferences;
+          fields.push("technicalReferences");
+        }
+        if (texts.executionNotes !== undefined) {
+          l.executionNotes = texts.executionNotes;
+          fields.push("executionNotes");
+        }
+        if (texts.qualityControls !== undefined) {
+          l.qualityControls = texts.qualityControls;
+          fields.push("qualityControls");
+        }
+        if (texts.technicalReservations !== undefined) {
+          l.technicalReservations = texts.technicalReservations;
+          fields.push("technicalReservations");
+        }
+        if (fields.length) {
+          l.textsUserEdited = true;
+          textLog.push({ code: l.code, fields });
+        }
+      }
     }
 
     const after = computeStudy({ params, lines });
@@ -828,19 +974,33 @@ export async function savePrepStudyEdits(input: PrepEditInput, db: Db = prisma) 
       });
     }
     let impacted = 0;
+    const textCodes = new Set(textLog.map((t) => t.code));
     for (const l of lines) {
       const a = after.nodes.get(l.code);
       const b = before.nodes.get(l.code);
-      const edited = lineLog.some((x) => x.code === l.code);
+      const editedQty = lineLog.some((x) => x.code === l.code);
+      const editedText = textCodes.has(l.code);
       const changed = a?.value !== b?.value || a?.error !== b?.error;
-      if (!edited && !changed) continue;
+      if (!editedQty && !editedText && !changed) continue;
       if (changed) impacted++;
       await tx.prepTakeoffLine.update({
         where: { studyId_code: { studyId: study.id, code: l.code } },
         data: {
           computedQuantity: a?.value ?? null,
           computeError: a?.error ?? null,
-          ...(edited ? { declaredQuantity: l.declaredQuantity, provenance: l.provenance } : {}),
+          ...(editedQty ? { declaredQuantity: l.declaredQuantity, provenance: l.provenance } : {}),
+          ...(editedText
+            ? {
+                designation: l.designation,
+                description: l.description,
+                includedServicesJson: jsonOrNull(l.includedServices),
+                technicalReferencesJson: jsonOrNull(l.technicalReferences),
+                executionNotes: l.executionNotes,
+                qualityControlsJson: jsonOrNull(l.qualityControls),
+                technicalReservationsJson: jsonOrNull(l.technicalReservations),
+                textsUserEdited: true,
+              }
+            : {}),
         },
       });
     }
@@ -853,12 +1013,174 @@ export async function savePrepStudyEdits(input: PrepEditInput, db: Db = prisma) 
       data: {
         studyId: study.id,
         organizationId: input.orgId,
-        kind: "EDIT",
-        detailJson: { params: paramLog, lines: lineLog, impacted },
+        kind: textLog.length && !paramLog.length && !lineLog.length ? "EDIT_TEXTS" : "EDIT",
+        detailJson: { params: paramLog, lines: lineLog, texts: textLog, impacted },
         actorUserId: input.userId,
       },
     });
-    return { version, impacted };
+    return { version, impacted, textsUpdated: textLog.length };
+  });
+}
+
+function enrichmentFromBundleLines(lines: PrepLineDTO[]): Map<string, PrepLineTextEnrichment> {
+  const map = new Map<string, PrepLineTextEnrichment>();
+  for (const l of lines) {
+    map.set(l.code, {
+      designation: l.designation,
+      technicalDescription: l.description ?? "",
+      includedServices: l.includedServices,
+      technicalReferences: l.technicalReferences,
+      executionNotes: l.executionNotes,
+      qualityControls: l.qualityControls,
+      technicalReservations: l.technicalReservations,
+    });
+  }
+  return map;
+}
+
+function resolveEnrichmentMap(input: {
+  source?: "c01-fondations" | "bundle";
+  raw?: string | null;
+  bundleId?: string | null;
+}): Map<string, PrepLineTextEnrichment> {
+  if (input.source === "bundle" || input.raw) {
+    if (!input.raw) throw new PrepError("JSON d'enrichissement manquant");
+    const parsed = parsePrepJsonText(input.raw);
+    if (!parsed.ok) throw new PrepError("Le JSON contient des erreurs bloquantes", 422, parsed.issues);
+    return enrichmentFromBundleLines(bundleLinesToDTO(parsed.bundle));
+  }
+  if (input.source === "c01-fondations" || input.bundleId === C01_ENRICHMENT_BUNDLE_ID) {
+    return new Map(Object.entries(C01_LINE_TEXT_ENRICHMENTS));
+  }
+  throw new PrepError(
+    "Aucun catalogue d'enrichissement pour cette étude. Importez un JSON enrichi (source « bundle ») ou utilisez le scénario C-01.",
+  );
+}
+
+/**
+ * Enrichit les désignations / fiches techniques sans toucher aux quantités ni formules.
+ * Ne remplace pas une fiche déjà retouchée manuellement (sauf champs encore vides).
+ */
+export async function enrichPrepStudyTexts(
+  input: {
+    orgId: string;
+    studyId: string;
+    userId: string;
+    expectedVersion: number;
+    source?: "c01-fondations" | "bundle";
+    raw?: string | null;
+  },
+  db: Db = prisma,
+) {
+  return inTx(db, async (tx) => {
+    const study = await loadForEdit(tx, input.orgId, input.studyId, input.expectedVersion);
+    const map = resolveEnrichmentMap({
+      source: input.source,
+      raw: input.raw,
+      bundleId: study.bundleId,
+    });
+    let updated = 0;
+    let skippedUser = 0;
+    let skippedMissing = 0;
+    const beforeEngine = computeStudy({
+      params: study.parameters.map(paramRowToDTO),
+      lines: study.lines.map(lineRowToDTO),
+    });
+
+    for (const line of study.lines) {
+      const enrich = map.get(line.code);
+      if (!enrich) {
+        skippedMissing++;
+        continue;
+      }
+      const original = line.originalDesignation ?? line.designation;
+      const designationUntouched =
+        !line.textsUserEdited &&
+        (line.designation === original ||
+          line.designation === enrich.replacesDesignation ||
+          line.designation === enrich.designation);
+
+      const data: Prisma.PrepTakeoffLineUpdateInput = {};
+      if (designationUntouched && line.designation !== enrich.designation) {
+        data.designation = enrich.designation;
+      }
+
+      const fillEmpty = (current: string | null | undefined, next: string | null) => {
+        if (line.textsUserEdited && current && current.trim()) return undefined;
+        return next;
+      };
+      const fillEmptyList = (current: unknown, next: unknown) => {
+        const cur = asStringList(current);
+        if (line.textsUserEdited && cur.length) return undefined;
+        return next;
+      };
+
+      const desc = fillEmpty(line.description, enrich.technicalDescription || null);
+      if (desc !== undefined) data.description = desc;
+
+      const services = fillEmptyList(line.includedServicesJson, enrich.includedServices);
+      if (services !== undefined) data.includedServicesJson = jsonOrNull(services);
+
+      const refs = (() => {
+        const cur = asTechRefs(line.technicalReferencesJson);
+        if (line.textsUserEdited && cur.length) return undefined;
+        return enrich.technicalReferences;
+      })();
+      if (refs !== undefined) data.technicalReferencesJson = jsonOrNull(refs);
+
+      const exec = fillEmpty(line.executionNotes, enrich.executionNotes);
+      if (exec !== undefined) data.executionNotes = exec;
+
+      const qc = fillEmptyList(line.qualityControlsJson, enrich.qualityControls);
+      if (qc !== undefined) data.qualityControlsJson = jsonOrNull(qc);
+
+      const res = fillEmptyList(line.technicalReservationsJson, enrich.technicalReservations);
+      if (res !== undefined) data.technicalReservationsJson = jsonOrNull(res);
+
+      if (!line.originalDesignation) data.originalDesignation = original;
+
+      if (Object.keys(data).length === 0) {
+        if (line.textsUserEdited) skippedUser++;
+        continue;
+      }
+
+      await tx.prepTakeoffLine.update({ where: { id: line.id }, data });
+      updated++;
+    }
+
+    const afterLines = (
+      await tx.prepTakeoffLine.findMany({ where: { studyId: study.id }, orderBy: { sortOrder: "asc" } })
+    ).map(lineRowToDTO);
+    const afterEngine = computeStudy({
+      params: study.parameters.map(paramRowToDTO),
+      lines: afterLines,
+    });
+    for (const line of afterLines) {
+      const a = afterEngine.nodes.get(line.code)?.value ?? null;
+      const b = beforeEngine.nodes.get(line.code)?.value ?? null;
+      if (a !== b) {
+        throw new PrepError(
+          `Enrichissement annulé : la quantité de ${line.code} aurait changé (${b} → ${a}). Les textes doivent rester indépendants du calcul.`,
+          500,
+        );
+      }
+    }
+
+    const version = study.version + 1;
+    await tx.prepStudy.update({
+      where: { id: study.id },
+      data: { version, updatedById: input.userId },
+    });
+    await tx.prepStudyEvent.create({
+      data: {
+        studyId: study.id,
+        organizationId: input.orgId,
+        kind: "ENRICH_TEXTS",
+        detailJson: { updated, skippedUser, skippedMissing, source: input.source ?? "auto" },
+        actorUserId: input.userId,
+      },
+    });
+    return { version, updated, skippedUser, skippedMissing };
   });
 }
 

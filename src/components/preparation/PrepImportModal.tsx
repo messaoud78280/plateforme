@@ -7,6 +7,7 @@ import type { PrepIssue } from "@/lib/preparation/types";
 import { displayUnit, formatQty } from "@/lib/preparation/units";
 import { quantitiesDiffer } from "@/lib/preparation/engine/compute";
 import { DemoBanner, IssueList, NatureBadge, ProvenanceBadge, RoleBadge } from "./prep-ui";
+import { PrepNewProjectModal, type PrepCreatedProject } from "./PrepNewProjectModal";
 
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 
@@ -27,7 +28,7 @@ export function PrepImportModal({
 }) {
   const [projectOptions, setProjectOptions] = useState(projects);
   const [projectId, setProjectId] = useState(target?.projectId ?? defaultProjectId ?? "");
-  const [newProject, setNewProject] = useState<{ title: string; city: string } | null>(null);
+  const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [raw, setRaw] = useState("");
   const [fileName, setFileName] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -56,35 +57,12 @@ export function PrepImportModal({
     setRaw(await file.text());
   }
 
-  async function createProject() {
-    if (!newProject?.title.trim()) return setError("Donnez un nom au projet");
-    setBusy(true);
+  function onProjectCreated(created: PrepCreatedProject) {
+    setProjectOptions((list) => [created, ...list.filter((p) => p.id !== created.id)]);
+    setProjectId(created.id);
+    setNewProjectOpen(false);
     setError(null);
-    try {
-      const res = await fetch("/api/projets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: newProject.title.trim(),
-          siteCity: newProject.city.trim() || null,
-          chantierStatus: "ETUDE",
-          description: "Projet de démonstration — étude de métré non contractuelle.",
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data?.id) {
-        setError(data?.error ?? "Création du projet impossible");
-        return;
-      }
-      const created = { id: String(data.id), title: newProject.title.trim(), siteCity: newProject.city.trim() || null };
-      setProjectOptions((list) => [created, ...list]);
-      setProjectId(created.id);
-      setNewProject(null);
-    } catch {
-      setError("Connexion interrompue — projet non créé");
-    } finally {
-      setBusy(false);
-    }
+    resetPreview();
   }
 
   async function runPreview() {
@@ -182,9 +160,23 @@ export function PrepImportModal({
         <div className="space-y-4 px-5 py-4">
           {!preview ? (
             <>
-              <label className="block text-[13px] font-medium text-slate-700">
-                Projet
+              <div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <label className="text-[13px] font-medium text-slate-700" htmlFor="prep-import-project">
+                    Projet
+                  </label>
+                  {!target ? (
+                    <button
+                      type="button"
+                      onClick={() => setNewProjectOpen(true)}
+                      className="rounded-full border border-[#1e3a5f]/20 bg-white px-3 py-1 text-[12px] font-medium text-[#1e3a5f] hover:bg-slate-50"
+                    >
+                      + Nouveau projet
+                    </button>
+                  ) : null}
+                </div>
                 <select
+                  id="prep-import-project"
                   value={projectId}
                   disabled={!!target}
                   onChange={(e) => {
@@ -201,48 +193,16 @@ export function PrepImportModal({
                     </option>
                   ))}
                 </select>
-              </label>
-              {!target ? (
-                newProject ? (
-                  <div className="flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2">
-                    <label className="min-w-[14rem] flex-1 text-[12px] text-slate-600">
-                      Nom du projet
-                      <input
-                        value={newProject.title}
-                        onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
-                        className="mt-0.5 block w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[13px]"
-                      />
-                    </label>
-                    <label className="w-40 text-[12px] text-slate-600">
-                      Ville
-                      <input
-                        value={newProject.city}
-                        onChange={(e) => setNewProject({ ...newProject, city: e.target.value })}
-                        className="mt-0.5 block w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[13px]"
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => void createProject()}
-                      disabled={busy}
-                      className="rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[12px] font-medium text-white disabled:opacity-50"
-                    >
-                      Créer le projet
-                    </button>
-                    <button type="button" onClick={() => setNewProject(null)} className="px-2 py-1.5 text-[12px] text-slate-500">
-                      Annuler
-                    </button>
-                  </div>
+                {projectId ? (
+                  <p className="mt-1 text-[12px] text-emerald-700">
+                    Projet sélectionné — vous pouvez charger le JSON.
+                  </p>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => setNewProject({ title: "DÉMO — Fondations C-01", city: "" })}
-                    className="text-[12px] font-medium text-[#1e3a5f] hover:underline"
-                  >
-                    + Créer un projet de démonstration
-                  </button>
-                )
-              ) : null}
+                  <p className="mt-1 text-[12px] text-slate-500">
+                    Sélectionnez un projet existant ou créez-en un nouveau pour y rattacher l&apos;étude.
+                  </p>
+                )}
+              </div>
               <div>
                 <div className="flex items-center justify-between">
                   <span className="text-[13px] font-medium text-slate-700">JSON</span>
@@ -349,6 +309,9 @@ export function PrepImportModal({
           )}
         </div>
       </div>
+      {newProjectOpen ? (
+        <PrepNewProjectModal onClose={() => setNewProjectOpen(false)} onCreated={onProjectCreated} />
+      ) : null}
     </div>
   );
 }

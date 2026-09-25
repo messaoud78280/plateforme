@@ -457,183 +457,224 @@ export async function commitPrepSchedule(input: {
         : `Planning — ${study.title}`)).slice(0, 200);
 
   try {
-    const plan = await prisma.$transaction(async (tx) => {
-      const created = await tx.prepSchedulePlan.create({
-        data: {
-          organizationId: input.orgId,
-          studyId: study.id,
-          projectId: study.projectId,
-          quoteId: input.quoteId ?? null,
-          title,
-          mode: isDemo ? "DEMONSTRATION" : "PROFESSIONAL",
-          isDemonstration: isDemo,
-          status: "INITIAL",
-          revisionKind: "INITIAL",
-          revisionNumber: 1,
-          startDate: computed.startDate ? new Date(computed.startDate) : null,
-          endDateBase: computed.baseEnd ? new Date(computed.baseEnd.date) : null,
-          endDateWithConditional: computed.placed.length
-            ? new Date(
-                computed.placed.reduce((a, t) => (t.endDate > a ? t.endDate : a), computed.placed[0]!.endDate),
-              )
-            : null,
-          baseDurationWorkingDays: computed.baseDurationWorkingDays,
-          withConditionalWorkingDays: computed.withConditionalDurationWorkingDays,
-          studyVersionAtGeneration: study.version,
-          calendarJson: schedule.calendar as unknown as Prisma.InputJsonValue,
-          summaryJson: {
-            selectedStepIds: [...selected],
-            warnings: computed.warnings,
-          },
-          note: schedule.note,
-          watermark: isDemo ? DEMO_WATERMARK : null,
-          idempotencyKey: key,
-          createdById: input.userId,
-        },
-      });
-
-      const idByStep = new Map<string, string>();
-      for (const [i, t] of placed.entries()) {
-        const fin = financeForTask(t.takeoffIds, finance);
-        const row = await tx.prepScheduleTask.create({
+    const plan = await prisma.$transaction(
+      async (tx) => {
+        const created = await tx.prepSchedulePlan.create({
           data: {
             organizationId: input.orgId,
-            planId: created.id,
-            stepCode: t.stepId,
-            name: t.name,
-            kind: t.kind,
-            sortOrder: i,
-            lot: t.lot,
-            description: t.description,
-            includeInBase: t.includeInBase,
-            holdPoint: t.holdPoint,
-            conditional: t.conditional,
-            conditionalJson: t.conditionalConditions.length
-              ? t.conditionalConditions
-              : undefined,
-            startDate: new Date(t.startDate),
-            endDate: new Date(t.endDate),
-            startHalf: t.start.half,
-            endHalf: t.end.half,
-            durationMode: input.durationOverrides?.[t.stepId] != null ? "manual" : t.duration.mode,
-            durationDays: t.duration.durationDays,
-            durationCalendar: t.duration.calendar,
-            durationLockedByUser: input.durationOverrides?.[t.stepId] != null,
-            computedDurationDays: t.duration.durationDays,
-            driverTakeoffCode: t.duration.driverItem,
-            quantitySnapshot: t.duration.quantity,
-            quantityUnit: t.duration.quantityUnit,
-            rateId: t.duration.rateId,
-            rateValue: t.duration.rateValue,
-            rateUnit: t.duration.rateUnit,
-            ratePer: t.duration.ratePer,
-            parallelUnits: t.duration.parallelUnits,
-            takeoffCodesJson: t.takeoffIds,
-            crewJson: t.crew,
-            equipmentJson: t.equipment,
-            suppliesJson: t.supplies,
-            preconditionsJson: t.preconditions,
-            controlsJson: t.controlsBeforeNext,
-            constraintsJson: t.constraints,
-            safetyJson: t.safety,
-            proofsJson: t.proofs,
-            dependsOnJson: t.dependsOn,
-            blockingReason: t.blockingReason,
-            sellHtSnapshot: fin.sellHt,
-            costHtSnapshot: fin.costHt,
+            studyId: study.id,
+            projectId: study.projectId,
+            quoteId: input.quoteId ?? null,
+            title,
+            mode: isDemo ? "DEMONSTRATION" : "PROFESSIONAL",
+            isDemonstration: isDemo,
+            status: "INITIAL",
+            revisionKind: "INITIAL",
+            revisionNumber: 1,
+            startDate: computed.startDate ? new Date(computed.startDate) : null,
+            endDateBase: computed.baseEnd ? new Date(computed.baseEnd.date) : null,
+            endDateWithConditional: computed.placed.length
+              ? new Date(
+                  computed.placed.reduce(
+                    (a, t) => (t.endDate > a ? t.endDate : a),
+                    computed.placed[0]!.endDate,
+                  ),
+                )
+              : null,
+            baseDurationWorkingDays: computed.baseDurationWorkingDays,
+            withConditionalWorkingDays: computed.withConditionalDurationWorkingDays,
+            studyVersionAtGeneration: study.version,
+            calendarJson: schedule.calendar as unknown as Prisma.InputJsonValue,
+            summaryJson: {
+              selectedStepIds: [...selected],
+              warnings: computed.warnings,
+            },
+            note: schedule.note,
+            watermark: isDemo ? DEMO_WATERMARK : null,
+            idempotencyKey: key,
+            createdById: input.userId,
           },
         });
-        idByStep.set(t.stepId, row.id);
 
-        for (const code of t.takeoffIds) {
-          const line = lineByCode.get(code);
-          await tx.prepScheduleTakeoffLink.create({
+        const idByStep = new Map<string, string>();
+        const takeoffRows: Prisma.PrepScheduleTakeoffLinkCreateManyInput[] = [];
+        const quoteRows: Prisma.PrepScheduleQuoteLinkCreateManyInput[] = [];
+        const depRows: Prisma.PrepScheduleDependencyCreateManyInput[] = [];
+
+        // Précharge lignes devis une fois (évite N+1 dans la transaction).
+        const allQuoteLineIds = [
+          ...new Set(
+            placed.flatMap((t) => financeForTask(t.takeoffIds, finance).quoteLineIds),
+          ),
+        ];
+        const quoteLineById = new Map(
+          allQuoteLineIds.length
+            ? (
+                await tx.commercialQuoteLine.findMany({
+                  where: { id: { in: allQuoteLineIds }, organizationId: input.orgId },
+                  select: { id: true, lineSellHt: true, lineCostHt: true },
+                })
+              ).map((l) => [l.id, l])
+            : [],
+        );
+        const prepLinkByQuoteLine = new Map(
+          allQuoteLineIds.length
+            ? (
+                await tx.prepQuoteLink.findMany({
+                  where: {
+                    quoteLineId: { in: allQuoteLineIds },
+                    organizationId: input.orgId,
+                  },
+                  select: { quoteLineId: true, studyLineCode: true },
+                })
+              ).map((l) => [l.quoteLineId, l.studyLineCode])
+            : [],
+        );
+
+        for (const [i, t] of placed.entries()) {
+          const fin = financeForTask(t.takeoffIds, finance);
+          const row = await tx.prepScheduleTask.create({
             data: {
+              organizationId: input.orgId,
+              planId: created.id,
+              stepCode: t.stepId,
+              name: t.name,
+              kind: t.kind,
+              sortOrder: i,
+              lot: t.lot,
+              description: t.description,
+              includeInBase: t.includeInBase,
+              holdPoint: t.holdPoint,
+              conditional: t.conditional,
+              conditionalJson: t.conditionalConditions.length
+                ? t.conditionalConditions
+                : undefined,
+              startDate: new Date(t.startDate),
+              endDate: new Date(t.endDate),
+              startHalf: t.start.half,
+              endHalf: t.end.half,
+              durationMode:
+                input.durationOverrides?.[t.stepId] != null ? "manual" : t.duration.mode,
+              durationDays: t.duration.durationDays,
+              durationCalendar: t.duration.calendar,
+              durationLockedByUser: input.durationOverrides?.[t.stepId] != null,
+              computedDurationDays: t.duration.durationDays,
+              driverTakeoffCode: t.duration.driverItem,
+              quantitySnapshot: t.duration.quantity,
+              quantityUnit: t.duration.quantityUnit,
+              rateId: t.duration.rateId,
+              rateValue: t.duration.rateValue,
+              rateUnit: t.duration.rateUnit,
+              ratePer: t.duration.ratePer,
+              parallelUnits: t.duration.parallelUnits,
+              takeoffCodesJson: t.takeoffIds,
+              crewJson: t.crew,
+              equipmentJson: t.equipment,
+              suppliesJson: t.supplies,
+              preconditionsJson: t.preconditions,
+              controlsJson: t.controlsBeforeNext,
+              constraintsJson: t.constraints,
+              safetyJson: t.safety,
+              proofsJson: t.proofs,
+              dependsOnJson: t.dependsOn,
+              blockingReason: t.blockingReason,
+              sellHtSnapshot: fin.sellHt,
+              costHtSnapshot: fin.costHt,
+            },
+          });
+          idByStep.set(t.stepId, row.id);
+
+          for (const code of t.takeoffIds) {
+            const line = lineByCode.get(code);
+            takeoffRows.push({
+              id: crypto.randomUUID().replace(/-/g, "").slice(0, 25),
               organizationId: input.orgId,
               planId: created.id,
               taskId: row.id,
               studyLineCode: code,
               role: line?.role ?? null,
-            },
-          });
-        }
+            });
+          }
 
-        if (input.quoteId && fin.quoteLineIds.length) {
-          for (const qLineId of fin.quoteLineIds) {
-            const link = await tx.prepQuoteLink.findFirst({
-              where: { quoteLineId: qLineId, organizationId: input.orgId },
-              select: { studyLineCode: true },
-            });
-            const qLine = await tx.commercialQuoteLine.findFirst({
-              where: { id: qLineId, organizationId: input.orgId },
-              select: { lineSellHt: true, lineCostHt: true },
-            });
-            await tx.prepScheduleQuoteLink.create({
-              data: {
+          if (input.quoteId) {
+            for (const qLineId of fin.quoteLineIds) {
+              const qLine = quoteLineById.get(qLineId);
+              quoteRows.push({
+                id: crypto.randomUUID().replace(/-/g, "").slice(0, 25),
                 organizationId: input.orgId,
                 planId: created.id,
                 taskId: row.id,
                 quoteId: input.quoteId,
                 quoteLineId: qLineId,
-                studyLineCode: link?.studyLineCode ?? null,
+                studyLineCode: prepLinkByQuoteLine.get(qLineId) ?? null,
                 sellHt: qLine ? d(qLine.lineSellHt) : null,
                 costHt: qLine ? d(qLine.lineCostHt) : null,
-              },
-            });
+              });
+            }
           }
         }
-      }
 
-      for (const t of placed) {
-        const succId = idByStep.get(t.stepId);
-        if (!succId) continue;
-        for (const dep of t.dependsOn) {
-          const predId = idByStep.get(dep.stepId);
-          if (!predId) continue;
-          await tx.prepScheduleDependency.create({
-            data: {
+        for (const t of placed) {
+          const succId = idByStep.get(t.stepId);
+          if (!succId) continue;
+          for (const dep of t.dependsOn) {
+            const predId = idByStep.get(dep.stepId);
+            if (!predId) continue;
+            depRows.push({
+              id: crypto.randomUUID().replace(/-/g, "").slice(0, 25),
               organizationId: input.orgId,
               planId: created.id,
               predecessorId: predId,
               successorId: succId,
               type: dep.type,
               lagDays: dep.lagDays,
-            },
-          });
+            });
+          }
         }
-      }
 
-      await tx.prepScheduleEvent.create({
-        data: {
-          organizationId: input.orgId,
-          planId: created.id,
-          kind: "PLAN_CREATED",
-          detailJson: {
-            taskCount: placed.length,
-            baseDurationWorkingDays: computed.baseDurationWorkingDays,
-            quoteId: input.quoteId ?? null,
-            isDemonstration: isDemo,
-          },
-          actorUserId: input.userId,
-        },
-      });
+        if (takeoffRows.length) {
+          await tx.prepScheduleTakeoffLink.createMany({ data: takeoffRows });
+        }
+        if (quoteRows.length) {
+          await tx.prepScheduleQuoteLink.createMany({ data: quoteRows });
+        }
+        if (depRows.length) {
+          await tx.prepScheduleDependency.createMany({ data: depRows });
+        }
 
-      await tx.prepStudyEvent.create({
-        data: {
-          studyId: study.id,
-          organizationId: input.orgId,
-          kind: "TRANSFER_TO_SCHEDULE",
-          detailJson: {
+        await tx.prepScheduleEvent.create({
+          data: {
+            organizationId: input.orgId,
             planId: created.id,
-            taskCount: placed.length,
-            isDemonstration: isDemo,
+            kind: "PLAN_CREATED",
+            detailJson: {
+              taskCount: placed.length,
+              baseDurationWorkingDays: computed.baseDurationWorkingDays,
+              quoteId: input.quoteId ?? null,
+              isDemonstration: isDemo,
+            },
+            actorUserId: input.userId,
           },
-          actorUserId: input.userId,
-        },
-      });
+        });
 
-      return created;
-    });
+        await tx.prepStudyEvent.create({
+          data: {
+            studyId: study.id,
+            organizationId: input.orgId,
+            kind: "TRANSFER_TO_SCHEDULE",
+            detailJson: {
+              planId: created.id,
+              taskCount: placed.length,
+              isDemonstration: isDemo,
+            },
+            actorUserId: input.userId,
+          },
+        });
+
+        return created;
+      },
+      { timeout: 60_000, maxWait: 15_000 },
+    );
 
     return {
       action: "created",

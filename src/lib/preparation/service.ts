@@ -261,12 +261,17 @@ const EVENT_LABELS: Record<string, string> = {
   VALIDATE_LINES: "Validation de quantités",
   UNVALIDATE_LINES: "Retrait de validation",
   UNDO_IMPORT: "Annulation d'import",
+  TRANSFER_TO_QUOTE: "Transfert vers devis",
+  SYNC_QUOTE_LINE: "Synchronisation ligne devis",
 };
 
 function eventSummary(kind: string, detail: unknown): string {
   const base = EVENT_LABELS[kind] ?? kind;
   if (detail && typeof detail === "object") {
     const o = detail as Record<string, unknown>;
+    if (typeof o.quoteNumber === "string") {
+      return `${base} — ${o.quoteNumber}`;
+    }
     if (typeof o.updated === "number") {
       return `${base} — ${o.updated} ligne(s)`;
     }
@@ -278,6 +283,8 @@ function eventSummary(kind: string, detail: unknown): string {
       return `${base} — ${n} valeur(s), ${Number(o.impacted ?? 0)} quantité(s) recalculée(s)`;
     }
     if (Array.isArray(o.codes)) return `${base} — ${o.codes.length} ligne(s)`;
+    if (typeof o.lineCount === "number") return `${base} — ${o.lineCount} ligne(s)`;
+    if (typeof o.code === "string") return `${base} — ${o.code}`;
   }
   return base;
 }

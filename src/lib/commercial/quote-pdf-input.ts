@@ -64,6 +64,7 @@ export type QuotePdfHeaderSource = {
   currency: string;
   projectTitle?: string | null;
   acceptedAt?: Date | null;
+  isDemonstration?: boolean;
 };
 
 function asSnapshot(raw: unknown): QuotePdfSnapshot | null {
@@ -192,6 +193,7 @@ export function buildQuotePdfInputFromVersion(opts: {
       : null,
     bank: opts.bank ?? null,
     acceptedAt: quote.acceptedAt ?? null,
+    isDemonstration: quote.isDemonstration === true,
     particularConditions: opts.particularConditions ?? null,
     executionDurationNote: opts.executionDurationNote ?? null,
     executionStartNote: opts.executionStartNote ?? null,

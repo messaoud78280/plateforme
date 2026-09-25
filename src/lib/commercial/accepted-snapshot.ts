@@ -100,6 +100,7 @@ async function loadVersionPdfContext(orgId: string, quoteId: string, versionId: 
       acceptedVersionId: true,
       acceptedAt: true,
       projectId: true,
+      isDemonstration: true,
       project: { select: { title: true } },
     },
   });

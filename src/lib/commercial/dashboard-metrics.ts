@@ -296,6 +296,7 @@ async function loadCommercialDashboardMetrics(
     ...(projectId ? { projectId } : {}),
   };
   const quoteExtra: Prisma.CommercialQuoteWhereInput = {
+    isDemonstration: false,
     ...(clientId ? { clientExternalOrgId: clientId } : {}),
     ...(projectId ? { projectId } : {}),
   };

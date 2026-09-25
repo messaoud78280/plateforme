@@ -35,6 +35,7 @@ import {
 import { PrepImportModal, type PrepProjectOption } from "./PrepImportModal";
 import { PrepLineTechSheetPanel } from "./PrepLineTechSheetPanel";
 import { PrepChatGptPatchModal } from "./PrepChatGptPatchModal";
+import { PrepQuoteTransferModal } from "./PrepQuoteTransferModal";
 import {
   studyNeedsC01TextEnrichment,
 } from "@/lib/preparation/enrichment/c01-fondations-texts";
@@ -85,6 +86,7 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
   const [flash, setFlash] = useState<Flash>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [patchOpen, setPatchOpen] = useState(false);
+  const [quoteOpen, setQuoteOpen] = useState(false);
   const [confirmUndo, setConfirmUndo] = useState(false);
   const [confirmUndoPatch, setConfirmUndoPatch] = useState(false);
 
@@ -509,6 +511,15 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
           <button
             type="button"
             disabled={busy || dirty}
+            onClick={() => setQuoteOpen(true)}
+            className="rounded-full bg-[#1e3a5f] px-4 py-2 text-[13px] font-medium text-white disabled:opacity-50"
+            title={dirty ? "Enregistrez ou annulez vos modifications avant" : undefined}
+          >
+            Générer un devis depuis ce métré
+          </button>
+          <button
+            type="button"
+            disabled={busy || dirty}
             onClick={() => setPatchOpen(true)}
             className="rounded-full border border-[#1e3a5f]/20 bg-white px-4 py-2 text-[13px] font-medium text-[#1e3a5f] disabled:opacity-50"
           >
@@ -855,6 +866,14 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
             setStudy(next);
             setFlash({ tone: "ok", text: "Modifications ChatGPT appliquées — quantités recalculées si nécessaire." });
           }}
+        />
+      ) : null}
+
+      {quoteOpen ? (
+        <PrepQuoteTransferModal
+          studyId={study.id}
+          open={quoteOpen}
+          onClose={() => setQuoteOpen(false)}
         />
       ) : null}
 
@@ -1468,8 +1487,8 @@ function PreparationPanel({ study }: { study: PrepStudyView }) {
         ))}
       </div>
       <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] text-slate-600">
-        Ces données sont importées et conservées avec l&apos;étude. Le mode opératoire, les ressources, le planning et le
-        transfert vers un devis seront exploités dans les phases suivantes, après validation du module Métré.
+        Le transfert vers un devis est disponible via « Générer un devis depuis ce métré ». Mode opératoire,
+        ressources et planning restent préparés pour les phases suivantes.
       </p>
       {study.disclaimers.length ? (
         <ul className="list-disc space-y-0.5 pl-5 text-[12px] text-slate-500">

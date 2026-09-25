@@ -686,6 +686,8 @@ model Organization {
   siteDocuments                 SiteDocument[]
   prepStudies                   PrepStudy[]
   prepChatgptPatches            PrepChatgptPatch[]
+  prepQuoteTransfers            PrepQuoteTransfer[]
+  prepQuoteLinks                PrepQuoteLink[]
   platformAdminAuditEvents      PlatformAdminAuditEvent[]
   platformSupportSessions       PlatformSupportSession[]
 
@@ -4043,6 +4045,8 @@ model CommercialOrgSettings {
   nextInvoiceSeq       Int      @default(1)
   nextAmendmentSeq     Int      @default(1)
   nextCreditSeq        Int      @default(1)
+  /// Compteur séparé pour les devis issus d'études de métré en démonstration (DEMO-AAAA-0001).
+  nextDemoQuoteSeq     Int      @default(1)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
@@ -4148,6 +4152,10 @@ model CommercialQuote {
   totalTtc               Decimal               @default(0) @db.Decimal(14, 4)
   marginAmount           Decimal               @default(0) @db.Decimal(14, 4)
   marginPercent          Decimal               @default(0) @db.Decimal(8, 4)
+  /// Devis issu d'une étude Métré en mode démonstration — non contractuel, non facturable.
+  isDemonstration        Boolean               @default(false)
+  /// Étude de métré d'origine (passerelle phase 2), si applicable.
+  sourcePrepStudyId      String?
   createdAt              DateTime              @default(now())
   updatedAt              DateTime              @updatedAt
 
@@ -4167,12 +4175,17 @@ model CommercialQuote {
   siteVisit            SiteVisit?
   commercialLeads      CommercialLead[]
   chatgptPatches       CommercialQuoteChatgptPatch[]
+  sourcePrepStudy      PrepStudy?            @relation("PrepStudySourceQuotes", fields: [sourcePrepStudyId], references: [id], onDelete: SetNull)
+  prepQuoteTransfers   PrepQuoteTransfer[]
+  prepQuoteLinks       PrepQuoteLink[]
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
   @@index([organizationId, updatedAt])
+  @@index([organizationId, isDemonstration])
   @@index([projectId])
   @@index([clientExternalOrgId])
+  @@index([sourcePrepStudyId])
 }
 
 /// Historique des patches ChatGPT (bework_quote_patch_v1) — idempotence + undo.
@@ -5332,6 +5345,9 @@ model PrepStudy {
   imports      PrepImport[]
   events       PrepStudyEvent[]
   chatgptPatches PrepChatgptPatch[]
+  sourceQuotes CommercialQuote[] @relation("PrepStudySourceQuotes")
+  quoteTransfers PrepQuoteTransfer[]
+  quoteLinks     PrepQuoteLink[]
 
   @@index([organizationId, projectId])
   @@index([projectId, archivedAt])
@@ -5483,4 +5499,57 @@ model PrepChatgptPatch {
   @@unique([studyId, patchId])
   @@index([organizationId, studyId])
   @@index([studyId, status, appliedAt])
+}
+
+/// Transfert Métré → Devis (un clic = un transfert, idempotent via idempotencyKey).
+model PrepQuoteTransfer {
+  id               String   @id @default(cuid())
+  organizationId   String
+  studyId          String
+  quoteId          String
+  /// Clé anti double-clic / retry réseau (unique par organisation).
+  idempotencyKey   String
+  studyVersion     Int
+  isDemonstration  Boolean  @default(false)
+  summaryJson      Json?
+  createdById      String?
+  createdAt        DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  study        PrepStudy    @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  quote        CommercialQuote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  links        PrepQuoteLink[]
+
+  @@unique([organizationId, idempotencyKey])
+  @@index([studyId, createdAt])
+  @@index([quoteId])
+  @@index([organizationId])
+}
+
+/// Liaison ligne de métré ↔ ligne de devis (traçabilité + sync manuelle des écarts).
+model PrepQuoteLink {
+  id                      String   @id @default(cuid())
+  organizationId          String
+  transferId              String
+  studyId                 String
+  studyLineCode           String
+  quoteId                 String
+  quoteLineId             String
+  quantityAtTransfer      Decimal  @db.Decimal(24, 10)
+  unitAtTransfer          String
+  designationAtTransfer   String
+  descriptionAtTransfer   String?  @db.Text
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  transfer     PrepQuoteTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  study        PrepStudy        @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  quote        CommercialQuote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@unique([quoteLineId])
+  @@index([studyId, studyLineCode])
+  @@index([quoteId])
+  @@index([organizationId, studyId])
+  @@index([transferId])
 }

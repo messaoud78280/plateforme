@@ -178,9 +178,14 @@ export async function createDepositInvoice(input: {
       issuerSnapshotJson: true,
       depositPercent: true,
       paymentScheduleJson: true,
+      isDemonstration: true,
     },
   });
   if (!quote) throw new Error("Devis introuvable");
+  const { assertDemoQuoteNotBillable } = await import(
+    "@/lib/preparation/quote-bridge/demo-guards"
+  );
+  assertDemoQuoteNotBillable(quote.isDemonstration, "acompte");
   if (quote.status !== "ACCEPTED") {
     throw new Error("Acompte réservé aux devis acceptés");
   }
@@ -304,9 +309,14 @@ export async function createQuoteProgressInvoice(input: {
       clientSnapshotJson: true,
       issuerSnapshotJson: true,
       paymentScheduleJson: true,
+      isDemonstration: true,
     },
   });
   if (!quote) throw new Error("Devis introuvable");
+  const { assertDemoQuoteNotBillable } = await import(
+    "@/lib/preparation/quote-bridge/demo-guards"
+  );
+  assertDemoQuoteNotBillable(quote.isDemonstration, "facturation");
   if (quote.status !== "ACCEPTED") {
     throw new Error("Facturation réservée aux devis acceptés");
   }

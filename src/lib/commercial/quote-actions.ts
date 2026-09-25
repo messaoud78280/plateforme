@@ -36,14 +36,31 @@ export function getQuoteActionsForStatus(input: {
   canEdit: boolean;
   hasAcceptedPdf?: boolean;
   hasProject?: boolean;
+  /** Devis Métré de démonstration — pas d'envoi, acceptation, ni facturation. */
+  isDemonstration?: boolean;
 }): { primary: QuoteActionDef | null; secondary: QuoteActionDef[] } {
   const status = input.status;
   const secondary: QuoteActionDef[] = [];
   let primary: QuoteActionDef | null = null;
+  const demo = input.isDemonstration === true;
 
   const pdf: QuoteActionDef = input.hasAcceptedPdf
     ? { id: "accepted_pdf", label: "PDF figé à l’acceptation" }
     : { id: "preview_pdf", label: "Prévisualiser PDF" };
+
+  if (demo) {
+    primary = { id: "preview_pdf", label: "Prévisualiser PDF", primary: true };
+    secondary.push({ id: "price_check", label: "Vérifier les prix" });
+    if (input.canEdit) {
+      secondary.push({
+        id: "cancel",
+        label: "Annuler le devis",
+        toStatus: "CANCELLED",
+        destructive: true,
+      });
+    }
+    return { primary, secondary };
+  }
 
   switch (status) {
     case "DRAFT":

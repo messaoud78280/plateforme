@@ -29,7 +29,7 @@ import {
   pdfSafe,
 } from "@/lib/commercial/pdf/format";
 import { tryDrawLogo } from "@/lib/commercial/pdf/logo";
-import { drawDraftWatermark } from "@/lib/commercial/pdf/architectural-watermark";
+import { drawDraftWatermark, drawDemoWatermark } from "@/lib/commercial/pdf/architectural-watermark";
 import {
   DEFAULT_ACCEPTANCE_TEXT,
   type QuoteDocumentSettings,
@@ -94,6 +94,8 @@ export type QuotePdfInput = {
   siteAddressSnapshot?: string | null;
   projectTitle?: string | null;
   versionNumber?: number | null;
+  /** Devis de démonstration (Métré) — filigrane NON CONTRACTUEL. */
+  isDemonstration?: boolean;
   issuer: QuotePdfSnapshot | null;
   client: QuotePdfSnapshot | null;
   currency: string;
@@ -209,16 +211,31 @@ function splitLineCopy(line: QuotePdfLine): {
   if (!raw) return { title, technical: null, observation: null };
   const parts = raw
     .split(/\n\s*\n/)
-    .map((p) => p.replace(/\s+/g, " ").trim())
+    .map((p) => p.replace(/[ \t]+/g, " ").replace(/\n+/g, "\n").trim())
     .filter(Boolean);
+  const MAX_TECH = 1600;
+  const softCap = (s: string, refHint: string | null) => {
+    if (s.length <= MAX_TECH) return s;
+    const cut = s.slice(0, MAX_TECH - 60).trimEnd();
+    const suffix = refHint
+      ? `… [détail complet dans le métré ${refHint}]`
+      : "… [détail complet dans BeWork Devis]";
+    return `${cut}\n${suffix}`;
+  };
+  const refMatch = raw.match(/Réf\. métré\s*:\s*([A-Z0-9._-]+)/i);
+  const refHint = refMatch?.[1] ?? line.reference ?? null;
   if (parts.length >= 2) {
     return {
       title,
-      technical: parts[0] ?? null,
-      observation: parts.slice(1).join(" "),
+      technical: softCap(parts[0] ?? "", refHint),
+      observation: softCap(parts.slice(1).join("\n\n"), refHint),
     };
   }
-  return { title, technical: raw.replace(/\s+/g, " "), observation: null };
+  return {
+    title,
+    technical: softCap(parts[0]?.replace(/\n/g, " ") ?? raw.replace(/\s+/g, " "), refHint),
+    observation: null,
+  };
 }
 
 function stabilizePdfDocumentIds(pdf: Buffer): Buffer {
@@ -247,6 +264,7 @@ export function generateQuotePdfBuffer(input: QuotePdfInput): Buffer {
   const wash = tint(brand, 0.94);
   const docSettings = input.documentSettings ?? {};
   const isDraft = input.status === "DRAFT" || input.status === "TO_VALIDATE";
+  const isDemo = input.isDemonstration === true;
 
   let y = MARGIN;
   let inTable = false;
@@ -254,7 +272,8 @@ export function generateQuotePdfBuffer(input: QuotePdfInput): Buffer {
   const contentBottom = () => pageH - FOOTER_H - 3;
 
   const paintDraftIfNeeded = () => {
-    if (isDraft) drawDraftWatermark(doc, pageW, pageH);
+    if (isDemo) drawDemoWatermark(doc, pageW, pageH);
+    else if (isDraft) drawDraftWatermark(doc, pageW, pageH);
   };
 
   const startNewPage = () => {

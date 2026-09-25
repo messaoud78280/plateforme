@@ -13,6 +13,7 @@ export function QuoteStatusActions({
   canEdit,
   hasAcceptedPdf,
   hasProject,
+  isDemonstration,
   busy,
   onAction,
 }: {
@@ -20,6 +21,7 @@ export function QuoteStatusActions({
   canEdit: boolean;
   hasAcceptedPdf: boolean;
   hasProject: boolean;
+  isDemonstration?: boolean;
   busy: boolean;
   onAction: (action: QuoteActionDef) => void;
 }) {
@@ -28,6 +30,7 @@ export function QuoteStatusActions({
     canEdit,
     hasAcceptedPdf,
     hasProject,
+    isDemonstration,
   });
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);

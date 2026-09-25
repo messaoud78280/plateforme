@@ -210,6 +210,13 @@ export async function createQuote(input: {
   depositPercent?: number | null;
   /** Snapshot libre (ex. visite sans ExternalOrg). */
   clientSnapshotJson?: Prisma.InputJsonValue | null;
+  /** Devis issu d'une étude Métré en démonstration. */
+  isDemonstration?: boolean;
+  sourcePrepStudyId?: string | null;
+  /** Numéro déjà alloué (ex. série DEMO-) — sinon numérotation professionnelle. */
+  numberOverride?: string | null;
+  /** Ne pas créer la section « Ouvrages » vide (ex. transfert Métré qui crée ses lots). */
+  skipDefaultSection?: boolean;
 }) {
   const settings = await ensureCommercialOrgSettings(input.orgId);
   const subject = input.subject.trim();
@@ -241,13 +248,29 @@ export async function createQuote(input: {
     if (!project) throw new Error("Chantier introuvable");
   }
 
+  if (input.sourcePrepStudyId) {
+    const study = await prisma.prepStudy.findFirst({
+      where: { id: input.sourcePrepStudyId, organizationId: input.orgId, archivedAt: null },
+      select: { id: true },
+    });
+    if (!study) throw new Error("Étude de métré introuvable");
+  }
+
   const issuerSnapshotJson = await buildIssuerSnapshot(input.orgId);
   const clientSnapshotJson =
     input.clientSnapshotJson ??
     (await buildClientSnapshot(input.clientExternalOrgId ?? null));
 
   const quote = await prisma.$transaction(async (tx) => {
-    const number = await nextQuoteNumber(input.orgId, tx);
+    const number =
+      input.numberOverride?.trim() || (await nextQuoteNumber(input.orgId, tx));
+    if (input.numberOverride?.trim()) {
+      const clash = await tx.commercialQuote.findFirst({
+        where: { organizationId: input.orgId, number },
+        select: { id: true },
+      });
+      if (clash) throw new Error(`La référence ${number} est déjà utilisée`);
+    }
     const created = await tx.commercialQuote.create({
       data: {
         organizationId: input.orgId,
@@ -270,6 +293,8 @@ export async function createQuote(input: {
         paymentScheduleJson: scheduleNorm ?? undefined,
         depositPercent: input.depositPercent ?? null,
         defaultVatRate: settings.defaultVatRate,
+        isDemonstration: input.isDemonstration === true,
+        sourcePrepStudyId: input.sourcePrepStudyId ?? null,
       },
     });
 
@@ -288,14 +313,16 @@ export async function createQuote(input: {
       },
     });
 
-    await tx.commercialQuoteSection.create({
-      data: {
-        organizationId: input.orgId,
-        versionId: version.id,
-        title: "Ouvrages",
-        sortOrder: 0,
-      },
-    });
+    if (!input.skipDefaultSection) {
+      await tx.commercialQuoteSection.create({
+        data: {
+          organizationId: input.orgId,
+          versionId: version.id,
+          title: "Ouvrages",
+          sortOrder: 0,
+        },
+      });
+    }
 
     await tx.commercialQuote.update({
       where: { id: created.id },
@@ -1358,6 +1385,11 @@ export async function transitionQuoteStatus(
   if (toStatus === "ACCEPTED" && quote.status === "ACCEPTED") {
     return quote;
   }
+
+  const { assertDemoQuoteAllowsStatus } = await import(
+    "@/lib/preparation/quote-bridge/demo-guards"
+  );
+  assertDemoQuoteAllowsStatus(quote.isDemonstration, toStatus);
 
   const allowed = ALLOWED_TRANSITIONS[quote.status] ?? [];
   if (!allowed.includes(toStatus)) {

@@ -138,6 +138,7 @@ type QuoteDetail = {
   number: string;
   subject: string;
   status: string;
+  isDemonstration?: boolean;
   issueDate?: string | Date | null;
   validityDate?: string | Date | null;
   paymentTerms?: string | null;
@@ -1019,6 +1020,12 @@ export function QuoteEditor({
 
   return (
     <div className="relative pb-24">
+      {quote.isDemonstration ? (
+        <div className="mx-auto mb-3 max-w-[1500px] rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-[13px] text-amber-950">
+          <span className="font-semibold">DÉMONSTRATION — NON CONTRACTUEL.</span>{" "}
+          Chiffrage et PDF autorisés. Envoi client, acceptation et facturation bloqués côté serveur.
+        </div>
+      ) : null}
       {/* Barre sticky */}
       <div className="sticky top-12 z-30 -mx-1 mb-4 border-b border-slate-200/80 bg-white/95 px-1 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
@@ -1099,6 +1106,7 @@ export function QuoteEditor({
               canEdit={canEdit}
               hasAcceptedPdf={acceptedPdfAvailable}
               hasProject={Boolean(quote.project)}
+              isDemonstration={quote.isDemonstration === true}
               busy={busyStatus || accepting}
               onAction={(a) => void handleStatusAction(a)}
             />

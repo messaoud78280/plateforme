@@ -129,6 +129,17 @@ function assert(cond: boolean, msg: string) {
     accepted.secondary.some((a) => a.id === "prepare_invoice"),
     "ACCEPTED → préparer facture",
   );
+
+  const demo = getQuoteActionsForStatus({
+    status: "DRAFT",
+    canEdit: true,
+    isDemonstration: true,
+  });
+  assert(demo.primary?.id === "preview_pdf", "démo → PDF seulement");
+  assert(
+    !demo.secondary.some((a) => a.id === "mark_sent" || a.id === "prepare_invoice"),
+    "démo sans envoi ni facture",
+  );
 }
 
 {

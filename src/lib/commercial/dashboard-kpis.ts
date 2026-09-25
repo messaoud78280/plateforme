@@ -97,11 +97,14 @@ export async function loadCommercialDashboardKpis(
   const { loadCollectionsKpis } = await import("@/lib/commercial/collections");
   const [quoteCount, grouped, avenantsSum, collections] = await mapPool(
     [
-      () => prisma.commercialQuote.count({ where: { organizationId: orgId } }),
+      () =>
+        prisma.commercialQuote.count({
+          where: { organizationId: orgId, isDemonstration: false },
+        }),
       () =>
         prisma.commercialQuote.groupBy({
           by: ["status"],
-          where: { organizationId: orgId },
+          where: { organizationId: orgId, isDemonstration: false },
           _count: true,
           _sum: { totalSellHt: true },
         }),

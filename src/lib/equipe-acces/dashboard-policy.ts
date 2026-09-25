@@ -106,7 +106,7 @@ export function requiredHrefForApiPath(apiPath: string): string | null {
   if (path.startsWith("/api/annual-contracts")) {
     return "/dashboard/contrats-annuels";
   }
-  if (path.startsWith("/api/site-visits")) {
+  if (path.startsWith("/api/site-visits") || path.startsWith("/api/prep-studies")) {
     return "/dashboard/visites-metres";
   }
   if (path.startsWith("/api/purchase-orders")) {

@@ -320,12 +320,20 @@ export function SiteVisitsWorkspace({
         title="Visites & métrés"
         description="Du terrain au devis, sans ressaisie."
         actions={
-          <Link
-            href="/dashboard/visites-metres/nouveau"
-            className="rounded-full bg-[#1e3a5f] px-4 py-2 text-[13px] font-medium text-white"
-          >
-            + Nouvelle visite
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/dashboard/visites-metres/etudes"
+              className="rounded-full border border-[#1e3a5f]/20 bg-white px-4 py-2 text-[13px] font-medium text-[#1e3a5f] hover:bg-slate-50"
+            >
+              Études de métré
+            </Link>
+            <Link
+              href="/dashboard/visites-metres/nouveau"
+              className="rounded-full bg-[#1e3a5f] px-4 py-2 text-[13px] font-medium text-white"
+            >
+              + Nouvelle visite
+            </Link>
+          </div>
         }
       />
 

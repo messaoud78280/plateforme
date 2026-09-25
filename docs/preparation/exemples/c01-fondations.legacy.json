@@ -1,0 +1,136 @@
+{
+  "type": "bework_foundations_demo_bundle_v1",
+  "status": "DEMONSTRATION_ONLY_NOT_FOR_CONSTRUCTION",
+  "interoperability": "PROPOSED_SCHEMA_NOT_YET_SUPPORTED_BY_BEWORK",
+  "source_document": {
+    "filename": "plan de fondation.pdf",
+    "plan_number": "C-01",
+    "title": "Plan Niveau Fondations",
+    "scale_on_drawing": "1:50",
+    "pdf_page": 1,
+    "source_is_raster": true
+  },
+  "data_policy": {
+    "observed": [
+      "Dessin de fondations, repères SF1, S1, S2 et quadrillage d’axes",
+      "Section SF1 (50 x 25 cm) lisible",
+      "Notation S1 (80 x 80 x 25 cm) à confirmer sur plan original"
+    ],
+    "assumed": [
+      "Longueur développée SF1 76 m",
+      "Nombre S1 8, S2 2; section S2 100 x 100 x 30 cm",
+      "Fouilles SF1 largeur 60 cm; profondeur commune 80 cm",
+      "Fouilles S1 100 x 100 cm; S2 120 x 120 cm",
+      "Propreté 5 cm et aciers 740 kg",
+      "Chaises 16, foisonnement 1.25",
+      "Fouilles sans intersections à déduire pour la simulation"
+    ],
+    "note": "Les hypothèses ne prouvent ni conformité technique, ni recevabilité d’une entreprise, ni conformité à l’étude géotechnique."
+  },
+  "geometry_demo": {
+    "sf1": { "quantity": 1, "total_length_m": 76, "footing_width_m": 0.5, "footing_height_m": 0.25, "trench_width_m": 0.6, "trench_depth_m": 0.8, "clean_concrete_width_m": 0.6, "clean_concrete_height_m": 0.05 },
+    "s1": { "count": 8, "footing_length_m": 0.8, "footing_width_m": 0.8, "footing_height_m": 0.25, "trench_length_m": 1, "trench_width_m": 1, "trench_depth_m": 0.8 },
+    "s2": { "count": 2, "footing_length_m": 1, "footing_width_m": 1, "footing_height_m": 0.3, "trench_length_m": 1.2, "trench_width_m": 1.2, "trench_depth_m": 0.8 },
+    "assumed_depth_reference": "0.80 m sous terrain de référence jusqu’au fond de fouille; béton de propreté 0.05 m; sous-face semelle à -0.75 m si sur propreté."
+  },
+  "takeoff": {
+    "type": "bework_takeoff_bundle_v1",
+    "items": [
+      { "id": "IM-01", "lot": "implantation", "designation": "Installation et préparation du chantier", "unit": "FT", "quantity": 1, "formula": "hypothèse forfaitaire", "provenance": "demo_assumption" },
+      { "id": "IM-02", "lot": "implantation", "designation": "Implantation générale et repères altimétriques", "unit": "FT", "quantity": 1, "formula": "hypothèse forfaitaire", "provenance": "demo_assumption" },
+      { "id": "IM-03", "lot": "implantation", "designation": "Chaises d’implantation et cordeaux", "unit": "U", "quantity": 16, "formula": "hypothèse de 16 chaises", "provenance": "demo_assumption" },
+      { "id": "IM-04", "lot": "implantation", "designation": "Traçage des semelles filantes SF1", "unit": "ML", "quantity": 76, "formula": "hypothèse de longueur développée", "provenance": "demo_assumption" },
+      { "id": "IM-05", "lot": "implantation", "designation": "Traçage des semelles isolées S1 et S2", "unit": "U", "quantity": 10, "formula": "8 + 2", "provenance": "demo_assumption" },
+      { "id": "TE-01", "lot": "terrassement", "designation": "Fouilles en rigoles SF1", "unit": "M3", "quantity": 36.48, "formula": "76 * 0.60 * 0.80", "provenance": "calculated_from_demo_assumptions" },
+      { "id": "TE-02", "lot": "terrassement", "designation": "Fouilles semelles isolées S1", "unit": "M3", "quantity": 6.4, "formula": "8 * 1.00 * 1.00 * 0.80", "provenance": "calculated_from_demo_assumptions" },
+      { "id": "TE-03", "lot": "terrassement", "designation": "Fouilles semelles isolées S2", "unit": "M3", "quantity": 2.304, "formula": "2 * 1.20 * 1.20 * 0.80", "provenance": "calculated_from_demo_assumptions" },
+      { "id": "TE-04", "lot": "terrassement", "designation": "Réglage des fonds de fouille (brut)", "unit": "M2", "quantity": 56.48, "formula": "76 * 0.60 + 8 * 1.00 + 2 * 1.44", "provenance": "calculated_from_demo_assumptions", "notes": "Surface brute théorique sans correction d’intersections." },
+      { "id": "EV-01", "lot": "déblais", "designation": "Déblais en place, avant décision de réemploi", "unit": "M3", "quantity": 45.184, "formula": "TE-01 + TE-02 + TE-03", "provenance": "calculated_from_demo_assumptions", "notes": "Ce volume n’est pas automatiquement la quantité à évacuer." },
+      { "id": "EV-02", "lot": "déblais", "designation": "Déblais foisonnés théoriques (si tout transporté)", "unit": "M3", "quantity": 56.48, "formula": "EV-01 * 1.25", "provenance": "calculated_from_demo_assumptions", "notes": "Indicateur de capacité transport, non quantité retenue au devis tant que le réemploi n’est pas décidé." },
+      { "id": "BP-01", "lot": "béton de propreté", "designation": "Béton de propreté SF1", "unit": "M3", "quantity": 2.28, "formula": "76 * 0.60 * 0.05", "provenance": "calculated_from_demo_assumptions", "notes": "Propreté supposée sur 60 cm de largeur." },
+      { "id": "BP-02", "lot": "béton de propreté", "designation": "Béton de propreté S1", "unit": "M3", "quantity": 0.4, "formula": "8 * 1.00 * 1.00 * 0.05", "provenance": "calculated_from_demo_assumptions" },
+      { "id": "BP-03", "lot": "béton de propreté", "designation": "Béton de propreté S2", "unit": "M3", "quantity": 0.144, "formula": "2 * 1.20 * 1.20 * 0.05", "provenance": "calculated_from_demo_assumptions" },
+      { "id": "AR-01", "lot": "armatures", "designation": "Fourniture, façonnage et pose des aciers (forfait quantitatif de test)", "unit": "KG", "quantity": 740, "formula": "hypothèse illustrative, aucun plan de ferraillage fourni", "provenance": "demo_assumption", "notes": "NE PAS traiter comme dimensionnement structurel." },
+      { "id": "BE-01", "lot": "béton armé", "designation": "Béton des semelles filantes SF1", "unit": "M3", "quantity": 9.5, "formula": "76 * 0.50 * 0.25", "provenance": "calculated_from_demo_assumptions" },
+      { "id": "BE-02", "lot": "béton armé", "designation": "Béton des semelles isolées S1", "unit": "M3", "quantity": 1.28, "formula": "8 * 0.80 * 0.80 * 0.25", "provenance": "calculated_from_demo_assumptions" },
+      { "id": "BE-03", "lot": "béton armé", "designation": "Béton des semelles isolées S2", "unit": "M3", "quantity": 0.6, "formula": "2 * 1.00 * 1.00 * 0.30", "provenance": "calculated_from_demo_assumptions" },
+      { "id": "CO-01", "lot": "contrôles", "designation": "Vérification de l’implantation, armatures et fonds de fouille avant bétonnage", "unit": "FT", "quantity": 1, "formula": "hypothèse forfaitaire", "provenance": "demo_assumption" },
+      { "id": "CO-02", "lot": "contrôles", "designation": "Cure et protection du béton", "unit": "FT", "quantity": 1, "formula": "hypothèse forfaitaire", "provenance": "demo_assumption" },
+      { "id": "RE-01", "lot": "remblaiement", "designation": "Vide théorique résiduel à remblayer, si remise au niveau initial", "unit": "M3", "quantity": 30.98, "formula": "EV-01 - (BP-01+BP-02+BP-03) - (BE-01+BE-02+BE-03)", "provenance": "calculated_from_demo_assumptions", "notes": "Indicateur uniquement : omet intersections, compactage, ouvrages de soubassement et éventuelle différence de niveau final." },
+      { "id": "RE-02", "lot": "repli", "designation": "Nettoyage et repli du chantier", "unit": "FT", "quantity": 1, "formula": "hypothèse forfaitaire", "provenance": "demo_assumption" }
+    ],
+    "totals": {
+      "excavation_m3_in_situ_gross": 45.184,
+      "excavation_m3_loose_if_all_hauled": 56.48,
+      "excavation_bottom_m2_gross": 56.48,
+      "clean_concrete_m3": 2.824,
+      "footing_concrete_m3": 11.38,
+      "all_concrete_m3": 14.204,
+      "reinforcement_kg_demo_only": 740,
+      "theoretical_void_after_concrete_m3": 30.98
+    },
+    "pricing_state": "UNPRICED",
+    "quote_transfer": "DRAFT_ONLY_AFTER_USER_VALIDATION"
+  },
+  "workflow": {
+    "type": "bework_workflow_bundle_v1",
+    "steps": [
+      { "id": "P01", "name": "Installation et balisage du chantier", "takeoff_item_ids": ["IM-01"], "duration_work_days_demo": 1, "after": [], "method_notes": "Equipe 2 personnes; contrôle accès et réseaux." },
+      { "id": "P02", "name": "Implantation des axes, niveaux, chaises et traçage", "takeoff_item_ids": ["IM-02", "IM-03", "IM-04", "IM-05"], "duration_work_days_demo": 1, "after": ["P01"], "method_notes": "Equipe 2 personnes; contrôle équerrage/diagonales et cotes." },
+      { "id": "P03", "name": "Terrassement mécanique et gestion des déblais", "takeoff_item_ids": ["TE-01", "TE-02", "TE-03", "EV-01"], "duration_work_days_demo": 2, "after": ["P02"], "method_notes": "Pelle mécanique adaptée, camion/bennes; protections des fouilles selon terrain." },
+      { "id": "P04", "name": "Réglage, contrôle des fonds de fouille", "takeoff_item_ids": ["TE-04"], "duration_work_days_demo": 1, "after": ["P03"], "method_notes": "Ne pas intervenir dans une fouille instable; validation selon étude géotechnique." },
+      { "id": "P05", "name": "Mise en oeuvre du béton de propreté", "takeoff_item_ids": ["BP-01", "BP-02", "BP-03"], "duration_work_days_demo": 1, "after": ["P04"], "method_notes": "Vérifier niveaux et fonds avant coulage." },
+      { "id": "P06", "name": "Préparation, pose et calage des armatures", "takeoff_item_ids": ["AR-01"], "duration_work_days_demo": 2, "after": ["P05"], "method_notes": "Les 740 kg sont fictifs; enrobage, recouvrements et attentes à valider sur ferraillage." },
+      { "id": "P07", "name": "Contrôle avant bétonnage", "takeoff_item_ids": ["CO-01"], "duration_work_days_demo": 0.5, "after": ["P06"], "method_notes": "Contrôle implantation, dimensions, armatures, réservations." },
+      { "id": "P08", "name": "Coulage, vibration selon méthode et finition des semelles", "takeoff_item_ids": ["BE-01", "BE-02", "BE-03"], "duration_work_days_demo": 1, "after": ["P07"], "method_notes": "Béton et cadence de livraison à définir; pas de changement des sections structurelles." },
+      { "id": "P09", "name": "Cure, protection et délai avant sollicitation", "takeoff_item_ids": ["CO-02"], "duration_work_days_demo": 3, "after": ["P08"], "method_notes": "3 j = espace réservé sur planning de démo, PAS un délai réglementaire universel." },
+      { "id": "P10", "name": "Remblaiement conditionnel après travaux de soubassement et autorisation", "takeoff_item_ids": ["RE-01"], "duration_work_days_demo": 1, "after": ["P09"], "method_notes": "Etape bloquée si soubassement / conditions de réemploi / contrôle compaction non validés." },
+      { "id": "P11", "name": "Nettoyage et repli", "takeoff_item_ids": ["RE-02"], "duration_work_days_demo": 0.5, "after": ["P10"], "method_notes": "Vérifier évacuation effective selon scénario validé." }
+    ]
+  },
+  "resources": {
+    "type": "bework_resources_bundle_v1",
+    "demo_assumptions": {
+      "site_team": "2-3 personnes selon phase",
+      "excavator": "pelle mécanique à choisir selon accès et sol",
+      "concrete_delivery": "camion toupie, mode de mise en place selon accès",
+      "excavation_productivity_m3_per_workday": 24,
+      "reinforcement_placing_kg_per_workday": 370,
+      "pouring_productivity_m3_per_workday": 12
+    },
+    "technical_checks": [
+      "Géotechnique déjà réalisée: vérifier effectivement les prescriptions, sans en inventer les résultats",
+      "Terrassement 60 cm de large: aucun poste de travail en fond de fouille prévu; adapter la méthode et la géométrie si présence humaine nécessaire",
+      "Gestion du risque d’effondrement et protection des fouilles",
+      "Pentes, soutènement, eaux, réseaux et évacuation",
+      "Béton, fers et délais selon plans et prescriptions du projet"
+    ]
+  },
+  "schedule": {
+    "type": "bework_schedule_bundle_v1",
+    "time_unit": "working_day",
+    "start_date": null,
+    "tasks": [
+      { "id": "P01", "name": "Installation et balisage du chantier", "takeoff_item_ids": ["IM-01"], "duration_work_days_demo": 1, "after": [] },
+      { "id": "P02", "name": "Implantation des axes, niveaux, chaises et traçage", "takeoff_item_ids": ["IM-02", "IM-03", "IM-04", "IM-05"], "duration_work_days_demo": 1, "after": ["P01"] },
+      { "id": "P03", "name": "Terrassement mécanique et gestion des déblais", "takeoff_item_ids": ["TE-01", "TE-02", "TE-03", "EV-01"], "duration_work_days_demo": 2, "after": ["P02"] },
+      { "id": "P04", "name": "Réglage, contrôle des fonds de fouille", "takeoff_item_ids": ["TE-04"], "duration_work_days_demo": 1, "after": ["P03"] },
+      { "id": "P05", "name": "Mise en oeuvre du béton de propreté", "takeoff_item_ids": ["BP-01", "BP-02", "BP-03"], "duration_work_days_demo": 1, "after": ["P04"] },
+      { "id": "P06", "name": "Préparation, pose et calage des armatures", "takeoff_item_ids": ["AR-01"], "duration_work_days_demo": 2, "after": ["P05"] },
+      { "id": "P07", "name": "Contrôle avant bétonnage", "takeoff_item_ids": ["CO-01"], "duration_work_days_demo": 0.5, "after": ["P06"] },
+      { "id": "P08", "name": "Coulage, vibration selon méthode et finition des semelles", "takeoff_item_ids": ["BE-01", "BE-02", "BE-03"], "duration_work_days_demo": 1, "after": ["P07"] },
+      { "id": "P09", "name": "Cure, protection et délai avant sollicitation", "takeoff_item_ids": ["CO-02"], "duration_work_days_demo": 3, "after": ["P08"] },
+      { "id": "P10", "name": "Remblaiement conditionnel après travaux de soubassement et autorisation", "takeoff_item_ids": ["RE-01"], "duration_work_days_demo": 1, "after": ["P09"] },
+      { "id": "P11", "name": "Nettoyage et repli", "takeoff_item_ids": ["RE-02"], "duration_work_days_demo": 0.5, "after": ["P10"] }
+    ],
+    "estimate_including_conditional_backfill_days": 14.0,
+    "note": "Durées de simulation non contractuelles; ne pas utiliser le délai de cure démo comme seuil de résistance du béton."
+  },
+  "open_decisions": [
+    "Déduire les intersections des fouilles et volumes béton sur plans lisibles",
+    "Distinguer fondations SF1 des éléments 15x40 / 15x50 potentiellement structurels",
+    "Fixer le scénario de réemploi, de foisonnement, de transport et de remblaiement avant chiffrage",
+    "Vérifier armatures, profondeurs, méthode en fouille et prescriptions géotechniques",
+    "Ne pas importer dans le devis existant tant que le mapping n'a pas été validé dans BeWork"
+  ]
+}

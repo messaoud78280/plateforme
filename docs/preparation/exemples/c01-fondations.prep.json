@@ -1,0 +1,1830 @@
+{
+  "format": "bework_prep_bundle_v1",
+  "schema_version": "1.0",
+  "bundle_id": "c01-fondations-demo-v1",
+  "mode": "demonstration",
+  "study": {
+    "title": "Fondations — Plan C-01 (démonstration formation)",
+    "trade": "fondations",
+    "description": "Scénario pédagogique de fondations superficielles (semelles filantes SF1, semelles isolées S1 et S2). Données majoritairement fictives : ne pas utiliser pour l'exécution d'un chantier réel.",
+    "language": "fr"
+  },
+  "sources": [
+    {
+      "id": "SRC-C01",
+      "filename": "plan de fondation.pdf",
+      "plan_number": "C-01",
+      "title": "Plan Niveau Fondations",
+      "revision": null,
+      "date": null,
+      "scale": "1:50",
+      "page": 1,
+      "is_raster": true,
+      "legibility": "partielle",
+      "note": "Document raster : cotes partiellement lisibles. Indice de révision non identifié — à vérifier."
+    }
+  ],
+  "parameters": [
+    {
+      "key": "sf1.longueur",
+      "label": "Longueur développée des semelles filantes SF1",
+      "value": 76,
+      "unit": "m",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-01"
+    },
+    {
+      "key": "sf1.largeur",
+      "label": "Largeur semelle SF1",
+      "value": 0.5,
+      "unit": "m",
+      "provenance": "RELEVE",
+      "source_ref": "SRC-C01",
+      "evidence": {
+        "kind": "texte_lu",
+        "location": "Repère SF1, annotation de section",
+        "quote": "SF1 50 x 25"
+      }
+    },
+    {
+      "key": "sf1.hauteur",
+      "label": "Hauteur semelle SF1",
+      "value": 0.25,
+      "unit": "m",
+      "provenance": "RELEVE",
+      "source_ref": "SRC-C01",
+      "evidence": {
+        "kind": "texte_lu",
+        "location": "Repère SF1, annotation de section",
+        "quote": "SF1 50 x 25"
+      }
+    },
+    {
+      "key": "sf1.fouille_largeur",
+      "label": "Largeur de fouille en rigole SF1",
+      "value": 0.6,
+      "unit": "m",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-03"
+    },
+    {
+      "key": "fouille.profondeur_commune",
+      "label": "Profondeur de fouille commune (terrain de référence → fond de fouille)",
+      "value": 0.8,
+      "unit": "m",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-04"
+    },
+    {
+      "key": "sf1.fouille_profondeur",
+      "label": "Profondeur de fouille SF1",
+      "formula": "fouille.profondeur_commune",
+      "unit": "m"
+    },
+    {
+      "key": "sf1.proprete_largeur",
+      "label": "Largeur du béton de propreté SF1",
+      "formula": "sf1.fouille_largeur",
+      "unit": "m",
+      "note": "Propreté supposée sur toute la largeur de fouille (H-05)."
+    },
+    {
+      "key": "s1.nombre",
+      "label": "Nombre de semelles isolées S1",
+      "value": 8,
+      "unit": "u",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-02"
+    },
+    {
+      "key": "s1.longueur",
+      "label": "Longueur semelle S1",
+      "value": 0.8,
+      "unit": "m",
+      "provenance": "RELEVE_A_VERIFIER",
+      "source_ref": "SRC-C01",
+      "evidence": {
+        "kind": "texte_lu",
+        "location": "Repère S1",
+        "quote": "S1 80 x 80 x 25 (lecture incertaine)"
+      },
+      "note": "Notation à confirmer sur plan original."
+    },
+    {
+      "key": "s1.largeur",
+      "label": "Largeur semelle S1",
+      "value": 0.8,
+      "unit": "m",
+      "provenance": "RELEVE_A_VERIFIER",
+      "source_ref": "SRC-C01",
+      "evidence": {
+        "kind": "texte_lu",
+        "location": "Repère S1",
+        "quote": "S1 80 x 80 x 25 (lecture incertaine)"
+      }
+    },
+    {
+      "key": "s1.hauteur",
+      "label": "Hauteur semelle S1",
+      "value": 0.25,
+      "unit": "m",
+      "provenance": "RELEVE_A_VERIFIER",
+      "source_ref": "SRC-C01",
+      "evidence": {
+        "kind": "texte_lu",
+        "location": "Repère S1",
+        "quote": "S1 80 x 80 x 25 (lecture incertaine)"
+      }
+    },
+    {
+      "key": "s1.fouille_longueur",
+      "label": "Longueur de fouille S1",
+      "value": 1.0,
+      "unit": "m",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-03"
+    },
+    {
+      "key": "s1.fouille_largeur",
+      "label": "Largeur de fouille S1",
+      "value": 1.0,
+      "unit": "m",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-03"
+    },
+    {
+      "key": "s1.fouille_profondeur",
+      "label": "Profondeur de fouille S1",
+      "formula": "fouille.profondeur_commune",
+      "unit": "m"
+    },
+    {
+      "key": "s2.nombre",
+      "label": "Nombre de semelles isolées S2",
+      "value": 2,
+      "unit": "u",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-02"
+    },
+    {
+      "key": "s2.longueur",
+      "label": "Longueur semelle S2",
+      "value": 1.0,
+      "unit": "m",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-02"
+    },
+    {
+      "key": "s2.largeur",
+      "label": "Largeur semelle S2",
+      "value": 1.0,
+      "unit": "m",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-02"
+    },
+    {
+      "key": "s2.hauteur",
+      "label": "Hauteur semelle S2",
+      "value": 0.3,
+      "unit": "m",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-02"
+    },
+    {
+      "key": "s2.fouille_longueur",
+      "label": "Longueur de fouille S2",
+      "value": 1.2,
+      "unit": "m",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-03"
+    },
+    {
+      "key": "s2.fouille_largeur",
+      "label": "Largeur de fouille S2",
+      "value": 1.2,
+      "unit": "m",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-03"
+    },
+    {
+      "key": "s2.fouille_profondeur",
+      "label": "Profondeur de fouille S2",
+      "formula": "fouille.profondeur_commune",
+      "unit": "m"
+    },
+    {
+      "key": "proprete.epaisseur",
+      "label": "Épaisseur du béton de propreté",
+      "value": 0.05,
+      "unit": "m",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-05"
+    },
+    {
+      "key": "aciers.masse_forfaitaire",
+      "label": "Masse d'aciers (valeur illustrative de test)",
+      "value": 740,
+      "unit": "kg",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-06",
+      "note": "Aucun plan de ferraillage fourni. NE PAS traiter comme un dimensionnement structurel. Valeur fixe : ne suit pas le volume de béton."
+    },
+    {
+      "key": "implantation.nombre_chaises",
+      "label": "Nombre de chaises d'implantation",
+      "value": 16,
+      "unit": "u",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-07"
+    },
+    {
+      "key": "deblais.foisonnement",
+      "label": "Coefficient de foisonnement des déblais",
+      "value": 1.25,
+      "unit": "coef",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-08"
+    },
+    {
+      "key": "deblais.taux_reemploi",
+      "label": "Part des déblais conservée sur site pour réemploi (0 = évacuation totale)",
+      "value": 0,
+      "unit": "coef",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-09"
+    },
+    {
+      "key": "camion.capacite_m3",
+      "label": "Capacité utile d'un camion benne (déblais foisonnés)",
+      "value": 10,
+      "unit": "m3",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-10"
+    },
+    {
+      "key": "toupie.capacite_m3",
+      "label": "Capacité utile d'un camion toupie",
+      "value": 7,
+      "unit": "m3",
+      "provenance": "HYPOTHESE",
+      "hypothesis_id": "H-10"
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "H-01",
+      "statement": "Longueur développée SF1 prise à 76 m.",
+      "reason": "Cotes de longueur non exploitables sur le document raster.",
+      "to_confirm_with": "Plan de fondations lisible ou métré contradictoire sur plan d'exécution."
+    },
+    {
+      "id": "H-02",
+      "statement": "8 semelles S1 et 2 semelles S2 ; section S2 prise à 100 x 100 x 30 cm.",
+      "reason": "Comptage et section S2 non confirmés sur le document.",
+      "to_confirm_with": "Plan de fondations indicé, tableau des semelles du BET structure."
+    },
+    {
+      "id": "H-03",
+      "statement": "Fouilles : SF1 60 cm de large ; S1 100 x 100 cm ; S2 120 x 120 cm.",
+      "reason": "Surlargeur de fouille non prescrite sur le document.",
+      "to_confirm_with": "Méthode de terrassement retenue, nature du sol, étude géotechnique."
+    },
+    {
+      "id": "H-04",
+      "statement": "Profondeur de fouille commune 0,80 m sous terrain de référence.",
+      "reason": "Niveau d'assise non lisible ; sous-face semelle supposée à -0,75 m sur 5 cm de propreté.",
+      "to_confirm_with": "Étude géotechnique (niveau d'assise), plan de nivellement."
+    },
+    {
+      "id": "H-05",
+      "statement": "Béton de propreté de 5 cm sur toute la surface des fonds de fouille.",
+      "reason": "Épaisseur et emprise non prescrites sur le document.",
+      "to_confirm_with": "CCTP gros œuvre, plans BET."
+    },
+    {
+      "id": "H-06",
+      "statement": "740 kg d'aciers, valeur illustrative fixe.",
+      "reason": "Aucun plan de ferraillage fourni.",
+      "to_confirm_with": "Plans de ferraillage BET structure."
+    },
+    {
+      "id": "H-07",
+      "statement": "16 chaises d'implantation.",
+      "reason": "Estimation pédagogique selon le nombre d'axes.",
+      "to_confirm_with": "Plan d'implantation et méthode du chef d'équipe ou du géomètre."
+    },
+    {
+      "id": "H-08",
+      "statement": "Foisonnement des déblais à 1,25.",
+      "reason": "Nature des terres non caractérisée.",
+      "to_confirm_with": "Étude géotechnique, retour du terrassier."
+    },
+    {
+      "id": "H-09",
+      "statement": "Scénario de base : évacuation totale des déblais (aucun réemploi).",
+      "reason": "Aptitude des terres au réemploi non connue ; décision D-03 ouverte.",
+      "to_confirm_with": "Étude géotechnique, décision conducteur de travaux / MOE."
+    },
+    {
+      "id": "H-10",
+      "statement": "Camion benne 10 m³ utiles ; toupie 7 m³ utiles.",
+      "reason": "Valeurs pédagogiques pour estimer les rotations.",
+      "to_confirm_with": "Transporteur et centrale à béton (accès, gabarit, tonnage autorisé)."
+    },
+    {
+      "id": "H-11",
+      "statement": "Aucune intersection de fouilles ni de semelles déduite.",
+      "reason": "Simplification de simulation ; les volumes sont bruts théoriques.",
+      "to_confirm_with": "Plans lisibles (décision D-01)."
+    }
+  ],
+  "elements": [
+    {
+      "id": "EL-SF1",
+      "code": "SF1",
+      "kind": "semelle_filante",
+      "label": "Semelles filantes SF1 (50 x 25 cm)",
+      "parameter_prefix": "sf1",
+      "source_ref": "SRC-C01"
+    },
+    {
+      "id": "EL-S1",
+      "code": "S1",
+      "kind": "semelle_isolee",
+      "label": "Semelles isolées S1 (80 x 80 x 25 cm — à vérifier)",
+      "parameter_prefix": "s1",
+      "source_ref": "SRC-C01"
+    },
+    {
+      "id": "EL-S2",
+      "code": "S2",
+      "kind": "semelle_isolee",
+      "label": "Semelles isolées S2 (100 x 100 x 30 cm — hypothèse)",
+      "parameter_prefix": "s2",
+      "source_ref": "SRC-C01"
+    }
+  ],
+  "takeoff": {
+    "lots": [
+      {
+        "code": "IMP",
+        "label": "Installation et implantation"
+      },
+      {
+        "code": "TER",
+        "label": "Terrassement"
+      },
+      {
+        "code": "DEB",
+        "label": "Déblais et bilan des terres"
+      },
+      {
+        "code": "PRO",
+        "label": "Béton de propreté"
+      },
+      {
+        "code": "ARM",
+        "label": "Armatures"
+      },
+      {
+        "code": "BET",
+        "label": "Béton armé des semelles"
+      },
+      {
+        "code": "CTL",
+        "label": "Contrôles, cure et protection"
+      },
+      {
+        "code": "REM",
+        "label": "Remblaiement"
+      },
+      {
+        "code": "REP",
+        "label": "Repli"
+      },
+      {
+        "code": "LOG",
+        "label": "Logistique (moyens estimés)"
+      }
+    ],
+    "items": [
+      {
+        "id": "IM-01",
+        "lot": "IMP",
+        "designation": "Installation et préparation du chantier",
+        "description": "Balisage, accès, zone de stockage, repérage des réseaux existants avant terrassement.",
+        "unit": "forfait",
+        "formula": null,
+        "declared_quantity": 1,
+        "provenance": "HYPOTHESE",
+        "justification": "Hypothèse forfaitaire.",
+        "role": "quote"
+      },
+      {
+        "id": "IM-02",
+        "lot": "IMP",
+        "designation": "Implantation générale et repères altimétriques",
+        "unit": "forfait",
+        "formula": null,
+        "declared_quantity": 1,
+        "provenance": "HYPOTHESE",
+        "justification": "Hypothèse forfaitaire.",
+        "role": "quote"
+      },
+      {
+        "id": "IM-03",
+        "lot": "IMP",
+        "designation": "Chaises d'implantation et cordeaux",
+        "unit": "u",
+        "formula": "implantation.nombre_chaises",
+        "declared_quantity": 16,
+        "role": "quote"
+      },
+      {
+        "id": "IM-04",
+        "lot": "IMP",
+        "designation": "Traçage des semelles filantes SF1",
+        "unit": "ml",
+        "element_ids": [
+          "EL-SF1"
+        ],
+        "formula": "sf1.longueur",
+        "declared_quantity": 76,
+        "role": "quote"
+      },
+      {
+        "id": "IM-05",
+        "lot": "IMP",
+        "designation": "Traçage des semelles isolées S1 et S2",
+        "unit": "u",
+        "element_ids": [
+          "EL-S1",
+          "EL-S2"
+        ],
+        "formula": "s1.nombre + s2.nombre",
+        "declared_quantity": 10,
+        "role": "quote"
+      },
+      {
+        "id": "TE-01",
+        "lot": "TER",
+        "designation": "Fouilles en rigoles SF1",
+        "unit": "m3",
+        "element_ids": [
+          "EL-SF1"
+        ],
+        "formula": "sf1.longueur * sf1.fouille_largeur * sf1.fouille_profondeur",
+        "declared_quantity": 36.48,
+        "role": "quote",
+        "nature": "en_place",
+        "depends_on_decisions": [
+          "D-01"
+        ]
+      },
+      {
+        "id": "TE-02",
+        "lot": "TER",
+        "designation": "Fouilles en puits semelles isolées S1",
+        "unit": "m3",
+        "element_ids": [
+          "EL-S1"
+        ],
+        "formula": "s1.nombre * s1.fouille_longueur * s1.fouille_largeur * s1.fouille_profondeur",
+        "declared_quantity": 6.4,
+        "role": "quote",
+        "nature": "en_place",
+        "depends_on_decisions": [
+          "D-01"
+        ]
+      },
+      {
+        "id": "TE-03",
+        "lot": "TER",
+        "designation": "Fouilles en puits semelles isolées S2",
+        "unit": "m3",
+        "element_ids": [
+          "EL-S2"
+        ],
+        "formula": "s2.nombre * s2.fouille_longueur * s2.fouille_largeur * s2.fouille_profondeur",
+        "declared_quantity": 2.304,
+        "role": "quote",
+        "nature": "en_place",
+        "depends_on_decisions": [
+          "D-01"
+        ]
+      },
+      {
+        "id": "TE-04",
+        "lot": "TER",
+        "designation": "Réglage des fonds de fouille (surface brute)",
+        "unit": "m2",
+        "element_ids": [
+          "EL-SF1",
+          "EL-S1",
+          "EL-S2"
+        ],
+        "formula": "sf1.longueur * sf1.fouille_largeur + s1.nombre * s1.fouille_longueur * s1.fouille_largeur + s2.nombre * s2.fouille_longueur * s2.fouille_largeur",
+        "declared_quantity": 56.48,
+        "role": "quote",
+        "notes": "Surface brute théorique sans correction d'intersections. Ne pas confondre avec EV-02 (m³) : valeurs égales par coïncidence (0,80 x 1,25 = 1,00).",
+        "depends_on_decisions": [
+          "D-01"
+        ]
+      },
+      {
+        "id": "EV-01",
+        "lot": "DEB",
+        "designation": "Déblais en place (avant décision de réemploi)",
+        "unit": "m3",
+        "formula": "TE-01 + TE-02 + TE-03",
+        "declared_quantity": 45.184,
+        "role": "indicator",
+        "nature": "en_place",
+        "notes": "Volume en place : n'est pas automatiquement la quantité à évacuer."
+      },
+      {
+        "id": "EV-02",
+        "lot": "DEB",
+        "designation": "Déblais foisonnés théoriques (si tout transporté)",
+        "unit": "m3",
+        "formula": "EV-01 * deblais.foisonnement",
+        "declared_quantity": 56.48,
+        "role": "indicator",
+        "nature": "foisonne",
+        "notes": "Indicateur de capacité de transport."
+      },
+      {
+        "id": "EV-03",
+        "lot": "DEB",
+        "designation": "Chargement, transport et évacuation des déblais excédentaires (foisonnés)",
+        "unit": "m3",
+        "formula": "EV-01 * (1 - deblais.taux_reemploi) * deblais.foisonnement",
+        "declared_quantity": 56.48,
+        "role": "quote",
+        "nature": "foisonne",
+        "notes": "Dépend du scénario de réemploi. Lieu de dépôt, distance et frais de mise en décharge à confirmer.",
+        "depends_on_decisions": [
+          "D-03"
+        ]
+      },
+      {
+        "id": "EV-04",
+        "lot": "DEB",
+        "designation": "Terres conservées sur site pour réemploi (volume en place)",
+        "unit": "m3",
+        "formula": "EV-01 * deblais.taux_reemploi",
+        "declared_quantity": 0,
+        "role": "indicator",
+        "nature": "en_place",
+        "notes": "Stockage sur site : emprise, protection contre les intempéries et aptitude au réemploi à vérifier.",
+        "depends_on_decisions": [
+          "D-03"
+        ]
+      },
+      {
+        "id": "EV-05",
+        "lot": "DEB",
+        "designation": "Bilan des terres pour remblaiement (négatif = apport à prévoir)",
+        "unit": "m3",
+        "formula": "EV-04 - RE-01",
+        "declared_quantity": -30.98,
+        "role": "indicator",
+        "nature": "theorique",
+        "notes": "Bilan brut en place, sans prise en compte du compactage.",
+        "depends_on_decisions": [
+          "D-03"
+        ]
+      },
+      {
+        "id": "BP-01",
+        "lot": "PRO",
+        "designation": "Béton de propreté SF1",
+        "unit": "m3",
+        "element_ids": [
+          "EL-SF1"
+        ],
+        "formula": "sf1.longueur * sf1.proprete_largeur * proprete.epaisseur",
+        "declared_quantity": 2.28,
+        "role": "quote"
+      },
+      {
+        "id": "BP-02",
+        "lot": "PRO",
+        "designation": "Béton de propreté S1",
+        "unit": "m3",
+        "element_ids": [
+          "EL-S1"
+        ],
+        "formula": "s1.nombre * s1.fouille_longueur * s1.fouille_largeur * proprete.epaisseur",
+        "declared_quantity": 0.4,
+        "role": "quote"
+      },
+      {
+        "id": "BP-03",
+        "lot": "PRO",
+        "designation": "Béton de propreté S2",
+        "unit": "m3",
+        "element_ids": [
+          "EL-S2"
+        ],
+        "formula": "s2.nombre * s2.fouille_longueur * s2.fouille_largeur * proprete.epaisseur",
+        "declared_quantity": 0.144,
+        "role": "quote"
+      },
+      {
+        "id": "TOT-01",
+        "lot": "PRO",
+        "designation": "Total béton de propreté",
+        "unit": "m3",
+        "formula": "BP-01 + BP-02 + BP-03",
+        "declared_quantity": 2.824,
+        "role": "indicator"
+      },
+      {
+        "id": "AR-01",
+        "lot": "ARM",
+        "designation": "Fourniture, façonnage et pose des aciers HA (quantité de test)",
+        "unit": "kg",
+        "formula": "aciers.masse_forfaitaire",
+        "declared_quantity": 740,
+        "role": "quote",
+        "notes": "NE PAS traiter comme un dimensionnement structurel.",
+        "depends_on_decisions": [
+          "D-04"
+        ]
+      },
+      {
+        "id": "BE-01",
+        "lot": "BET",
+        "designation": "Béton des semelles filantes SF1",
+        "unit": "m3",
+        "element_ids": [
+          "EL-SF1"
+        ],
+        "formula": "sf1.longueur * sf1.largeur * sf1.hauteur",
+        "declared_quantity": 9.5,
+        "role": "quote",
+        "depends_on_decisions": [
+          "D-01"
+        ]
+      },
+      {
+        "id": "BE-02",
+        "lot": "BET",
+        "designation": "Béton des semelles isolées S1",
+        "unit": "m3",
+        "element_ids": [
+          "EL-S1"
+        ],
+        "formula": "s1.nombre * s1.longueur * s1.largeur * s1.hauteur",
+        "declared_quantity": 1.28,
+        "role": "quote"
+      },
+      {
+        "id": "BE-03",
+        "lot": "BET",
+        "designation": "Béton des semelles isolées S2",
+        "unit": "m3",
+        "element_ids": [
+          "EL-S2"
+        ],
+        "formula": "s2.nombre * s2.longueur * s2.largeur * s2.hauteur",
+        "declared_quantity": 0.6,
+        "role": "quote"
+      },
+      {
+        "id": "TOT-02",
+        "lot": "BET",
+        "designation": "Total béton des semelles",
+        "unit": "m3",
+        "formula": "BE-01 + BE-02 + BE-03",
+        "declared_quantity": 11.38,
+        "role": "indicator"
+      },
+      {
+        "id": "TOT-03",
+        "lot": "BET",
+        "designation": "Total béton (propreté + semelles)",
+        "unit": "m3",
+        "formula": "TOT-01 + TOT-02",
+        "declared_quantity": 14.204,
+        "role": "indicator"
+      },
+      {
+        "id": "TOT-04",
+        "lot": "ARM",
+        "designation": "Ratio aciers / béton des semelles (contrôle de vraisemblance)",
+        "unit": "kg/m3",
+        "formula": "AR-01 / TOT-02",
+        "declared_quantity": null,
+        "role": "indicator",
+        "notes": "Contrôle de cohérence uniquement : ne valide aucun ferraillage."
+      },
+      {
+        "id": "CO-01",
+        "lot": "CTL",
+        "designation": "Vérification de l'implantation, des armatures et des fonds de fouille avant bétonnage",
+        "unit": "forfait",
+        "formula": null,
+        "declared_quantity": 1,
+        "provenance": "HYPOTHESE",
+        "justification": "Hypothèse forfaitaire.",
+        "role": "quote"
+      },
+      {
+        "id": "CO-02",
+        "lot": "CTL",
+        "designation": "Cure et protection du béton",
+        "unit": "forfait",
+        "formula": null,
+        "declared_quantity": 1,
+        "provenance": "HYPOTHESE",
+        "justification": "Hypothèse forfaitaire.",
+        "role": "quote"
+      },
+      {
+        "id": "RE-01",
+        "lot": "REM",
+        "designation": "Vide théorique résiduel à remblayer (si remise au niveau initial)",
+        "unit": "m3",
+        "formula": "EV-01 - TOT-01 - TOT-02",
+        "declared_quantity": 30.98,
+        "role": "indicator",
+        "nature": "theorique",
+        "notes": "Omet intersections, compactage, ouvrages de soubassement et éventuelle différence de niveau final.",
+        "depends_on_decisions": [
+          "D-03"
+        ]
+      },
+      {
+        "id": "RE-02",
+        "lot": "REP",
+        "designation": "Nettoyage et repli du chantier",
+        "unit": "forfait",
+        "formula": null,
+        "declared_quantity": 1,
+        "provenance": "HYPOTHESE",
+        "justification": "Hypothèse forfaitaire.",
+        "role": "quote"
+      },
+      {
+        "id": "LOG-01",
+        "lot": "LOG",
+        "designation": "Rotations de camion benne estimées",
+        "unit": "rotation",
+        "formula": "ceil(EV-03 / camion.capacite_m3)",
+        "declared_quantity": 6,
+        "role": "logistics"
+      },
+      {
+        "id": "LOG-02",
+        "lot": "LOG",
+        "designation": "Camions toupies estimés — béton de propreté",
+        "unit": "u",
+        "formula": "ceil(TOT-01 / toupie.capacite_m3)",
+        "declared_quantity": 1,
+        "role": "logistics"
+      },
+      {
+        "id": "LOG-03",
+        "lot": "LOG",
+        "designation": "Camions toupies estimés — béton des semelles",
+        "unit": "u",
+        "formula": "ceil(TOT-02 / toupie.capacite_m3)",
+        "declared_quantity": 2,
+        "role": "logistics"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "CHK-01",
+      "label": "Déblais en place",
+      "target": "EV-01",
+      "expected": 45.184
+    },
+    {
+      "id": "CHK-02",
+      "label": "Déblais foisonnés si tout transporté",
+      "target": "EV-02",
+      "expected": 56.48
+    },
+    {
+      "id": "CHK-03",
+      "label": "Surface brute des fonds de fouille",
+      "target": "TE-04",
+      "expected": 56.48
+    },
+    {
+      "id": "CHK-04",
+      "label": "Béton de propreté",
+      "target": "TOT-01",
+      "expected": 2.824
+    },
+    {
+      "id": "CHK-05",
+      "label": "Béton des semelles",
+      "target": "TOT-02",
+      "expected": 11.38
+    },
+    {
+      "id": "CHK-06",
+      "label": "Béton total",
+      "target": "TOT-03",
+      "expected": 14.204
+    },
+    {
+      "id": "CHK-07",
+      "label": "Aciers (démo)",
+      "target": "AR-01",
+      "expected": 740
+    },
+    {
+      "id": "CHK-08",
+      "label": "Vide théorique après bétonnage",
+      "target": "RE-01",
+      "expected": 30.98
+    }
+  ],
+  "resources": {
+    "labor": [
+      {
+        "id": "L-CTX",
+        "role": "Conducteur de travaux",
+        "note": "Validation des points d'arrêt."
+      },
+      {
+        "id": "L-CHEF",
+        "role": "Chef d'équipe"
+      },
+      {
+        "id": "L-MACON",
+        "role": "Maçon coffreur"
+      },
+      {
+        "id": "L-MANOEUVRE",
+        "role": "Manœuvre / aide"
+      },
+      {
+        "id": "L-FERR",
+        "role": "Ferrailleur"
+      },
+      {
+        "id": "L-ENGIN",
+        "role": "Conducteur d'engin"
+      },
+      {
+        "id": "L-CHAUF",
+        "role": "Chauffeur poids lourd",
+        "note": "Peut relever d'un transporteur sous-traitant — à confirmer."
+      }
+    ],
+    "equipment": [
+      {
+        "id": "EQ-BALISAGE",
+        "category": "installation",
+        "label": "Barrières, balisage et signalisation de chantier"
+      },
+      {
+        "id": "EQ-LASER",
+        "category": "implantation",
+        "label": "Niveau laser rotatif / station d'implantation"
+      },
+      {
+        "id": "EQ-PELLE",
+        "category": "terrassement",
+        "label": "Pelle hydraulique",
+        "note": "Gabarit à choisir selon accès, sol et profondeur — à vérifier."
+      },
+      {
+        "id": "EQ-CAMION",
+        "category": "transport",
+        "label": "Camion benne"
+      },
+      {
+        "id": "EQ-BLINDAGE",
+        "category": "securite",
+        "label": "Protection des fouilles (talutage ou blindage selon terrain)",
+        "note": "Nécessité et type selon étude géotechnique et méthode — à vérifier."
+      },
+      {
+        "id": "EQ-TOUPIE",
+        "category": "betonnage",
+        "label": "Camion toupie (centrale à béton)"
+      },
+      {
+        "id": "EQ-MISE-EN-PLACE",
+        "category": "betonnage",
+        "label": "Goulotte, tapis ou pompe à béton selon accès",
+        "note": "Mode de mise en place à définir selon accès — à vérifier."
+      },
+      {
+        "id": "EQ-VIBREUR",
+        "category": "betonnage",
+        "label": "Aiguille vibrante"
+      },
+      {
+        "id": "EQ-COMPACT",
+        "category": "terrassement",
+        "label": "Plaque vibrante / pilonneuse"
+      },
+      {
+        "id": "EQ-PROTECTION",
+        "category": "cure",
+        "label": "Bâches / produit de cure"
+      }
+    ],
+    "supplies": [
+      {
+        "id": "SU-CHAISES",
+        "label": "Chaises bois, piquets, cordeaux, bombe de traçage"
+      },
+      {
+        "id": "SU-BETON-PRO",
+        "label": "Béton de propreté",
+        "note": "Dosage à confirmer selon CCTP."
+      },
+      {
+        "id": "SU-BETON-SEM",
+        "label": "Béton de fondation",
+        "note": "Classe de résistance et d'exposition selon plans BET et CCTP — à confirmer."
+      },
+      {
+        "id": "SU-ACIERS",
+        "label": "Aciers HA façonnés",
+        "note": "Selon plans de ferraillage (non fournis)."
+      },
+      {
+        "id": "SU-CALES",
+        "label": "Cales et distanciers d'enrobage"
+      }
+    ],
+    "rates": [
+      {
+        "id": "R-TERR",
+        "label": "Terrassement en fouilles",
+        "value": 24,
+        "unit": "m3/j",
+        "per": "engin",
+        "provenance": "HYPOTHESE",
+        "note": "Rendement de démonstration ; dépend du sol, de l'accès, de l'évacuation et de la présence de réseaux."
+      },
+      {
+        "id": "R-FERR",
+        "label": "Pose et calage des armatures",
+        "value": 370,
+        "unit": "kg/j",
+        "per": "equipe",
+        "provenance": "HYPOTHESE",
+        "note": "Équipe de 2 ferrailleurs, aciers livrés façonnés (hypothèse)."
+      },
+      {
+        "id": "R-COUL",
+        "label": "Coulage et vibration des semelles",
+        "value": 12,
+        "unit": "m3/j",
+        "per": "equipe",
+        "provenance": "HYPOTHESE",
+        "note": "En pratique limité par la cadence de livraison béton — à confirmer avec la centrale."
+      }
+    ]
+  },
+  "workflow": {
+    "steps": [
+      {
+        "id": "P01",
+        "order": 1,
+        "name": "Installation et balisage du chantier",
+        "lot": "IMP",
+        "kind": "work",
+        "description": "Mise en place du balisage, des accès, de la zone de stockage et de la signalisation. Repérage des réseaux existants.",
+        "takeoff_ids": [
+          "IM-01"
+        ],
+        "duration": {
+          "mode": "fixed",
+          "days": 1,
+          "calendar": "working",
+          "provenance": "HYPOTHESE"
+        },
+        "crew": [
+          {
+            "labor_id": "L-CHEF",
+            "count": 1
+          },
+          {
+            "labor_id": "L-MANOEUVRE",
+            "count": 1
+          }
+        ],
+        "equipment": [
+          {
+            "equipment_id": "EQ-BALISAGE",
+            "count": 1
+          }
+        ],
+        "supplies": [],
+        "preconditions": [
+          "Déclarations DT/DICT faites et récépissés reçus — à vérifier",
+          "Accès chantier et zone de livraison définis avec le maître d'ouvrage",
+          "Plan d'installation de chantier disponible"
+        ],
+        "controls_before_next": [
+          "Réseaux repérés et marqués au sol",
+          "Accès engins et camions vérifiés"
+        ],
+        "constraints": [
+          "Accès poids lourds à confirmer"
+        ],
+        "safety": [
+          "Balisage périmétrique",
+          "Port des EPI"
+        ],
+        "proofs": [
+          "Photos de l'installation",
+          "Récépissés DT/DICT"
+        ]
+      },
+      {
+        "id": "P02",
+        "order": 2,
+        "name": "Implantation des axes, niveaux, chaises et traçage",
+        "lot": "IMP",
+        "kind": "work",
+        "description": "Implantation des axes et repères altimétriques, pose des chaises et cordeaux, traçage des semelles filantes et isolées.",
+        "takeoff_ids": [
+          "IM-02",
+          "IM-03",
+          "IM-04",
+          "IM-05"
+        ],
+        "duration": {
+          "mode": "fixed",
+          "days": 1,
+          "calendar": "working",
+          "provenance": "HYPOTHESE"
+        },
+        "crew": [
+          {
+            "labor_id": "L-CHEF",
+            "count": 1
+          },
+          {
+            "labor_id": "L-MANOEUVRE",
+            "count": 1
+          }
+        ],
+        "equipment": [
+          {
+            "equipment_id": "EQ-LASER",
+            "count": 1
+          }
+        ],
+        "supplies": [
+          "SU-CHAISES"
+        ],
+        "preconditions": [
+          "Plan d'implantation indicé et validé",
+          "Repères de référence (bornage, niveau de référence) connus"
+        ],
+        "controls_before_next": [
+          "Équerrage et diagonales contrôlés",
+          "Cotes d'axes contrôlées",
+          "Niveau de référence reporté"
+        ],
+        "constraints": [],
+        "safety": [],
+        "proofs": [
+          "Relevé d'implantation",
+          "Photos des chaises"
+        ]
+      },
+      {
+        "id": "P03",
+        "order": 3,
+        "name": "Terrassement mécanique et gestion des déblais",
+        "lot": "TER",
+        "kind": "work",
+        "description": "Fouilles en rigoles SF1 et en puits S1/S2 à la pelle, chargement et évacuation ou stockage des déblais selon le scénario retenu.",
+        "takeoff_ids": [
+          "TE-01",
+          "TE-02",
+          "TE-03",
+          "EV-03"
+        ],
+        "duration": {
+          "mode": "computed",
+          "driver_item": "EV-01",
+          "rate_id": "R-TERR",
+          "parallel_units": 1,
+          "rounding": "ceil_half_day"
+        },
+        "crew": [
+          {
+            "labor_id": "L-ENGIN",
+            "count": 1
+          },
+          {
+            "labor_id": "L-MANOEUVRE",
+            "count": 1
+          },
+          {
+            "labor_id": "L-CHAUF",
+            "count": 1
+          }
+        ],
+        "equipment": [
+          {
+            "equipment_id": "EQ-PELLE",
+            "count": 1
+          },
+          {
+            "equipment_id": "EQ-CAMION",
+            "count": 1
+          },
+          {
+            "equipment_id": "EQ-BLINDAGE",
+            "count": 1
+          }
+        ],
+        "supplies": [],
+        "preconditions": [
+          "Implantation contrôlée (P02)",
+          "Prescriptions de l'étude géotechnique lues (niveau d'assise, tenue des parois, eau) — sans en inventer les résultats",
+          "Lieu de dépôt des déblais et scénario de réemploi décidés (D-03)"
+        ],
+        "controls_before_next": [
+          "Profondeur et largeur des fouilles contrôlées",
+          "Stabilité des parois vérifiée"
+        ],
+        "constraints": [
+          "Fouilles de 60 cm : aucun poste de travail humain en fond de fouille prévu ; adapter la méthode si intervention nécessaire",
+          "Gestion des eaux de ruissellement et d'infiltration à prévoir"
+        ],
+        "safety": [
+          "Risque d'effondrement des parois : talutage ou blindage selon terrain",
+          "Circulation engins / piétons séparée",
+          "Arrêt immédiat en cas de réseau non repéré"
+        ],
+        "proofs": [
+          "Bons d'évacuation / de dépôt des déblais",
+          "Photos des fouilles"
+        ]
+      },
+      {
+        "id": "P04",
+        "order": 4,
+        "name": "Réglage et contrôle des fonds de fouille",
+        "lot": "TER",
+        "kind": "work",
+        "description": "Réglage manuel des fonds, purge des parties décomprimées, contrôle du niveau d'assise.",
+        "takeoff_ids": [
+          "TE-04"
+        ],
+        "duration": {
+          "mode": "fixed",
+          "days": 1,
+          "calendar": "working",
+          "provenance": "HYPOTHESE"
+        },
+        "crew": [
+          {
+            "labor_id": "L-MACON",
+            "count": 1
+          },
+          {
+            "labor_id": "L-MANOEUVRE",
+            "count": 1
+          }
+        ],
+        "equipment": [
+          {
+            "equipment_id": "EQ-LASER",
+            "count": 1
+          }
+        ],
+        "supplies": [],
+        "preconditions": [
+          "Fouilles stables et sécurisées"
+        ],
+        "controls_before_next": [
+          "Niveau d'assise conforme aux prescriptions",
+          "Réception du fond de fouille selon mission géotechnique (G3/G4 indicatif) — à vérifier"
+        ],
+        "constraints": [
+          "Ne pas intervenir dans une fouille instable"
+        ],
+        "safety": [
+          "Accès sécurisé aux fouilles"
+        ],
+        "proofs": [
+          "Relevé de niveaux",
+          "Visa ou avis géotechnicien si prévu"
+        ]
+      },
+      {
+        "id": "P05",
+        "order": 5,
+        "name": "Mise en œuvre du béton de propreté",
+        "lot": "PRO",
+        "kind": "work",
+        "description": "Coulage et réglage du béton de propreté en fond de fouille.",
+        "takeoff_ids": [
+          "BP-01",
+          "BP-02",
+          "BP-03"
+        ],
+        "duration": {
+          "mode": "fixed",
+          "days": 1,
+          "calendar": "working",
+          "provenance": "HYPOTHESE"
+        },
+        "crew": [
+          {
+            "labor_id": "L-MACON",
+            "count": 1
+          },
+          {
+            "labor_id": "L-MANOEUVRE",
+            "count": 1
+          }
+        ],
+        "equipment": [
+          {
+            "equipment_id": "EQ-TOUPIE",
+            "count": 1
+          },
+          {
+            "equipment_id": "EQ-MISE-EN-PLACE",
+            "count": 1
+          }
+        ],
+        "supplies": [
+          "SU-BETON-PRO"
+        ],
+        "preconditions": [
+          "Fonds de fouille réceptionnés (P04)",
+          "Commande béton confirmée"
+        ],
+        "controls_before_next": [
+          "Niveaux du béton de propreté contrôlés"
+        ],
+        "constraints": [
+          "Livraison béton : créneau et accès toupie à confirmer"
+        ],
+        "safety": [],
+        "proofs": [
+          "Bons de livraison béton"
+        ]
+      },
+      {
+        "id": "P06",
+        "order": 6,
+        "name": "Préparation, pose et calage des armatures",
+        "lot": "ARM",
+        "kind": "work",
+        "description": "Pose des aciers façonnés, calage, distanciers d'enrobage, attentes pour soubassement.",
+        "takeoff_ids": [
+          "AR-01"
+        ],
+        "duration": {
+          "mode": "computed",
+          "driver_item": "AR-01",
+          "rate_id": "R-FERR",
+          "parallel_units": 1,
+          "rounding": "ceil_half_day"
+        },
+        "crew": [
+          {
+            "labor_id": "L-FERR",
+            "count": 2
+          }
+        ],
+        "equipment": [],
+        "supplies": [
+          "SU-ACIERS",
+          "SU-CALES"
+        ],
+        "preconditions": [
+          "Plans de ferraillage indicés disponibles (D-04)",
+          "Aciers livrés"
+        ],
+        "controls_before_next": [
+          "Enrobage, recouvrements et attentes conformes aux plans"
+        ],
+        "constraints": [
+          "Les 740 kg sont fictifs"
+        ],
+        "safety": [
+          "Protection des extrémités d'aciers en attente"
+        ],
+        "proofs": [
+          "Bons de livraison aciers",
+          "Photos du ferraillage"
+        ]
+      },
+      {
+        "id": "P07",
+        "order": 7,
+        "name": "Contrôle avant bétonnage (point d'arrêt)",
+        "lot": "CTL",
+        "kind": "control",
+        "description": "Contrôle de l'implantation, des dimensions, des armatures et des réservations avant autorisation de couler.",
+        "takeoff_ids": [
+          "CO-01"
+        ],
+        "duration": {
+          "mode": "fixed",
+          "days": 0.5,
+          "calendar": "working",
+          "provenance": "HYPOTHESE"
+        },
+        "crew": [
+          {
+            "labor_id": "L-CTX",
+            "count": 1
+          },
+          {
+            "labor_id": "L-CHEF",
+            "count": 1
+          }
+        ],
+        "equipment": [
+          {
+            "equipment_id": "EQ-LASER",
+            "count": 1
+          }
+        ],
+        "supplies": [],
+        "hold_point": true,
+        "preconditions": [
+          "Ferraillage terminé (P06)"
+        ],
+        "controls_before_next": [
+          "Implantation et dimensions conformes",
+          "Armatures conformes aux plans",
+          "Réservations et traversées de réseaux en place — à vérifier",
+          "Liaison équipotentielle / terre en fond de fouille selon lot électricité — à vérifier"
+        ],
+        "constraints": [],
+        "safety": [],
+        "proofs": [
+          "Fiche de contrôle signée",
+          "Photos avant coulage"
+        ]
+      },
+      {
+        "id": "P08",
+        "order": 8,
+        "name": "Coulage, vibration et finition des semelles",
+        "lot": "BET",
+        "kind": "work",
+        "description": "Réception des toupies, coulage, vibration et finition, mise en place immédiate de la protection.",
+        "takeoff_ids": [
+          "BE-01",
+          "BE-02",
+          "BE-03"
+        ],
+        "duration": {
+          "mode": "computed",
+          "driver_item": "TOT-02",
+          "rate_id": "R-COUL",
+          "parallel_units": 1,
+          "rounding": "ceil_half_day"
+        },
+        "crew": [
+          {
+            "labor_id": "L-CHEF",
+            "count": 1
+          },
+          {
+            "labor_id": "L-MACON",
+            "count": 1
+          },
+          {
+            "labor_id": "L-MANOEUVRE",
+            "count": 1
+          }
+        ],
+        "equipment": [
+          {
+            "equipment_id": "EQ-TOUPIE",
+            "count": 1
+          },
+          {
+            "equipment_id": "EQ-MISE-EN-PLACE",
+            "count": 1
+          },
+          {
+            "equipment_id": "EQ-VIBREUR",
+            "count": 1
+          },
+          {
+            "equipment_id": "EQ-PROTECTION",
+            "count": 1
+          }
+        ],
+        "supplies": [
+          "SU-BETON-SEM"
+        ],
+        "preconditions": [
+          "Point d'arrêt P07 levé",
+          "Béton commandé, cadence de livraison confirmée",
+          "Météo compatible"
+        ],
+        "controls_before_next": [
+          "Bons de livraison conformes à la commande",
+          "Protection du béton en place"
+        ],
+        "constraints": [
+          "Pas de modification des sections structurelles",
+          "Coulage à démarrer en début de journée"
+        ],
+        "safety": [
+          "Zone de manœuvre toupie balisée"
+        ],
+        "proofs": [
+          "Bons de livraison béton",
+          "Éprouvettes si prévues au CCTP — à vérifier"
+        ]
+      },
+      {
+        "id": "P09",
+        "order": 9,
+        "name": "Cure, protection et délai avant sollicitation",
+        "lot": "CTL",
+        "kind": "wait",
+        "description": "Attente calendaire de cure et de protection. Aucune équipe mobilisée.",
+        "takeoff_ids": [
+          "CO-02"
+        ],
+        "duration": {
+          "mode": "fixed",
+          "days": 3,
+          "calendar": "calendar",
+          "provenance": "HYPOTHESE"
+        },
+        "crew": [],
+        "equipment": [
+          {
+            "equipment_id": "EQ-PROTECTION",
+            "count": 1
+          }
+        ],
+        "supplies": [],
+        "preconditions": [],
+        "controls_before_next": [
+          "Autorisation de solliciter les semelles donnée par le conducteur de travaux"
+        ],
+        "constraints": [
+          "3 jours = réserve de démonstration, PAS un délai réglementaire ni un seuil de résistance du béton (D-08)"
+        ],
+        "safety": [],
+        "proofs": []
+      },
+      {
+        "id": "P10",
+        "order": 10,
+        "name": "Remblaiement conditionnel après soubassement",
+        "lot": "REM",
+        "kind": "work",
+        "description": "Remblaiement et compactage par couches après réalisation des soubassements.",
+        "takeoff_ids": [
+          "RE-01"
+        ],
+        "duration": {
+          "mode": "fixed",
+          "days": 1,
+          "calendar": "working",
+          "provenance": "HYPOTHESE"
+        },
+        "crew": [
+          {
+            "labor_id": "L-ENGIN",
+            "count": 1
+          },
+          {
+            "labor_id": "L-MANOEUVRE",
+            "count": 1
+          }
+        ],
+        "equipment": [
+          {
+            "equipment_id": "EQ-PELLE",
+            "count": 1
+          },
+          {
+            "equipment_id": "EQ-COMPACT",
+            "count": 1
+          }
+        ],
+        "supplies": [],
+        "conditional": {
+          "conditions": [
+            "Soubassements réalisés (hors périmètre de cette étude)",
+            "Scénario de réemploi validé (D-03)",
+            "Méthode de compactage et contrôle définis"
+          ]
+        },
+        "preconditions": [
+          "Cure terminée (P09)"
+        ],
+        "controls_before_next": [
+          "Compactage contrôlé selon prescriptions"
+        ],
+        "constraints": [],
+        "safety": [
+          "Circulation engins en bord de fouille"
+        ],
+        "proofs": [
+          "Résultats de contrôle de compactage si prévus"
+        ]
+      },
+      {
+        "id": "P11",
+        "order": 11,
+        "name": "Nettoyage et repli",
+        "lot": "REP",
+        "kind": "work",
+        "description": "Nettoyage des abords, repli du matériel de la phase fondations.",
+        "takeoff_ids": [
+          "RE-02"
+        ],
+        "duration": {
+          "mode": "fixed",
+          "days": 0.5,
+          "calendar": "working",
+          "provenance": "HYPOTHESE"
+        },
+        "crew": [
+          {
+            "labor_id": "L-CHEF",
+            "count": 1
+          },
+          {
+            "labor_id": "L-MANOEUVRE",
+            "count": 1
+          }
+        ],
+        "equipment": [],
+        "supplies": [],
+        "preconditions": [],
+        "controls_before_next": [
+          "Évacuation effective des déblais selon scénario validé"
+        ],
+        "constraints": [],
+        "safety": [],
+        "proofs": [
+          "Photos de fin de phase"
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "start_date": "2026-10-05",
+    "start_date_provenance": "HYPOTHESE",
+    "calendar": {
+      "working_days": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "holidays": "FR_METROPOLE",
+      "granularity_days": 0.5
+    },
+    "tasks": [
+      {
+        "step_id": "P01",
+        "depends_on": []
+      },
+      {
+        "step_id": "P02",
+        "depends_on": [
+          {
+            "step_id": "P01",
+            "type": "FS"
+          }
+        ]
+      },
+      {
+        "step_id": "P03",
+        "depends_on": [
+          {
+            "step_id": "P02",
+            "type": "FS"
+          }
+        ]
+      },
+      {
+        "step_id": "P04",
+        "depends_on": [
+          {
+            "step_id": "P03",
+            "type": "FS"
+          }
+        ]
+      },
+      {
+        "step_id": "P05",
+        "depends_on": [
+          {
+            "step_id": "P04",
+            "type": "FS"
+          }
+        ]
+      },
+      {
+        "step_id": "P06",
+        "depends_on": [
+          {
+            "step_id": "P05",
+            "type": "FS"
+          }
+        ]
+      },
+      {
+        "step_id": "P07",
+        "depends_on": [
+          {
+            "step_id": "P06",
+            "type": "FS"
+          }
+        ]
+      },
+      {
+        "step_id": "P08",
+        "depends_on": [
+          {
+            "step_id": "P07",
+            "type": "FS"
+          }
+        ],
+        "start_alignment": "day_start"
+      },
+      {
+        "step_id": "P09",
+        "depends_on": [
+          {
+            "step_id": "P08",
+            "type": "FS"
+          }
+        ]
+      },
+      {
+        "step_id": "P10",
+        "depends_on": [
+          {
+            "step_id": "P09",
+            "type": "FS"
+          }
+        ],
+        "include_in_base": false
+      },
+      {
+        "step_id": "P11",
+        "depends_on": [
+          {
+            "step_id": "P08",
+            "type": "FS"
+          }
+        ]
+      }
+    ],
+    "note": "Durées de simulation non contractuelles. La cure est une attente calendaire ; le remblaiement conditionnel est exclu de la durée de base."
+  },
+  "decisions": [
+    {
+      "id": "D-01",
+      "question": "Déduire les intersections des fouilles et des volumes de béton sur plans lisibles.",
+      "affects": [
+        "TE-01",
+        "TE-02",
+        "TE-03",
+        "TE-04",
+        "BE-01"
+      ],
+      "blocking_for": [
+        "validation"
+      ]
+    },
+    {
+      "id": "D-02",
+      "question": "Distinguer les fondations SF1 des éléments 15 x 40 / 15 x 50 potentiellement structurels.",
+      "affects": [
+        "sf1.longueur"
+      ],
+      "blocking_for": [
+        "validation"
+      ]
+    },
+    {
+      "id": "D-03",
+      "question": "Fixer le scénario de réemploi, de foisonnement, de transport et de remblaiement avant chiffrage.",
+      "affects": [
+        "deblais.taux_reemploi",
+        "deblais.foisonnement",
+        "EV-03",
+        "RE-01"
+      ],
+      "blocking_for": [
+        "validation",
+        "quote_transfer"
+      ]
+    },
+    {
+      "id": "D-04",
+      "question": "Vérifier armatures, profondeurs, méthode en fouille et prescriptions géotechniques.",
+      "affects": [
+        "aciers.masse_forfaitaire",
+        "fouille.profondeur_commune"
+      ],
+      "blocking_for": [
+        "validation",
+        "execution"
+      ]
+    },
+    {
+      "id": "D-05",
+      "question": "Valider dans BeWork le mapping des lignes de métré vers le devis avant tout transfert.",
+      "affects": [],
+      "blocking_for": [
+        "quote_transfer"
+      ]
+    },
+    {
+      "id": "D-06",
+      "question": "Confirmer les réseaux existants (DT/DICT) et leur incidence sur le terrassement.",
+      "affects": [
+        "P01",
+        "P03"
+      ],
+      "blocking_for": [
+        "execution"
+      ]
+    },
+    {
+      "id": "D-07",
+      "question": "Définir la gestion des eaux en fond de fouille (pompage éventuel).",
+      "affects": [
+        "P03",
+        "P04"
+      ],
+      "blocking_for": [
+        "execution"
+      ]
+    },
+    {
+      "id": "D-08",
+      "question": "Fixer la durée de cure et le délai avant sollicitation selon le béton, la météo et les prescriptions.",
+      "affects": [
+        "P09"
+      ],
+      "blocking_for": [
+        "execution"
+      ]
+    },
+    {
+      "id": "D-09",
+      "question": "Préciser l'interface avec le lot électricité (liaison de terre en fond de fouille) et les réservations réseaux.",
+      "affects": [
+        "P07"
+      ],
+      "blocking_for": [
+        "execution"
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "id": "V-01",
+      "label": "Fouille SF1 élargie à 70 cm",
+      "description": "Surlargeur pour faciliter le coffrage ou l'intervention en fouille.",
+      "overrides": {
+        "sf1.fouille_largeur": 0.7
+      }
+    },
+    {
+      "id": "V-02",
+      "label": "Profondeur de fouille 90 cm",
+      "description": "Assise plus profonde. La section des semelles n'est pas modifiée : le surplus de profondeur est à combler (remblai ou gros béton, à décider).",
+      "overrides": {
+        "fouille.profondeur_commune": 0.9
+      }
+    },
+    {
+      "id": "V-03",
+      "label": "Réemploi partiel des terres (65 %)",
+      "description": "Conservation sur site d'une partie des déblais pour le remblaiement. Aptitude des terres au réemploi à vérifier.",
+      "overrides": {
+        "deblais.taux_reemploi": 0.65
+      }
+    }
+  ],
+  "disclaimers": [
+    "DÉMONSTRATION — NON CONTRACTUEL",
+    "Les hypothèses ne prouvent ni la conformité technique, ni la recevabilité d'une entreprise, ni la conformité à l'étude géotechnique."
+  ]
+}

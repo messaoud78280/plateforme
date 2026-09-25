@@ -684,6 +684,7 @@ model Organization {
   annualServiceContracts        AnnualServiceContract[]
   siteVisits                    SiteVisit[]
   siteDocuments                 SiteDocument[]
+  prepStudies                   PrepStudy[]
   platformAdminAuditEvents      PlatformAdminAuditEvent[]
   platformSupportSessions       PlatformSupportSession[]
 
@@ -948,6 +949,7 @@ model Project {
   siteVisits             SiteVisit[]
   commercialLeads        CommercialLead[]
   siteDocuments          SiteDocument[]
+  prepStudies            PrepStudy[]
 
   @@index([organizationId])
 }
@@ -5284,5 +5286,161 @@ model SiteDocumentChatgptImport {
 
   @@unique([siteDocumentId, importId])
   @@index([siteDocumentId, status, appliedAt])
+  @@index([organizationId])
+}
+
+/// Métré & Préparation de chantier — étude importée depuis bework_prep_bundle_v1 (sans API IA).
+/// Un projet peut contenir plusieurs études (fondations, gros œuvre, VRD…).
+model PrepStudy {
+  id              String    @id @default(cuid())
+  organizationId  String
+  projectId       String
+  title           String
+  trade           String?
+  description     String?   @db.Text
+  /// DEMONSTRATION | PROFESSIONAL
+  mode            String    @default("PROFESSIONAL")
+  /// DEMONSTRATION | PRO_A_VALIDER | PRO_VALIDE
+  dossierStatus   String    @default("PRO_A_VALIDER")
+  bundleId        String?
+  sourceFormat    String?
+  /// Incrémentée à chaque enregistrement (concurrence optimiste, annulation d'import).
+  version         Int       @default(1)
+  sourcesJson     Json?
+  hypothesesJson  Json?
+  elementsJson    Json?
+  lotsJson        Json?
+  checksJson      Json?
+  /// Phases suivantes : conservés tels qu'importés.
+  resourcesJson   Json?
+  workflowJson    Json?
+  scheduleJson    Json?
+  decisionsJson   Json?
+  variantsJson    Json?
+  disclaimersJson Json?
+  createdById     String?
+  updatedById     String?
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parameters   PrepParameter[]
+  lines        PrepTakeoffLine[]
+  imports      PrepImport[]
+  events       PrepStudyEvent[]
+
+  @@index([organizationId, projectId])
+  @@index([projectId, archivedAt])
+}
+
+model PrepParameter {
+  id                 String    @id @default(cuid())
+  studyId            String
+  organizationId     String
+  key                String
+  label              String
+  unit               String
+  value              Decimal?  @db.Decimal(24, 10)
+  formula            String?   @db.Text
+  /// RELEVE | RELEVE_A_VERIFIER | HYPOTHESE | SAISIE_MANUELLE (null si formule)
+  provenance         String?
+  sourceRef          String?
+  evidenceJson       Json?
+  hypothesisId       String?
+  note               String?   @db.Text
+  sortOrder          Int       @default(0)
+  originalValue      Decimal?  @db.Decimal(24, 10)
+  originalProvenance String?
+  modifiedById       String?
+  modifiedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  study PrepStudy @relation(fields: [studyId], references: [id], onDelete: Cascade)
+
+  @@unique([studyId, key])
+  @@index([organizationId])
+}
+
+model PrepTakeoffLine {
+  id                     String    @id @default(cuid())
+  studyId                String
+  organizationId         String
+  code                   String
+  lot                    String
+  subLot                 String?
+  designation            String
+  description            String?   @db.Text
+  unit                   String
+  elementIdsJson         Json?
+  formula                String?   @db.Text
+  declaredQuantity       Decimal?  @db.Decimal(24, 10)
+  /// Lignes sans formule : RELEVE | RELEVE_A_VERIFIER | HYPOTHESE | SAISIE_MANUELLE
+  provenance             String?
+  literalProvenance      String?
+  justification          String?   @db.Text
+  /// quote | indicator | logistics
+  role                   String    @default("quote")
+  /// en_place | foisonne | compacte | theorique
+  nature                 String?
+  dependsOnDecisionsJson Json?
+  notes                  String?   @db.Text
+  sortOrder              Int       @default(0)
+  /// Dernier résultat du moteur (cache d'affichage — le moteur fait foi).
+  computedQuantity       Decimal?  @db.Decimal(24, 10)
+  computeError           String?
+  originalDeclared       Decimal?  @db.Decimal(24, 10)
+  originalProvenance     String?
+  validatedQuantity      Decimal?  @db.Decimal(24, 10)
+  validatedAt            DateTime?
+  validatedById          String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  study PrepStudy @relation(fields: [studyId], references: [id], onDelete: Cascade)
+
+  @@unique([studyId, code])
+  @@index([organizationId])
+}
+
+model PrepImport {
+  id                 String    @id @default(cuid())
+  studyId            String
+  organizationId     String
+  projectId          String
+  format             String
+  bundleId           String?
+  fingerprint        String
+  /// CREATE | REPLACE
+  kind               String
+  /// APPLIED | UNDONE
+  status             String    @default("APPLIED")
+  summaryJson        Json
+  snapshotBeforeJson Json?
+  versionAfter       Int
+  appliedById        String?
+  appliedAt          DateTime  @default(now())
+  undoneAt           DateTime?
+
+  study PrepStudy @relation(fields: [studyId], references: [id], onDelete: Cascade)
+
+  @@index([studyId, appliedAt])
+  @@index([organizationId, projectId, fingerprint])
+}
+
+model PrepStudyEvent {
+  id             String   @id @default(cuid())
+  studyId        String
+  organizationId String
+  kind           String
+  detailJson     Json?
+  actorUserId    String?
+  createdAt      DateTime @default(now())
+
+  study PrepStudy @relation(fields: [studyId], references: [id], onDelete: Cascade)
+
+  @@index([studyId, createdAt])
   @@index([organizationId])
 }

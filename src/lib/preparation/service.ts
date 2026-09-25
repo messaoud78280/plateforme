@@ -106,6 +106,13 @@ export type PrepStudyView = {
     canUndo: boolean;
     undoBlockedReason: string | null;
   } | null;
+  lastPatch: {
+    id: string;
+    patchId: string;
+    appliedAt: string;
+    canUndo: boolean;
+    undoBlockedReason: string | null;
+  } | null;
   events: { id: string; kind: string; createdAt: string; summary: string }[];
 };
 
@@ -249,6 +256,8 @@ const EVENT_LABELS: Record<string, string> = {
   EDIT: "Modification",
   EDIT_TEXTS: "Modification des fiches techniques",
   ENRICH_TEXTS: "Enrichissement des désignations techniques",
+  CHATGPT_PATCH: "Modification ChatGPT (patch)",
+  UNDO_CHATGPT_PATCH: "Annulation patch ChatGPT",
   VALIDATE_LINES: "Validation de quantités",
   UNVALIDATE_LINES: "Retrait de validation",
   UNDO_IMPORT: "Annulation d'import",
@@ -306,6 +315,25 @@ export async function getPrepStudyView(
     };
   }
 
+  let lastPatch: PrepStudyView["lastPatch"] = null;
+  const patchRow = await db.prepChatgptPatch.findFirst({
+    where: { studyId, organizationId: orgId, status: "APPLIED" },
+    orderBy: { appliedAt: "desc" },
+    select: { id: true, patchId: true, versionAfter: true, appliedAt: true },
+  });
+  if (patchRow) {
+    const canUndo = patchRow.versionAfter === study.version;
+    lastPatch = {
+      id: patchRow.id,
+      patchId: patchRow.patchId,
+      appliedAt: patchRow.appliedAt.toISOString(),
+      canUndo,
+      undoBlockedReason: canUndo
+        ? null
+        : "Des modifications ont été enregistrées depuis ce patch : annulation refusée.",
+    };
+  }
+
   const workflow = study.workflowJson as { steps?: unknown[] } | null;
   const resources = study.resourcesJson as { rates?: unknown[] } | null;
   const schedule = study.scheduleJson as { tasks?: unknown[] } | null;
@@ -340,6 +368,7 @@ export async function getPrepStudyView(
       variants: asArray(study.variantsJson).length,
     },
     lastImport,
+    lastPatch,
     events: study.events.map((e) => ({
       id: e.id,
       kind: e.kind,

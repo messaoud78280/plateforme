@@ -461,6 +461,7 @@ La validation fige une **version** du métré. Toute modification ultérieure cr
 |---|---|
 | `bework_foundations_demo_bundle_v1` et bundles séparés `bework_takeoff_bundle_v1`, `bework_workflow_bundle_v1`, `bework_resources_bundle_v1`, `bework_schedule_bundle_v1` | Converti en `bework_prep_bundle_v1`, avec un rapport de conversion. |
 | `bework_quote_bundle_v1`, `bework_quote_patch_v1`, `bework_site_report_v1`, `bework_ppsps_v1` | **Non concernés** : ils continuent d'être traités par leurs importeurs actuels, **sans aucun changement de comportement**. |
+| `bework_prep_patch_v1` | Format distinct pour **modifier** une étude existante (voir `BEWORK-PREP-PATCH-V1.md`). Ne remplace pas ce bundle. |
 
 Règles de conversion pour les anciens bundles de préparation :
 

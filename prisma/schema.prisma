@@ -685,6 +685,7 @@ model Organization {
   siteVisits                    SiteVisit[]
   siteDocuments                 SiteDocument[]
   prepStudies                   PrepStudy[]
+  prepChatgptPatches            PrepChatgptPatch[]
   platformAdminAuditEvents      PlatformAdminAuditEvent[]
   platformSupportSessions       PlatformSupportSession[]
 
@@ -5330,6 +5331,7 @@ model PrepStudy {
   lines        PrepTakeoffLine[]
   imports      PrepImport[]
   events       PrepStudyEvent[]
+  chatgptPatches PrepChatgptPatch[]
 
   @@index([organizationId, projectId])
   @@index([projectId, archivedAt])
@@ -5454,4 +5456,31 @@ model PrepStudyEvent {
 
   @@index([studyId, createdAt])
   @@index([organizationId])
+}
+
+/// Historique des patches ChatGPT (bework_prep_patch_v1) — idempotence + undo.
+model PrepChatgptPatch {
+  id                 String    @id @default(cuid())
+  organizationId     String
+  studyId            String
+  /// Identifiant stable fourni par le JSON (patch_id).
+  patchId            String
+  versionBefore      Int
+  versionAfter       Int
+  /// APPLIED | UNDONE
+  status             String    @default("APPLIED")
+  summaryJson        Json
+  snapshotBeforeJson Json
+  /// Empreinte après application — détecte les retouches manuelles avant undo.
+  fingerprintAfter   String
+  appliedAt          DateTime  @default(now())
+  undoneAt           DateTime?
+  appliedById        String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  study        PrepStudy    @relation(fields: [studyId], references: [id], onDelete: Cascade)
+
+  @@unique([studyId, patchId])
+  @@index([organizationId, studyId])
+  @@index([studyId, status, appliedAt])
 }

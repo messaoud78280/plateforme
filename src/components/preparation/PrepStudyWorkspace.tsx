@@ -34,6 +34,7 @@ import {
 } from "./prep-ui";
 import { PrepImportModal, type PrepProjectOption } from "./PrepImportModal";
 import { PrepLineTechSheetPanel } from "./PrepLineTechSheetPanel";
+import { PrepChatGptPatchModal } from "./PrepChatGptPatchModal";
 import {
   studyNeedsC01TextEnrichment,
 } from "@/lib/preparation/enrichment/c01-fondations-texts";
@@ -83,7 +84,9 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
   const [busy, setBusy] = useState(false);
   const [flash, setFlash] = useState<Flash>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [patchOpen, setPatchOpen] = useState(false);
   const [confirmUndo, setConfirmUndo] = useState(false);
+  const [confirmUndoPatch, setConfirmUndoPatch] = useState(false);
 
   const params = useMemo<PrepParamDTO[]>(
     () =>
@@ -286,6 +289,22 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
     }
   }
 
+  async function undoPatch() {
+    setBusy(true);
+    setConfirmUndoPatch(false);
+    try {
+      const { res, data } = await callApi(`/api/prep-studies/${study.id}/chatgpt-patch/undo`, "POST");
+      if (!res.ok) {
+        setFlash({ tone: "error", text: data?.error ?? "Annulation du patch impossible" });
+        return;
+      }
+      if (data.study) setStudy(data.study);
+      setFlash({ tone: "ok", text: "Dernière modification ChatGPT annulée — état antérieur rétabli." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function enrichTexts() {
     setBusy(true);
     setFlash(null);
@@ -465,6 +484,17 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {study.lastPatch ? (
+            <button
+              type="button"
+              disabled={busy || dirty || !study.lastPatch.canUndo}
+              title={study.lastPatch.undoBlockedReason ?? undefined}
+              onClick={() => setConfirmUndoPatch(true)}
+              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-[13px] text-slate-700 disabled:opacity-50"
+            >
+              Annuler la dernière modification
+            </button>
+          ) : null}
           {study.lastImport ? (
             <button
               type="button"
@@ -476,6 +506,14 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
               Annuler le dernier import
             </button>
           ) : null}
+          <button
+            type="button"
+            disabled={busy || dirty}
+            onClick={() => setPatchOpen(true)}
+            className="rounded-full border border-[#1e3a5f]/20 bg-white px-4 py-2 text-[13px] font-medium text-[#1e3a5f] disabled:opacity-50"
+          >
+            ✨ Modifier avec ChatGPT
+          </button>
           <button
             type="button"
             disabled={busy || dirty}
@@ -525,6 +563,31 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
             </button>
             <button type="button" onClick={() => setConfirmUndo(false)} className="rounded-full px-3 py-1.5 text-[12px]">
               Garder l&apos;import
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {confirmUndoPatch && study.lastPatch ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-950">
+          <p>
+            Annuler le patch <span className="font-mono">{study.lastPatch.patchId}</span> rétablit l&apos;état
+            de l&apos;étude juste avant cette modification ChatGPT.
+          </p>
+          <div className="mt-2 flex gap-2">
+            <button
+              type="button"
+              onClick={() => void undoPatch()}
+              className="rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[12px] font-medium text-white"
+            >
+              Confirmer l&apos;annulation
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmUndoPatch(false)}
+              className="rounded-full px-3 py-1.5 text-[12px]"
+            >
+              Garder la modification
             </button>
           </div>
         </div>
@@ -779,6 +842,19 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
           target={{ studyId: study.id, title: study.title, projectId: study.project.id }}
           onClose={() => setImportOpen(false)}
           onImported={() => window.location.reload()}
+        />
+      ) : null}
+
+      {patchOpen ? (
+        <PrepChatGptPatchModal
+          studyId={study.id}
+          studyTitle={study.title}
+          open={patchOpen}
+          onClose={() => setPatchOpen(false)}
+          onApplied={(next) => {
+            setStudy(next);
+            setFlash({ tone: "ok", text: "Modifications ChatGPT appliquées — quantités recalculées si nécessaire." });
+          }}
         />
       ) : null}
 

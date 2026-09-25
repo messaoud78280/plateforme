@@ -262,6 +262,7 @@ const EVENT_LABELS: Record<string, string> = {
   UNVALIDATE_LINES: "Retrait de validation",
   UNDO_IMPORT: "Annulation d'import",
   TRANSFER_TO_QUOTE: "Transfert vers devis",
+  TRANSFER_TO_SCHEDULE: "Génération planning de chantier",
   SYNC_QUOTE_LINE: "Synchronisation ligne devis",
 };
 

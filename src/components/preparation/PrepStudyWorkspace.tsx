@@ -36,6 +36,7 @@ import { PrepImportModal, type PrepProjectOption } from "./PrepImportModal";
 import { PrepLineTechSheetPanel } from "./PrepLineTechSheetPanel";
 import { PrepChatGptPatchModal } from "./PrepChatGptPatchModal";
 import { PrepQuoteTransferModal } from "./PrepQuoteTransferModal";
+import { PrepScheduleTransferModal } from "./PrepScheduleTransferModal";
 import {
   studyNeedsC01TextEnrichment,
 } from "@/lib/preparation/enrichment/c01-fondations-texts";
@@ -87,6 +88,7 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
   const [importOpen, setImportOpen] = useState(false);
   const [patchOpen, setPatchOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
   const [confirmUndo, setConfirmUndo] = useState(false);
   const [confirmUndoPatch, setConfirmUndoPatch] = useState(false);
 
@@ -511,8 +513,17 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
           <button
             type="button"
             disabled={busy || dirty}
-            onClick={() => setQuoteOpen(true)}
+            onClick={() => setScheduleOpen(true)}
             className="rounded-full bg-[#1e3a5f] px-4 py-2 text-[13px] font-medium text-white disabled:opacity-50"
+            title={dirty ? "Enregistrez ou annulez vos modifications avant" : undefined}
+          >
+            Générer un planning de chantier
+          </button>
+          <button
+            type="button"
+            disabled={busy || dirty}
+            onClick={() => setQuoteOpen(true)}
+            className="rounded-full border border-[#1e3a5f]/30 bg-white px-4 py-2 text-[13px] font-medium text-[#1e3a5f] disabled:opacity-50"
             title={dirty ? "Enregistrez ou annulez vos modifications avant" : undefined}
           >
             Générer un devis depuis ce métré
@@ -874,6 +885,14 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
           studyId={study.id}
           open={quoteOpen}
           onClose={() => setQuoteOpen(false)}
+        />
+      ) : null}
+
+      {scheduleOpen ? (
+        <PrepScheduleTransferModal
+          studyId={study.id}
+          open={scheduleOpen}
+          onClose={() => setScheduleOpen(false)}
         />
       ) : null}
 
@@ -1487,8 +1506,8 @@ function PreparationPanel({ study }: { study: PrepStudyView }) {
         ))}
       </div>
       <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] text-slate-600">
-        Le transfert vers un devis est disponible via « Générer un devis depuis ce métré ». Mode opératoire,
-        ressources et planning restent préparés pour les phases suivantes.
+        Transfert devis et génération du planning de chantier disponibles depuis l&apos;en-tête de
+        l&apos;étude. Le Gantt interactif et les exports PDF avancés suivront après validation C-01.
       </p>
       {study.disclaimers.length ? (
         <ul className="list-disc space-y-0.5 pl-5 text-[12px] text-slate-500">

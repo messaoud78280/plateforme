@@ -688,6 +688,7 @@ model Organization {
   prepChatgptPatches            PrepChatgptPatch[]
   prepQuoteTransfers            PrepQuoteTransfer[]
   prepQuoteLinks                PrepQuoteLink[]
+  prepSchedulePlans             PrepSchedulePlan[]
   platformAdminAuditEvents      PlatformAdminAuditEvent[]
   platformSupportSessions       PlatformSupportSession[]
 
@@ -953,6 +954,7 @@ model Project {
   commercialLeads        CommercialLead[]
   siteDocuments          SiteDocument[]
   prepStudies            PrepStudy[]
+  prepSchedulePlans      PrepSchedulePlan[]
 
   @@index([organizationId])
 }
@@ -4178,6 +4180,7 @@ model CommercialQuote {
   sourcePrepStudy      PrepStudy?            @relation("PrepStudySourceQuotes", fields: [sourcePrepStudyId], references: [id], onDelete: SetNull)
   prepQuoteTransfers   PrepQuoteTransfer[]
   prepQuoteLinks       PrepQuoteLink[]
+  prepSchedulePlans    PrepSchedulePlan[]
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
@@ -5348,6 +5351,7 @@ model PrepStudy {
   sourceQuotes CommercialQuote[] @relation("PrepStudySourceQuotes")
   quoteTransfers PrepQuoteTransfer[]
   quoteLinks     PrepQuoteLink[]
+  schedulePlans  PrepSchedulePlan[]
 
   @@index([organizationId, projectId])
   @@index([projectId, archivedAt])
@@ -5552,4 +5556,187 @@ model PrepQuoteLink {
   @@index([quoteId])
   @@index([organizationId, studyId])
   @@index([transferId])
+}
+
+/// Planification de chantier (phase 3) — plan généré depuis une étude de métré.
+model PrepSchedulePlan {
+  id                       String    @id @default(cuid())
+  organizationId           String
+  studyId                  String
+  projectId                String
+  quoteId                  String?
+  title                    String
+  /// DEMONSTRATION | PROFESSIONAL
+  mode                     String    @default("PROFESSIONAL")
+  isDemonstration          Boolean   @default(false)
+  /// DRAFT | INITIAL | CURRENT | ARCHIVED
+  status                   String    @default("DRAFT")
+  /// INITIAL | CURRENT — distinction planning initial vs actuel.
+  revisionKind             String    @default("INITIAL")
+  revisionNumber           Int       @default(1)
+  parentPlanId             String?
+  startDate                DateTime? @db.Date
+  endDateBase              DateTime? @db.Date
+  endDateWithConditional   DateTime? @db.Date
+  baseDurationWorkingDays  Decimal?  @db.Decimal(10, 2)
+  withConditionalWorkingDays Decimal? @db.Decimal(10, 2)
+  studyVersionAtGeneration Int
+  calendarJson             Json?
+  summaryJson              Json?
+  note                     String?   @db.Text
+  watermark                String?
+  idempotencyKey           String
+  createdById              String?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  study        PrepStudy    @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  quote        CommercialQuote? @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  parentPlan   PrepSchedulePlan? @relation("PrepSchedulePlanRevisions", fields: [parentPlanId], references: [id], onDelete: SetNull)
+  childPlans   PrepSchedulePlan[] @relation("PrepSchedulePlanRevisions")
+  tasks        PrepScheduleTask[]
+  events       PrepScheduleEvent[]
+
+  @@unique([organizationId, idempotencyKey])
+  @@index([studyId, createdAt])
+  @@index([projectId])
+  @@index([quoteId])
+  @@index([organizationId, isDemonstration])
+  @@index([parentPlanId])
+}
+
+model PrepScheduleTask {
+  id                      String    @id @default(cuid())
+  organizationId          String
+  planId                  String
+  stepCode                String
+  name                    String
+  /// work | control | wait
+  kind                    String
+  sortOrder               Int       @default(0)
+  lot                     String?
+  description             String?   @db.Text
+  includeInBase           Boolean   @default(true)
+  holdPoint               Boolean   @default(false)
+  conditional             Boolean   @default(false)
+  conditionalJson         Json?
+  startDate               DateTime? @db.Date
+  endDate                 DateTime? @db.Date
+  startHalf               Int       @default(0)
+  endHalf                 Int       @default(1)
+  /// computed | fixed | manual
+  durationMode            String    @default("fixed")
+  durationDays            Decimal   @db.Decimal(10, 4)
+  durationCalendar        String    @default("working")
+  durationLockedByUser    Boolean   @default(false)
+  computedDurationDays    Decimal?  @db.Decimal(10, 4)
+  driverTakeoffCode       String?
+  quantitySnapshot        Decimal?  @db.Decimal(24, 10)
+  quantityUnit            String?
+  rateId                  String?
+  rateValue               Decimal?  @db.Decimal(14, 4)
+  rateUnit                String?
+  /// engins | equipe
+  ratePer                 String?
+  parallelUnits           Int       @default(1)
+  takeoffCodesJson        Json?
+  crewJson                Json?
+  equipmentJson           Json?
+  suppliesJson            Json?
+  preconditionsJson       Json?
+  controlsJson            Json?
+  constraintsJson         Json?
+  safetyJson              Json?
+  proofsJson              Json?
+  dependsOnJson           Json?
+  blockingReason          String?
+  sellHtSnapshot          Decimal?  @db.Decimal(14, 4)
+  costHtSnapshot          Decimal?  @db.Decimal(14, 4)
+  laborCostHtSnapshot     Decimal?  @db.Decimal(14, 4)
+  materialsCostHtSnapshot Decimal?  @db.Decimal(14, 4)
+  equipmentCostHtSnapshot Decimal?  @db.Decimal(14, 4)
+  subcontractCostHtSnapshot Decimal? @db.Decimal(14, 4)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  plan         PrepSchedulePlan         @relation(fields: [planId], references: [id], onDelete: Cascade)
+  dependencies PrepScheduleDependency[] @relation("PrepScheduleDepSuccessor")
+  dependents   PrepScheduleDependency[] @relation("PrepScheduleDepPredecessor")
+  takeoffLinks PrepScheduleTakeoffLink[]
+  quoteLinks   PrepScheduleQuoteLink[]
+
+  @@unique([planId, stepCode])
+  @@index([organizationId, planId])
+  @@index([planId, sortOrder])
+}
+
+model PrepScheduleDependency {
+  id               String  @id @default(cuid())
+  organizationId   String
+  planId           String
+  predecessorId    String
+  successorId      String
+  /// FS | SS | FF
+  type             String  @default("FS")
+  lagDays          Decimal @default(0) @db.Decimal(8, 2)
+  lagCalendar      String  @default("working")
+
+  predecessor PrepScheduleTask @relation("PrepScheduleDepPredecessor", fields: [predecessorId], references: [id], onDelete: Cascade)
+  successor   PrepScheduleTask @relation("PrepScheduleDepSuccessor", fields: [successorId], references: [id], onDelete: Cascade)
+
+  @@unique([successorId, predecessorId, type])
+  @@index([planId])
+  @@index([organizationId])
+}
+
+model PrepScheduleTakeoffLink {
+  id             String @id @default(cuid())
+  organizationId String
+  planId         String
+  taskId         String
+  studyLineCode  String
+  role           String?
+
+  task PrepScheduleTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, studyLineCode])
+  @@index([planId])
+  @@index([organizationId, planId])
+}
+
+model PrepScheduleQuoteLink {
+  id             String  @id @default(cuid())
+  organizationId String
+  planId         String
+  taskId         String
+  quoteId        String
+  quoteLineId    String
+  studyLineCode  String?
+  sellHt         Decimal? @db.Decimal(14, 4)
+  costHt         Decimal? @db.Decimal(14, 4)
+
+  task PrepScheduleTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, quoteLineId])
+  @@index([planId])
+  @@index([quoteId])
+  @@index([organizationId])
+}
+
+/// Journal des modifications de planning (traçabilité initial vs actuel).
+model PrepScheduleEvent {
+  id             String   @id @default(cuid())
+  organizationId String
+  planId         String
+  kind           String
+  detailJson     Json?
+  actorUserId    String?
+  createdAt      DateTime @default(now())
+
+  plan PrepSchedulePlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId, createdAt])
+  @@index([organizationId])
 }

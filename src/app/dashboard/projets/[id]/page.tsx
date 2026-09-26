@@ -829,6 +829,12 @@ export default async function ProjetDetailPage({
         </div>
       </header>
 
+      {preparationWorkspace ? (
+        <div className="pt-1 pb-2">
+          <ProjectPreparationOverview workspace={preparationWorkspace} />
+        </div>
+      ) : null}
+
       <ChantierCockpit
         stats={[
           {
@@ -876,16 +882,7 @@ export default async function ProjetDetailPage({
         }
         hiddenTabs={canManageShare ? undefined : ["partage"]}
         panels={{
-          overview: (
-            <>
-              {preparationWorkspace ? (
-                <div className="mb-4">
-                  <ProjectPreparationOverview workspace={preparationWorkspace} />
-                </div>
-              ) : null}
-              {contextCard}
-            </>
-          ),
+          overview: contextCard,
           taches: tachesPanel,
           materiaux: materiauxPanel,
           documents: documentsPanel,

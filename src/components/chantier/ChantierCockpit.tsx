@@ -224,7 +224,7 @@ export function ChantierCockpit({
             </>
           )}
 
-          {/* Contexte chantier (adresse, dates…) — sous le cockpit ops */}
+          {/* Contexte chantier (adresse, dates…) — en bas de la vue d’ensemble */}
           <div>{panels.overview}</div>
         </div>
       ) : (

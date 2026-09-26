@@ -980,7 +980,10 @@ export async function buildPrepSchedulePlanPayload(
             label: supplyById.get(o.supply_id) ?? o.supply_id,
           };
         })
-        .filter((x): x is { supply_id: string; count?: number; label: string } => !!x),
+        .filter(
+          (x): x is { supply_id: string; count: number | undefined; label: string } =>
+            x != null,
+        ),
       preconditions: asStringList(t.preconditionsJson),
       controls: asStringList(t.controlsJson),
       dependsOn,

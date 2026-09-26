@@ -689,6 +689,7 @@ model Organization {
   prepQuoteTransfers            PrepQuoteTransfer[]
   prepQuoteLinks                PrepQuoteLink[]
   prepSchedulePlans             PrepSchedulePlan[]
+  projectScopes                 ProjectScope[]
   platformAdminAuditEvents      PlatformAdminAuditEvent[]
   platformSupportSessions       PlatformSupportSession[]
 
@@ -955,6 +956,7 @@ model Project {
   siteDocuments          SiteDocument[]
   prepStudies            PrepStudy[]
   prepSchedulePlans      PrepSchedulePlan[]
+  projectScopes          ProjectScope[]
 
   @@index([organizationId])
 }
@@ -4181,6 +4183,7 @@ model CommercialQuote {
   prepQuoteTransfers   PrepQuoteTransfer[]
   prepQuoteLinks       PrepQuoteLink[]
   prepSchedulePlans    PrepSchedulePlan[]
+  referencedByScopes   ProjectScope[] @relation("ProjectScopeReferenceQuote")
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
@@ -5308,10 +5311,49 @@ model SiteDocumentChatgptImport {
 
 /// Métré & Préparation de chantier — étude importée depuis bework_prep_bundle_v1 (sans API IA).
 /// Un projet peut contenir plusieurs études (fondations, gros œuvre, VRD…).
+/// Périmètre technique d'un chantier (Fondations, VRD, etc.).
+/// Racine = Project. Ne pas confondre avec ChantierFolder (GED) ni WorksitePilotage (1/projet).
+model ProjectScope {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String
+  code           String
+  name           String
+  description    String?   @db.Text
+  /// ACTIVE | ARCHIVED
+  status         String    @default("ACTIVE")
+  displayOrder   Int       @default(0)
+  /// Hiérarchie future (nullable en V1).
+  parentId       String?
+  /// Baselines de référence (optionnelles — un scope peut avoir N objets).
+  referenceStudyId         String?  @unique
+  referenceQuoteId         String?  @unique
+  referenceSchedulePlanId  String?  @unique
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parent       ProjectScope?  @relation("ProjectScopeTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children     ProjectScope[] @relation("ProjectScopeTree")
+  referenceStudy         PrepStudy?        @relation("ProjectScopeReferenceStudy", fields: [referenceStudyId], references: [id], onDelete: SetNull)
+  referenceQuote         CommercialQuote?  @relation("ProjectScopeReferenceQuote", fields: [referenceQuoteId], references: [id], onDelete: SetNull)
+  referenceSchedulePlan  PrepSchedulePlan? @relation("ProjectScopeReferenceSchedule", fields: [referenceSchedulePlanId], references: [id], onDelete: SetNull)
+  studies        PrepStudy[]
+  schedulePlans  PrepSchedulePlan[]
+
+  @@unique([projectId, code])
+  @@index([organizationId, projectId])
+  @@index([projectId, displayOrder])
+  @@index([parentId])
+}
+
 model PrepStudy {
   id              String    @id @default(cuid())
   organizationId  String
   projectId       String
+  /// Périmètre technique (nullable = non classé / legacy).
+  scopeId         String?
   title           String
   trade           String?
   description     String?   @db.Text
@@ -5343,6 +5385,8 @@ model PrepStudy {
 
   organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   project      Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scope        ProjectScope?     @relation(fields: [scopeId], references: [id], onDelete: SetNull)
+  referencedByScopes ProjectScope[] @relation("ProjectScopeReferenceStudy")
   parameters   PrepParameter[]
   lines        PrepTakeoffLine[]
   imports      PrepImport[]
@@ -5355,6 +5399,7 @@ model PrepStudy {
 
   @@index([organizationId, projectId])
   @@index([projectId, archivedAt])
+  @@index([scopeId])
 }
 
 model PrepParameter {
@@ -5564,6 +5609,8 @@ model PrepSchedulePlan {
   organizationId           String
   studyId                  String
   projectId                String
+  /// Périmètre technique (nullable = non classé / legacy).
+  scopeId                  String?
   quoteId                  String?
   title                    String
   /// DEMONSTRATION | PROFESSIONAL
@@ -5593,6 +5640,8 @@ model PrepSchedulePlan {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   study        PrepStudy    @relation(fields: [studyId], references: [id], onDelete: Cascade)
   project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scope        ProjectScope? @relation(fields: [scopeId], references: [id], onDelete: SetNull)
+  referencedByScopes ProjectScope[] @relation("ProjectScopeReferenceSchedule")
   quote        CommercialQuote? @relation(fields: [quoteId], references: [id], onDelete: SetNull)
   parentPlan   PrepSchedulePlan? @relation("PrepSchedulePlanRevisions", fields: [parentPlanId], references: [id], onDelete: SetNull)
   childPlans   PrepSchedulePlan[] @relation("PrepSchedulePlanRevisions")
@@ -5603,6 +5652,7 @@ model PrepSchedulePlan {
   @@index([studyId, createdAt])
   @@index([projectId])
   @@index([quoteId])
+  @@index([scopeId])
   @@index([organizationId, isDemonstration])
   @@index([parentPlanId])
 }

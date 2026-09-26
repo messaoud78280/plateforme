@@ -59,6 +59,8 @@ import { loadMaterialRequirementsForProject } from "@/lib/materiaux/load-for-pro
 import { isInternalPurchaseOrderActor } from "@/lib/purchase-orders/access";
 import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 import { loadDocumentHub } from "@/lib/ged/document-hub";
+import { getProjectWorkspace } from "@/lib/chantier/project-workspace";
+import { ProjectPreparationOverview } from "@/components/chantier/ProjectPreparationOverview";
 
 export default async function ProjetDetailPage({
   params,
@@ -359,6 +361,14 @@ export default async function ProjetDetailPage({
           })
         : Promise.resolve({ items: [], classifyCount: 0, missingCount: 0, weekCount: 0, totalAll: 0, companies: [], total: 0, page: 1, pageSize: 50, groups: [], projectStats: [] }),
     ]);
+
+  const preparationWorkspace =
+    !isExternalViewer && project.organizationId
+      ? await getProjectWorkspace(project.organizationId, id).catch((e) => {
+          console.error("[ProjetDetail] preparation workspace:", e);
+          return null;
+        })
+      : null;
 
   const dossierFolders = chantierFolders.map((folder) => ({
     id: folder.id,
@@ -870,7 +880,16 @@ export default async function ProjetDetailPage({
         }
         hiddenTabs={canManageShare ? undefined : ["partage"]}
         panels={{
-          overview: contextCard,
+          overview: (
+            <>
+              {preparationWorkspace ? (
+                <div className="mb-4">
+                  <ProjectPreparationOverview workspace={preparationWorkspace} />
+                </div>
+              ) : null}
+              {contextCard}
+            </>
+          ),
           taches: tachesPanel,
           materiaux: materiauxPanel,
           documents: documentsPanel,

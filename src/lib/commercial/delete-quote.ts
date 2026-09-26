@@ -135,6 +135,11 @@ export async function deleteQuote(orgId: string, quoteId: string): Promise<Delet
         where: { id: quoteId },
         data: { currentVersionId: null, acceptedVersionId: null },
       });
+      /* Baseline périmètre : null sans remplacement automatique (FK SET NULL en filet). */
+      await tx.projectScope.updateMany({
+        where: { referenceQuoteId: quoteId },
+        data: { referenceQuoteId: null },
+      });
       await tx.commercialQuote.delete({
         where: { id: quoteId },
       });

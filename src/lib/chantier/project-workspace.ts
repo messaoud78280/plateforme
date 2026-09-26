@@ -747,26 +747,53 @@ export async function attachQuoteToScope(input: {
       organizationId: input.orgId,
       OR: [{ projectId: scope.projectId }, { projectId: null }],
     },
-    select: { id: true, projectId: true, sourcePrepStudyId: true },
+    select: {
+      id: true,
+      projectId: true,
+      organizationId: true,
+      sourcePrepStudyId: true,
+      scopeId: true,
+    },
   });
   if (!quote) throw new Error("Devis introuvable");
+  if (quote.organizationId !== input.orgId) {
+    throw new Error("Ce devis appartient à une autre organisation");
+  }
   if (quote.projectId && quote.projectId !== scope.projectId) {
     throw new Error("Ce devis appartient à un autre chantier");
   }
 
   if (quote.sourcePrepStudyId) {
+    const study = await prisma.prepStudy.findFirst({
+      where: {
+        id: quote.sourcePrepStudyId,
+        organizationId: input.orgId,
+        projectId: scope.projectId,
+      },
+      select: { id: true },
+    });
+    if (!study) {
+      throw new Error("Le métré source du devis n’appartient pas à ce chantier");
+    }
     await attachStudyToScope({
       orgId: input.orgId,
       scopeId: scope.id,
       studyId: quote.sourcePrepStudyId,
-      setAsReference: input.setAsReference === true ||
+      setAsReference:
+        input.setAsReference === true ||
         (input.setAsReference !== false && !scope.referenceQuoteId),
     });
-    // Garantit le membership même si d'autres devis du métré existent
     await prisma.commercialQuote.update({
       where: { id: quote.id },
       data: { scopeId: scope.id },
     });
+    if (input.setAsReference === true) {
+      await setScopeReferenceQuote({
+        orgId: input.orgId,
+        scopeId: scope.id,
+        quoteId: quote.id,
+      });
+    }
     return;
   }
 
@@ -789,6 +816,111 @@ export async function attachQuoteToScope(input: {
       });
     }
   });
+}
+
+/**
+ * Définit le devis de référence d’un lot.
+ * Le devis doit déjà appartenir au périmètre (scopeId).
+ * Ne retire aucun autre devis du lot.
+ */
+export async function setScopeReferenceQuote(input: {
+  orgId: string;
+  scopeId: string;
+  quoteId: string;
+}): Promise<void> {
+  const scope = await prisma.projectScope.findFirst({
+    where: { id: input.scopeId, organizationId: input.orgId },
+    select: { id: true, projectId: true, organizationId: true },
+  });
+  if (!scope) throw new Error("Périmètre introuvable");
+
+  const quote = await prisma.commercialQuote.findFirst({
+    where: { id: input.quoteId, organizationId: input.orgId },
+    select: { id: true, scopeId: true, projectId: true, organizationId: true },
+  });
+  if (!quote) throw new Error("Devis introuvable");
+  if (quote.organizationId !== scope.organizationId) {
+    throw new Error("Ce devis appartient à une autre organisation");
+  }
+  if (quote.projectId && quote.projectId !== scope.projectId) {
+    throw new Error("Ce devis appartient à un autre chantier");
+  }
+  if (quote.scopeId !== scope.id) {
+    throw new Error(
+      "Le devis de référence doit d’abord être rattaché à ce lot de travaux",
+    );
+  }
+
+  await prisma.projectScope.update({
+    where: { id: scope.id },
+    data: { referenceQuoteId: quote.id },
+  });
+}
+
+/**
+ * Retire un devis d’un périmètre.
+ * Si c’était le devis de référence → referenceQuoteId = null (aucun remplacement auto).
+ */
+export async function detachQuoteFromScope(input: {
+  orgId: string;
+  quoteId: string;
+}): Promise<{ clearedReference: boolean }> {
+  const quote = await prisma.commercialQuote.findFirst({
+    where: { id: input.quoteId, organizationId: input.orgId },
+    select: { id: true, scopeId: true },
+  });
+  if (!quote) throw new Error("Devis introuvable");
+  if (!quote.scopeId) return { clearedReference: false };
+
+  const scope = await prisma.projectScope.findFirst({
+    where: { id: quote.scopeId, organizationId: input.orgId },
+    select: { id: true, referenceQuoteId: true },
+  });
+
+  const clearedReference = scope?.referenceQuoteId === quote.id;
+
+  await prisma.$transaction(async (tx) => {
+    if (clearedReference && scope) {
+      await tx.projectScope.update({
+        where: { id: scope.id },
+        data: { referenceQuoteId: null },
+      });
+    }
+    await tx.commercialQuote.update({
+      where: { id: quote.id },
+      data: { scopeId: null },
+    });
+  });
+
+  return { clearedReference };
+}
+
+/** Vérifie les invariants membership / référence (outil de validation). */
+export function assertQuoteScopeConsistency(input: {
+  scope: { id: string; projectId: string; organizationId: string; referenceQuoteId: string | null };
+  quote: {
+    id: string;
+    projectId: string | null;
+    organizationId: string;
+    scopeId: string | null;
+  };
+}): { ok: true } | { ok: false; error: string } {
+  if (input.quote.organizationId !== input.scope.organizationId) {
+    return { ok: false, error: "Organisation différente" };
+  }
+  if (input.quote.projectId && input.quote.projectId !== input.scope.projectId) {
+    return { ok: false, error: "Projet différent" };
+  }
+  if (input.quote.scopeId && input.quote.scopeId !== input.scope.id) {
+    return { ok: false, error: "Membership hors périmètre" };
+  }
+  if (
+    input.scope.referenceQuoteId === input.quote.id &&
+    input.quote.scopeId !== input.scope.id
+  ) {
+    return { ok: false, error: "Référence sans membership" };
+  }
+  return { ok: true };
 }
 
 export async function attachSchedulePlanToScope(input: {

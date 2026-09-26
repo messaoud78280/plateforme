@@ -10,6 +10,7 @@ import {
   attachStudyToScope,
   codeFromScopeName,
   ensureProjectScope,
+  setScopeReferenceQuote,
 } from "@/lib/chantier/project-workspace";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -145,11 +146,17 @@ export async function POST(req: Request, ctx: Ctx) {
         : null;
   if (refCandidate) {
     try {
+      // Assurer membership puis baseline (sans retirer les autres)
       await attachQuoteToScope({
         orgId: project.organizationId,
         scopeId: scope.id,
         quoteId: refCandidate,
-        setAsReference: true,
+        setAsReference: false,
+      });
+      await setScopeReferenceQuote({
+        orgId: project.organizationId,
+        scopeId: scope.id,
+        quoteId: refCandidate,
       });
     } catch (e) {
       errors.push(e instanceof Error ? e.message : "Référence devis impossible");

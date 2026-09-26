@@ -37,6 +37,9 @@ export async function PATCH(req: Request, ctx: Ctx) {
   const body = (await req.json().catch(() => null)) as {
     chantierFileId?: string;
     sourceId?: string;
+    planNumber?: string;
+    revision?: string;
+    title?: string;
   } | null;
 
   const chantierFileId = body?.chantierFileId?.trim();
@@ -56,6 +59,9 @@ export async function PATCH(req: Request, ctx: Ctx) {
     chantierFileId,
     sourceId: body?.sourceId ?? null,
     actorUserId: session.user.id,
+    planNumber: body?.planNumber ?? null,
+    revision: body?.revision ?? null,
+    title: body?.title ?? null,
   });
 
   if (!result.ok) {

@@ -143,6 +143,10 @@ export async function attachPrepStudyPlanSource(input: {
   chantierFileId: string;
   sourceId?: string | null;
   actorUserId: string;
+  /** Préremplissage / correction métadonnée source (ex. C-01). */
+  planNumber?: string | null;
+  revision?: string | null;
+  title?: string | null;
 }): Promise<{ ok: true; source: PrepSource } | { ok: false; error: string }> {
   const study = await prisma.prepStudy.findFirst({
     where: {
@@ -174,6 +178,14 @@ export async function attachPrepStudyPlanSource(input: {
     return { ok: false, error: "Ce document n’a pas encore de fichier (pièce manquante)" };
   }
 
+  const planNumber =
+    (input.planNumber?.trim() || null) ?? null;
+  const revision =
+    (input.revision?.trim() || null) ??
+    file.indice ??
+    (file.versionLabel && file.versionLabel !== "1" ? file.versionLabel : null);
+  const titleHint = input.title?.trim() || null;
+
   const sources = asSources(study.sourcesJson);
   const targetId = input.sourceId?.trim() || sources[0]?.id || "SRC-C01";
   let found = false;
@@ -184,17 +196,23 @@ export async function attachPrepStudyPlanSource(input: {
       ...s,
       chantierFileId: file.id,
       filename: s.filename ?? file.name,
-      revision: s.revision ?? file.indice ?? file.versionLabel ?? s.revision,
-      title: s.title ?? (file.documentType || file.name),
+      planNumber: planNumber ?? s.planNumber,
+      revision: revision ?? s.revision,
+      title:
+        titleHint ??
+        s.title ??
+        (s.planNumber || planNumber
+          ? `Plan Niveau Fondations`
+          : file.documentType || file.name),
     };
   });
   if (!found) {
     next.unshift({
       id: targetId,
       filename: file.name,
-      planNumber: null,
-      title: file.documentType || file.name,
-      revision: file.indice ?? file.versionLabel,
+      planNumber,
+      title: titleHint ?? file.documentType ?? file.name,
+      revision,
       scale: null,
       page: null,
       isRaster: null,
@@ -212,6 +230,18 @@ export async function attachPrepStudyPlanSource(input: {
         updatedById: input.actorUserId,
       },
     });
+    // Figée la révision sur le fichier GED si fournie
+    if (revision || planNumber) {
+      await tx.chantierFile.update({
+        where: { id: file.id },
+        data: {
+          ...(revision ? { indice: revision } : {}),
+          ...(planNumber && !file.documentType
+            ? { documentType: `Plan d'exécution ${planNumber}` }
+            : {}),
+        },
+      });
+    }
     const existing = await tx.chantierFileLink.findFirst({
       where: {
         fileId: file.id,
@@ -229,6 +259,11 @@ export async function attachPrepStudyPlanSource(input: {
           entityLabel: `Métré · V${study.version}`,
           createdById: input.actorUserId,
         },
+      });
+    } else {
+      await tx.chantierFileLink.update({
+        where: { id: existing.id },
+        data: { entityLabel: `Métré · V${study.version}` },
       });
     }
   });

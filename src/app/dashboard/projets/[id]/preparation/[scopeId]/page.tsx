@@ -130,7 +130,7 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
                     {meta?.fileMissing
                       ? "Fichier non rattaché"
                       : card.syncState === "A_JOUR"
-                        ? "Disponible"
+                        ? "PDF disponible"
                         : card.syncState === "ABSENT"
                           ? "Absent"
                           : "À vérifier"}

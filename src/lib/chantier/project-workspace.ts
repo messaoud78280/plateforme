@@ -161,9 +161,9 @@ function buildScopeCards(input: {
       : "Aucun plan déclaré";
 
   const planDetailParts = [
-    rev ? `Révision ${rev}` : primary && !primary.revision ? "Révision non identifiée" : null,
+    rev ? `Révision : ${rev}` : null,
+    !fileMissing && primary ? "PDF disponible" : null,
     planSource?.file?.documentDate ? `Date ${planSource.file.documentDate}` : null,
-    planSource?.file?.documentType ?? null,
     fileMissing && primary ? "Fichier non rattaché" : null,
   ].filter(Boolean);
 

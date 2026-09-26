@@ -726,7 +726,15 @@ export async function getPrepSchedulePlanView(orgId: string, planId: string) {
         include: { takeoffLinks: true, quoteLinks: true },
       },
       events: { orderBy: { createdAt: "desc" }, take: 30 },
-      study: { select: { id: true, title: true, resourcesJson: true } },
+      study: {
+        select: {
+          id: true,
+          title: true,
+          resourcesJson: true,
+          scopeId: true,
+          scope: { select: { id: true, name: true, code: true } },
+        },
+      },
       project: { select: { id: true, title: true } },
       quote: {
         select: {
@@ -757,6 +765,7 @@ export type SchedulePlanViewPayload = {
   note: string | null;
   study: { id: string; title: string };
   project: { id: string; title: string };
+  scope: { id: string; name: string; code: string } | null;
   quote: {
     id: string;
     number: string;
@@ -1011,6 +1020,13 @@ export async function buildPrepSchedulePlanPayload(
     note: plan.note,
     study: { id: plan.study.id, title: plan.study.title },
     project: { id: plan.project.id, title: plan.project.title },
+    scope: plan.study.scope
+      ? {
+          id: plan.study.scope.id,
+          name: plan.study.scope.name,
+          code: plan.study.scope.code,
+        }
+      : null,
     quote: plan.quote
       ? {
           id: plan.quote.id,

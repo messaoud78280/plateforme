@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -7,11 +6,21 @@ import { canAccessChantierProject, isChantierStaff } from "@/lib/chantier-dossie
 import { requireSiteDocumentAccess } from "@/lib/site-documents/access";
 import { listSiteDocuments } from "@/lib/site-documents/service";
 import { SiteDocumentsHub } from "@/components/site-documents/SiteDocumentsHub";
+import {
+  ChantierHierarchyNav,
+  chantierProjectHref,
+  chantierProjectsHref,
+  moduleChantierNav,
+} from "@/components/chantier/ChantierHierarchyNav";
 
-type Props = { params: Promise<{ id: string }> };
+type Props = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ scopeId?: string }>;
+};
 
-export default async function DocumentsChantierPage({ params }: Props) {
+export default async function DocumentsChantierPage({ params, searchParams }: Props) {
   const { id } = await params;
+  const { scopeId: scopeIdRaw } = await searchParams;
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) notFound();
 
@@ -27,18 +36,40 @@ export default async function DocumentsChantierPage({ params }: Props) {
   const auth = await requireSiteDocumentAccess(id);
   if (!auth.ok) notFound();
 
+  const scopeId = scopeIdRaw?.trim() || null;
+  const scope = scopeId
+    ? await prisma.projectScope.findFirst({
+        where: { id: scopeId, projectId: id, status: "ACTIVE" },
+        select: { id: true, name: true },
+      })
+    : null;
+
   const items = await listSiteDocuments(auth.orgId, id);
 
+  const nav = scope
+    ? moduleChantierNav({
+        projectId: id,
+        projectTitle: project.title,
+        scope: { id: scope.id, name: scope.name },
+        currentLabel: "Plans & documents",
+      })
+    : {
+        backHref: chantierProjectHref(id),
+        backLabel: "Retour au dossier chantier",
+        crumbs: [
+          { label: "Chantiers", href: chantierProjectsHref() },
+          { label: project.title, href: chantierProjectHref(id) },
+          { label: "Plans & documents" },
+        ],
+      };
+
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
-      <p className="mb-4 text-sm">
-        <Link
-          href={`/dashboard/projets/${id}`}
-          className="font-semibold text-[#1d4ed8] hover:underline"
-        >
-          ← {project.title}
-        </Link>
-      </p>
+    <div className="mx-auto max-w-5xl space-y-4 px-4 py-6 sm:px-6">
+      <ChantierHierarchyNav
+        backHref={nav.backHref}
+        backLabel={nav.backLabel}
+        crumbs={nav.crumbs}
+      />
       <SiteDocumentsHub
         projectId={id}
         canWrite={isChantierStaff(session.user.role)}

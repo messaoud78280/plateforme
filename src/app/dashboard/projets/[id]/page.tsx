@@ -3,13 +3,12 @@ import { redirect, notFound } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { ContextBackButton } from "@/components/ui/ContextBackButton";
 import { buildProjectPresentation } from "@/lib/chantier/party-labels";
+import { withReturnTo } from "@/lib/navigation/safe-return-to";
 import {
-  contextBackLabelForHref,
-  sanitizeInternalReturnTo,
-  withReturnTo,
-} from "@/lib/navigation/safe-return-to";
+  ChantierHierarchyNav,
+  chantierProjectsHref,
+} from "@/components/chantier/ChantierHierarchyNav";
 import { MessageForm } from "@/components/MessageForm";
 import { ProjectAssignAgent } from "@/components/projects/ProjectAssignAgent";
 import { ProjectPpspsSection } from "@/components/projects/ProjectPpspsSection";
@@ -64,14 +63,11 @@ import { ProjectPreparationOverview } from "@/components/chantier/ProjectPrepara
 
 export default async function ProjetDetailPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ returnTo?: string }>;
 }) {
   const session = await getServerSession(authOptions);
   const { id } = await params;
-  const { returnTo: returnToRaw } = await searchParams;
 
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard");
@@ -203,9 +199,6 @@ export default async function ProjetDetailPage({
     ),
     followUpClientName: followUpClient?.clientName ?? null,
   });
-
-  const safeReturnTo = sanitizeInternalReturnTo(returnToRaw, "/dashboard/projets");
-  const backLabel = contextBackLabelForHref(safeReturnTo, "Retour aux chantiers");
 
   await ensureChantierFolders(id);
 
@@ -732,10 +725,13 @@ export default async function ProjetDetailPage({
 
   return (
     <div className="space-y-5">
-      <ContextBackButton
-        label={backLabel}
-        fallbackHref="/dashboard/projets"
-        returnTo={returnToRaw}
+      <ChantierHierarchyNav
+        backHref={chantierProjectsHref()}
+        backLabel="Retour aux chantiers"
+        crumbs={[
+          { label: "Chantiers", href: chantierProjectsHref() },
+          { label: project.title },
+        ]}
       />
 
       <header className="rounded-xl border border-slate-200/90 bg-white px-4 py-4 sm:px-5 sm:py-5">

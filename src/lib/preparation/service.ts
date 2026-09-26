@@ -88,6 +88,8 @@ export type PrepStudyView = {
   createdAt: string;
   updatedAt: string;
   project: { id: string; title: string };
+  /** Périmètre technique (dossier chantier V2), si classé. */
+  scope: { id: string; name: string; code: string } | null;
   orgIsDemo: boolean;
   params: PrepParamDTO[];
   lines: PrepLineDTO[];
@@ -299,6 +301,7 @@ export async function getPrepStudyView(
     where: { id: studyId, organizationId: orgId, archivedAt: null },
     include: {
       project: { select: { id: true, title: true } },
+      scope: { select: { id: true, name: true, code: true } },
       organization: { select: { kind: true } },
       parameters: { orderBy: { sortOrder: "asc" } },
       lines: { orderBy: { sortOrder: "asc" } },
@@ -359,6 +362,9 @@ export async function getPrepStudyView(
     createdAt: study.createdAt.toISOString(),
     updatedAt: study.updatedAt.toISOString(),
     project: study.project,
+    scope: study.scope
+      ? { id: study.scope.id, name: study.scope.name, code: study.scope.code }
+      : null,
     orgIsDemo: study.organization.kind === "DEMO",
     params: study.parameters.map(paramRowToDTO),
     lines: study.lines.map(lineRowToDTO),

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -7,11 +6,20 @@ import { canAccessChantierProject, isChantierStaff } from "@/lib/chantier-dossie
 import { requireSiteDocumentAccess } from "@/lib/site-documents/access";
 import { getSiteDocument } from "@/lib/site-documents/service";
 import { SiteDocumentEditor } from "@/components/site-documents/SiteDocumentEditor";
+import {
+  ChantierHierarchyNav,
+  chantierProjectHref,
+  chantierProjectsHref,
+} from "@/components/chantier/ChantierHierarchyNav";
 
-type Props = { params: Promise<{ id: string; docId: string }> };
+type Props = {
+  params: Promise<{ id: string; docId: string }>;
+  searchParams: Promise<{ scopeId?: string }>;
+};
 
-export default async function SiteDocumentPage({ params }: Props) {
+export default async function SiteDocumentPage({ params, searchParams }: Props) {
   const { id, docId } = await params;
+  const { scopeId: scopeIdRaw } = await searchParams;
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) notFound();
 
@@ -30,8 +38,51 @@ export default async function SiteDocumentPage({ params }: Props) {
   const document = await getSiteDocument(auth.orgId, id, docId);
   if (!document) notFound();
 
+  const scopeId = scopeIdRaw?.trim() || null;
+  const scope = scopeId
+    ? await prisma.projectScope.findFirst({
+        where: { id: scopeId, projectId: id, status: "ACTIVE" },
+        select: { id: true, name: true },
+      })
+    : null;
+
+  const docsListHref = scope
+    ? `/dashboard/projets/${id}/documents-chantier?scopeId=${encodeURIComponent(scope.id)}`
+    : `/dashboard/projets/${id}/documents-chantier`;
+
+  const nav = scope
+    ? {
+        backHref: docsListHref,
+        backLabel: "Retour à Plans & documents",
+        crumbs: [
+          { label: "Chantiers", href: chantierProjectsHref() },
+          { label: project.title, href: chantierProjectHref(id) },
+          {
+            label: scope.name,
+            href: `/dashboard/projets/${id}/preparation/${scope.id}`,
+          },
+          { label: "Plans & documents", href: docsListHref },
+          { label: document.title || "Document" },
+        ],
+      }
+    : {
+        backHref: docsListHref,
+        backLabel: "Retour aux documents",
+        crumbs: [
+          { label: "Chantiers", href: chantierProjectsHref() },
+          { label: project.title, href: chantierProjectHref(id) },
+          { label: "Plans & documents", href: docsListHref },
+          { label: document.title || "Document" },
+        ],
+      };
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-4xl space-y-4 px-4 py-6 sm:px-6">
+      <ChantierHierarchyNav
+        backHref={nav.backHref}
+        backLabel={nav.backLabel}
+        crumbs={nav.crumbs}
+      />
       <SiteDocumentEditor
         projectId={id}
         projectTitle={project.title}
@@ -52,11 +103,6 @@ export default async function SiteDocumentPage({ params }: Props) {
           chatgptImports: document.chatgptImports.map((x) => ({ id: x.id })),
         }}
       />
-      <p className="mt-6 text-center text-xs text-slate-400">
-        <Link href={`/dashboard/projets/${id}/documents-chantier`} className="hover:underline">
-          Retour aux documents
-        </Link>
-      </p>
     </div>
   );
 }

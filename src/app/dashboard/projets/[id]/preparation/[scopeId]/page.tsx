@@ -5,6 +5,11 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
 import { getProjectWorkspace } from "@/lib/chantier/project-workspace";
+import {
+  ChantierHierarchyNav,
+  chantierProjectHref,
+  chantierProjectsHref,
+} from "@/components/chantier/ChantierHierarchyNav";
 import { cn } from "@/lib/cn";
 
 export const dynamic = "force-dynamic";
@@ -37,29 +42,27 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
 
   return (
     <div className="mx-auto max-w-6xl space-y-4 px-4 py-6 sm:px-6">
-      <nav className="text-[12px] text-slate-500">
-        <Link href="/dashboard" className="hover:underline">
-          BeWork
-        </Link>
-        {" · "}
-        <Link href={`/dashboard/projets/${projectId}`} className="hover:underline">
-          {workspace.title}
-        </Link>
-        {" · "}
-        <span className="font-medium text-slate-700">{scope.name}</span>
-      </nav>
+      <ChantierHierarchyNav
+        backHref={chantierProjectHref(projectId)}
+        backLabel="Retour au dossier chantier"
+        crumbs={[
+          { label: "Chantiers", href: chantierProjectsHref() },
+          { label: workspace.title, href: chantierProjectHref(projectId) },
+          { label: scope.name },
+        ]}
+      />
 
       <header>
         <p className="text-[12px] font-semibold uppercase tracking-wide text-slate-400">
           {scope.code}
         </p>
-        <h1 className="text-[1.6rem] font-semibold text-[#1e3a5f]">{scope.name}</h1>
+        <h1 className="mt-0.5 text-[1.6rem] font-semibold text-[#1e3a5f]">{scope.name}</h1>
         {scope.description ? (
           <p className="mt-1 text-[13px] text-slate-600">{scope.description}</p>
         ) : null}
       </header>
 
-      {/* Barre de contexte métier */}
+      {/* Barre de filiation métier */}
       <div className="sticky top-0 z-20 overflow-x-auto rounded-2xl border border-[#1e3a5f]/15 bg-white/95 px-3 py-2 shadow-sm backdrop-blur">
         <div className="flex min-w-max items-center gap-1 text-[12px]">
           <span className="shrink-0 font-semibold text-[#1e3a5f]">
@@ -145,16 +148,6 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
         })}
       </div>
 
-      <div className="pt-2">
-        <Link
-          href={`/dashboard/projets/${projectId}`}
-          className="text-[13px] text-slate-600 hover:underline"
-        >
-          ← Retour au dossier chantier
-        </Link>
-      </div>
-
-      {/* Contexte projet pour navigation latérale */}
       <details className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-[13px]">
         <summary className="cursor-pointer font-medium text-[#1e3a5f]">
           Autres périmètres du chantier

@@ -15,6 +15,9 @@ import { loadAcceptedArchiveUi } from "@/lib/commercial/accepted-snapshot";
 import { ensureCommercialOrgSettings } from "@/lib/commercial/settings";
 import { d } from "@/lib/commercial/decimal";
 import { VisitQuoteMeasurementsPanel } from "@/components/site-visits/VisitQuoteMeasurementsPanel";
+import { ChantierHierarchyNav } from "@/components/chantier/ChantierHierarchyNav";
+import { resolveQuoteChantierNav } from "@/lib/chantier/quote-chantier-nav";
+import { BackLink } from "@/components/ui/BackLink";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +52,7 @@ export default async function DevisDetailPage({
   });
   const fromVisitId = fromVisit?.id ?? sp.fromVisit ?? null;
 
-  const [summary, invoiceStats, archive, settings] = await Promise.all([
+  const [summary, invoiceStats, archive, settings, chantierNav] = await Promise.all([
     quote.status === "ACCEPTED" || quote.acceptedAt
       ? loadDealFinancialSummary(orgId, id)
       : null,
@@ -65,6 +68,12 @@ export default async function DevisDetailPage({
       ? loadAcceptedArchiveUi(orgId, id)
       : null,
     ensureCommercialOrgSettings(orgId),
+    resolveQuoteChantierNav(orgId, {
+      id: quote.id,
+      projectId: quote.projectId,
+      sourcePrepStudyId: quote.sourcePrepStudyId,
+      project: quote.project,
+    }),
   ]);
 
   const hasInvoice = invoiceStats.length > 0;
@@ -79,6 +88,17 @@ export default async function DevisDetailPage({
 
   return (
     <div className="space-y-4">
+      {chantierNav ? (
+        <ChantierHierarchyNav
+          backHref={chantierNav.backHref}
+          backLabel={chantierNav.backLabel}
+          crumbs={chantierNav.crumbs}
+        />
+      ) : (
+        <BackLink href="/dashboard/devis-facturation/devis">
+          Retour aux devis
+        </BackLink>
+      )}
       <QuoteCommercialFlow
         status={quote.status}
         hasProject={Boolean(quote.projectId)}

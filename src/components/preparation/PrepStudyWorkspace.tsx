@@ -4,6 +4,10 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
+import {
+  ChantierHierarchyNav,
+  moduleChantierNav,
+} from "@/components/chantier/ChantierHierarchyNav";
 import type { PrepStudyView } from "@/lib/preparation/service";
 import {
   computeStudy,
@@ -453,23 +457,25 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
     })
     .map((l) => l.code);
 
+  const nav = moduleChantierNav({
+    projectId: study.project.id,
+    projectTitle: study.project.title,
+    scope: study.scope
+      ? { id: study.scope.id, name: study.scope.name }
+      : null,
+    currentLabel: "Métré",
+  });
+
   return (
     <div className="mx-auto max-w-[1600px] space-y-4 px-4 pb-28 pt-6 sm:px-6 lg:px-8">
+      <ChantierHierarchyNav
+        backHref={nav.backHref}
+        backLabel={nav.backLabel}
+        crumbs={nav.crumbs}
+      />
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[12px] text-slate-500">
-            <Link href="/dashboard/visites-metres/etudes" className="hover:underline">
-              Études de métré
-            </Link>
-            {" · "}
-            <Link
-              href={`/dashboard/visites-metres/etudes?projectId=${encodeURIComponent(study.project.id)}`}
-              className="hover:underline"
-            >
-              {study.project.title}
-            </Link>
-          </p>
-          <h1 className="mt-0.5 text-[1.6rem] font-semibold tracking-tight text-[#1e3a5f]">{study.title}</h1>
+          <h1 className="text-[1.6rem] font-semibold tracking-tight text-[#1e3a5f]">{study.title}</h1>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-[12px] text-slate-500">
             <Chip
               className={

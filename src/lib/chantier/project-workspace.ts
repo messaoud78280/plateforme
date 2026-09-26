@@ -134,14 +134,12 @@ function buildScopeCards(input: {
   const cards: WorkspaceCard[] = [
     {
       kind: "plan",
-      label: "Plan source",
-      title: planSourceLabel ?? (study ? "Document source (métadonnée)" : "—"),
-      href: study
-        ? `/dashboard/visites-metres/etudes/${study.id}`
-        : null,
+      label: "Plans & documents",
+      title: planSourceLabel ?? (study ? "Documents du périmètre" : "—"),
+      href: `/dashboard/projets/${input.projectId}/documents-chantier?scopeId=${encodeURIComponent(input.scopeId)}`,
       detail: study
         ? "Lien GED révision précise — étape D (PrepStudySource)"
-        : null,
+        : "Ouvrir la GED chantier filtrée sur ce périmètre",
       syncState: study ? "A_VERIFIER" : "ABSENT",
       syncHint: study
         ? "Provenance documentaire encore basée sur sourcesJson — FK fichier à venir"

@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
+import {
+  ChantierHierarchyNav,
+  moduleChantierNav,
+} from "@/components/chantier/ChantierHierarchyNav";
 import { formatQty } from "@/lib/preparation/units";
 import type { SchedulePlanViewPayload } from "@/lib/preparation/schedule/transfer";
 import { PrepScheduleGantt } from "./PrepScheduleGantt";
@@ -112,19 +116,23 @@ export function PrepSchedulePlanView({
   }
 
   const ind = plan.indicators;
+  const nav = moduleChantierNav({
+    projectId: plan.project.id,
+    projectTitle: plan.project.title,
+    scope: plan.scope ? { id: plan.scope.id, name: plan.scope.name } : null,
+    currentLabel: "Planning",
+  });
 
   return (
     <div className="relative mx-auto max-w-[1600px] space-y-4 px-4 pb-16 pt-6 sm:px-6">
+      <ChantierHierarchyNav
+        backHref={nav.backHref}
+        backLabel={nav.backLabel}
+        crumbs={nav.crumbs}
+      />
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[12px] text-slate-500">
-            <Link href={`/dashboard/visites-metres/etudes/${studyId}`} className="hover:underline">
-              {plan.study.title}
-            </Link>
-            {" · "}
-            {plan.project.title}
-          </p>
-          <h1 className="mt-0.5 text-[1.5rem] font-semibold text-[#1e3a5f]">{plan.title}</h1>
+          <h1 className="text-[1.5rem] font-semibold text-[#1e3a5f]">{plan.title}</h1>
           <p className="mt-1 text-[12px] text-slate-500">
             {plan.revisionKind} · {plan.status}
             {plan.quote ? ` · Devis ${plan.quote.number}` : " · Sans devis"}
@@ -170,7 +178,7 @@ export function PrepSchedulePlanView({
             href={`/dashboard/visites-metres/etudes/${studyId}`}
             className="rounded-full border border-slate-200 px-4 py-2 text-[13px] text-slate-700"
           >
-            Retour à l&apos;étude
+            Voir le métré
           </Link>
         </div>
       </header>

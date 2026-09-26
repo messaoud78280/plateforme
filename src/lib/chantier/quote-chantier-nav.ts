@@ -11,9 +11,30 @@ export async function resolveQuoteChantierNav(
     id: string;
     projectId: string | null;
     sourcePrepStudyId: string | null;
+    scopeId?: string | null;
     project: { id: string; title: string } | null;
   },
 ): Promise<ReturnType<typeof moduleChantierNav> | null> {
+  if (quote.scopeId) {
+    const byMembership = await prisma.projectScope.findFirst({
+      where: { id: quote.scopeId, organizationId: orgId },
+      select: {
+        id: true,
+        name: true,
+        projectId: true,
+        project: { select: { title: true } },
+      },
+    });
+    if (byMembership) {
+      return moduleChantierNav({
+        projectId: byMembership.projectId,
+        projectTitle: byMembership.project.title,
+        scope: { id: byMembership.id, name: byMembership.name },
+        currentLabel: "Devis",
+      });
+    }
+  }
+
   const byRef = await prisma.projectScope.findFirst({
     where: { organizationId: orgId, referenceQuoteId: quote.id },
     select: {

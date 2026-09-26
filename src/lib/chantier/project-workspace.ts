@@ -216,6 +216,8 @@ function buildScopeCards(input: {
     totalSellHt: unknown;
     isDemonstration: boolean;
   } | null;
+  /** Nombre total de devis rattachés au lot (référence + autres). */
+  quotesCount?: number;
   plan: {
     id: string;
     studyId: string;
@@ -236,6 +238,7 @@ function buildScopeCards(input: {
   const alerts: ScopeWorkspace["alerts"] = [];
   const study = input.study;
   const quote = input.quote;
+  const quotesCount = Math.max(input.quotesCount ?? (quote ? 1 : 0), quote ? 1 : 0);
   const plan = input.plan;
   const planSource = input.planSource;
   const primary = planSource?.source ?? primaryPrepSource(study?.sourcesJson ?? null);
@@ -380,13 +383,24 @@ function buildScopeCards(input: {
           ? `/dashboard/visites-metres/etudes/${study.id}`
           : `/dashboard/devis-facturation/devis/nouveau?projectId=${encodeURIComponent(input.projectId)}`,
       detail: quote
-        ? `${euro(d(quote.totalSellHt)) ?? ""}${quote.isDemonstration ? " · démo" : ""}`.trim()
+        ? [
+            euro(d(quote.totalSellHt)),
+            quote.isDemonstration ? "démo" : null,
+            quotesCount > 1
+              ? `réf. · +${quotesCount - 1} autre${quotesCount - 1 > 1 ? "s" : ""}`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" · ") || null
         : "À générer",
       syncState: devisSync,
       statusLabel: statusLabelFromSync(devisSync, "devis"),
       actionLabel: quote ? "Ouvrir" : "Générer un devis",
       ready: !!quote,
-      syncHint: devisHint,
+      syncHint:
+        quotesCount > 1
+          ? `${quotesCount} devis sur ce lot — ${quote?.number ?? "—"} en référence`
+          : devisHint,
       isReference: !!(quote && input.refs.quoteId === quote.id),
     },
     {
@@ -473,6 +487,7 @@ export async function getProjectWorkspace(
       isDemonstration: true,
       sourcePrepStudyId: true,
       projectId: true,
+      scopeId: true,
     },
     orderBy: { updatedAt: "desc" },
   });
@@ -492,10 +507,6 @@ export async function getProjectWorkspace(
     },
     orderBy: { createdAt: "desc" },
   });
-
-  const referencedQuoteIds = new Set(
-    scopes.map((s) => s.referenceQuoteId).filter((id): id is string => !!id),
-  );
 
   const planSourceByStudyId = new Map<
     string,
@@ -522,8 +533,9 @@ export async function getProjectWorkspace(
 
     const scopeQuotes = quotes.filter(
       (q) =>
+        q.scopeId === scope.id ||
         q.id === scope.referenceQuoteId ||
-        (refStudy && q.sourcePrepStudyId === refStudy.id),
+        (refStudy != null && q.sourcePrepStudyId === refStudy.id),
     );
     const refQuote =
       scopeQuotes.find((q) => q.id === scope.referenceQuoteId) ??
@@ -545,6 +557,7 @@ export async function getProjectWorkspace(
       scopeId: scope.id,
       study: refStudy,
       quote: refQuote,
+      quotesCount: scopeQuotes.length,
       plan: refPlan,
       planSource: refStudy ? planSourceByStudyId.get(refStudy.id) ?? null : null,
       refs: {
@@ -572,12 +585,7 @@ export async function getProjectWorkspace(
 
   const unscopedStudies = studies.filter((s) => !s.scopeId);
   const unscopedPlans = plans.filter((p) => !p.scopeId);
-  const unscopedQuotes = quotes.filter((q) => {
-    if (referencedQuoteIds.has(q.id)) return false;
-    const study = studies.find((s) => s.id === q.sourcePrepStudyId);
-    if (study?.scopeId) return false;
-    return true;
-  });
+  const unscopedQuotes = quotes.filter((q) => !q.scopeId);
 
   const items: UnscopedItem[] = [
     ...unscopedQuotes.map((q) => ({
@@ -683,6 +691,14 @@ export async function attachStudyToScope(input: {
       where: { studyId: study.id, organizationId: input.orgId },
       data: { scopeId: scope.id },
     });
+    // Tous les devis issus de ce métré rejoignent le lot
+    await tx.commercialQuote.updateMany({
+      where: {
+        organizationId: input.orgId,
+        sourcePrepStudyId: study.id,
+      },
+      data: { scopeId: scope.id },
+    });
 
     if (input.setAsReference !== false) {
       const quote = await tx.commercialQuote.findFirst({
@@ -710,11 +726,15 @@ export async function attachStudyToScope(input: {
   });
 }
 
-/** Rattache un devis orphelin (sans métré) comme référence du périmètre. */
+/**
+ * Rattache un devis à un périmètre (N devis / lot).
+ * `setAsReference` : true = forcer, false = jamais, "if_empty" (défaut) = seulement si aucune référence.
+ */
 export async function attachQuoteToScope(input: {
   orgId: string;
   scopeId: string;
   quoteId: string;
+  setAsReference?: boolean | "if_empty";
 }): Promise<void> {
   const scope = await prisma.projectScope.findFirst({
     where: { id: input.scopeId, organizationId: input.orgId },
@@ -739,28 +759,35 @@ export async function attachQuoteToScope(input: {
       orgId: input.orgId,
       scopeId: scope.id,
       studyId: quote.sourcePrepStudyId,
-      setAsReference: true,
+      setAsReference: input.setAsReference === true ||
+        (input.setAsReference !== false && !scope.referenceQuoteId),
+    });
+    // Garantit le membership même si d'autres devis du métré existent
+    await prisma.commercialQuote.update({
+      where: { id: quote.id },
+      data: { scopeId: scope.id },
     });
     return;
   }
 
-  if (scope.referenceQuoteId && scope.referenceQuoteId !== quote.id) {
-    throw new Error(
-      "Ce lot a déjà un devis de référence. Créez un autre lot ou choisissez un seul devis.",
-    );
-  }
+  const mode = input.setAsReference ?? "if_empty";
+  const makeReference =
+    mode === true || (mode === "if_empty" && !scope.referenceQuoteId);
 
   await prisma.$transaction(async (tx) => {
-    if (!quote.projectId) {
-      await tx.commercialQuote.update({
-        where: { id: quote.id },
-        data: { projectId: scope.projectId },
+    await tx.commercialQuote.update({
+      where: { id: quote.id },
+      data: {
+        scopeId: scope.id,
+        ...(quote.projectId ? {} : { projectId: scope.projectId }),
+      },
+    });
+    if (makeReference) {
+      await tx.projectScope.update({
+        where: { id: scope.id },
+        data: { referenceQuoteId: quote.id },
       });
     }
-    await tx.projectScope.update({
-      where: { id: scope.id },
-      data: { referenceQuoteId: quote.id },
-    });
   });
 }
 

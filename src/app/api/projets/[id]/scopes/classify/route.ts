@@ -43,6 +43,8 @@ export async function POST(req: Request, ctx: Ctx) {
     scopeId?: string;
     createScope?: { name?: string; code?: string; description?: string };
     items?: Array<{ kind: "study" | "quote" | "plan"; id: string }>;
+    /** Devis à définir comme référence (sinon : premier devis, si le lot n’en a pas encore). */
+    referenceQuoteId?: string;
   } | null;
 
   const items = Array.isArray(body?.items) ? body!.items : [];
@@ -84,11 +86,14 @@ export async function POST(req: Request, ctx: Ctx) {
       organizationId: project.organizationId,
       status: "ACTIVE",
     },
-    select: { id: true },
+    select: { id: true, referenceQuoteId: true },
   });
   if (!scope) {
     return NextResponse.json({ error: "Périmètre introuvable" }, { status: 404 });
   }
+
+  const preferredRef = body?.referenceQuoteId?.trim() || null;
+  const quoteItems = items.filter((i) => i.kind === "quote" && i.id?.trim());
 
   const attached: string[] = [];
   const errors: string[] = [];
@@ -102,7 +107,7 @@ export async function POST(req: Request, ctx: Ctx) {
           orgId: project.organizationId,
           scopeId: scope.id,
           studyId: id,
-          setAsReference: true,
+          setAsReference: false,
         });
         attached.push(`study:${id}`);
       } else if (item.kind === "quote") {
@@ -110,6 +115,7 @@ export async function POST(req: Request, ctx: Ctx) {
           orgId: project.organizationId,
           scopeId: scope.id,
           quoteId: id,
+          setAsReference: false,
         });
         attached.push(`quote:${id}`);
       } else if (item.kind === "plan") {
@@ -122,6 +128,31 @@ export async function POST(req: Request, ctx: Ctx) {
       }
     } catch (e) {
       errors.push(e instanceof Error ? e.message : "Erreur de rattachement");
+    }
+  }
+
+  // Devis de référence : choix explicite, sinon premier devis classé si le lot n’en a pas
+  const fresh = await prisma.projectScope.findUnique({
+    where: { id: scope.id },
+    select: { referenceQuoteId: true },
+  });
+  const refCandidate =
+    preferredRef &&
+    quoteItems.some((q) => q.id === preferredRef)
+      ? preferredRef
+      : !fresh?.referenceQuoteId
+        ? quoteItems[0]?.id?.trim() ?? null
+        : null;
+  if (refCandidate) {
+    try {
+      await attachQuoteToScope({
+        orgId: project.organizationId,
+        scopeId: scope.id,
+        quoteId: refCandidate,
+        setAsReference: true,
+      });
+    } catch (e) {
+      errors.push(e instanceof Error ? e.message : "Référence devis impossible");
     }
   }
 

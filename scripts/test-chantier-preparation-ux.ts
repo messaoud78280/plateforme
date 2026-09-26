@@ -34,4 +34,7 @@ assert.equal(
   null,
 );
 
+// N devis / lot : le helper de code reste stable
+assert.equal(codeFromScopeName("Installation électrique"), "IE");
+
 console.log("OK chantier-preparation-ux");

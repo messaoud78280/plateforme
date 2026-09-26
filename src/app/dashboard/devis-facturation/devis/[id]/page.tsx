@@ -72,6 +72,7 @@ export default async function DevisDetailPage({
       id: quote.id,
       projectId: quote.projectId,
       sourcePrepStudyId: quote.sourcePrepStudyId,
+      scopeId: quote.scopeId ?? null,
       project: quote.project,
     }),
   ]);

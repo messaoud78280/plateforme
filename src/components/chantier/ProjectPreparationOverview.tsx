@@ -517,8 +517,13 @@ function ClassifyItemsModal({
   const [scopeId, setScopeId] = useState(scopes[0]?.id ?? "");
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
+  const [referenceQuoteId, setReferenceQuoteId] = useState<string>("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const selectedQuotes = items.filter(
+    (i) => i.kind === "quote" && selected.has(`${i.kind}:${i.id}`),
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -529,6 +534,8 @@ function ClassifyItemsModal({
       items.find((i) => i.suggestedScopeName)?.suggestedScopeName ?? "";
     setName(suggestion);
     setCode(suggestion ? codeFromScopeName(suggestion) : "");
+    const firstQuote = items.find((i) => i.kind === "quote");
+    setReferenceQuoteId(firstQuote?.id ?? "");
     setError(null);
   }, [open, items, scopes]);
 
@@ -551,6 +558,11 @@ function ClassifyItemsModal({
       if (payloadItems.length === 0) {
         throw new Error("Sélectionnez au moins un élément");
       }
+      const refId =
+        referenceQuoteId &&
+        payloadItems.some((i) => i.kind === "quote" && i.id === referenceQuoteId)
+          ? referenceQuoteId
+          : undefined;
       const res = await fetch(`/api/projets/${projectId}/scopes/classify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -562,8 +574,9 @@ function ClassifyItemsModal({
                   code: code.trim() || undefined,
                 },
                 items: payloadItems,
+                referenceQuoteId: refId,
               }
-            : { scopeId, items: payloadItems },
+            : { scopeId, items: payloadItems, referenceQuoteId: refId },
         ),
       });
       const data = await res.json().catch(() => null);
@@ -707,6 +720,31 @@ function ClassifyItemsModal({
             </label>
           </div>
         )}
+
+        {selectedQuotes.length > 0 ? (
+          <label className="block text-[12.5px] font-medium text-slate-700">
+            Devis de référence (facultatif)
+            <select
+              value={
+                selectedQuotes.some((q) => q.id === referenceQuoteId)
+                  ? referenceQuoteId
+                  : selectedQuotes[0]?.id ?? ""
+              }
+              onChange={(e) => setReferenceQuoteId(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-[14px]"
+            >
+              {selectedQuotes.map((q) => (
+                <option key={q.id} value={q.id}>
+                  {q.label}
+                  {q.detail ? ` — ${q.detail}` : ""}
+                </option>
+              ))}
+            </select>
+            <span className="mt-1 block text-[11.5px] font-normal text-slate-500">
+              Les autres devis restent rattachés au même lot.
+            </span>
+          </label>
+        ) : null}
 
         {error ? <p className="text-[12.5px] text-red-700">{error}</p> : null}
       </div>

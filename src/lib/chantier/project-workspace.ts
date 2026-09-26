@@ -4,6 +4,11 @@
  */
 import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
+import {
+  planSourceDisplayTitle,
+  primaryPrepSource,
+  resolvePrepPlanSource,
+} from "@/lib/preparation/plan-source";
 
 export type SyncState =
   | "A_JOUR"
@@ -21,6 +26,18 @@ export type WorkspaceCard = {
   syncState: SyncState;
   syncHint: string | null;
   isReference: boolean;
+  /** Actions / méta spécifiques plan source (optionnel). */
+  planMeta?: {
+    studyId: string | null;
+    chantierFileId: string | null;
+    revisionLabel: string | null;
+    documentDate: string | null;
+    documentType: string | null;
+    fileMissing: boolean;
+    openHref: string | null;
+    attachHref: string | null;
+    versionsHref: string | null;
+  };
 };
 
 export type ScopeWorkspace = {
@@ -85,6 +102,7 @@ function buildScopeCards(input: {
     endDateBase: Date | null;
     studyVersionAtGeneration: number;
   } | null;
+  planSource: Awaited<ReturnType<typeof resolvePrepPlanSource>>;
   refs: {
     studyId: string | null;
     quoteId: string | null;
@@ -95,16 +113,14 @@ function buildScopeCards(input: {
   const study = input.study;
   const quote = input.quote;
   const plan = input.plan;
+  const planSource = input.planSource;
+  const primary = planSource?.source ?? primaryPrepSource(study?.sourcesJson ?? null);
 
-  const planSourceLabel = (() => {
-    const sources = Array.isArray(study?.sourcesJson) ? study!.sourcesJson : [];
-    const first = sources[0] as { planNumber?: string; plan_number?: string; revision?: string | null; title?: string | null } | undefined;
-    if (!first) return null;
-    const num = first.planNumber ?? first.plan_number ?? null;
-    const rev = first.revision ? ` ${first.revision}` : "";
-    if (num) return `${num}${rev}`;
-    return first.title ?? null;
-  })();
+  const gedHref = `/dashboard/documents?projectId=${encodeURIComponent(input.projectId)}`;
+  const openHref = planSource?.file
+    ? `/dashboard/projets/${input.projectId}/plan-source?studyId=${encodeURIComponent(study?.id ?? "")}&fileId=${encodeURIComponent(planSource.file.id)}`
+    : null;
+  const fileMissing = !planSource || planSource.fileMissing;
 
   const metreSync: SyncState = study ? "A_JOUR" : "ABSENT";
   let devisSync: SyncState = quote ? "A_JOUR" : "ABSENT";
@@ -130,21 +146,60 @@ function buildScopeCards(input: {
   if (!study) {
     alerts.push({ level: "info", message: "Aucun métré rattaché à ce périmètre" });
   }
+  if (primary && fileMissing) {
+    alerts.push({
+      level: "warning",
+      message: "Plan source identifié mais fichier non rattaché — rattachez le PDF dans la GED chantier",
+    });
+  }
+
+  const rev = planSource?.revisionLabel ?? null;
+  const planTitle = planSource
+    ? planSource.displayTitle
+    : primary
+      ? planSourceDisplayTitle(primary)
+      : "Aucun plan déclaré";
+
+  const planDetailParts = [
+    rev ? `Révision ${rev}` : primary && !primary.revision ? "Révision non identifiée" : null,
+    planSource?.file?.documentDate ? `Date ${planSource.file.documentDate}` : null,
+    planSource?.file?.documentType ?? null,
+    fileMissing && primary ? "Fichier non rattaché" : null,
+  ].filter(Boolean);
 
   const cards: WorkspaceCard[] = [
     {
       kind: "plan",
-      label: "Plans & documents",
-      title: planSourceLabel ?? (study ? "Documents du périmètre" : "—"),
-      href: `/dashboard/projets/${input.projectId}/documents-chantier?scopeId=${encodeURIComponent(input.scopeId)}`,
-      detail: study
-        ? "Lien GED révision précise — étape D (PrepStudySource)"
-        : "Ouvrir la GED chantier filtrée sur ce périmètre",
-      syncState: study ? "A_VERIFIER" : "ABSENT",
-      syncHint: study
-        ? "Provenance documentaire encore basée sur sourcesJson — FK fichier à venir"
-        : null,
+      label: "Plan source",
+      title: planTitle,
+      href: openHref
+        ? openHref
+        : study
+          ? `/dashboard/visites-metres/etudes/${study.id}?attachPlan=1`
+          : gedHref,
+      detail: planDetailParts.join(" · ") || null,
+      syncState: !primary ? "ABSENT" : fileMissing ? "A_VERIFIER" : "A_JOUR",
+      syncHint: fileMissing
+        ? "Plan source identifié mais fichier non rattaché"
+        : rev
+          ? `Révision figée pour le métré : ${rev}`
+          : null,
       isReference: false,
+      planMeta: {
+        studyId: study?.id ?? null,
+        chantierFileId: planSource?.file?.id ?? null,
+        revisionLabel: rev,
+        documentDate: planSource?.file?.documentDate ?? null,
+        documentType: planSource?.file?.documentType ?? null,
+        fileMissing,
+        openHref,
+        attachHref: study
+          ? `/dashboard/visites-metres/etudes/${study.id}?attachPlan=1`
+          : `${gedHref}&upload=1`,
+        versionsHref: planSource?.file
+          ? `${gedHref}&fileId=${encodeURIComponent(planSource.file.id)}`
+          : gedHref,
+      },
     },
     {
       kind: "metre",
@@ -269,6 +324,22 @@ export async function getProjectWorkspace(
     orderBy: { createdAt: "desc" },
   });
 
+  const planSourceByStudyId = new Map<
+    string,
+    Awaited<ReturnType<typeof resolvePrepPlanSource>>
+  >();
+  await Promise.all(
+    studies.map(async (s) => {
+      planSourceByStudyId.set(
+        s.id,
+        await resolvePrepPlanSource({
+          projectId,
+          sourcesJson: s.sourcesJson,
+        }),
+      );
+    }),
+  );
+
   const scopeWorkspaces: ScopeWorkspace[] = scopes.map((scope) => {
     const scopeStudies = studies.filter((s) => s.scopeId === scope.id);
     const refStudy =
@@ -302,6 +373,7 @@ export async function getProjectWorkspace(
       study: refStudy,
       quote: refQuote,
       plan: refPlan,
+      planSource: refStudy ? planSourceByStudyId.get(refStudy.id) ?? null : null,
       refs: {
         studyId: scope.referenceStudyId,
         quoteId: scope.referenceQuoteId,

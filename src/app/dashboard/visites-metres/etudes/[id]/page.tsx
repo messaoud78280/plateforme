@@ -7,7 +7,13 @@ import { PrepStudyWorkspace } from "@/components/preparation/PrepStudyWorkspace"
 
 export const dynamic = "force-dynamic";
 
-export default async function EtudeMetreDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EtudeMetreDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ attachPlan?: string }>;
+}) {
   const session = await getCachedServerSession();
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard/visites-metres/etudes");
@@ -24,8 +30,15 @@ export default async function EtudeMetreDetailPage({ params }: { params: Promise
   if (!orgId) redirect("/dashboard");
 
   const { id } = await params;
+  const sp = await searchParams;
   const [study, projects] = await Promise.all([getPrepStudyView(orgId, id), listOrgProjectsForPrep(orgId)]);
   if (!study) notFound();
 
-  return <PrepStudyWorkspace initial={study} projects={projects} />;
+  return (
+    <PrepStudyWorkspace
+      initial={study}
+      projects={projects}
+      attachPlan={sp.attachPlan === "1"}
+    />
+  );
 }

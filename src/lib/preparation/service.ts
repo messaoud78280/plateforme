@@ -32,6 +32,11 @@ import {
   C01_LINE_TEXT_ENRICHMENTS,
   type PrepLineTextEnrichment,
 } from "@/lib/preparation/enrichment/c01-fondations-texts";
+import {
+  normalizePrepSources,
+  resolvePrepPlanSource,
+  type ResolvedPlanSource,
+} from "@/lib/preparation/plan-source";
 
 type Db = PrismaClient | Prisma.TransactionClient;
 
@@ -99,6 +104,8 @@ export type PrepStudyView = {
   checks: PrepCheck[];
   decisions: PrepDecision[];
   sources: PrepSource[];
+  /** Plan d'exécution rattaché (GED) — null si aucune source déclarée. */
+  planSource: ResolvedPlanSource | null;
   disclaimers: string[];
   prepared: { workflowSteps: number; rates: number; scheduleTasks: number; variants: number };
   lastImport: {
@@ -373,7 +380,11 @@ export async function getPrepStudyView(
     hypotheses: asArray<PrepHypothesis>(study.hypothesesJson),
     checks: asArray<PrepCheck>(study.checksJson),
     decisions: asArray<PrepDecision>(study.decisionsJson),
-    sources: asArray<PrepSource>(study.sourcesJson),
+    sources: normalizePrepSources(study.sourcesJson),
+    planSource: await resolvePrepPlanSource({
+      projectId: study.projectId,
+      sourcesJson: study.sourcesJson,
+    }),
     disclaimers: asArray<string>(study.disclaimersJson),
     prepared: {
       workflowSteps: asArray(workflow?.steps).length,

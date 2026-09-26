@@ -8,6 +8,7 @@ import {
   ChantierHierarchyNav,
   moduleChantierNav,
 } from "@/components/chantier/ChantierHierarchyNav";
+import { PrepPlanSourceActions } from "@/components/preparation/PrepPlanSourceActions";
 import type { PrepStudyView } from "@/lib/preparation/service";
 import {
   computeStudy,
@@ -74,9 +75,21 @@ function lineStatus(line: PrepLineDTO, node: EngineNode | undefined): LineStatus
   return "theoretical";
 }
 
-export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyView; projects: PrepProjectOption[] }) {
+export function PrepStudyWorkspace({
+  initial,
+  projects,
+  attachPlan = false,
+}: {
+  initial: PrepStudyView;
+  projects: PrepProjectOption[];
+  attachPlan?: boolean;
+}) {
   const router = useRouter();
   const [study, setStudy] = useState(initial);
+
+  useEffect(() => {
+    setStudy(initial);
+  }, [initial]);
   const [paramEdits, setParamEdits] = useState<Record<string, number>>({});
   const [paramRestores, setParamRestores] = useState<Set<string>>(new Set());
   const [lineEdits, setLineEdits] = useState<Record<string, number>>({});
@@ -491,6 +504,14 @@ export function PrepStudyWorkspace({ initial, projects }: { initial: PrepStudyVi
             {study.sourceFormat && study.sourceFormat !== "bework_prep_bundle_v1" ? (
               <span>Importé depuis l&apos;ancien format</span>
             ) : null}
+          </div>
+          <div className="mt-3">
+            <PrepPlanSourceActions
+              studyId={study.id}
+              projectId={study.project.id}
+              planSource={study.planSource}
+              autoOpenAttach={attachPlan}
+            />
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -1484,6 +1505,11 @@ function HypothesesPanel({
                 {[s.planNumber, s.title ?? s.filename, s.revision ? `ind. ${s.revision}` : null, s.scale]
                   .filter(Boolean)
                   .join(" · ")}
+                {s.chantierFileId ? (
+                  <span className="text-emerald-700"> — fichier GED rattaché</span>
+                ) : (
+                  <span className="text-amber-700"> — fichier non rattaché</span>
+                )}
                 {s.legibility ? <span className="text-amber-700"> — lisibilité : {s.legibility}</span> : null}
               </li>
             ))}

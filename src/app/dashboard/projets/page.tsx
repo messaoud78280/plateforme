@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { CreateChantierForm } from "@/components/chantier/CreateChantierForm";
 import { ChantiersPortfolioList } from "@/components/chantier/ChantiersPortfolioList";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { ChantiersPortfolioKpis } from "@/components/chantier/ChantiersPortfolioKpis";
 import { isChantierStaff } from "@/lib/chantier-dossier/access";
 import { projectWhereForClientUser } from "@/lib/organization/access";
 import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
@@ -76,43 +76,62 @@ export default async function ProjetsPage({
 
   const { rows, summary } = portfolio;
 
-  const summaryParts = [
-    `${summary.total} chantier${summary.total !== 1 ? "s" : ""}`,
-    summary.enCours > 0 ? `${summary.enCours} en cours` : null,
-    summary.etude > 0 ? `${summary.etude} étude${summary.etude > 1 ? "s" : ""}` : null,
-    summary.enAttente > 0 ? `${summary.enAttente} en attente` : null,
-  ].filter(Boolean);
-
   return (
-    <div className="space-y-5">
-      <PageHeader
-        title="Chantiers"
-        description="Repérez immédiatement les chantiers qui demandent votre attention."
-        actions={
+    <div className="space-y-6">
+      <nav aria-label="Fil d'Ariane" className="text-[12px] text-slate-500">
+        <ol className="flex flex-wrap items-center gap-1.5">
+          <li>
+            <Link href="/dashboard" className="hover:text-[#1e3a5f] hover:underline">
+              Accueil
+            </Link>
+          </li>
+          <li className="text-slate-300" aria-hidden>
+            ›
+          </li>
+          <li className="font-medium text-slate-700" aria-current="page">
+            Chantiers
+          </li>
+        </ol>
+      </nav>
+
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-[1.85rem] font-bold tracking-tight text-slate-900 sm:text-[2rem]">Chantiers</h1>
+          <p className="mt-1.5 max-w-2xl text-[14px] leading-relaxed text-slate-500">
+            Repérez immédiatement les chantiers qui demandent votre attention.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <CreateChantierForm
             clients={clients}
             showClientPicker={staff && session.user.role !== "AGENT"}
           />
-        }
-      />
+        </div>
+      </header>
 
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[13px] text-bework-muted">
-        <p className="text-slate-500">{summaryParts.join(" · ")}</p>
-        {summary.withAttention > 0 ? (
-          <span className="font-semibold text-amber-900">
-            {summary.withAttention} à surveiller
-          </span>
-        ) : null}
-        {summary.missingPieces > 0 ? (
-          <Link
-            href="/dashboard/projets/manquants"
-            className="font-semibold text-amber-800 hover:underline"
-          >
-            {summary.missingPieces} pièce{summary.missingPieces > 1 ? "s" : ""} manquante
-            {summary.missingPieces > 1 ? "s" : ""}
-          </Link>
-        ) : null}
-      </div>
+      <ChantiersPortfolioKpis summary={summary} />
+
+      {summary.withAttention > 0 || summary.missingPieces > 0 ? (
+        <p className="text-[13px] text-slate-500">
+          {summary.withAttention > 0 ? (
+            <span className="font-semibold text-amber-900">
+              {summary.withAttention} à surveiller
+            </span>
+          ) : null}
+          {summary.withAttention > 0 && summary.missingPieces > 0 ? (
+            <span className="text-slate-300"> · </span>
+          ) : null}
+          {summary.missingPieces > 0 ? (
+            <Link
+              href="/dashboard/projets/manquants"
+              className="font-semibold text-amber-800 hover:underline"
+            >
+              {summary.missingPieces} pièce{summary.missingPieces > 1 ? "s" : ""} manquante
+              {summary.missingPieces > 1 ? "s" : ""}
+            </Link>
+          ) : null}
+        </p>
+      ) : null}
 
       <ChantiersPortfolioList
         rows={rows}

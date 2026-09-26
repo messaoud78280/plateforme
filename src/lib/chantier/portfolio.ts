@@ -31,6 +31,15 @@ const ACTIVE_STATUSES: ChantierStatus[] = ["ETUDE", "EN_COURS", "EN_ATTENTE", "R
 
 export type PortfolioAttentionLevel = "none" | "watch" | "urgent" | "critical";
 
+export type PortfolioModuleState = "done" | "progress" | "todo";
+
+export type PortfolioModuleSnapshot = {
+  key: "visite" | "metre" | "devis" | "planning";
+  label: string;
+  state: PortfolioModuleState;
+  stateLabel: string;
+};
+
 export type PortfolioProjectRow = {
   id: string;
   title: string;
@@ -64,6 +73,11 @@ export type PortfolioProjectRow = {
   openTasks: number;
   overdueTasks: number;
   documentsCount: number;
+  /** Modules métier (visite / métré / devis / planning) — lecture seule pour la carte. */
+  modules: PortfolioModuleSnapshot[];
+  /** Avancement synthétique 0–100 (préparation / suivi). */
+  progressPercent: number;
+  progressLabel: string;
   /**
    * Dernière activité métier (max tâches / agenda / commandes).
    * Pas project.updatedAt seul (évite bruit sync technique).
@@ -147,6 +161,88 @@ function attentionHeadline(level: PortfolioAttentionLevel, n: number): string | 
   if (level === "critical") return "Critique";
   if (level === "urgent") return "À traiter";
   return "À surveiller";
+}
+
+function moduleSnapshot(
+  key: PortfolioModuleSnapshot["key"],
+  label: string,
+  state: PortfolioModuleState,
+  labels: { done: string; progress: string; todo: string },
+): PortfolioModuleSnapshot {
+  return {
+    key,
+    label,
+    state,
+    stateLabel:
+      state === "done" ? labels.done : state === "progress" ? labels.progress : labels.todo,
+  };
+}
+
+function buildPortfolioModules(input: {
+  visitState: "done" | "progress" | null;
+  metreStatus: string | null;
+  quoteStatus: string | null;
+  hasPlan: boolean;
+}): PortfolioModuleSnapshot[] {
+  const visite = moduleSnapshot(
+    "visite",
+    "Visite",
+    input.visitState ?? "todo",
+    { done: "Réalisée", progress: "Planifiée", todo: "À faire" },
+  );
+
+  let metreState: PortfolioModuleState = "todo";
+  if (input.metreStatus === "PRO_VALIDE" || input.metreStatus === "DEMONSTRATION") {
+    metreState = "done";
+  } else if (input.metreStatus) {
+    metreState = "progress";
+  }
+  const metre = moduleSnapshot("metre", "Métré", metreState, {
+    done: "Validé",
+    progress: "En cours",
+    todo: "À faire",
+  });
+
+  let devisState: PortfolioModuleState = "todo";
+  if (input.quoteStatus === "ACCEPTED" || input.quoteStatus === "SENT" || input.quoteStatus === "VIEWED") {
+    devisState = "done";
+  } else if (input.quoteStatus) {
+    devisState = "progress";
+  }
+  const devis = moduleSnapshot("devis", "Devis", devisState, {
+    done: input.quoteStatus === "ACCEPTED" ? "Accepté" : "Émis",
+    progress: "En cours",
+    todo: "À faire",
+  });
+
+  const planning = moduleSnapshot(
+    "planning",
+    "Planning",
+    input.hasPlan ? "done" : "todo",
+    { done: "Prêt", progress: "En cours", todo: "À faire" },
+  );
+
+  return [visite, metre, devis, planning];
+}
+
+function buildProgress(input: {
+  status: ChantierStatus;
+  modules: PortfolioModuleSnapshot[];
+}): { percent: number; label: string } {
+  const done = input.modules.filter((m) => m.state === "done").length;
+  const progress = input.modules.filter((m) => m.state === "progress").length;
+  const base = Math.round(((done + progress * 0.45) / Math.max(input.modules.length, 1)) * 100);
+
+  if (input.status === "TERMINE") {
+    return { percent: 100, label: "Avancement global" };
+  }
+  if (input.status === "RECEPTION") {
+    return { percent: Math.max(base, 85), label: "Avancement global" };
+  }
+  if (input.status === "EN_COURS") {
+    return { percent: Math.max(base, 40), label: "Avancement global" };
+  }
+  return { percent: base, label: "Avancement préparation" };
 }
 
 export async function loadProjectsPortfolio(opts: {
@@ -247,6 +343,10 @@ export async function loadProjectsPortfolio(opts: {
       taskActivity,
       agendaActivity,
       poActivity,
+      visitRows,
+      studyRows,
+      quoteRows,
+      planRows,
     ] = await Promise.all([
         projectIds.length
           ? prisma.task.groupBy({
@@ -362,7 +462,59 @@ export async function loadProjectsPortfolio(opts: {
               _max: { updatedAt: true },
             })
           : Promise.resolve([]),
+        projectIds.length
+          ? prisma.siteVisit.findMany({
+              where: { projectId: { in: projectIds } },
+              select: { projectId: true, preparedAt: true, findingsJson: true },
+              take: 200,
+            })
+          : Promise.resolve([]),
+        projectIds.length
+          ? prisma.prepStudy.findMany({
+              where: { projectId: { in: projectIds }, archivedAt: null },
+              select: { projectId: true, dossierStatus: true, updatedAt: true },
+              orderBy: { updatedAt: "desc" },
+              take: 200,
+            })
+          : Promise.resolve([]),
+        projectIds.length
+          ? prisma.commercialQuote.findMany({
+              where: { projectId: { in: projectIds } },
+              select: { projectId: true, status: true, updatedAt: true },
+              orderBy: { updatedAt: "desc" },
+              take: 200,
+            })
+          : Promise.resolve([]),
+        projectIds.length
+          ? prisma.prepSchedulePlan.findMany({
+              where: { projectId: { in: projectIds } },
+              select: { projectId: true },
+              take: 200,
+            })
+          : Promise.resolve([]),
       ]);
+
+    const visitByProject = new Map<string, "done" | "progress">();
+    for (const v of visitRows) {
+      if (!v.projectId) continue;
+      const done = Boolean(v.preparedAt) || v.findingsJson != null;
+      const prev = visitByProject.get(v.projectId);
+      if (prev === "done") continue;
+      visitByProject.set(v.projectId, done ? "done" : "progress");
+    }
+    const metreByProject = new Map<string, string>();
+    for (const s of studyRows) {
+      if (!metreByProject.has(s.projectId)) metreByProject.set(s.projectId, s.dossierStatus);
+    }
+    const quoteByProject = new Map<string, string>();
+    for (const q of quoteRows) {
+      if (q.projectId && !quoteByProject.has(q.projectId)) {
+        quoteByProject.set(q.projectId, q.status);
+      }
+    }
+    const planByProject = new Set(
+      planRows.map((p) => p.projectId).filter((id): id is string => Boolean(id)),
+    );
 
     // Attention FollowUp : batch unique — loadAttentionForSheets résout l’org par fiche
     // (portfolio multi-tenant). Ne pas forcer un seul organizationId.
@@ -585,6 +737,17 @@ export async function loadProjectsPortfolio(opts: {
       const primaryReason = att.primaryReason;
       const otherCount = primaryReason ? Math.max(0, att.n - 1) : 0;
 
+      const modules = buildPortfolioModules({
+        visitState: visitByProject.get(p.id) ?? null,
+        metreStatus: metreByProject.get(p.id) ?? null,
+        quoteStatus: quoteByProject.get(p.id) ?? null,
+        hasPlan: planByProject.has(p.id),
+      });
+      const progress = buildProgress({
+        status: p.chantierStatus,
+        modules,
+      });
+
       return {
         id: p.id,
         title: p.title,
@@ -616,6 +779,9 @@ export async function loadProjectsPortfolio(opts: {
         openTasks,
         overdueTasks,
         documentsCount: p._count.chantierFiles,
+        modules,
+        progressPercent: progress.percent,
+        progressLabel: progress.label,
         lastActivityAt: lastAct.toISOString(),
         updatedAt: p.updatedAt.toISOString(),
         canDelete: canDeleteChantierProject(opts.user, p),

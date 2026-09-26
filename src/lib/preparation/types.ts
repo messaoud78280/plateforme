@@ -174,4 +174,9 @@ export type PrepSource = {
   isRaster: boolean | null;
   legibility: string | null;
   note: string | null;
+  /**
+   * FK GED (ChantierFile) — révision exacte utilisée au métré.
+   * Jamais remplacée silencieusement si une version plus récente apparaît.
+   */
+  chantierFileId: string | null;
 };

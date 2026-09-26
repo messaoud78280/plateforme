@@ -306,6 +306,8 @@ export function parsePrepBundle(input: unknown): PrepParseResult {
         isRaster: typeof s.is_raster === "boolean" ? s.is_raster : null,
         legibility: str(s.legibility, 40),
         note: str(s.note),
+        chantierFileId:
+          str(s.chantier_file_id, 60) ?? str(s.chantierFileId, 60) ?? null,
       });
       if (!revision) warn(`sources[${i}].revision`, `${id} : indice de révision non identifié — à vérifier`);
     });

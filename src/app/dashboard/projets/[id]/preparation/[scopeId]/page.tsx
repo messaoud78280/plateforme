@@ -110,6 +110,67 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {scope.cards.map((card) => {
+          if (card.kind === "plan") {
+            const meta = card.planMeta;
+            return (
+              <div
+                key={card.kind}
+                className="rounded-2xl border border-[#1e3a5f]/10 bg-white p-4"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                  {card.label}
+                </p>
+                <p className="mt-1 text-[15px] font-semibold text-[#1e3a5f]">{card.title}</p>
+                {card.detail ? (
+                  <p className="mt-1 text-[12px] text-slate-600">{card.detail}</p>
+                ) : null}
+                <p className="mt-2 text-[12px] text-slate-500">
+                  Statut :{" "}
+                  <span className="font-medium text-slate-700">
+                    {meta?.fileMissing
+                      ? "Fichier non rattaché"
+                      : card.syncState === "A_JOUR"
+                        ? "Disponible"
+                        : card.syncState === "ABSENT"
+                          ? "Absent"
+                          : "À vérifier"}
+                  </span>
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {meta?.openHref ? (
+                    <Link
+                      href={meta.openHref}
+                      className="rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[12px] font-medium text-white"
+                    >
+                      Ouvrir le plan
+                    </Link>
+                  ) : null}
+                  {meta?.attachHref ? (
+                    <Link
+                      href={meta.attachHref}
+                      className="rounded-full border border-slate-200 px-3 py-1.5 text-[12px] font-medium text-slate-700"
+                    >
+                      {meta.fileMissing ? "Rattacher un document" : "Changer le fichier"}
+                    </Link>
+                  ) : null}
+                  {meta?.versionsHref ? (
+                    <Link
+                      href={meta.versionsHref}
+                      className="rounded-full border border-slate-200 px-3 py-1.5 text-[12px] font-medium text-slate-700"
+                    >
+                      Voir les versions
+                    </Link>
+                  ) : null}
+                </div>
+                {meta?.fileMissing ? (
+                  <p className="mt-2 text-[11.5px] text-amber-800">
+                    Plan source identifié mais fichier non rattaché
+                  </p>
+                ) : null}
+              </div>
+            );
+          }
+
           const body = (
             <>
               <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">

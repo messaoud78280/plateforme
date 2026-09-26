@@ -5620,6 +5620,8 @@ model PrepScheduleTask {
   description             String?   @db.Text
   includeInBase           Boolean   @default(true)
   holdPoint               Boolean   @default(false)
+  /// A_CONTROLER | VALIDE | RESERVES — état point d'arrêt (qualité V1, évolutif)
+  holdPointStatus         String?
   conditional             Boolean   @default(false)
   conditionalJson         Json?
   startDate               DateTime? @db.Date

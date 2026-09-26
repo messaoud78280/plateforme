@@ -18,6 +18,11 @@ import {
   type PlacedTask,
 } from "@/lib/preparation/schedule/compute";
 import { RATE_PER_LABELS } from "@/lib/preparation/schedule/types";
+import {
+  computePlanIndicators,
+  holdPointBlocksSuccessor,
+  normalizeHoldPointStatus,
+} from "@/lib/preparation/schedule/gantt-layout";
 
 export type SchedulePreviewQuoteOption = {
   id: string;
@@ -716,12 +721,508 @@ export async function getPrepSchedulePlanView(orgId: string, planId: string) {
   const plan = await prisma.prepSchedulePlan.findFirst({
     where: { id: planId, organizationId: orgId },
     include: {
-      tasks: { orderBy: { sortOrder: "asc" }, include: { takeoffLinks: true, quoteLinks: true } },
+      tasks: {
+        orderBy: { sortOrder: "asc" },
+        include: { takeoffLinks: true, quoteLinks: true },
+      },
       events: { orderBy: { createdAt: "desc" }, take: 30 },
-      study: { select: { id: true, title: true } },
+      study: { select: { id: true, title: true, resourcesJson: true } },
       project: { select: { id: true, title: true } },
-      quote: { select: { id: true, number: true, subject: true, isDemonstration: true } },
+      quote: {
+        select: {
+          id: true,
+          number: true,
+          subject: true,
+          isDemonstration: true,
+          totalSellHt: true,
+        },
+      },
     },
   });
   return plan;
+}
+
+export type SchedulePlanViewPayload = {
+  id: string;
+  title: string;
+  isDemonstration: boolean;
+  watermark: string | null;
+  status: string;
+  revisionKind: string;
+  startDate: string | null;
+  endDateBase: string | null;
+  endDateWithConditional: string | null;
+  baseDurationWorkingDays: number | null;
+  withConditionalWorkingDays: number | null;
+  note: string | null;
+  study: { id: string; title: string };
+  project: { id: string; title: string };
+  quote: {
+    id: string;
+    number: string;
+    subject: string;
+    isDemonstration: boolean;
+    totalSellHt: number;
+  } | null;
+  quoteOptions: SchedulePreviewQuoteOption[];
+  /** Total HT rattaché sans double comptage (lignes devis uniques). */
+  linkedSellHtTotal: number | null;
+  linkedCostHtTotal: number | null;
+  indicators: ReturnType<typeof computePlanIndicators>;
+  dependencies: Array<{
+    id: string;
+    type: string;
+    lagDays: number;
+    predecessorStepCode: string;
+    successorStepCode: string;
+  }>;
+  tasks: Array<{
+    id: string;
+    stepCode: string;
+    name: string;
+    kind: string;
+    includeInBase: boolean;
+    holdPoint: boolean;
+    holdPointStatus: string | null;
+    holdPointBlocksNext: boolean;
+    conditional: boolean;
+    conditionalConditions: string[];
+    startDate: string | null;
+    endDate: string | null;
+    startHalf: number;
+    endHalf: number;
+    durationDays: number;
+    durationCalendar: string;
+    quantitySnapshot: number | null;
+    quantityUnit: string | null;
+    driverTakeoffCode: string | null;
+    rateValue: number | null;
+    rateUnit: string | null;
+    ratePer: string | null;
+    ratePerLabel: string | null;
+    parallelUnits: number;
+    crew: Array<{ labor_id: string; count: number; label: string }>;
+    equipment: Array<{ equipment_id: string; count: number; label: string }>;
+    supplies: Array<{ supply_id: string; count?: number; label: string }>;
+    preconditions: string[];
+    controls: string[];
+    dependsOn: Array<{ stepId: string; type: string }>;
+    blockingReason: string | null;
+    sellHtSnapshot: number | null;
+    costHtSnapshot: number | null;
+    description: string | null;
+  }>;
+};
+
+function asIsoDate(v: Date | string | null | undefined): string | null {
+  if (!v) return null;
+  if (typeof v === "string") return v.slice(0, 10);
+  return v.toISOString().slice(0, 10);
+}
+
+function asStringList(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((x): x is string => typeof x === "string");
+}
+
+export async function buildPrepSchedulePlanPayload(
+  orgId: string,
+  planId: string,
+): Promise<SchedulePlanViewPayload | null> {
+  const plan = await getPrepSchedulePlanView(orgId, planId);
+  if (!plan) return null;
+
+  const deps = await prisma.prepScheduleDependency.findMany({
+    where: { planId: plan.id, organizationId: orgId },
+    include: {
+      predecessor: { select: { stepCode: true } },
+      successor: { select: { stepCode: true } },
+    },
+  });
+
+  const resources = parsePrepResources(plan.study.resourcesJson);
+  const laborById = new Map(resources.labor.map((l) => [l.id, l.role]));
+  const eqById = new Map(resources.equipment.map((e) => [e.id, e.label]));
+  const supplyById = new Map(resources.supplies.map((s) => [s.id, s.label]));
+
+  const quoteOptions = await prisma.commercialQuote.findMany({
+    where: {
+      organizationId: orgId,
+      OR: [{ sourcePrepStudyId: plan.studyId }, { projectId: plan.projectId }],
+    },
+    orderBy: { createdAt: "desc" },
+    take: 40,
+    select: {
+      id: true,
+      number: true,
+      subject: true,
+      status: true,
+      isDemonstration: true,
+      totalSellHt: true,
+    },
+  });
+
+  // Total HT sans double comptage : une ligne devis comptée une seule fois.
+  const seenQuoteLines = new Set<string>();
+  let linkedSell = 0;
+  let linkedCost = 0;
+  let hasLink = false;
+  for (const t of plan.tasks) {
+    for (const ql of t.quoteLinks) {
+      if (seenQuoteLines.has(ql.quoteLineId)) continue;
+      seenQuoteLines.add(ql.quoteLineId);
+      hasLink = true;
+      linkedSell += ql.sellHt != null ? d(ql.sellHt) : 0;
+      linkedCost += ql.costHt != null ? d(ql.costHt) : 0;
+    }
+  }
+
+  const tasksForIndicators = plan.tasks.map((t) => ({
+    id: t.id,
+    stepCode: t.stepCode,
+    startDate: asIsoDate(t.startDate),
+    endDate: asIsoDate(t.endDate),
+    startHalf: t.startHalf,
+    endHalf: t.endHalf,
+    durationDays: d(t.durationDays),
+    durationCalendar: t.durationCalendar,
+    kind: t.kind,
+    includeInBase: t.includeInBase,
+    holdPoint: t.holdPoint,
+    conditional: t.conditional,
+  }));
+
+  const startDate = asIsoDate(plan.startDate);
+  const endDateBase = asIsoDate(plan.endDateBase);
+  const indicators = computePlanIndicators({
+    tasks: tasksForIndicators,
+    startDate,
+    endDateBase,
+    baseDurationWorkingDays:
+      plan.baseDurationWorkingDays != null ? d(plan.baseDurationWorkingDays) : null,
+  });
+
+  const tasks = plan.tasks.map((t) => {
+    const holdStatus = normalizeHoldPointStatus(t.holdPointStatus, t.holdPoint);
+    const crewRaw = Array.isArray(t.crewJson) ? t.crewJson : [];
+    const eqRaw = Array.isArray(t.equipmentJson) ? t.equipmentJson : [];
+    const suppliesRaw = Array.isArray(t.suppliesJson) ? t.suppliesJson : [];
+    const dependsOn = Array.isArray(t.dependsOnJson)
+      ? t.dependsOnJson
+          .map((x) => {
+            if (!x || typeof x !== "object") return null;
+            const o = x as { stepId?: string; type?: string };
+            if (!o.stepId) return null;
+            return { stepId: o.stepId, type: o.type ?? "FS" };
+          })
+          .filter((x): x is { stepId: string; type: string } => !!x)
+      : [];
+
+    return {
+      id: t.id,
+      stepCode: t.stepCode,
+      name: t.name,
+      kind: t.kind,
+      includeInBase: t.includeInBase,
+      holdPoint: t.holdPoint,
+      holdPointStatus: holdStatus,
+      holdPointBlocksNext: holdPointBlocksSuccessor(t.holdPoint, holdStatus),
+      conditional: t.conditional,
+      conditionalConditions: asStringList(t.conditionalJson),
+      startDate: asIsoDate(t.startDate),
+      endDate: asIsoDate(t.endDate),
+      startHalf: t.startHalf,
+      endHalf: t.endHalf,
+      durationDays: d(t.durationDays),
+      durationCalendar: t.durationCalendar,
+      quantitySnapshot: t.quantitySnapshot != null ? d(t.quantitySnapshot) : null,
+      quantityUnit: t.quantityUnit,
+      driverTakeoffCode: t.driverTakeoffCode,
+      rateValue: t.rateValue != null ? d(t.rateValue) : null,
+      rateUnit: t.rateUnit,
+      ratePer: t.ratePer,
+      ratePerLabel: t.ratePer
+        ? RATE_PER_LABELS[t.ratePer as "engin" | "equipe"] ?? t.ratePer
+        : null,
+      parallelUnits: t.parallelUnits,
+      crew: crewRaw
+        .map((c) => {
+          if (!c || typeof c !== "object") return null;
+          const o = c as { labor_id?: string; count?: number };
+          if (!o.labor_id) return null;
+          return {
+            labor_id: o.labor_id,
+            count: o.count ?? 1,
+            label: laborById.get(o.labor_id) ?? o.labor_id,
+          };
+        })
+        .filter((x): x is { labor_id: string; count: number; label: string } => !!x),
+      equipment: eqRaw
+        .map((c) => {
+          if (!c || typeof c !== "object") return null;
+          const o = c as { equipment_id?: string; count?: number };
+          if (!o.equipment_id) return null;
+          return {
+            equipment_id: o.equipment_id,
+            count: o.count ?? 1,
+            label: eqById.get(o.equipment_id) ?? o.equipment_id,
+          };
+        })
+        .filter((x): x is { equipment_id: string; count: number; label: string } => !!x),
+      supplies: suppliesRaw
+        .map((c) => {
+          if (!c || typeof c !== "object") return null;
+          const o = c as { supply_id?: string; count?: number };
+          if (!o.supply_id) return null;
+          return {
+            supply_id: o.supply_id,
+            count: o.count,
+            label: supplyById.get(o.supply_id) ?? o.supply_id,
+          };
+        })
+        .filter((x): x is { supply_id: string; count?: number; label: string } => !!x),
+      preconditions: asStringList(t.preconditionsJson),
+      controls: asStringList(t.controlsJson),
+      dependsOn,
+      blockingReason: t.blockingReason,
+      sellHtSnapshot: t.sellHtSnapshot != null ? d(t.sellHtSnapshot) : null,
+      costHtSnapshot: t.costHtSnapshot != null ? d(t.costHtSnapshot) : null,
+      description: t.description,
+    };
+  });
+
+  return {
+    id: plan.id,
+    title: plan.title,
+    isDemonstration: plan.isDemonstration,
+    watermark: plan.watermark,
+    status: plan.status,
+    revisionKind: plan.revisionKind,
+    startDate,
+    endDateBase,
+    endDateWithConditional: asIsoDate(plan.endDateWithConditional),
+    baseDurationWorkingDays:
+      plan.baseDurationWorkingDays != null ? d(plan.baseDurationWorkingDays) : null,
+    withConditionalWorkingDays:
+      plan.withConditionalWorkingDays != null ? d(plan.withConditionalWorkingDays) : null,
+    note: plan.note,
+    study: { id: plan.study.id, title: plan.study.title },
+    project: { id: plan.project.id, title: plan.project.title },
+    quote: plan.quote
+      ? {
+          id: plan.quote.id,
+          number: plan.quote.number,
+          subject: plan.quote.subject,
+          isDemonstration: plan.quote.isDemonstration,
+          totalSellHt: d(plan.quote.totalSellHt),
+        }
+      : null,
+    quoteOptions: quoteOptions.map((q) => ({
+      id: q.id,
+      number: q.number,
+      subject: q.subject,
+      status: q.status,
+      isDemonstration: q.isDemonstration,
+      totalSellHt: d(q.totalSellHt),
+    })),
+    linkedSellHtTotal: hasLink ? Math.round(linkedSell * 100) / 100 : null,
+    linkedCostHtTotal: hasLink ? Math.round(linkedCost * 100) / 100 : null,
+    indicators,
+    dependencies: deps.map((dep) => ({
+      id: dep.id,
+      type: dep.type,
+      lagDays: d(dep.lagDays),
+      predecessorStepCode: dep.predecessor.stepCode,
+      successorStepCode: dep.successor.stepCode,
+    })),
+    tasks,
+  };
+}
+
+/**
+ * Lie (ou détache) un devis à un planning existant.
+ * Recalcule les associations et snapshots HT — ne touche ni dates ni durées.
+ */
+export async function linkPrepScheduleQuote(input: {
+  orgId: string;
+  planId: string;
+  quoteId: string | null;
+  userId: string;
+}): Promise<SchedulePlanViewPayload> {
+  const plan = await prisma.prepSchedulePlan.findFirst({
+    where: { id: input.planId, organizationId: input.orgId },
+    include: {
+      tasks: { select: { id: true, takeoffCodesJson: true } },
+    },
+  });
+  if (!plan) throw new PrepError("Planning introuvable", 404);
+
+  if (input.quoteId) {
+    const quote = await prisma.commercialQuote.findFirst({
+      where: {
+        id: input.quoteId,
+        organizationId: input.orgId,
+        OR: [{ sourcePrepStudyId: plan.studyId }, { projectId: plan.projectId }],
+      },
+      select: { id: true },
+    });
+    if (!quote) {
+      throw new PrepError(
+        "Devis introuvable ou non rattaché à cette étude / ce projet",
+        422,
+      );
+    }
+  }
+
+  const finance = await loadQuoteFinanceByTakeoff(
+    input.orgId,
+    plan.studyId,
+    input.quoteId,
+  );
+
+  const allQuoteLineIds = [
+    ...new Set(
+      plan.tasks.flatMap((t) => {
+        const takeoffIds = Array.isArray(t.takeoffCodesJson)
+          ? t.takeoffCodesJson.filter((x): x is string => typeof x === "string")
+          : [];
+        return financeForTask(takeoffIds, finance).quoteLineIds;
+      }),
+    ),
+  ];
+
+  await prisma.$transaction(
+    async (tx) => {
+      await tx.prepScheduleQuoteLink.deleteMany({
+        where: { planId: plan.id, organizationId: input.orgId },
+      });
+
+      const quoteLineById = new Map(
+        allQuoteLineIds.length && input.quoteId
+          ? (
+              await tx.commercialQuoteLine.findMany({
+                where: { id: { in: allQuoteLineIds }, organizationId: input.orgId },
+                select: { id: true, lineSellHt: true, lineCostHt: true },
+              })
+            ).map((l) => [l.id, l] as const)
+          : [],
+      );
+      const codeByLine = new Map(
+        allQuoteLineIds.length && input.quoteId
+          ? (
+              await tx.prepQuoteLink.findMany({
+                where: {
+                  quoteLineId: { in: allQuoteLineIds },
+                  organizationId: input.orgId,
+                },
+                select: { quoteLineId: true, studyLineCode: true },
+              })
+            ).map((l) => [l.quoteLineId, l.studyLineCode] as const)
+          : [],
+      );
+
+      const quoteRows: Prisma.PrepScheduleQuoteLinkCreateManyInput[] = [];
+
+      for (const t of plan.tasks) {
+        const takeoffIds = Array.isArray(t.takeoffCodesJson)
+          ? t.takeoffCodesJson.filter((x): x is string => typeof x === "string")
+          : [];
+        const fin = financeForTask(takeoffIds, finance);
+
+        await tx.prepScheduleTask.update({
+          where: { id: t.id },
+          data: {
+            sellHtSnapshot: fin.sellHt,
+            costHtSnapshot: fin.costHt,
+          },
+        });
+
+        if (input.quoteId) {
+          for (const qLineId of fin.quoteLineIds) {
+            const line = quoteLineById.get(qLineId);
+            if (!line) continue;
+            quoteRows.push({
+              id: crypto.randomUUID().replace(/-/g, "").slice(0, 25),
+              organizationId: input.orgId,
+              planId: plan.id,
+              taskId: t.id,
+              quoteId: input.quoteId,
+              quoteLineId: line.id,
+              studyLineCode: codeByLine.get(line.id) ?? null,
+              sellHt: d(line.lineSellHt),
+              costHt: d(line.lineCostHt),
+            });
+          }
+        }
+      }
+
+      if (quoteRows.length) {
+        await tx.prepScheduleQuoteLink.createMany({ data: quoteRows });
+      }
+
+      await tx.prepSchedulePlan.update({
+        where: { id: plan.id },
+        data: { quoteId: input.quoteId },
+      });
+
+      await tx.prepScheduleEvent.create({
+        data: {
+          organizationId: input.orgId,
+          planId: plan.id,
+          kind: input.quoteId ? "QUOTE_LINKED" : "QUOTE_UNLINKED",
+          detailJson: { quoteId: input.quoteId },
+          actorUserId: input.userId,
+        },
+      });
+    },
+    { timeout: 45_000 },
+  );
+
+  const payload = await buildPrepSchedulePlanPayload(input.orgId, plan.id);
+  if (!payload) throw new PrepError("Planning introuvable après liaison", 500);
+  return payload;
+}
+
+export async function updatePrepScheduleHoldPoint(input: {
+  orgId: string;
+  planId: string;
+  taskId: string;
+  holdPointStatus: "A_CONTROLER" | "VALIDE" | "RESERVES";
+  userId: string;
+}): Promise<SchedulePlanViewPayload> {
+  const task = await prisma.prepScheduleTask.findFirst({
+    where: {
+      id: input.taskId,
+      planId: input.planId,
+      organizationId: input.orgId,
+    },
+  });
+  if (!task) throw new PrepError("Intervention introuvable", 404);
+  if (!task.holdPoint) {
+    throw new PrepError("Cette intervention n'est pas un point d'arrêt", 422);
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.prepScheduleTask.update({
+      where: { id: task.id },
+      data: { holdPointStatus: input.holdPointStatus },
+    });
+    await tx.prepScheduleEvent.create({
+      data: {
+        organizationId: input.orgId,
+        planId: input.planId,
+        kind: "HOLD_POINT_STATUS",
+        detailJson: {
+          taskId: task.id,
+          stepCode: task.stepCode,
+          holdPointStatus: input.holdPointStatus,
+        },
+        actorUserId: input.userId,
+      },
+    });
+  });
+
+  const payload = await buildPrepSchedulePlanPayload(input.orgId, input.planId);
+  if (!payload) throw new PrepError("Planning introuvable", 500);
+  return payload;
 }

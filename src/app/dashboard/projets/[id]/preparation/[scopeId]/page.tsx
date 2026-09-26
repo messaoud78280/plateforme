@@ -126,15 +126,7 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
                 ) : null}
                 <p className="mt-2 text-[12px] text-slate-500">
                   Statut :{" "}
-                  <span className="font-medium text-slate-700">
-                    {meta?.fileMissing
-                      ? "Fichier non rattaché"
-                      : card.syncState === "A_JOUR"
-                        ? "PDF disponible"
-                        : card.syncState === "ABSENT"
-                          ? "Absent"
-                          : "À vérifier"}
-                  </span>
+                  <span className="font-medium text-slate-700">{card.statusLabel}</span>
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {meta?.openHref ? (
@@ -182,11 +174,7 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
                 <p className="mt-1 text-[12px] text-slate-600">{card.detail}</p>
               ) : null}
               <p className="mt-3 text-[12px] font-medium text-slate-500">
-                {card.href
-                  ? card.syncState === "ABSENT"
-                    ? "Créer / générer"
-                    : "Ouvrir"
-                  : "À créer"}
+                {card.actionLabel}
               </p>
             </>
           );

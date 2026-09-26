@@ -17,16 +17,30 @@ export type SyncState =
   | "DESYNCHRONISE_VOLONTAIREMENT"
   | "ABSENT";
 
+/** Libellés métier affichés (pas le vocabulaire technique interne). */
+export type CardStatusLabel =
+  | "À jour"
+  | "À vérifier"
+  | "À préparer"
+  | "En cours"
+  | "Action requise"
+  | "Non démarré";
+
+export type WorkspaceCardKind = "plan" | "metre" | "devis" | "planning" | "suivi";
+
 export type WorkspaceCard = {
-  kind: "plan" | "metre" | "devis" | "planning" | "suivi";
+  kind: WorkspaceCardKind;
   label: string;
   title: string;
   href: string | null;
   detail: string | null;
   syncState: SyncState;
+  statusLabel: CardStatusLabel;
+  actionLabel: string;
+  /** Étape structurée pour l’indicateur de progression. */
+  ready: boolean;
   syncHint: string | null;
   isReference: boolean;
-  /** Actions / méta spécifiques plan source (optionnel). */
   planMeta?: {
     studyId: string | null;
     chantierFileId: string | null;
@@ -50,6 +64,17 @@ export type ScopeWorkspace = {
   href: string;
   cards: WorkspaceCard[];
   alerts: Array<{ level: "info" | "warning"; message: string }>;
+  progress: { ready: number; total: number };
+};
+
+export type UnscopedItemKind = "study" | "quote" | "plan";
+
+export type UnscopedItem = {
+  kind: UnscopedItemKind;
+  id: string;
+  label: string;
+  detail: string | null;
+  suggestedScopeName: string | null;
 };
 
 export type ProjectWorkspace = {
@@ -62,6 +87,7 @@ export type ProjectWorkspace = {
     studies: number;
     schedulePlans: number;
     quotes: number;
+    items: UnscopedItem[];
   };
 };
 
@@ -71,9 +97,107 @@ function asIso(v: Date | string | null | undefined): string | null {
   return v.toISOString().slice(0, 10);
 }
 
+function fmtShortFr(iso: string | null): string | null {
+  if (!iso) return null;
+  const dt = new Date(`${iso}T12:00:00`);
+  if (Number.isNaN(dt.getTime())) return iso;
+  return dt.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "short",
+  });
+}
+
 function euro(n: number | null): string | null {
   if (n == null) return null;
   return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € HT`;
+}
+
+function planningDisplayTitle(plan: {
+  title: string;
+  revisionKind: string;
+}): string {
+  const kind = plan.revisionKind?.toUpperCase() ?? "";
+  if (kind === "INITIAL") return "Planning initial";
+  if (kind === "CURRENT") return "Planning actuel";
+  if (kind === "ARCHIVED") return plan.title?.trim() || "Planning archivé";
+  return plan.title?.trim() || "Planning";
+}
+
+export function statusLabelFromSync(
+  sync: SyncState,
+  kind: WorkspaceCardKind,
+): CardStatusLabel {
+  if (sync === "A_JOUR") return "À jour";
+  if (sync === "A_VERIFIER") return "À vérifier";
+  if (sync === "MODIFICATION_DISPONIBLE") return "Action requise";
+  if (sync === "DESYNCHRONISE_VOLONTAIREMENT") return "À vérifier";
+  if (kind === "suivi") return "Non démarré";
+  return "À préparer";
+}
+
+export function suggestScopeNameFromText(text: string | null | undefined): string | null {
+  const t = (text ?? "").trim();
+  if (!t) return null;
+  const rules: Array<[RegExp, string]> = [
+    [/fondation/i, "Fondations"],
+    [/électri|electri/i, "Installation électrique"],
+    [/\bvrd\b/i, "VRD"],
+    [/maçonn|maconn/i, "Maçonnerie"],
+    [/plomber/i, "Plomberie"],
+    [/couvertur|toiture/i, "Couverture"],
+    [/menuiser/i, "Menuiseries"],
+    [/isolation|ite\b/i, "Isolation"],
+    [/peinture|revêtement|revetement/i, "Finitions"],
+    [/chauffage|clim|cvc/i, "CVC"],
+  ];
+  for (const [re, name] of rules) {
+    if (re.test(t)) return name;
+  }
+  return null;
+}
+
+export function codeFromScopeName(name: string): string {
+  const cleaned = name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9\s-]/g, " ")
+    .trim();
+  const words = cleaned.split(/[\s-]+/).filter(Boolean);
+  if (words.length === 0) return "LOT";
+  if (words.length === 1) return words[0]!.slice(0, 16);
+  const initials = words.map((w) => w[0]!).join("");
+  return (initials.length >= 2 ? initials : words[0]!).slice(0, 12);
+}
+
+function humanUnscopedSummary(u: {
+  studies: number;
+  schedulePlans: number;
+  quotes: number;
+}): string | null {
+  const parts: string[] = [];
+  if (u.quotes === 1) parts.push("1 devis");
+  else if (u.quotes > 1) parts.push(`${u.quotes} devis`);
+  if (u.studies === 1) parts.push("1 métré");
+  else if (u.studies > 1) parts.push(`${u.studies} métrés`);
+  if (u.schedulePlans === 1) parts.push("1 planning");
+  else if (u.schedulePlans > 1) parts.push(`${u.schedulePlans} plannings`);
+  if (parts.length === 0) return null;
+  const total = u.quotes + u.studies + u.schedulePlans;
+  if (parts.length === 1) {
+    const singular = total === 1;
+    return `${parts[0]} de ce chantier ${singular ? "n’est" : "ne sont"} pas encore ${singular ? "rattaché" : "rattachés"} à un lot de travaux.`;
+  }
+  const last = parts.pop()!;
+  return `${parts.join(", ")} et ${last} de ce chantier ne sont pas encore rattachés à un lot de travaux.`;
+}
+
+export function formatUnscopedHumanMessage(u: {
+  studies: number;
+  schedulePlans: number;
+  quotes: number;
+}): string | null {
+  return humanUnscopedSummary(u);
 }
 
 function buildScopeCards(input: {
@@ -133,23 +257,32 @@ function buildScopeCards(input: {
     planningHint = `Métré V${study.version} plus récent que le planning (généré sur V${plan.studyVersionAtGeneration})`;
     alerts.push({
       level: "warning",
-      message: "Planning à recalculer — le métré a évolué depuis la génération",
+      message: "Le planning doit être recalculé — le métré a évolué.",
     });
   }
 
   if (study && !quote) {
-    alerts.push({ level: "info", message: "Aucun devis de référence — génération possible depuis le métré" });
+    alerts.push({
+      level: "info",
+      message: "Aucun devis de référence — vous pouvez en générer un depuis le métré.",
+    });
   }
   if (study && !plan) {
-    alerts.push({ level: "info", message: "Aucun planning de référence — génération possible depuis le métré" });
+    alerts.push({
+      level: "info",
+      message: "Aucun planning de référence — génération possible depuis le métré.",
+    });
   }
   if (!study) {
-    alerts.push({ level: "info", message: "Aucun métré rattaché à ce périmètre" });
+    alerts.push({
+      level: "info",
+      message: "Aucun métré rattaché à ce lot de travaux.",
+    });
   }
   if (primary && fileMissing) {
     alerts.push({
       level: "warning",
-      message: "Plan source identifié mais fichier non rattaché — rattachez le PDF dans la GED chantier",
+      message: "Plan source identifié mais fichier non rattaché.",
     });
   }
 
@@ -158,27 +291,39 @@ function buildScopeCards(input: {
     ? planSource.displayTitle
     : primary
       ? planSourceDisplayTitle(primary)
-      : "Aucun plan déclaré";
+      : "Aucun plan";
 
-  const planDetailParts = [
-    rev ? `Révision : ${rev}` : null,
-    !fileMissing && primary ? "PDF disponible" : null,
-    planSource?.file?.documentDate ? `Date ${planSource.file.documentDate}` : null,
-    fileMissing && primary ? "Fichier non rattaché" : null,
-  ].filter(Boolean);
+  const planReady = !!(primary && !fileMissing && planSource?.file);
+  const planSync: SyncState = !primary ? "ABSENT" : fileMissing ? "A_VERIFIER" : "A_JOUR";
+
+  const startLabel = fmtShortFr(asIso(plan?.startDate));
+  const endLabel = fmtShortFr(asIso(plan?.endDateBase));
+  const planningDetail =
+    startLabel && endLabel
+      ? `${startLabel} → ${endLabel}`
+      : startLabel
+        ? `À partir du ${startLabel}`
+        : null;
 
   const cards: WorkspaceCard[] = [
     {
       kind: "plan",
-      label: "Plan source",
+      label: "Plan",
       title: planTitle,
-      href: openHref
+      href: planReady
         ? openHref
         : study
           ? `/dashboard/visites-metres/etudes/${study.id}?attachPlan=1`
-          : gedHref,
-      detail: planDetailParts.join(" · ") || null,
-      syncState: !primary ? "ABSENT" : fileMissing ? "A_VERIFIER" : "A_JOUR",
+          : `${gedHref}&upload=1`,
+      detail: planReady
+        ? [rev ? `Révision ${rev}` : null, "PDF disponible"].filter(Boolean).join(" · ")
+        : primary
+          ? "Fichier à rattacher"
+          : "À ajouter",
+      syncState: planSync,
+      statusLabel: statusLabelFromSync(planSync, "plan"),
+      actionLabel: planReady ? "Ouvrir" : "Ajouter un plan",
+      ready: planReady,
       syncHint: fileMissing
         ? "Plan source identifié mais fichier non rattaché"
         : rev
@@ -205,11 +350,23 @@ function buildScopeCards(input: {
       kind: "metre",
       label: "Métré",
       title: study?.title ?? "Non créé",
-      href: study ? `/dashboard/visites-metres/etudes/${study.id}` : null,
+      href: study
+        ? `/dashboard/visites-metres/etudes/${study.id}`
+        : `/dashboard/visites-metres/nouveau?projectId=${encodeURIComponent(input.projectId)}`,
       detail: study
-        ? `Version ${study.version} · ${study._count.lines} ligne(s)`
-        : null,
+        ? [
+            `Version ${study.version}`,
+            study._count.lines > 0
+              ? `${study._count.lines} quantité${study._count.lines > 1 ? "s" : ""}`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" · ")
+        : "À créer ou importer",
       syncState: metreSync,
+      statusLabel: statusLabelFromSync(metreSync, "metre"),
+      actionLabel: study ? "Ouvrir" : "Créer / importer un métré",
+      ready: !!study,
       syncHint: null,
       isReference: !!(study && input.refs.studyId === study.id),
     },
@@ -217,28 +374,36 @@ function buildScopeCards(input: {
       kind: "devis",
       label: "Devis",
       title: quote?.number ?? "Non créé",
-      href: quote ? `/dashboard/devis-facturation/devis/${quote.id}` : null,
+      href: quote
+        ? `/dashboard/devis-facturation/devis/${quote.id}`
+        : study
+          ? `/dashboard/visites-metres/etudes/${study.id}`
+          : `/dashboard/devis-facturation/devis/nouveau?projectId=${encodeURIComponent(input.projectId)}`,
       detail: quote
-        ? `${euro(d(quote.totalSellHt)) ?? ""}${quote.isDemonstration ? " · démo" : ""}`
-        : null,
+        ? `${euro(d(quote.totalSellHt)) ?? ""}${quote.isDemonstration ? " · démo" : ""}`.trim()
+        : "À générer",
       syncState: devisSync,
+      statusLabel: statusLabelFromSync(devisSync, "devis"),
+      actionLabel: quote ? "Ouvrir" : "Générer un devis",
+      ready: !!quote,
       syncHint: devisHint,
       isReference: !!(quote && input.refs.quoteId === quote.id),
     },
     {
       kind: "planning",
       label: "Planning",
-      title: plan
-        ? `${plan.revisionKind}${plan.status ? ` · ${plan.status}` : ""}`
-        : "Non créé",
+      title: plan ? planningDisplayTitle(plan) : "Non créé",
       href:
         plan && study
           ? `/dashboard/visites-metres/etudes/${plan.studyId}/planning/${plan.id}`
-          : null,
-      detail: plan
-        ? `${asIso(plan.startDate) ?? "—"} → ${asIso(plan.endDateBase) ?? "—"}`
-        : null,
+          : study
+            ? `/dashboard/visites-metres/etudes/${study.id}`
+            : null,
+      detail: plan ? planningDetail : "À générer",
       syncState: planningSync,
+      statusLabel: statusLabelFromSync(planningSync, "planning"),
+      actionLabel: plan ? "Ouvrir" : "Générer un planning",
+      ready: !!plan && planningSync === "A_JOUR",
       syncHint: planningHint,
       isReference: !!(plan && input.refs.planId === plan.id),
     },
@@ -246,9 +411,12 @@ function buildScopeCards(input: {
       kind: "suivi",
       label: "Suivi",
       title: "Non démarré",
-      href: `/dashboard/projets/${input.projectId}`,
-      detail: "Raccordement suivi réel — étapes ultérieures",
+      href: `/dashboard/projets/${input.projectId}/preparation/${input.scopeId}`,
+      detail: "Préparation du suivi chantier",
       syncState: "ABSENT",
+      statusLabel: "Non démarré",
+      actionLabel: "Préparer le suivi",
+      ready: false,
       syncHint: null,
       isReference: false,
     },
@@ -300,6 +468,7 @@ export async function getProjectWorkspace(
     select: {
       id: true,
       number: true,
+      subject: true,
       totalSellHt: true,
       isDemonstration: true,
       sourcePrepStudyId: true,
@@ -323,6 +492,10 @@ export async function getProjectWorkspace(
     },
     orderBy: { createdAt: "desc" },
   });
+
+  const referencedQuoteIds = new Set(
+    scopes.map((s) => s.referenceQuoteId).filter((id): id is string => !!id),
+  );
 
   const planSourceByStudyId = new Map<
     string,
@@ -381,6 +554,8 @@ export async function getProjectWorkspace(
       },
     });
 
+    const ready = cards.filter((c) => c.ready).length;
+
     return {
       id: scope.id,
       code: scope.code,
@@ -391,8 +566,46 @@ export async function getProjectWorkspace(
       href: `/dashboard/projets/${projectId}/preparation/${scope.id}`,
       cards,
       alerts,
+      progress: { ready, total: cards.length },
     };
   });
+
+  const unscopedStudies = studies.filter((s) => !s.scopeId);
+  const unscopedPlans = plans.filter((p) => !p.scopeId);
+  const unscopedQuotes = quotes.filter((q) => {
+    if (referencedQuoteIds.has(q.id)) return false;
+    const study = studies.find((s) => s.id === q.sourcePrepStudyId);
+    if (study?.scopeId) return false;
+    return true;
+  });
+
+  const items: UnscopedItem[] = [
+    ...unscopedQuotes.map((q) => ({
+      kind: "quote" as const,
+      id: q.id,
+      label: q.number,
+      detail: [q.subject?.trim() || null, euro(d(q.totalSellHt))]
+        .filter(Boolean)
+        .join(" · "),
+      suggestedScopeName:
+        suggestScopeNameFromText(q.subject) ??
+        suggestScopeNameFromText(q.number),
+    })),
+    ...unscopedStudies.map((s) => ({
+      kind: "study" as const,
+      id: s.id,
+      label: s.title,
+      detail: `Métré · version ${s.version}`,
+      suggestedScopeName: suggestScopeNameFromText(s.title),
+    })),
+    ...unscopedPlans.map((p) => ({
+      kind: "plan" as const,
+      id: p.id,
+      label: planningDisplayTitle(p),
+      detail: "Planning non rattaché",
+      suggestedScopeName: suggestScopeNameFromText(p.title),
+    })),
+  ];
 
   return {
     projectId: project.id,
@@ -401,12 +614,10 @@ export async function getProjectWorkspace(
     href: `/dashboard/projets/${project.id}`,
     scopes: scopeWorkspaces,
     unscoped: {
-      studies: studies.filter((s) => !s.scopeId).length,
-      schedulePlans: plans.filter((p) => !p.scopeId).length,
-      quotes: quotes.filter((q) => {
-        const study = studies.find((s) => s.id === q.sourcePrepStudyId);
-        return !study?.scopeId;
-      }).length,
+      studies: unscopedStudies.length,
+      schedulePlans: unscopedPlans.length,
+      quotes: unscopedQuotes.length,
+      items,
     },
   };
 }
@@ -491,8 +702,103 @@ export async function attachStudyToScope(input: {
         where: { id: scope.id },
         data: {
           referenceStudyId: study.id,
-          referenceQuoteId: quote?.id ?? null,
-          referenceSchedulePlanId: plan?.id ?? null,
+          referenceQuoteId: quote?.id ?? scope.referenceQuoteId,
+          referenceSchedulePlanId: plan?.id ?? scope.referenceSchedulePlanId,
+        },
+      });
+    }
+  });
+}
+
+/** Rattache un devis orphelin (sans métré) comme référence du périmètre. */
+export async function attachQuoteToScope(input: {
+  orgId: string;
+  scopeId: string;
+  quoteId: string;
+}): Promise<void> {
+  const scope = await prisma.projectScope.findFirst({
+    where: { id: input.scopeId, organizationId: input.orgId },
+  });
+  if (!scope) throw new Error("Périmètre introuvable");
+
+  const quote = await prisma.commercialQuote.findFirst({
+    where: {
+      id: input.quoteId,
+      organizationId: input.orgId,
+      OR: [{ projectId: scope.projectId }, { projectId: null }],
+    },
+    select: { id: true, projectId: true, sourcePrepStudyId: true },
+  });
+  if (!quote) throw new Error("Devis introuvable");
+  if (quote.projectId && quote.projectId !== scope.projectId) {
+    throw new Error("Ce devis appartient à un autre chantier");
+  }
+
+  if (quote.sourcePrepStudyId) {
+    await attachStudyToScope({
+      orgId: input.orgId,
+      scopeId: scope.id,
+      studyId: quote.sourcePrepStudyId,
+      setAsReference: true,
+    });
+    return;
+  }
+
+  if (scope.referenceQuoteId && scope.referenceQuoteId !== quote.id) {
+    throw new Error(
+      "Ce lot a déjà un devis de référence. Créez un autre lot ou choisissez un seul devis.",
+    );
+  }
+
+  await prisma.$transaction(async (tx) => {
+    if (!quote.projectId) {
+      await tx.commercialQuote.update({
+        where: { id: quote.id },
+        data: { projectId: scope.projectId },
+      });
+    }
+    await tx.projectScope.update({
+      where: { id: scope.id },
+      data: { referenceQuoteId: quote.id },
+    });
+  });
+}
+
+export async function attachSchedulePlanToScope(input: {
+  orgId: string;
+  scopeId: string;
+  planId: string;
+}): Promise<void> {
+  const scope = await prisma.projectScope.findFirst({
+    where: { id: input.scopeId, organizationId: input.orgId },
+  });
+  if (!scope) throw new Error("Périmètre introuvable");
+
+  const plan = await prisma.prepSchedulePlan.findFirst({
+    where: {
+      id: input.planId,
+      organizationId: input.orgId,
+      projectId: scope.projectId,
+    },
+    select: { id: true, studyId: true },
+  });
+  if (!plan) throw new Error("Planning introuvable");
+
+  await prisma.$transaction(async (tx) => {
+    await tx.prepSchedulePlan.update({
+      where: { id: plan.id },
+      data: { scopeId: scope.id },
+    });
+    await tx.prepStudy.update({
+      where: { id: plan.studyId },
+      data: { scopeId: scope.id },
+    });
+    if (!scope.referenceSchedulePlanId) {
+      await tx.projectScope.update({
+        where: { id: scope.id },
+        data: {
+          referenceSchedulePlanId: plan.id,
+          referenceStudyId: scope.referenceStudyId ?? plan.studyId,
         },
       });
     }

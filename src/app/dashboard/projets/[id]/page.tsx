@@ -734,20 +734,16 @@ export default async function ProjetDetailPage({
         ]}
       />
 
-      <header className="rounded-xl border border-slate-200/90 bg-white px-4 py-4 sm:px-5 sm:py-5">
+      <header className="rounded-2xl border border-slate-200/90 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
               Chantier
             </p>
-            <h1 className="mt-1 text-xl font-extrabold tracking-tight text-slate-950 sm:text-2xl">
+            <h1 className="mt-1.5 text-[1.35rem] font-extrabold tracking-tight text-slate-950 sm:text-2xl">
               {project.title}
             </h1>
-            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
-              {presentation.clientLabel ? (
-                <span className="font-medium text-slate-800">{presentation.clientLabel}</span>
-              ) : null}
-              {presentation.clientLabel ? <span className="text-slate-300">·</span> : null}
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[13px] text-slate-600">
               {isStaff ? (
                 <ChantierStatusSelect projectId={project.id} value={project.chantierStatus} canEdit />
               ) : (
@@ -755,19 +751,36 @@ export default async function ProjetDetailPage({
                   {chantierStatusDisplayLabel(project.chantierStatus)}
                 </Badge>
               )}
-              {responsibleLabel ? (
+              {project.siteCity || project.siteAddress ? (
                 <>
-                  <span className="text-slate-300">·</span>
-                  <span>
-                    Responsable :{" "}
-                    <strong className="font-semibold text-slate-900">{responsibleLabel}</strong>
+                  <span className="text-slate-300" aria-hidden>
+                    ·
+                  </span>
+                  <span className="text-slate-700">
+                    {[project.siteCity, project.siteAddress && !project.siteCity ? project.siteAddress : null]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </span>
                 </>
-              ) : (
+              ) : null}
+              {presentation.clientLabel ? (
                 <>
-                  <span className="text-slate-300">·</span>
-                  <span className="text-slate-500">Responsable à définir</span>
+                  <span className="text-slate-300" aria-hidden>
+                    ·
+                  </span>
+                  <span className="font-medium text-slate-800">{presentation.clientLabel}</span>
                 </>
+              ) : null}
+              <span className="text-slate-300" aria-hidden>
+                ·
+              </span>
+              {responsibleLabel ? (
+                <span>
+                  Responsable :{" "}
+                  <strong className="font-semibold text-slate-900">{responsibleLabel}</strong>
+                </span>
+              ) : (
+                <span className="text-slate-500">Responsable à définir</span>
               )}
             </div>
           </div>
@@ -786,7 +799,7 @@ export default async function ProjetDetailPage({
             ) : null}
             <Link
               href={ops?.links.agenda ?? `/dashboard/agenda?projectId=${encodeURIComponent(id)}`}
-              className="inline-flex rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#1e3a5f] hover:bg-slate-50"
+              className="inline-flex min-h-10 items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#1e3a5f] hover:bg-slate-50"
             >
               Agenda
             </Link>
@@ -830,8 +843,11 @@ export default async function ProjetDetailPage({
       </header>
 
       {preparationWorkspace ? (
-        <div className="pt-1 pb-2">
-          <ProjectPreparationOverview workspace={preparationWorkspace} />
+        <div className="pt-1 pb-1">
+          <ProjectPreparationOverview
+            workspace={preparationWorkspace}
+            canEdit={isStaff}
+          />
         </div>
       ) : null}
 

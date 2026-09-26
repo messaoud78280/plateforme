@@ -129,27 +129,35 @@ export function ChantierCockpit({
   return (
     <div className="space-y-5">
       <div
-        className="flex gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-slate-50/80 p-1"
-        role="tablist"
-        aria-label="Sections chantier"
+        className={cn(
+          "sticky top-0 z-10 -mx-1 px-1 py-1",
+          "bg-[color-mix(in_srgb,var(--background,#f8fafc)_92%,transparent)] backdrop-blur-sm supports-[not(backdrop-filter)]:bg-slate-50",
+        )}
       >
-        {visibleTabs.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            role="tab"
-            aria-selected={tab === t.id}
-            onClick={() => selectTab(t.id)}
-            className={cn(
-              "shrink-0 rounded-lg px-3.5 py-2 text-xs font-semibold transition sm:text-sm",
-              tab === t.id
-                ? "bg-bework-navy text-white shadow-sm"
-                : "text-slate-600 hover:bg-white hover:text-bework-navy",
-            )}
-          >
-            {t.label}
-          </button>
-        ))}
+        <div
+          className="flex gap-1 overflow-x-auto rounded-xl border border-slate-200/90 bg-white p-1 shadow-[0_1px_0_rgba(15,23,42,0.03)]"
+          role="tablist"
+          aria-label="Navigation chantier"
+        >
+          {visibleTabs.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === t.id}
+              onClick={() => selectTab(t.id)}
+              className={cn(
+                "shrink-0 rounded-lg px-3.5 py-2 text-xs font-semibold transition sm:text-[13px]",
+                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e3a5f]",
+                tab === t.id
+                  ? "bg-[#1e3a5f] text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-[#1e3a5f]",
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {tab === "overview" ? (

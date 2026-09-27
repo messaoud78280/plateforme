@@ -676,7 +676,7 @@ export async function previewGlobalPrepFromQuote(input: {
     existingPlanId: ctx.existingPlan?.id ?? null,
     quantities,
     quoteLineCount: flatLines.length,
-    proposedTaskCount: flatLines.filter((l) => (l.kind ?? "LINE") !== "TITLE").length,
+    proposedTaskCount: flatLines.filter((l) => l.kind === "WORK").length,
     warnings,
     caseLabel,
   };
@@ -809,7 +809,7 @@ export async function createGlobalPrepFromQuote(input: {
   for (const section of ctx.sections) {
     let lineIndex = 0;
     for (const line of section.lines) {
-      if ((line.kind ?? "LINE") === "TITLE") continue;
+      if (line.kind !== "WORK") continue;
       const code = lineCode(sectionIndex, lineIndex);
       const qty = d(line.quantity);
       const meta = taskMetaForLine(line.designation, line.unit, qty);

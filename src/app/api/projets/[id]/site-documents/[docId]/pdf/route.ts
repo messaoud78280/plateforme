@@ -30,7 +30,7 @@ export async function GET(_req: Request, ctx: Ctx) {
   };
 
   const bytes =
-    document.kind === "COMPTE_RENDU"
+    document.kind === "COMPTE_RENDU" || document.kind === "NOTICE"
       ? generateSiteReportPdf({
           meta,
           payload: document.payloadJson as unknown as SiteReportPayload,

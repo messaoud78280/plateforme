@@ -102,7 +102,8 @@ export async function nextSiteDocumentNumber(
   projectId: string,
   kind: SiteDocumentKind,
 ): Promise<string> {
-  const prefix = kind === "COMPTE_RENDU" ? "CR" : "PPSPS";
+  const prefix =
+    kind === "COMPTE_RENDU" ? "CR" : kind === "NOTICE" ? "NOTICE" : "PPSPS";
   const existing = await prisma.siteDocument.findMany({
     where: { projectId, kind },
     select: { number: true },

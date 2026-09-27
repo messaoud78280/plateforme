@@ -15,7 +15,7 @@ import {
 
 type Doc = {
   id: string;
-  kind: "COMPTE_RENDU" | "PPSPS";
+  kind: "COMPTE_RENDU" | "NOTICE" | "PPSPS";
   number: string;
   versionNumber: number;
   status: string;
@@ -86,7 +86,7 @@ export function SiteDocumentEditor({
   const [weather, setWeather] = useState(initial.weather ?? "");
   const [authorName, setAuthorName] = useState(initial.authorName ?? "");
   const [cr, setCr] = useState<SiteReportPayload>(() =>
-    initial.kind === "COMPTE_RENDU"
+    initial.kind === "COMPTE_RENDU" || initial.kind === "NOTICE"
       ? { ...emptySiteReportPayload(), ...(initial.payloadJson as SiteReportPayload) }
       : emptySiteReportPayload(),
   );
@@ -104,9 +104,10 @@ export function SiteDocumentEditor({
   const hubHref = `/dashboard/projets/${projectId}/documents-chantier`;
   const apiBase = `/api/projets/${projectId}/site-documents/${doc.id}`;
 
+  const isReportKind = doc.kind === "COMPTE_RENDU" || doc.kind === "NOTICE";
   const payload = useMemo(
-    () => (doc.kind === "COMPTE_RENDU" ? cr : ppsps),
-    [doc.kind, cr, ppsps],
+    () => (isReportKind ? cr : ppsps),
+    [isReportKind, cr, ppsps],
   );
 
   async function save() {
@@ -179,7 +180,7 @@ export function SiteDocumentEditor({
       const body = await refreshed.json();
       if (refreshed.ok && body.document) {
         setDoc(body.document);
-        if (body.document.kind === "COMPTE_RENDU") {
+        if (body.document.kind === "COMPTE_RENDU" || body.document.kind === "NOTICE") {
           setCr({
             ...emptySiteReportPayload(),
             ...(body.document.payloadJson as SiteReportPayload),
@@ -207,7 +208,7 @@ export function SiteDocumentEditor({
       if (refreshed.ok && body.document) {
         setDoc(body.document);
         setTitle(body.document.title);
-        if (body.document.kind === "COMPTE_RENDU") {
+        if (body.document.kind === "COMPTE_RENDU" || body.document.kind === "NOTICE") {
           setCr({
             ...emptySiteReportPayload(),
             ...(body.document.payloadJson as SiteReportPayload),
@@ -236,7 +237,11 @@ export function SiteDocumentEditor({
               {doc.number} · {projectTitle}
             </h1>
             <p className="text-xs text-slate-500">
-              {doc.kind === "COMPTE_RENDU" ? "Compte rendu" : `PPSPS · v${doc.versionNumber}`}
+              {doc.kind === "COMPTE_RENDU"
+                ? "Compte rendu"
+                : doc.kind === "NOTICE"
+                  ? "Notice explicative"
+                  : `PPSPS · v${doc.versionNumber}`}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -335,7 +340,7 @@ export function SiteDocumentEditor({
             <option value="ARCHIVED">Archivé</option>
           </select>
         </Field>
-        {doc.kind === "COMPTE_RENDU" ? (
+        {isReportKind ? (
           <>
             <Field label="Date">
               <input type="date" className={inputClass} value={visitDate} disabled={!canWrite} onChange={(e) => setVisitDate(e.target.value)} />
@@ -353,7 +358,7 @@ export function SiteDocumentEditor({
         ) : null}
       </section>
 
-      {doc.kind === "COMPTE_RENDU" ? (
+      {isReportKind ? (
         <CrForm cr={cr} setCr={setCr} canWrite={canWrite} />
       ) : (
         <PpspsForm ppsps={ppsps} setPpsps={setPpsps} canWrite={canWrite} />

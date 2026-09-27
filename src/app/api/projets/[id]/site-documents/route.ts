@@ -19,7 +19,9 @@ export async function GET(req: Request, ctx: Ctx) {
   const items = await listSiteDocuments(
     auth.orgId,
     projectId,
-    kind === "COMPTE_RENDU" || kind === "PPSPS" ? kind : undefined,
+    kind === "COMPTE_RENDU" || kind === "PPSPS" || kind === "NOTICE"
+      ? kind
+      : undefined,
   );
   return NextResponse.json({ items, canWrite: auth.canWrite });
 }
@@ -34,8 +36,15 @@ export async function POST(req: Request, ctx: Ctx) {
     kind?: SiteDocumentKind;
     title?: string;
   } | null;
-  if (body?.kind !== "COMPTE_RENDU" && body?.kind !== "PPSPS") {
-    return NextResponse.json({ error: "kind requis (COMPTE_RENDU | PPSPS)" }, { status: 400 });
+  if (
+    body?.kind !== "COMPTE_RENDU" &&
+    body?.kind !== "PPSPS" &&
+    body?.kind !== "NOTICE"
+  ) {
+    return NextResponse.json(
+      { error: "kind requis (COMPTE_RENDU | NOTICE | PPSPS)" },
+      { status: 400 },
+    );
   }
   const seed = await buildProjectPromptSeed(projectId, auth.orgId);
   const doc = await createSiteDocument({

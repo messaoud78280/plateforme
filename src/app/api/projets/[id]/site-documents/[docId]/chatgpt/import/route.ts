@@ -25,7 +25,7 @@ export async function POST(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "JSON manquant" }, { status: 400 });
   }
 
-  if (document.kind === "COMPTE_RENDU") {
+  if (document.kind === "COMPTE_RENDU" || document.kind === "NOTICE") {
     const parsed = parseSiteReportJson(body.raw);
     if (!parsed.ok) {
       return NextResponse.json({ error: "JSON invalide", errors: parsed.errors }, { status: 400 });

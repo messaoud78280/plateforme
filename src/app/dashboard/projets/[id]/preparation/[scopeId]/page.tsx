@@ -11,8 +11,6 @@ import {
   chantierProjectsHref,
   workspaceHomeCrumb,
 } from "@/components/chantier/ChantierHierarchyNav";
-import { cn } from "@/lib/cn";
-
 export const dynamic = "force-dynamic";
 
 type Ctx = {
@@ -64,139 +62,65 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
         ) : null}
       </header>
 
-      {/* Barre de filiation métier */}
-      <div className="sticky top-0 z-20 overflow-x-auto rounded-2xl border border-[#1e3a5f]/15 bg-white/95 px-3 py-2 shadow-sm backdrop-blur">
-        <div className="flex min-w-max items-center gap-1 text-[12px]">
-          <span className="shrink-0 font-semibold text-[#1e3a5f]">
-            {workspace.title.split("—").pop()?.trim() ?? workspace.title} /{" "}
-            {scope.name.toUpperCase()}
-          </span>
-          <span className="mx-1 text-slate-300">|</span>
-          {scope.cards.map((card, i) => (
-            <span key={card.kind} className="flex items-center gap-1">
-              {i > 0 ? <span className="text-slate-300">→</span> : null}
-              {card.href ? (
-                <Link
-                  href={card.href}
-                  className="rounded-full px-2 py-1 font-medium text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
-                >
-                  {card.kind === "metre" || card.kind === "devis" || card.kind === "planning"
-                    ? card.title
-                    : card.label}
-                </Link>
-              ) : (
-                <span className="rounded-full px-2 py-1 text-slate-400">{card.label}</span>
-              )}
-            </span>
-          ))}
-        </div>
+      <div className="rounded-2xl border border-[#1e3a5f]/15 bg-[rgba(30,58,95,0.03)] px-4 py-3">
+        <p className="text-[13px] font-semibold text-[#1e3a5f]">
+          Phase du dossier chantier — pas un planning séparé
+        </p>
+        <p className="mt-1 text-[12.5px] text-slate-600">
+          Métré, devis et planning sont globaux. Cette page filtre le contenu
+          pour « {scope.name} ».
+        </p>
+        <Link
+          href={chantierProjectHref(projectId)}
+          className="mt-2 inline-flex text-[12.5px] font-semibold text-[#1e3a5f] hover:underline"
+        >
+          ← Retour à la chaîne chantier
+        </Link>
       </div>
 
-      {scope.alerts.length ? (
-        <ul className="space-y-1">
-          {scope.alerts.map((a) => (
-            <li
-              key={a.message}
-              className={cn(
-                "rounded-xl px-3 py-2 text-[13px]",
-                a.level === "warning"
-                  ? "border border-amber-200 bg-amber-50 text-amber-950"
-                  : "border border-slate-200 bg-slate-50 text-slate-700",
-              )}
-            >
-              {a.message}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
+      {/* Chaîne globale (même dossier, pas de Nouvelle visite) */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {scope.cards.map((card) => {
-          if (card.kind === "plan") {
-            const meta = card.planMeta;
-            return (
-              <div
-                key={card.kind}
-                className="rounded-2xl border border-[#1e3a5f]/10 bg-white p-4"
-              >
+        {(workspace.global.workflow ?? [])
+          .filter((s) =>
+            ["visite", "metre", "devis", "planning", "suivi"].includes(s.id),
+          )
+          .map((step) => {
+            const body = (
+              <>
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                  {card.label}
+                  {step.label}
+                  {step.ready ? " · prêt" : ""}
                 </p>
-                <p className="mt-1 text-[15px] font-semibold text-[#1e3a5f]">{card.title}</p>
-                {card.detail ? (
-                  <p className="mt-1 text-[12px] text-slate-600">{card.detail}</p>
-                ) : null}
-                <p className="mt-2 text-[12px] text-slate-500">
-                  Statut :{" "}
-                  <span className="font-medium text-slate-700">{card.statusLabel}</span>
+                <p className="mt-1 text-[15px] font-semibold text-[#1e3a5f] line-clamp-2">
+                  {step.title}
                 </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {meta?.openHref ? (
-                    <Link
-                      href={meta.openHref}
-                      className="rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[12px] font-medium text-white"
-                    >
-                      Ouvrir le plan
-                    </Link>
-                  ) : null}
-                  {meta?.attachHref ? (
-                    <Link
-                      href={meta.attachHref}
-                      className="rounded-full border border-slate-200 px-3 py-1.5 text-[12px] font-medium text-slate-700"
-                    >
-                      {meta.fileMissing ? "Rattacher un document" : "Changer le fichier"}
-                    </Link>
-                  ) : null}
-                  {meta?.versionsHref ? (
-                    <Link
-                      href={meta.versionsHref}
-                      className="rounded-full border border-slate-200 px-3 py-1.5 text-[12px] font-medium text-slate-700"
-                    >
-                      Voir les versions
-                    </Link>
-                  ) : null}
-                </div>
-                {meta?.fileMissing ? (
-                  <p className="mt-2 text-[11.5px] text-amber-800">
-                    Plan source identifié mais fichier non rattaché
+                {step.detail ? (
+                  <p className="mt-1 text-[12px] text-slate-600 line-clamp-2">
+                    {step.detail}
                   </p>
                 ) : null}
+                <p className="mt-3 text-[12px] font-medium text-slate-500">
+                  {step.actionLabel}
+                </p>
+              </>
+            );
+            return step.href ? (
+              <Link
+                key={step.id}
+                href={step.href}
+                className="rounded-2xl border border-[#1e3a5f]/10 bg-white p-4 hover:border-[#1e3a5f]/30"
+              >
+                {body}
+              </Link>
+            ) : (
+              <div
+                key={step.id}
+                className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 opacity-80"
+              >
+                {body}
               </div>
             );
-          }
-
-          const body = (
-            <>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                {card.label}
-                {card.isReference ? " · référence" : ""}
-              </p>
-              <p className="mt-1 text-[15px] font-semibold text-[#1e3a5f]">{card.title}</p>
-              {card.detail ? (
-                <p className="mt-1 text-[12px] text-slate-600">{card.detail}</p>
-              ) : null}
-              <p className="mt-3 text-[12px] font-medium text-slate-500">
-                {card.actionLabel}
-              </p>
-            </>
-          );
-          return card.href ? (
-            <Link
-              key={card.kind}
-              href={card.href}
-              className="rounded-2xl border border-[#1e3a5f]/10 bg-white p-4 hover:border-[#1e3a5f]/30"
-            >
-              {body}
-            </Link>
-          ) : (
-            <div
-              key={card.kind}
-              className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 opacity-80"
-            >
-              {body}
-            </div>
-          );
-        })}
+          })}
       </div>
 
       <details className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-[13px]">

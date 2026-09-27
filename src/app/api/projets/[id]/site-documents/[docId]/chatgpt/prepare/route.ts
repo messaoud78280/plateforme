@@ -33,7 +33,7 @@ export async function GET(_req: Request, ctx: Ctx) {
     };
 
   const text =
-    document.kind === "COMPTE_RENDU"
+    document.kind === "COMPTE_RENDU" || document.kind === "NOTICE"
       ? buildSiteReportPrompt({
           project: seed,
           draft: document.payloadJson as unknown as SiteReportPayload,

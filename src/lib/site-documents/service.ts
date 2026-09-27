@@ -66,10 +66,14 @@ export async function createSiteDocument(input: {
   let payload: SiteReportPayload | PpspsPayload;
   let title: string;
 
-  if (input.kind === "COMPTE_RENDU") {
+  if (input.kind === "COMPTE_RENDU" || input.kind === "NOTICE") {
+    const defaultTitle =
+      input.kind === "NOTICE"
+        ? `Notice explicative — ${number}`
+        : `Compte rendu — ${number}`;
     payload = emptySiteReportPayload({
       reportNumber: number,
-      title: input.title ?? `Compte rendu — ${number}`,
+      title: input.title ?? defaultTitle,
       author: input.seed?.manager ?? null,
     });
     title = payload.title;
@@ -172,7 +176,7 @@ export async function duplicateSiteDocument(input: {
       : 1;
 
   let payload = src.payloadJson as unknown as SiteReportPayload | PpspsPayload;
-  if (src.kind === "COMPTE_RENDU") {
+  if (src.kind === "COMPTE_RENDU" || src.kind === "NOTICE") {
     payload = {
       ...(payload as SiteReportPayload),
       reportNumber: number,
@@ -241,7 +245,9 @@ export async function applyChatgptImport(input: {
 
   const before = existing.payloadJson;
   let merged: SiteReportPayload | PpspsPayload;
-  if (existing.kind === "COMPTE_RENDU") {
+  const isReportKind =
+    existing.kind === "COMPTE_RENDU" || existing.kind === "NOTICE";
+  if (isReportKind) {
     const cur = before as unknown as SiteReportPayload;
     const inc = input.incoming as SiteReportPayload;
     merged = input.replaceAll ? { ...emptySiteReportPayload(), ...inc } : mergeSiteReport(cur, inc);
@@ -259,21 +265,18 @@ export async function applyChatgptImport(input: {
         sourceFormat: input.format,
         title: "title" in merged && merged.title ? String(merged.title) : existing.title,
         visitDate:
-          existing.kind === "COMPTE_RENDU" && (merged as SiteReportPayload).date
+          isReportKind && (merged as SiteReportPayload).date
             ? new Date((merged as SiteReportPayload).date)
             : existing.visitDate,
-        visitTime:
-          existing.kind === "COMPTE_RENDU"
-            ? (merged as SiteReportPayload).time ?? existing.visitTime
-            : existing.visitTime,
-        weather:
-          existing.kind === "COMPTE_RENDU"
-            ? (merged as SiteReportPayload).weather ?? existing.weather
-            : existing.weather,
-        authorName:
-          existing.kind === "COMPTE_RENDU"
-            ? (merged as SiteReportPayload).author ?? existing.authorName
-            : existing.authorName,
+        visitTime: isReportKind
+          ? (merged as SiteReportPayload).time ?? existing.visitTime
+          : existing.visitTime,
+        weather: isReportKind
+          ? (merged as SiteReportPayload).weather ?? existing.weather
+          : existing.weather,
+        authorName: isReportKind
+          ? (merged as SiteReportPayload).author ?? existing.authorName
+          : existing.authorName,
         updatedById: input.userId,
       },
     });

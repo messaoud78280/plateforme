@@ -18,6 +18,7 @@ import {
   codeFromScopeName,
   formatUnscopedHumanMessage,
   type CardStatusLabel,
+  type ChantierWorkflowStep,
   type ProjectWorkspace,
   type ScopeWorkspace,
   type UnscopedItem,
@@ -74,22 +75,40 @@ export function ProjectPreparationOverview({
     workspace.global.primaryQuoteId;
   const [globalBusy, setGlobalBusy] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
-  const globalReady = [
-    workspace.global.metre,
-    workspace.global.devis,
-    workspace.global.planning,
-  ].filter((c) => c.ready).length;
+  const workflow = workspace.global.workflow ?? [];
+  const workflowReady = workflow.filter((s) => s.ready).length;
 
   async function createGlobalPrep() {
     const quoteId = workspace.global.primaryQuoteId ?? primaryUnscopedQuoteId;
-    if (!quoteId) return;
     setGlobalBusy(true);
     setGlobalError(null);
     try {
+      // Rattacher d’abord une visite suggérée si besoin (jamais Nouvelle visite)
+      if (!workspace.global.visitId && workspace.global.suggestedVisitId) {
+        const attach = await fetch(
+          `/api/projets/${workspace.projectId}/global-prep`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "attach_visit",
+              attachVisitId: workspace.global.suggestedVisitId,
+              quoteId: quoteId ?? undefined,
+            }),
+          },
+        );
+        const attachData = await attach.json().catch(() => null);
+        if (!attach.ok) {
+          throw new Error(attachData?.error ?? "Rattachement visite impossible");
+        }
+      }
+      if (!quoteId && !workspace.global.metre.ready) {
+        throw new Error("Aucun devis rattaché pour générer le métré / planning");
+      }
       const res = await fetch(`/api/projets/${workspace.projectId}/global-prep`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quoteId }),
+        body: JSON.stringify({ quoteId: quoteId ?? undefined }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "Création impossible");
@@ -99,6 +118,143 @@ export function ProjectPreparationOverview({
     } finally {
       setGlobalBusy(false);
     }
+  }
+
+  async function attachSuggestedVisit() {
+    if (!workspace.global.suggestedVisitId) return;
+    setGlobalBusy(true);
+    setGlobalError(null);
+    try {
+      const res = await fetch(`/api/projets/${workspace.projectId}/global-prep`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "attach_visit",
+          attachVisitId: workspace.global.suggestedVisitId,
+          quoteId: workspace.global.primaryQuoteId ?? undefined,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error ?? "Rattachement impossible");
+      router.refresh();
+    } catch (e) {
+      setGlobalError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setGlobalBusy(false);
+    }
+  }
+
+  async function createFollowUp() {
+    setGlobalBusy(true);
+    setGlobalError(null);
+    try {
+      const res = await fetch(
+        `/api/projets/${workspace.projectId}/planning-suivi`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        },
+      );
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error ?? "Création suivi impossible");
+      const href =
+        data?.href ??
+        `/dashboard/projets/${workspace.projectId}/suivi-planning`;
+      router.push(href);
+    } catch (e) {
+      setGlobalError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setGlobalBusy(false);
+    }
+  }
+
+  async function createCompteRendu() {
+    setGlobalBusy(true);
+    setGlobalError(null);
+    try {
+      const res = await fetch(
+        `/api/projets/${workspace.projectId}/site-documents`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            kind: "COMPTE_RENDU",
+            title: "Compte rendu de chantier",
+          }),
+        },
+      );
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error ?? "Création document impossible");
+      const id = data?.document?.id ?? data?.id;
+      if (id) {
+        router.push(
+          `/dashboard/projets/${workspace.projectId}/documents-chantier/${id}`,
+        );
+      } else {
+        router.push(`/dashboard/projets/${workspace.projectId}/documents-chantier`);
+      }
+    } catch (e) {
+      setGlobalError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setGlobalBusy(false);
+    }
+  }
+
+  async function createNotice() {
+    setGlobalBusy(true);
+    setGlobalError(null);
+    try {
+      const res = await fetch(
+        `/api/projets/${workspace.projectId}/site-documents`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            kind: "NOTICE",
+            title: "Notice explicative du chantier",
+          }),
+        },
+      );
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error ?? "Création notice impossible");
+      const id = data?.document?.id ?? data?.id;
+      if (id) {
+        router.push(
+          `/dashboard/projets/${workspace.projectId}/documents-chantier/${id}`,
+        );
+      } else {
+        router.push(`/dashboard/projets/${workspace.projectId}/documents-chantier`);
+      }
+    } catch (e) {
+      setGlobalError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setGlobalBusy(false);
+    }
+  }
+
+  async function runWorkflowAction(step: ChantierWorkflowStep) {
+    if (step.primaryAction === "attach_visit") {
+      await attachSuggestedVisit();
+      return;
+    }
+    if (step.primaryAction === "create_global_prep") {
+      await createGlobalPrep();
+      return;
+    }
+    if (step.primaryAction === "create_follow_up") {
+      await createFollowUp();
+      return;
+    }
+    if (step.primaryAction === "create_compte_rendu") {
+      await createCompteRendu();
+      return;
+    }
+    if (step.primaryAction === "create_notice") {
+      await createNotice();
+      return;
+    }
+    if (step.href) router.push(step.href);
   }
 
   function openCreate(prefill?: string) {
@@ -127,8 +283,8 @@ export function ProjectPreparationOverview({
             Préparation & conduite de chantier
           </h2>
           <p className="mt-1 text-[13px] text-slate-600">
-            Un métré, un devis, un planning pour tout le chantier — les lots
-            structurent les phases.
+            Dossier unique : visite → métré → devis → planning → suivi → compte
+            rendu → notice. Les lots filtrent, ils ne dupliquent pas.
           </p>
         </div>
         {canEdit && workspace.scopes.length > 0 ? (
@@ -145,50 +301,77 @@ export function ProjectPreparationOverview({
 
       <div className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-3">
         <p className="text-[12.5px] font-semibold text-slate-800">
-          Pilotage chantier :{" "}
-          <span className="tabular-nums text-[#1e3a5f]">{globalReady} / 3</span>{" "}
-          piliers prêts
+          Chaîne chantier :{" "}
+          <span className="tabular-nums text-[#1e3a5f]">
+            {workflowReady} / {Math.max(workflow.length, 1)}
+          </span>{" "}
+          étapes prêtes
         </p>
       </div>
 
-      <div className="mt-4 grid gap-2 sm:grid-cols-3">
-        <PrepCard card={workspace.global.metre} />
-        <PrepCard card={workspace.global.devis} />
-        <PrepCard card={workspace.global.planning} />
-      </div>
-
-      {canEdit &&
-      workspace.global.primaryQuoteId &&
-      (!workspace.global.metre.ready || !workspace.global.planning.ready) ? (
-        <div className="mt-3 flex flex-col gap-2 rounded-xl border border-[#1e3a5f]/15 bg-[rgba(30,58,95,0.03)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-[13px] font-semibold text-[#1e3a5f]">
-              Créer le métré et le planning depuis le devis
-            </p>
-            <p className="mt-0.5 text-[12.5px] text-slate-600">
-              Reprend les quantités, postes et contraintes du devis
-              {workspace.global.devis.title !== "Non créé"
-                ? ` (${workspace.global.devis.title})`
-                : ""}
-              . Un seul planning global — les lots restent des phases.
-            </p>
-            {globalError ? (
-              <p className="mt-1 text-[12.5px] text-red-700">{globalError}</p>
-            ) : null}
-          </div>
-          <button
-            type="button"
-            disabled={globalBusy}
-            onClick={() => void createGlobalPrep()}
-            className="shrink-0 rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-[12.5px] font-semibold text-white hover:bg-[#152a45] disabled:opacity-50"
+      <ol className="mt-4 space-y-2">
+        {workflow.map((step) => (
+          <li
+            key={step.id}
+            className={cn(
+              "flex flex-col gap-2 rounded-xl border px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between",
+              step.ready
+                ? "border-emerald-200/80 bg-emerald-50/40"
+                : "border-slate-200/90 bg-white",
+            )}
           >
-            {globalBusy
-              ? "Création…"
-              : !workspace.global.metre.ready
-                ? "Créer métré + planning"
-                : "Créer le planning global"}
-          </button>
-        </div>
+            <div className="min-w-0">
+              <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                {step.label}
+              </p>
+              <p className="mt-0.5 text-[13.5px] font-semibold text-slate-900">
+                {step.ready ? "✓ " : ""}
+                {step.title}
+              </p>
+              {step.detail ? (
+                <p className="mt-0.5 text-[12px] text-slate-500">{step.detail}</p>
+              ) : null}
+            </div>
+            {canEdit || step.href ? (
+              <div className="flex shrink-0 flex-wrap gap-2">
+                {step.ready && step.href ? (
+                  <Link
+                    href={step.href}
+                    className="rounded-lg border border-[#1e3a5f]/20 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/[0.03]"
+                  >
+                    Ouvrir
+                  </Link>
+                ) : null}
+                {canEdit &&
+                step.primaryAction &&
+                step.primaryAction !== "open" ? (
+                  <button
+                    type="button"
+                    disabled={globalBusy}
+                    onClick={() => void runWorkflowAction(step)}
+                    className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-[12.5px] font-semibold text-white hover:bg-[#152a45] disabled:opacity-50"
+                  >
+                    {globalBusy ? "…" : step.actionLabel}
+                  </button>
+                ) : null}
+                {!step.ready &&
+                step.primaryAction === "open" &&
+                step.href ? (
+                  <Link
+                    href={step.href}
+                    className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-[12.5px] font-semibold text-white hover:bg-[#152a45]"
+                  >
+                    {step.actionLabel}
+                  </Link>
+                ) : null}
+              </div>
+            ) : null}
+          </li>
+        ))}
+      </ol>
+
+      {globalError ? (
+        <p className="mt-2 text-[12.5px] text-red-700">{globalError}</p>
       ) : null}
 
       {hasUnscoped ? (
@@ -429,50 +612,22 @@ function EmptyPreparationState({
 
 function ScopeBlock({ scope }: { scope: ScopeWorkspace }) {
   return (
-    <div className="rounded-2xl border border-slate-200/90 bg-slate-50/40 p-3.5 sm:p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-slate-400">
-            {scope.code}
-          </p>
-          <Link
-            href={scope.href}
-            className="text-[15px] font-semibold text-[#1e3a5f] hover:underline"
-          >
-            {scope.name}
-          </Link>
-          <p className="mt-0.5 text-[11.5px] text-slate-500">
-            {scope.progress.ready}/{scope.progress.total} étapes prêtes
-          </p>
-        </div>
-        <Link
-          href={scope.href}
-          className="rounded-lg border border-[#1e3a5f]/15 bg-white px-3 py-1.5 text-[12px] font-semibold text-[#1e3a5f] transition hover:border-[#1e3a5f]/35"
-        >
-          Ouvrir
-        </Link>
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200/90 bg-slate-50/50 px-3.5 py-2.5">
+      <div className="min-w-0">
+        <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-slate-400">
+          {scope.code}
+        </p>
+        <p className="text-[13.5px] font-semibold text-[#1e3a5f]">{scope.name}</p>
+        <p className="mt-0.5 text-[11.5px] text-slate-500">
+          Phase / filtre — pas de métré ni planning séparés
+        </p>
       </div>
-
-      {scope.alerts.filter((a) => a.level === "warning").length ? (
-        <ul className="mt-2 space-y-1">
-          {scope.alerts
-            .filter((a) => a.level === "warning")
-            .map((a) => (
-              <li
-                key={a.message}
-                className="rounded-lg bg-amber-50 px-2.5 py-1.5 text-[12px] text-amber-950"
-              >
-                {a.message}
-              </li>
-            ))}
-        </ul>
-      ) : null}
-
-      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-        {scope.cards.map((card) => (
-          <PrepCard key={card.kind} card={card} />
-        ))}
-      </div>
+      <Link
+        href={scope.href}
+        className="rounded-lg border border-[#1e3a5f]/15 bg-white px-3 py-1.5 text-[12px] font-semibold text-[#1e3a5f] transition hover:border-[#1e3a5f]/35"
+      >
+        Filtrer
+      </Link>
     </div>
   );
 }

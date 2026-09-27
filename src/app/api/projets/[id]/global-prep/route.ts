@@ -71,9 +71,47 @@ export async function POST(req: Request, ctx: Ctx) {
   const body = (await req.json().catch(() => null)) as {
     quoteId?: string;
     forceNewPlan?: boolean;
+    /** Rattache une visite existante au chantier (jamais de nouvelle visite). */
+    attachVisitId?: string;
+    action?: "attach_visit" | "create_prep";
   } | null;
 
   try {
+    if (body?.action === "attach_visit" || body?.attachVisitId) {
+      const visitId = body.attachVisitId?.trim();
+      if (!visitId) {
+        return NextResponse.json({ error: "attachVisitId requis" }, { status: 400 });
+      }
+      const visit = await prisma.siteVisit.findFirst({
+        where: { id: visitId, organizationId: project.organizationId },
+        select: { id: true, projectId: true, commercialQuoteId: true },
+      });
+      if (!visit) {
+        return NextResponse.json({ error: "Visite introuvable" }, { status: 404 });
+      }
+      if (visit.projectId && visit.projectId !== projectId) {
+        return NextResponse.json(
+          { error: "Cette visite est déjà rattachée à un autre chantier" },
+          { status: 409 },
+        );
+      }
+      const quoteId = body.quoteId?.trim() || null;
+      await prisma.siteVisit.update({
+        where: { id: visit.id },
+        data: {
+          projectId,
+          ...(quoteId && !visit.commercialQuoteId
+            ? { commercialQuoteId: quoteId }
+            : {}),
+        },
+      });
+      return NextResponse.json({
+        ok: true,
+        attachedVisitId: visit.id,
+        projectId,
+      });
+    }
+
     const result = await createGlobalPrepFromQuote({
       orgId: project.organizationId,
       projectId,

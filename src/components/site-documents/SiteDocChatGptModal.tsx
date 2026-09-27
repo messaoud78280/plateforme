@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 type Props = {
   projectId: string;
   docId: string;
-  kind: "COMPTE_RENDU" | "PPSPS";
+  kind: "COMPTE_RENDU" | "NOTICE" | "PPSPS";
   open: boolean;
   mode: "prepare" | "import";
   onClose: () => void;
@@ -111,9 +111,11 @@ export function SiteDocChatGptModal({
 
   const title =
     mode === "prepare"
-      ? kind === "COMPTE_RENDU"
-        ? "Préparer pour ChatGPT"
-        : "Préparer le PPSPS pour ChatGPT"
+      ? kind === "PPSPS"
+        ? "Préparer le PPSPS pour ChatGPT"
+        : kind === "NOTICE"
+          ? "Préparer la notice pour ChatGPT"
+          : "Préparer pour ChatGPT"
       : "Importer la réponse ChatGPT";
 
   return (
@@ -167,9 +169,9 @@ export function SiteDocChatGptModal({
                 onChange={(e) => setRaw(e.target.value)}
                 rows={12}
                 placeholder={
-                  kind === "COMPTE_RENDU"
-                    ? '{ "format": "bework_site_report_v1", ... }'
-                    : '{ "format": "bework_ppsps_v1", ... }'
+                  kind === "PPSPS"
+                    ? '{ "format": "bework_ppsps_v1", ... }'
+                    : '{ "format": "bework_site_report_v1", ... }'
                 }
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-3 font-mono text-[12.5px] text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-[#1e3a5f]/30"
               />

@@ -6,9 +6,9 @@ import { DEMO_WATERMARK } from "@/lib/preparation/types";
  * Visible en regardant la page, sans gêner la lecture des montants.
  */
 export function drawDraftWatermark(doc: jsPDF, pageW: number, pageH: number) {
-  doc.setTextColor(242, 244, 247);
+  doc.setTextColor(244, 246, 249);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(32);
+  doc.setFontSize(30);
   doc.text("BROUILLON", pageW / 2, pageH / 2, {
     align: "center",
     angle: 28,
@@ -16,17 +16,15 @@ export function drawDraftWatermark(doc: jsPDF, pageW: number, pageH: number) {
 }
 
 /**
- * Filigrane devis de démonstration — visible sur chaque page, non contractuel.
+ * Filigrane devis de démonstration — très léger, lisibilité prioritaire.
+ * Le badge d’en-tête porte l’information principale.
  */
 export function drawDemoWatermark(doc: jsPDF, pageW: number, pageH: number) {
-  doc.setTextColor(248, 236, 220);
+  doc.setTextColor(250, 246, 240);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
+  doc.setFontSize(18);
   doc.text(DEMO_WATERMARK, pageW / 2, pageH / 2, {
     align: "center",
     angle: 28,
   });
-  doc.setTextColor(180, 120, 40);
-  doc.setFontSize(8);
-  doc.text(DEMO_WATERMARK, pageW / 2, 8, { align: "center" });
 }

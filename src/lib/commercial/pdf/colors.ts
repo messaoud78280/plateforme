@@ -1,11 +1,17 @@
-/** Couleurs PDF devis — accent entreprise + teintes. */
+/** Couleurs PDF devis — accent entreprise + teintes premium BTP. */
 export type Rgb = [number, number, number];
 
+/** Bleu nuit — titres, en-têtes, structure. */
 export const DEFAULT_BRAND: Rgb = [30, 58, 95];
+/** Bleu secondaire plus vif — filets, badges discrets. */
+export const BRAND_BRIGHT: Rgb = [37, 99, 145];
+/** Orange chantier — accents, lots, démo. */
+export const ACCENT_ORANGE: Rgb = [196, 110, 42];
 export const SLATE: Rgb = [71, 85, 105];
 export const INK: Rgb = [15, 23, 42];
 export const MUTED: Rgb = [148, 163, 184];
 export const RULE: Rgb = [226, 232, 240];
+export const WASH_GRAY: Rgb = [248, 250, 252];
 export const WHITE: Rgb = [255, 255, 255];
 
 export function parseHexColor(hex: string | null | undefined, fallback: Rgb = DEFAULT_BRAND): Rgb {

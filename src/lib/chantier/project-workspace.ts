@@ -170,6 +170,24 @@ export function codeFromScopeName(name: string): string {
   return (initials.length >= 2 ? initials : words[0]!).slice(0, 12);
 }
 
+/** Code stable pour une section de devis (« Lot 01 — … » → L01). */
+export function codeFromSectionTitle(title: string, fallbackIndex: number): string {
+  const lotNum = title.match(/\bLot\s*0*(\d+)\b/i);
+  if (lotNum?.[1]) return `L${String(lotNum[1]).padStart(2, "0")}`;
+  const base = codeFromScopeName(title);
+  if (base && base !== "LOT") return base.slice(0, 12);
+  return `L${String(fallbackIndex + 1).padStart(2, "0")}`;
+}
+
+export function normalizeLotLabel(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
 function humanUnscopedSummary(u: {
   studies: number;
   schedulePlans: number;
@@ -276,7 +294,13 @@ function buildScopeCards(input: {
       message: "Aucun planning de référence — génération possible depuis le métré.",
     });
   }
-  if (!study) {
+  if (!study && quote) {
+    alerts.push({
+      level: "info",
+      message:
+        "Devis de référence prêt — créez un métré pour générer le planning à partir des postes.",
+    });
+  } else if (!study) {
     alerts.push({
       level: "info",
       message: "Aucun métré rattaché à ce lot de travaux.",
@@ -412,11 +436,25 @@ function buildScopeCards(input: {
           ? `/dashboard/visites-metres/etudes/${plan.studyId}/planning/${plan.id}`
           : study
             ? `/dashboard/visites-metres/etudes/${study.id}`
-            : null,
-      detail: plan ? planningDetail : "À générer",
+            : quote
+              ? `/dashboard/visites-metres/nouveau?projectId=${encodeURIComponent(input.projectId)}&scopeId=${encodeURIComponent(input.scopeId)}&fromQuoteId=${encodeURIComponent(quote.id)}`
+              : null,
+      detail: plan
+        ? planningDetail
+        : study
+          ? "À générer"
+          : quote
+            ? "Accessible — via métré à partir du devis"
+            : "À générer",
       syncState: planningSync,
       statusLabel: statusLabelFromSync(planningSync, "planning"),
-      actionLabel: plan ? "Ouvrir" : "Générer un planning",
+      actionLabel: plan
+        ? "Ouvrir"
+        : study
+          ? "Générer un planning"
+          : quote
+            ? "Préparer le planning"
+            : "Générer un planning",
       ready: !!plan && planningSync === "A_JOUR",
       syncHint: planningHint,
       isReference: !!(plan && input.refs.planId === plan.id),
@@ -583,9 +621,15 @@ export async function getProjectWorkspace(
     };
   });
 
+  const referencedQuoteIds = new Set(
+    scopes.map((s) => s.referenceQuoteId).filter((id): id is string => Boolean(id)),
+  );
   const unscopedStudies = studies.filter((s) => !s.scopeId);
   const unscopedPlans = plans.filter((p) => !p.scopeId);
-  const unscopedQuotes = quotes.filter((q) => !q.scopeId);
+  // Un devis déjà en référence d’un lot n’est plus « à organiser ».
+  const unscopedQuotes = quotes.filter(
+    (q) => !q.scopeId && !referencedQuoteIds.has(q.id),
+  );
 
   const items: UnscopedItem[] = [
     ...unscopedQuotes.map((q) => ({
@@ -820,7 +864,9 @@ export async function attachQuoteToScope(input: {
 
 /**
  * Définit le devis de référence d’un lot.
- * Le devis doit déjà appartenir au périmètre (scopeId).
+ * Le devis doit appartenir au même chantier (projectId).
+ * Membership scopeId facultatif : un devis multi-sections peut être
+ * référence de plusieurs lots sans y être « membre » unique.
  * Ne retire aucun autre devis du lot.
  */
 export async function setScopeReferenceQuote(input: {
@@ -845,15 +891,18 @@ export async function setScopeReferenceQuote(input: {
   if (quote.projectId && quote.projectId !== scope.projectId) {
     throw new Error("Ce devis appartient à un autre chantier");
   }
-  if (quote.scopeId !== scope.id) {
-    throw new Error(
-      "Le devis de référence doit d’abord être rattaché à ce lot de travaux",
-    );
-  }
 
-  await prisma.projectScope.update({
-    where: { id: scope.id },
-    data: { referenceQuoteId: quote.id },
+  await prisma.$transaction(async (tx) => {
+    if (!quote.projectId) {
+      await tx.commercialQuote.update({
+        where: { id: quote.id },
+        data: { projectId: scope.projectId },
+      });
+    }
+    await tx.projectScope.update({
+      where: { id: scope.id },
+      data: { referenceQuoteId: quote.id },
+    });
   });
 }
 
@@ -911,16 +960,209 @@ export function assertQuoteScopeConsistency(input: {
   if (input.quote.projectId && input.quote.projectId !== input.scope.projectId) {
     return { ok: false, error: "Projet différent" };
   }
-  if (input.quote.scopeId && input.quote.scopeId !== input.scope.id) {
+  // Membership scopeId facultatif si même chantier (devis multi-lots).
+  if (
+    input.quote.scopeId &&
+    input.quote.scopeId !== input.scope.id &&
+    input.quote.projectId &&
+    input.quote.projectId !== input.scope.projectId
+  ) {
     return { ok: false, error: "Membership hors périmètre" };
   }
-  if (
-    input.scope.referenceQuoteId === input.quote.id &&
-    input.quote.scopeId !== input.scope.id
-  ) {
-    return { ok: false, error: "Référence sans membership" };
-  }
   return { ok: true };
+}
+
+export type QuoteSectionScopePreview = {
+  sectionId: string;
+  title: string;
+  code: string;
+  lineCount: number;
+  selected: boolean;
+  /** Lot existant au nom correspondant — rattachement sans doublon. */
+  existingScopeId: string | null;
+  existingScopeName: string | null;
+  action: "create" | "link_existing";
+};
+
+export async function previewScopesFromQuoteSections(input: {
+  orgId: string;
+  projectId: string;
+  quoteId: string;
+}): Promise<{
+  quote: { id: string; number: string; subject: string };
+  sections: QuoteSectionScopePreview[];
+}> {
+  const quote = await prisma.commercialQuote.findFirst({
+    where: {
+      id: input.quoteId,
+      organizationId: input.orgId,
+      OR: [{ projectId: input.projectId }, { projectId: null }],
+    },
+    select: {
+      id: true,
+      number: true,
+      subject: true,
+      projectId: true,
+      currentVersionId: true,
+    },
+  });
+  if (!quote?.currentVersionId) throw new Error("Devis introuvable sur ce chantier");
+
+  const [sections, existingScopes] = await Promise.all([
+    prisma.commercialQuoteSection.findMany({
+      where: { versionId: quote.currentVersionId, organizationId: input.orgId },
+      select: {
+        id: true,
+        title: true,
+        sortOrder: true,
+        _count: { select: { lines: true } },
+      },
+      orderBy: { sortOrder: "asc" },
+    }),
+    prisma.projectScope.findMany({
+      where: {
+        projectId: input.projectId,
+        organizationId: input.orgId,
+        status: "ACTIVE",
+      },
+      select: { id: true, name: true, code: true },
+    }),
+  ]);
+
+  if (sections.length === 0) {
+    throw new Error("Ce devis n’a aucune section / lot structuré");
+  }
+
+  const byName = new Map(
+    existingScopes.map((s) => [normalizeLotLabel(s.name), s] as const),
+  );
+  const byCode = new Map(existingScopes.map((s) => [s.code.toUpperCase(), s]));
+
+  return {
+    quote: { id: quote.id, number: quote.number, subject: quote.subject },
+    sections: sections.map((sec, index) => {
+      const code = codeFromSectionTitle(sec.title, index);
+      const existing =
+        byName.get(normalizeLotLabel(sec.title)) ??
+        byCode.get(code.toUpperCase()) ??
+        null;
+      return {
+        sectionId: sec.id,
+        title: sec.title,
+        code,
+        lineCount: sec._count.lines,
+        selected: true,
+        existingScopeId: existing?.id ?? null,
+        existingScopeName: existing?.name ?? null,
+        action: existing ? ("link_existing" as const) : ("create" as const),
+      };
+    }),
+  };
+}
+
+/**
+ * Crée / rattache des lots depuis les sections d’un devis.
+ * - pas de doublon si lot homonyme ;
+ * - devis en référence sur chaque lot retenu ;
+ * - membership scopeId = premier lot créé/lié (si devis encore orphelin).
+ */
+export async function createScopesFromQuoteSections(input: {
+  orgId: string;
+  projectId: string;
+  quoteId: string;
+  sectionIds: string[];
+}): Promise<{
+  created: Array<{ scopeId: string; name: string; code: string; created: boolean }>;
+  quoteId: string;
+  primaryScopeId: string | null;
+}> {
+  const preview = await previewScopesFromQuoteSections(input);
+  const wanted = new Set(input.sectionIds);
+  const chosen = preview.sections.filter((s) => wanted.has(s.sectionId) && s.selected);
+  if (chosen.length === 0) {
+    throw new Error("Sélectionnez au moins une section");
+  }
+
+  const quote = await prisma.commercialQuote.findFirst({
+    where: { id: input.quoteId, organizationId: input.orgId },
+    select: { id: true, projectId: true, scopeId: true },
+  });
+  if (!quote) throw new Error("Devis introuvable");
+
+  let displayOrder = await prisma.projectScope.count({
+    where: { projectId: input.projectId, organizationId: input.orgId },
+  });
+
+  const results: Array<{
+    scopeId: string;
+    name: string;
+    code: string;
+    created: boolean;
+  }> = [];
+
+  for (const sec of chosen) {
+    let scopeId = sec.existingScopeId;
+    let created = false;
+    if (scopeId) {
+      // Lot existant — pas de doublon
+    } else {
+      // Éviter collision de code
+      let code = sec.code;
+      const codeTaken = await prisma.projectScope.findUnique({
+        where: {
+          projectId_code: { projectId: input.projectId, code },
+        },
+        select: { id: true },
+      });
+      if (codeTaken) {
+        code = `${sec.code}-${String(displayOrder + 1).padStart(2, "0")}`.slice(0, 32);
+      }
+      const ensured = await ensureProjectScope({
+        orgId: input.orgId,
+        projectId: input.projectId,
+        code,
+        name: sec.title,
+        description: `Lot créé depuis le devis ${preview.quote.number} — section « ${sec.title} ».`,
+        displayOrder,
+      });
+      scopeId = ensured.id;
+      created = ensured.created;
+      displayOrder += 1;
+    }
+
+    await setScopeReferenceQuote({
+      orgId: input.orgId,
+      scopeId: scopeId!,
+      quoteId: quote.id,
+    });
+
+    results.push({
+      scopeId: scopeId!,
+      name: sec.existingScopeName ?? sec.title,
+      code: sec.code,
+      created,
+    });
+  }
+
+  const primaryScopeId = results[0]?.scopeId ?? null;
+
+  // Membership : premier lot si le devis n’est encore rattaché à aucun lot
+  if (primaryScopeId && !quote.scopeId) {
+    await prisma.commercialQuote.update({
+      where: { id: quote.id },
+      data: {
+        projectId: input.projectId,
+        scopeId: primaryScopeId,
+      },
+    });
+  } else if (!quote.projectId) {
+    await prisma.commercialQuote.update({
+      where: { id: quote.id },
+      data: { projectId: input.projectId },
+    });
+  }
+
+  return { created: results, quoteId: quote.id, primaryScopeId };
 }
 
 export async function attachSchedulePlanToScope(input: {

@@ -5330,8 +5330,10 @@ model ProjectScope {
   /// Hiérarchie future (nullable en V1).
   parentId       String?
   /// Baselines de référence (optionnelles — un scope peut avoir N objets).
+  /// referenceQuoteId n’est PAS unique : un même devis multi-sections peut
+  /// servir de référence à plusieurs lots créés depuis ses sections.
   referenceStudyId         String?  @unique
-  referenceQuoteId         String?  @unique
+  referenceQuoteId         String?
   referenceSchedulePlanId  String?  @unique
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt

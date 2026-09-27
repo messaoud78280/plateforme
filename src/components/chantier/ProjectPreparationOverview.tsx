@@ -8,6 +8,7 @@ import {
   ClipboardList,
   FileText,
   FolderKanban,
+  Layers,
   Map,
   Plus,
 } from "lucide-react";
@@ -23,6 +24,17 @@ import {
   type WorkspaceCard,
   type WorkspaceCardKind,
 } from "@/lib/chantier/project-workspace";
+
+type QuoteSectionPreview = {
+  sectionId: string;
+  title: string;
+  code: string;
+  lineCount: number;
+  selected: boolean;
+  existingScopeId: string | null;
+  existingScopeName: string | null;
+  action: "create" | "link_existing";
+};
 
 const STATUS_TONE: Record<CardStatusLabel, string> = {
   "À jour": "bg-emerald-50 text-emerald-800 border-emerald-200/80",
@@ -51,16 +63,27 @@ export function ProjectPreparationOverview({
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
   const [classifyOpen, setClassifyOpen] = useState(false);
+  const [fromQuoteOpen, setFromQuoteOpen] = useState(false);
+  const [fromQuoteId, setFromQuoteId] = useState<string | null>(null);
   const [createPrefill, setCreatePrefill] = useState("");
 
   const unscopedMsg = formatUnscopedHumanMessage(workspace.unscoped);
   const hasUnscoped = workspace.unscoped.items.length > 0;
+  const primaryUnscopedQuoteId =
+    workspace.unscoped.items.find((i) => i.kind === "quote")?.id ?? null;
   const totalReady = workspace.scopes.reduce((n, s) => n + s.progress.ready, 0);
   const totalSteps = workspace.scopes.reduce((n, s) => n + s.progress.total, 0);
 
   function openCreate(prefill?: string) {
     setCreatePrefill(prefill ?? "");
     setCreateOpen(true);
+  }
+
+  function openCreateLotsFromQuote(quoteId?: string | null) {
+    const id = quoteId ?? primaryUnscopedQuoteId;
+    if (!id) return;
+    setFromQuoteId(id);
+    setFromQuoteOpen(true);
   }
 
   return (
@@ -117,15 +140,37 @@ export function ProjectPreparationOverview({
             {unscopedMsg ? (
               <p className="mt-0.5 text-[12.5px] text-amber-900/85">{unscopedMsg}</p>
             ) : null}
+            {primaryUnscopedQuoteId ? (
+              <p className="mt-0.5 text-[12.5px] text-amber-900/85">
+                Créez les lots automatiquement depuis les sections du devis.
+              </p>
+            ) : null}
           </div>
           {canEdit ? (
-            <button
-              type="button"
-              onClick={() => setClassifyOpen(true)}
-              className="shrink-0 rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-[12.5px] font-semibold text-white hover:bg-[#152a45]"
-            >
-              Classer {workspace.unscoped.items.length === 1 ? "maintenant" : "les éléments"}
-            </button>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              {primaryUnscopedQuoteId ? (
+                <button
+                  type="button"
+                  onClick={() => openCreateLotsFromQuote(primaryUnscopedQuoteId)}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-[12.5px] font-semibold text-white hover:bg-[#152a45]"
+                >
+                  <Layers className="h-3.5 w-3.5" aria-hidden />
+                  Créer les lots depuis le devis
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => setClassifyOpen(true)}
+                className={cn(
+                  "rounded-lg px-3.5 py-2 text-[12.5px] font-semibold",
+                  primaryUnscopedQuoteId
+                    ? "border border-amber-300/80 bg-white text-amber-950 hover:bg-amber-50"
+                    : "bg-[#1e3a5f] text-white hover:bg-[#152a45]",
+                )}
+              >
+                Classer {workspace.unscoped.items.length === 1 ? "maintenant" : "les éléments"}
+              </button>
+            </div>
           ) : null}
         </div>
       ) : null}
@@ -134,10 +179,12 @@ export function ProjectPreparationOverview({
         <EmptyPreparationState
           canEdit={canEdit}
           hasUnscoped={hasUnscoped}
+          hasUnscopedQuote={!!primaryUnscopedQuoteId}
           onCreate={() =>
             openCreate(workspace.unscoped.items[0]?.suggestedScopeName ?? "")
           }
           onClassify={() => setClassifyOpen(true)}
+          onCreateFromQuote={() => openCreateLotsFromQuote(primaryUnscopedQuoteId)}
         />
       ) : (
         <div className="mt-5 space-y-4">
@@ -169,6 +216,23 @@ export function ProjectPreparationOverview({
           router.refresh();
         }}
       />
+
+      {fromQuoteId ? (
+        <CreateLotsFromQuoteModal
+          open={fromQuoteOpen}
+          projectId={workspace.projectId}
+          quoteId={fromQuoteId}
+          onClose={() => {
+            setFromQuoteOpen(false);
+            setFromQuoteId(null);
+          }}
+          onDone={() => {
+            setFromQuoteOpen(false);
+            setFromQuoteId(null);
+            router.refresh();
+          }}
+        />
+      ) : null}
     </section>
   );
 }
@@ -222,13 +286,17 @@ function PreparationProgress({
 function EmptyPreparationState({
   canEdit,
   hasUnscoped,
+  hasUnscopedQuote,
   onCreate,
   onClassify,
+  onCreateFromQuote,
 }: {
   canEdit: boolean;
   hasUnscoped: boolean;
+  hasUnscopedQuote: boolean;
   onCreate: () => void;
   onClassify: () => void;
+  onCreateFromQuote: () => void;
 }) {
   return (
     <div className="mt-5 rounded-2xl border border-dashed border-[#1e3a5f]/20 bg-[rgba(30,58,95,0.02)] px-5 py-8 text-center sm:px-8">
@@ -239,20 +307,36 @@ function EmptyPreparationState({
         Aucun lot de travaux n’est encore défini.
       </p>
       <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-slate-600">
-        Organisez ce chantier par périmètre pour regrouper les plans, métrés, devis et
-        plannings.
+        {hasUnscopedQuote
+          ? "Votre devis contient déjà des sections : créez les lots en un clic pour débloquer la préparation et le planning."
+          : "Organisez ce chantier par périmètre pour regrouper les plans, métrés, devis et plannings."}
       </p>
       {canEdit ? (
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+          {hasUnscopedQuote ? (
+            <button
+              type="button"
+              onClick={onCreateFromQuote}
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-[#1e3a5f] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#152a45]"
+            >
+              <Layers className="h-4 w-4" aria-hidden />
+              Créer les lots depuis le devis
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={onCreate}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-[#1e3a5f] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#152a45]"
+            className={cn(
+              "inline-flex min-h-10 items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] font-semibold",
+              hasUnscopedQuote
+                ? "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                : "bg-[#1e3a5f] text-white hover:bg-[#152a45]",
+            )}
           >
             <Plus className="h-4 w-4" aria-hidden />
             Créer un périmètre
           </button>
-          {hasUnscoped ? (
+          {hasUnscoped && !hasUnscopedQuote ? (
             <button
               type="button"
               onClick={onClassify}
@@ -375,6 +459,211 @@ function PrepCard({ card }: { card: WorkspaceCard }) {
     );
   }
   return <div className={cn(cls, "opacity-90")}>{body}</div>;
+}
+
+function CreateLotsFromQuoteModal({
+  open,
+  projectId,
+  quoteId,
+  onClose,
+  onDone,
+}: {
+  open: boolean;
+  projectId: string;
+  quoteId: string;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [quoteLabel, setQuoteLabel] = useState("");
+  const [sections, setSections] = useState<QuoteSectionPreview[]>([]);
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    if (!open || !quoteId) return;
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    setSections([]);
+    setSelected(new Set());
+    setQuoteLabel("");
+
+    void (async () => {
+      try {
+        const res = await fetch(
+          `/api/projets/${projectId}/scopes/from-quote?quoteId=${encodeURIComponent(quoteId)}`,
+        );
+        const data = await res.json().catch(() => null);
+        if (!res.ok) {
+          throw new Error(data?.error ?? "Aperçu impossible");
+        }
+        if (cancelled) return;
+        const list = (data?.sections ?? []) as QuoteSectionPreview[];
+        setQuoteLabel(
+          [data?.quote?.number, data?.quote?.subject].filter(Boolean).join(" — "),
+        );
+        setSections(list);
+        setSelected(new Set(list.map((s) => s.sectionId)));
+      } catch (e) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : "Erreur");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, projectId, quoteId]);
+
+  function toggle(sectionId: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(sectionId)) next.delete(sectionId);
+      else next.add(sectionId);
+      return next;
+    });
+  }
+
+  async function submit() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/projets/${projectId}/scopes/from-quote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          quoteId,
+          sectionIds: [...selected],
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error ?? "Création impossible");
+      onDone();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const selectedCount = selected.size;
+  const createCount = sections.filter(
+    (s) => selected.has(s.sectionId) && s.action === "create",
+  ).length;
+  const linkCount = sections.filter(
+    (s) => selected.has(s.sectionId) && s.action === "link_existing",
+  ).length;
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Créer les lots depuis le devis"
+      description={
+        quoteLabel
+          ? `Aperçu des lots à partir de ${quoteLabel}. Décochez les sections à ignorer.`
+          : "Aperçu des lots à créer à partir des sections du devis."
+      }
+      size="md"
+      footer={
+        <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-[13px] font-medium text-slate-700"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            disabled={busy || loading || selectedCount === 0}
+            onClick={() => void submit()}
+            className="rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
+          >
+            {busy
+              ? "Création…"
+              : selectedCount === 0
+                ? "Sélectionnez un lot"
+                : `Valider (${selectedCount})`}
+          </button>
+        </div>
+      }
+    >
+      <div className="space-y-3">
+        {loading ? (
+          <p className="text-[13px] text-slate-500">Chargement des sections…</p>
+        ) : null}
+        {!loading && sections.length > 0 ? (
+          <>
+            <ul className="max-h-[min(360px,50vh)] space-y-2 overflow-y-auto">
+              {sections.map((sec) => {
+                const checked = selected.has(sec.sectionId);
+                return (
+                  <li key={sec.sectionId}>
+                    <label
+                      className={cn(
+                        "flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-2.5 transition",
+                        checked
+                          ? "border-[#1e3a5f]/25 bg-[rgba(30,58,95,0.03)]"
+                          : "border-slate-200 bg-white opacity-70",
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        className="mt-1"
+                        checked={checked}
+                        onChange={() => toggle(sec.sectionId)}
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-2">
+                          <span className="text-[10.5px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                            {sec.code}
+                          </span>
+                          {sec.action === "link_existing" ? (
+                            <span className="rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[10.5px] font-semibold text-sky-900">
+                              Lot existant — rattacher
+                            </span>
+                          ) : (
+                            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-900">
+                              À créer
+                            </span>
+                          )}
+                        </span>
+                        <span className="mt-0.5 block text-[13.5px] font-semibold text-slate-900">
+                          {sec.title}
+                        </span>
+                        <span className="mt-0.5 block text-[12px] text-slate-500">
+                          {sec.lineCount} poste{sec.lineCount > 1 ? "s" : ""}
+                          {sec.existingScopeName
+                            ? ` · rattachement à « ${sec.existingScopeName} »`
+                            : null}
+                        </span>
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="text-[12px] text-slate-500">
+              {createCount > 0
+                ? `${createCount} lot${createCount > 1 ? "s" : ""} à créer`
+                : "Aucun nouveau lot"}
+              {linkCount > 0
+                ? ` · ${linkCount} rattachement${linkCount > 1 ? "s" : ""} sans doublon`
+                : null}
+              . Le devis devient référence des lots retenus — montants inchangés.
+            </p>
+          </>
+        ) : null}
+        {error ? <p className="text-[12.5px] text-red-700">{error}</p> : null}
+      </div>
+    </Modal>
+  );
 }
 
 function CreateScopeModal({

@@ -70,9 +70,36 @@ export function ProjectPreparationOverview({
   const unscopedMsg = formatUnscopedHumanMessage(workspace.unscoped);
   const hasUnscoped = workspace.unscoped.items.length > 0;
   const primaryUnscopedQuoteId =
-    workspace.unscoped.items.find((i) => i.kind === "quote")?.id ?? null;
-  const totalReady = workspace.scopes.reduce((n, s) => n + s.progress.ready, 0);
-  const totalSteps = workspace.scopes.reduce((n, s) => n + s.progress.total, 0);
+    workspace.unscoped.items.find((i) => i.kind === "quote")?.id ??
+    workspace.global.primaryQuoteId;
+  const [globalBusy, setGlobalBusy] = useState(false);
+  const [globalError, setGlobalError] = useState<string | null>(null);
+  const globalReady = [
+    workspace.global.metre,
+    workspace.global.devis,
+    workspace.global.planning,
+  ].filter((c) => c.ready).length;
+
+  async function createGlobalPrep() {
+    const quoteId = workspace.global.primaryQuoteId ?? primaryUnscopedQuoteId;
+    if (!quoteId) return;
+    setGlobalBusy(true);
+    setGlobalError(null);
+    try {
+      const res = await fetch(`/api/projets/${workspace.projectId}/global-prep`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quoteId }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error ?? "Création impossible");
+      router.refresh();
+    } catch (e) {
+      setGlobalError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setGlobalBusy(false);
+    }
+  }
 
   function openCreate(prefill?: string) {
     setCreatePrefill(prefill ?? "");
@@ -100,7 +127,8 @@ export function ProjectPreparationOverview({
             Préparation & conduite de chantier
           </h2>
           <p className="mt-1 text-[13px] text-slate-600">
-            Plans, métrés, devis, planning et suivi réunis au même endroit.
+            Un métré, un devis, un planning pour tout le chantier — les lots
+            structurent les phases.
           </p>
         </div>
         {canEdit && workspace.scopes.length > 0 ? (
@@ -110,17 +138,57 @@ export function ProjectPreparationOverview({
             className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-[#1e3a5f]/20 bg-white px-3 py-2 text-[12.5px] font-semibold text-[#1e3a5f] transition hover:border-[#1e3a5f]/40 hover:bg-[#1e3a5f]/[0.03]"
           >
             <Plus className="h-3.5 w-3.5" aria-hidden />
-            Créer un périmètre
+            Créer une phase
           </button>
         ) : null}
       </div>
 
-      {workspace.scopes.length > 0 ? (
-        <PreparationProgress
-          ready={totalReady}
-          total={totalSteps}
-          scopes={workspace.scopes}
-        />
+      <div className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-3">
+        <p className="text-[12.5px] font-semibold text-slate-800">
+          Pilotage chantier :{" "}
+          <span className="tabular-nums text-[#1e3a5f]">{globalReady} / 3</span>{" "}
+          piliers prêts
+        </p>
+      </div>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        <PrepCard card={workspace.global.metre} />
+        <PrepCard card={workspace.global.devis} />
+        <PrepCard card={workspace.global.planning} />
+      </div>
+
+      {canEdit &&
+      workspace.global.primaryQuoteId &&
+      (!workspace.global.metre.ready || !workspace.global.planning.ready) ? (
+        <div className="mt-3 flex flex-col gap-2 rounded-xl border border-[#1e3a5f]/15 bg-[rgba(30,58,95,0.03)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[13px] font-semibold text-[#1e3a5f]">
+              Créer le métré et le planning depuis le devis
+            </p>
+            <p className="mt-0.5 text-[12.5px] text-slate-600">
+              Reprend les quantités, postes et contraintes du devis
+              {workspace.global.devis.title !== "Non créé"
+                ? ` (${workspace.global.devis.title})`
+                : ""}
+              . Un seul planning global — les lots restent des phases.
+            </p>
+            {globalError ? (
+              <p className="mt-1 text-[12.5px] text-red-700">{globalError}</p>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            disabled={globalBusy}
+            onClick={() => void createGlobalPrep()}
+            className="shrink-0 rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-[12.5px] font-semibold text-white hover:bg-[#152a45] disabled:opacity-50"
+          >
+            {globalBusy
+              ? "Création…"
+              : !workspace.global.metre.ready
+                ? "Créer métré + planning"
+                : "Créer le planning global"}
+          </button>
+        </div>
       ) : null}
 
       {hasUnscoped ? (
@@ -175,7 +243,21 @@ export function ProjectPreparationOverview({
         </div>
       ) : null}
 
-      {workspace.scopes.length === 0 ? (
+      {workspace.global.phases.length > 0 ? (
+        <div className="mt-5">
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+            Phases / lots (catégorisation)
+          </p>
+          <p className="mt-1 text-[12.5px] text-slate-500">
+            Structurent le contenu du chantier — ne créent pas de planning séparé.
+          </p>
+          <div className="mt-3 space-y-3">
+            {workspace.scopes.map((scope) => (
+              <ScopeBlock key={scope.id} scope={scope} />
+            ))}
+          </div>
+        </div>
+      ) : (
         <EmptyPreparationState
           canEdit={canEdit}
           hasUnscoped={hasUnscoped}
@@ -186,12 +268,6 @@ export function ProjectPreparationOverview({
           onClassify={() => setClassifyOpen(true)}
           onCreateFromQuote={() => openCreateLotsFromQuote(primaryUnscopedQuoteId)}
         />
-      ) : (
-        <div className="mt-5 space-y-4">
-          {workspace.scopes.map((scope) => (
-            <ScopeBlock key={scope.id} scope={scope} />
-          ))}
-        </div>
       )}
 
       <CreateScopeModal

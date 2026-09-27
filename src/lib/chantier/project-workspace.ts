@@ -77,11 +77,23 @@ export type UnscopedItem = {
   suggestedScopeName: string | null;
 };
 
+/** Pilotage global chantier (métré / devis / planning uniques). */
+export type ProjectGlobalWorkspace = {
+  metre: WorkspaceCard;
+  devis: WorkspaceCard;
+  planning: WorkspaceCard;
+  phases: Array<{ id: string; code: string; name: string; href: string }>;
+  canCreateFromQuote: boolean;
+  primaryQuoteId: string | null;
+};
+
 export type ProjectWorkspace = {
   projectId: string;
   title: string;
   chantierStatus: string;
   href: string;
+  /** Métré / devis / planning au niveau chantier (pas par lot). */
+  global: ProjectGlobalWorkspace;
   scopes: ScopeWorkspace[];
   unscoped: {
     studies: number;
@@ -90,6 +102,13 @@ export type ProjectWorkspace = {
     items: UnscopedItem[];
   };
 };
+
+const GLOBAL_STUDY_KIND = "bework_global_metre_v1";
+
+function isGlobalStudySources(sourcesJson: unknown): boolean {
+  if (!sourcesJson || typeof sourcesJson !== "object") return false;
+  return (sourcesJson as { kind?: string }).kind === GLOBAL_STUDY_KIND;
+}
 
 function asIso(v: Date | string | null | undefined): string | null {
   if (!v) return null;
@@ -562,6 +581,102 @@ export async function getProjectWorkspace(
     }),
   );
 
+  const globalStudy =
+    studies.find((s) => isGlobalStudySources(s.sourcesJson) && !s.scopeId) ??
+    studies.find((s) => !s.scopeId) ??
+    null;
+  const globalPlan =
+    plans.find(
+      (p) =>
+        p.scopeId == null &&
+        (p.status === "CURRENT" || p.revisionKind === "CURRENT") &&
+        (!globalStudy || p.studyId === globalStudy.id),
+    ) ??
+    plans.find((p) => p.scopeId == null && (!globalStudy || p.studyId === globalStudy.id)) ??
+    null;
+
+  const referencedQuoteIds = new Set(
+    scopes.map((s) => s.referenceQuoteId).filter((id): id is string => Boolean(id)),
+  );
+  const globalQuote =
+    quotes.find((q) => q.id === scopes[0]?.referenceQuoteId) ??
+    quotes.find((q) => referencedQuoteIds.has(q.id)) ??
+    quotes.find((q) => q.projectId === projectId) ??
+    quotes[0] ??
+    null;
+
+  const globalMetreCard: WorkspaceCard = {
+    kind: "metre",
+    label: "Métré global",
+    title: globalStudy?.title ?? "Non créé",
+    href: globalStudy
+      ? `/dashboard/visites-metres/etudes/${globalStudy.id}`
+      : null,
+    detail: globalStudy
+      ? `Version ${globalStudy.version}${
+          globalStudy._count.lines > 0
+            ? ` · ${globalStudy._count.lines} poste${globalStudy._count.lines > 1 ? "s" : ""}`
+            : ""
+        }`
+      : globalQuote
+        ? "À créer depuis la visite et le devis"
+        : "À créer ou importer",
+    syncState: globalStudy ? "A_JOUR" : "ABSENT",
+    statusLabel: globalStudy ? "À jour" : "À préparer",
+    actionLabel: globalStudy ? "Ouvrir" : "Créer le métré",
+    ready: !!globalStudy,
+    syncHint: null,
+    isReference: true,
+  };
+
+  const globalDevisCard: WorkspaceCard = {
+    kind: "devis",
+    label: "Devis global",
+    title: globalQuote?.number ?? "Non créé",
+    href: globalQuote
+      ? `/dashboard/devis-facturation/devis/${globalQuote.id}`
+      : `/dashboard/devis-facturation/devis/nouveau?projectId=${encodeURIComponent(projectId)}`,
+    detail: globalQuote
+      ? [euro(d(globalQuote.totalSellHt)), globalQuote.isDemonstration ? "démo" : null]
+          .filter(Boolean)
+          .join(" · ")
+      : "À rattacher",
+    syncState: globalQuote ? "A_JOUR" : "ABSENT",
+    statusLabel: globalQuote ? "À jour" : "À préparer",
+    actionLabel: globalQuote ? "Ouvrir" : "Créer un devis",
+    ready: !!globalQuote,
+    syncHint: null,
+    isReference: true,
+  };
+
+  const globalPlanningCard: WorkspaceCard = {
+    kind: "planning",
+    label: "Planning global",
+    title: globalPlan ? planningDisplayTitle(globalPlan) : "Non créé",
+    href:
+      globalPlan && globalStudy
+        ? `/dashboard/visites-metres/etudes/${globalPlan.studyId}/planning/${globalPlan.id}`
+        : globalStudy
+          ? `/dashboard/visites-metres/etudes/${globalStudy.id}`
+          : null,
+    detail: globalPlan
+      ? [
+          globalPlan.startDate ? fmtShortFr(asIso(globalPlan.startDate)) : null,
+          globalPlan.endDateBase ? `→ ${fmtShortFr(asIso(globalPlan.endDateBase))}` : null,
+        ]
+          .filter(Boolean)
+          .join(" ") || "Planning unique du chantier"
+      : globalQuote
+        ? "Accessible depuis le devis — un seul planning chantier"
+        : "À générer",
+    syncState: globalPlan ? "A_JOUR" : "ABSENT",
+    statusLabel: globalPlan ? "À jour" : "À préparer",
+    actionLabel: globalPlan ? "Ouvrir" : "Créer le planning",
+    ready: !!globalPlan,
+    syncHint: "Un seul planning pour tout le chantier — les lots sont des phases.",
+    isReference: true,
+  };
+
   const scopeWorkspaces: ScopeWorkspace[] = scopes.map((scope) => {
     const scopeStudies = studies.filter((s) => s.scopeId === scope.id);
     const refStudy =
@@ -578,33 +693,25 @@ export async function getProjectWorkspace(
     const refQuote =
       scopeQuotes.find((q) => q.id === scope.referenceQuoteId) ??
       scopeQuotes[0] ??
+      globalQuote ??
       null;
 
-    const scopePlans = plans.filter(
-      (p) =>
-        p.scopeId === scope.id ||
-        (refStudy && p.studyId === refStudy.id),
-    );
-    const refPlan =
-      scopePlans.find((p) => p.id === scope.referenceSchedulePlanId) ??
-      scopePlans[0] ??
-      null;
-
-    const { cards, alerts } = buildScopeCards({
+    // Pas de planning par lot : le planning est global chantier.
+    const { cards: rawCards, alerts } = buildScopeCards({
       projectId,
       scopeId: scope.id,
       study: refStudy,
       quote: refQuote,
       quotesCount: scopeQuotes.length,
-      plan: refPlan,
+      plan: null,
       planSource: refStudy ? planSourceByStudyId.get(refStudy.id) ?? null : null,
       refs: {
         studyId: scope.referenceStudyId,
         quoteId: scope.referenceQuoteId,
-        planId: scope.referenceSchedulePlanId,
+        planId: null,
       },
     });
-
+    const cards = rawCards.filter((c) => c.kind !== "planning" && c.kind !== "suivi");
     const ready = cards.filter((c) => c.ready).length;
 
     return {
@@ -616,19 +723,32 @@ export async function getProjectWorkspace(
       displayOrder: scope.displayOrder,
       href: `/dashboard/projets/${projectId}/preparation/${scope.id}`,
       cards,
-      alerts,
-      progress: { ready, total: cards.length },
+      alerts: [
+        ...alerts.filter((a) => !/planning/i.test(a.message)),
+        {
+          level: "info" as const,
+          message: "Phase du planning global — pas un planning séparé.",
+        },
+      ],
+      progress: { ready, total: Math.max(cards.length, 1) },
     };
   });
 
-  const referencedQuoteIds = new Set(
-    scopes.map((s) => s.referenceQuoteId).filter((id): id is string => Boolean(id)),
+  const unscopedStudies = studies.filter(
+    (s) => !s.scopeId && !isGlobalStudySources(s.sourcesJson),
   );
-  const unscopedStudies = studies.filter((s) => !s.scopeId);
-  const unscopedPlans = plans.filter((p) => !p.scopeId);
-  // Un devis déjà en référence d’un lot n’est plus « à organiser ».
+  const unscopedPlans = plans.filter(
+    (p) =>
+      !p.scopeId &&
+      p.status !== "ARCHIVED" &&
+      !(globalPlan && p.id === globalPlan.id),
+  );
+  // Devis déjà en référence d’un lot / devis global → plus « à organiser ».
   const unscopedQuotes = quotes.filter(
-    (q) => !q.scopeId && !referencedQuoteIds.has(q.id),
+    (q) =>
+      !q.scopeId &&
+      !referencedQuoteIds.has(q.id) &&
+      !(globalQuote && q.id === globalQuote.id),
   );
 
   const items: UnscopedItem[] = [
@@ -664,6 +784,19 @@ export async function getProjectWorkspace(
     title: project.title,
     chantierStatus: project.chantierStatus,
     href: `/dashboard/projets/${project.id}`,
+    global: {
+      metre: globalMetreCard,
+      devis: globalDevisCard,
+      planning: globalPlanningCard,
+      phases: scopes.map((s) => ({
+        id: s.id,
+        code: s.code,
+        name: s.name,
+        href: `/dashboard/projets/${projectId}/preparation/${s.id}`,
+      })),
+      canCreateFromQuote: !!globalQuote && (!globalStudy || !globalPlan),
+      primaryQuoteId: globalQuote?.id ?? null,
+    },
     scopes: scopeWorkspaces,
     unscoped: {
       studies: unscopedStudies.length,

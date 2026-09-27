@@ -8,6 +8,7 @@ import {
   ChantierHierarchyNav,
   chantierProjectHref,
   chantierProjectsHref,
+  workspaceHomeCrumb,
   chantierScopeHref,
 } from "@/components/chantier/ChantierHierarchyNav";
 import { PrepPlanSourceViewer } from "@/components/preparation/PrepPlanSourceViewer";
@@ -79,6 +80,7 @@ export default async function ProjectPlanSourcePage({ params, searchParams }: Ct
               : "Retour au dossier chantier"
           }
           crumbs={[
+            workspaceHomeCrumb(),
             { label: "Chantiers", href: chantierProjectsHref() },
             { label: project.title, href: chantierProjectHref(projectId) },
             ...(study?.scope
@@ -155,6 +157,7 @@ export default async function ProjectPlanSourcePage({ params, searchParams }: Ct
         backHref={backHref}
         backLabel={backLabel}
         crumbs={[
+          workspaceHomeCrumb(),
           { label: "Chantiers", href: chantierProjectsHref() },
           { label: project.title, href: chantierProjectHref(projectId) },
           ...(study?.scope

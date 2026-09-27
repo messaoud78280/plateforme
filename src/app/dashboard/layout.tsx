@@ -47,6 +47,7 @@ import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-
 import { isCommercialWorkspacePath } from "@/lib/commercial/workspace";
 import { CommercialWorkspaceShell } from "@/components/commercial/CommercialWorkspaceShell";
 import { CommercialLaunchLink } from "@/components/dashboard/CommercialLaunchLink";
+import Link from "next/link";
 import { getPlatformRoleForUserId } from "@/lib/platform-admin/authz";
 import { isPlatformAdminRole } from "@/lib/platform-admin/role";
 import { getActiveSupportSessionForAdmin } from "@/lib/platform-admin/support";
@@ -246,8 +247,13 @@ export default async function DashboardLayout({
           <SaasTrialExpiredBanner />
         ) : null}
         <header className="cc-header sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 px-3 sm:px-5">
-          <div className="min-w-0">
-            <p className="truncate text-[0.9375rem] font-semibold tracking-tight text-bework-ink">
+          <Link
+            href="/dashboard"
+            title="Retour à l’espace de travail"
+            aria-label="Retour à l’espace de travail"
+            className="group min-w-0 rounded-lg px-1 py-0.5 outline-none transition-colors hover:bg-bework-soft-navy/50 focus-visible:ring-2 focus-visible:ring-bework-navy/25"
+          >
+            <p className="truncate text-[0.9375rem] font-semibold tracking-tight text-bework-ink group-hover:text-bework-navy">
               {external
                 ? personaHomeLabel(personType, permissionProfile)
                 : workspaceCompanyName || "Espace de travail"}
@@ -259,7 +265,7 @@ export default async function DashboardLayout({
                   ? "Espace de travail"
                   : platform.branding.productSecondaryLabel}
             </p>
-          </div>
+          </Link>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             {isDemo && platform.features.demoViewAs ? <DemoViewAsSwitcher /> : null}
             {session.user?.role === "CLIENT" && !isDemo && !external ? (

@@ -10,6 +10,7 @@ import {
   ChantierHierarchyNav,
   chantierProjectHref,
   chantierProjectsHref,
+  workspaceHomeCrumb,
 } from "@/components/chantier/ChantierHierarchyNav";
 
 type Props = {
@@ -55,6 +56,7 @@ export default async function SiteDocumentPage({ params, searchParams }: Props) 
         backHref: docsListHref,
         backLabel: "Retour à Plans & documents",
         crumbs: [
+          workspaceHomeCrumb(),
           { label: "Chantiers", href: chantierProjectsHref() },
           { label: project.title, href: chantierProjectHref(id) },
           {
@@ -69,6 +71,7 @@ export default async function SiteDocumentPage({ params, searchParams }: Props) 
         backHref: docsListHref,
         backLabel: "Retour aux documents",
         crumbs: [
+          workspaceHomeCrumb(),
           { label: "Chantiers", href: chantierProjectsHref() },
           { label: project.title, href: chantierProjectHref(id) },
           { label: "Plans & documents", href: docsListHref },

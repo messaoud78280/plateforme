@@ -23,21 +23,21 @@ type Tab = {
 };
 
 const INTERNAL_TABS: Tab[] = [
-  { href: "/dashboard", label: "Accueil", icon: Home, exact: true },
+  { href: "/dashboard", label: "Espace", icon: Home, exact: true },
   { href: "/dashboard/a-traiter", label: "À traiter", icon: AlertCircle },
   { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
   { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
 ];
 
 const SUPPLIER_TABS: Tab[] = [
-  { href: "/dashboard", label: "Accueil", icon: Home, exact: true },
+  { href: "/dashboard", label: "Espace", icon: Home, exact: true },
   { href: "/dashboard/commandes", label: "Commandes", icon: Briefcase },
   { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
   { href: "/dashboard/documents", label: "Docs", icon: FileText },
 ];
 
 const CLIENT_TABS: Tab[] = [
-  { href: "/dashboard", label: "Accueil", icon: Home, exact: true },
+  { href: "/dashboard", label: "Espace", icon: Home, exact: true },
   { href: "/dashboard/projets", label: "Chantiers", icon: Briefcase },
   { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
   { href: "/dashboard/documents", label: "Docs", icon: FileText },
@@ -116,10 +116,13 @@ export function MobileBottomNav({
               isMsg && active ? "font-bold" : null,
             )}
             aria-current={active ? "page" : undefined}
+            title={tab.href === "/dashboard" ? "Espace de travail" : tab.label}
             aria-label={
               isMsg && msgBadge > 0
                 ? `Messagerie, ${msgBadge} non lus`
-                : tab.label
+                : tab.href === "/dashboard"
+                  ? "Espace de travail"
+                  : tab.label
             }
           >
             <span className="relative inline-flex">

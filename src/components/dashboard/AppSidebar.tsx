@@ -1,7 +1,6 @@
 "use client";
 
 import type { ComponentType, CSSProperties } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -39,6 +38,7 @@ import { isNavHrefAllowedForDemo } from "@/lib/demo-environment/nav-modules";
 import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 import { MessagerieNavBadge } from "@/components/dashboard/MessagerieNavBadge";
 import { useATraiterCount } from "@/hooks/useATraiterCount";
+import { WorkspaceBrandLink } from "@/components/dashboard/WorkspaceBrandLink";
 
 type RoleKey = "CLIENT" | "MANAGER" | "AGENT" | "AGENCE";
 type FamTone = "navy" | "cyan" | "watch" | "violet" | "ok" | "magenta" | "neutral";
@@ -78,11 +78,18 @@ function buildFamilies(): NavFamily[] {
   return [
     {
       id: "accueil",
-      label: "Accueil",
+      label: "Espace de travail",
       tone: "navy",
       pinned: true,
       items: [
-        { href: "/dashboard", label: "Accueil", exact: true, icon: Home, roles: ALL, emphasis: "high" },
+        {
+          href: "/dashboard",
+          label: "Espace de travail",
+          exact: true,
+          icon: Home,
+          roles: ALL,
+          emphasis: "high",
+        },
         { href: "/dashboard/a-traiter", label: "À traiter", icon: AlertCircle, roles: ALL, emphasis: "high" },
       ],
     },
@@ -321,13 +328,6 @@ export function AppSidebar({
   const brandLogo = isDemo ? demoLogoUrl || null : null;
   const workspaceLabel =
     companyName?.trim() || (isDemo ? demoCompanyLabel : "Espace de travail");
-  const companyInitials = workspaceLabel
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((p) => p[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "BW";
   const secondaryLabel =
     productSecondaryLabel?.trim() ||
     (isDemo ? "Démonstration BeWork" : "Propulsé par BeWork");
@@ -341,38 +341,14 @@ export function AppSidebar({
           collapsed && "justify-center px-2",
         )}
       >
-        <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5" onClick={() => setMobileOpen(false)}>
-          {isDemo && brandLogo && !collapsed ? (
-            <span className="relative flex h-9 w-[7.5rem] shrink-0 items-center overflow-hidden rounded-[var(--cc-radius)] bg-white ring-1 ring-[color:var(--cc-border)]">
-              <Image
-                src={brandLogo}
-                alt={workspaceLabel}
-                width={120}
-                height={36}
-                className="h-8 w-auto max-w-[7.25rem] object-contain object-left px-1.5"
-                priority
-              />
-            </span>
-          ) : (
-            <span
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--cc-radius)] bg-bework-navy text-[11px] font-bold tracking-wide text-white"
-              title={workspaceLabel}
-              aria-hidden
-            >
-              {companyInitials}
-            </span>
-          )}
-          {!collapsed ? (
-            <span className="min-w-0">
-              <span className="block truncate text-[15px] font-semibold tracking-tight text-bework-navy">
-                {workspaceLabel}
-              </span>
-              <span className="block truncate text-[11px] font-medium text-bework-muted">
-                {secondaryLabel}
-              </span>
-            </span>
-          ) : null}
-        </Link>
+        <WorkspaceBrandLink
+          primaryLabel={workspaceLabel}
+          secondaryLabel={secondaryLabel}
+          logoUrl={brandLogo}
+          collapsed={collapsed}
+          className="min-w-0 flex-1"
+          onNavigate={() => setMobileOpen(false)}
+        />
         {mobileOpen ? (
           <button
             type="button"

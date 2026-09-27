@@ -8,6 +8,7 @@ import { withReturnTo } from "@/lib/navigation/safe-return-to";
 import {
   ChantierHierarchyNav,
   chantierProjectsHref,
+  workspaceHomeCrumb,
 } from "@/components/chantier/ChantierHierarchyNav";
 import { MessageForm } from "@/components/MessageForm";
 import { ProjectAssignAgent } from "@/components/projects/ProjectAssignAgent";
@@ -729,6 +730,7 @@ export default async function ProjetDetailPage({
         backHref={chantierProjectsHref()}
         backLabel="Retour aux chantiers"
         crumbs={[
+          workspaceHomeCrumb(),
           { label: "Chantiers", href: chantierProjectsHref() },
           { label: project.title },
         ]}

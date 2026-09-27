@@ -57,6 +57,10 @@ export function ChantierHierarchyNav({
   );
 }
 
+export function workspaceHomeCrumb(): ChantierCrumb {
+  return { label: "Espace de travail", href: "/dashboard" };
+}
+
 export function chantierProjectsHref() {
   return "/dashboard/projets";
 }
@@ -83,6 +87,7 @@ export function moduleChantierNav(input: {
       backHref: scopeHref,
       backLabel: `Retour à ${input.scope.name}`,
       crumbs: [
+        { label: "Espace de travail", href: "/dashboard" },
         { label: "Chantiers", href: chantierProjectsHref() },
         { label: input.projectTitle, href: projectHref },
         { label: input.scope.name, href: scopeHref },
@@ -94,6 +99,7 @@ export function moduleChantierNav(input: {
     backHref: projectHref,
     backLabel: "Retour au dossier chantier",
     crumbs: [
+      { label: "Espace de travail", href: "/dashboard" },
       { label: "Chantiers", href: chantierProjectsHref() },
       { label: input.projectTitle, href: projectHref },
       { label: input.currentLabel },

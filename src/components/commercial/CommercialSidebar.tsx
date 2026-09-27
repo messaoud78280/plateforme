@@ -6,9 +6,9 @@ import { usePathname } from "next/navigation";
 import {
   Building2,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   FileText,
+  Home,
   LayoutDashboard,
   Menu,
   PanelLeftClose,
@@ -23,6 +23,7 @@ import {
   isCommercialNavActive,
   type CommercialNavGroup,
 } from "@/lib/commercial/workspace-nav";
+import { WorkspaceBrandLink } from "@/components/dashboard/WorkspaceBrandLink";
 
 const COLLAPSE_KEY = "bework.commercial.sidebarCollapsed";
 const OPEN_KEY = "bework.commercial.navOpen";
@@ -86,26 +87,25 @@ export function CommercialSidebar({
     return openGroups[g.id] ?? true;
   }
 
+  const brandPrimary = orgLabel?.trim() || "Espace de travail";
+
   const nav = (
     <div className="flex h-full flex-col">
-      <div className={cn("border-b border-slate-200/80 px-3 py-4", collapsed && "px-2")}>
-        <Link
-          href="/dashboard/devis-facturation"
-          className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
-        >
-          <p className="text-[15px] font-semibold tracking-tight text-bework-navy-deep">
-            {collapsed ? "BW" : "BeWork"}
-          </p>
-          {!collapsed ? (
-            <p className="mt-0.5 text-[13px] font-medium text-bework-navy/80">
-              Devis & Facturation
-            </p>
-          ) : null}
-        </Link>
-        {!collapsed && orgLabel ? (
-          <p className="mt-2 truncate text-[11px] font-medium uppercase tracking-[0.08em] text-slate-400">
-            {orgLabel}
-          </p>
+      <div className={cn("border-b border-slate-200/80 px-3 py-3.5", collapsed && "px-2")}>
+        <WorkspaceBrandLink
+          primaryLabel={brandPrimary}
+          secondaryLabel="Propulsé par BeWork"
+          collapsed={collapsed}
+          onNavigate={() => setMobileOpen(false)}
+        />
+        {!collapsed ? (
+          <Link
+            href="/dashboard/devis-facturation"
+            onClick={() => setMobileOpen(false)}
+            className="mt-2 block rounded-md px-1.5 py-1 text-[12px] font-semibold text-bework-navy/70 transition-colors hover:bg-bework-soft-navy/50 hover:text-bework-navy"
+          >
+            Devis & Facturation
+          </Link>
         ) : null}
       </div>
 
@@ -141,6 +141,7 @@ export function CommercialSidebar({
                         <Link
                           href={l.href}
                           title={l.label}
+                          onClick={() => setMobileOpen(false)}
                           className={cn(
                             "flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-[background,color,box-shadow] duration-150",
                             collapsed && "justify-center px-2",
@@ -157,7 +158,9 @@ export function CommercialSidebar({
                             <NavIcon label={l.label} action={l.action} />
                           ) : (
                             <>
-                              {l.action ? (
+                              {l.href === "/dashboard" ? (
+                                <Home className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+                              ) : l.action ? (
                                 <span className="text-[12px] font-bold">+</span>
                               ) : null}
                               <span className="truncate">{l.label}</span>
@@ -189,16 +192,6 @@ export function CommercialSidebar({
             </>
           )}
         </button>
-        <Link
-          href="/dashboard"
-          className={cn(
-            "flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-[#1e3a5f]",
-            collapsed && "justify-center",
-          )}
-        >
-          <ChevronLeft className="h-4 w-4 shrink-0" />
-          {!collapsed ? <span>Retour à la plateforme</span> : null}
-        </Link>
       </div>
     </div>
   );
@@ -253,6 +246,9 @@ export function CommercialSidebar({
 function NavIcon({ label, action }: { label: string; action?: boolean }) {
   if (action) return <span className="text-sm font-bold">+</span>;
   const l = label.toLowerCase();
+  if (l.includes("espace de travail")) {
+    return <Home className="h-4 w-4" />;
+  }
   if (l.includes("vue") || l.includes("tableau")) {
     return <LayoutDashboard className="h-4 w-4" />;
   }

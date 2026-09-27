@@ -51,10 +51,15 @@ function testWorkspaceHeader() {
   assert.doesNotMatch(header, /CommercialSubNav/);
   assert.doesNotMatch(header, /window\.close/);
   const sidebar = read("src/components/commercial/CommercialSidebar.tsx");
-  assert.match(sidebar, /Retour à la plateforme/);
-  assert.match(sidebar, /href="\/dashboard"/);
+  assert.match(sidebar, /Espace de travail/);
+  assert.match(sidebar, /WorkspaceBrandLink/);
+  const brand = read("src/components/dashboard/WorkspaceBrandLink.tsx");
+  assert.match(brand, /href=\{WORKSPACE_HOME\}/);
+  assert.match(brand, /"\/dashboard"/);
   const nav = read("src/lib/commercial/workspace-nav.ts");
   assert.match(nav, /Vue d’ensemble/);
+  assert.match(nav, /Espace de travail/);
+  assert.match(nav, /href: "\/dashboard"/);
   assert.match(nav, /Devis/);
   assert.match(nav, /Factures/);
   assert.match(nav, /Encaissements/);

@@ -10,6 +10,7 @@ import {
   ChantierHierarchyNav,
   chantierProjectHref,
   chantierProjectsHref,
+  workspaceHomeCrumb,
   moduleChantierNav,
 } from "@/components/chantier/ChantierHierarchyNav";
 
@@ -57,6 +58,7 @@ export default async function DocumentsChantierPage({ params, searchParams }: Pr
         backHref: chantierProjectHref(id),
         backLabel: "Retour au dossier chantier",
         crumbs: [
+          workspaceHomeCrumb(),
           { label: "Chantiers", href: chantierProjectsHref() },
           { label: project.title, href: chantierProjectHref(id) },
           { label: "Plans & documents" },

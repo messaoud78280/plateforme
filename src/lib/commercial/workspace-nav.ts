@@ -41,6 +41,18 @@ export function buildCommercialNav(opts: {
 
   const groups: CommercialNavGroup[] = [
     {
+      id: "workspace",
+      label: "Espace de travail",
+      links: [
+        {
+          href: "/dashboard",
+          label: "Espace de travail",
+          exact: true,
+          external: true,
+        },
+      ],
+    },
+    {
       id: "accueil",
       label: null,
       links: [{ href: BASE, label: "Vue d’ensemble", exact: true }],

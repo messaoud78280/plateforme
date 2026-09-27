@@ -75,7 +75,11 @@ function testShell() {
   assert.doesNotMatch(header, /CommercialSubNav/);
   assert.match(header, /Nouveau devis/);
   const sidebar = read("src/components/commercial/CommercialSidebar.tsx");
-  assert.match(sidebar, /Retour à la plateforme/);
+  assert.match(sidebar, /Espace de travail/);
+  assert.match(sidebar, /WorkspaceBrandLink/);
+  const workspaceNav = read("src/lib/commercial/workspace-nav.ts");
+  assert.match(workspaceNav, /Espace de travail/);
+  assert.match(workspaceNav, /id: \"workspace\"/);
   console.log("✓ shell sidebar + header fin");
 }
 

@@ -9,6 +9,7 @@ import {
   ChantierHierarchyNav,
   chantierProjectHref,
   chantierProjectsHref,
+  workspaceHomeCrumb,
 } from "@/components/chantier/ChantierHierarchyNav";
 import { cn } from "@/lib/cn";
 
@@ -46,6 +47,7 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
         backHref={chantierProjectHref(projectId)}
         backLabel="Retour au dossier chantier"
         crumbs={[
+          workspaceHomeCrumb(),
           { label: "Chantiers", href: chantierProjectsHref() },
           { label: workspace.title, href: chantierProjectHref(projectId) },
           { label: scope.name },

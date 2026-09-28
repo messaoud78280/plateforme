@@ -403,92 +403,92 @@ export function extractQuantitiesFromQuoteTexts(input: {
 }
 
 function phaseLotFromSection(title: string): string {
-  const t = title.toLowerCase();
-  if (t.includes("installation") || t.includes("dépose") || t.includes("depose")) {
-    return "PHASE 1 — Installation & déposes";
-  }
-  if (t.includes("cuisine") && !t.includes("finitions")) return "PHASE 5 — Cuisine";
-  if (t.includes("salle de bain") || t.includes("sdb")) return "PHASE 4 — Salle de bain";
-  if (t.includes("finition") || t.includes("nettoyage")) return "PHASE 6 — Finitions";
-  return title.replace(/^Lot\s*\d+\s*[—–-]\s*/i, "").trim() || title;
+  const cleaned = title.replace(/^Lot\s*\d+\s*[—–-]\s*/i, "").trim() || title;
+  return cleaned;
 }
 
-function taskMetaForLine(designation: string, unit: string, qty: number): {
+/**
+ * Lot / métier pour regroupement et resource leveling (pas pour inventer des FS).
+ * Heuristiques de durée Cuisine/SDB conservées si détectables ; sinon section devis.
+ */
+function taskMetaForLine(designation: string, unit: string, qty: number, sectionTitle: string): {
   phase: string;
   duration: { mode: "fixed"; days: number } | { mode: "computed"; rateId: string; driver: string };
   orderBoost: number;
 } {
   const dsg = designation.toLowerCase();
+  const sectionLot = phaseLotFromSection(sectionTitle);
+
   // Étanchéité / SPEC avant « protection » générique
   if (/protection à l'eau|etancheit|étanchéité|\bspec\b/.test(dsg)) {
-    return { phase: "PHASE 4 — Salle de bain", duration: { mode: "fixed", days: 1 }, orderBoost: 100 };
+    return { phase: sectionLot || "Salle de bain", duration: { mode: "fixed", days: 1 }, orderBoost: 100 };
   }
   if (/installation|préparation du chantier|preparation du chantier|protection du chantier|protections et préparation/.test(dsg)) {
-    return { phase: "PHASE 1 — Installation & déposes", duration: { mode: "fixed", days: 0.5 }, orderBoost: 10 };
+    return { phase: sectionLot || "Installation", duration: { mode: "fixed", days: 0.5 }, orderBoost: 10 };
   }
   if (/dépose.*cuisine|depose.*cuisine/.test(dsg)) {
-    return { phase: "PHASE 1 — Installation & déposes", duration: { mode: "fixed", days: 1 }, orderBoost: 20 };
+    return { phase: sectionLot || "Déposes", duration: { mode: "fixed", days: 1 }, orderBoost: 20 };
   }
   if (/dépose|depose/.test(dsg)) {
-    return { phase: "PHASE 1 — Installation & déposes", duration: { mode: "fixed", days: 1 }, orderBoost: 30 };
+    return { phase: sectionLot || "Déposes", duration: { mode: "fixed", days: 1 }, orderBoost: 30 };
   }
   if (/préparation.*cuisine|preparation.*cuisine|reprise.*cuisine/.test(dsg)) {
-    return { phase: "PHASE 2 — Préparation", duration: { mode: "fixed", days: 1 }, orderBoost: 40 };
+    return { phase: sectionLot || "Préparation", duration: { mode: "fixed", days: 1 }, orderBoost: 40 };
   }
   if (/préparation.*salle|preparation.*salle|reprise.*salle/.test(dsg)) {
-    return { phase: "PHASE 2 — Préparation", duration: { mode: "fixed", days: 1 }, orderBoost: 50 };
+    return { phase: sectionLot || "Préparation", duration: { mode: "fixed", days: 1 }, orderBoost: 50 };
   }
   if (/alimentation|évacuation.*cuisine|evacuation.*cuisine|plomberie.*cuisine/.test(dsg) && /cuisine/.test(dsg)) {
-    return { phase: "PHASE 3 — Réseaux", duration: { mode: "fixed", days: 0.5 }, orderBoost: 60 };
+    return { phase: sectionLot || "Plomberie", duration: { mode: "fixed", days: 0.5 }, orderBoost: 60 };
   }
   if (/électri|electri/.test(dsg)) {
-    return { phase: "PHASE 3 — Réseaux", duration: { mode: "fixed", days: 1 }, orderBoost: 70 };
+    return { phase: sectionLot || "Électricité", duration: { mode: "fixed", days: 1 }, orderBoost: 70 };
   }
   if (/plomberie.*salle|adaptation plomberie/.test(dsg)) {
-    return { phase: "PHASE 3 — Réseaux", duration: { mode: "fixed", days: 1 }, orderBoost: 80 };
+    return { phase: sectionLot || "Plomberie", duration: { mode: "fixed", days: 1 }, orderBoost: 80 };
   }
   if (/ventilation/.test(dsg)) {
-    return { phase: "PHASE 3 — Réseaux", duration: { mode: "fixed", days: 0.5 }, orderBoost: 90 };
+    return { phase: sectionLot || "Ventilation", duration: { mode: "fixed", days: 0.5 }, orderBoost: 90 };
   }
   if (/paroi/.test(dsg)) {
-    return { phase: "PHASE 4 — Salle de bain", duration: { mode: "fixed", days: 0.5 }, orderBoost: 140 };
+    return { phase: sectionLot || "Salle de bain", duration: { mode: "fixed", days: 0.5 }, orderBoost: 140 };
   }
   if (/douche|receveur/.test(dsg)) {
-    return { phase: "PHASE 4 — Salle de bain", duration: { mode: "fixed", days: 1 }, orderBoost: 110 };
+    return { phase: sectionLot || "Salle de bain", duration: { mode: "fixed", days: 1 }, orderBoost: 110 };
   }
   if (/revêtement.*mur|revetement.*mur|faïence|faience/.test(dsg)) {
     return {
-      phase: "PHASE 4 — Salle de bain",
+      phase: sectionLot || "Salle de bain",
       duration: { mode: "computed", rateId: "rate_faience_m2j", driver: "TO_USE_LINE" },
       orderBoost: 120,
     };
   }
   if (/carrelage.*sol|sol de la salle/.test(dsg)) {
     return {
-      phase: "PHASE 4 — Salle de bain",
+      phase: sectionLot || "Salle de bain",
       duration: { mode: "computed", rateId: "rate_carrelage_sol_m2j", driver: "TO_USE_LINE" },
       orderBoost: 130,
     };
   }
   if (/meuble vasque|vasque/.test(dsg)) {
-    return { phase: "PHASE 4 — Salle de bain", duration: { mode: "fixed", days: 0.5 }, orderBoost: 150 };
+    return { phase: sectionLot || "Salle de bain", duration: { mode: "fixed", days: 0.5 }, orderBoost: 150 };
   }
   if (/cuisine équipée|cuisine equipee|pose d'une cuisine/.test(dsg)) {
-    return { phase: "PHASE 5 — Cuisine", duration: { mode: "fixed", days: 2 }, orderBoost: 160 };
+    return { phase: sectionLot || "Cuisine", duration: { mode: "fixed", days: 2 }, orderBoost: 160 };
   }
   if (/finition|nettoyage|essais/.test(dsg)) {
-    return { phase: "PHASE 6 — Finitions", duration: { mode: "fixed", days: 1 }, orderBoost: 170 };
+    return { phase: sectionLot || "Finitions", duration: { mode: "fixed", days: 1 }, orderBoost: 170 };
   }
   // Fallback forfait / quantité
   if (/m²|m2/i.test(unit) && qty > 0) {
     return {
-      phase: phaseLotFromSection(designation),
+      phase: sectionLot,
       duration: { mode: "computed", rateId: "rate_carrelage_sol_m2j", driver: "TO_USE_LINE" },
       orderBoost: 125,
     };
   }
   return {
-    phase: phaseLotFromSection(designation),
+    phase: sectionLot,
     duration: { mode: "fixed", days: Math.max(0.5, qty >= 1 && /forfait/i.test(unit) ? 1 : 0.5) },
     orderBoost: 100,
   };
@@ -812,7 +812,12 @@ export async function createGlobalPrepFromQuote(input: {
       if (line.kind !== "WORK") continue;
       const code = lineCode(sectionIndex, lineIndex);
       const qty = d(line.quantity);
-      const meta = taskMetaForLine(line.designation, line.unit, qty);
+      const meta = taskMetaForLine(
+        line.designation,
+        line.unit,
+        qty,
+        section.title ?? "",
+      );
       const duration =
         meta.duration.mode === "computed"
           ? { ...meta.duration, driver: code }
@@ -985,72 +990,9 @@ export async function createGlobalPrepFromQuote(input: {
     };
   });
 
-  // Dépendances logiques FS
-  const depsByStep = new Map<string, Array<{ step_id: string; type: "FS" }>>();
-  const byPhase = new Map<string, string[]>();
-  for (const r of sorted) {
-    const sid = `S-${r.code}`;
-    const list = byPhase.get(r.phase) ?? [];
-    list.push(sid);
-    byPhase.set(r.phase, list);
-  }
-  const phaseOrder = [
-    "PHASE 1 — Installation & déposes",
-    "PHASE 2 — Préparation",
-    "PHASE 3 — Réseaux",
-    "PHASE 4 — Salle de bain",
-    "PHASE 5 — Cuisine",
-    "PHASE 6 — Finitions",
-  ];
-  // Chain: last of phase N → first of phase N+1 ; within phase sequential except parallel réseaux
-  for (let i = 0; i < phaseOrder.length; i++) {
-    const phase = phaseOrder[i]!;
-    const steps = byPhase.get(phase) ?? [];
-    if (phase === "PHASE 3 — Réseaux" || phase === "PHASE 1 — Installation & déposes") {
-      // Parallel within phase: all depend on previous phase end
-      const prevPhase = phaseOrder[i - 1];
-      const prevSteps = prevPhase ? byPhase.get(prevPhase) ?? [] : [];
-      const prevLast = prevSteps[prevSteps.length - 1];
-      for (const sid of steps) {
-        if (prevLast) depsByStep.set(sid, [{ step_id: prevLast, type: "FS" }]);
-      }
-    } else {
-      for (let j = 0; j < steps.length; j++) {
-        const sid = steps[j]!;
-        if (j === 0) {
-          const prevPhase = phaseOrder[i - 1];
-          const prevSteps = prevPhase ? byPhase.get(prevPhase) ?? [] : [];
-          // PHASE 5 Cuisine peut démarrer après PHASE 3 (réseaux) — pas forcément après SDB
-          if (phase === "PHASE 5 — Cuisine") {
-            const reseaux = byPhase.get("PHASE 3 — Réseaux") ?? [];
-            const prep = byPhase.get("PHASE 2 — Préparation") ?? [];
-            const deps: Array<{ step_id: string; type: "FS" }> = [];
-            if (reseaux.length) deps.push({ step_id: reseaux[reseaux.length - 1]!, type: "FS" });
-            else if (prep.length) deps.push({ step_id: prep[prep.length - 1]!, type: "FS" });
-            if (deps.length) depsByStep.set(sid, deps);
-          } else if (prevSteps.length) {
-            depsByStep.set(sid, [
-              { step_id: prevSteps[prevSteps.length - 1]!, type: "FS" },
-            ]);
-          }
-        } else {
-          depsByStep.set(sid, [{ step_id: steps[j - 1]!, type: "FS" }]);
-        }
-      }
-    }
-  }
-
-  // Finitions dépend de la dernière tâche cuisine ET salle de bain
-  const finitions = byPhase.get("PHASE 6 — Finitions") ?? [];
-  const cuisine = byPhase.get("PHASE 5 — Cuisine") ?? [];
-  const sdb = byPhase.get("PHASE 4 — Salle de bain") ?? [];
-  if (finitions[0]) {
-    const deps: Array<{ step_id: string; type: "FS" }> = [];
-    if (cuisine.length) deps.push({ step_id: cuisine[cuisine.length - 1]!, type: "FS" });
-    if (sdb.length) deps.push({ step_id: sdb[sdb.length - 1]!, type: "FS" });
-    if (deps.length) depsByStep.set(finitions[0], deps);
-  }
-
+  // Pas de FS inventés : sans dépendance technique fiable, le resource leveling
+  // séquence les tâches d’une même ressource logique (lot / crew_id).
+  const uniqueLots = [...new Set(sorted.map((r) => r.phase).filter(Boolean))];
   const scheduleJson = {
     start_date: null,
     start_date_provenance: "HYPOTHESE",
@@ -1061,10 +1003,10 @@ export async function createGlobalPrepFromQuote(input: {
     },
     tasks: stepIds.map((sid) => ({
       step_id: sid,
-      depends_on: depsByStep.get(sid) ?? [],
+      depends_on: [] as Array<{ step_id: string; type: "FS" }>,
       include_in_base: true,
     })),
-    note: "Planning global chantier généré depuis le devis — durées estimatives modifiables.",
+    note: "Planning global chantier généré depuis le devis — durées estimatives modifiables. Séquencement par ressource (lot) sauf dépendances techniques explicites.",
   };
 
   await prisma.prepStudy.update({
@@ -1073,7 +1015,10 @@ export async function createGlobalPrepFromQuote(input: {
       resourcesJson: resourcesJson as unknown as Prisma.InputJsonValue,
       workflowJson: { steps: workflowSteps } as unknown as Prisma.InputJsonValue,
       scheduleJson: scheduleJson as unknown as Prisma.InputJsonValue,
-      lotsJson: phaseOrder.map((name, i) => ({ code: `P${i + 1}`, name })),
+      lotsJson: uniqueLots.map((name, i) => ({
+        code: `L${i + 1}`,
+        name,
+      })),
       updatedById: input.userId,
     },
   });

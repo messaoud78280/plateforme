@@ -103,10 +103,51 @@ function crewLabel(
   task: PlacedTask,
   laborById: Map<string, string>,
 ): string {
+  if (task.crewId) {
+    const members = task.crew.length
+      ? task.crew
+          .map((c) => `${c.count}× ${laborById.get(c.labor_id) ?? c.labor_id}`)
+          .join(", ")
+      : null;
+    return members ? `${task.crewId} (${members})` : task.crewId;
+  }
   if (!task.crew.length) return "—";
   return task.crew
     .map((c) => `${c.count}× ${laborById.get(c.labor_id) ?? c.labor_id}`)
     .join(", ");
+}
+
+/** Persistance crewJson compatible array legacy + métadonnées crew_id. */
+function serializeCrewJson(task: PlacedTask): unknown {
+  const members = task.crew;
+  if (task.crewId || task.crewSize != null || task.parallelizable || task.workloadPersonDays != null) {
+    return {
+      crew_id: task.crewId,
+      crew_size: task.crewSize,
+      parallelizable: task.parallelizable || undefined,
+      workload_person_days: task.workloadPersonDays,
+      members,
+    };
+  }
+  return members;
+}
+
+function parseCrewJsonMembers(raw: unknown): Array<{ labor_id: string; count: number }> {
+  if (Array.isArray(raw)) {
+    return raw
+      .map((c) => {
+        if (!c || typeof c !== "object") return null;
+        const o = c as { labor_id?: string; count?: number };
+        if (!o.labor_id) return null;
+        return { labor_id: o.labor_id, count: o.count ?? 1 };
+      })
+      .filter((x): x is { labor_id: string; count: number } => !!x);
+  }
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const o = raw as { members?: unknown };
+    return parseCrewJsonMembers(o.members);
+  }
+  return [];
 }
 
 function equipmentLabel(
@@ -577,7 +618,7 @@ export async function commitPrepSchedule(input: {
               ratePer: t.duration.ratePer,
               parallelUnits: t.duration.parallelUnits,
               takeoffCodesJson: t.takeoffIds,
-              crewJson: t.crew,
+              crewJson: serializeCrewJson(t) as Prisma.InputJsonValue,
               equipmentJson: t.equipment,
               suppliesJson: t.supplies,
               preconditionsJson: t.preconditions,
@@ -915,7 +956,16 @@ export async function buildPrepSchedulePlanPayload(
 
   const tasks = plan.tasks.map((t) => {
     const holdStatus = normalizeHoldPointStatus(t.holdPointStatus, t.holdPoint);
-    const crewRaw = Array.isArray(t.crewJson) ? t.crewJson : [];
+    const crewMeta =
+      t.crewJson && typeof t.crewJson === "object" && !Array.isArray(t.crewJson)
+        ? (t.crewJson as {
+            crew_id?: string | null;
+            crew_size?: number | null;
+            parallelizable?: boolean;
+            workload_person_days?: number | null;
+          })
+        : null;
+    const crewRaw = parseCrewJsonMembers(t.crewJson);
     const eqRaw = Array.isArray(t.equipmentJson) ? t.equipmentJson : [];
     const suppliesRaw = Array.isArray(t.suppliesJson) ? t.suppliesJson : [];
     const dependsOn = Array.isArray(t.dependsOnJson)
@@ -956,18 +1006,15 @@ export async function buildPrepSchedulePlanPayload(
         ? RATE_PER_LABELS[t.ratePer as "engin" | "equipe"] ?? t.ratePer
         : null,
       parallelUnits: t.parallelUnits,
-      crew: crewRaw
-        .map((c) => {
-          if (!c || typeof c !== "object") return null;
-          const o = c as { labor_id?: string; count?: number };
-          if (!o.labor_id) return null;
-          return {
-            labor_id: o.labor_id,
-            count: o.count ?? 1,
-            label: laborById.get(o.labor_id) ?? o.labor_id,
-          };
-        })
-        .filter((x): x is { labor_id: string; count: number; label: string } => !!x),
+      crewId: crewMeta?.crew_id ?? null,
+      crewSize: crewMeta?.crew_size ?? null,
+      parallelizable: crewMeta?.parallelizable === true,
+      workloadPersonDays: crewMeta?.workload_person_days ?? null,
+      crew: crewRaw.map((c) => ({
+        labor_id: c.labor_id,
+        count: c.count,
+        label: laborById.get(c.labor_id) ?? c.labor_id,
+      })),
       equipment: eqRaw
         .map((c) => {
           if (!c || typeof c !== "object") return null;

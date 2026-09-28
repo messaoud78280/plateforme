@@ -175,6 +175,11 @@ export type TechnicalWorkflowStep = {
   takeoff_ids?: string[];
   controls?: string[];
   crew?: string[];
+  /** Ressource logique exclusive (ex. ELEC-A). */
+  crew_id?: string | null;
+  crew_size?: number | null;
+  workload_person_days?: number | null;
+  parallelizable?: boolean;
   equipment?: string[];
   duration?: unknown;
 };
@@ -187,6 +192,8 @@ export type TechnicalScheduleTask = {
     lag_days?: number;
   }>;
   include_in_base?: boolean;
+  crew_id?: string | null;
+  parallelizable?: boolean;
 };
 
 export type TechnicalPlanningSettings = {

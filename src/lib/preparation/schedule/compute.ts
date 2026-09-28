@@ -1,6 +1,7 @@
 /**
- * Moteur de planification : durées (qty ÷ rendement) + dates + dépendances.
+ * Moteur de planification : durées (qty ÷ rendement) + dates + dépendances + resource leveling.
  * Ne multiplie jamais un rendement « équipe » par le nombre d'ouvriers.
+ * Ne divise jamais duration_days par crew_size.
  */
 import {
   addCalendarDays,
@@ -18,6 +19,7 @@ import {
 import type {
   PrepResourcesDTO,
   PrepScheduleDTO,
+  PrepScheduleTaskDTO,
   PrepWorkflowStepDTO,
 } from "@/lib/preparation/schedule/types";
 import { RATE_PER_LABELS, STEP_KIND_LABELS } from "@/lib/preparation/schedule/types";
@@ -41,6 +43,18 @@ export type ComputedTaskDuration = {
   warnings: string[];
 };
 
+export type ScheduleResourceKeySource = "crew_id" | "lot" | "default";
+
+export type ScheduleResourceKey = {
+  /** Clé interne d’ordonnancement (jamais inventée en donnée métier persistée). */
+  key: string;
+  /** crew_id explicite si fourni, sinon null (fallback lot/default non écrit en bundle). */
+  crewId: string | null;
+  source: ScheduleResourceKeySource;
+  /** true → la ressource est exclusive (pas de chevauchement). */
+  exclusive: boolean;
+};
+
 export type PlacedTask = {
   stepId: string;
   name: string;
@@ -60,6 +74,13 @@ export type PlacedTask = {
   endDate: string | null;
   duration: ComputedTaskDuration;
   crew: PrepWorkflowStepDTO["crew"];
+  crewId: string | null;
+  crewSize: number | null;
+  workloadPersonDays: number | null;
+  parallelizable: boolean;
+  /** Ressource logique utilisée pour le leveling (interne). */
+  resourceKey: string;
+  resourceKeySource: ScheduleResourceKeySource;
   equipment: PrepWorkflowStepDTO["equipment"];
   supplies: string[];
   preconditions: string[];
@@ -92,6 +113,95 @@ function ceilHalfDay(days: number): number {
 
 function ceilDay(days: number): number {
   return Math.ceil(days - 1e-12);
+}
+
+/** Normalise un libellé de lot pour une clé de ressource stable. */
+export function normalizeLotResourceLabel(lot: string): string {
+  return lot
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^A-Z0-9_:-]/g, "")
+    .slice(0, 80);
+}
+
+/**
+ * Résout la ressource logique d’ordonnancement.
+ * Fallback lot / DEFAULT-A = règle de sécurité interne — pas une équipe métier inventée.
+ *
+ * @param opts.forceDefault — true si le planning a des lots trop fragmentés
+ *   (désignations uniques) : une seule ressource logique pour éviter un faux parallèle.
+ */
+export function resolveScheduleResourceKey(
+  step: PrepWorkflowStepDTO,
+  sched?: PrepScheduleTaskDTO | null,
+  opts?: { forceDefault?: boolean },
+): ScheduleResourceKey {
+  const explicit =
+    (sched?.crew_id && sched.crew_id.trim()) ||
+    (step.crew_id && step.crew_id.trim()) ||
+    null;
+  if (explicit) {
+    return {
+      key: `CREW:${explicit.trim()}`,
+      crewId: explicit.trim(),
+      source: "crew_id",
+      exclusive: true,
+    };
+  }
+  if (opts?.forceDefault) {
+    return {
+      key: "DEFAULT-A",
+      crewId: null,
+      source: "default",
+      exclusive: true,
+    };
+  }
+  const lot = step.lot?.trim();
+  if (lot) {
+    const norm = normalizeLotResourceLabel(lot);
+    return {
+      key: `LOT:${norm || "UNKNOWN"}`,
+      crewId: null,
+      source: "lot",
+      exclusive: true,
+    };
+  }
+  return {
+    key: "DEFAULT-A",
+    crewId: null,
+    source: "default",
+    exclusive: true,
+  };
+}
+
+/**
+ * Détecte un découpage lot = désignation (1 lot / tâche) qui simulerait
+ * autant d’équipes que de postes. Dans ce cas → resource DEFAULT-A unique.
+ */
+export function detectFragmentedLotFallback(
+  steps: PrepWorkflowStepDTO[],
+  scheduleTasks: PrepScheduleTaskDTO[],
+): boolean {
+  const schedById = new Map(scheduleTasks.map((t) => [t.step_id, t]));
+  const withoutCrew = steps.filter((s) => {
+    const sched = schedById.get(s.id);
+    const crew =
+      (sched?.crew_id && sched.crew_id.trim()) ||
+      (s.crew_id && s.crew_id.trim()) ||
+      null;
+    return !crew;
+  });
+  if (withoutCrew.length < 4) return false;
+  const lots = withoutCrew
+    .map((s) => s.lot?.trim() || "")
+    .filter(Boolean);
+  if (lots.length < 4) return false;
+  const unique = new Set(lots);
+  // ≥ 50 % de lots distincts → fragmentation (ex. lot = désignation ligne)
+  return unique.size >= Math.max(3, Math.ceil(lots.length * 0.5));
 }
 
 export function computeStepDuration(
@@ -154,6 +264,7 @@ export function computeStepDuration(
   base.ratePer = rate.per;
   // Important : rate.per = equipe → le rendement est déjà celui de l'équipe.
   // On ne multiplie PAS par le nombre d'ouvriers. parallel_units = engins/équipes en parallèle.
+  // On ne divise JAMAIS duration_days par crew_size.
   const productive = rate.value * base.parallelUnits;
   const raw = qty / productive;
   base.rawDays = raw;
@@ -274,6 +385,17 @@ export function computeSchedule(input: {
 
   const placedMap = new Map<string, PlacedTask>();
   const schedById = new Map(scheduleTasks.map((t) => [t.step_id, t]));
+  /** Prochaine disponibilité par ressource exclusive. */
+  const resourceNextFree = new Map<string, Instant>();
+  const forceDefaultResource = detectFragmentedLotFallback(
+    input.workflowSteps.filter((s) => scheduleTasks.some((t) => t.step_id === s.id)),
+    scheduleTasks,
+  );
+  if (forceDefaultResource) {
+    warnings.push(
+      "Lots trop fragmentés (quasi 1 lot / tâche) — resource leveling sur ressource logique unique DEFAULT-A (pas d’équipes inventées)",
+    );
+  }
 
   for (const stepId of order) {
     const step = stepById.get(stepId)!;
@@ -299,6 +421,12 @@ export function computeSchedule(input: {
       sched.include_in_base !== false && !step.conditional;
     const isConditional = !!step.conditional || sched.include_in_base === false;
 
+    const resource = resolveScheduleResourceKey(step, sched, {
+      forceDefault: forceDefaultResource,
+    });
+    const parallelizable =
+      sched.parallelizable === true || step.parallelizable === true;
+
     let earliest: Instant = planStart;
     for (const dep of sched.depends_on) {
       const pred = placedMap.get(dep.step_id);
@@ -311,11 +439,7 @@ export function computeSchedule(input: {
         cand = planStart;
       } else {
         // FS
-        if (pred.duration.calendar === "calendar" && pred.kind === "wait") {
-          cand = instantAfterEnd(pred.end, cfg);
-        } else {
-          cand = instantAfterEnd(pred.end, cfg);
-        }
+        cand = instantAfterEnd(pred.end, cfg);
       }
       const lag = dep.lag_days ?? 0;
       if (lag > 0) {
@@ -335,6 +459,15 @@ export function computeSchedule(input: {
       earliest = maxInstant(earliest, cand);
     }
 
+    // Resource leveling : même ressource exclusive → pas de chevauchement.
+    // parallelizable=true n’autorise PAS le chevauchement d’une même équipe physique.
+    // Attentes calendaires (wait) ne consomment pas l’équipe.
+    const consumesResource = step.kind !== "wait" && resource.exclusive;
+    if (consumesResource) {
+      const free = resourceNextFree.get(resource.key);
+      if (free) earliest = maxInstant(earliest, free);
+    }
+
     if (sched.start_alignment === "day_start") {
       earliest = alignDayStart(earliest, cfg);
     }
@@ -342,16 +475,6 @@ export function computeSchedule(input: {
     let start = earliest;
     let end: Instant;
     if (duration.calendar === "calendar" || step.kind === "wait") {
-      // Attente : commence le calendrier après la fin du prédécesseur (déjà dans earliest
-      // si FS). Pour une wait pure, la durée est calendaire depuis le lendemain éventuel.
-      // Spec : « une attente calendaire commence à la fin de la tâche précédente ».
-      // Si earliest est déjà « après fin », on compte N jours calendaires.
-      const waitStartDate =
-        start.half === 1 || start.date > (startIso ?? start.date)
-          ? start.date
-          : start.date;
-      // Simplification alignée scénario : après fin coulage (soir), cure = 3 j cal
-      // commençant le lendemain → fin N jours plus tard soir.
       const afterPred = sched.depends_on.length
         ? (() => {
             const pred = placedMap.get(sched.depends_on[0]!.step_id);
@@ -374,6 +497,10 @@ export function computeSchedule(input: {
       if (end.date < pred.end.date || (end.date === pred.end.date && end.half < pred.end.half)) {
         end = pred.end;
       }
+    }
+
+    if (consumesResource) {
+      resourceNextFree.set(resource.key, instantAfterEnd(end, cfg));
     }
 
     let blockingReason: string | null = null;
@@ -404,6 +531,12 @@ export function computeSchedule(input: {
       endDate: hasCivilStart ? end.date : null,
       duration,
       crew: step.crew,
+      crewId: resource.crewId,
+      crewSize: step.crew_size ?? null,
+      workloadPersonDays: step.workload_person_days ?? null,
+      parallelizable,
+      resourceKey: resource.key,
+      resourceKeySource: resource.source,
       equipment: step.equipment,
       supplies: step.supplies,
       preconditions: step.preconditions,

@@ -186,6 +186,8 @@ export function parsePrepWorkflowSteps(raw: unknown): PrepWorkflowStepDTO[] {
     if (isObj(item.conditional)) {
       conditional = { conditions: strArr(item.conditional.conditions) };
     }
+    const crewSize = num(item.crew_size ?? item.crewSize);
+    const workload = num(item.workload_person_days ?? item.workloadPersonDays);
     steps.push({
       id,
       order,
@@ -196,6 +198,10 @@ export function parsePrepWorkflowSteps(raw: unknown): PrepWorkflowStepDTO[] {
       takeoff_ids: strArr(item.takeoff_ids),
       duration,
       crew,
+      crew_id: str(item.crew_id ?? item.crewId),
+      crew_size: crewSize != null && crewSize > 0 ? crewSize : null,
+      workload_person_days: workload != null && workload >= 0 ? workload : null,
+      parallelizable: item.parallelizable === true,
       equipment,
       supplies: strArr(item.supplies),
       preconditions: strArr(item.preconditions),
@@ -252,6 +258,8 @@ export function parsePrepSchedule(raw: unknown): PrepScheduleDTO | null {
         depends_on,
         start_alignment: t.start_alignment === "day_start" ? "day_start" : null,
         include_in_base: t.include_in_base === false ? false : true,
+        crew_id: str(t.crew_id ?? t.crewId),
+        parallelizable: t.parallelizable === true,
       });
     }
   }

@@ -180,6 +180,12 @@ export function adaptPrepBundleToTechnical(input: unknown): TechnicalBundleV1 {
             ? st.controls_before_next.filter((x): x is string => typeof x === "string")
             : [],
           duration: st.duration,
+          crew_id: str(st.crew_id ?? st.crewId),
+          crew_size: num(st.crew_size ?? st.crewSize),
+          workload_person_days: num(
+            st.workload_person_days ?? st.workloadPersonDays,
+          ),
+          parallelizable: st.parallelizable === true,
         };
       })
     : [];
@@ -206,6 +212,8 @@ export function adaptPrepBundleToTechnical(input: unknown): TechnicalBundleV1 {
               step_id: str(t.step_id) ?? "",
               depends_on,
               include_in_base: t.include_in_base !== false,
+              crew_id: str(t.crew_id ?? t.crewId),
+              parallelizable: t.parallelizable === true,
             };
           })
           .filter((t) => t.step_id)

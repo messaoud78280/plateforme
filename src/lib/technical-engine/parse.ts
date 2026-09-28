@@ -605,6 +605,16 @@ export function parseTechnicalBundle(input: unknown): TechnicalParseResult {
         takeoff_ids: strList(st.takeoff_ids ?? st.takeoffIds, 40),
         controls: strList(st.controls),
         crew: strList(st.crew),
+        crew_id: str(st.crew_id ?? st.crewId, 40),
+        crew_size: (() => {
+          const n = num(st.crew_size ?? st.crewSize);
+          return n != null && n > 0 ? n : null;
+        })(),
+        workload_person_days: (() => {
+          const n = num(st.workload_person_days ?? st.workloadPersonDays);
+          return n != null && n >= 0 ? n : null;
+        })(),
+        parallelizable: st.parallelizable === true,
         equipment: strList(st.equipment),
         duration: st.duration ?? undefined,
       });
@@ -642,6 +652,8 @@ export function parseTechnicalBundle(input: unknown): TechnicalParseResult {
           step_id: stepId,
           depends_on,
           include_in_base: t.include_in_base === false ? false : true,
+          crew_id: str(t.crew_id ?? t.crewId, 40),
+          parallelizable: t.parallelizable === true,
         });
       });
     }

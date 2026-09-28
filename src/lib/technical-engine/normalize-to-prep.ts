@@ -192,6 +192,10 @@ export function technicalToPrepBundleJson(
             typeof c === "string" ? { labor_id: c, count: 1 } : c,
           )
         : [],
+      crew_id: st.crew_id ?? null,
+      crew_size: st.crew_size ?? null,
+      workload_person_days: st.workload_person_days ?? null,
+      parallelizable: st.parallelizable === true,
       equipment: Array.isArray(st.equipment)
         ? st.equipment.map((e) =>
             typeof e === "string" ? { equipment_id: e, count: 1 } : e,
@@ -214,6 +218,8 @@ export function technicalToPrepBundleJson(
       lag_days: d.lag_days ?? 0,
     })),
     include_in_base: t.include_in_base !== false,
+    crew_id: t.crew_id ?? null,
+    parallelizable: t.parallelizable === true,
   }));
 
   const disclaimers = [

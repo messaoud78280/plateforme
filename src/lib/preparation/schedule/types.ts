@@ -59,6 +59,21 @@ export type PrepWorkflowStepDTO = {
   takeoff_ids: string[];
   duration: PrepStepDuration;
   crew: Array<{ labor_id: string; count: number }>;
+  /**
+   * Ressource logique exclusive (ex. ELEC-A, MACON-A).
+   * Même crew_id → pas de chevauchement à l’ordonnancement.
+   */
+  crew_id?: string | null;
+  /** Effectif informatif / rendement — ne divise jamais duration_days automatiquement. */
+  crew_size?: number | null;
+  /** Charge homme/jour éventuelle — distincte de duration_days. */
+  workload_person_days?: number | null;
+  /**
+   * Indique une intention de parallélisation côté modèle.
+   * Ne permet PAS à une même équipe physique (même crew_id) de se chevaucher.
+   * Le vrai parallèle exige des crew_id distincts (ou ressource non exclusive).
+   */
+  parallelizable?: boolean;
   equipment: Array<{ equipment_id: string; count: number }>;
   supplies: string[];
   preconditions: string[];
@@ -84,6 +99,9 @@ export type PrepScheduleTaskDTO = {
   depends_on: PrepScheduleDepDTO[];
   start_alignment?: "day_start" | null;
   include_in_base?: boolean;
+  /** Override éventuel de la ressource logique (sinon workflow.crew_id / lot). */
+  crew_id?: string | null;
+  parallelizable?: boolean;
 };
 
 export type PrepScheduleCalendarDTO = {

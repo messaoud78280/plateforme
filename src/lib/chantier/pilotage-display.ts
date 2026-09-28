@@ -44,7 +44,7 @@ export function humanizeTechnicalStatus(raw: string | null | undefined): string 
 /** Sous-titre court pour la timeline (détail déjà présent dans le workspace). */
 export function timelineStepCaption(step: ChantierWorkflowStep): string {
   if (!step.ready) {
-    if (step.id === "visite") return "Pas de visite liée";
+    if (step.id === "visite") return step.title || "Pas de visite liée";
     if (step.id === "suivi" && step.actionLabel === "Planning requis") {
       return "Planning requis";
     }
@@ -52,7 +52,7 @@ export function timelineStepCaption(step: ChantierWorkflowStep): string {
   }
   const d = humanizeTechnicalStatus(step.detail) || step.title;
   // Raccourcis utiles
-  if (step.id === "visite") return "Terminée";
+  if (step.id === "visite") return step.title || "Visite";
   if (step.id === "metre") {
     const posts = d.match(/(\d+)\s*poste/i);
     if (posts) return `${posts[1]} postes`;

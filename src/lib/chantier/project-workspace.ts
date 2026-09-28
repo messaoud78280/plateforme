@@ -14,11 +14,11 @@ import {
   extractVisitSearchBits,
   isGlobalStudySources,
   pickBestPlan,
-  pickSuggestedVisitId,
   resolvePrepSchedulePlanForWorkspace,
   resolvePrepStudyForWorkspace,
   workspaceOpenOrGenerateLabel,
 } from "@/lib/chantier/resolve-workspace-entities";
+import { buildPreparationSnapshot } from "@/lib/chantier/preparation-state";
 
 export type SyncState =
   | "A_JOUR"
@@ -583,6 +583,7 @@ async function getProjectWorkspaceUncached(
           version: true,
           scopeId: true,
           sourcesJson: true,
+          dossierStatus: true,
           _count: { select: { lines: true } },
         },
         orderBy: { updatedAt: "desc" },
@@ -649,6 +650,9 @@ async function getProjectWorkspaceUncached(
       sourcePrepStudyId: true,
       projectId: true,
       scopeId: true,
+      status: true,
+      isDemonstration: true,
+      subject: true,
     },
     orderBy: { updatedAt: "desc" },
   });
@@ -735,6 +739,15 @@ async function getProjectWorkspaceUncached(
 
   const visit = linkedVisits[0] ?? null;
   let suggestedVisitId: string | null = null;
+  let addressCandidates: Array<{
+    id: string;
+    status: string;
+    projectId: string | null;
+    commercialQuoteId: string | null;
+    subject: string | null;
+    clientNeed: string | null;
+    siteAddress: string | null;
+  }> = [];
   if (!visit) {
     const searchBits = extractVisitSearchBits({
       title: project.title,
@@ -742,7 +755,7 @@ async function getProjectWorkspaceUncached(
       siteCity: project.siteCity,
     });
     if (searchBits.length > 0) {
-      const candidates = await prisma.siteVisit.findMany({
+      addressCandidates = await prisma.siteVisit.findMany({
         where: {
           organizationId: orgId,
           projectId: null,
@@ -757,15 +770,48 @@ async function getProjectWorkspaceUncached(
         take: 12,
         select: {
           id: true,
+          status: true,
+          projectId: true,
+          commercialQuoteId: true,
           subject: true,
           clientNeed: true,
           siteAddress: true,
-          siteName: true,
         },
       });
-      suggestedVisitId = pickSuggestedVisitId({ searchBits, candidates });
     }
   }
+
+  const preparation = buildPreparationSnapshot({
+    projectId,
+    title: project.title,
+    siteAddress: project.siteAddress,
+    siteCity: project.siteCity,
+    visits: [
+      ...linkedVisits.map((v) => ({
+        id: v.id,
+        status: v.status,
+        projectId: v.projectId,
+        commercialQuoteId: v.commercialQuoteId,
+        siteAddress: null,
+        subject: v.subject,
+        clientNeed: null,
+      })),
+      ...addressCandidates,
+    ],
+    studies: studies.map((s) => ({
+      id: s.id,
+      scopeId: s.scopeId,
+      sourcesJson: s.sourcesJson,
+      dossierStatus: s.dossierStatus,
+      lineCount: s._count.lines,
+    })),
+    scopes,
+    quotes,
+    plans,
+  });
+  const visitView = preparation.modules.find((m) => m.key === "visite");
+  const resolvedVisitId = visit?.id ?? preparation.visitId;
+  if (!visit) suggestedVisitId = preparation.visitId;
 
   const followUp = followUpSheets[0] ?? null;
   const compteRendu =
@@ -861,28 +907,25 @@ async function getProjectWorkspaceUncached(
     {
       id: "visite",
       label: "Visite",
-      title: visit
-        ? visit.subject?.slice(0, 80) || "Visite rattachée"
-        : suggestedVisitId
-          ? "Visite détectée — à rattacher"
-          : "Pas de visite liée",
-      detail: visit
-        ? `Statut ${visit.status}`
-        : suggestedVisitId
-          ? "Une visite existante correspond à ce chantier"
-          : "Aucune visite terrain liée — ouvrir les visites pour rattacher ou créer",
-      href: visit
-        ? `/dashboard/visites-metres/${visit.id}`
-        : suggestedVisitId
-          ? `/dashboard/visites-metres/${suggestedVisitId}`
-          : visitsListHref,
-      ready: !!visit,
-      actionLabel: visit
-        ? "Ouvrir"
-        : suggestedVisitId
-          ? "Rattacher la visite"
-          : "Ouvrir les visites",
-      primaryAction: visit ? "open" : suggestedVisitId ? "attach_visit" : "open",
+      title: visitView?.stateLabel ?? (visit ? "Visite rattachée" : "Pas de visite liée"),
+      detail:
+        visitView?.state === "na"
+          ? "La visite terrain n’est pas une étape de ce dossier"
+          : visit
+            ? visitView?.stateLabel ?? `Statut ${visit.status}`
+            : resolvedVisitId
+              ? visitView?.stateLabel ?? "Visite du même chantier, pas encore rattachée"
+              : "Aucune visite terrain liée",
+      href: resolvedVisitId
+        ? `/dashboard/visites-metres/${resolvedVisitId}`
+        : visitsListHref,
+      ready: visitView?.state === "done" || visitView?.state === "na",
+      actionLabel: resolvedVisitId
+        ? visit
+          ? "Ouvrir"
+          : "Ouvrir la visite"
+        : "Ouvrir les visites",
+      primaryAction: "open",
     },
     {
       id: "metre",

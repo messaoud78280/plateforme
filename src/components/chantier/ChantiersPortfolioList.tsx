@@ -98,6 +98,7 @@ function statusVisual(status: ChantierStatus): {
 function moduleDot(state: PortfolioModuleSnapshot["state"]) {
   if (state === "done") return "bg-emerald-500";
   if (state === "progress") return "bg-amber-400";
+  if (state === "na") return "bg-slate-300";
   return "bg-slate-300";
 }
 
@@ -166,6 +167,13 @@ function RowMenu({ row }: { row: PortfolioProjectRow }) {
 
 function AttentionChip({ row }: { row: PortfolioProjectRow }) {
   if (row.attentionLevel === "none" || row.attentionCount <= 0) {
+    if (row.nextAction) {
+      return (
+        <span className="inline-flex items-center rounded-xl bg-[#1e3a5f]/5 px-3 py-2 text-[12px] font-semibold text-[#1e3a5f] ring-1 ring-[#1e3a5f]/15">
+          {row.nextAction}
+        </span>
+      );
+    }
     return (
       <span className="inline-flex items-center rounded-xl bg-slate-50 px-3 py-2 text-[12px] font-medium text-slate-500 ring-1 ring-slate-200/70">
         Aucune alerte
@@ -242,7 +250,9 @@ function ModulesColumn({ modules }: { modules: PortfolioModuleSnapshot[] }) {
                 ? "text-emerald-700"
                 : m.state === "progress"
                   ? "text-amber-700"
-                  : "text-slate-400",
+                  : m.state === "na"
+                    ? "text-slate-500"
+                    : "text-slate-400",
             )}
           >
             {m.stateLabel}

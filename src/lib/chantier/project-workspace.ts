@@ -516,7 +516,7 @@ function buildScopeCards(input: {
       actionLabel: plan
         ? "Ouvrir"
         : "Générer le planning chantier",
-      ready: !!plan && planningSync === "A_JOUR",
+      ready: !!plan,
       syncHint: planningHint ?? "Un seul planning pour tout le chantier.",
       isReference: !!(plan && input.refs.planId === plan.id),
     },
@@ -549,6 +549,8 @@ async function getProjectWorkspaceUncached(
       id: true,
       title: true,
       chantierStatus: true,
+      siteAddress: true,
+      siteCity: true,
     },
   });
   if (!project) return null;
@@ -638,19 +640,78 @@ async function getProjectWorkspaceUncached(
     orderBy: { updatedAt: "desc" },
   });
 
+  const planSourceByStudyId = new Map<
+    string,
+    Awaited<ReturnType<typeof resolvePrepPlanSource>>
+  >();
+  await Promise.all(
+    studies.map(async (s) => {
+      planSourceByStudyId.set(
+        s.id,
+        await resolvePrepPlanSource({
+          projectId,
+          sourcesJson: s.sourcesJson,
+        }),
+      );
+    }),
+  );
+
+  // Lecture robuste : global (scopeId null) OU référence de lot OU unique study projet.
+  // Ne crée rien, ne modifie aucun scopeId.
+  const studyById = (id: string | null | undefined) =>
+    id ? studies.find((s) => s.id === id) ?? null : null;
+  const planById = (id: string | null | undefined) =>
+    id ? plans.find((p) => p.id === id) ?? null : null;
+
   const globalStudy =
     studies.find((s) => isGlobalStudySources(s.sourcesJson) && !s.scopeId) ??
     studies.find((s) => !s.scopeId) ??
-    null;
+    (() => {
+      for (const sc of scopes) {
+        const hit = studyById(sc.referenceStudyId);
+        if (hit) return hit;
+      }
+      return null;
+    })() ??
+    (studies.length === 1 ? studies[0]! : null);
+
+  const plansForStudy = (studyId: string | null | undefined) =>
+    studyId ? plans.filter((p) => p.studyId === studyId) : [];
+
+  const pickPlanFromList = (
+    list: typeof plans,
+  ): (typeof plans)[number] | null => {
+    if (list.length === 0) return null;
+    return (
+      list.find(
+        (p) => p.status === "CURRENT" || p.revisionKind === "CURRENT",
+      ) ??
+      list.find((p) => p.status !== "ARCHIVED") ??
+      list[0] ??
+      null
+    );
+  };
+
   const globalPlan =
-    plans.find(
-      (p) =>
-        p.scopeId == null &&
-        (p.status === "CURRENT" || p.revisionKind === "CURRENT") &&
-        (!globalStudy || p.studyId === globalStudy.id),
+    pickPlanFromList(
+      plans.filter(
+        (p) =>
+          p.scopeId == null &&
+          (!globalStudy || p.studyId === globalStudy.id),
+      ),
     ) ??
-    plans.find((p) => p.scopeId == null && (!globalStudy || p.studyId === globalStudy.id)) ??
-    null;
+    pickPlanFromList(plansForStudy(globalStudy?.id)) ??
+    (() => {
+      for (const sc of scopes) {
+        const hit = planById(sc.referenceSchedulePlanId);
+        if (hit) return hit;
+      }
+      return null;
+    })() ??
+    (() => {
+      const active = plans.filter((p) => p.status !== "ARCHIVED");
+      return active.length === 1 ? active[0]! : null;
+    })();
 
   const referencedQuoteIds = new Set(
     scopes.map((s) => s.referenceQuoteId).filter((id): id is string => Boolean(id)),
@@ -659,6 +720,9 @@ async function getProjectWorkspaceUncached(
     quotes.find((q) => q.id === scopes[0]?.referenceQuoteId) ??
     quotes.find((q) => referencedQuoteIds.has(q.id)) ??
     quotes.find((q) => q.projectId === projectId) ??
+    (globalStudy
+      ? quotes.find((q) => q.sourcePrepStudyId === globalStudy.id)
+      : null) ??
     quotes[0] ??
     null;
 
@@ -703,29 +767,54 @@ async function getProjectWorkspaceUncached(
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .split(/[^a-z0-9]+/)
-      .filter((w) => w.length >= 5)
+      .filter((w) => w.length >= 5 && !["construction", "renovation", "maison", "individuelle", "complete", "demo"].includes(w))
       .slice(0, 6);
-    const candidates = await prisma.siteVisit.findMany({
-      where: {
-        organizationId: orgId,
-        projectId: null,
-        OR: [
-          { subject: { contains: "cuisine", mode: "insensitive" } },
-          { clientNeed: { contains: "cuisine", mode: "insensitive" } },
-        ],
-      },
-      orderBy: { updatedAt: "desc" },
-      take: 8,
-      select: { id: true, subject: true, clientNeed: true },
-    });
-    const match = candidates.find((c) => {
-      const blob = `${c.subject ?? ""} ${c.clientNeed ?? ""}`.toLowerCase();
-      return (
-        blob.includes("salle de bain") &&
-        (titleBits.some((b) => blob.includes(b)) || blob.includes("cuisine"))
-      );
-    });
-    suggestedVisitId = match?.id ?? candidates[0]?.id ?? null;
+    const addressBits = [project.siteAddress, project.siteCity]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .split(/[^a-z0-9]+/)
+      .filter((w) => w.length >= 4)
+      .slice(0, 4);
+
+    const searchBits = [...new Set([...titleBits, ...addressBits])].slice(0, 8);
+    if (searchBits.length > 0) {
+      const candidates = await prisma.siteVisit.findMany({
+        where: {
+          organizationId: orgId,
+          projectId: null,
+          OR: searchBits.flatMap((b) => [
+            { subject: { contains: b, mode: "insensitive" as const } },
+            { clientNeed: { contains: b, mode: "insensitive" as const } },
+            { siteAddress: { contains: b, mode: "insensitive" as const } },
+            { siteName: { contains: b, mode: "insensitive" as const } },
+          ]),
+        },
+        orderBy: { updatedAt: "desc" },
+        take: 12,
+        select: {
+          id: true,
+          subject: true,
+          clientNeed: true,
+          siteAddress: true,
+          siteName: true,
+        },
+      });
+      const minHits = Math.min(2, searchBits.length);
+      const match = candidates.find((c) => {
+        const blob =
+          `${c.subject ?? ""} ${c.clientNeed ?? ""} ${c.siteAddress ?? ""} ${c.siteName ?? ""}`
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+        const hits = searchBits.filter((b) => blob.includes(b));
+        return hits.length >= minHits;
+      });
+      // Jamais de fallback « premier candidat » — évite les faux positifs (ex. cuisine).
+      suggestedVisitId = match?.id ?? null;
+    }
   }
 
   const followUp = followUpSheets[0] ?? null;
@@ -740,7 +829,7 @@ async function getProjectWorkspaceUncached(
       : null;
 
   const globalPlanHref =
-    globalPlan && globalStudy
+    globalPlan
       ? `/dashboard/visites-metres/etudes/${globalPlan.studyId}/planning/${globalPlan.id}`
       : null;
 
@@ -823,12 +912,12 @@ async function getProjectWorkspaceUncached(
         ? visit.subject?.slice(0, 80) || "Visite rattachée"
         : suggestedVisitId
           ? "Visite détectée — à rattacher"
-          : "Aucune visite rattachée",
+          : "Pas de visite liée",
       detail: visit
         ? `Statut ${visit.status}`
         : suggestedVisitId
           ? "Une visite existante correspond à ce chantier"
-          : "Rattacher une visite terrain existante",
+          : "Aucune visite terrain liée à ce projet",
       href: visit ? `/dashboard/visites-metres/${visit.id}` : null,
       ready: !!visit,
       actionLabel: visit ? "Ouvrir" : suggestedVisitId ? "Rattacher la visite" : "—",
@@ -915,7 +1004,61 @@ async function getProjectWorkspaceUncached(
   ];
 
   const scopeWorkspaces: ScopeWorkspace[] = scopes.map((scope) => {
-    // Lots = phases / filtres uniquement — pas de chaîne métré/planning par lot.
+    const scopeStudies = studies.filter((s) => s.scopeId === scope.id);
+    const refStudy =
+      scopeStudies.find((s) => s.id === scope.referenceStudyId) ??
+      studyById(scope.referenceStudyId) ??
+      scopeStudies[0] ??
+      // Fallback lecture : même métré chantier affiché depuis le lot (sans duplication).
+      (studies.length === 1 ? studies[0]! : null) ??
+      globalStudy;
+
+    const scopeQuotes = quotes.filter(
+      (q) =>
+        q.scopeId === scope.id ||
+        q.id === scope.referenceQuoteId ||
+        (refStudy != null && q.sourcePrepStudyId === refStudy.id),
+    );
+    const refQuote =
+      scopeQuotes.find((q) => q.id === scope.referenceQuoteId) ??
+      scopeQuotes[0] ??
+      globalQuote ??
+      null;
+
+    const scopePlans = plans.filter(
+      (p) =>
+        p.scopeId === scope.id ||
+        p.id === scope.referenceSchedulePlanId ||
+        (refStudy != null && p.studyId === refStudy.id),
+    );
+    const refPlan =
+      planById(scope.referenceSchedulePlanId) ??
+      pickPlanFromList(scopePlans) ??
+      (refStudy && globalPlan && globalPlan.studyId === refStudy.id
+        ? globalPlan
+        : null) ??
+      null;
+
+    const { cards, alerts } = buildScopeCards({
+      projectId,
+      scopeId: scope.id,
+      study: refStudy,
+      quote: refQuote,
+      quotesCount: Math.max(scopeQuotes.length, refQuote ? 1 : 0),
+      plan: refPlan,
+      planSource: refStudy
+        ? planSourceByStudyId.get(refStudy.id) ?? null
+        : null,
+      refs: {
+        studyId: scope.referenceStudyId,
+        quoteId: scope.referenceQuoteId,
+        planId: scope.referenceSchedulePlanId,
+      },
+      fallbackStudyId: globalStudy?.id ?? null,
+      fallbackPlanHref: globalPlanHref,
+    });
+    const ready = cards.filter((c) => c.ready).length;
+
     return {
       id: scope.id,
       code: scope.code,
@@ -924,17 +1067,16 @@ async function getProjectWorkspaceUncached(
       status: scope.status,
       displayOrder: scope.displayOrder,
       href: `/dashboard/projets/${projectId}/preparation/${scope.id}`,
-      cards: [],
+      cards,
       alerts: [
+        ...alerts,
         {
           level: "info" as const,
-          message: "Phase / filtre du dossier chantier — métré et planning sont globaux.",
+          message:
+            "Phase / filtre du dossier — les éléments ouverts sont ceux du chantier (pas de doublon).",
         },
       ],
-      progress: {
-        ready: globalStudy && globalQuote && globalPlan ? 1 : 0,
-        total: 1,
-      },
+      progress: { ready, total: Math.max(cards.length, 1) },
     };
   });
 

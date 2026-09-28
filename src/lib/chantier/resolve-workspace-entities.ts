@@ -40,10 +40,10 @@ export function isGlobalStudySources(sourcesJson: unknown): boolean {
  * 4. unique PrepStudy du projet
  * 5. null (ne jamais inventer)
  */
-export function resolvePrepStudyForWorkspace(input: {
-  studies: StudyLike[];
+export function resolvePrepStudyForWorkspace<T extends StudyLike>(input: {
+  studies: T[];
   scopes: ScopeLike[];
-}): StudyLike | null {
+}): T | null {
   const { studies, scopes } = input;
   const byId = (id: string | null | undefined) =>
     id ? studies.find((s) => s.id === id) ?? null : null;
@@ -62,7 +62,7 @@ export function resolvePrepStudyForWorkspace(input: {
   );
 }
 
-export function pickBestPlan(list: PlanLike[]): PlanLike | null {
+export function pickBestPlan<T extends PlanLike>(list: T[]): T | null {
   if (list.length === 0) return null;
   return (
     list.find((p) => p.status === "CURRENT") ??
@@ -80,11 +80,11 @@ export function pickBestPlan(list: PlanLike[]): PlanLike | null {
  * 3. referenceSchedulePlanId des scopes
  * 4. unique planning non archivé du projet
  */
-export function resolvePrepSchedulePlanForWorkspace(input: {
-  plans: PlanLike[];
+export function resolvePrepSchedulePlanForWorkspace<T extends PlanLike>(input: {
+  plans: T[];
   scopes: ScopeLike[];
   study: StudyLike | null;
-}): PlanLike | null {
+}): T | null {
   const { plans, scopes, study } = input;
   const byId = (id: string | null | undefined) =>
     id ? plans.find((p) => p.id === id) ?? null : null;

@@ -44,6 +44,10 @@ export function humanizeTechnicalStatus(raw: string | null | undefined): string 
 /** Sous-titre court pour la timeline (détail déjà présent dans le workspace). */
 export function timelineStepCaption(step: ChantierWorkflowStep): string {
   if (!step.ready) {
+    if (step.id === "visite") return "Pas de visite liée";
+    if (step.id === "suivi" && step.actionLabel === "Planning requis") {
+      return "Planning requis";
+    }
     return humanizeTechnicalStatus(step.detail) || step.actionLabel || "À préparer";
   }
   const d = humanizeTechnicalStatus(step.detail) || step.title;
@@ -107,16 +111,23 @@ export function computePilotageNextAction(input: {
           ? firstTodo.id === "planning"
             ? "Générer le planning chantier"
             : "Générer le métré / planning"
-          : firstTodo.primaryAction === "create_follow_up"
+          : firstTodo.primaryAction === "create_follow_up" ||
+              (firstTodo.id === "suivi" && !firstTodo.ready)
             ? "Créer le suivi depuis le planning"
-            : firstTodo.primaryAction === "create_compte_rendu"
+            : firstTodo.id === "compte_rendu"
               ? "Générer le compte rendu"
-              : firstTodo.primaryAction === "create_notice"
+              : firstTodo.id === "notice"
                 ? "Générer la notice explicative"
-                : firstTodo.actionLabel || `Préparer : ${firstTodo.label}`;
+                : firstTodo.id === "visite"
+                  ? firstTodo.actionLabel || "Ouvrir les visites"
+                  : firstTodo.actionLabel || `Préparer : ${firstTodo.label}`;
     return {
       label,
-      href: firstTodo.href,
+      href:
+        firstTodo.primaryAction === "attach_visit" ||
+        firstTodo.primaryAction === "create_global_prep"
+          ? null
+          : firstTodo.href,
       stepId: firstTodo.id,
     };
   }

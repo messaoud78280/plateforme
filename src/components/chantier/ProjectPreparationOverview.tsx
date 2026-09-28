@@ -422,12 +422,26 @@ export function ProjectPreparationOverview({
         </div>
       </div>
 
-      {/* Timeline compacte */}
+      {/* Timeline compacte — chaque étape navigable */}
       <div className="rounded-2xl border border-slate-200/90 bg-white px-3 py-3 sm:px-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
         <ol className="flex gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {workflow.map((step, idx) => {
             const caption = timelineStepCaption(step);
-            const clickable = step.ready && step.href;
+            /** Actions qui doivent rester côté client (pas une simple navigation). */
+            const clientAction =
+              canEdit &&
+              !step.ready &&
+              (step.primaryAction === "attach_visit" ||
+                step.primaryAction === "create_global_prep" ||
+                (step.primaryAction === "create_follow_up" && !step.href));
+            const cardClass = cn(
+              "flex w-full flex-col rounded-xl border px-2.5 py-2 text-left transition",
+              "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/40 focus-visible:ring-offset-1",
+              "hover:-translate-y-0.5 hover:shadow-md",
+              step.ready
+                ? "border-slate-200/90 bg-white hover:border-[#1e3a5f]/35 hover:bg-slate-50/90"
+                : "border-dashed border-slate-200 bg-slate-50/60 hover:border-[#1e3a5f]/30 hover:bg-white",
+            );
             const Inner = (
               <>
                 <span
@@ -446,6 +460,18 @@ export function ProjectPreparationOverview({
                 <span className="mt-0.5 line-clamp-2 text-[12px] font-semibold leading-snug text-slate-800">
                   {caption}
                 </span>
+                <span
+                  className={cn(
+                    "mt-1.5 text-[10.5px] font-semibold",
+                    step.ready ? "text-[#1e3a5f]" : "text-slate-500",
+                  )}
+                >
+                  {step.ready
+                    ? "Ouvrir →"
+                    : step.actionLabel && step.actionLabel !== "—"
+                      ? `${step.actionLabel} →`
+                      : "Continuer →"}
+                </span>
               </>
             );
             return (
@@ -456,38 +482,70 @@ export function ProjectPreparationOverview({
                     aria-hidden
                   />
                 ) : null}
-                {clickable ? (
-                  <Link
-                    href={step.href!}
-                    className={cn(
-                      "flex w-full flex-col rounded-xl border px-2.5 py-2 transition",
-                      step.ready
-                        ? "border-slate-200/90 bg-white hover:border-[#1e3a5f]/30 hover:bg-slate-50/80"
-                        : "border-dashed border-slate-200 bg-slate-50/50",
-                    )}
-                  >
-                    {Inner}
-                  </Link>
-                ) : canEdit &&
-                  step.primaryAction &&
-                  step.primaryAction !== "open" ? (
+                {clientAction ? (
                   <button
                     type="button"
                     disabled={globalBusy}
                     onClick={() => void runWorkflowAction(step)}
-                    className="flex w-full flex-col rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-2.5 py-2 text-left transition hover:border-[#1e3a5f]/25 disabled:opacity-50"
+                    className={cn(cardClass, "disabled:cursor-not-allowed disabled:opacity-50")}
+                    aria-label={`${step.label} — ${step.actionLabel}`}
+                  >
+                    {Inner}
+                  </button>
+                ) : step.href ? (
+                  <Link
+                    href={step.href}
+                    className={cardClass}
+                    aria-label={`${step.label} — ${step.actionLabel}`}
+                  >
+                    {Inner}
+                  </Link>
+                ) : canEdit && step.primaryAction ? (
+                  <button
+                    type="button"
+                    disabled={globalBusy}
+                    onClick={() => void runWorkflowAction(step)}
+                    className={cn(cardClass, "disabled:cursor-not-allowed disabled:opacity-50")}
+                    aria-label={`${step.label} — ${step.actionLabel}`}
                   >
                     {Inner}
                   </button>
                 ) : (
-                  <div className="flex w-full flex-col rounded-xl border border-dashed border-slate-200 bg-slate-50/40 px-2.5 py-2">
+                  <Link
+                    href={`/dashboard/projets/${workspace.projectId}`}
+                    className={cardClass}
+                    aria-label={`${step.label} — dossier chantier`}
+                  >
                     {Inner}
-                  </div>
+                  </Link>
                 )}
               </li>
             );
           })}
         </ol>
+
+        {workspace.global.planSource?.href ? (
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.03] px-3 py-2.5">
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#1e3a5f]/70">
+                Plan source
+              </p>
+              <p className="mt-0.5 truncate text-[13px] font-semibold text-slate-900">
+                {workspace.global.planSource.fileName}
+              </p>
+              <p className="truncate text-[11.5px] text-slate-500">
+                {workspace.global.planSource.title}
+              </p>
+            </div>
+            <Link
+              href={workspace.global.planSource.href}
+              className="inline-flex shrink-0 items-center rounded-lg bg-[#1e3a5f] px-3 py-2 text-[12.5px] font-semibold text-white hover:bg-[#152a45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/40"
+            >
+              Ouvrir le plan
+            </Link>
+          </div>
+        ) : null}
+
         {globalError ? (
           <p className="mt-2 text-[12.5px] text-red-700">{globalError}</p>
         ) : null}

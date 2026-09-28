@@ -117,6 +117,15 @@ export type ChantierWorkflowStep = {
     | null;
 };
 
+/** Accès plan source (PDF) — lecture seule, lien vers viewer existant. */
+export type ProjectPlanSourceLink = {
+  fileName: string;
+  title: string;
+  href: string;
+  studyId: string | null;
+  chantierFileId: string;
+};
+
 /** Pilotage global chantier (métré / devis / planning uniques). */
 export type ProjectGlobalWorkspace = {
   metre: WorkspaceCard;
@@ -124,6 +133,8 @@ export type ProjectGlobalWorkspace = {
   planning: WorkspaceCard;
   /** Chaîne Visite → … → Notice (une seule, pas par lot). */
   workflow: ChantierWorkflowStep[];
+  /** Plan d’exécution rattaché au métré chantier (si présent). */
+  planSource: ProjectPlanSourceLink | null;
   phases: Array<{ id: string; code: string; name: string; href: string }>;
   canCreateFromQuote: boolean;
   primaryQuoteId: string | null;
@@ -838,6 +849,9 @@ async function getProjectWorkspaceUncached(
     isReference: true,
   };
 
+  const visitsListHref = `/dashboard/visites-metres?projectId=${encodeURIComponent(projectId)}`;
+  const documentsChantierHref = `/dashboard/projets/${projectId}/documents-chantier`;
+
   const workflow: ChantierWorkflowStep[] = [
     {
       id: "visite",
@@ -851,11 +865,19 @@ async function getProjectWorkspaceUncached(
         ? `Statut ${visit.status}`
         : suggestedVisitId
           ? "Une visite existante correspond à ce chantier"
-          : "Aucune visite terrain liée à ce projet",
-      href: visit ? `/dashboard/visites-metres/${visit.id}` : null,
+          : "Aucune visite terrain liée — ouvrir les visites pour rattacher ou créer",
+      href: visit
+        ? `/dashboard/visites-metres/${visit.id}`
+        : suggestedVisitId
+          ? `/dashboard/visites-metres/${suggestedVisitId}`
+          : visitsListHref,
       ready: !!visit,
-      actionLabel: visit ? "Ouvrir" : suggestedVisitId ? "Rattacher la visite" : "—",
-      primaryAction: visit ? "open" : suggestedVisitId ? "attach_visit" : null,
+      actionLabel: visit
+        ? "Ouvrir"
+        : suggestedVisitId
+          ? "Rattacher la visite"
+          : "Ouvrir les visites",
+      primaryAction: visit ? "open" : suggestedVisitId ? "attach_visit" : "open",
     },
     {
       id: "metre",
@@ -905,14 +927,20 @@ async function getProjectWorkspaceUncached(
         : globalPlan
           ? "Créer le suivi depuis les tâches du planning global"
           : "Générez d’abord le planning global",
-      href: followUp || globalPlan ? suiviHref : null,
+      // Toujours navigable : écran suivi si planning, sinon prérequis planning/métré.
+      href:
+        followUp || globalPlan
+          ? suiviHref
+          : globalPlanningCard.href ??
+            globalMetreCard.href ??
+            `/dashboard/projets/${projectId}`,
       ready: !!followUp,
       actionLabel: followUp ? "Ouvrir" : globalPlan ? "Créer le suivi" : "Planning requis",
       primaryAction: followUp
         ? "open"
         : globalPlan
           ? "create_follow_up"
-          : null,
+          : "open",
     },
     {
       id: "compte_rendu",
@@ -920,13 +948,14 @@ async function getProjectWorkspaceUncached(
       title: compteRendu ? `${compteRendu.number} — ${compteRendu.title}` : "Non créé",
       detail: compteRendu
         ? `Statut ${compteRendu.status}`
-        : "Générer depuis le suivi et le chantier",
+        : "Ouvrir les documents chantier pour générer le compte rendu",
       href: compteRendu
         ? `/dashboard/projets/${projectId}/documents-chantier/${compteRendu.id}`
-        : `/dashboard/projets/${projectId}/documents-chantier`,
+        : documentsChantierHref,
       ready: !!compteRendu,
       actionLabel: compteRendu ? "Ouvrir" : "Générer",
-      primaryAction: compteRendu ? "open" : "create_compte_rendu",
+      // Navigation vers l’écran documents — pas de création auto au clic timeline.
+      primaryAction: "open",
     },
     {
       id: "notice",
@@ -936,15 +965,32 @@ async function getProjectWorkspaceUncached(
         : "Non créée",
       detail: noticeDoc
         ? `Statut ${noticeDoc.status}`
-        : "Expliquer le déroulement du chantier (PDF client)",
+        : "Ouvrir les documents chantier pour générer la notice",
       href: noticeDoc
         ? `/dashboard/projets/${projectId}/documents-chantier/${noticeDoc.id}`
-        : `/dashboard/projets/${projectId}/documents-chantier`,
+        : documentsChantierHref,
       ready: !!noticeDoc,
       actionLabel: noticeDoc ? "Ouvrir" : "Générer",
-      primaryAction: noticeDoc ? "open" : "create_notice",
+      primaryAction: "open",
     },
   ];
+
+  const globalPlanSourceResolved = globalStudy
+    ? planSourceByStudyId.get(globalStudy.id) ?? null
+    : null;
+  const globalPlanSourceFile = globalPlanSourceResolved?.file ?? null;
+  const globalPlanSourceLink: ProjectPlanSourceLink | null =
+    globalPlanSourceFile && !globalPlanSourceResolved?.fileMissing
+      ? {
+          fileName: globalPlanSourceFile.name,
+          title:
+            globalPlanSourceResolved?.displayTitle ??
+            globalPlanSourceFile.name,
+          href: `/dashboard/projets/${projectId}/plan-source?studyId=${encodeURIComponent(globalStudy?.id ?? "")}&fileId=${encodeURIComponent(globalPlanSourceFile.id)}`,
+          studyId: globalStudy?.id ?? null,
+          chantierFileId: globalPlanSourceFile.id,
+        }
+      : null;
 
   const scopeWorkspaces: ScopeWorkspace[] = scopes.map((scope) => {
     const scopeStudies = studies.filter((s) => s.scopeId === scope.id);
@@ -1078,6 +1124,7 @@ async function getProjectWorkspaceUncached(
       devis: globalDevisCard,
       planning: globalPlanningCard,
       workflow,
+      planSource: globalPlanSourceLink,
       phases: scopes.map((s) => ({
         id: s.id,
         code: s.code,

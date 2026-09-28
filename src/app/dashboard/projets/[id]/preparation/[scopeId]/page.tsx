@@ -108,12 +108,14 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
                 </p>
               ) : null}
               {card.kind === "plan" && card.planMeta?.openHref ? (
-                <p className="mt-1 text-[12px] text-slate-500">
-                  Plan source disponible
+                <p className="mt-1 text-[12px] font-medium text-[#1e3a5f]">
+                  Plan source · Ouvrir le plan
                 </p>
               ) : null}
               <p className="mt-3 text-[12px] font-medium text-slate-500">
-                {card.actionLabel}
+                {card.kind === "plan" && card.ready
+                  ? "Ouvrir le plan →"
+                  : card.actionLabel}
               </p>
             </>
           );

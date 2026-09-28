@@ -56,9 +56,83 @@ export function ProjectPreparationOverview({
     workspace.unscoped.items.find((i) => i.kind === "quote")?.id ??
     workspace.global.primaryQuoteId;
   const [globalBusy, setGlobalBusy] = useState(false);
+  const [globalBusyLabel, setGlobalBusyLabel] = useState<string | null>(null);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const workflow = workspace.global.workflow ?? [];
   const workflowReady = workflow.filter((s) => s.ready).length;
+  const quoteId =
+    workspace.global.primaryQuoteId ?? primaryUnscopedQuoteId ?? null;
+
+  function metreBlockReason(): string | null {
+    if (workspace.global.metre.ready) return null;
+    if (!canEdit) return "Action réservée à l’équipe chantier";
+    if (!quoteId) return "Un devis est requis avant de générer le métré";
+    return null;
+  }
+
+  function planningBlockReason(): string | null {
+    if (workspace.global.planning.ready) return null;
+    if (!canEdit) return "Action réservée à l’équipe chantier";
+    if (!workspace.global.metre.ready) {
+      return "Générez d’abord le métré";
+    }
+    if (!quoteId && !workspace.global.metre.ready) {
+      return "Un devis ou un métré est requis avant de générer le planning";
+    }
+    return null;
+  }
+
+  function workflowCardMode(step: ChantierWorkflowStep): {
+    mode: "open" | "generate" | "blocked";
+    reason: string | null;
+    busyLabel: string | null;
+  } {
+    if (step.ready && step.href) {
+      return { mode: "open", reason: null, busyLabel: null };
+    }
+    if (step.id === "metre" && !step.ready) {
+      const reason = metreBlockReason();
+      if (reason) return { mode: "blocked", reason, busyLabel: null };
+      return {
+        mode: "generate",
+        reason: null,
+        busyLabel: "Préparation du métré…",
+      };
+    }
+    if (step.id === "planning" && !step.ready) {
+      const reason = planningBlockReason();
+      if (reason) return { mode: "blocked", reason, busyLabel: null };
+      return {
+        mode: "generate",
+        reason: null,
+        busyLabel: "Préparation du planning…",
+      };
+    }
+    if (
+      canEdit &&
+      !step.ready &&
+      (step.primaryAction === "attach_visit" ||
+        step.primaryAction === "create_global_prep" ||
+        step.primaryAction === "create_follow_up" ||
+        step.primaryAction === "create_compte_rendu" ||
+        step.primaryAction === "create_notice")
+    ) {
+      return { mode: "generate", reason: null, busyLabel: "Préparation…" };
+    }
+    if (step.href) return { mode: "open", reason: null, busyLabel: null };
+    if (!canEdit) {
+      return {
+        mode: "blocked",
+        reason: "Action réservée à l’équipe chantier",
+        busyLabel: null,
+      };
+    }
+    return {
+      mode: "blocked",
+      reason: "Action indisponible pour le moment",
+      busyLabel: null,
+    };
+  }
 
   const nextAction = useMemo(
     () =>
@@ -87,12 +161,16 @@ export function ProjectPreparationOverview({
       /(\d{1,2}\s+[a-zéûôî]+)/i,
     )?.[1] ?? null;
 
-  async function createGlobalPrep() {
-    const quoteId = workspace.global.primaryQuoteId ?? primaryUnscopedQuoteId;
+  async function createGlobalPrep(opts?: { prefer?: "metre" | "planning" }) {
+    const targetQuoteId = quoteId;
     setGlobalBusy(true);
+    setGlobalBusyLabel(
+      opts?.prefer === "planning"
+        ? "Préparation du planning…"
+        : "Préparation du métré…",
+    );
     setGlobalError(null);
     try {
-      // Rattacher d’abord une visite suggérée si besoin (jamais Nouvelle visite)
       if (!workspace.global.visitId && workspace.global.suggestedVisitId) {
         const attach = await fetch(
           `/api/projets/${workspace.projectId}/global-prep`,
@@ -102,7 +180,7 @@ export function ProjectPreparationOverview({
             body: JSON.stringify({
               action: "attach_visit",
               attachVisitId: workspace.global.suggestedVisitId,
-              quoteId: quoteId ?? undefined,
+              quoteId: targetQuoteId ?? undefined,
             }),
           },
         );
@@ -111,27 +189,57 @@ export function ProjectPreparationOverview({
           throw new Error(attachData?.error ?? "Rattachement visite impossible");
         }
       }
-      if (!quoteId && !workspace.global.metre.ready) {
-        throw new Error("Aucun devis rattaché pour générer le métré / planning");
+      if (!targetQuoteId && !workspace.global.metre.ready) {
+        throw new Error("Un devis est requis avant de générer le métré");
+      }
+      if (opts?.prefer === "planning" && !workspace.global.metre.ready) {
+        throw new Error("Générez d’abord le métré");
       }
       const res = await fetch(`/api/projets/${workspace.projectId}/global-prep`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quoteId: quoteId ?? undefined }),
+        body: JSON.stringify({ quoteId: targetQuoteId ?? undefined }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "Création impossible");
+      const planHref =
+        typeof data?.planHref === "string" && data.planHref
+          ? data.planHref
+          : null;
+      const studyId =
+        typeof data?.studyId === "string" && data.studyId ? data.studyId : null;
+      if (opts?.prefer === "planning" && planHref) {
+        router.push(planHref);
+        return;
+      }
+      if (opts?.prefer === "metre" && studyId) {
+        router.push(`/dashboard/visites-metres/etudes/${studyId}`);
+        return;
+      }
+      if (planHref) {
+        router.push(planHref);
+        return;
+      }
+      if (studyId) {
+        router.push(`/dashboard/visites-metres/etudes/${studyId}`);
+        return;
+      }
       router.refresh();
     } catch (e) {
       setGlobalError(e instanceof Error ? e.message : "Erreur");
     } finally {
       setGlobalBusy(false);
+      setGlobalBusyLabel(null);
     }
   }
 
   async function attachSuggestedVisit() {
-    if (!workspace.global.suggestedVisitId) return;
+    if (!workspace.global.suggestedVisitId) {
+      setGlobalError("Aucune visite à rattacher");
+      return;
+    }
     setGlobalBusy(true);
+    setGlobalBusyLabel("Rattachement de la visite…");
     setGlobalError(null);
     try {
       const res = await fetch(`/api/projets/${workspace.projectId}/global-prep`, {
@@ -150,11 +258,13 @@ export function ProjectPreparationOverview({
       setGlobalError(e instanceof Error ? e.message : "Erreur");
     } finally {
       setGlobalBusy(false);
+      setGlobalBusyLabel(null);
     }
   }
 
   async function createFollowUp() {
     setGlobalBusy(true);
+    setGlobalBusyLabel("Préparation du suivi…");
     setGlobalError(null);
     try {
       const res = await fetch(
@@ -175,11 +285,13 @@ export function ProjectPreparationOverview({
       setGlobalError(e instanceof Error ? e.message : "Erreur");
     } finally {
       setGlobalBusy(false);
+      setGlobalBusyLabel(null);
     }
   }
 
   async function createCompteRendu() {
     setGlobalBusy(true);
+    setGlobalBusyLabel("Préparation du compte rendu…");
     setGlobalError(null);
     try {
       const res = await fetch(
@@ -207,11 +319,13 @@ export function ProjectPreparationOverview({
       setGlobalError(e instanceof Error ? e.message : "Erreur");
     } finally {
       setGlobalBusy(false);
+      setGlobalBusyLabel(null);
     }
   }
 
   async function createNotice() {
     setGlobalBusy(true);
+    setGlobalBusyLabel("Préparation de la notice…");
     setGlobalError(null);
     try {
       const res = await fetch(
@@ -239,16 +353,24 @@ export function ProjectPreparationOverview({
       setGlobalError(e instanceof Error ? e.message : "Erreur");
     } finally {
       setGlobalBusy(false);
+      setGlobalBusyLabel(null);
     }
   }
 
   async function runWorkflowAction(step: ChantierWorkflowStep) {
+    const card = workflowCardMode(step);
+    if (card.mode === "blocked") {
+      setGlobalError(card.reason ?? "Action indisponible");
+      return;
+    }
     if (step.primaryAction === "attach_visit") {
       await attachSuggestedVisit();
       return;
     }
     if (step.primaryAction === "create_global_prep") {
-      await createGlobalPrep();
+      await createGlobalPrep({
+        prefer: step.id === "planning" ? "planning" : "metre",
+      });
       return;
     }
     if (step.primaryAction === "create_follow_up") {
@@ -263,7 +385,11 @@ export function ProjectPreparationOverview({
       await createNotice();
       return;
     }
-    if (step.href) router.push(step.href);
+    if (step.href) {
+      router.push(step.href);
+      return;
+    }
+    setGlobalError("Aucune action disponible pour cette étape");
   }
 
   function openCreate(prefill?: string) {
@@ -422,25 +548,34 @@ export function ProjectPreparationOverview({
         </div>
       </div>
 
-      {/* Timeline compacte — chaque étape navigable */}
+      {/* Timeline compacte — chaque étape navigable ou générable */}
       <div className="rounded-2xl border border-slate-200/90 bg-white px-3 py-3 sm:px-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
         <ol className="flex gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {workflow.map((step, idx) => {
-            const caption = timelineStepCaption(step);
-            /** Actions qui doivent rester côté client (pas une simple navigation). */
-            const clientAction =
-              canEdit &&
-              !step.ready &&
-              (step.primaryAction === "attach_visit" ||
-                step.primaryAction === "create_global_prep" ||
-                (step.primaryAction === "create_follow_up" && !step.href));
+            const card = workflowCardMode(step);
+            const caption =
+              card.mode === "blocked" && card.reason
+                ? card.reason
+                : timelineStepCaption(step);
+            const ctaLabel =
+              card.mode === "open"
+                ? "Ouvrir →"
+                : card.mode === "generate"
+                  ? step.actionLabel && step.actionLabel !== "—"
+                    ? `${step.actionLabel} →`
+                    : "Générer →"
+                  : "Bloqué";
             const cardClass = cn(
               "flex w-full flex-col rounded-xl border px-2.5 py-2 text-left transition",
-              "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/40 focus-visible:ring-offset-1",
-              "hover:-translate-y-0.5 hover:shadow-md",
-              step.ready
-                ? "border-slate-200/90 bg-white hover:border-[#1e3a5f]/35 hover:bg-slate-50/90"
-                : "border-dashed border-slate-200 bg-slate-50/60 hover:border-[#1e3a5f]/30 hover:bg-white",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/40 focus-visible:ring-offset-1",
+              card.mode === "blocked"
+                ? "cursor-not-allowed border-dashed border-slate-200 bg-slate-50/80 opacity-90"
+                : cn(
+                    "cursor-pointer hover:-translate-y-0.5 hover:shadow-md",
+                    step.ready
+                      ? "border-slate-200/90 bg-white hover:border-[#1e3a5f]/35 hover:bg-slate-50/90"
+                      : "border-dashed border-slate-200 bg-slate-50/60 hover:border-[#1e3a5f]/30 hover:bg-white",
+                  ),
             );
             const Inner = (
               <>
@@ -449,7 +584,9 @@ export function ProjectPreparationOverview({
                     "flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold",
                     step.ready
                       ? "bg-emerald-100 text-emerald-800"
-                      : "bg-slate-100 text-slate-500",
+                      : card.mode === "blocked"
+                        ? "bg-amber-100 text-amber-800"
+                        : "bg-slate-100 text-slate-500",
                   )}
                 >
                   {step.ready ? "✓" : idx + 1}
@@ -463,14 +600,16 @@ export function ProjectPreparationOverview({
                 <span
                   className={cn(
                     "mt-1.5 text-[10.5px] font-semibold",
-                    step.ready ? "text-[#1e3a5f]" : "text-slate-500",
+                    card.mode === "open"
+                      ? "text-[#1e3a5f]"
+                      : card.mode === "generate"
+                        ? "text-[#1e3a5f]"
+                        : "text-amber-800",
                   )}
                 >
-                  {step.ready
-                    ? "Ouvrir →"
-                    : step.actionLabel && step.actionLabel !== "—"
-                      ? `${step.actionLabel} →`
-                      : "Continuer →"}
+                  {globalBusy && card.mode === "generate" && globalBusyLabel
+                    ? globalBusyLabel
+                    : ctaLabel}
                 </span>
               </>
             );
@@ -482,17 +621,17 @@ export function ProjectPreparationOverview({
                     aria-hidden
                   />
                 ) : null}
-                {clientAction ? (
+                {card.mode === "generate" ? (
                   <button
                     type="button"
                     disabled={globalBusy}
                     onClick={() => void runWorkflowAction(step)}
-                    className={cn(cardClass, "disabled:cursor-not-allowed disabled:opacity-50")}
+                    className={cn(cardClass, "disabled:cursor-wait disabled:opacity-60")}
                     aria-label={`${step.label} — ${step.actionLabel}`}
                   >
                     {Inner}
                   </button>
-                ) : step.href ? (
+                ) : card.mode === "open" && step.href ? (
                   <Link
                     href={step.href}
                     className={cardClass}
@@ -500,24 +639,16 @@ export function ProjectPreparationOverview({
                   >
                     {Inner}
                   </Link>
-                ) : canEdit && step.primaryAction ? (
+                ) : (
                   <button
                     type="button"
-                    disabled={globalBusy}
-                    onClick={() => void runWorkflowAction(step)}
-                    className={cn(cardClass, "disabled:cursor-not-allowed disabled:opacity-50")}
-                    aria-label={`${step.label} — ${step.actionLabel}`}
+                    disabled
+                    title={card.reason ?? undefined}
+                    className={cardClass}
+                    aria-label={`${step.label} — ${card.reason ?? "Bloqué"}`}
                   >
                     {Inner}
                   </button>
-                ) : (
-                  <Link
-                    href={`/dashboard/projets/${workspace.projectId}`}
-                    className={cardClass}
-                    aria-label={`${step.label} — dossier chantier`}
-                  >
-                    {Inner}
-                  </Link>
                 )}
               </li>
             );
@@ -546,8 +677,18 @@ export function ProjectPreparationOverview({
           </div>
         ) : null}
 
+        {globalBusyLabel ? (
+          <p className="mt-2 text-[12.5px] font-medium text-[#1e3a5f]">
+            {globalBusyLabel}
+          </p>
+        ) : null}
         {globalError ? (
-          <p className="mt-2 text-[12.5px] text-red-700">{globalError}</p>
+          <p
+            role="alert"
+            className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[12.5px] font-medium text-red-800"
+          >
+            {globalError}
+          </p>
         ) : null}
       </div>
 

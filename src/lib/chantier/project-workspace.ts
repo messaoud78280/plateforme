@@ -840,9 +840,9 @@ async function getProjectWorkspaceUncached(
             ? ` · ${globalStudy._count.lines} poste${globalStudy._count.lines > 1 ? "s" : ""}`
             : ""
         }`
-      : visit || suggestedVisitId || globalQuote
+      : globalQuote
         ? "Générer depuis la visite et/ou le devis — sans nouvelle visite"
-        : "À créer ou importer (JSON ChatGPT)",
+        : "Un devis est requis avant de générer le métré",
     syncState: globalStudy ? "A_JOUR" : "ABSENT",
     statusLabel: globalStudy ? "À jour" : "À préparer",
     actionLabel: globalStudy ? "Ouvrir" : "Générer le métré",
@@ -880,19 +880,25 @@ async function getProjectWorkspaceUncached(
       : globalStudy
         ? `/dashboard/visites-metres/etudes/${globalStudy.id}`
         : null,
-    detail: globalPlan
+      detail: globalPlan
       ? [
           globalPlan.startDate ? fmtShortFr(asIso(globalPlan.startDate)) : null,
           globalPlan.endDateBase ? `→ ${fmtShortFr(asIso(globalPlan.endDateBase))}` : null,
         ]
           .filter(Boolean)
           .join(" ") || "Planning unique du chantier"
-      : globalQuote || globalStudy
+      : globalStudy
         ? "Générer au niveau chantier — jamais via Nouvelle visite"
-        : "À générer",
+        : globalQuote
+          ? "Générez d’abord le métré"
+          : "À générer",
     syncState: globalPlan ? "A_JOUR" : "ABSENT",
     statusLabel: globalPlan ? "À jour" : "À préparer",
-    actionLabel: globalPlan ? "Ouvrir" : "Générer le planning",
+    actionLabel: globalPlan
+      ? "Ouvrir"
+      : globalStudy
+        ? "Générer le planning"
+        : "Métré requis",
     ready: !!globalPlan,
     syncHint: "Un seul planning pour tout le chantier — les lots sont des phases.",
     isReference: true,
@@ -934,9 +940,13 @@ async function getProjectWorkspaceUncached(
       ready: globalMetreCard.ready,
       actionLabel: workspaceOpenOrGenerateLabel(
         globalMetreCard.ready,
-        "Générer depuis la visite",
+        globalQuote ? "Générer depuis la visite" : "Devis requis",
       ),
-      primaryAction: globalMetreCard.ready ? "open" : "create_global_prep",
+      primaryAction: globalMetreCard.ready
+        ? "open"
+        : globalQuote
+          ? "create_global_prep"
+          : "open",
     },
     {
       id: "devis",
@@ -960,9 +970,13 @@ async function getProjectWorkspaceUncached(
       ready: globalPlanningCard.ready,
       actionLabel: workspaceOpenOrGenerateLabel(
         globalPlanningCard.ready,
-        "Générer le planning",
+        globalStudy ? "Générer le planning" : "Métré requis",
       ),
-      primaryAction: globalPlanningCard.ready ? "open" : "create_global_prep",
+      primaryAction: globalPlanningCard.ready
+        ? "open"
+        : globalStudy
+          ? "create_global_prep"
+          : "open",
     },
     {
       id: "suivi",

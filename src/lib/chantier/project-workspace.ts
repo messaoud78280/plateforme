@@ -675,12 +675,17 @@ async function getProjectWorkspaceUncached(
   const planById = (id: string | null | undefined) =>
     id ? plans.find((p) => p.id === id) ?? null : null;
 
-  const globalStudy = resolvePrepStudyForWorkspace({ studies, scopes });
-  const globalPlan = resolvePrepSchedulePlanForWorkspace({
-    plans,
-    scopes,
-    study: globalStudy,
-  });
+  // Remonter via les tableaux Prisma (titre, version, dates…) — pas le type StudyLike/PlanLike.
+  const globalStudy = studyById(
+    resolvePrepStudyForWorkspace({ studies, scopes })?.id,
+  );
+  const globalPlan = planById(
+    resolvePrepSchedulePlanForWorkspace({
+      plans,
+      scopes,
+      study: globalStudy,
+    })?.id,
+  );
 
   const referencedQuoteIds = new Set(
     scopes.map((s) => s.referenceQuoteId).filter((id): id is string => Boolean(id)),

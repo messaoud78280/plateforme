@@ -181,7 +181,12 @@ export function serializeVisit(
     }>;
     responsible?: { id: string; name: string | null; email: string } | null;
     commercialQuote?: { id: string; number: string; status: string } | null;
-    project?: { id: string; title: string } | null;
+    project?: {
+      id: string;
+      title: string;
+      siteCity?: string | null;
+      projectScopes?: Array<{ name: string }>;
+    } | null;
   },
 ) {
   const measurements = (v.measurements ?? []).map((m) => {

@@ -132,12 +132,18 @@ export async function uploadSiteVisitMedia(opts: {
   return getSiteVisit(opts.organizationId, visit.id);
 }
 
+const PHOTO_ORIGINS = new Set(["TERRAIN", "DEMONSTRATION"]);
+
 export async function updateSiteVisitMedia(opts: {
   organizationId: string;
   visitId: string;
   mediaId: string;
   caption?: string | null;
   observation?: string | null;
+  zone?: string | null;
+  category?: string | null;
+  hypothesis?: string | null;
+  origin?: string | null;
 }) {
   const media = await prisma.siteVisitMedia.findFirst({
     where: {
@@ -148,14 +154,23 @@ export async function updateSiteVisitMedia(opts: {
     select: { id: true },
   });
   if (!media) throw new Error("Média introuvable");
+  if (opts.origin != null && opts.origin !== "" && !PHOTO_ORIGINS.has(opts.origin)) {
+    throw new Error("Origine de photo invalide");
+  }
+  const clip = (value: string | null | undefined, max: number) => {
+    const text = value?.trim() || "";
+    return text ? text.slice(0, max) : null;
+  };
   await prisma.siteVisitMedia.update({
     where: { id: media.id },
     data: {
-      ...(opts.caption !== undefined
-        ? { caption: opts.caption?.trim() || null }
-        : {}),
-      ...(opts.observation !== undefined
-        ? { observation: opts.observation?.trim() || null }
+      ...(opts.caption !== undefined ? { caption: clip(opts.caption, 240) } : {}),
+      ...(opts.observation !== undefined ? { observation: clip(opts.observation, 2000) } : {}),
+      ...(opts.zone !== undefined ? { zone: clip(opts.zone, 120) } : {}),
+      ...(opts.category !== undefined ? { category: clip(opts.category, 80) } : {}),
+      ...(opts.hypothesis !== undefined ? { hypothesis: clip(opts.hypothesis, 2000) } : {}),
+      ...(opts.origin !== undefined
+        ? { origin: opts.origin === "DEMONSTRATION" ? "DEMONSTRATION" : "TERRAIN" }
         : {}),
     },
   });

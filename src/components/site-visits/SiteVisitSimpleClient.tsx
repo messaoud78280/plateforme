@@ -12,7 +12,12 @@ import {
   computeMeasurement,
   type MeasureType,
 } from "@/lib/site-visits/measurements";
-import { emptyCommercial, type SiteVisitCommercialInfo } from "@/lib/site-visits/survey-types";
+import {
+  emptyCommercial,
+  PHOTO_CATEGORIES,
+  PHOTO_ORIGIN,
+  type SiteVisitCommercialInfo,
+} from "@/lib/site-visits/survey-types";
 import {
   photoImportSummary,
   siteVisitPhotoSrc,
@@ -78,7 +83,11 @@ type Visit = {
     kind: string;
     name: string;
     caption: string | null;
+    zone?: string | null;
+    category?: string | null;
     observation?: string | null;
+    hypothesis?: string | null;
+    origin?: string | null;
     fileUrl: string | null;
   }>;
   missingInfos: Array<{ id: string; label: string; open: boolean }>;
@@ -612,14 +621,25 @@ export function SiteVisitSimpleClient({
     }
   }
 
-  async function updateCaption(mediaId: string, caption: string) {
+  async function updatePhoto(
+    mediaId: string,
+    patch: {
+      caption?: string | null;
+      zone?: string | null;
+      category?: string | null;
+      observation?: string | null;
+      hypothesis?: string | null;
+      origin?: string | null;
+    },
+  ) {
     const res = await fetch(`/api/site-visits/${visit.id}/media`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mediaId, caption }),
+      body: JSON.stringify({ mediaId, ...patch }),
     });
     const json = await res.json();
     if (res.ok) setVisit(json.visit);
+    else setMessage(json.error || "Enregistrement de la photo impossible");
   }
 
   async function deletePhoto(mediaId: string) {
@@ -1364,11 +1384,68 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
                     <div className="space-y-1 p-2">
                       <input
                         className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-[12px]"
+                        defaultValue={p.zone ?? ""}
+                        placeholder="Zone"
+                        onBlur={(e) => {
+                          if (e.target.value !== (p.zone ?? "")) {
+                            void updatePhoto(p.id, { zone: e.target.value });
+                          }
+                        }}
+                      />
+                      <input
+                        className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-[12px]"
                         defaultValue={p.caption ?? ""}
-                        placeholder="Légende…"
+                        placeholder="Légende"
                         onBlur={(e) => {
                           if (e.target.value !== (p.caption ?? "")) {
-                            void updateCaption(p.id, e.target.value);
+                            void updatePhoto(p.id, { caption: e.target.value });
+                          }
+                        }}
+                      />
+                      <select
+                        className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[12px]"
+                        value={p.category ?? ""}
+                        onChange={(e) => {
+                          const category = e.target.value || null;
+                          void updatePhoto(p.id, {
+                            category,
+                            ...(category === "ILLUSTRATION_DEMO"
+                              ? { origin: "DEMONSTRATION" }
+                              : {}),
+                          });
+                        }}
+                      >
+                        <option value="">Sans catégorie</option>
+                        {PHOTO_CATEGORIES.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.label}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[12px]"
+                        value={p.origin === "DEMONSTRATION" ? "DEMONSTRATION" : "TERRAIN"}
+                        onChange={(e) => {
+                          const origin = e.target.value;
+                          void updatePhoto(p.id, {
+                            origin,
+                            ...(origin === "TERRAIN" && p.category === "ILLUSTRATION_DEMO"
+                              ? { category: null }
+                              : {}),
+                          });
+                        }}
+                      >
+                        <option value="TERRAIN">{PHOTO_ORIGIN.TERRAIN}</option>
+                        <option value="DEMONSTRATION">{PHOTO_ORIGIN.DEMONSTRATION}</option>
+                      </select>
+                      <textarea
+                        className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-[12px]"
+                        defaultValue={p.observation ?? ""}
+                        rows={2}
+                        placeholder="Observation"
+                        onBlur={(e) => {
+                          if (e.target.value !== (p.observation ?? "")) {
+                            void updatePhoto(p.id, { observation: e.target.value });
                           }
                         }}
                       />

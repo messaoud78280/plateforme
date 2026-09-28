@@ -174,6 +174,8 @@ export function serializeVisit(
       category?: string | null;
       observation?: string | null;
       hypothesis?: string | null;
+      origin?: string | null;
+      chantierFileId?: string | null;
       fileUrl: string | null;
       mimeType: string | null;
       storagePath?: string | null;
@@ -361,6 +363,8 @@ export function serializeVisit(
       category: m.category ?? null,
       observation: m.observation ?? null,
       hypothesis: m.hypothesis ?? null,
+      origin: m.origin === "DEMONSTRATION" ? "DEMONSTRATION" : "TERRAIN",
+      chantierFileId: m.chantierFileId ?? null,
       fileUrl: m.fileUrl,
       mimeType: m.mimeType,
       storagePath: m.storagePath ?? null,

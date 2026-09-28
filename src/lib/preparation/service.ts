@@ -26,6 +26,7 @@ import type {
   StoredProvenance,
   StudyMode,
   TechRefKind,
+  TECH_REF_KINDS,
 } from "@/lib/preparation/types";
 import {
   C01_ENRICHMENT_BUNDLE_ID,
@@ -165,7 +166,7 @@ function asTechRefs(v: unknown): PrepTechnicalReference[] {
     const label = typeof o.label === "string" ? o.label.trim() : "";
     if (!label) continue;
     const kindRaw = typeof o.kind === "string" ? o.kind : "INDICATIVE";
-    const kind = (["INDICATIVE", "DOSSIER", "TO_VERIFY"].includes(kindRaw) ? kindRaw : "INDICATIVE") as TechRefKind;
+    const kind = ((TECH_REF_KINDS as readonly string[]).includes(kindRaw) ? kindRaw : "INDICATIVE") as TechRefKind;
     out.push({
       label,
       kind,

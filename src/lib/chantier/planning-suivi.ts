@@ -29,7 +29,15 @@ export type SuiviTaskRow = {
   actualEndDate: string | null;
   executionNotes: string | null;
   blockingReason: string | null;
-  photos: Array<{ url?: string; caption?: string; at?: string }>;
+  photos: Array<{
+    url?: string;
+    caption?: string;
+    at?: string;
+    siteVisitMediaId?: string;
+    chantierFileId?: string;
+    photoCode?: string;
+    origin?: string;
+  }>;
   reserves: Array<{ label?: string; status?: string; at?: string }>;
 };
 
@@ -225,7 +233,7 @@ export async function updatePlanningSuiviTask(input: {
   actualEndDate?: string | null;
   executionNotes?: string | null;
   blockingReason?: string | null;
-  photos?: Array<{ url?: string; caption?: string; at?: string }>;
+  photos?: SuiviTaskRow["photos"];
   reserves?: Array<{ label?: string; status?: string; at?: string }>;
 }): Promise<SuiviTaskRow> {
   const task = await prisma.prepScheduleTask.findFirst({

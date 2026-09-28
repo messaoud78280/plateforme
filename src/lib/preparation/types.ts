@@ -76,12 +76,13 @@ export type PrepParamDTO = {
 };
 
 /** Nature d'une référence technique rattachée à une ligne de métré. */
-export type TechRefKind = "INDICATIVE" | "DOSSIER" | "TO_VERIFY";
-export const TECH_REF_KINDS: TechRefKind[] = ["INDICATIVE", "DOSSIER", "TO_VERIFY"];
+export type TechRefKind = "INDICATIVE" | "DOSSIER" | "TO_VERIFY" | "PHOTO";
+export const TECH_REF_KINDS: TechRefKind[] = ["INDICATIVE", "DOSSIER", "TO_VERIFY", "PHOTO"];
 export const TECH_REF_KIND_LABELS: Record<TechRefKind, string> = {
   INDICATIVE: "Référence technique indicative",
   DOSSIER: "Prescription du dossier d'exécution",
   TO_VERIFY: "Point restant à vérifier",
+  PHOTO: "Photo du chantier",
 };
 
 export type PrepTechnicalReference = {

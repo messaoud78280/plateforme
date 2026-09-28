@@ -5218,6 +5218,8 @@ model SiteVisitMedia {
   observation    String?           @db.Text
   /// Hypothèse technique à confirmer (distincte du constat).
   hypothesis     String?           @db.Text
+  /// TERRAIN | DEMONSTRATION — une illustration n’est jamais une preuve de visite.
+  origin         String            @default("TERRAIN")
   fileUrl        String?
   mimeType       String?
   fileSize       Int?

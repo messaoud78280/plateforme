@@ -71,6 +71,15 @@ export const SURVEY_STAGE_LABELS: Record<SurveyStage, string> = {
 };
 
 export const PHOTO_CATEGORIES = [
+  { id: "ETAT_INITIAL", label: "État initial" },
+  { id: "CONSTAT", label: "Constat" },
+  { id: "OUVRAGE_EXISTANT", label: "Ouvrage existant" },
+  { id: "ZONE_TRAVAUX", label: "Zone de travaux" },
+  { id: "POINT_TECHNIQUE", label: "Point technique" },
+  { id: "AVANT_TRAVAUX", label: "Avant travaux" },
+  { id: "PENDANT_TRAVAUX", label: "Pendant travaux" },
+  { id: "APRES_TRAVAUX", label: "Après travaux" },
+  { id: "ILLUSTRATION_DEMO", label: "Illustration de démonstration" },
   { id: "VUE_GENERALE", label: "Vue générale" },
   { id: "ETAT_EXISTANT", label: "État existant" },
   { id: "DEFAUT", label: "Défaut constaté" },
@@ -82,6 +91,17 @@ export const PHOTO_CATEGORIES = [
   { id: "CONTRAINTE", label: "Contrainte" },
   { id: "AUTRE", label: "Autre" },
 ] as const;
+
+export const PHOTO_ORIGIN = {
+  TERRAIN: "Photo terrain",
+  DEMONSTRATION: "Illustration de démonstration",
+} as const;
+
+export function photoCategoryLabel(category: string | null | undefined): string | null {
+  if (!category) return null;
+  const known = PHOTO_CATEGORIES.find((c) => c.id === category);
+  return known?.label ?? category;
+}
 
 export const MISSING_CHECK_STATUSES = [
   { id: "A_VERIFIER", label: "À vérifier" },

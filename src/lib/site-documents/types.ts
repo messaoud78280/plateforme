@@ -18,6 +18,18 @@ export type SiteReportNextStep = {
   dueDate?: string | null;
 };
 
+/** Référence vers un média déjà stocké. Ne contient pas le fichier. */
+export type SiteReportMediaRef = {
+  siteVisitMediaId: string;
+  visitId: string;
+  chantierFileId?: string | null;
+  photoCode: string;
+  stepLabel?: string | null;
+  caption?: string | null;
+  origin?: "TERRAIN" | "DEMONSTRATION" | null;
+  categoryLabel?: string | null;
+};
+
 export type SiteReportPayload = {
   title: string;
   reportNumber: string;
@@ -46,6 +58,7 @@ export type SiteReportPayload = {
   reservations: string[];
   additionalNotes?: string | null;
   nextMeeting?: string | null;
+  mediaRefs?: SiteReportMediaRef[];
 };
 
 export type PpspsRisk = {
@@ -142,6 +155,7 @@ export function emptySiteReportPayload(
     reservations: [],
     additionalNotes: null,
     nextMeeting: null,
+    mediaRefs: [],
     ...partial,
   };
 }

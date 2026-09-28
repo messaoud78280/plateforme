@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SiteDocChatGptModal } from "@/components/site-documents/SiteDocChatGptModal";
+import { siteVisitPhotoSrc } from "@/lib/site-visits/photo-import";
 import {
   emptyPpspsPayload,
   emptySiteReportPayload,
   PPSPS_EQUIPMENT_PRESETS,
   PPSPS_RISK_CATEGORIES,
   type PpspsPayload,
+  type SiteReportMediaRef,
   type SiteReportPayload,
 } from "@/lib/site-documents/types";
 
@@ -359,7 +361,7 @@ export function SiteDocumentEditor({
       </section>
 
       {isReportKind ? (
-        <CrForm cr={cr} setCr={setCr} canWrite={canWrite} />
+        <CrForm cr={cr} setCr={setCr} canWrite={canWrite} projectId={projectId} />
       ) : (
         <PpspsForm ppsps={ppsps} setPpsps={setPpsps} canWrite={canWrite} />
       )}
@@ -392,13 +394,21 @@ function CrForm({
   cr,
   setCr,
   canWrite,
+  projectId,
 }: {
   cr: SiteReportPayload;
   setCr: (v: SiteReportPayload) => void;
   canWrite: boolean;
+  projectId: string;
 }) {
   return (
     <div className="space-y-4">
+      <ChantierPhotoRefs
+        projectId={projectId}
+        refs={cr.mediaRefs ?? []}
+        canWrite={canWrite}
+        onChange={(mediaRefs) => setCr({ ...cr, mediaRefs })}
+      />
       <section className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
         <h3 className="text-sm font-bold text-[#1e3a5f]">Synthèse & participants</h3>
         <Field label="Synthèse">
@@ -724,5 +734,146 @@ function PpspsForm({
         </Field>
       </section>
     </div>
+  );
+}
+
+type LibraryPhoto = {
+  siteVisitMediaId: string;
+  visitId: string;
+  visitLabel: string;
+  linkedToProject: boolean;
+  chantierFileId: string | null;
+  photoCode: string;
+  name: string;
+  caption: string | null;
+  categoryLabel: string | null;
+  origin: "TERRAIN" | "DEMONSTRATION";
+};
+
+function ChantierPhotoRefs({
+  projectId,
+  refs,
+  canWrite,
+  onChange,
+}: {
+  projectId: string;
+  refs: SiteReportMediaRef[];
+  canWrite: boolean;
+  onChange: (refs: SiteReportMediaRef[]) => void;
+}) {
+  const [library, setLibrary] = useState<LibraryPhoto[]>([]);
+  const [picked, setPicked] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch(`/api/projets/${projectId}/chantier-photos`)
+      .then((res) => res.json())
+      .then((json: { photos?: LibraryPhoto[] }) => {
+        if (!cancelled) setLibrary(json.photos ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setLibrary([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  function add(id: string) {
+    const photo = library.find((p) => p.siteVisitMediaId === id);
+    if (!photo || refs.some((r) => r.siteVisitMediaId === id)) return;
+    onChange([
+      ...refs,
+      {
+        siteVisitMediaId: photo.siteVisitMediaId,
+        visitId: photo.visitId,
+        chantierFileId: photo.chantierFileId,
+        photoCode: photo.photoCode,
+        caption: photo.caption || photo.categoryLabel || photo.name,
+        origin: photo.origin,
+        categoryLabel: photo.categoryLabel,
+        stepLabel: "",
+      },
+    ]);
+    setPicked("");
+  }
+
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
+      <h3 className="text-sm font-bold text-[#1e3a5f]">Photos du chantier</h3>
+      <p className="text-[12px] text-slate-500">
+        Ces photos restent dans la visite. Le document ne fait que les citer.
+      </p>
+      {canWrite ? (
+        <select
+          className={inputClass}
+          value={picked}
+          onChange={(e) => add(e.target.value)}
+        >
+          <option value="">Ajouter une photo déjà présente…</option>
+          {library.map((photo) => (
+            <option key={photo.siteVisitMediaId} value={photo.siteVisitMediaId}>
+              {photo.photoCode} — {photo.visitLabel}
+              {photo.origin === "DEMONSTRATION" ? " — illustration" : ""}
+              {photo.linkedToProject ? "" : " — visite non rattachée"}
+              {photo.caption ? ` — ${photo.caption}` : ""}
+            </option>
+          ))}
+        </select>
+      ) : null}
+      {refs.length === 0 ? (
+        <p className="text-[13px] text-slate-500">Aucune photo citée.</p>
+      ) : (
+        <ul className="space-y-3">
+          {refs.map((ref) => {
+            const src = siteVisitPhotoSrc(ref.visitId, {
+              id: ref.siteVisitMediaId,
+              fileUrl: "storage://documents/photo",
+            });
+            return (
+              <li key={ref.siteVisitMediaId} className="flex gap-3 rounded-xl border border-slate-100 p-2">
+                {src ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={src} alt="" className="h-16 w-16 shrink-0 rounded-lg object-cover" />
+                ) : null}
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="text-[12px] font-semibold text-[#1e3a5f]">
+                    {ref.photoCode}
+                    {ref.origin === "DEMONSTRATION" ? " — Illustration démonstration" : " — Photo terrain"}
+                  </p>
+                  <input
+                    className={inputClass}
+                    disabled={!canWrite}
+                    value={ref.stepLabel ?? ""}
+                    placeholder="Étape, ex. Terrassement"
+                    onChange={(e) =>
+                      onChange(
+                        refs.map((row) =>
+                          row.siteVisitMediaId === ref.siteVisitMediaId
+                            ? { ...row, stepLabel: e.target.value }
+                            : row,
+                        ),
+                      )
+                    }
+                  />
+                  <p className="truncate text-[12px] text-slate-500">{ref.caption}</p>
+                </div>
+                {canWrite ? (
+                  <button
+                    type="button"
+                    className="text-[12px] font-medium text-red-600"
+                    onClick={() =>
+                      onChange(refs.filter((row) => row.siteVisitMediaId !== ref.siteVisitMediaId))
+                    }
+                  >
+                    Retirer
+                  </button>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }

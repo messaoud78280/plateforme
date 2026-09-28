@@ -128,7 +128,15 @@ export async function PATCH(req: Request, ctx: Ctx) {
     actualEndDate?: string | null;
     executionNotes?: string | null;
     blockingReason?: string | null;
-    photos?: Array<{ url?: string; caption?: string; at?: string }>;
+    photos?: Array<{
+      url?: string;
+      caption?: string;
+      at?: string;
+      siteVisitMediaId?: string;
+      chantierFileId?: string;
+      photoCode?: string;
+      origin?: string;
+    }>;
     reserves?: Array<{ label?: string; status?: string; at?: string }>;
   } | null;
 

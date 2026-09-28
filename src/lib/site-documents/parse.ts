@@ -6,6 +6,7 @@ import {
   emptySiteReportPayload,
   type PpspsPayload,
   type PpspsRisk,
+  type SiteReportMediaRef,
   type SiteReportNextStep,
   type SiteReportParticipant,
   type SiteReportPayload,
@@ -37,6 +38,31 @@ function asParticipants(raw: unknown): SiteReportParticipant[] {
       name,
       company: asString(o.company ?? o.societe ?? o.society),
       role: asString(o.role ?? o.fonction ?? o.function),
+    });
+  }
+  return out;
+}
+
+function asMediaRefs(raw: unknown): SiteReportMediaRef[] {
+  if (!Array.isArray(raw)) return [];
+  const out: SiteReportMediaRef[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const o = item as Record<string, unknown>;
+    const siteVisitMediaId = asString(o.siteVisitMediaId ?? o.site_visit_media_id ?? o.media_id);
+    const visitId = asString(o.visitId ?? o.visit_id);
+    const photoCode = asString(o.photoCode ?? o.photo_id);
+    if (!siteVisitMediaId || !visitId || !photoCode) continue;
+    const originRaw = asString(o.origin);
+    out.push({
+      siteVisitMediaId,
+      visitId,
+      chantierFileId: asString(o.chantierFileId ?? o.chantier_file_id),
+      photoCode,
+      stepLabel: asString(o.stepLabel ?? o.step_label ?? o.etape),
+      caption: asString(o.caption ?? o.legende),
+      origin: originRaw === "DEMONSTRATION" ? "DEMONSTRATION" : "TERRAIN",
+      categoryLabel: asString(o.categoryLabel ?? o.category_label),
     });
   }
   return out;
@@ -166,6 +192,7 @@ export function parseSiteReportJson(
     nextMeeting: asString(
       reportRaw.next_meeting ?? reportRaw.nextMeeting ?? reportRaw.prochaine_visite,
     ),
+    mediaRefs: asMediaRefs(reportRaw.media_refs ?? reportRaw.mediaRefs),
   });
 
   if (errors.length) return { ok: false, errors };
@@ -357,6 +384,7 @@ export function mergeSiteReport(
     reservations: pickArr(incoming.reservations, current.reservations),
     additionalNotes: pickStr(incoming.additionalNotes, current.additionalNotes) ?? null,
     nextMeeting: pickStr(incoming.nextMeeting, current.nextMeeting) ?? null,
+    mediaRefs: pickArr(incoming.mediaRefs ?? [], current.mediaRefs ?? []),
   };
 }
 

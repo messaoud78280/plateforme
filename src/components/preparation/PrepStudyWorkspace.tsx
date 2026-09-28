@@ -964,6 +964,7 @@ export function PrepStudyWorkspace({
           quantity={engine.nodes.get(sheetLine.code)?.value ?? null}
           characteristics={lineCharacteristics(sheetLine)}
           busy={busy}
+          projectId={study.project.id}
           onClose={() => setSheetCode(null)}
           onSave={async (texts) => {
             await saveLineTexts(sheetLine.code, texts);

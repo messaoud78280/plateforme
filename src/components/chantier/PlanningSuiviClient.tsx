@@ -26,6 +26,16 @@ export function PlanningSuiviClient({
     null,
   );
   const [tasks, setTasks] = useState<SuiviTaskRow[]>([]);
+  const [chantierPhotos, setChantierPhotos] = useState<
+    Array<{
+      siteVisitMediaId: string;
+      chantierFileId: string | null;
+      photoCode: string;
+      visitLabel: string;
+      caption: string | null;
+      origin: string;
+    }>
+  >([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -39,6 +49,9 @@ export function PlanningSuiviClient({
       if (!res.ok) throw new Error(data?.error ?? "Chargement impossible");
       setPlan(data.plan);
       setTasks(data.tasks ?? []);
+      const photosRes = await fetch(`/api/projets/${projectId}/chantier-photos`);
+      const photosJson = await photosRes.json().catch(() => null);
+      setChantierPhotos(photosRes.ok ? photosJson?.photos ?? [] : []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
     } finally {
@@ -59,6 +72,7 @@ export function PlanningSuiviClient({
       actualEndDate: string | null;
       executionNotes: string | null;
       blockingReason: string | null;
+      photos: SuiviTaskRow["photos"];
     }>,
   ) {
     setBusyId(taskId);
@@ -269,10 +283,47 @@ export function PlanningSuiviClient({
               </p>
             ) : null}
             {t.photos.length > 0 ? (
-              <p className="mt-1 text-[12px] text-slate-500">
-                Photos : {t.photos.length}
-              </p>
+              <ul className="mt-1 space-y-0.5 text-[12px] text-slate-600">
+                {t.photos.map((photo, index) => (
+                  <li key={`${photo.siteVisitMediaId ?? photo.url ?? index}`}>
+                    {photo.origin === "DEMONSTRATION" ? "Illustration — " : ""}
+                    {photo.photoCode ? `${photo.photoCode} — ` : ""}
+                    {photo.caption || "Photo liée"}
+                  </li>
+                ))}
+              </ul>
             ) : null}
+            <select
+              className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[12px]"
+              value=""
+              disabled={busyId === t.id || chantierPhotos.length === 0}
+              onChange={(e) => {
+                const photo = chantierPhotos.find((p) => p.siteVisitMediaId === e.target.value);
+                if (!photo) return;
+                if (t.photos.some((p) => p.siteVisitMediaId === photo.siteVisitMediaId)) return;
+                const photos = [
+                  ...t.photos,
+                  {
+                    siteVisitMediaId: photo.siteVisitMediaId,
+                    chantierFileId: photo.chantierFileId ?? undefined,
+                    photoCode: photo.photoCode,
+                    caption: photo.caption || photo.visitLabel,
+                    origin: photo.origin,
+                    at: new Date().toISOString(),
+                  },
+                ];
+                setTasks((prev) => prev.map((x) => (x.id === t.id ? { ...x, photos } : x)));
+                void patchTask(t.id, { photos });
+              }}
+            >
+              <option value="">Lier une photo déjà présente…</option>
+              {chantierPhotos.map((photo) => (
+                <option key={photo.siteVisitMediaId} value={photo.siteVisitMediaId}>
+                  {photo.photoCode} — {photo.visitLabel}
+                  {photo.origin === "DEMONSTRATION" ? " — illustration" : ""}
+                </option>
+              ))}
+            </select>
           </li>
         ))}
       </ul>

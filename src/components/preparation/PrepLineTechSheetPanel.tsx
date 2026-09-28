@@ -46,6 +46,7 @@ const KIND_STYLE: Record<TechRefKind, string> = {
   INDICATIVE: "bg-slate-100 text-slate-700 ring-slate-200",
   DOSSIER: "bg-sky-50 text-sky-800 ring-sky-200",
   TO_VERIFY: "bg-amber-50 text-amber-800 ring-amber-200",
+  PHOTO: "bg-emerald-50 text-emerald-800 ring-emerald-200",
 };
 
 export function PrepLineTechSheetPanel({
@@ -53,6 +54,7 @@ export function PrepLineTechSheetPanel({
   quantity,
   characteristics,
   busy,
+  projectId,
   onClose,
   onSave,
 }: {
@@ -60,6 +62,7 @@ export function PrepLineTechSheetPanel({
   quantity: number | null;
   characteristics: { label: string; value: string }[];
   busy: boolean;
+  projectId?: string | null;
   onClose: () => void;
   onSave: (texts: {
     designation: string;
@@ -73,6 +76,31 @@ export function PrepLineTechSheetPanel({
 }) {
   const [draft, setDraft] = useState(() => toDraft(line));
   const [saving, setSaving] = useState(false);
+  const [chantierPhotos, setChantierPhotos] = useState<
+    Array<{
+      siteVisitMediaId: string;
+      photoCode: string;
+      visitLabel: string;
+      caption: string | null;
+      origin: string;
+    }>
+  >([]);
+
+  useEffect(() => {
+    if (!projectId) return;
+    let cancelled = false;
+    void fetch(`/api/projets/${projectId}/chantier-photos`)
+      .then((res) => res.json())
+      .then((json: { photos?: typeof chantierPhotos }) => {
+        if (!cancelled) setChantierPhotos(json.photos ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setChantierPhotos([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
 
   useEffect(() => {
     setDraft(toDraft(line));
@@ -233,12 +261,35 @@ export function PrepLineTechSheetPanel({
                   <span className={cn("mt-1.5 inline-flex rounded-md px-1.5 py-0.5 text-[10px] ring-1", KIND_STYLE[ref.kind])}>
                     {TECH_REF_KIND_LABELS[ref.kind]}
                   </span>
-                  <input
-                    value={ref.note ?? ""}
-                    onChange={(e) => updateRef(i, { note: e.target.value || null })}
-                    placeholder="Précision (indicatif, à confirmer…)"
-                    className="mt-1.5 w-full rounded-lg border border-slate-100 bg-slate-50 px-2 py-1.5 text-[12px] text-slate-600 outline-none"
-                  />
+                  {ref.kind === "PHOTO" ? (
+                    <select
+                      value={ref.note ?? ""}
+                      onChange={(e) => {
+                        const photo = chantierPhotos.find((p) => p.siteVisitMediaId === e.target.value);
+                        updateRef(i, {
+                          note: photo?.siteVisitMediaId ?? null,
+                          label: photo ? `${photo.photoCode} — ${photo.visitLabel}` : ref.label,
+                        });
+                      }}
+                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[12px]"
+                    >
+                      <option value="">Choisir une photo déjà présente…</option>
+                      {chantierPhotos.map((photo) => (
+                        <option key={photo.siteVisitMediaId} value={photo.siteVisitMediaId}>
+                          {photo.photoCode} — {photo.visitLabel}
+                          {photo.origin === "DEMONSTRATION" ? " — illustration" : ""}
+                          {photo.caption ? ` — ${photo.caption}` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      value={ref.note ?? ""}
+                      onChange={(e) => updateRef(i, { note: e.target.value || null })}
+                      placeholder="Précision (indicatif, à confirmer…)"
+                      className="mt-1.5 w-full rounded-lg border border-slate-100 bg-slate-50 px-2 py-1.5 text-[12px] text-slate-600 outline-none"
+                    />
+                  )}
                 </div>
               ))}
               <button

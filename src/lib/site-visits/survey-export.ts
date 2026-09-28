@@ -8,6 +8,7 @@ import { fmtDate, pdfSafe } from "@/lib/commercial/pdf/format";
 import { BEWORK_QUOTE_BUNDLE_FORMAT } from "@/lib/commercial/chatgpt-bundle/types";
 import {
   BEWORK_SITE_SURVEY_FORMAT,
+  photoCategoryLabel,
   type SiteVisitCommercialInfo,
   type SiteVisitFinding,
   type SiteVisitProposedWork,
@@ -88,6 +89,7 @@ export type SurveyVisitInput = {
     category?: string | null;
     observation?: string | null;
     hypothesis?: string | null;
+    origin?: string | null;
     measurementId: string | null;
     fileUrl: string | null;
     storagePath?: string | null;
@@ -291,8 +293,10 @@ export function buildSiteSurveyJson(visit: SurveyVisitInput) {
           media_id: p.id,
           caption: p.caption,
           category: p.category,
+          category_label: photoCategoryLabel(p.category),
           observation: p.observation,
           hypothesis: p.hypothesis,
+          origin: p.origin === "DEMONSTRATION" ? "DEMONSTRATION" : "TERRAIN",
           measurement_id: p.measurementId,
           // URL privée BeWork — le PDF embarque les bytes ; le JSON référence l’id.
           note: "Image intégrée au PDF d’export ; ne pas inventer de dimension depuis la photo.",
@@ -332,8 +336,10 @@ export function buildSiteSurveyJson(visit: SurveyVisitInput) {
       zone: p.zone,
       caption: p.caption,
       category: p.category,
+      category_label: photoCategoryLabel(p.category),
       observation: p.observation,
       hypothesis: p.hypothesis,
+      origin: p.origin === "DEMONSTRATION" ? "DEMONSTRATION" : "TERRAIN",
       measurement_id: p.measurementId,
     })),
     rules: {
@@ -439,6 +445,8 @@ export function buildChatgptQuoteInstructions(survey: ReturnType<typeof buildSit
     "- Si une quantité est ambiguë, mets-la dans warnings / reservations, ne l'invente pas.",
     "- Le champ field_notes est le récit terrain de l'artisan : respecte-le intégralement.",
     "- Photos : référence les photo_id dans les descriptions si utile.",
+    "- origin = TERRAIN : photo réellement prise sur le chantier.",
+    "- origin = DEMONSTRATION : illustration de formation. Écris « Illustration démonstration » et ne la présente jamais comme une preuve terrain.",
     "- Client : ne remplace jamais une coordonnée renseignée par une chaîne vide.",
     "",
     "DONNÉES DE VISITE (bework_site_survey_v1) :",

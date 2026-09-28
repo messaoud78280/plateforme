@@ -160,6 +160,10 @@ export async function PATCH(
       mediaId,
       caption: body.caption,
       observation: body.observation,
+      zone: body.zone,
+      category: body.category,
+      hypothesis: body.hypothesis,
+      origin: body.origin,
     });
     return NextResponse.json({ visit });
   } catch (e) {

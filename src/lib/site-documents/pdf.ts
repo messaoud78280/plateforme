@@ -148,6 +148,26 @@ export function generateSiteReportPdf(input: {
     y = sectionTitle(doc, y, "Observations");
     y = writeLines(doc, y, payload.observations);
   }
+  if (payload.mediaRefs?.length) {
+    y = sectionTitle(doc, y, "Photos du chantier");
+    y = writeLines(
+      doc,
+      y,
+      payload.mediaRefs.map((ref) => {
+        const kind =
+          ref.origin === "DEMONSTRATION" ? "Illustration démonstration" : "Photo terrain";
+        return [
+          ref.stepLabel,
+          ref.photoCode,
+          kind,
+          ref.categoryLabel,
+          ref.caption,
+        ]
+          .filter(Boolean)
+          .join(" — ");
+      }),
+    );
+  }
   if (payload.issues.length) {
     y = sectionTitle(doc, y, "Problèmes rencontrés");
     y = writeLines(doc, y, payload.issues);

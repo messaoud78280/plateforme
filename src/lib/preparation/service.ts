@@ -8,6 +8,7 @@ import { d } from "@/lib/commercial/decimal";
 import { parsePrepJsonText, type NormalizedPrepBundle } from "@/lib/preparation/bundle/parse";
 import { prepBundleFingerprint } from "@/lib/preparation/bundle/fingerprint";
 import { computeStudy, summarizeBases, type EngineResult } from "@/lib/preparation/engine/compute";
+import { TECH_REF_KINDS } from "@/lib/preparation/types";
 import type {
   DossierStatus,
   LineNature,
@@ -26,7 +27,6 @@ import type {
   StoredProvenance,
   StudyMode,
   TechRefKind,
-  TECH_REF_KINDS,
 } from "@/lib/preparation/types";
 import {
   C01_ENRICHMENT_BUNDLE_ID,

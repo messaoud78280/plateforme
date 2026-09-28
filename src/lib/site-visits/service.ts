@@ -21,6 +21,11 @@ import {
   parseProposedWorks,
 } from "@/lib/site-visits/survey-types";
 import { buildVisitQuality } from "@/lib/site-visits/quality";
+import {
+  applyVisitMeasurements,
+  buildVisitChantierMetreStatus,
+  type VisitChantierMetreStatus,
+} from "@/lib/site-visits/chantier-metre-status";
 
 export type CreateSiteVisitInput = {
   organizationId: string;
@@ -293,6 +298,9 @@ export function serializeVisit(
     clientExternalOrgId: v.clientExternalOrgId,
     projectId: v.projectId,
     projectTitle: v.project?.title ?? null,
+    projectCity: v.project?.siteCity ?? null,
+    scopeNames: (v.project?.projectScopes ?? []).map((s) => s.name),
+    visitCity: prep.city ?? null,
     scheduledAt: v.scheduledAt?.toISOString() ?? null,
     responsibleId: v.responsibleId,
     responsibleName: v.responsible?.name || v.responsible?.email || null,
@@ -388,7 +396,18 @@ const visitInclude = {
   medias: { orderBy: { createdAt: "desc" as const } },
   responsible: { select: { id: true, name: true, email: true } },
   commercialQuote: { select: { id: true, number: true, status: true } },
-  project: { select: { id: true, title: true } },
+  project: {
+    select: {
+      id: true,
+      title: true,
+      siteCity: true,
+      projectScopes: {
+        where: { status: "ACTIVE" },
+        orderBy: { displayOrder: "asc" as const },
+        select: { name: true },
+      },
+    },
+  },
 } as const;
 
 export async function createSiteVisit(input: CreateSiteVisitInput) {
@@ -542,7 +561,115 @@ export async function listSiteVisits(opts: {
     orderBy: [{ scheduledAt: "asc" }, { updatedAt: "desc" }],
     take: opts.take ?? 120,
   });
-  return visits.map(serializeVisit);
+  const serialized = visits.map(serializeVisit);
+  const metreByProject = await loadChantierMetreByProject(
+    opts.organizationId,
+    serialized.map((v) => v.projectId),
+  );
+  const absent = buildVisitChantierMetreStatus({
+    measurementLabels: [],
+    studies: [],
+    scopes: [],
+  });
+  return serialized.map((v) => ({
+    ...v,
+    chantierMetre: applyVisitMeasurements(
+      (v.projectId ? metreByProject.get(v.projectId) : null) ?? absent,
+      v.stats.totalsByUnit ?? [],
+    ),
+  }));
+}
+
+/**
+ * Lecture seule : une étude par projet, même résolution que le dossier chantier.
+ * Ne crée ni étude, ni visite, ni rattachement.
+ */
+async function loadChantierMetreByProject(
+  organizationId: string,
+  projectIds: Array<string | null>,
+): Promise<Map<string, VisitChantierMetreStatus>> {
+  const ids = [...new Set(projectIds.filter((id): id is string => Boolean(id)))];
+  const out = new Map<string, VisitChantierMetreStatus>();
+  if (ids.length === 0) return out;
+
+  const [studies, scopes] = await Promise.all([
+    prisma.prepStudy.findMany({
+      where: {
+        organizationId,
+        projectId: { in: ids },
+        archivedAt: null,
+      },
+      select: {
+        id: true,
+        projectId: true,
+        scopeId: true,
+        sourcesJson: true,
+        dossierStatus: true,
+        _count: { select: { lines: true } },
+      },
+    }),
+    prisma.projectScope.findMany({
+      where: {
+        organizationId,
+        projectId: { in: ids },
+        status: "ACTIVE",
+      },
+      select: {
+        id: true,
+        projectId: true,
+        referenceStudyId: true,
+        referenceQuoteId: true,
+        referenceSchedulePlanId: true,
+      },
+    }),
+  ]);
+
+  const studyIds = studies.map((s) => s.id);
+  const validatedGroups =
+    studyIds.length === 0
+      ? []
+      : await prisma.prepTakeoffLine.groupBy({
+          by: ["studyId"],
+          where: {
+            organizationId,
+            studyId: { in: studyIds },
+            validatedAt: { not: null },
+          },
+          _count: { _all: true },
+        });
+  const validatedByStudy = new Map(
+    validatedGroups.map((g) => [g.studyId, g._count._all]),
+  );
+
+  for (const projectId of ids) {
+    const projectStudies = studies
+      .filter((s) => s.projectId === projectId)
+      .map((s) => ({
+        id: s.id,
+        scopeId: s.scopeId,
+        sourcesJson: s.sourcesJson,
+        lineCount: s._count.lines,
+        validatedLineCount: validatedByStudy.get(s.id) ?? 0,
+        dossierStatus: s.dossierStatus,
+      }));
+    const projectScopes = scopes
+      .filter((sc) => sc.projectId === projectId)
+      .map((sc) => ({
+        id: sc.id,
+        referenceStudyId: sc.referenceStudyId,
+        referenceQuoteId: sc.referenceQuoteId,
+        referenceSchedulePlanId: sc.referenceSchedulePlanId,
+      }));
+    out.set(
+      projectId,
+      buildVisitChantierMetreStatus({
+        measurementLabels: [],
+        studies: projectStudies,
+        scopes: projectScopes,
+      }),
+    );
+  }
+  return out;
 }
 
 export async function listSiteVisitKpis(organizationId: string) {

@@ -23,6 +23,8 @@ import {
 } from "@/lib/site-visits/types";
 import { badgeClassForTone, type BwTone } from "@/lib/design-system/semantic-colors";
 import type { SiteVisitStatus } from "@prisma/client";
+import type { VisitChantierMetreStatus } from "@/lib/site-visits/chantier-metre-status";
+import { buildVisitCardIdentity } from "@/lib/site-visits/visit-card-identity";
 
 const VISIT_STATUS_BADGE_TONE: Record<string, BwTone> = {
   TO_PLAN: "neutral",
@@ -54,6 +56,11 @@ export type VisitListItem = {
   status: string;
   statusLabel: string;
   subject?: string | null;
+  clientNeed?: string | null;
+  projectTitle?: string | null;
+  projectCity?: string | null;
+  scopeNames?: string[];
+  visitCity?: string | null;
   estimatedCrewCount?: number | null;
   estimatedDuration?: string | null;
   lots?: string[];
@@ -74,6 +81,7 @@ export type VisitListItem = {
     totalsByUnit?: string[];
     impactPreview?: string[];
   };
+  chantierMetre?: VisitChantierMetreStatus;
   commercialQuoteNumber: string | null;
   commercialQuoteHref: string | null;
 };
@@ -99,6 +107,117 @@ function formatWhen(iso: string | null): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function compactMetreLabel(label: string): string {
+  if (label.startsWith("Métré validé — ")) {
+    return `Métré validé : ${label.slice("Métré validé — ".length)}`;
+  }
+  if (label.startsWith("Métré — ")) {
+    return `Métré chantier : ${label.slice("Métré — ".length)}`;
+  }
+  return label;
+}
+
+function VisitQuantitatifStatus({ item }: { item: VisitListItem }) {
+  const metre = item.chantierMetre;
+  const count = item.stats.measurementCount ?? 0;
+  const releve =
+    count > 0
+      ? `Relevés : ${count}`
+      : (metre?.releveLabel ?? "Aucun relevé quantitatif");
+  const metreLabel = compactMetreLabel(metre?.metreLabel ?? "Métré chantier non créé");
+  return (
+    <div className="text-[13px]">
+      <p className="text-slate-600">{releve}</p>
+      {metre?.metreHref ? (
+        <Link href={metre.metreHref} className="font-semibold text-[#1e3a5f] hover:underline">
+          {metreLabel}
+        </Link>
+      ) : (
+        <p className="text-slate-500">{metreLabel}</p>
+      )}
+    </div>
+  );
+}
+
+function VisitCardHeading({
+  item,
+  onOpen,
+  titleClassName = "text-[16px]",
+}: {
+  item: VisitListItem;
+  onOpen?: () => void;
+  titleClassName?: string;
+}) {
+  const identity = buildVisitCardIdentity({
+    projectTitle: item.projectTitle,
+    projectCity: item.projectCity,
+    scopeNames: item.scopeNames,
+    clientName: item.clientName,
+    siteName: item.siteName,
+    subject: item.subject,
+    clientNeed: item.clientNeed,
+    lots: item.lots,
+    visitCity: item.visitCity,
+    siteAddress: item.siteAddress,
+  });
+  const titleClass = cn("truncate font-semibold text-[#1e3a5f]", titleClassName);
+  return (
+    <div className="min-w-0">
+      {identity.linked && item.projectHref ? (
+        <Link href={item.projectHref} className={cn(titleClass, "block hover:underline")} title={identity.title}>
+          {identity.title}
+        </Link>
+      ) : onOpen ? (
+        <button type="button" onClick={onOpen} className={cn(titleClass, "block w-full text-left")} title={identity.title}>
+          {identity.title}
+        </button>
+      ) : (
+        <p className={titleClass} title={identity.title}>{identity.title}</p>
+      )}
+      {identity.clientLine ? (
+        onOpen ? (
+          <button type="button" onClick={onOpen} className="block w-full truncate text-left text-[13px] text-slate-600">
+            {identity.clientLine}
+          </button>
+        ) : (
+          <p className="truncate text-[13px] text-slate-600">{identity.clientLine}</p>
+        )
+      ) : null}
+      {identity.place ? (
+        <p className="truncate text-[13px] text-slate-500" title={item.siteAddress}>
+          <MapPin className="mr-1 inline h-3 w-3" />
+          {identity.place}
+        </p>
+      ) : null}
+      {identity.badges.length > 0 ? (
+        <div className="mt-1 flex flex-wrap gap-1">
+          {identity.badges.map((badge) => (
+            <span
+              key={badge}
+              className="max-w-[11rem] truncate rounded-full bg-bework-soft-violet px-2 py-0.5 text-[11px] font-medium text-bework-intel"
+              title={badge}
+            >
+              {badge}
+            </span>
+          ))}
+          {identity.extraBadgeCount > 0 ? (
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">
+              +{identity.extraBadgeCount}
+            </span>
+          ) : null}
+        </div>
+      ) : identity.typeLine ? (
+        <p className="mt-0.5 line-clamp-2 text-[12.5px] text-slate-600" title={identity.typeLine}>
+          {identity.typeLine}
+        </p>
+      ) : null}
+      {identity.linked ? (
+        <p className="mt-1 text-[11px] font-medium text-slate-400">Dossier chantier lié</p>
+      ) : null}
+    </div>
+  );
 }
 
 function isTomorrow(iso: string | null): boolean {
@@ -591,19 +710,14 @@ export function SiteVisitsWorkspace({
                             )}
                             aria-hidden
                           />
-                          <button type="button" className="w-full text-left" onClick={() => setDrawer(v)}>
-                            <p className="truncate text-[14px] font-semibold text-bework-ink" title={v.siteName || v.clientName}>
-                              {v.siteName || v.clientName}
-                            </p>
-                            {v.stats.totalsByUnit?.length ? (
-                              <p className="mt-1 text-[13px] font-semibold tabular-nums text-bework-navy">
-                                {v.stats.totalsByUnit.join(" · ")}
-                              </p>
-                            ) : null}
-                            {v.stats.lotCount ? (
-                              <p className="mt-0.5 text-[12px] text-slate-500">{v.stats.lotCount} lot{v.stats.lotCount > 1 ? "s" : ""}</p>
-                            ) : null}
-                          </button>
+                          <VisitCardHeading
+                            item={v}
+                            onOpen={() => setDrawer(v)}
+                            titleClassName="text-[14px]"
+                          />
+                          <div className="mt-1">
+                            <VisitQuantitatifStatus item={v} />
+                          </div>
                           <button
                             type="button"
                             disabled={busy}
@@ -652,50 +766,30 @@ export function SiteVisitsWorkspace({
                 <li key={v.id} className={cn("relative overflow-hidden rounded-2xl border", rowBg)}>
                   <span className={cn("absolute inset-y-0 left-0 w-[3px]", barTone)} aria-hidden />
                   <div className="group flex flex-col gap-3 px-4 py-3 pl-5 lg:flex-row lg:items-center">
-                    <button
-                      type="button"
-                      className="min-w-0 flex-1 text-left lg:max-w-[26%]"
-                      onClick={() => setDrawer(v)}
-                    >
-                      <p className="truncate text-[16px] font-semibold text-bework-ink" title={v.siteName || v.clientName}>
-                        {v.siteName || v.clientName}
-                      </p>
-                      {v.clientName && v.siteName ? (
-                        <p className="truncate text-[13px] text-slate-600">{v.clientName}</p>
-                      ) : null}
-                      <p className="truncate text-[13px] text-slate-600" title={v.siteAddress}>
-                        <MapPin className="mr-1 inline h-3 w-3" />
-                        {v.siteAddress}
-                      </p>
-                      <p className="mt-1 text-[12px] text-slate-600">
+                    <div className="min-w-0 flex-[1.4] lg:max-w-[46%]">
+                      <VisitCardHeading item={v} onOpen={() => setDrawer(v)} />
+                      <p className="mt-1 text-[12px] text-slate-500">
                         {formatWhen(v.scheduledAt)}
                         {v.responsibleName ? ` · ${v.responsibleName}` : ""}
                       </p>
-                    </button>
+                    </div>
                     <div className="min-w-0 flex-1">
-                      {v.stats.totalsByUnit?.length ? (
-                        <p className="text-[17px] font-semibold tabular-nums text-bework-navy">
-                          {v.stats.totalsByUnit.join(" · ")}
+                      <VisitQuantitatifStatus item={v} />
+                      {[
+                        v.stats.zoneCount ? `${v.stats.zoneCount} zone${v.stats.zoneCount > 1 ? "s" : ""}` : null,
+                        v.estimatedCrewCount ? `${v.estimatedCrewCount} pers.` : null,
+                        v.estimatedDuration ?? null,
+                      ].filter(Boolean).length > 0 ? (
+                        <p className="mt-1 text-[12px] text-slate-600">
+                          {[
+                            v.stats.zoneCount ? `${v.stats.zoneCount} zone${v.stats.zoneCount > 1 ? "s" : ""}` : null,
+                            v.estimatedCrewCount ? `${v.estimatedCrewCount} pers.` : null,
+                            v.estimatedDuration ?? null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
                         </p>
-                      ) : (
-                        <p className="text-[13px] text-slate-500">Pas encore de métré</p>
-                      )}
-                      <div className="mt-1 flex flex-wrap gap-1">
-                        {(v.lots ?? []).slice(0, 4).map((l) => (
-                          <span key={l} className="rounded-full bg-bework-soft-violet px-2 py-0.5 text-[11px] font-medium text-bework-intel">
-                            {l}
-                          </span>
-                        ))}
-                      </div>
-                      <p className="mt-1 text-[12px] text-slate-600">
-                        {[
-                          v.stats.zoneCount ? `${v.stats.zoneCount} zone${v.stats.zoneCount > 1 ? "s" : ""}` : null,
-                          v.estimatedCrewCount ? `${v.estimatedCrewCount} pers.` : null,
-                          v.estimatedDuration ?? null,
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </p>
+                      ) : null}
                     </div>
                     <div className="min-w-0 text-[12px] text-slate-600 lg:w-[160px]">
                       {v.stats.constraintCount ? (
@@ -786,9 +880,9 @@ export function SiteVisitsWorkspace({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="truncate text-[16px] font-semibold text-bework-ink">{drawer.siteName || drawer.clientName}</p>
-                <span className={cn("mt-1 inline-flex", visitStatusBadgeClass(drawer.status))}>{drawer.statusLabel}</span>
+              <div className="min-w-0 flex-1">
+                <VisitCardHeading item={drawer} titleClassName="text-[16px]" />
+                <span className={cn("mt-2 inline-flex", visitStatusBadgeClass(drawer.status))}>{drawer.statusLabel}</span>
               </div>
               <button type="button" onClick={() => setDrawer(null)} className="text-slate-400" aria-label="Fermer">
                 ×
@@ -799,12 +893,9 @@ export function SiteVisitsWorkspace({
                 <dt className="text-[11px] uppercase tracking-wide text-slate-400">Rendez-vous</dt>
                 <dd>{formatWhen(drawer.scheduledAt)}{drawer.responsibleName ? ` · ${drawer.responsibleName}` : ""}</dd>
               </div>
-              {drawer.stats.totalsByUnit?.length ? (
-                <div>
-                  <dt className="text-[11px] uppercase tracking-wide text-slate-400">Métrés</dt>
-                  <dd className="font-semibold tabular-nums text-bework-navy">{drawer.stats.totalsByUnit.join(" · ")}</dd>
-                </div>
-              ) : null}
+              <div>
+                <VisitQuantitatifStatus item={drawer} />
+              </div>
               {drawer.stats.impactPreview?.length ? (
                 <div>
                   <dt className="text-[11px] uppercase tracking-wide text-slate-400">Contraintes</dt>

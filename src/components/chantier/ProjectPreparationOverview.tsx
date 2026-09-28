@@ -3,28 +3,22 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import {
-  CalendarRange,
-  ClipboardList,
-  FileText,
-  FolderKanban,
-  Layers,
-  Map,
-  Plus,
-} from "lucide-react";
+import { ChevronRight, Layers, Plus } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Modal } from "@/components/ui/Modal";
 import {
   codeFromScopeName,
   formatUnscopedHumanMessage,
-  type CardStatusLabel,
   type ChantierWorkflowStep,
   type ProjectWorkspace,
   type ScopeWorkspace,
   type UnscopedItem,
-  type WorkspaceCard,
-  type WorkspaceCardKind,
 } from "@/lib/chantier/project-workspace";
+import {
+  buildPilotageTodos,
+  computePilotageNextAction,
+  timelineStepCaption,
+} from "@/lib/chantier/pilotage-display";
 
 type QuoteSectionPreview = {
   sectionId: string;
@@ -37,29 +31,16 @@ type QuoteSectionPreview = {
   action: "create" | "link_existing";
 };
 
-const STATUS_TONE: Record<CardStatusLabel, string> = {
-  "À jour": "bg-emerald-50 text-emerald-800 border-emerald-200/80",
-  "À vérifier": "bg-amber-50 text-amber-900 border-amber-200/80",
-  "À préparer": "bg-slate-100 text-slate-600 border-slate-200",
-  "En cours": "bg-sky-50 text-sky-900 border-sky-200/80",
-  "Action requise": "bg-amber-50 text-amber-900 border-amber-200/80",
-  "Non démarré": "bg-slate-50 text-slate-500 border-slate-200",
-};
-
-const KIND_ICON: Record<WorkspaceCardKind, typeof Map> = {
-  plan: Map,
-  metre: ClipboardList,
-  devis: FileText,
-  planning: CalendarRange,
-  suivi: FolderKanban,
-};
-
 export function ProjectPreparationOverview({
   workspace,
   canEdit = true,
+  hasResponsible = true,
+  missingDocumentsCount = 0,
 }: {
   workspace: ProjectWorkspace;
   canEdit?: boolean;
+  hasResponsible?: boolean;
+  missingDocumentsCount?: number;
 }) {
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
@@ -67,6 +48,7 @@ export function ProjectPreparationOverview({
   const [fromQuoteOpen, setFromQuoteOpen] = useState(false);
   const [fromQuoteId, setFromQuoteId] = useState<string | null>(null);
   const [createPrefill, setCreatePrefill] = useState("");
+  const [addMenuOpen, setAddMenuOpen] = useState(false);
 
   const unscopedMsg = formatUnscopedHumanMessage(workspace.unscoped);
   const hasUnscoped = workspace.unscoped.items.length > 0;
@@ -77,6 +59,33 @@ export function ProjectPreparationOverview({
   const [globalError, setGlobalError] = useState<string | null>(null);
   const workflow = workspace.global.workflow ?? [];
   const workflowReady = workflow.filter((s) => s.ready).length;
+
+  const nextAction = useMemo(
+    () =>
+      computePilotageNextAction({
+        workspace,
+        hasResponsible,
+        missingDocumentsCount,
+      }),
+    [workspace, hasResponsible, missingDocumentsCount],
+  );
+  const todos = useMemo(
+    () =>
+      buildPilotageTodos({
+        workspace,
+        hasResponsible,
+        missingDocumentsCount,
+        canEdit,
+      }),
+    [workspace, hasResponsible, missingDocumentsCount, canEdit],
+  );
+
+  const metrePosts =
+    workspace.global.metre.detail?.match(/(\d+)\s*poste/i)?.[1] ?? null;
+  const planningStart =
+    workspace.global.planning.detail?.match(
+      /(\d{1,2}\s+[a-zéûôî]+)/i,
+    )?.[1] ?? null;
 
   async function createGlobalPrep() {
     const quoteId = workspace.global.primaryQuoteId ?? primaryUnscopedQuoteId;
@@ -270,112 +279,321 @@ export function ProjectPreparationOverview({
   }
 
   return (
-    <section
-      className={cn(
-        "rounded-2xl border border-[#1e3a5f]/15 bg-white",
-        "px-4 py-5 sm:px-6 sm:py-6",
-        "shadow-[0_1px_2px_rgba(30,58,95,0.04)]",
-      )}
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="text-[17px] font-bold tracking-tight text-[#1e3a5f] sm:text-[18px]">
-            Préparation & conduite de chantier
-          </h2>
-          <p className="mt-1 text-[13px] text-slate-600">
-            Dossier unique : visite → métré → devis → planning → suivi → compte
-            rendu → notice. Les lots filtrent, ils ne dupliquent pas.
-          </p>
-        </div>
-        {canEdit && workspace.scopes.length > 0 ? (
-          <button
-            type="button"
-            onClick={() => openCreate()}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-[#1e3a5f]/20 bg-white px-3 py-2 text-[12.5px] font-semibold text-[#1e3a5f] transition hover:border-[#1e3a5f]/40 hover:bg-[#1e3a5f]/[0.03]"
-          >
-            <Plus className="h-3.5 w-3.5" aria-hidden />
-            Créer une phase
-          </button>
-        ) : null}
-      </div>
-
-      <div className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-3">
-        <p className="text-[12.5px] font-semibold text-slate-800">
-          Chaîne chantier :{" "}
-          <span className="tabular-nums text-[#1e3a5f]">
-            {workflowReady} / {Math.max(workflow.length, 1)}
-          </span>{" "}
-          étapes prêtes
-        </p>
-      </div>
-
-      <ol className="mt-4 space-y-2">
-        {workflow.map((step) => (
-          <li
-            key={step.id}
-            className={cn(
-              "flex flex-col gap-2 rounded-xl border px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between",
-              step.ready
-                ? "border-emerald-200/80 bg-emerald-50/40"
-                : "border-slate-200/90 bg-white",
-            )}
-          >
-            <div className="min-w-0">
-              <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-slate-400">
-                {step.label}
+    <section className="space-y-4">
+      {/* Bandeau décisionnel */}
+      <div className="rounded-2xl border border-slate-200/90 bg-white px-4 py-4 sm:px-5 sm:py-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+              Pilotage chantier
+            </p>
+            <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+              {workspace.global.devis.ready ? (
+                <p className="text-[1.35rem] font-extrabold tabular-nums tracking-tight text-slate-950">
+                  {workspace.global.devis.detail?.split(" · ")[0] ??
+                    workspace.global.devis.title}
+                </p>
+              ) : (
+                <p className="text-[15px] font-semibold text-slate-500">
+                  Devis non rattaché
+                </p>
+              )}
+              {planningStart ? (
+                <p className="text-[13px] text-slate-600">
+                  Début :{" "}
+                  <span className="font-semibold text-slate-900">{planningStart}</span>
+                </p>
+              ) : null}
+              <p className="text-[13px] text-slate-600">
+                Préparation :{" "}
+                <span className="font-semibold tabular-nums text-[#1e3a5f]">
+                  {workflowReady} / {Math.max(workflow.length, 1)}
+                </span>
               </p>
-              <p className="mt-0.5 text-[13.5px] font-semibold text-slate-900">
-                {step.ready ? "✓ " : ""}
-                {step.title}
-              </p>
-              {step.detail ? (
-                <p className="mt-0.5 text-[12px] text-slate-500">{step.detail}</p>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.03] px-3 py-2.5">
+              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#1e3a5f]/70">
+                Prochaine action
+              </span>
+              <span className="text-[13.5px] font-semibold text-slate-900">
+                {nextAction.label}
+              </span>
+              {nextAction.href ? (
+                <Link
+                  href={nextAction.href}
+                  className="ml-auto text-[12.5px] font-semibold text-[#1e3a5f] hover:underline"
+                >
+                  Ouvrir →
+                </Link>
+              ) : canEdit &&
+                nextAction.stepId &&
+                nextAction.stepId !== "responsable" &&
+                nextAction.stepId !== "documents" ? (
+                <button
+                  type="button"
+                  disabled={globalBusy}
+                  onClick={() => {
+                    const step = workflow.find((s) => s.id === nextAction.stepId);
+                    if (step) void runWorkflowAction(step);
+                  }}
+                  className="ml-auto rounded-lg bg-[#1e3a5f] px-2.5 py-1 text-[12px] font-semibold text-white disabled:opacity-50"
+                >
+                  {globalBusy ? "…" : "Lancer"}
+                </button>
               ) : null}
             </div>
-            {canEdit || step.href ? (
-              <div className="flex shrink-0 flex-wrap gap-2">
-                {step.ready && step.href ? (
-                  <Link
-                    href={step.href}
-                    className="rounded-lg border border-[#1e3a5f]/20 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/[0.03]"
-                  >
-                    Ouvrir
-                  </Link>
+          </div>
+
+          {canEdit ? (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setAddMenuOpen((v) => !v)}
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-[12.5px] font-semibold text-white hover:bg-[#152a45]"
+              >
+                <Plus className="h-3.5 w-3.5" aria-hidden />
+                Ajouter au chantier
+              </button>
+              {addMenuOpen ? (
+                <>
+                  <button
+                    type="button"
+                    className="fixed inset-0 z-10 cursor-default"
+                    aria-label="Fermer"
+                    onClick={() => setAddMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 z-20 mt-1 min-w-[220px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+                    {workspace.global.visitId ? (
+                      <Link
+                        href={`/dashboard/visites-metres/${workspace.global.visitId}`}
+                        className="block px-3.5 py-2 text-[13px] text-slate-800 hover:bg-slate-50"
+                        onClick={() => setAddMenuOpen(false)}
+                      >
+                        Visite
+                      </Link>
+                    ) : null}
+                    <Link
+                      href={`/dashboard/projets/${workspace.projectId}/documents-chantier`}
+                      className="block px-3.5 py-2 text-[13px] text-slate-800 hover:bg-slate-50"
+                      onClick={() => setAddMenuOpen(false)}
+                    >
+                      Document
+                    </Link>
+                    <button
+                      type="button"
+                      className="block w-full px-3.5 py-2 text-left text-[13px] text-slate-800 hover:bg-slate-50"
+                      onClick={() => {
+                        setAddMenuOpen(false);
+                        const step = workflow.find((s) => s.id === "compte_rendu");
+                        if (step) void runWorkflowAction(step);
+                      }}
+                    >
+                      Compte rendu
+                    </button>
+                    <Link
+                      href={`/dashboard/devis-facturation/devis/nouveau?projectId=${encodeURIComponent(workspace.projectId)}`}
+                      className="block px-3.5 py-2 text-[13px] text-slate-800 hover:bg-slate-50"
+                      onClick={() => setAddMenuOpen(false)}
+                    >
+                      Devis complémentaire
+                    </Link>
+                    <button
+                      type="button"
+                      className="block w-full px-3.5 py-2 text-left text-[13px] text-slate-800 hover:bg-slate-50"
+                      onClick={() => {
+                        setAddMenuOpen(false);
+                        openCreate();
+                      }}
+                    >
+                      Lot / phase
+                    </button>
+                    <Link
+                      href={`#tab-taches`}
+                      className="block px-3.5 py-2 text-[13px] text-slate-800 hover:bg-slate-50"
+                      onClick={() => setAddMenuOpen(false)}
+                    >
+                      Tâche
+                    </Link>
+                  </div>
+                </>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Timeline compacte */}
+      <div className="rounded-2xl border border-slate-200/90 bg-white px-3 py-3 sm:px-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+        <ol className="flex gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {workflow.map((step, idx) => {
+            const caption = timelineStepCaption(step);
+            const clickable = step.ready && step.href;
+            const Inner = (
+              <>
+                <span
+                  className={cn(
+                    "flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold",
+                    step.ready
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-slate-100 text-slate-500",
+                  )}
+                >
+                  {step.ready ? "✓" : idx + 1}
+                </span>
+                <span className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                  {step.label.replace(" & quantitatif", "").replace(" chantier", "")}
+                </span>
+                <span className="mt-0.5 line-clamp-2 text-[12px] font-semibold leading-snug text-slate-800">
+                  {caption}
+                </span>
+              </>
+            );
+            return (
+              <li key={step.id} className="flex min-w-[7.5rem] flex-1 items-stretch">
+                {idx > 0 ? (
+                  <span
+                    className="mt-3 hidden w-2 shrink-0 self-start border-t border-slate-200 sm:block"
+                    aria-hidden
+                  />
                 ) : null}
-                {canEdit &&
-                step.primaryAction &&
-                step.primaryAction !== "open" ? (
+                {clickable ? (
+                  <Link
+                    href={step.href!}
+                    className={cn(
+                      "flex w-full flex-col rounded-xl border px-2.5 py-2 transition",
+                      step.ready
+                        ? "border-slate-200/90 bg-white hover:border-[#1e3a5f]/30 hover:bg-slate-50/80"
+                        : "border-dashed border-slate-200 bg-slate-50/50",
+                    )}
+                  >
+                    {Inner}
+                  </Link>
+                ) : canEdit &&
+                  step.primaryAction &&
+                  step.primaryAction !== "open" ? (
                   <button
                     type="button"
                     disabled={globalBusy}
                     onClick={() => void runWorkflowAction(step)}
-                    className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-[12.5px] font-semibold text-white hover:bg-[#152a45] disabled:opacity-50"
+                    className="flex w-full flex-col rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-2.5 py-2 text-left transition hover:border-[#1e3a5f]/25 disabled:opacity-50"
                   >
-                    {globalBusy ? "…" : step.actionLabel}
+                    {Inner}
                   </button>
-                ) : null}
-                {!step.ready &&
-                step.primaryAction === "open" &&
-                step.href ? (
-                  <Link
-                    href={step.href}
-                    className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-[12.5px] font-semibold text-white hover:bg-[#152a45]"
-                  >
-                    {step.actionLabel}
-                  </Link>
-                ) : null}
-              </div>
-            ) : null}
-          </li>
-        ))}
-      </ol>
+                ) : (
+                  <div className="flex w-full flex-col rounded-xl border border-dashed border-slate-200 bg-slate-50/40 px-2.5 py-2">
+                    {Inner}
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+        {globalError ? (
+          <p className="mt-2 text-[12.5px] text-red-700">{globalError}</p>
+        ) : null}
+      </div>
 
-      {globalError ? (
-        <p className="mt-2 text-[12.5px] text-red-700">{globalError}</p>
-      ) : null}
+      {/* 3 colonnes pilotage */}
+      <div className="grid gap-3 lg:grid-cols-3">
+        <article className="rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+            À faire
+          </h3>
+          {todos.length === 0 ? (
+            <p className="mt-2 text-[13px] text-slate-500">Rien de bloquant.</p>
+          ) : (
+            <ul className="mt-2 space-y-1.5">
+              {todos.map((t) => (
+                <li key={t.id}>
+                  {t.href ? (
+                    <Link
+                      href={t.href}
+                      className="flex items-start justify-between gap-2 rounded-lg px-1.5 py-1 text-[13px] text-slate-800 hover:bg-slate-50"
+                    >
+                      <span>{t.label}</span>
+                      <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    </Link>
+                  ) : t.id === "unscoped-quotes" && canEdit ? (
+                    <button
+                      type="button"
+                      onClick={() => openCreateLotsFromQuote()}
+                      className="flex w-full items-start justify-between gap-2 rounded-lg px-1.5 py-1 text-left text-[13px] text-slate-800 hover:bg-slate-50"
+                    >
+                      <span>{t.label}</span>
+                      <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    </button>
+                  ) : (
+                    <span className="block px-1.5 py-1 text-[13px] text-slate-700">
+                      {t.label}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
+
+        <article className="rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+            Chantier
+          </h3>
+          <dl className="mt-2 space-y-1.5 text-[13px]">
+            <div className="flex justify-between gap-2">
+              <dt className="text-slate-500">Lots</dt>
+              <dd className="font-semibold tabular-nums text-slate-900">
+                {workspace.scopes.length}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-2">
+              <dt className="text-slate-500">Postes métré</dt>
+              <dd className="font-semibold tabular-nums text-slate-900">
+                {metrePosts ?? (workspace.global.metre.ready ? "—" : "—")}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-2">
+              <dt className="text-slate-500">Début planning</dt>
+              <dd className="font-semibold text-slate-900">
+                {planningStart ?? "—"}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-2">
+              <dt className="text-slate-500">Chaîne</dt>
+              <dd className="font-semibold tabular-nums text-slate-900">
+                {workflowReady}/{Math.max(workflow.length, 1)}
+              </dd>
+            </div>
+          </dl>
+        </article>
+
+        <article className="rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+            Commercial
+          </h3>
+          {workspace.global.devis.ready ? (
+            <div className="mt-2 space-y-1.5 text-[13px]">
+              <p className="font-semibold text-slate-900">
+                {workspace.global.devis.title}
+              </p>
+              <p className="text-slate-600">
+                {workspace.global.devis.detail ?? "—"}
+              </p>
+              {workspace.global.devis.href ? (
+                <Link
+                  href={workspace.global.devis.href}
+                  className="inline-flex text-[12.5px] font-semibold text-[#1e3a5f] hover:underline"
+                >
+                  Ouvrir le devis →
+                </Link>
+              ) : null}
+            </div>
+          ) : (
+            <p className="mt-2 text-[13px] text-slate-500">Aucun devis de référence.</p>
+          )}
+        </article>
+      </div>
 
       {hasUnscoped ? (
-        <div className="mt-4 flex flex-col gap-3 rounded-xl border border-amber-200/80 bg-amber-50/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-xl border border-amber-200/80 bg-amber-50/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[13px] font-semibold text-amber-950">
               {workspace.unscoped.quotes === 1 &&
@@ -390,11 +608,6 @@ export function ProjectPreparationOverview({
             </p>
             {unscopedMsg ? (
               <p className="mt-0.5 text-[12.5px] text-amber-900/85">{unscopedMsg}</p>
-            ) : null}
-            {primaryUnscopedQuoteId ? (
-              <p className="mt-0.5 text-[12.5px] text-amber-900/85">
-                Créez les lots automatiquement depuis les sections du devis.
-              </p>
             ) : null}
           </div>
           {canEdit ? (
@@ -419,7 +632,7 @@ export function ProjectPreparationOverview({
                     : "bg-[#1e3a5f] text-white hover:bg-[#152a45]",
                 )}
               >
-                Classer {workspace.unscoped.items.length === 1 ? "maintenant" : "les éléments"}
+                Classer
               </button>
             </div>
           ) : null}
@@ -427,18 +640,50 @@ export function ProjectPreparationOverview({
       ) : null}
 
       {workspace.global.phases.length > 0 ? (
-        <div className="mt-5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
-            Phases / lots (catégorisation)
-          </p>
-          <p className="mt-1 text-[12.5px] text-slate-500">
-            Structurent le contenu du chantier — ne créent pas de planning séparé.
-          </p>
-          <div className="mt-3 space-y-3">
-            {workspace.scopes.map((scope) => (
-              <ScopeBlock key={scope.id} scope={scope} />
-            ))}
+        <div className="rounded-2xl border border-slate-200/90 bg-white px-3.5 py-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                Lots / phases
+              </h3>
+              <p className="mt-0.5 text-[12px] text-slate-500">
+                Filtres du dossier — pas de métré ni planning séparés.
+              </p>
+            </div>
+            {canEdit ? (
+              <button
+                type="button"
+                onClick={() => openCreate()}
+                className="text-[12.5px] font-semibold text-[#1e3a5f] hover:underline"
+              >
+                + Phase
+              </button>
+            ) : null}
           </div>
+          <ul className="mt-2.5 divide-y divide-slate-100">
+            {workspace.scopes.map((scope) => (
+              <li key={scope.id}>
+                <Link
+                  href={scope.href}
+                  className="flex items-center gap-3 py-2.5 transition hover:bg-slate-50/80"
+                >
+                  <span className="w-10 shrink-0 text-[11px] font-bold tabular-nums text-slate-400">
+                    {scope.code}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-[13.5px] font-semibold text-slate-900">
+                    {scope.name}
+                  </span>
+                  <span className="shrink-0 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">
+                    {scope.progress.ready >= scope.progress.total &&
+                    scope.progress.total > 0
+                      ? "Prêt"
+                      : "Filtre"}
+                  </span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-slate-300" />
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       ) : (
         <EmptyPreparationState
@@ -493,52 +738,6 @@ export function ProjectPreparationOverview({
         />
       ) : null}
     </section>
-  );
-}
-
-function PreparationProgress({
-  ready,
-  total,
-  scopes,
-}: {
-  ready: number;
-  total: number;
-  scopes: ScopeWorkspace[];
-}) {
-  const steps = useMemo(() => {
-    if (scopes.length !== 1) return null;
-    return scopes[0]!.cards.map((c) => ({
-      label: c.label,
-      ready: c.ready,
-    }));
-  }, [scopes]);
-
-  return (
-    <div className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-3">
-      <p className="text-[12.5px] font-semibold text-slate-800">
-        Préparation :{" "}
-        <span className="tabular-nums text-[#1e3a5f]">
-          {ready} / {total}
-        </span>{" "}
-        étape{total > 1 ? "s" : ""} structurée{total > 1 ? "s" : ""}
-      </p>
-      {steps ? (
-        <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1.5">
-          {steps.map((s) => (
-            <li
-              key={s.label}
-              className={cn(
-                "inline-flex items-center gap-1.5 text-[12px] font-medium",
-                s.ready ? "text-emerald-800" : "text-slate-500",
-              )}
-            >
-              <span aria-hidden>{s.ready ? "✓" : "○"}</span>
-              {s.label}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
   );
 }
 
@@ -608,88 +807,6 @@ function EmptyPreparationState({
       ) : null}
     </div>
   );
-}
-
-function ScopeBlock({ scope }: { scope: ScopeWorkspace }) {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200/90 bg-slate-50/50 px-3.5 py-2.5">
-      <div className="min-w-0">
-        <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-slate-400">
-          {scope.code}
-        </p>
-        <p className="text-[13.5px] font-semibold text-[#1e3a5f]">{scope.name}</p>
-        <p className="mt-0.5 text-[11.5px] text-slate-500">
-          Phase / filtre — pas de métré ni planning séparés
-        </p>
-      </div>
-      <Link
-        href={scope.href}
-        className="rounded-lg border border-[#1e3a5f]/15 bg-white px-3 py-1.5 text-[12px] font-semibold text-[#1e3a5f] transition hover:border-[#1e3a5f]/35"
-      >
-        Filtrer
-      </Link>
-    </div>
-  );
-}
-
-function PrepCard({ card }: { card: WorkspaceCard }) {
-  const Icon = KIND_ICON[card.kind];
-  const interactive = !!card.href;
-  const body = (
-    <>
-      <div className="flex items-start justify-between gap-2">
-        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#1e3a5f]/[0.06] text-[#1e3a5f]">
-          <Icon className="h-3.5 w-3.5" aria-hidden />
-        </span>
-        <span
-          className={cn(
-            "rounded-full border px-2 py-0.5 text-[10px] font-semibold",
-            STATUS_TONE[card.statusLabel],
-          )}
-          title={card.syncHint ?? undefined}
-        >
-          {card.statusLabel}
-        </span>
-      </div>
-      <p className="mt-2.5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-slate-400">
-        {card.label}
-      </p>
-      <p className="mt-0.5 text-[13px] font-semibold leading-snug text-slate-900 line-clamp-2">
-        {card.title}
-      </p>
-      {card.detail ? (
-        <p className="mt-1 text-[11.5px] leading-snug text-slate-500 line-clamp-2">
-          {card.detail}
-        </p>
-      ) : null}
-      <span
-        className={cn(
-          "mt-3 inline-flex text-[12px] font-semibold",
-          card.ready ? "text-[#1d4ed8]" : "text-[#1e3a5f]",
-        )}
-      >
-        {card.actionLabel}
-        {interactive ? " →" : ""}
-      </span>
-    </>
-  );
-
-  const cls = cn(
-    "rounded-xl border border-slate-200/90 bg-white p-3",
-    "transition duration-150",
-    "motion-safe:hover:-translate-y-0.5 motion-safe:hover:border-[#1e3a5f]/30 motion-safe:hover:shadow-sm",
-    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e3a5f]",
-    !card.ready && "border-dashed bg-slate-50/60",
-  );
-
-  if (card.href) {
-    return (
-      <Link href={card.href} className={cls}>
-        {body}
-      </Link>
-    );
-  }
-  return <div className={cn(cls, "opacity-90")}>{body}</div>;
 }
 
 function CreateLotsFromQuoteModal({

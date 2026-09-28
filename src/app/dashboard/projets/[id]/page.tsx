@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { redirect, notFound } from "next/navigation";
+import { after } from "next/server";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
@@ -15,7 +17,6 @@ import { ProjectAssignAgent } from "@/components/projects/ProjectAssignAgent";
 import { ProjectPpspsSection } from "@/components/projects/ProjectPpspsSection";
 import { ProjectReportsSection } from "@/components/projects/ProjectReportsSection";
 import { SiteDocumentsEntryCard } from "@/components/site-documents/SiteDocumentsEntryCard";
-import { ChantierDossierSection } from "@/components/chantier/ChantierDossierSection";
 import { ChantierCockpit } from "@/components/chantier/ChantierCockpit";
 import { ChantierSharePanel } from "@/components/chantier/ChantierSharePanel";
 import { canAccessBeWorkSkills } from "@/lib/be-work-skills-access";
@@ -37,12 +38,11 @@ import { TaskStatus } from "@prisma/client";
 import { ProjectMessagerieLinks } from "@/components/messagerie/MessagerieContextLinks";
 import {
   chantierStatusDisplayLabel,
-  loadChantierCockpitOps,
 } from "@/lib/chantier/cockpit-ops";
 import {
-  ChantierOpsOverview,
-  ChantierQuickActions,
-} from "@/components/chantier/ChantierOpsOverview";
+  ChantierOpsOverviewDeferred,
+  ChantierOpsOverviewSkeleton,
+} from "@/components/chantier/ChantierOpsOverviewDeferred";
 import { projectTeamHref } from "@/lib/messagerie/resolve-conversation";
 import {
   CHANTIER_MISSING_STATUSES,
@@ -50,23 +50,30 @@ import {
 import { chantierStatusBadgeTone } from "@/lib/chantier-lifecycle";
 import { ChantierContractuelPanel } from "@/components/chantier/ChantierContractuelPanel";
 import { ChantierSubcontractorsPanel } from "@/components/chantier/ChantierSubcontractorsPanel";
-import { ProjectProfitabilityPanel } from "@/components/chantier/ProjectProfitabilityPanel";
-import { loadProjectProfitability } from "@/lib/chantier/project-profitability";
 import { canEditPilotageOperational } from "@/lib/pilotage/access";
 import { isActionOpen, isVisaPending, isOverdue } from "@/lib/pilotage/calculations";
 import { ProjectMateriauxSection } from "@/components/projects/ProjectMateriauxSection";
 import { loadMaterialRequirementsForProject } from "@/lib/materiaux/load-for-project";
 import { isInternalPurchaseOrderActor } from "@/lib/purchase-orders/access";
 import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
-import { loadDocumentHub } from "@/lib/ged/document-hub";
-import { getProjectWorkspace } from "@/lib/chantier/project-workspace";
-import { ProjectPreparationOverview } from "@/components/chantier/ProjectPreparationOverview";
-
+import {
+  ProjectPreparationDeferred,
+  ProjectPreparationSkeleton,
+} from "@/components/chantier/ProjectPreparationDeferred";
+import {
+  ChantierDossierDeferred,
+  ChantierDossierSkeleton,
+} from "@/components/chantier/ChantierDossierDeferred";
+import {
+  ProjectProfitabilityDeferred,
+  ProjectProfitabilitySkeleton,
+} from "@/components/chantier/ProjectProfitabilityDeferred";
 export default async function ProjetDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const tPage = Date.now();
   const session = await getServerSession(authOptions);
   const { id } = await params;
 
@@ -94,11 +101,23 @@ export default async function ProjetDetailPage({
         })()
       : null;
 
-  const [project, actionsConsumed, chantierMissions] = await Promise.all([
+  const tShell = Date.now();
+  const [project, actionsConsumed, chantierMissions, access] = await Promise.all([
     prisma.project.findUnique({
       where: { id },
       include: {
-        client: true,
+        client: {
+          select: {
+            id: true,
+            name: true,
+            company: true,
+            personType: true,
+            role: true,
+            accessStatus: true,
+            monthlyActionsTotal: true,
+            monthlyActionsUsed: true,
+          },
+        },
         assignedTo: {
           select: {
             id: true,
@@ -119,11 +138,30 @@ export default async function ProjetDetailPage({
               ? { channel: { in: channelFilterEarly.channels } }
               : {}),
           },
-          include: { sender: true, receiver: true },
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            senderId: true,
+            receiverId: true,
+            channel: true,
+            sender: { select: { id: true, name: true, role: true } },
+            receiver: { select: { id: true, name: true, role: true } },
+          },
           orderBy: { createdAt: "desc" },
           take: 40,
         },
-        documents: { orderBy: { createdAt: "desc" }, take: 30 },
+        documents: {
+          orderBy: { createdAt: "desc" },
+          take: 30,
+          select: {
+            id: true,
+            name: true,
+            createdAt: true,
+            mimeType: true,
+            fileUrl: true,
+          },
+        },
       },
     }),
     prisma.task.aggregate({
@@ -146,12 +184,15 @@ export default async function ProjetDetailPage({
       },
       orderBy: { updatedAt: "desc" },
     }),
+    canAccessChantierProject(session.user, id),
   ]);
 
   if (!project) notFound();
-
-  const access = await canAccessChantierProject(session.user, id);
   if (!access.ok) notFound();
+
+  console.info(
+    `[PROJECT PERF] shell project+missions+access: ${Date.now() - tShell}ms`,
+  );
 
   const [clientExtAccess, followUpClient, clientChannel] = await Promise.all([
     prisma.projectAccess.findMany({
@@ -201,18 +242,20 @@ export default async function ProjetDetailPage({
     followUpClientName: followUpClient?.clientName ?? null,
   });
 
-  await ensureChantierFolders(id);
+  // Écritures d’entretien : hors chemin critique (ne bloquent plus le 1er rendu)
+  after(async () => {
+    try {
+      await ensureChantierFolders(id);
+      await syncProjectMissionDocuments(id);
+    } catch (e) {
+      console.error("[ProjetDetail] after ensure/sync:", e);
+    }
+  });
 
   const isAgenceRole =
     session.user.role === "AGENCE" || session.user.role === "MANAGER";
 
-  let syncBanner: { synced: number } | null = null;
-  try {
-    const syncResult = await syncProjectMissionDocuments(id);
-    if (syncResult.synced > 0) syncBanner = { synced: syncResult.synced };
-  } catch (e) {
-    console.error("[ProjetDetail] sync mission documents:", e);
-  }
+  const syncBanner: { synced: number } | null = null;
 
   const orphanMissions = isAgenceRole
     ? await findOrphanMissionDocumentsForProject(id).catch(() => [])
@@ -251,7 +294,8 @@ export default async function ProjetDetailPage({
   const canSeeMateriaux =
     !isExternalViewer && isInternalPurchaseOrderActor(session.user);
 
-  const [chantierFolders, missingCount, ops, contractuelRaw, billingHint, materiauxRows, profitability, chantierHub] =
+  const tHeavy = Date.now();
+  const [chantierFolders, missingCount, contractuelRaw, billingHint, materiauxRows] =
     await Promise.all([
       canSeeDocuments
         ? prisma.chantierFolder.findMany({
@@ -268,14 +312,6 @@ export default async function ProjetDetailPage({
         : Promise.resolve([]),
       prisma.chantierFile.count({
         where: { projectId: id, status: { in: CHANTIER_MISSING_STATUSES } },
-      }),
-      loadChantierCockpitOps({
-        projectId: id,
-        projectTitle: project.title,
-        externalViewer: isExternalViewer,
-      }).catch((e) => {
-        console.error("[ProjetDetail] cockpit ops:", e);
-        return null;
       }),
       // Summary légère — pas le détail contractuel complet
       canSeeContractuel
@@ -330,39 +366,10 @@ export default async function ProjetDetailPage({
             return [];
           })
         : Promise.resolve([]),
-      canSeeRentabilite && project.organizationId
-        ? loadProjectProfitability(project.organizationId, id).catch((e) => {
-            console.error("[ProjetDetail] profitability:", e);
-            return null;
-          })
-        : Promise.resolve(null),
-      canSeeDocuments
-        ? loadDocumentHub({
-            user: {
-              id: session.user.id,
-              role: session.user.role,
-              personType: actorProfile?.personType ?? session.user.personType ?? null,
-              permissionProfile: actorProfile?.permissionProfile ?? null,
-              name: session.user.name ?? null,
-            },
-            page: 1,
-            projectId: id,
-            view: "all",
-            sort: "recent",
-          }).catch((e) => {
-            console.error("[ProjetDetail] GED hub:", e);
-            return { items: [], classifyCount: 0, missingCount: 0, weekCount: 0, totalAll: 0, companies: [], total: 0, page: 1, pageSize: 50, groups: [], projectStats: [] };
-          })
-        : Promise.resolve({ items: [], classifyCount: 0, missingCount: 0, weekCount: 0, totalAll: 0, companies: [], total: 0, page: 1, pageSize: 50, groups: [], projectStats: [] }),
     ]);
-
-  const preparationWorkspace =
-    !isExternalViewer && project.organizationId
-      ? await getProjectWorkspace(project.organizationId, id).catch((e) => {
-          console.error("[ProjetDetail] preparation workspace:", e);
-          return null;
-        })
-      : null;
+  console.info(
+    `[PROJECT PERF] heavy parallel (folders/pilotage/…).: ${Date.now() - tHeavy}ms`,
+  );
 
   const dossierFolders = chantierFolders.map((folder) => ({
     id: folder.id,
@@ -570,16 +577,22 @@ export default async function ProjetDetailPage({
         </p>
       ) : null}
       <ChantierOrphanMissionBanner projectId={id} orphans={orphanMissions} />
-      <div id="dossier-chantier">
-        <ChantierDossierSection
+      <Suspense fallback={<ChantierDossierSkeleton />}>
+        <ChantierDossierDeferred
           projectId={id}
           projectTitle={project.title}
           folders={dossierFolders}
           canEdit={canEditDossier}
-          hubItems={chantierHub.items}
-          classifyCount={chantierHub.classifyCount}
+          user={{
+            id: session.user.id,
+            role: session.user.role,
+            personType: actorProfile?.personType ?? session.user.personType ?? null,
+            permissionProfile:
+              actorProfile?.permissionProfile ?? session.user.permissionProfile ?? null,
+            name: session.user.name ?? null,
+          }}
         />
-      </div>
+      </Suspense>
       {!isExternalViewer && project.documents.length > 0 ? (
         <div className="rounded-xl surface-metallic-light p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">
@@ -716,13 +729,22 @@ export default async function ProjetDetailPage({
   ) : null;
 
   const rentabilitePanel =
-    canSeeRentabilite && profitability ? (
-      <ProjectProfitabilityPanel initial={profitability} />
+    canSeeRentabilite && project.organizationId ? (
+      <Suspense fallback={<ProjectProfitabilitySkeleton />}>
+        <ProjectProfitabilityDeferred
+          organizationId={project.organizationId}
+          projectId={id}
+        />
+      </Suspense>
     ) : null;
 
   const sousTraitantsPanel = canSeeContractuel ? (
     <ChantierSubcontractorsPanel projectId={project.id} canEdit={isStaff} />
   ) : null;
+
+  console.info(
+    `[PROJECT PERF] total server before stream: ${Date.now() - tPage}ms project=${id}`,
+  );
 
   return (
     <div className="space-y-5">
@@ -736,16 +758,26 @@ export default async function ProjetDetailPage({
         ]}
       />
 
-      <header className="rounded-2xl border border-slate-200/90 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <header className="rounded-2xl border border-slate-200/90 bg-white px-4 py-4 sm:px-5 sm:py-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
               Chantier
             </p>
-            <h1 className="mt-1.5 text-[1.35rem] font-extrabold tracking-tight text-slate-950 sm:text-2xl">
+            <h1 className="mt-1 text-[1.25rem] font-extrabold tracking-tight text-slate-950 sm:text-[1.45rem]">
               {project.title}
             </h1>
-            <div className="mt-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[13px] text-slate-600">
+            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-slate-600">
+              {project.siteCity ? (
+                <span className="font-medium text-slate-800">{project.siteCity}</span>
+              ) : project.siteAddress ? (
+                <span className="font-medium text-slate-800">{project.siteAddress}</span>
+              ) : null}
+              {(project.siteCity || project.siteAddress) && (
+                <span className="text-slate-300" aria-hidden>
+                  ·
+                </span>
+              )}
               {isStaff ? (
                 <ChantierStatusSelect projectId={project.id} value={project.chantierStatus} canEdit />
               ) : (
@@ -753,26 +785,6 @@ export default async function ProjetDetailPage({
                   {chantierStatusDisplayLabel(project.chantierStatus)}
                 </Badge>
               )}
-              {project.siteCity || project.siteAddress ? (
-                <>
-                  <span className="text-slate-300" aria-hidden>
-                    ·
-                  </span>
-                  <span className="text-slate-700">
-                    {[project.siteCity, project.siteAddress && !project.siteCity ? project.siteAddress : null]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </span>
-                </>
-              ) : null}
-              {presentation.clientLabel ? (
-                <>
-                  <span className="text-slate-300" aria-hidden>
-                    ·
-                  </span>
-                  <span className="font-medium text-slate-800">{presentation.clientLabel}</span>
-                </>
-              ) : null}
               <span className="text-slate-300" aria-hidden>
                 ·
               </span>
@@ -785,6 +797,35 @@ export default async function ProjetDetailPage({
                 <span className="text-slate-500">Responsable à définir</span>
               )}
             </div>
+            {(project.signedQuoteAmount != null ||
+              project.plannedStartDate ||
+              project.dateSouhaitee) && (
+              <div className="mt-2.5 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[13px]">
+                {project.signedQuoteAmount != null ? (
+                  <p className="text-[1.15rem] font-extrabold tabular-nums tracking-tight text-slate-950">
+                    {Number(project.signedQuoteAmount).toLocaleString("fr-FR", {
+                      style: "currency",
+                      currency: "EUR",
+                      maximumFractionDigits: 0,
+                    })}{" "}
+                    <span className="text-[12px] font-semibold text-slate-500">HT</span>
+                  </p>
+                ) : null}
+                {project.plannedStartDate || project.dateSouhaitee ? (
+                  <p className="text-slate-600">
+                    Début :{" "}
+                    <span className="font-semibold text-slate-900">
+                      {new Date(
+                        project.plannedStartDate ?? project.dateSouhaitee!,
+                      ).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </span>
+                  </p>
+                ) : null}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -800,19 +841,24 @@ export default async function ProjetDetailPage({
               </Link>
             ) : null}
             <Link
-              href={ops?.links.agenda ?? `/dashboard/agenda?projectId=${encodeURIComponent(id)}`}
+              href={`/dashboard/agenda?projectId=${encodeURIComponent(id)}`}
               className="inline-flex min-h-10 items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#1e3a5f] hover:bg-slate-50"
             >
               Agenda
             </Link>
-            {ops && !isExternalViewer ? (
-              <ChantierQuickActions ops={ops} canCreate={isStaff} />
-            ) : null}
             <details className="relative">
               <summary className="list-none cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
                 •••
               </summary>
               <div className="absolute right-0 z-20 mt-1 min-w-[200px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+                {!isExternalViewer && isStaff ? (
+                  <Link
+                    href="/dashboard/a-traiter"
+                    className="block px-3.5 py-2 text-sm text-slate-800 hover:bg-slate-50"
+                  >
+                    À traiter
+                  </Link>
+                ) : null}
                 {!isExternalViewer ? (
                   <div className="border-b border-slate-100 px-2 py-2">
                     <ProjectMessagerieLinks projectId={project.id} />
@@ -844,13 +890,16 @@ export default async function ProjetDetailPage({
         </div>
       </header>
 
-      {preparationWorkspace ? (
-        <div className="pt-1 pb-1">
-          <ProjectPreparationOverview
-            workspace={preparationWorkspace}
+      {!isExternalViewer && project.organizationId ? (
+        <Suspense fallback={<ProjectPreparationSkeleton />}>
+          <ProjectPreparationDeferred
+            organizationId={project.organizationId}
+            projectId={id}
             canEdit={isStaff}
+            hasResponsible={!!responsibleLabel}
+            missingDocumentsCount={missingCount}
           />
-        </div>
+        </Suspense>
       ) : null}
 
       <ChantierCockpit
@@ -882,10 +931,11 @@ export default async function ProjetDetailPage({
         ]}
         attentionItems={attentionItems}
         opsOverview={
-          ops ? (
-            <ChantierOpsOverview
-              ops={ops}
-              mode={isExternalViewer ? "external" : "internal"}
+          <Suspense fallback={<ChantierOpsOverviewSkeleton />}>
+            <ChantierOpsOverviewDeferred
+              projectId={id}
+              projectTitle={project.title}
+              externalViewer={isExternalViewer}
               billingHint={
                 billingHint
                   ? {
@@ -896,8 +946,20 @@ export default async function ProjetDetailPage({
                   : null
               }
             />
-          ) : undefined
+          </Suspense>
         }
+        travauxExternalLinks={[
+          {
+            label: "Planning & suivi",
+            href: `/dashboard/projets/${id}/suivi-planning`,
+          },
+        ]}
+        documentsExternalLinks={[
+          {
+            label: "Documents chantier",
+            href: `/dashboard/projets/${id}/documents-chantier`,
+          },
+        ]}
         hiddenTabs={canManageShare ? undefined : ["partage"]}
         panels={{
           overview: contextCard,

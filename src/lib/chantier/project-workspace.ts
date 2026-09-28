@@ -2,6 +2,7 @@
  * Dossier chantier V2 — agrégateur lecture Project / ProjectScope.
  * Aucune synchronisation automatique entre modules.
  */
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
 import {
@@ -537,10 +538,11 @@ function buildScopeCards(input: {
   return { cards, alerts };
 }
 
-export async function getProjectWorkspace(
+async function getProjectWorkspaceUncached(
   orgId: string,
   projectId: string,
 ): Promise<ProjectWorkspace | null> {
+  const t0 = Date.now();
   const project = await prisma.project.findFirst({
     where: { id: projectId, organizationId: orgId },
     select: {
@@ -551,30 +553,76 @@ export async function getProjectWorkspace(
   });
   if (!project) return null;
 
-  const scopes = await prisma.projectScope.findMany({
-    where: { projectId, organizationId: orgId, status: "ACTIVE" },
-    orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
-  });
+  // Vague 1 — lectures indépendantes (plus de cascade scopes→studies→quotes→plans)
+  const [scopes, studies, plans, followUpSheets, siteDocs, visitsByProject] =
+    await Promise.all([
+      prisma.projectScope.findMany({
+        where: { projectId, organizationId: orgId, status: "ACTIVE" },
+        orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
+      }),
+      prisma.prepStudy.findMany({
+        where: { projectId, organizationId: orgId, archivedAt: null },
+        select: {
+          id: true,
+          title: true,
+          version: true,
+          scopeId: true,
+          sourcesJson: true,
+          _count: { select: { lines: true } },
+        },
+        orderBy: { updatedAt: "desc" },
+      }),
+      prisma.prepSchedulePlan.findMany({
+        where: { projectId, organizationId: orgId },
+        select: {
+          id: true,
+          studyId: true,
+          scopeId: true,
+          title: true,
+          revisionKind: true,
+          status: true,
+          startDate: true,
+          endDateBase: true,
+          studyVersionAtGeneration: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.followUpSheet.findMany({
+        where: {
+          projectId,
+          status: { not: "ARCHIVE" },
+        },
+        orderBy: { updatedAt: "desc" },
+        take: 5,
+        select: { id: true, title: true, status: true },
+      }),
+      prisma.siteDocument.findMany({
+        where: { organizationId: orgId, projectId, status: { not: "ARCHIVED" } },
+        orderBy: { updatedAt: "desc" },
+        take: 10,
+        select: { id: true, kind: true, title: true, number: true, status: true },
+      }),
+      prisma.siteVisit.findMany({
+        where: { organizationId: orgId, projectId },
+        orderBy: { updatedAt: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          subject: true,
+          status: true,
+          projectId: true,
+          commercialQuoteId: true,
+        },
+      }),
+    ]);
 
-  const studies = await prisma.prepStudy.findMany({
-    where: { projectId, organizationId: orgId, archivedAt: null },
-    select: {
-      id: true,
-      title: true,
-      version: true,
-      scopeId: true,
-      sourcesJson: true,
-      _count: { select: { lines: true } },
-    },
-    orderBy: { updatedAt: "desc" },
-  });
-
+  const studyIds = studies.map((s) => s.id);
   const quotes = await prisma.commercialQuote.findMany({
     where: {
       organizationId: orgId,
       OR: [
         { projectId },
-        { sourcePrepStudyId: { in: studies.map((s) => s.id) } },
+        ...(studyIds.length ? [{ sourcePrepStudyId: { in: studyIds } }] : []),
       ],
     },
     select: {
@@ -588,22 +636,6 @@ export async function getProjectWorkspace(
       scopeId: true,
     },
     orderBy: { updatedAt: "desc" },
-  });
-
-  const plans = await prisma.prepSchedulePlan.findMany({
-    where: { projectId, organizationId: orgId },
-    select: {
-      id: true,
-      studyId: true,
-      scopeId: true,
-      title: true,
-      revisionKind: true,
-      status: true,
-      startDate: true,
-      endDateBase: true,
-      studyVersionAtGeneration: true,
-    },
-    orderBy: { createdAt: "desc" },
   });
 
   const globalStudy =
@@ -631,35 +663,37 @@ export async function getProjectWorkspace(
     null;
 
   const quoteIds = quotes.map((q) => q.id);
-  const [linkedVisits, followUpSheets, siteDocs] = await Promise.all([
-    prisma.siteVisit.findMany({
-      where: {
-        organizationId: orgId,
-        OR: [
-          { projectId },
-          ...(quoteIds.length ? [{ commercialQuoteId: { in: quoteIds } }] : []),
-        ],
-      },
-      orderBy: { updatedAt: "desc" },
-      take: 5,
-      select: { id: true, subject: true, status: true, projectId: true, commercialQuoteId: true },
-    }),
-    prisma.followUpSheet.findMany({
-      where: {
-        projectId,
-        status: { not: "ARCHIVE" },
-      },
-      orderBy: { updatedAt: "desc" },
-      take: 5,
-      select: { id: true, title: true, status: true },
-    }),
-    prisma.siteDocument.findMany({
-      where: { organizationId: orgId, projectId, status: { not: "ARCHIVED" } },
-      orderBy: { updatedAt: "desc" },
-      take: 10,
-      select: { id: true, kind: true, title: true, number: true, status: true },
-    }),
-  ]);
+  // Visites liées au devis (complément si pas déjà liées au projet)
+  const linkedVisits =
+    quoteIds.length === 0
+      ? visitsByProject
+      : await (async () => {
+          const extra = await prisma.siteVisit.findMany({
+            where: {
+              organizationId: orgId,
+              projectId: null,
+              commercialQuoteId: { in: quoteIds },
+            },
+            orderBy: { updatedAt: "desc" },
+            take: 5,
+            select: {
+              id: true,
+              subject: true,
+              status: true,
+              projectId: true,
+              commercialQuoteId: true,
+            },
+          });
+          const seen = new Set(visitsByProject.map((v) => v.id));
+          return [
+            ...visitsByProject,
+            ...extra.filter((v) => !seen.has(v.id)),
+          ].slice(0, 5);
+        })();
+
+  if (process.env.BEWORK_PERF_LOG === "1" || process.env.NODE_ENV === "development") {
+    console.info(`[PROJECT PERF] getProjectWorkspace: ${Date.now() - t0}ms`);
+  }
 
   const visit = linkedVisits[0] ?? null;
   let suggestedVisitId: string | null = null;
@@ -981,6 +1015,9 @@ export async function getProjectWorkspace(
     },
   };
 }
+
+/** Dedupée dans le même rendu React (layout + page / Suspense). */
+export const getProjectWorkspace = cache(getProjectWorkspaceUncached);
 
 export async function ensureProjectScope(input: {
   orgId: string;

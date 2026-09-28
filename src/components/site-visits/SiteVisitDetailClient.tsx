@@ -437,6 +437,10 @@ export function SiteVisitDetailClient({
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Échec");
       setVisit(json.visit);
+      const missing = Array.isArray(json.missing) ? (json.missing as string[]) : [];
+      if (body.action === "finish" && missing.length) {
+        setMessage(`Impossible de terminer la visite : ${missing.join(", ")}`);
+      }
       setFinishOpen(false);
       setMissingLabel("");
     } catch (e) {
@@ -1553,6 +1557,10 @@ export function SiteVisitDetailClient({
             >
               Suivant
             </button>
+          ) : visit.status === "TRANSMITTED" || visit.status === "CANCELLED" || visit.status === "READY_TO_QUOTE" ? (
+            <p className="flex h-11 flex-1 items-center justify-center text-[13px] font-semibold text-emerald-800">
+              {visit.statusLabel}
+            </p>
           ) : (
             <button
               type="button"
@@ -1931,36 +1939,19 @@ export function SiteVisitDetailClient({
       ) : null}
 
       {finishOpen ? (
-        <Modal title="Clôturer la visite" onClose={() => setFinishOpen(false)}>
-          {missingOpen.length > 0 ? (
-            <p className="text-[14px] text-amber-900">
-              {missingOpen.length} information
-              {missingOpen.length > 1 ? "s sont" : " est"} encore à confirmer.
-            </p>
-          ) : (
-            <p className="text-[14px] text-slate-700">
-              Aucune information manquante ouverte. Le dossier peut être marqué prêt
-              à chiffrer.
-            </p>
-          )}
+        <Modal title="Terminer la visite" onClose={() => setFinishOpen(false)}>
+          <p className="text-[14px] text-slate-700">
+            Si le dossier est complet, la visite passe à « Prêt à chiffrer ». Sinon elle
+            reste incomplète et les manques sont affichés.
+          </p>
           <div className="mt-4 flex flex-col gap-2">
             <button
               type="button"
               disabled={busy}
-              onClick={() => void action({ action: "finish", mode: "ready" })}
+              onClick={() => void action({ action: "finish" })}
               className="h-12 rounded-xl bg-[#1e3a5f] text-[14px] font-semibold text-white"
             >
-              {missingOpen.length > 0
-                ? "Continuer quand même (prêt à chiffrer)"
-                : "Marquer prête à chiffrer"}
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void action({ action: "finish", mode: "incomplete" })}
-              className="h-11 rounded-xl border border-slate-200 text-[13px] font-semibold text-slate-700"
-            >
-              Conserver comme incomplet
+              Terminer la visite
             </button>
           </div>
         </Modal>

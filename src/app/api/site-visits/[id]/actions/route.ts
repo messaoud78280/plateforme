@@ -41,12 +41,11 @@ export async function POST(
   try {
     const body = await req.json();
     if (body.action === "finish") {
-      const visit = await finishSiteVisit({
+      const result = await finishSiteVisit({
         organizationId: orgId,
         visitId: id,
-        mode: body.mode === "incomplete" ? "incomplete" : "ready",
       });
-      return NextResponse.json({ visit });
+      return NextResponse.json(result);
     }
     if (body.action === "add_missing") {
       const visit = await addMissingInfo({

@@ -14,6 +14,7 @@ import { SITE_VISIT_STATUS_LABELS, normalizeConstraints, parseVisitPrep, type Si
 import { buildVisitSummary } from "@/lib/site-visits/summary";
 import { buildQuoteImpactPoints } from "@/lib/site-visits/impact";
 import { buildVisitCompleteness, hasVisitConstraints } from "@/lib/site-visits/completeness";
+import { assessVisitQuoteReadiness } from "@/lib/site-visits/quote-readiness";
 import { syncSiteVisitAgenda } from "@/lib/site-visits/agenda-sync";
 import {
   parseCommercial,
@@ -275,6 +276,35 @@ export function serializeVisit(
     photoCount: photos.length,
     documentCount: docs.length,
   });
+  const readiness = assessVisitQuoteReadiness({
+    clientName: v.clientName,
+    clientNeed: v.clientNeed,
+    subject: v.subject,
+    siteAddress: v.siteAddress,
+    fieldNotes: prep.fieldNotes,
+    measurementCount: measurements.length,
+    comments: v.comments,
+    hasConstraints: hasVisitConstraints(constraints),
+  });
+  const visitClosed = v.status === "READY_TO_QUOTE" || v.status === "TRANSMITTED";
+  const completenessView = {
+    ...completeness,
+    done: visitClosed ? readiness.total : readiness.done,
+    total: readiness.total,
+    label: visitClosed
+      ? SITE_VISIT_STATUS_LABELS[v.status]
+      : readiness.ready
+        ? "Critères atteints"
+        : readiness.missing.length
+          ? `Manque : ${readiness.missing[0]}`
+          : completeness.label,
+    tone: (v.status === "INCOMPLETE"
+      ? "watch"
+      : readiness.ready
+        ? "ok"
+        : "watch") as "ok" | "watch" | "accent",
+    missingLabels: readiness.missing,
+  };
   const quality = buildVisitQuality({
     clientName: v.clientName,
     siteAddress: v.siteAddress,
@@ -371,11 +401,11 @@ export function serializeVisit(
       createdAt: m.createdAt?.toISOString() ?? null,
     })),
     impactPoints,
-    completeness: {
-      ...completeness,
-      tone: v.status === "INCOMPLETE" ? "watch" : completeness.tone,
-    },
-    primaryAction: primaryActionFor(v.status, quoteHref),
+    completeness: completenessView,
+    primaryAction:
+      readiness.ready && (v.status === "IN_PROGRESS" || v.status === "INCOMPLETE")
+        ? { kind: "continue", label: "Terminer la visite" }
+        : primaryActionFor(v.status, quoteHref),
     createdAt: v.createdAt?.toISOString() ?? null,
     updatedAt: v.updatedAt?.toISOString() ?? null,
     summary,
@@ -833,7 +863,7 @@ export async function updateSiteVisit(opts: {
         ? new Date(d0.scheduledAt)
         : null;
   }
-  if (typeof d0.status === "string") {
+  if (typeof d0.status === "string" && existing.status !== "TRANSMITTED") {
     patch.status = d0.status as SiteVisitStatus;
   } else if (
     existing.status === "TO_PLAN" &&
@@ -1016,7 +1046,6 @@ export async function resolveMissingInfo(opts: {
 export async function finishSiteVisit(opts: {
   organizationId: string;
   visitId: string;
-  mode: "incomplete" | "ready";
 }) {
   const visit = await prisma.siteVisit.findFirst({
     where: { id: opts.visitId, organizationId: opts.organizationId },
@@ -1027,20 +1056,36 @@ export async function finishSiteVisit(opts: {
   }
   if (visit.status === "CANCELLED") throw new Error("Visite annulée");
 
-  const next: SiteVisitStatus =
-    opts.mode === "incomplete" ? "INCOMPLETE" : "READY_TO_QUOTE";
-
-  await prisma.siteVisit.update({
-    where: { id: visit.id },
-    data: { status: next },
+  const measurementCount = await prisma.siteVisitMeasurement.count({
+    where: { visitId: visit.id },
+  });
+  const prep = parseVisitPrep(visit.prepJson);
+  const readiness = assessVisitQuoteReadiness({
+    clientName: visit.clientName,
+    clientNeed: visit.clientNeed,
+    subject: visit.subject,
+    siteAddress: visit.siteAddress,
+    fieldNotes: prep.fieldNotes,
+    measurementCount,
+    comments: visit.comments,
+    hasConstraints: hasVisitConstraints(normalizeConstraints(visit.constraintsJson)),
   });
 
-  if (visit.agendaEventId) {
+  const next: SiteVisitStatus = readiness.ready ? "READY_TO_QUOTE" : "INCOMPLETE";
+  if (visit.status !== next) {
+    await prisma.siteVisit.update({
+      where: { id: visit.id },
+      data: { status: next },
+    });
+  }
+
+  if (readiness.ready && visit.agendaEventId) {
     await prisma.agendaEvent.updateMany({
       where: { id: visit.agendaEventId, organizationId: opts.organizationId },
       data: { status: "TERMINE" },
     });
   }
 
-  return getSiteVisit(opts.organizationId, visit.id);
+  const refreshed = await getSiteVisit(opts.organizationId, visit.id);
+  return { visit: refreshed, missing: readiness.missing };
 }

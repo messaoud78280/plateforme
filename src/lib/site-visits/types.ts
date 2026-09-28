@@ -8,9 +8,9 @@ export const SITE_VISIT_STATUS_LABELS: Record<SiteVisitStatus, string> = {
   TO_PLAN: "À planifier",
   SCHEDULED: "Visite prévue",
   IN_PROGRESS: "Relevé en cours",
-  INCOMPLETE: "Incomplète",
-  READY_TO_QUOTE: "Prête à chiffrer",
-  TRANSMITTED: "Transmise au devis",
+  INCOMPLETE: "Dossier incomplet",
+  READY_TO_QUOTE: "Prêt à chiffrer",
+  TRANSMITTED: "Transmis au devis",
   CANCELLED: "Annulée",
 };
 

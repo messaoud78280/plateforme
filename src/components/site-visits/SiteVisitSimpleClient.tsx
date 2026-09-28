@@ -24,6 +24,7 @@ import {
   snapshotPhotoFiles,
   unsupportedPhotoReason,
 } from "@/lib/site-visits/photo-import";
+import { assessVisitQuoteReadiness } from "@/lib/site-visits/quote-readiness";
 
 type ClientOpt = {
   id: string;
@@ -297,6 +298,17 @@ export function SiteVisitSimpleClient({
     photos: photos.length,
     observations: Boolean(observations.trim()),
   };
+  const readiness = assessVisitQuoteReadiness({
+    clientName,
+    clientNeed: works,
+    subject: works.trim() ? works : visit.subject,
+    siteAddress: address,
+    fieldNotes,
+    measurementCount: visit.measurements.length,
+    comments: observations,
+  });
+  const canFinish =
+    visit.status !== "TRANSMITTED" && visit.status !== "CANCELLED" && visit.status !== "READY_TO_QUOTE";
 
   const markDirty = () => {
     dirty.current = true;
@@ -715,6 +727,32 @@ export function SiteVisitSimpleClient({
       window.location.href = `/api/site-visits/${visit.id}/export-survey?format=zip`;
     } catch {
       /* */
+    }
+  }
+
+  async function finishVisit() {
+    setBusy(true);
+    setMessage(null);
+    try {
+      await patch(buildPayload());
+      const res = await fetch(`/api/site-visits/${visit.id}/actions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "finish" }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Impossible de terminer la visite");
+      setVisit(json.visit);
+      const missing = Array.isArray(json.missing) ? (json.missing as string[]) : [];
+      setMessage(
+        missing.length
+          ? `Impossible de terminer la visite : ${missing.join(", ")}`
+          : "Visite prête à chiffrer",
+      );
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -1541,9 +1579,28 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
               onClick={() => void openPreview()}
               className="h-14 flex-1 rounded-2xl bg-[#1e3a5f] text-[16px] font-semibold text-white shadow-sm"
             >
-              ✨ Générer le compte rendu
+              Générer le compte rendu
             </button>
+            {canFinish ? (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void finishVisit()}
+                className="h-14 flex-1 rounded-2xl border border-[#1e3a5f] bg-white text-[16px] font-semibold text-[#1e3a5f]"
+              >
+                {readiness.ready ? "Marquer prêt à chiffrer" : "Terminer la visite"}
+              </button>
+            ) : (
+              <p className="flex h-14 flex-1 items-center justify-center text-[15px] font-semibold text-emerald-800">
+                {visit.statusLabel}
+              </p>
+            )}
           </div>
+          {previewOpen && readiness.ready && canFinish ? (
+            <p className="text-[13px] text-[#1e3a5f]">
+              Compte rendu prêt — Marquer la visite prête à chiffrer
+            </p>
+          ) : null}
 
           {canCreateQuote && visit.commercialQuoteHref ? (
             <Link
@@ -1577,10 +1634,21 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
               <li className="text-slate-700">
                 Photos : {dossier.photos} photo{dossier.photos > 1 ? "s" : ""}
               </li>
-              <li className={dossier.observations ? "text-emerald-700" : "text-slate-500"}>
-                Observations : {dossier.observations ? "renseignées" : "facultatif"}
+              <li className={dossier.observations ? "text-emerald-700" : "text-amber-800"}>
+                Observations : {dossier.observations ? "renseignées" : "à compléter"}
               </li>
             </ul>
+            <p className="mt-3 text-[12px] font-medium text-slate-600">{visit.statusLabel}</p>
+            {canFinish ? (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void finishVisit()}
+                className="mt-3 flex h-11 w-full items-center justify-center rounded-xl border border-[#1e3a5f] text-[13px] font-semibold text-[#1e3a5f]"
+              >
+                {readiness.ready ? "Marquer prêt à chiffrer" : "Terminer la visite"}
+              </button>
+            ) : null}
             <button
               type="button"
               disabled={busy}

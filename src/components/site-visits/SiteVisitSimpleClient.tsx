@@ -13,6 +13,12 @@ import {
   type MeasureType,
 } from "@/lib/site-visits/measurements";
 import { emptyCommercial, type SiteVisitCommercialInfo } from "@/lib/site-visits/survey-types";
+import {
+  photoImportSummary,
+  siteVisitPhotoSrc,
+  snapshotPhotoFiles,
+  unsupportedPhotoReason,
+} from "@/lib/site-visits/photo-import";
 
 type ClientOpt = {
   id: string;
@@ -188,6 +194,8 @@ export function SiteVisitSimpleClient({
   const [busy, setBusy] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [photoImport, setPhotoImport] = useState<string | null>(null);
+  const [importingPhotos, setImportingPhotos] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [chatgptPreview, setChatgptPreview] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{ url: string; caption: string } | null>(null);
@@ -548,28 +556,58 @@ export function SiteVisitSimpleClient({
     }
   }
 
-  async function uploadPhotos(files: FileList | null) {
-    if (!files?.length) return;
-    setBusy(true);
+  async function uploadPhotos(files: File[]) {
+    if (files.length === 0) return;
+    setImportingPhotos(true);
+    setPhotoImport("Import en cours…");
+    setMessage(null);
+    const failures: string[] = [];
+    let added = 0;
     try {
-      await patch(buildPayload());
       let latest = visit;
-      for (const file of Array.from(files)) {
-        const fd = new FormData();
-        fd.set("file", file);
-        fd.set("kind", "PHOTO");
-        const res = await fetch(`/api/site-visits/${visit.id}/media`, {
-          method: "POST",
-          body: fd,
-        });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || "Upload photo impossible");
-        latest = json.visit;
+      try {
+        latest = await patch(buildPayload());
+      } catch {
+        setPhotoImport(null);
+        return;
       }
-      setVisit(latest);
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Erreur photo");
+      for (const file of files) {
+        const rejected = unsupportedPhotoReason(file);
+        if (rejected) {
+          failures.push(rejected);
+          continue;
+        }
+        try {
+          const fd = new FormData();
+          fd.set("file", file);
+          fd.set("kind", "PHOTO");
+          const res = await fetch(`/api/site-visits/${visit.id}/media`, {
+            method: "POST",
+            body: fd,
+          });
+          const json = (await res.json().catch(() => ({}))) as {
+            error?: string;
+            visit?: Visit;
+          };
+          if (!res.ok || !json.visit) {
+            failures.push(`${file.name} : ${json.error || "échec de l’envoi"}`);
+            continue;
+          }
+          latest = json.visit;
+          added += 1;
+          setVisit(latest);
+        } catch (e) {
+          failures.push(
+            `${file.name} : ${e instanceof Error ? e.message : "échec de l’envoi"}`,
+          );
+        }
+      }
+      const summary = photoImportSummary(added, failures.length);
+      const detail = failures.length ? `${summary}. ${failures[0]}` : summary;
+      setPhotoImport(detail);
+      if (failures.length) setMessage(detail);
     } finally {
+      setImportingPhotos(false);
       setBusy(false);
     }
   }
@@ -1248,8 +1286,9 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
               capture="environment"
               className="hidden"
               onChange={(e) => {
-                void uploadPhotos(e.target.files);
+                const selected = snapshotPhotoFiles(e.target.files);
                 e.target.value = "";
+                void uploadPhotos(selected);
               }}
             />
             <input
@@ -1259,14 +1298,15 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
               multiple
               className="hidden"
               onChange={(e) => {
-                void uploadPhotos(e.target.files);
+                const selected = snapshotPhotoFiles(e.target.files);
                 e.target.value = "";
+                void uploadPhotos(selected);
               }}
             />
             <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
               <button
                 type="button"
-                disabled={busy}
+                disabled={busy || importingPhotos}
                 onClick={() => cameraRef.current?.click()}
                 className="flex h-14 items-center justify-center gap-2 rounded-xl bg-[#1e3a5f] text-[15px] font-semibold text-white"
               >
@@ -1274,29 +1314,44 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
               </button>
               <button
                 type="button"
-                disabled={busy}
+                disabled={busy || importingPhotos}
                 onClick={() => galleryRef.current?.click()}
                 className="flex h-14 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-[15px] font-semibold text-[#1e3a5f]"
               >
                 Importer des images
               </button>
             </div>
+            {photoImport ? (
+              <p
+                className={cn(
+                  "mt-3 rounded-xl px-3 py-2 text-[13px]",
+                  photoImport.startsWith("Import en cours")
+                    ? "bg-slate-100 text-slate-700"
+                    : photoImport.includes("échec") || photoImport.includes("impossible")
+                      ? "bg-amber-50 text-amber-900"
+                      : "bg-emerald-50 text-emerald-800",
+                )}
+              >
+                {photoImport}
+              </p>
+            ) : null}
             {photos.length > 0 ? (
               <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {photos.map((p) => (
+                {photos.map((p) => {
+                  const src = siteVisitPhotoSrc(visit.id, p);
+                  return (
                   <li key={p.id} className="overflow-hidden rounded-xl border border-slate-100">
                     <button
                       type="button"
                       className="block w-full"
                       onClick={() =>
-                        p.fileUrl &&
-                        setLightbox({ url: p.fileUrl, caption: p.caption || p.name })
+                        src && setLightbox({ url: src, caption: p.caption || p.name })
                       }
                     >
-                      {p.fileUrl ? (
+                      {src ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={p.fileUrl}
+                          src={src}
                           alt={p.caption || p.name}
                           className="aspect-square w-full object-cover"
                         />
@@ -1326,7 +1381,8 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
                       </button>
                     </div>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             ) : (
               <p className="mt-3 text-center text-[13px] text-slate-500">

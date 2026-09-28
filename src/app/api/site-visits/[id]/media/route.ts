@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCachedServerSession } from "@/lib/auth/cached-session";
 import { decideApiAccess } from "@/lib/equipe-acces/dashboard-policy";
+import { prisma } from "@/lib/prisma";
 import {
   canAccessSiteVisits,
   resolveSiteVisitsOrgId,
@@ -10,6 +11,12 @@ import {
   updateSiteVisitMedia,
   uploadSiteVisitMedia,
 } from "@/lib/site-visits/media";
+import { createServiceRoleClient } from "@/lib/supabase";
+import {
+  DOCUMENTS_BUCKET,
+  downloadStorageObject,
+  extractStoragePathFromUrl,
+} from "@/lib/storage/supabase-object";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +41,61 @@ async function gate() {
     return { error: NextResponse.json({ error: "Organisation introuvable" }, { status: 404 }) };
   }
   return { session, orgId };
+}
+
+/** Aperçu authentifié : fileUrl est une référence storage://, pas une URL navigateur. */
+export async function GET(
+  req: Request,
+  ctx: { params: Promise<{ id: string }> },
+) {
+  const g = await gate();
+  if ("error" in g && g.error) return g.error;
+  const { orgId } = g as { orgId: string };
+  const { id } = await ctx.params;
+  const mediaId = new URL(req.url).searchParams.get("mediaId") || "";
+  if (!mediaId) {
+    return NextResponse.json({ error: "mediaId requis" }, { status: 400 });
+  }
+
+  const media = await prisma.siteVisitMedia.findFirst({
+    where: { id: mediaId, visitId: id, organizationId: orgId },
+    select: {
+      storagePath: true,
+      fileUrl: true,
+      mimeType: true,
+      name: true,
+    },
+  });
+  if (!media) {
+    return NextResponse.json({ error: "Photo introuvable" }, { status: 404 });
+  }
+
+  const path =
+    media.storagePath ||
+    (media.fileUrl ? extractStoragePathFromUrl(media.fileUrl, DOCUMENTS_BUCKET) : null);
+  if (!path) {
+    return NextResponse.json({ error: "Fichier introuvable" }, { status: 404 });
+  }
+
+  const supabase = createServiceRoleClient();
+  if (!supabase) {
+    return NextResponse.json({ error: "Stockage non configuré" }, { status: 500 });
+  }
+  const downloaded = await downloadStorageObject(supabase, DOCUMENTS_BUCKET, path);
+  if (!downloaded) {
+    return NextResponse.json({ error: "Fichier introuvable" }, { status: 404 });
+  }
+
+  const bytes = Buffer.from(await downloaded.blob.arrayBuffer());
+  const type = media.mimeType || downloaded.contentType || "application/octet-stream";
+  const filename = (media.name || "photo").replace(/["\r\n]/g, "");
+  return new NextResponse(bytes, {
+    headers: {
+      "Content-Type": type,
+      "Content-Disposition": `inline; filename="${filename}"`,
+      "Cache-Control": "private, max-age=300",
+    },
+  });
 }
 
 export async function POST(

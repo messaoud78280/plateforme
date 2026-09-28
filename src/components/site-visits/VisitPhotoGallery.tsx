@@ -8,6 +8,7 @@ import {
   VisitSectionCard,
   visitFieldClass,
 } from "@/components/site-visits/VisitSectionCard";
+import { siteVisitPhotoSrc } from "@/lib/site-visits/photo-import";
 
 export type GalleryPhoto = {
   id: string;
@@ -22,6 +23,7 @@ export type GalleryPhoto = {
 };
 
 type Props = {
+  visitId: string;
   photos: GalleryPhoto[];
   zones: string[];
   caption: string;
@@ -40,6 +42,7 @@ type Props = {
 };
 
 export function VisitPhotoGallery({
+  visitId,
   photos,
   zones,
   caption,
@@ -234,10 +237,10 @@ export function VisitPhotoGallery({
                   onClick={() => setSelectedId(p.id)}
                   className="w-full overflow-hidden rounded-xl border border-slate-100 bg-slate-50 text-left"
                 >
-                  {p.fileUrl ? (
+                  {siteVisitPhotoSrc(visitId, p) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={p.fileUrl}
+                      src={siteVisitPhotoSrc(visitId, p) ?? ""}
                       alt={p.caption || p.name}
                       className="aspect-square w-full object-cover"
                     />
@@ -263,10 +266,10 @@ export function VisitPhotoGallery({
         {selected ? (
           <div className="rounded-xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/5 p-3">
             <div className="flex gap-3">
-              {selected.fileUrl ? (
+              {siteVisitPhotoSrc(visitId, selected) ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={selected.fileUrl}
+                  src={siteVisitPhotoSrc(visitId, selected) ?? ""}
                   alt={selected.caption || selected.name}
                   className="h-24 w-24 shrink-0 rounded-lg object-cover"
                 />

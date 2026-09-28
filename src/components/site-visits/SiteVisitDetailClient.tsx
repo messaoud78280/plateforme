@@ -1213,6 +1213,7 @@ export function SiteVisitDetailClient({
       {step === "medias" ? (
         <>
           <VisitPhotoGallery
+            visitId={visit.id}
             photos={photos}
             zones={visit.zones ?? []}
             caption={mediaCaption}

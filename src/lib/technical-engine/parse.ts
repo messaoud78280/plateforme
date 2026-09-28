@@ -4,7 +4,6 @@
  */
 import { normalizeCivilStartDate } from "@/lib/preparation/schedule/calendar";
 import { normalizePrepUnit } from "@/lib/preparation/units";
-import type { PrepIssue } from "@/lib/preparation/types";
 import { technicalBundleFingerprint } from "@/lib/technical-engine/fingerprint";
 import {
   DEFAULT_PLANNING_WORKING_DAYS,
@@ -47,7 +46,9 @@ export const TECHNICAL_LIMITS = {
   techText: 8000,
 };
 
-export type TechnicalIssue = PrepIssue & {
+export type TechnicalIssue = {
+  path: string;
+  message: string;
   severity: "error" | "warn" | "info";
 };
 

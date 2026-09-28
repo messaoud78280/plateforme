@@ -106,6 +106,10 @@ export function adaptPrepBundleToTechnical(input: unknown): TechnicalBundleV1 {
   const items = Array.isArray(takeoff.items)
     ? takeoff.items.filter(isObj).map((it) => {
         const prov = str(it.provenance);
+        const role: "quote" | "indicator" | "logistics" =
+          it.role === "indicator" || it.role === "logistics" || it.role === "quote"
+            ? it.role
+            : "quote";
         return {
           code: str(it.id) ?? str(it.code) ?? "GEN-01",
           lot: str(it.lot) ?? "GEN",
@@ -115,25 +119,24 @@ export function adaptPrepBundleToTechnical(input: unknown): TechnicalBundleV1 {
           unit: str(it.unit) ?? "u",
           formula: str(it.formula),
           quantity: num(it.declared_quantity ?? it.quantity),
-          role:
-            it.role === "indicator" || it.role === "logistics" || it.role === "quote"
-              ? it.role
-              : ("quote" as const),
+          role,
           provenance: {
             source:
-              prov === "HYPOTHESE"
-                ? ("assumption" as const)
-                : ("plan" as const),
+              (prov === "HYPOTHESE"
+                ? "assumption"
+                : "plan") as "assumption" | "plan",
             confidence:
-              prov === "RELEVE" ? ("confirmed" as const) : ("to_confirm" as const),
+              (prov === "RELEVE" ? "confirmed" : "to_confirm") as
+                | "confirmed"
+                | "to_confirm",
             classification:
-              prov === "HYPOTHESE"
-                ? ("ASSUMED" as const)
+              (prov === "HYPOTHESE"
+                ? "ASSUMED"
                 : str(it.formula)
-                  ? ("CALCULATED" as const)
-                  : ("TO_CONFIRM" as const),
+                  ? "CALCULATED"
+                  : "TO_CONFIRM") as "ASSUMED" | "CALCULATED" | "TO_CONFIRM",
           },
-          warnings: [],
+          warnings: [] as string[],
         };
       })
     : [];
@@ -155,45 +158,57 @@ export function adaptPrepBundleToTechnical(input: unknown): TechnicalBundleV1 {
     : [];
 
   const workflowSteps = workflow && Array.isArray(workflow.steps)
-    ? workflow.steps.filter(isObj).map((st, i) => ({
-        id: str(st.id) ?? `P${String(i + 1).padStart(2, "0")}`,
-        order: num(st.order) ?? i + 1,
-        name: str(st.name) ?? `Étape ${i + 1}`,
-        lot: str(st.lot),
-        kind:
+    ? workflow.steps.filter(isObj).map((st, i) => {
+        const kind: "work" | "control" | "wait" =
           st.kind === "control" || st.kind === "wait" || st.kind === "work"
             ? st.kind
-            : ("work" as const),
-        description: str(st.description),
-        takeoff_ids: Array.isArray(st.takeoff_ids)
-          ? st.takeoff_ids.filter((x): x is string => typeof x === "string")
-          : [],
-        prerequisites: Array.isArray(st.preconditions)
-          ? st.preconditions.filter((x): x is string => typeof x === "string")
-          : [],
-        controls: Array.isArray(st.controls_before_next)
-          ? st.controls_before_next.filter((x): x is string => typeof x === "string")
-          : [],
-        duration: st.duration,
-      }))
+            : "work";
+        return {
+          id: str(st.id) ?? `P${String(i + 1).padStart(2, "0")}`,
+          order: num(st.order) ?? i + 1,
+          name: str(st.name) ?? `Étape ${i + 1}`,
+          lot: str(st.lot),
+          kind,
+          description: str(st.description),
+          takeoff_ids: Array.isArray(st.takeoff_ids)
+            ? st.takeoff_ids.filter((x): x is string => typeof x === "string")
+            : [],
+          prerequisites: Array.isArray(st.preconditions)
+            ? st.preconditions.filter((x): x is string => typeof x === "string")
+            : [],
+          controls: Array.isArray(st.controls_before_next)
+            ? st.controls_before_next.filter((x): x is string => typeof x === "string")
+            : [],
+          duration: st.duration,
+        };
+      })
     : [];
 
   const scheduleTasks =
     schedule && Array.isArray(schedule.tasks)
-      ? schedule.tasks.filter(isObj).map((t) => ({
-          step_id: str(t.step_id) ?? "",
-          depends_on: Array.isArray(t.depends_on)
-            ? t.depends_on.filter(isObj).map((d) => ({
-                step_id: str(d.step_id) ?? "",
-                type:
-                  d.type === "SS" || d.type === "FF" || d.type === "FS"
-                    ? d.type
-                    : ("FS" as const),
-                lag_days: num(d.lag_days) ?? 0,
-              }))
-            : [],
-          include_in_base: t.include_in_base !== false,
-        })).filter((t) => t.step_id)
+      ? schedule.tasks
+          .filter(isObj)
+          .map((t) => {
+            const depends_on = Array.isArray(t.depends_on)
+              ? t.depends_on.filter(isObj).map((d) => {
+                  const type: "FS" | "SS" | "FF" =
+                    d.type === "SS" || d.type === "FF" || d.type === "FS"
+                      ? d.type
+                      : "FS";
+                  return {
+                    step_id: str(d.step_id) ?? "",
+                    type,
+                    lag_days: num(d.lag_days) ?? 0,
+                  };
+                })
+              : [];
+            return {
+              step_id: str(t.step_id) ?? "",
+              depends_on,
+              include_in_base: t.include_in_base !== false,
+            };
+          })
+          .filter((t) => t.step_id)
       : [];
 
   let workingDays = [...DEFAULT_PLANNING_WORKING_DAYS];

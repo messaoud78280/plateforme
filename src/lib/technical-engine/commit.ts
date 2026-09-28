@@ -80,7 +80,17 @@ export async function commitTechnicalImport(input: {
 
   const parsed = parseTechnicalJsonText(input.raw);
   if (!parsed.ok) {
-    throw new PrepError("Le JSON technique contient des erreurs bloquantes", 422, parsed.issues);
+    throw new PrepError(
+      "Le JSON technique contient des erreurs bloquantes",
+      422,
+      parsed.issues
+        .filter((i) => i.severity === "error" || i.severity === "warn")
+        .map((i) => ({
+          path: i.path,
+          message: i.message,
+          severity: i.severity as "error" | "warn",
+        })),
+    );
   }
   const tech = parsed.bundle;
 

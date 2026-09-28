@@ -651,8 +651,6 @@ async function getProjectWorkspaceUncached(
       projectId: true,
       scopeId: true,
       status: true,
-      isDemonstration: true,
-      subject: true,
     },
     orderBy: { updatedAt: "desc" },
   });

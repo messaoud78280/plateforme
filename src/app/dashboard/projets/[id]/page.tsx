@@ -64,10 +64,12 @@ import {
   ChantierDossierDeferred,
   ChantierDossierSkeleton,
 } from "@/components/chantier/ChantierDossierDeferred";
+import type { ChantierFolderWithFiles } from "@/components/chantier/ChantierDossierSection";
 import {
   ProjectProfitabilityDeferred,
   ProjectProfitabilitySkeleton,
 } from "@/components/chantier/ProjectProfitabilityDeferred";
+import { CHANTIER_FILE_STATUS_LABELS } from "@/lib/chantier-dossier/constants";
 export default async function ProjetDetailPage({
   params,
 }: {
@@ -255,8 +257,6 @@ export default async function ProjetDetailPage({
   const isAgenceRole =
     session.user.role === "AGENCE" || session.user.role === "MANAGER";
 
-  const syncBanner: { synced: number } | null = null;
-
   const orphanMissions = isAgenceRole
     ? await findOrphanMissionDocumentsForProject(id).catch(() => [])
     : [];
@@ -371,7 +371,7 @@ export default async function ProjetDetailPage({
     `[PROJECT PERF] heavy parallel (folders/pilotage/…).: ${Date.now() - tHeavy}ms`,
   );
 
-  const dossierFolders = chantierFolders.map((folder) => ({
+  const dossierFolders: ChantierFolderWithFiles[] = chantierFolders.map((folder) => ({
     id: folder.id,
     code: folder.code,
     label: folder.label,
@@ -386,10 +386,12 @@ export default async function ProjetDetailPage({
         fileUrl: f.fileUrl,
         mimeType: f.mimeType,
         documentType: f.documentType,
-        status: f.status,
+        status: f.status as keyof typeof CHANTIER_FILE_STATUS_LABELS,
         comment: f.comment,
         createdAt: f.createdAt.toISOString(),
-        addedBy: f.addedBy,
+        addedBy: f.addedBy
+          ? { name: f.addedBy.name?.trim() || "—" }
+          : null,
         visibility: f.visibility,
       })),
   }));
@@ -570,12 +572,6 @@ export default async function ProjetDetailPage({
         </p>
       ) : null}
       {!isExternalViewer ? <SiteDocumentsEntryCard projectId={project.id} /> : null}
-      {syncBanner ? (
-        <p className="rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800">
-          {syncBanner.synced} pièce{syncBanner.synced > 1 ? "s" : ""} importée
-          {syncBanner.synced > 1 ? "s" : ""} depuis les missions liées à ce chantier.
-        </p>
-      ) : null}
       <ChantierOrphanMissionBanner projectId={id} orphans={orphanMissions} />
       <Suspense fallback={<ChantierDossierSkeleton />}>
         <ChantierDossierDeferred

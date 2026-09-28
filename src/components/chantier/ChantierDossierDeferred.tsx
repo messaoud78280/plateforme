@@ -1,24 +1,7 @@
 import { loadDocumentHub } from "@/lib/ged/document-hub";
 import { ChantierDossierSection } from "@/components/chantier/ChantierDossierSection";
+import type { ChantierFolderWithFiles } from "@/components/chantier/ChantierDossierSection";
 import type { Session } from "next-auth";
-
-type FolderRow = {
-  id: string;
-  code: string;
-  label: string;
-  files: Array<{
-    id: string;
-    name: string;
-    fileUrl: string;
-    mimeType: string | null;
-    documentType: string | null;
-    status: string;
-    comment: string | null;
-    createdAt: string;
-    addedBy: { name: string | null } | null;
-    visibility: string;
-  }>;
-};
 
 /** GED hub — chargé en Suspense (ne bloque pas le shell chantier). */
 export async function ChantierDossierDeferred({
@@ -30,7 +13,7 @@ export async function ChantierDossierDeferred({
 }: {
   projectId: string;
   projectTitle: string;
-  folders: FolderRow[];
+  folders: ChantierFolderWithFiles[];
   canEdit: boolean;
   user: {
     id: string;

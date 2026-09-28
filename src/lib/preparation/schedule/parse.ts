@@ -1,6 +1,7 @@
 /**
  * Parsing défensif des JSON resources / workflow / schedule PrepStudy.
  */
+import { normalizeCivilStartDate } from "@/lib/preparation/schedule/calendar";
 import type {
   PrepDependencyType,
   PrepDurationComputed,
@@ -256,7 +257,7 @@ export function parsePrepSchedule(raw: unknown): PrepScheduleDTO | null {
   }
 
   return {
-    start_date: str(raw.start_date),
+    start_date: normalizeCivilStartDate(str(raw.start_date)),
     start_date_provenance: str(raw.start_date_provenance),
     calendar,
     tasks,

@@ -13,6 +13,7 @@ import {
   parsePrepSchedule,
   parsePrepWorkflowSteps,
 } from "@/lib/preparation/schedule/parse";
+import { normalizeCivilStartDate } from "@/lib/preparation/schedule/calendar";
 import {
   computeSchedule,
   type PlacedTask,
@@ -44,8 +45,8 @@ export type SchedulePreviewTask = {
   includeInBase: boolean;
   holdPoint: boolean;
   conditional: boolean;
-  startDate: string;
-  endDate: string;
+  startDate: string | null;
+  endDate: string | null;
   startHalf: number;
   endHalf: number;
   durationDays: number;
@@ -477,15 +478,18 @@ export async function commitPrepSchedule(input: {
             revisionKind: "INITIAL",
             revisionNumber: 1,
             startDate: computed.startDate ? new Date(computed.startDate) : null,
-            endDateBase: computed.baseEnd ? new Date(computed.baseEnd.date) : null,
-            endDateWithConditional: computed.placed.length
-              ? new Date(
-                  computed.placed.reduce(
-                    (a, t) => (t.endDate > a ? t.endDate : a),
-                    computed.placed[0]!.endDate,
-                  ),
-                )
-              : null,
+            endDateBase:
+              computed.startDate && computed.baseEnd
+                ? new Date(computed.baseEnd.date)
+                : null,
+            endDateWithConditional: (() => {
+              if (!computed.startDate) return null;
+              const ends = computed.placed
+                .map((t) => t.endDate)
+                .filter((x): x is string => Boolean(x));
+              if (!ends.length) return null;
+              return new Date(ends.reduce((a, b) => (b > a ? b : a)));
+            })(),
             baseDurationWorkingDays: computed.baseDurationWorkingDays,
             withConditionalWorkingDays: computed.withConditionalDurationWorkingDays,
             studyVersionAtGeneration: study.version,
@@ -554,8 +558,8 @@ export async function commitPrepSchedule(input: {
               conditionalJson: t.conditionalConditions.length
                 ? t.conditionalConditions
                 : undefined,
-              startDate: new Date(t.startDate),
-              endDate: new Date(t.endDate),
+              startDate: t.startDate ? new Date(t.startDate) : null,
+              endDate: t.endDate ? new Date(t.endDate) : null,
               startHalf: t.start.half,
               endHalf: t.end.half,
               durationMode:
@@ -824,9 +828,7 @@ export type SchedulePlanViewPayload = {
 };
 
 function asIsoDate(v: Date | string | null | undefined): string | null {
-  if (!v) return null;
-  if (typeof v === "string") return v.slice(0, 10);
-  return v.toISOString().slice(0, 10);
+  return normalizeCivilStartDate(v);
 }
 
 function asStringList(raw: unknown): string[] {

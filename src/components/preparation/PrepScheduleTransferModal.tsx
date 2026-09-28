@@ -226,7 +226,9 @@ export function PrepScheduleTransferModal({ studyId, open, onClose }: Props) {
               <div className="grid gap-2 sm:grid-cols-3">
                 <div className="rounded-xl border border-[#1e3a5f]/10 bg-white px-3 py-2">
                   <p className="text-[11px] text-slate-500">Démarrage</p>
-                  <p className="font-semibold text-[#1e3a5f]">{preview.startDate ?? "—"}</p>
+                  <p className="font-semibold text-[#1e3a5f]">
+                    {preview.startDate ?? "Date de démarrage à définir"}
+                  </p>
                 </div>
                 <div className="rounded-xl border border-[#1e3a5f]/10 bg-white px-3 py-2">
                   <p className="text-[11px] text-slate-500">Durée de base</p>
@@ -297,7 +299,9 @@ export function PrepScheduleTransferModal({ studyId, open, onClose }: Props) {
                           <span className="mt-0.5 block text-[12px] text-slate-600">
                             {t.durationDays} j {t.durationCalendar === "calendar" ? "calendaires" : "ouvrés"}
                             {" · "}
-                            {t.startDate} → {t.endDate}
+                            {t.startDate && t.endDate
+                              ? `${t.startDate} → ${t.endDate}`
+                              : "Dates à définir"}
                             {t.quantity != null
                               ? ` · ${formatQty(t.quantity)} ${t.quantityUnit ?? ""}`
                               : ""}

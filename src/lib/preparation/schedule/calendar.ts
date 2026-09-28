@@ -18,6 +18,27 @@ export function toIsoDate(d: Date): string {
   return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
 }
 
+/**
+ * Date civile de démarrage planning utilisable (YYYY-MM-DD).
+ * Rejette null, chaînes invalides et le sentinelle historique 1970-01-01
+ * (jamais affiché ni persisté comme date métier).
+ */
+export function normalizeCivilStartDate(
+  value: string | Date | null | undefined,
+): string | null {
+  if (value == null) return null;
+  const iso =
+    typeof value === "string"
+      ? value.trim().slice(0, 10)
+      : toIsoDate(value);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+  // Epoch Unix / sentinelle historique — traité comme « à définir ».
+  if (iso <= "1970-01-01") return null;
+  const y = Number(iso.slice(0, 4));
+  if (!Number.isFinite(y) || y < 1990 || y > 2100) return null;
+  return iso;
+}
+
 export function parseIsoDate(iso: string): Date {
   const [y, m, day] = iso.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, day));

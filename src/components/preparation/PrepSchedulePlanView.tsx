@@ -17,6 +17,11 @@ function asIso(d: string | null): string {
   return d.slice(0, 10);
 }
 
+function asStartLabel(d: string | null): string {
+  if (!d) return "Date de démarrage à définir";
+  return d.slice(0, 10);
+}
+
 function euro(n: number | null): string {
   if (n == null) return "—";
   return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
@@ -35,6 +40,8 @@ export function PrepSchedulePlanView({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [quoteModal, setQuoteModal] = useState(false);
   const [quoteChoice, setQuoteChoice] = useState<string>("");
+  const [startDraft, setStartDraft] = useState("");
+  const [startOpen, setStartOpen] = useState(false);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/prep-studies/${studyId}/schedule/${planId}`);
@@ -81,6 +88,26 @@ export function PrepSchedulePlanView({
       if (!res.ok) throw new Error(data?.error ?? "Liaison impossible");
       setPlan(data.plan);
       setQuoteModal(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function applyStartDate() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/prep-studies/${studyId}/set-start-date`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ startDate: startDraft, planId }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error ?? "Date de démarrage impossible");
+      setStartOpen(false);
+      await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
     } finally {
@@ -197,7 +224,7 @@ export function PrepSchedulePlanView({
       ) : null}
 
       <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 xl:grid-cols-6">
-        <Kpi label="Démarrage" value={asIso(plan.startDate)} />
+        <Kpi label="Démarrage" value={asStartLabel(plan.startDate)} />
         <Kpi label="Fin de base" value={asIso(plan.endDateBase)} />
         <Kpi
           label="A · Charge de travail cumulée"
@@ -220,6 +247,62 @@ export function PrepSchedulePlanView({
           hint="Somme des tâches d'attente (ex. cure)"
         />
       </div>
+
+      {!plan.startDate || startOpen ? (
+        <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3">
+          <div>
+            <p className="text-[12px] font-medium text-amber-950">
+              {plan.startDate
+                ? "Modifier la date de démarrage"
+                : "Date de démarrage à définir"}
+            </p>
+            <p className="mt-0.5 text-[11px] text-amber-900/80">
+              Recalcule les dates civiles sans recréer les tâches, le métré ni le devis.
+            </p>
+          </div>
+          <label className="text-[12px] text-slate-700">
+            Date
+            <input
+              type="date"
+              className="ml-2 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-[13px]"
+              value={startDraft}
+              onChange={(e) => setStartDraft(e.target.value)}
+              min="1990-01-01"
+              max="2100-12-31"
+            />
+          </label>
+          <button
+            type="button"
+            disabled={busy || !startDraft}
+            onClick={() => void applyStartDate()}
+            className="rounded-xl bg-[#1e3a5f] px-3 py-1.5 text-[12.5px] font-semibold text-white disabled:opacity-50"
+          >
+            Définir la date de démarrage
+          </button>
+          {plan.startDate && startOpen ? (
+            <button
+              type="button"
+              className="text-[12px] text-slate-600 underline"
+              onClick={() => setStartOpen(false)}
+            >
+              Annuler
+            </button>
+          ) : null}
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            className="rounded-xl border border-[#1e3a5f]/20 bg-white px-3 py-1.5 text-[12.5px] font-medium text-[#1e3a5f]"
+            onClick={() => {
+              setStartDraft(plan.startDate ?? "");
+              setStartOpen(true);
+            }}
+          >
+            Modifier la date de démarrage
+          </button>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#1e3a5f]/10 bg-white px-4 py-3 text-[13px]">
         <span className="text-slate-500">Devis rattaché</span>

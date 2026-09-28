@@ -105,7 +105,11 @@ export function PrepScheduleTaskPanel({
         <Section title="Planning">
           <Row
             label="Dates"
-            value={`${task.startDate ?? "—"} → ${task.endDate ?? "—"}`}
+            value={
+              task.startDate && task.endDate
+                ? `${task.startDate} → ${task.endDate}`
+                : "Dates à définir (démarrer le planning)"
+            }
           />
           <Row
             label="Créneaux"

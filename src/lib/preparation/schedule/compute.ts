@@ -11,6 +11,7 @@ import {
   endInstantAfterWorkingDays,
   instantAfterEnd,
   nextWorkingHalf,
+  normalizeCivilStartDate,
   type CalendarConfig,
   type Instant,
 } from "@/lib/preparation/schedule/calendar";
@@ -54,8 +55,9 @@ export type PlacedTask = {
   conditionalConditions: string[];
   start: Instant;
   end: Instant;
-  startDate: string;
-  endDate: string;
+  /** Date civile ISO — null si aucune date de démarrage n’a été fournie (jamais 1970). */
+  startDate: string | null;
+  endDate: string | null;
   duration: ComputedTaskDuration;
   crew: PrepWorkflowStepDTO["crew"];
   equipment: PrepWorkflowStepDTO["equipment"];
@@ -220,9 +222,11 @@ export function computeSchedule(input: {
   const errors: string[] = [];
   const stepById = new Map(input.workflowSteps.map((s) => [s.id, s]));
   const scheduleTasks = input.schedule.tasks.filter((t) => stepById.has(t.step_id));
+  const startIso = normalizeCivilStartDate(input.schedule.start_date);
+
   if (!scheduleTasks.length) {
     return {
-      startDate: input.schedule.start_date,
+      startDate: startIso,
       placed: [],
       baseEnd: null,
       baseDurationWorkingDays: null,
@@ -232,7 +236,6 @@ export function computeSchedule(input: {
     };
   }
 
-  const startIso = input.schedule.start_date;
   const year = startIso ? Number(startIso.slice(0, 4)) : new Date().getFullYear();
   const cfg: CalendarConfig = {
     workingDays: input.schedule.calendar.working_days,
@@ -262,9 +265,12 @@ export function computeSchedule(input: {
     };
   }
 
-  const planStart: Instant = startIso
-    ? nextWorkingHalf({ date: startIso, half: 0 }, cfg)
-    : { date: "1970-01-01", half: 0 };
+  // Ancre relative interne uniquement — jamais exposée ni persistée comme date civile.
+  const RELATIVE_ANCHOR = "2000-01-03"; // lundi fixe, calendrier FR
+  const hasCivilStart = Boolean(startIso);
+  const planStart: Instant = hasCivilStart
+    ? nextWorkingHalf({ date: startIso!, half: 0 }, cfg)
+    : { date: RELATIVE_ANCHOR, half: 0 };
 
   const placedMap = new Map<string, PlacedTask>();
   const schedById = new Map(scheduleTasks.map((t) => [t.step_id, t]));
@@ -394,8 +400,8 @@ export function computeSchedule(input: {
       conditionalConditions: step.conditional?.conditions ?? [],
       start,
       end,
-      startDate: start.date,
-      endDate: end.date,
+      startDate: hasCivilStart ? start.date : null,
+      endDate: hasCivilStart ? end.date : null,
       duration,
       crew: step.crew,
       equipment: step.equipment,
@@ -428,14 +434,13 @@ export function computeSchedule(input: {
     return maxInstant(acc, t.end);
   }, null);
 
-  const baseDurationWorkingDays =
-    startIso && baseEnd
-      ? countWorkingDaysInclusive(planStart, baseEnd, cfg)
-      : null;
-  const withConditionalDurationWorkingDays =
-    startIso && allEnd
-      ? countWorkingDaysInclusive(planStart, allEnd, cfg)
-      : null;
+  // Durées relatives calculables même sans date civile de démarrage.
+  const baseDurationWorkingDays = baseEnd
+    ? countWorkingDaysInclusive(planStart, baseEnd, cfg)
+    : null;
+  const withConditionalDurationWorkingDays = allEnd
+    ? countWorkingDaysInclusive(planStart, allEnd, cfg)
+    : null;
 
   return {
     startDate: startIso,

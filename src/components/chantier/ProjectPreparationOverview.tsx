@@ -65,14 +65,14 @@ export function ProjectPreparationOverview({
 
   function metreBlockReason(): string | null {
     if (workspace.global.metre.ready) return null;
-    if (!canEdit) return "Action réservée à l’équipe chantier";
+    if (!canEdit) return "Modification du chantier non autorisée";
     if (!quoteId) return "Un devis est requis avant de générer le métré";
     return null;
   }
 
   function planningBlockReason(): string | null {
     if (workspace.global.planning.ready) return null;
-    if (!canEdit) return "Action réservée à l’équipe chantier";
+    if (!canEdit) return "Modification du chantier non autorisée";
     if (!workspace.global.metre.ready) {
       return "Générez d’abord le métré";
     }
@@ -123,7 +123,7 @@ export function ProjectPreparationOverview({
     if (!canEdit) {
       return {
         mode: "blocked",
-        reason: "Action réservée à l’équipe chantier",
+        reason: "Modification du chantier non autorisée",
         busyLabel: null,
       };
     }

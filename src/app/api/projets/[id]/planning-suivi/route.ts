@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
-import { isBeworkStaff } from "@/lib/authz";
 import {
   ensurePlanningSuivi,
   listPlanningSuiviTasks,
@@ -78,9 +77,6 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
-  if (!isBeworkStaff(session.user)) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
-  }
   const { id: projectId } = await ctx.params;
   const project = await resolve(projectId, session.user);
   if (!project?.organizationId) {
@@ -110,9 +106,6 @@ export async function PATCH(req: Request, ctx: Ctx) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-  }
-  if (!isBeworkStaff(session.user)) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
   const { id: projectId } = await ctx.params;
   const project = await resolve(projectId, session.user);

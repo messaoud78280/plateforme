@@ -891,7 +891,7 @@ export default async function ProjetDetailPage({
           <ProjectPreparationDeferred
             organizationId={project.organizationId}
             projectId={id}
-            canEdit={isStaff}
+            canEdit={canEditDossier}
             hasResponsible={!!responsibleLabel}
             missingDocumentsCount={missingCount}
           />

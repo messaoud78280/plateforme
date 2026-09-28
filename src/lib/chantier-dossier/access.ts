@@ -33,6 +33,18 @@ export async function canAccessChantierProject(
   return { ok: false as const, project: null };
 }
 
+/**
+ * Droit de préparer / modifier le dossier chantier
+ * (métré, planning, suivi, CR, notice, lots…).
+ * Même périmètre que l’accès chantier : pas de filtre staff supplémentaire.
+ */
+export async function canModifyChantierProject(
+  user: SessionUser,
+  projectId: string | null | undefined,
+) {
+  return canAccessChantierProject(user, projectId);
+}
+
 /** Suppression du chantier : client propriétaire ou direction BeWork (pas les agents seuls). */
 export function canDeleteChantierProject(
   user: SessionUser,

@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import type { SiteDocumentKind } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { canAccessChantierProject, isChantierStaff } from "@/lib/chantier-dossier/access";
+import { canAccessChantierProject, canModifyChantierProject } from "@/lib/chantier-dossier/access";
 import { ensureOrganizationForOwner } from "@/lib/organization/access";
 
 export type SiteDocAuth =
@@ -74,9 +74,10 @@ export async function requireSiteDocumentAccess(
     }
   }
 
-  const canWrite = isChantierStaff(session.user.role);
+  const modify = await canModifyChantierProject(session.user, projectId);
+  const canWrite = modify.ok;
   if (opts?.requireWrite && !canWrite) {
-    return { ok: false, status: 403, error: "Écriture réservée à l’équipe chantier" };
+    return { ok: false, status: 403, error: "Modification du chantier non autorisée" };
   }
 
   return {

@@ -10,6 +10,15 @@ import {
   primaryPrepSource,
   resolvePrepPlanSource,
 } from "@/lib/preparation/plan-source";
+import {
+  extractVisitSearchBits,
+  isGlobalStudySources,
+  pickBestPlan,
+  pickSuggestedVisitId,
+  resolvePrepSchedulePlanForWorkspace,
+  resolvePrepStudyForWorkspace,
+  workspaceOpenOrGenerateLabel,
+} from "@/lib/chantier/resolve-workspace-entities";
 
 export type SyncState =
   | "A_JOUR"
@@ -140,13 +149,6 @@ export type ProjectWorkspace = {
     items: UnscopedItem[];
   };
 };
-
-const GLOBAL_STUDY_KIND = "bework_global_metre_v1";
-
-function isGlobalStudySources(sourcesJson: unknown): boolean {
-  if (!sourcesJson || typeof sourcesJson !== "object") return false;
-  return (sourcesJson as { kind?: string }).kind === GLOBAL_STUDY_KIND;
-}
 
 function asIso(v: Date | string | null | undefined): string | null {
   if (!v) return null;
@@ -656,62 +658,18 @@ async function getProjectWorkspaceUncached(
     }),
   );
 
-  // Lecture robuste : global (scopeId null) OU référence de lot OU unique study projet.
-  // Ne crée rien, ne modifie aucun scopeId.
+  // Lecture robuste centralisée (CAS global + scopé) — aucune mutation.
   const studyById = (id: string | null | undefined) =>
     id ? studies.find((s) => s.id === id) ?? null : null;
   const planById = (id: string | null | undefined) =>
     id ? plans.find((p) => p.id === id) ?? null : null;
 
-  const globalStudy =
-    studies.find((s) => isGlobalStudySources(s.sourcesJson) && !s.scopeId) ??
-    studies.find((s) => !s.scopeId) ??
-    (() => {
-      for (const sc of scopes) {
-        const hit = studyById(sc.referenceStudyId);
-        if (hit) return hit;
-      }
-      return null;
-    })() ??
-    (studies.length === 1 ? studies[0]! : null);
-
-  const plansForStudy = (studyId: string | null | undefined) =>
-    studyId ? plans.filter((p) => p.studyId === studyId) : [];
-
-  const pickPlanFromList = (
-    list: typeof plans,
-  ): (typeof plans)[number] | null => {
-    if (list.length === 0) return null;
-    return (
-      list.find(
-        (p) => p.status === "CURRENT" || p.revisionKind === "CURRENT",
-      ) ??
-      list.find((p) => p.status !== "ARCHIVED") ??
-      list[0] ??
-      null
-    );
-  };
-
-  const globalPlan =
-    pickPlanFromList(
-      plans.filter(
-        (p) =>
-          p.scopeId == null &&
-          (!globalStudy || p.studyId === globalStudy.id),
-      ),
-    ) ??
-    pickPlanFromList(plansForStudy(globalStudy?.id)) ??
-    (() => {
-      for (const sc of scopes) {
-        const hit = planById(sc.referenceSchedulePlanId);
-        if (hit) return hit;
-      }
-      return null;
-    })() ??
-    (() => {
-      const active = plans.filter((p) => p.status !== "ARCHIVED");
-      return active.length === 1 ? active[0]! : null;
-    })();
+  const globalStudy = resolvePrepStudyForWorkspace({ studies, scopes });
+  const globalPlan = resolvePrepSchedulePlanForWorkspace({
+    plans,
+    scopes,
+    study: globalStudy,
+  });
 
   const referencedQuoteIds = new Set(
     scopes.map((s) => s.referenceQuoteId).filter((id): id is string => Boolean(id)),
@@ -762,24 +720,11 @@ async function getProjectWorkspaceUncached(
   const visit = linkedVisits[0] ?? null;
   let suggestedVisitId: string | null = null;
   if (!visit) {
-    const titleBits = project.title
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .split(/[^a-z0-9]+/)
-      .filter((w) => w.length >= 5 && !["construction", "renovation", "maison", "individuelle", "complete", "demo"].includes(w))
-      .slice(0, 6);
-    const addressBits = [project.siteAddress, project.siteCity]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .split(/[^a-z0-9]+/)
-      .filter((w) => w.length >= 4)
-      .slice(0, 4);
-
-    const searchBits = [...new Set([...titleBits, ...addressBits])].slice(0, 8);
+    const searchBits = extractVisitSearchBits({
+      title: project.title,
+      siteAddress: project.siteAddress,
+      siteCity: project.siteCity,
+    });
     if (searchBits.length > 0) {
       const candidates = await prisma.siteVisit.findMany({
         where: {
@@ -802,18 +747,7 @@ async function getProjectWorkspaceUncached(
           siteName: true,
         },
       });
-      const minHits = Math.min(2, searchBits.length);
-      const match = candidates.find((c) => {
-        const blob =
-          `${c.subject ?? ""} ${c.clientNeed ?? ""} ${c.siteAddress ?? ""} ${c.siteName ?? ""}`
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
-        const hits = searchBits.filter((b) => blob.includes(b));
-        return hits.length >= minHits;
-      });
-      // Jamais de fallback « premier candidat » — évite les faux positifs (ex. cuisine).
-      suggestedVisitId = match?.id ?? null;
+      suggestedVisitId = pickSuggestedVisitId({ searchBits, candidates });
     }
   }
 
@@ -930,7 +864,10 @@ async function getProjectWorkspaceUncached(
       detail: globalMetreCard.detail,
       href: globalMetreCard.href,
       ready: globalMetreCard.ready,
-      actionLabel: globalMetreCard.ready ? "Ouvrir" : "Générer depuis la visite",
+      actionLabel: workspaceOpenOrGenerateLabel(
+        globalMetreCard.ready,
+        "Générer depuis la visite",
+      ),
       primaryAction: globalMetreCard.ready ? "open" : "create_global_prep",
     },
     {
@@ -940,7 +877,10 @@ async function getProjectWorkspaceUncached(
       detail: globalDevisCard.detail,
       href: globalDevisCard.href,
       ready: globalDevisCard.ready,
-      actionLabel: globalDevisCard.ready ? "Ouvrir" : "Créer un devis",
+      actionLabel: workspaceOpenOrGenerateLabel(
+        globalDevisCard.ready,
+        "Créer un devis",
+      ),
       primaryAction: "open",
     },
     {
@@ -950,7 +890,10 @@ async function getProjectWorkspaceUncached(
       detail: globalPlanningCard.detail,
       href: globalPlanningCard.href,
       ready: globalPlanningCard.ready,
-      actionLabel: globalPlanningCard.ready ? "Ouvrir" : "Générer le planning",
+      actionLabel: workspaceOpenOrGenerateLabel(
+        globalPlanningCard.ready,
+        "Générer le planning",
+      ),
       primaryAction: globalPlanningCard.ready ? "open" : "create_global_prep",
     },
     {
@@ -1033,7 +976,7 @@ async function getProjectWorkspaceUncached(
     );
     const refPlan =
       planById(scope.referenceSchedulePlanId) ??
-      pickPlanFromList(scopePlans) ??
+      pickBestPlan(scopePlans) ??
       (refStudy && globalPlan && globalPlan.studyId === refStudy.id
         ? globalPlan
         : null) ??

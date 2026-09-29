@@ -5,14 +5,6 @@ import type { BeworkPatchSection } from "@/lib/bework-patch/types";
 import type { SectionPatchCapability } from "@/lib/bework-patch/capability";
 import type { BeworkPatchAnalyzeResult } from "@/lib/bework-patch/analyze";
 import type { AnalyzePatchImpactResult } from "@/lib/bework-patch/impact/types";
-import {
-  canDelegateToPrepPatch,
-  toLegacyPrepPatch,
-} from "@/lib/bework-patch/adapters/prep";
-import {
-  canDelegateToQuotePatch,
-  toLegacyQuotePatch,
-} from "@/lib/bework-patch/adapters/quote";
 
 type Props = {
   open: boolean;
@@ -28,7 +20,40 @@ type Props = {
   onApplied: () => void;
 };
 
-type Step = "paste" | "result" | "success" | "failure";
+type Step = "paste" | "result" | "confirm" | "success" | "failure";
+
+type CommitMeta = {
+  fingerprint: string;
+  eligibility:
+    | {
+        ok: true;
+        mode: "FULL_SYNC" | "SAFE_PARTIAL_SYNC" | "QUOTE_ONLY";
+        buttonLabel: string;
+        warnings: string[];
+      }
+    | { ok: false; reason: string; code: string };
+  versions: {
+    study: number | null;
+    quoteVersion: number | null;
+    planRevision: number | null;
+  };
+};
+
+type CommitSuccess = {
+  syncMode: string;
+  message: string;
+  summary: {
+    takeoffUpdated: boolean;
+    quoteUpdated: boolean;
+    planningUpdated: boolean;
+    quoteProtected: boolean;
+  };
+  versionsAfter: {
+    study: number | null;
+    quoteVersion: number | null;
+    planRevision: number | null;
+  };
+};
 
 export function BeworkPatchModal({
   open,
@@ -39,7 +64,6 @@ export function BeworkPatchModal({
   version,
   capability,
   entityLabel,
-  legacyCommit = null,
   onClose,
   onApplied,
 }: Props) {
@@ -47,12 +71,16 @@ export function BeworkPatchModal({
   const [rawText, setRawText] = useState("");
   const [busy, setBusy] = useState(false);
   const [analysis, setAnalysis] = useState<BeworkPatchAnalyzeResult | null>(null);
+  const [commitMeta, setCommitMeta] = useState<CommitMeta | null>(null);
+  const [commitSuccess, setCommitSuccess] = useState<CommitSuccess | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
 
   const reset = useCallback(() => {
     setStep("paste");
     setRawText("");
     setAnalysis(null);
+    setCommitMeta(null);
+    setCommitSuccess(null);
     setBanner(null);
   }, []);
 
@@ -74,6 +102,8 @@ export function BeworkPatchModal({
   async function analyze() {
     setBusy(true);
     setBanner(null);
+    setCommitMeta(null);
+    setCommitSuccess(null);
     try {
       const res = await fetch("/api/bework-patch/analyze", {
         method: "POST",
@@ -93,6 +123,7 @@ export function BeworkPatchModal({
         return;
       }
       setAnalysis(data.analysis as BeworkPatchAnalyzeResult);
+      setCommitMeta((data.commit as CommitMeta) ?? null);
       setStep("result");
     } catch {
       setBanner("Erreur réseau lors de l’analyse.");
@@ -102,68 +133,41 @@ export function BeworkPatchModal({
     }
   }
 
-  async function applyLegacy() {
-    if (!analysis?.canCommit || !analysis.patch || !legacyCommit) return;
+  async function confirmCommit() {
+    if (!commitMeta?.eligibility || !("ok" in commitMeta.eligibility) || !commitMeta.eligibility.ok) {
+      return;
+    }
     setBusy(true);
     setBanner(null);
     try {
-      if (legacyCommit.kind === "quote") {
-        // Prefer universal → legacy conversion, else raw if already quote patch
-        let raw: unknown = rawText;
-        if (canDelegateToQuotePatch(analysis.patch)) {
-          const del = toLegacyQuotePatch(analysis.patch);
-          if (!del.ok) {
-            setBanner(del.errors[0]?.message ?? "Conversion devis impossible");
-            return;
-          }
-          // Enrich quote number from entity label if needed
-          del.quotePatch.target.quoteNumber =
-            entityLabel?.trim() || del.quotePatch.target.quoteNumber;
-          raw = del.quotePatch;
-        }
-        const res = await fetch(
-          `/api/commercial/quotes/${legacyCommit.id}/chatgpt-patch/commit`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ raw, forceVersionMismatch: false }),
-          },
+      const res = await fetch("/api/bework-patch/commit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          raw: rawText,
+          projectId,
+          previewFingerprint: commitMeta.fingerprint,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setBanner(
+          data?.error ??
+            "Synchronisation annulée. Aucune donnée n’a été modifiée.",
         );
-        const data = await res.json().catch(() => null);
-        if (!res.ok) {
-          setBanner(data?.error ?? "Application devis impossible");
-          setStep("failure");
-          return;
-        }
-      } else {
-        let raw: unknown = rawText;
-        if (canDelegateToPrepPatch(analysis.patch)) {
-          const del = toLegacyPrepPatch(analysis.patch);
-          if (!del.ok) {
-            setBanner(del.errors[0]?.message ?? "Conversion métré impossible");
-            return;
-          }
-          raw = del.prepPatch;
-        }
-        const res = await fetch(
-          `/api/prep-studies/${legacyCommit.id}/chatgpt-patch/commit`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ raw }),
-          },
-        );
-        const data = await res.json().catch(() => null);
-        if (!res.ok) {
-          setBanner(data?.error ?? "Application métré impossible");
-          setStep("failure");
-          return;
-        }
+        setStep("failure");
+        return;
       }
+      setCommitSuccess({
+        syncMode: data.syncMode,
+        message: data.message,
+        summary: data.summary,
+        versionsAfter: data.versionsAfter,
+      });
       setStep("success");
       onApplied();
     } catch {
-      setBanner("Erreur réseau lors de l’application.");
+      setBanner("Synchronisation annulée. Aucune donnée n’a été modifiée.");
       setStep("failure");
     } finally {
       setBusy(false);
@@ -172,6 +176,7 @@ export function BeworkPatchModal({
 
   const title =
     mode === "chatgpt" ? "Modifier avec ChatGPT" : "Modifier par bloc JSON";
+  const elig = commitMeta?.eligibility;
 
   return (
     <div
@@ -205,7 +210,7 @@ export function BeworkPatchModal({
         </div>
 
         <div className="space-y-4 px-5 py-4">
-          {capability.mode === "PREVIEW_ONLY" && capability.label ? (
+          {capability.mode === "PREVIEW_ONLY" && capability.label && !elig?.ok ? (
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12.5px] text-amber-950">
               {capability.label}
             </div>
@@ -263,66 +268,40 @@ export function BeworkPatchModal({
           {step === "result" && analysis ? (
             <>
               <div className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-[12.5px] text-sky-950">
-                Simulation uniquement — aucune écriture · aucune propagation réelle.
+                Analyse Impact Engine — fingerprint recalculé au commit.
               </div>
 
               {analysis.errors.length ? (
-                <IssueBlock title="Erreurs" tone="error" items={analysis.errors.map((e) => `${e.code} — ${e.message}`)} />
+                <IssueBlock
+                  title="Erreurs"
+                  tone="error"
+                  items={analysis.errors.map((e) => `${e.code} — ${e.message}`)}
+                />
               ) : null}
               {analysis.warnings.length ? (
-                <IssueBlock title="Avertissements" tone="warn" items={analysis.warnings.map((w) => `${w.code} — ${w.message}`)} />
-              ) : null}
-              {analysis.infos.length ? (
-                <IssueBlock title="Infos" tone="info" items={analysis.infos} />
+                <IssueBlock
+                  title="Avertissements"
+                  tone="warn"
+                  items={analysis.warnings.map((w) => `${w.code} — ${w.message}`)}
+                />
               ) : null}
 
               {analysis.impact ? (
                 <ImpactPreview impact={analysis.impact} />
               ) : (
-                <>
-                  <div>
-                    <h3 className="text-[13px] font-semibold text-[#1e3a5f]">
-                      Modifications demandées (directes)
-                    </h3>
-                    {analysis.directChanges.length === 0 ? (
-                      <p className="mt-1 text-[12.5px] text-slate-500">Aucune</p>
-                    ) : (
-                      <ul className="mt-2 space-y-2">
-                        {analysis.directChanges.map((c, i) => (
-                          <li
-                            key={i}
-                            className="rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 text-[12.5px]"
-                          >
-                            <p className="font-semibold text-slate-800">{c.op}</p>
-                            <p className="text-slate-600">{c.targetSummary}</p>
-                            <p className="mt-0.5 font-mono text-[11.5px] text-emerald-800">
-                              {c.changesSummary}
-                            </p>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                  {analysis.potentialImpacts.length ? (
-                    <div className="rounded-xl border border-dashed border-slate-300 bg-white px-3 py-2">
-                      <h3 className="text-[13px] font-semibold text-slate-700">
-                        Impacts potentiels détectés
-                      </h3>
-                      <p className="mt-1 text-[11.5px] font-medium text-amber-800">
-                        Propagation non activée dans cette phase.
-                      </p>
-                      <ul className="mt-2 space-y-1 text-[12.5px] text-slate-600">
-                        {analysis.potentialImpacts.map((p, i) => (
-                          <li key={i}>
-                            <span className="font-medium text-slate-800">{p.kind}</span>{" "}
-                            — {p.label} · {p.detail}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                </>
+                <p className="text-[13px] text-slate-500">
+                  Impact Engine non disponible pour cette section.
+                </p>
               )}
+
+              {elig && !elig.ok ? (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12.5px] text-amber-950">
+                  Commit indisponible : {elig.reason}
+                </div>
+              ) : null}
+              {elig && elig.ok && elig.warnings.length ? (
+                <IssueBlock title="Avant commit" tone="warn" items={elig.warnings} />
+              ) : null}
 
               {banner ? <p className="text-[13px] text-red-700">{banner}</p> : null}
 
@@ -338,42 +317,120 @@ export function BeworkPatchModal({
                 >
                   Retour
                 </button>
-                {analysis.canCommit && legacyCommit ? (
+                {elig && elig.ok ? (
                   <button
                     type="button"
                     className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
-                    disabled={busy || !analysis.ok}
-                    onClick={() => void applyLegacy()}
+                    disabled={busy}
+                    onClick={() => setStep("confirm")}
                   >
-                    {busy ? "Application…" : "Appliquer (entité seule)"}
+                    {elig.buttonLabel}
                   </button>
                 ) : (
-                  <span className="self-center text-[12px] font-medium text-amber-800">
-                    Simulation uniquement
-                  </span>
+                  <button
+                    type="button"
+                    className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[13px] font-medium text-slate-400"
+                    disabled
+                    title={elig && !elig.ok ? elig.reason : "Commit non disponible"}
+                  >
+                    Appliquer et synchroniser
+                  </button>
                 )}
               </div>
             </>
           ) : null}
 
-          {step === "success" ? (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] text-emerald-900">
-              Modification appliquée.
-              <div className="mt-3">
+          {step === "confirm" && elig && elig.ok ? (
+            <>
+              <div className="rounded-xl border border-[#1e3a5f]/20 bg-[#1e3a5f]/5 px-4 py-3">
+                <h3 className="text-[14px] font-semibold text-[#1e3a5f]">
+                  Vous allez modifier
+                </h3>
+                <ul className="mt-2 space-y-1 text-[13px] text-slate-700">
+                  {analysis?.impact?.directChanges.map((d, i) => (
+                    <li key={i}>
+                      {d.label} : {fmtVal(d.before)} → {fmtVal(d.after)}
+                      {d.unit ? ` ${d.unit}` : ""}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-[12.5px] text-slate-600">
+                  Mode : <strong>{elig.mode}</strong> — opération appliquée en une
+                  transaction.
+                </p>
+                {elig.mode === "SAFE_PARTIAL_SYNC" ? (
+                  <p className="mt-2 text-[12.5px] font-medium text-amber-900">
+                    Ce n’est pas une synchronisation totale : les éléments protégés
+                    restent intacts.
+                  </p>
+                ) : null}
+              </div>
+              <div className="flex flex-wrap justify-end gap-2">
                 <button
                   type="button"
-                  className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-[13px] font-semibold text-white"
-                  onClick={onClose}
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-[13px]"
+                  disabled={busy}
+                  onClick={() => setStep("result")}
                 >
-                  Fermer
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
+                  disabled={busy}
+                  onClick={() => void confirmCommit()}
+                >
+                  {busy ? "Application…" : "Confirmer"}
                 </button>
               </div>
+            </>
+          ) : null}
+
+          {step === "success" && commitSuccess ? (
+            <div className="space-y-3">
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] text-emerald-900">
+                {commitSuccess.message}
+              </div>
+              <ul className="space-y-1 text-[13px] text-slate-700">
+                <li>
+                  Métré {commitSuccess.summary.takeoffUpdated ? "✓" : "—"}
+                  {commitSuccess.versionsAfter.study != null
+                    ? ` · v${commitSuccess.versionsAfter.study}`
+                    : ""}
+                </li>
+                <li>
+                  Devis{" "}
+                  {commitSuccess.summary.quoteProtected
+                    ? "contractuel conservé ⚠"
+                    : commitSuccess.summary.quoteUpdated
+                      ? "✓"
+                      : "—"}
+                  {commitSuccess.versionsAfter.quoteVersion != null
+                    ? ` · v${commitSuccess.versionsAfter.quoteVersion}`
+                    : ""}
+                </li>
+                <li>
+                  Planning {commitSuccess.summary.planningUpdated ? "✓" : "—"}
+                  {commitSuccess.versionsAfter.planRevision != null
+                    ? ` · rev ${commitSuccess.versionsAfter.planRevision}`
+                    : ""}
+                </li>
+              </ul>
+              <button
+                type="button"
+                className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-[13px] font-semibold text-white"
+                onClick={onClose}
+              >
+                Fermer
+              </button>
             </div>
           ) : null}
 
           {step === "failure" ? (
             <div className="space-y-3">
-              <p className="text-[13px] text-red-700">{banner ?? "Échec"}</p>
+              <p className="text-[13px] text-red-700">
+                {banner ?? "Synchronisation annulée. Aucune donnée n’a été modifiée."}
+              </p>
               <button
                 type="button"
                 className="rounded-lg border border-slate-200 px-3 py-2 text-[13px]"
@@ -440,7 +497,15 @@ function ImpactPreview({ impact }: { impact: AnalyzePatchImpactResult }) {
       <Section title="Donnée canonique">
         <p className="text-[12.5px] text-slate-700">
           Résolution :{" "}
-          <span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${certaintyBadge(cr.status === "EXACT" ? "CERTAIN" : cr.status === "PARTIAL" ? "PARTIAL" : "NONE")}`}>
+          <span
+            className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${certaintyBadge(
+              cr.status === "EXACT"
+                ? "CERTAIN"
+                : cr.status === "PARTIAL"
+                  ? "PARTIAL"
+                  : "NONE",
+            )}`}
+          >
             {cr.status}
           </span>
           {cr.resolved_to ? ` · ${cr.resolved_to}` : ""}
@@ -453,17 +518,15 @@ function ImpactPreview({ impact }: { impact: AnalyzePatchImpactResult }) {
       </Section>
 
       {takeoff.length ? (
-        <Section title="Recalculs certains (métré)">
+        <Section title="Recalculs métré">
           <DerivedList items={takeoff} />
         </Section>
       ) : null}
-
       {quote.length ? (
         <Section title="Devis impacté">
           <DerivedList items={quote} />
         </Section>
       ) : null}
-
       {planning.length ? (
         <Section title="Planning impacté">
           <DerivedList items={planning} />
@@ -478,45 +541,16 @@ function ImpactPreview({ impact }: { impact: AnalyzePatchImpactResult }) {
             {impact.protectedEntities.map((p, i) => (
               <li key={i}>
                 <strong>{p.label}</strong> — {p.reason}
-                {p.gap
-                  ? ` (écart ${fmtVal(p.gap.current)} → ${fmtVal(p.gap.wouldBe)}${p.gap.unit ? ` ${p.gap.unit}` : ""})`
-                  : ""}
               </li>
             ))}
           </ul>
         )}
       </Section>
-
-      {impact.overrides.length ? (
-        <Section title="Overrides détectés">
-          <ul className="space-y-1 text-[12.5px] text-amber-950">
-            {impact.overrides.map((o, i) => (
-              <li key={i}>
-                {o.message} (métré {fmtVal(o.metreQty)} · transfert {fmtVal(o.transferQty)} ·
-                devis {fmtVal(o.currentQty)})
-              </li>
-            ))}
-          </ul>
-        </Section>
-      ) : null}
-
-      <p className="text-[11px] text-slate-500">
-        Sections affectées :{" "}
-        {impact.impactSummary.affectedSections.join(", ") || "aucune"} · CERTAIN{" "}
-        {impact.impactSummary.certainCount} · PARTIAL {impact.impactSummary.partialCount} ·
-        POTENTIAL {impact.impactSummary.potentialCount}
-      </p>
     </div>
   );
 }
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
       <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500">

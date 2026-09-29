@@ -143,6 +143,9 @@ export type ImpactQuote = {
   id: string;
   number: string;
   status: string;
+  /** versionNumber de CommercialQuoteVersion courante (DRAFT in-place = stable). */
+  versionNumber: number;
+  versionId: string;
   lines: ImpactQuoteLine[];
 };
 

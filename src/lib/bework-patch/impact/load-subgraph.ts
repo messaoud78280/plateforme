@@ -169,6 +169,8 @@ export async function loadImpactSubgraph(input: {
           status: true,
           currentVersion: {
             select: {
+              id: true,
+              versionNumber: true,
               lines: {
                 select: {
                   id: true,
@@ -189,6 +191,8 @@ export async function loadImpactSubgraph(input: {
         id: q.id,
         number: q.number,
         status: q.status,
+        versionNumber: q.currentVersion?.versionNumber ?? 1,
+        versionId: q.currentVersion?.id ?? "",
         lines: (q.currentVersion?.lines ?? []).map((l) => ({
           id: l.id,
           designation: l.designation,
@@ -298,6 +302,8 @@ export async function loadImpactSubgraph(input: {
         status: true,
         currentVersion: {
           select: {
+            id: true,
+            versionNumber: true,
             lines: {
               select: {
                 id: true,
@@ -320,6 +326,8 @@ export async function loadImpactSubgraph(input: {
           id: quote.id,
           number: quote.number,
           status: quote.status,
+          versionNumber: quote.currentVersion?.versionNumber ?? 1,
+          versionId: quote.currentVersion?.id ?? "",
           lines: (quote.currentVersion?.lines ?? []).map((l) => ({
             id: l.id,
             designation: l.designation,

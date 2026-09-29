@@ -3,14 +3,15 @@ import { requirePrepApiContext, prepErrorResponse } from "@/lib/preparation/acce
 import { analyzeBeworkPatchInput } from "@/lib/bework-patch/analyze";
 import { buildUniversalPatchContext } from "@/lib/bework-patch/build-context";
 import { loadImpactSubgraph } from "@/lib/bework-patch/impact/load-subgraph";
-import { BEWORK_PATCH_SECTIONS, type BeworkPatchSection } from "@/lib/bework-patch/types";
 import { parseBeworkPatch } from "@/lib/bework-patch/parse";
+import { buildCommitPreviewMeta } from "@/lib/bework-patch/commit/commit-universal";
+import { BEWORK_PATCH_SECTIONS, type BeworkPatchSection } from "@/lib/bework-patch/types";
 
 export const dynamic = "force-dynamic";
 
 /**
  * POST { raw, projectId?, entityId?, section?, currentVersion? }
- * Analyse universelle + Impact Engine V1 — aucune écriture.
+ * Analyse + Impact + fingerprint/eligibility — aucune écriture.
  */
 export async function POST(req: Request) {
   const guard = await requirePrepApiContext();
@@ -77,12 +78,22 @@ export async function POST(req: Request) {
       subgraph,
     });
 
+    let commitMeta = null;
+    if (parsed.ok && result.impact && subgraph) {
+      commitMeta = buildCommitPreviewMeta({
+        patch: parsed.patch,
+        impact: result.impact,
+        subgraph,
+      });
+    }
+
     return NextResponse.json({
       analysis: result,
+      commit: commitMeta,
       meta: {
         simulationOnly: true,
         canPropagate: false,
-        phase: "D",
+        phase: "E",
       },
     });
   } catch (e) {

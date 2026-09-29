@@ -71,6 +71,8 @@ export function buildFixtureSubgraph54(opts?: {
         id: FIXTURE_QUOTE_ID,
         number: "DEV-2026-0153",
         status: opts?.quoteStatus ?? "DRAFT",
+        versionNumber: 1,
+        versionId: "qv_1",
         lines: [
           {
             id: FIXTURE_QUOTE_LINE_ID,

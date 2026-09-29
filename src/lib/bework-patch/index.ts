@@ -82,6 +82,13 @@ export {
   loadImpactSubgraph,
 } from "@/lib/bework-patch/impact";
 
+export {
+  commitUniversalPatch,
+  buildCommitPreviewMeta,
+} from "@/lib/bework-patch/commit/commit-universal";
+
+export { evaluateCommitEligibility } from "@/lib/bework-patch/commit/eligibility";
+
 export type {
   AnalyzePatchImpactResult,
   DirectChange,

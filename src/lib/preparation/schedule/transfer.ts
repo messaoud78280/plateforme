@@ -802,6 +802,7 @@ export type SchedulePlanViewPayload = {
   watermark: string | null;
   status: string;
   revisionKind: string;
+  revisionNumber: number;
   startDate: string | null;
   endDateBase: string | null;
   endDateWithConditional: string | null;
@@ -1059,6 +1060,7 @@ export async function buildPrepSchedulePlanPayload(
     watermark: plan.watermark,
     status: plan.status,
     revisionKind: plan.revisionKind,
+    revisionNumber: plan.revisionNumber,
     startDate,
     endDateBase,
     endDateWithConditional: asIsoDate(plan.endDateWithConditional),

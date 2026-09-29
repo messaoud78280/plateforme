@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
+import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
+import { getSectionCapability } from "@/lib/bework-patch/capability";
 import {
   DEFAULT_REMINDER_OFFSETS_HOURS,
   POSTIT_COLORS,
@@ -250,6 +252,22 @@ export function FollowUpDetailClient({
             {sheet.siteAddress && <p className="mt-1 text-xs text-slate-600">{sheet.siteAddress}</p>}
           </div>
           <FollowUpMessagerieLink projectId={sheet.projectId} />
+        </div>
+        <div className="mt-3">
+          {sheet.projectId ? (
+            <BeworkPatchToolbar
+              section="FOLLOW_UP"
+              projectId={sheet.projectId}
+              entityId={sheet.id}
+              version={1}
+              capability={getSectionCapability("FOLLOW_UP")}
+              entityLabel={sheet.title}
+            />
+          ) : (
+            <p className="text-[11px] text-slate-500">
+              Liez un chantier pour activer la modification ChatGPT / JSON.
+            </p>
+          )}
         </div>
 
         {/* Infos essentielles — visibles immédiatement */}

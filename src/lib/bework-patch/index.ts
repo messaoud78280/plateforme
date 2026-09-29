@@ -1,6 +1,6 @@
 /**
- * bework_patch_v1 — façade Phase B (parse / validate / adapters).
- * Aucune écriture DB · aucune propagation.
+ * bework_patch_v1 — façade Phase B/C (parse / validate / adapters / capability).
+ * Aucune écriture DB · aucune propagation cross-module en Phase C.
  */
 
 export {
@@ -34,7 +34,11 @@ export {
   type BeworkPatchIssue,
 } from "@/lib/bework-patch/errors";
 
-export { OPERATION_CATALOG, supportedOperationsForSection, intentsForSection } from "@/lib/bework-patch/operations-catalog";
+export {
+  OPERATION_CATALOG,
+  supportedOperationsForSection,
+  intentsForSection,
+} from "@/lib/bework-patch/operations-catalog";
 
 export { parseBeworkPatch, type ParseBeworkPatchResult } from "@/lib/bework-patch/parse";
 
@@ -60,3 +64,15 @@ export {
   canDelegateToPrepPatch,
   toLegacyPrepPatch,
 } from "@/lib/bework-patch/adapters/prep";
+
+export {
+  getSectionCapability,
+  SECTION_PATCH_CAPABILITY,
+  type PatchCapabilityMode,
+  type SectionPatchCapability,
+} from "@/lib/bework-patch/capability";
+
+export {
+  analyzeBeworkPatchInput,
+  type BeworkPatchAnalyzeResult,
+} from "@/lib/bework-patch/analyze";

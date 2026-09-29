@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { SiteDocChatGptModal } from "@/components/site-documents/SiteDocChatGptModal";
+import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
+import { getSectionCapability } from "@/lib/bework-patch/capability";
 import { siteVisitPhotoSrc } from "@/lib/site-visits/photo-import";
 import {
   emptyPpspsPayload,
@@ -247,6 +249,18 @@ export function SiteDocumentEditor({
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            {canWrite && (doc.kind === "COMPTE_RENDU" || doc.kind === "NOTICE") ? (
+              <BeworkPatchToolbar
+                section={doc.kind === "NOTICE" ? "NOTICE" : "REPORT"}
+                projectId={projectId}
+                entityId={doc.id}
+                version={doc.versionNumber}
+                capability={getSectionCapability(
+                  doc.kind === "NOTICE" ? "NOTICE" : "REPORT",
+                )}
+                entityLabel={doc.number || doc.title}
+              />
+            ) : null}
             {canWrite ? (
               <>
                 <button

@@ -39,7 +39,8 @@ import {
 } from "./prep-ui";
 import { PrepImportModal, type PrepProjectOption } from "./PrepImportModal";
 import { PrepLineTechSheetPanel } from "./PrepLineTechSheetPanel";
-import { PrepChatGptPatchModal } from "./PrepChatGptPatchModal";
+import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
+import { getSectionCapability } from "@/lib/bework-patch/capability";
 import { PrepQuoteTransferModal } from "./PrepQuoteTransferModal";
 import { PrepScheduleTransferModal } from "./PrepScheduleTransferModal";
 import {
@@ -103,38 +104,11 @@ export function PrepStudyWorkspace({
   const [busy, setBusy] = useState(false);
   const [flash, setFlash] = useState<Flash>(null);
   const [importOpen, setImportOpen] = useState(false);
-  const [patchOpen, setPatchOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [confirmUndo, setConfirmUndo] = useState(false);
   const [confirmUndoPatch, setConfirmUndoPatch] = useState(false);
-  const [contextBusy, setContextBusy] = useState(false);
-
-  async function copyMetreContext() {
-    setContextBusy(true);
-    setFlash(null);
-    try {
-      const q = new URLSearchParams({ studyId: study.id });
-      const res = await fetch(
-        `/api/projets/${study.project.id}/metre-context?${q.toString()}`,
-      );
-      const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error ?? "Contexte indisponible");
-      const text = JSON.stringify(data, null, 2);
-      await navigator.clipboard.writeText(text);
-      setFlash({
-        tone: "ok",
-        text: "Contexte métré copié — collez-le dans ChatGPT, puis importez le JSON.",
-      });
-    } catch (e) {
-      setFlash({
-        tone: "error",
-        text: e instanceof Error ? e.message : "Copie impossible",
-      });
-    } finally {
-      setContextBusy(false);
-    }
-  }
+  const takeoffPatchCapability = getSectionCapability("TAKEOFF");
 
   const params = useMemo<PrepParamDTO[]>(
     () =>
@@ -582,22 +556,24 @@ export function PrepStudyWorkspace({
           >
             Générer un devis depuis ce métré
           </button>
-          <button
-            type="button"
-            disabled={busy || dirty || contextBusy}
-            onClick={() => setPatchOpen(true)}
-            className="rounded-full border border-[#1e3a5f]/20 bg-white px-4 py-2 text-[13px] font-medium text-[#1e3a5f] disabled:opacity-50"
-          >
-            ✨ Modifier avec ChatGPT
-          </button>
-          <button
-            type="button"
-            disabled={busy || contextBusy}
-            onClick={() => void copyMetreContext()}
-            className="rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-[13px] font-medium text-indigo-900 disabled:opacity-50"
-          >
-            {contextBusy ? "Copie…" : "Copier le contexte pour ChatGPT"}
-          </button>
+          <BeworkPatchToolbar
+            section="TAKEOFF"
+            projectId={study.project.id}
+            entityId={study.id}
+            version={study.version}
+            capability={takeoffPatchCapability}
+            entityLabel={study.title}
+            legacyCommit={{ kind: "prep", id: study.id }}
+            disabled={busy || dirty}
+            disabledReason={
+              dirty
+                ? "Enregistrez ou annulez vos modifications avant"
+                : null
+            }
+            onApplied={() => {
+              window.location.reload();
+            }}
+          />
           <button
             type="button"
             disabled={busy || dirty}
@@ -926,19 +902,6 @@ export function PrepStudyWorkspace({
           target={{ studyId: study.id, title: study.title, projectId: study.project.id }}
           onClose={() => setImportOpen(false)}
           onImported={() => window.location.reload()}
-        />
-      ) : null}
-
-      {patchOpen ? (
-        <PrepChatGptPatchModal
-          studyId={study.id}
-          studyTitle={study.title}
-          open={patchOpen}
-          onClose={() => setPatchOpen(false)}
-          onApplied={(next) => {
-            setStudy(next);
-            setFlash({ tone: "ok", text: "Modifications ChatGPT appliquées — quantités recalculées si nécessaire." });
-          }}
         />
       ) : null}
 

@@ -11,6 +11,8 @@ import { formatQty } from "@/lib/preparation/units";
 import type { SchedulePlanViewPayload } from "@/lib/preparation/schedule/transfer";
 import { PrepScheduleGantt } from "./PrepScheduleGantt";
 import { PrepScheduleTaskPanel } from "./PrepScheduleTaskPanel";
+import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
+import { getSectionCapability } from "@/lib/bework-patch/capability";
 
 function asIso(d: string | null): string {
   if (!d) return "—";
@@ -207,6 +209,14 @@ export function PrepSchedulePlanView({
           >
             Voir le métré
           </Link>
+          <BeworkPatchToolbar
+            section="PLANNING"
+            projectId={plan.project.id}
+            entityId={plan.id}
+            version={plan.revisionNumber}
+            capability={getSectionCapability("PLANNING")}
+            entityLabel={plan.title}
+          />
         </div>
       </header>
 

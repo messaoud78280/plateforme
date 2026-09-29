@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 import type { SuiviTaskRow, ExecutionStatus } from "@/lib/chantier/planning-suivi";
+import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
+import { getSectionCapability } from "@/lib/bework-patch/capability";
 
 const STATUS_OPTS: Array<{ id: ExecutionStatus; label: string }> = [
   { id: "NOT_STARTED", label: "Non démarrée" },
@@ -113,12 +115,22 @@ export function PlanningSuiviClient({
         </div>
         <div className="flex flex-wrap gap-2">
           {plan ? (
-            <Link
-              href={`/dashboard/visites-metres/etudes/${plan.studyId}/planning/${plan.id}`}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-slate-700"
-            >
-              Ouvrir le Gantt
-            </Link>
+            <>
+              <BeworkPatchToolbar
+                section="FOLLOW_UP"
+                projectId={projectId}
+                entityId={plan.id}
+                version={1}
+                capability={getSectionCapability("FOLLOW_UP")}
+                entityLabel={plan.title}
+              />
+              <Link
+                href={`/dashboard/visites-metres/etudes/${plan.studyId}/planning/${plan.id}`}
+                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-slate-700"
+              >
+                Ouvrir le Gantt
+              </Link>
+            </>
           ) : null}
           <Link
             href={`/dashboard/projets/${projectId}`}

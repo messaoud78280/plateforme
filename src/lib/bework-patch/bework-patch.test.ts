@@ -468,3 +468,91 @@ function baseOrigin(section: string, entity = "ent_1") {
 }
 
 console.log("ok — bework_patch Phase B (tests 1–15)");
+
+// --- Phase C : capability + analyze preview-only ---
+import {
+  analyzeBeworkPatchInput,
+  getSectionCapability,
+  SECTION_PATCH_CAPABILITY,
+} from "@/lib/bework-patch/index";
+
+{
+  assert.equal(getSectionCapability("QUOTE").mode, "AVAILABLE");
+  assert.equal(getSectionCapability("TAKEOFF").mode, "AVAILABLE");
+  assert.equal(getSectionCapability("PLANNING").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("VISIT").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("FOLLOW_UP").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("REPORT").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("NOTICE").mode, "PREVIEW_ONLY");
+  for (const [section, cap] of Object.entries(SECTION_PATCH_CAPABILITY)) {
+    if (cap.mode === "PREVIEW_ONLY") {
+      assert.ok(cap.label, `${section} doit exposer un label preview`);
+    }
+  }
+  console.log("ok — Phase C capabilities");
+}
+
+{
+  const result = analyzeBeworkPatchInput({
+    raw: {
+      type: "bework_patch_v1",
+      schema_version: 1,
+      patch_id: "patch_plan_preview",
+      origin: baseOrigin("PLANNING", "plan_1"),
+      change_intent: "PLANNING_ADJUSTMENT",
+      reason: "Ajustement durée",
+      operations: [
+        {
+          op: "update_duration",
+          target: {
+            entity_type: "PREP_SCHEDULE_TASK",
+            plan_id: "plan_1",
+            task_id: "t1",
+            step_code: "ELEC-01",
+          },
+          changes: { duration_days: 3 },
+        },
+      ],
+    },
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.capability.mode, "PREVIEW_ONLY");
+  assert.equal(result.canCommit, false);
+  assert.equal(result.directChanges.length, 1);
+  console.log("ok — Phase C PLANNING preview-only (pas de commit)");
+}
+
+{
+  const result = analyzeBeworkPatchInput({
+    raw: {
+      type: "bework_patch_v1",
+      schema_version: 1,
+      patch_id: "patch_quote_avail",
+      origin: baseOrigin("QUOTE", "quote_1"),
+      change_intent: "COMMERCIAL_ADJUSTMENT",
+      reason: "PU",
+      operations: [
+        {
+          op: "update_quote_item",
+          target: {
+            entity_type: "QUOTE_ITEM",
+            quote_id: "quote_1",
+            item_id: "line_1",
+          },
+          changes: { unit_price_ht: 42 },
+        },
+      ],
+    },
+    snapshot: {
+      organizationId: "org",
+      projectId: "proj_1",
+      currentVersion: 4,
+    },
+  });
+  assert.equal(result.capability.mode, "AVAILABLE");
+  assert.equal(result.legacyDelegate, "quote");
+  assert.equal(result.canCommit, true);
+  console.log("ok — Phase C QUOTE available + legacy");
+}
+
+console.log("ok — bework_patch Phase C");

@@ -28,7 +28,8 @@ import { QuoteDepositPanel } from "@/components/commercial/QuoteDepositPanel";
 import { QuoteProrataPanel } from "@/components/commercial/QuoteProrataPanel";
 import { LibraryPickerModal } from "@/components/commercial/LibraryPickerModal";
 import { ChatGptBundleImportModal } from "@/components/commercial/ChatGptBundleImportModal";
-import { ChatGptPatchImportModal } from "@/components/commercial/ChatGptPatchImportModal";
+import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
+import { getSectionCapability } from "@/lib/bework-patch/capability";
 import { QuoteClientNotesPreview } from "@/components/commercial/QuoteClientNotesPreview";
 import { IssuerEditModal } from "@/components/commercial/IssuerEditModal";
 import { ClientCoordsEditModal } from "@/components/commercial/ClientCoordsEditModal";
@@ -232,10 +233,10 @@ export function QuoteEditor({
   const [chatgptImportOpen, setChatgptImportOpen] = useState(false);
   const [chatgptImportUndo, setChatgptImportUndo] = useState(false);
   const [chatgptUndoBusy, setChatgptUndoBusy] = useState(false);
-  const [chatgptPatchOpen, setChatgptPatchOpen] = useState(false);
   const [chatgptPatchUndo, setChatgptPatchUndo] = useState(false);
   const [chatgptPatchUndoBusy, setChatgptPatchUndoBusy] = useState(false);
   const [chatgptToast, setChatgptToast] = useState<string | null>(null);
+  const quotePatchCapability = getSectionCapability("QUOTE");
   const [issuerEditOpen, setIssuerEditOpen] = useState(false);
   const [clientCoordsOpen, setClientCoordsOpen] = useState(false);
   const [lineNumericDrafts, setLineNumericDrafts] = useState<
@@ -1059,40 +1060,33 @@ export function QuoteEditor({
             ) : null}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {canEdit ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setChatgptPatchOpen(true)}
-                  className="rounded-lg border border-indigo-200 bg-indigo-50/80 px-2.5 py-2 text-xs font-semibold text-indigo-900 hover:bg-indigo-50"
-                >
-                  ✨ Modifier avec ChatGPT
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void (async () => {
-                      try {
-                        const res = await fetch(
-                          `/api/commercial/quotes/${quote.id}/chatgpt-patch/context`,
-                        );
-                        const data = await res.json();
-                        if (!res.ok) throw new Error(data.error || "Contexte indisponible");
-                        await navigator.clipboard.writeText(data.text);
-                        setChatgptToast("Contexte copié pour ChatGPT.");
-                        window.setTimeout(() => setChatgptToast(null), 3500);
-                      } catch (e) {
-                        setError(
-                          e instanceof Error ? e.message : "Copie impossible",
-                        );
-                      }
-                    })();
-                  }}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  Copier le contexte ChatGPT
-                </button>
-              </>
+            {canEdit && quote.project ? (
+              <BeworkPatchToolbar
+                section="QUOTE"
+                projectId={quote.project.id}
+                entityId={quote.id}
+                version={version?.versionNumber ?? 1}
+                capability={quotePatchCapability}
+                entityLabel={quote.number}
+                legacyCommit={{ kind: "quote", id: quote.id }}
+                onApplied={() => {
+                  setChatgptPatchUndo(true);
+                  setChatgptToast("Modifications ChatGPT appliquées.");
+                  window.setTimeout(() => {
+                    setChatgptToast((t) =>
+                      t === "Modifications ChatGPT appliquées." ? null : t,
+                    );
+                  }, 8000);
+                  const seq = ++mutationSeq.current;
+                  void refreshQuote(seq).then(() => {
+                    if (seq === mutationSeq.current) setSaveState("saved");
+                  });
+                }}
+              />
+            ) : canEdit ? (
+              <p className="text-[11px] text-slate-500">
+                Liez un chantier pour modifier via ChatGPT / JSON.
+              </p>
             ) : null}
             <button
               type="button"
@@ -1745,37 +1739,30 @@ export function QuoteEditor({
                 >
                   ✨ Importer depuis ChatGPT
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setChatgptPatchOpen(true)}
-                  className="rounded-lg border border-indigo-200 bg-indigo-50/80 px-3 py-2 text-xs font-semibold text-indigo-900 shadow-sm hover:bg-indigo-50"
-                >
-                  ✨ Modifier avec ChatGPT
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void (async () => {
-                      try {
-                        const res = await fetch(
-                          `/api/commercial/quotes/${quote.id}/chatgpt-patch/context`,
+                {quote.project ? (
+                  <BeworkPatchToolbar
+                    section="QUOTE"
+                    projectId={quote.project.id}
+                    entityId={quote.id}
+                    version={version?.versionNumber ?? 1}
+                    capability={quotePatchCapability}
+                    entityLabel={quote.number}
+                    legacyCommit={{ kind: "quote", id: quote.id }}
+                    onApplied={() => {
+                      setChatgptPatchUndo(true);
+                      setChatgptToast("Modifications ChatGPT appliquées.");
+                      window.setTimeout(() => {
+                        setChatgptToast((t) =>
+                          t === "Modifications ChatGPT appliquées." ? null : t,
                         );
-                        const data = await res.json();
-                        if (!res.ok) throw new Error(data.error || "Contexte indisponible");
-                        await navigator.clipboard.writeText(data.text);
-                        setChatgptToast("Contexte copié pour ChatGPT.");
-                        window.setTimeout(() => setChatgptToast(null), 3500);
-                      } catch (e) {
-                        setError(
-                          e instanceof Error ? e.message : "Copie impossible",
-                        );
-                      }
-                    })();
-                  }}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
-                >
-                  Copier le contexte pour ChatGPT
-                </button>
+                      }, 8000);
+                      const seq = ++mutationSeq.current;
+                      void refreshQuote(seq).then(() => {
+                        if (seq === mutationSeq.current) setSaveState("saved");
+                      });
+                    }}
+                  />
+                ) : null}
                 {addMenuFor === "__footer__" ? (
                   <AddMenu onSelect={runAddAction} />
                 ) : null}
@@ -2083,25 +2070,6 @@ export function QuoteEditor({
         onClose={() => setChatgptImportOpen(false)}
         onImported={({ canUndo }) => {
           setChatgptImportUndo(canUndo);
-          const seq = ++mutationSeq.current;
-          void refreshQuote(seq).then(() => {
-            if (seq === mutationSeq.current) setSaveState("saved");
-          });
-        }}
-      />
-      <ChatGptPatchImportModal
-        quoteId={quote.id}
-        quoteNumber={quote.number}
-        open={chatgptPatchOpen}
-        onClose={() => setChatgptPatchOpen(false)}
-        onApplied={({ canUndo }) => {
-          setChatgptPatchUndo(canUndo);
-          setChatgptToast("Modifications ChatGPT appliquées.");
-          window.setTimeout(() => {
-            setChatgptToast((t) =>
-              t === "Modifications ChatGPT appliquées." ? null : t,
-            );
-          }, 8000);
           const seq = ++mutationSeq.current;
           void refreshQuote(seq).then(() => {
             if (seq === mutationSeq.current) setSaveState("saved");

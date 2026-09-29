@@ -10,6 +10,8 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
+import { getSectionCapability } from "@/lib/bework-patch/capability";
 import {
   VisitSectionCard,
   visitFieldClass,
@@ -553,6 +555,22 @@ export function SiteVisitDetailClient({
             : "Date à planifier"}
           {visit.responsibleName ? ` · ${visit.responsibleName}` : ""}
         </p>
+        <div className="mt-3">
+          {visit.projectId ? (
+            <BeworkPatchToolbar
+              section="VISIT"
+              projectId={visit.projectId}
+              entityId={visit.id}
+              version={1}
+              capability={getSectionCapability("VISIT")}
+              entityLabel={visit.siteName || visit.clientName}
+            />
+          ) : (
+            <p className="text-[11px] text-slate-500">
+              Liez un chantier pour activer la modification ChatGPT / JSON.
+            </p>
+          )}
+        </div>
         {visit.completeness ? (
           <div className="mt-3">
             <p className="text-[13px] font-medium text-slate-600">{visit.completeness.label}</p>

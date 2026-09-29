@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import type { BeworkPatchSection } from "@/lib/bework-patch/types";
 import type { SectionPatchCapability } from "@/lib/bework-patch/capability";
 import type { BeworkPatchAnalyzeResult } from "@/lib/bework-patch/analyze";
+import type { AnalyzePatchImpactResult } from "@/lib/bework-patch/impact/types";
 import {
   canDelegateToPrepPatch,
   toLegacyPrepPatch,
@@ -261,6 +262,10 @@ export function BeworkPatchModal({
 
           {step === "result" && analysis ? (
             <>
+              <div className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-[12.5px] text-sky-950">
+                Simulation uniquement — aucune écriture · aucune propagation réelle.
+              </div>
+
               {analysis.errors.length ? (
                 <IssueBlock title="Erreurs" tone="error" items={analysis.errors.map((e) => `${e.code} — ${e.message}`)} />
               ) : null}
@@ -271,48 +276,53 @@ export function BeworkPatchModal({
                 <IssueBlock title="Infos" tone="info" items={analysis.infos} />
               ) : null}
 
-              <div>
-                <h3 className="text-[13px] font-semibold text-[#1e3a5f]">
-                  Modifications demandées (directes)
-                </h3>
-                {analysis.directChanges.length === 0 ? (
-                  <p className="mt-1 text-[12.5px] text-slate-500">Aucune</p>
-                ) : (
-                  <ul className="mt-2 space-y-2">
-                    {analysis.directChanges.map((c, i) => (
-                      <li
-                        key={i}
-                        className="rounded-xl border border-slate-150 border-slate-200 bg-slate-50/70 px-3 py-2 text-[12.5px]"
-                      >
-                        <p className="font-semibold text-slate-800">{c.op}</p>
-                        <p className="text-slate-600">{c.targetSummary}</p>
-                        <p className="mt-0.5 font-mono text-[11.5px] text-emerald-800">
-                          {c.changesSummary}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              {analysis.potentialImpacts.length ? (
-                <div className="rounded-xl border border-dashed border-slate-300 bg-white px-3 py-2">
-                  <h3 className="text-[13px] font-semibold text-slate-700">
-                    Impacts potentiels détectés
-                  </h3>
-                  <p className="mt-1 text-[11.5px] font-medium text-amber-800">
-                    Propagation non activée dans cette phase.
-                  </p>
-                  <ul className="mt-2 space-y-1 text-[12.5px] text-slate-600">
-                    {analysis.potentialImpacts.map((p, i) => (
-                      <li key={i}>
-                        <span className="font-medium text-slate-800">{p.kind}</span>{" "}
-                        — {p.label} · {p.detail}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
+              {analysis.impact ? (
+                <ImpactPreview impact={analysis.impact} />
+              ) : (
+                <>
+                  <div>
+                    <h3 className="text-[13px] font-semibold text-[#1e3a5f]">
+                      Modifications demandées (directes)
+                    </h3>
+                    {analysis.directChanges.length === 0 ? (
+                      <p className="mt-1 text-[12.5px] text-slate-500">Aucune</p>
+                    ) : (
+                      <ul className="mt-2 space-y-2">
+                        {analysis.directChanges.map((c, i) => (
+                          <li
+                            key={i}
+                            className="rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 text-[12.5px]"
+                          >
+                            <p className="font-semibold text-slate-800">{c.op}</p>
+                            <p className="text-slate-600">{c.targetSummary}</p>
+                            <p className="mt-0.5 font-mono text-[11.5px] text-emerald-800">
+                              {c.changesSummary}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  {analysis.potentialImpacts.length ? (
+                    <div className="rounded-xl border border-dashed border-slate-300 bg-white px-3 py-2">
+                      <h3 className="text-[13px] font-semibold text-slate-700">
+                        Impacts potentiels détectés
+                      </h3>
+                      <p className="mt-1 text-[11.5px] font-medium text-amber-800">
+                        Propagation non activée dans cette phase.
+                      </p>
+                      <ul className="mt-2 space-y-1 text-[12.5px] text-slate-600">
+                        {analysis.potentialImpacts.map((p, i) => (
+                          <li key={i}>
+                            <span className="font-medium text-slate-800">{p.kind}</span>{" "}
+                            — {p.label} · {p.detail}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </>
+              )}
 
               {banner ? <p className="text-[13px] text-red-700">{banner}</p> : null}
 
@@ -335,13 +345,13 @@ export function BeworkPatchModal({
                     disabled={busy || !analysis.ok}
                     onClick={() => void applyLegacy()}
                   >
-                    {busy ? "Application…" : "Appliquer"}
+                    {busy ? "Application…" : "Appliquer (entité seule)"}
                   </button>
-                ) : capability.mode === "PREVIEW_ONLY" ? (
+                ) : (
                   <span className="self-center text-[12px] font-medium text-amber-800">
-                    Preview uniquement — pas d’application
+                    Simulation uniquement
                   </span>
-                ) : null}
+                )}
               </div>
             </>
           ) : null}
@@ -376,6 +386,173 @@ export function BeworkPatchModal({
         </div>
       </div>
     </div>
+  );
+}
+
+function fmtVal(v: unknown): string {
+  if (v == null) return "—";
+  if (typeof v === "number") {
+    return Number.isInteger(v)
+      ? String(v)
+      : v.toLocaleString("fr-FR", { maximumFractionDigits: 4 });
+  }
+  if (typeof v === "object") return JSON.stringify(v);
+  return String(v);
+}
+
+function certaintyBadge(c: string) {
+  const map: Record<string, string> = {
+    CERTAIN: "bg-emerald-100 text-emerald-900",
+    PARTIAL: "bg-amber-100 text-amber-950",
+    POTENTIAL: "bg-orange-100 text-orange-950",
+    NONE: "bg-slate-100 text-slate-600",
+  };
+  return map[c] ?? "bg-slate-100 text-slate-700";
+}
+
+function ImpactPreview({ impact }: { impact: AnalyzePatchImpactResult }) {
+  const takeoff = impact.derivedChanges.filter((d) => d.section === "TAKEOFF");
+  const quote = impact.derivedChanges.filter((d) => d.section === "QUOTE");
+  const planning = impact.derivedChanges.filter((d) => d.section === "PLANNING");
+  const cr = impact.canonicalResolution;
+
+  return (
+    <div className="space-y-3">
+      <Section title="Modification demandée">
+        {impact.directChanges.length === 0 ? (
+          <p className="text-[12.5px] text-slate-500">Aucune</p>
+        ) : (
+          <ul className="space-y-1.5 text-[12.5px]">
+            {impact.directChanges.map((d, i) => (
+              <li key={i} className="font-mono text-emerald-900">
+                <span className="font-sans font-semibold text-slate-800">
+                  {d.label}
+                </span>{" "}
+                {fmtVal(d.before)}
+                {d.unit ? ` ${d.unit}` : ""} → {fmtVal(d.after)}
+                {d.unit ? ` ${d.unit}` : ""}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      <Section title="Donnée canonique">
+        <p className="text-[12.5px] text-slate-700">
+          Résolution :{" "}
+          <span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${certaintyBadge(cr.status === "EXACT" ? "CERTAIN" : cr.status === "PARTIAL" ? "PARTIAL" : "NONE")}`}>
+            {cr.status}
+          </span>
+          {cr.resolved_to ? ` · ${cr.resolved_to}` : ""}
+          {cr.parameter_key ? ` · ${cr.parameter_key}` : ""}
+          {cr.study_line_code ? ` · ${cr.study_line_code}` : ""}
+        </p>
+        {cr.note ? (
+          <p className="mt-1 text-[12px] text-amber-900">{cr.note}</p>
+        ) : null}
+      </Section>
+
+      {takeoff.length ? (
+        <Section title="Recalculs certains (métré)">
+          <DerivedList items={takeoff} />
+        </Section>
+      ) : null}
+
+      {quote.length ? (
+        <Section title="Devis impacté">
+          <DerivedList items={quote} />
+        </Section>
+      ) : null}
+
+      {planning.length ? (
+        <Section title="Planning impacté">
+          <DerivedList items={planning} />
+        </Section>
+      ) : null}
+
+      <Section title="Protégés">
+        {impact.protectedEntities.length === 0 ? (
+          <p className="text-[12.5px] text-slate-500">aucun</p>
+        ) : (
+          <ul className="space-y-1 text-[12.5px] text-red-900">
+            {impact.protectedEntities.map((p, i) => (
+              <li key={i}>
+                <strong>{p.label}</strong> — {p.reason}
+                {p.gap
+                  ? ` (écart ${fmtVal(p.gap.current)} → ${fmtVal(p.gap.wouldBe)}${p.gap.unit ? ` ${p.gap.unit}` : ""})`
+                  : ""}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      {impact.overrides.length ? (
+        <Section title="Overrides détectés">
+          <ul className="space-y-1 text-[12.5px] text-amber-950">
+            {impact.overrides.map((o, i) => (
+              <li key={i}>
+                {o.message} (métré {fmtVal(o.metreQty)} · transfert {fmtVal(o.transferQty)} ·
+                devis {fmtVal(o.currentQty)})
+              </li>
+            ))}
+          </ul>
+        </Section>
+      ) : null}
+
+      <p className="text-[11px] text-slate-500">
+        Sections affectées :{" "}
+        {impact.impactSummary.affectedSections.join(", ") || "aucune"} · CERTAIN{" "}
+        {impact.impactSummary.certainCount} · PARTIAL {impact.impactSummary.partialCount} ·
+        POTENTIAL {impact.impactSummary.potentialCount}
+      </p>
+    </div>
+  );
+}
+
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+      <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+        {title}
+      </h3>
+      <div className="mt-1.5">{children}</div>
+    </div>
+  );
+}
+
+function DerivedList({
+  items,
+}: {
+  items: AnalyzePatchImpactResult["derivedChanges"];
+}) {
+  return (
+    <ul className="space-y-1.5 text-[12.5px]">
+      {items.map((d, i) => (
+        <li key={i} className="flex flex-wrap items-baseline gap-2">
+          <span className="font-semibold text-slate-800">{d.label}</span>
+          <span className="font-mono text-emerald-900">
+            {d.field}: {fmtVal(d.before)}
+            {d.unit ? ` ${d.unit}` : ""} → {fmtVal(d.after)}
+            {d.unit ? ` ${d.unit}` : ""}
+          </span>
+          <span
+            className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${certaintyBadge(d.certainty)}`}
+          >
+            {d.certainty}
+          </span>
+          {d.blocked ? (
+            <span className="text-[11px] font-medium text-amber-800">bloqué</span>
+          ) : null}
+        </li>
+      ))}
+    </ul>
   );
 }
 

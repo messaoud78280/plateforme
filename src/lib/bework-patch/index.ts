@@ -76,3 +76,16 @@ export {
   analyzeBeworkPatchInput,
   type BeworkPatchAnalyzeResult,
 } from "@/lib/bework-patch/analyze";
+
+export {
+  analyzePatchImpact,
+  loadImpactSubgraph,
+} from "@/lib/bework-patch/impact";
+
+export type {
+  AnalyzePatchImpactResult,
+  DirectChange,
+  DerivedChange,
+  ImpactCertainty,
+  ImpactSubgraph,
+} from "@/lib/bework-patch/impact/types";

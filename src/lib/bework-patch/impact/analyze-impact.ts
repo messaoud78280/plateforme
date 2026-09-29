@@ -1,0 +1,1229 @@
+/**
+ * BeWork Impact Engine V1 — analyse + simulation (lecture seule).
+ *
+ * TAKEOFF ↔ QUOTE ↔ PLANNING uniquement.
+ * Aucune écriture · aucune propagation réelle.
+ */
+import type { BeworkPatchOperation, BeworkPatchV1 } from "@/lib/bework-patch/types";
+import { buildCanonicalResolution } from "@/lib/bework-patch/context";
+import type { BeworkPatchIssue } from "@/lib/bework-patch/errors";
+import {
+  classifyQuoteLink,
+  isQuoteProtected,
+  quoteProtectionReason,
+} from "@/lib/bework-patch/impact/protection";
+import { simulateTakeoffFromParamChange } from "@/lib/bework-patch/impact/simulate-takeoff";
+import {
+  simulateQuoteLine,
+  simulateQuoteTotals,
+} from "@/lib/bework-patch/impact/simulate-quote";
+import { simulatePlanFromQuantityMap } from "@/lib/bework-patch/impact/simulate-planning";
+import type {
+  AffectedEntity,
+  AnalyzePatchImpactResult,
+  DerivedChange,
+  DirectChange,
+  ImpactGraphNode,
+  ImpactSubgraph,
+  ProtectedEntity,
+  OverrideFlag,
+} from "@/lib/bework-patch/impact/types";
+
+function issue(
+  code: BeworkPatchIssue["code"],
+  message: string,
+  severity: "error" | "warn" = "warn",
+  path = "impact",
+): BeworkPatchIssue {
+  return { code, path, message, severity };
+}
+
+function emptyResult(
+  extras?: Partial<AnalyzePatchImpactResult>,
+): AnalyzePatchImpactResult {
+  return {
+    directChanges: [],
+    canonicalResolution: buildCanonicalResolution({}),
+    derivedChanges: [],
+    affectedEntities: [],
+    protectedEntities: [],
+    overrides: [],
+    warnings: [],
+    errors: [],
+    impactSummary: {
+      affectedSections: [],
+      simulationOnly: true,
+      canPropagate: false,
+      certainCount: 0,
+      partialCount: 0,
+      potentialCount: 0,
+      protectedCount: 0,
+      overrideCount: 0,
+    },
+    graph: [],
+    ...extras,
+  };
+}
+
+function summarizeImpact(
+  derived: DerivedChange[],
+  protectedEntities: ProtectedEntity[],
+  overrides: OverrideFlag[],
+  sections: Set<"TAKEOFF" | "QUOTE" | "PLANNING">,
+): AnalyzePatchImpactResult["impactSummary"] {
+  return {
+    affectedSections: [...sections],
+    simulationOnly: true,
+    canPropagate: false,
+    certainCount: derived.filter((d) => d.certainty === "CERTAIN" && !d.blocked).length,
+    partialCount: derived.filter((d) => d.certainty === "PARTIAL").length,
+    potentialCount: derived.filter((d) => d.certainty === "POTENTIAL").length,
+    protectedCount: protectedEntities.length,
+    overrideCount: overrides.length,
+  };
+}
+
+function pushAffected(
+  list: AffectedEntity[],
+  e: AffectedEntity,
+) {
+  if (list.some((x) => x.id === e.id && x.section === e.section)) return;
+  list.push(e);
+}
+
+/**
+ * Point d’entrée Impact Engine — pure (aucune I/O).
+ */
+export function analyzePatchImpact(input: {
+  patch: BeworkPatchV1;
+  subgraph: ImpactSubgraph;
+}): AnalyzePatchImpactResult {
+  const { patch, subgraph } = input;
+  const section = patch.origin.section;
+
+  // Sections hors V1 : pas de graphe cross-module
+  if (
+    section === "VISIT" ||
+    section === "FOLLOW_UP" ||
+    section === "REPORT" ||
+    section === "NOTICE"
+  ) {
+    return emptyResult({
+      warnings: [
+        issue(
+          "SECTION_OUT_OF_SCOPE",
+          `Impact Engine V1 : section ${section} — preview direct uniquement, pas de propagation.`,
+          "warn",
+        ),
+      ],
+      directChanges: extractDirectChanges(patch, subgraph),
+      impactSummary: {
+        affectedSections: [],
+        simulationOnly: true,
+        canPropagate: false,
+        certainCount: 0,
+        partialCount: 0,
+        potentialCount: 0,
+        protectedCount: 0,
+        overrideCount: 0,
+      },
+    });
+  }
+
+  if (section === "QUOTE" && patch.change_intent === "COMMERCIAL_ADJUSTMENT") {
+    return analyzeCommercialQuote(patch, subgraph);
+  }
+
+  if (section === "PLANNING") {
+    return analyzePlanningLocal(patch, subgraph);
+  }
+
+  if (section === "TAKEOFF") {
+    return analyzeTakeoffTechnical(patch, subgraph);
+  }
+
+  if (section === "QUOTE" && patch.change_intent === "TECHNICAL_CORRECTION") {
+    return analyzeQuoteTechnical(patch, subgraph);
+  }
+
+  // Autres intents QUOTE → local devis
+  if (section === "QUOTE") {
+    return analyzeCommercialQuote(patch, subgraph);
+  }
+
+  return emptyResult({
+    warnings: [
+      issue(
+        "IMPACT_UNSUPPORTED",
+        `Intent ${patch.change_intent} / section ${section} non couvert par Impact Engine V1.`,
+      ),
+    ],
+    directChanges: extractDirectChanges(patch, subgraph),
+  });
+}
+
+/* ─── Direct changes (explicite uniquement) ─── */
+
+function extractDirectChanges(
+  patch: BeworkPatchV1,
+  subgraph: ImpactSubgraph,
+): DirectChange[] {
+  const out: DirectChange[] = [];
+  for (const op of patch.operations) {
+    const d = describeDirectOp(op, subgraph, patch.origin.section);
+    if (d) out.push(d);
+  }
+  return out;
+}
+
+function describeDirectOp(
+  op: BeworkPatchOperation,
+  subgraph: ImpactSubgraph,
+  section: BeworkPatchV1["origin"]["section"],
+): DirectChange | null {
+  if (op.op === "update_parameter") {
+    const key = op.target.parameter_key ?? null;
+    const id = op.target.parameter_id ?? op.target.id ?? null;
+    const param = subgraph.study?.params.find(
+      (p) => p.key === key || p.id === id,
+    );
+    if (op.changes.value === undefined) return null;
+    return {
+      op: op.op,
+      section,
+      entityType: "PREP_PARAMETER",
+      entityId: param?.id ?? id,
+      label: param?.label ?? key ?? "paramètre",
+      field: "value",
+      before: param?.value ?? null,
+      after: op.changes.value,
+      unit: param?.unit ?? null,
+    };
+  }
+  if (op.op === "update_line") {
+    const code = op.target.line_code ?? op.target.code ?? null;
+    const line = subgraph.study?.lines.find(
+      (l) => l.code === code || l.id === op.target.id,
+    );
+    if (op.changes.declared_quantity === undefined) {
+      return {
+        op: op.op,
+        section,
+        entityType: "PREP_LINE",
+        entityId: line?.id ?? op.target.id ?? null,
+        label: line?.designation ?? code ?? "ligne",
+        field: "meta",
+        before: null,
+        after: op.changes,
+        unit: line?.unit ?? null,
+      };
+    }
+    return {
+      op: op.op,
+      section,
+      entityType: "PREP_LINE",
+      entityId: line?.id ?? null,
+      label: line?.designation ?? code ?? "ligne",
+      field: "declared_quantity",
+      before: line?.declaredQuantity ?? null,
+      after: op.changes.declared_quantity,
+      unit: line?.unit ?? null,
+    };
+  }
+  if (op.op === "update_quote_item") {
+    const quote = subgraph.quotes.find((q) => q.id === op.target.quote_id);
+    const line = quote?.lines.find(
+      (l) => l.id === op.target.item_id || l.id === op.target.id,
+    );
+    const field =
+      op.changes.quantity !== undefined
+        ? "quantity"
+        : op.changes.unit_price_ht !== undefined
+          ? "unit_price_ht"
+          : op.changes.discount_percent !== undefined
+            ? "discount_percent"
+            : "meta";
+    const before =
+      field === "quantity"
+        ? line?.quantity ?? null
+        : field === "unit_price_ht"
+          ? line?.unitSellHt ?? null
+          : field === "discount_percent"
+            ? line?.discountPercent ?? null
+            : null;
+    const after =
+      field === "quantity"
+        ? op.changes.quantity
+        : field === "unit_price_ht"
+          ? op.changes.unit_price_ht
+          : field === "discount_percent"
+            ? op.changes.discount_percent
+            : op.changes;
+    return {
+      op: op.op,
+      section,
+      entityType: "QUOTE_ITEM",
+      entityId: line?.id ?? op.target.item_id ?? null,
+      label: line?.designation ?? quote?.number ?? "ligne devis",
+      field,
+      before,
+      after,
+      unit: line?.unit ?? null,
+    };
+  }
+  if (op.op === "update_duration") {
+    const plan = subgraph.plans.find((p) => p.id === op.target.plan_id);
+    const task = plan?.tasks.find(
+      (t) =>
+        t.id === op.target.task_id ||
+        t.id === op.target.id ||
+        t.stepCode === op.target.step_code ||
+        t.stepCode === op.target.code,
+    );
+    return {
+      op: op.op,
+      section,
+      entityType: "PREP_SCHEDULE_TASK",
+      entityId: task?.id ?? op.target.task_id ?? null,
+      label: task?.name ?? op.target.step_code ?? "tâche",
+      field: "duration_days",
+      before: task?.durationDays ?? null,
+      after: op.changes.duration_days,
+      unit: "j",
+    };
+  }
+  if (op.op === "update_task") {
+    const plan = subgraph.plans.find((p) => p.id === op.target.plan_id);
+    const task = plan?.tasks.find(
+      (t) => t.id === op.target.task_id || t.stepCode === op.target.step_code,
+    );
+    return {
+      op: op.op,
+      section,
+      entityType: "PREP_SCHEDULE_TASK",
+      entityId: task?.id ?? null,
+      label: task?.name ?? "tâche",
+      field: "meta",
+      before: { name: task?.name, lot: task?.lot },
+      after: op.changes,
+      unit: null,
+    };
+  }
+  return {
+    op: op.op,
+    section,
+    entityType: "UNKNOWN",
+    entityId: null,
+    label: op.op,
+    field: "raw",
+    before: null,
+    after: "changes" in op ? op.changes : null,
+    unit: null,
+  };
+}
+
+/* ─── COMMERCIAL_ADJUSTMENT (QUOTE only) ─── */
+
+function analyzeCommercialQuote(
+  patch: BeworkPatchV1,
+  subgraph: ImpactSubgraph,
+): AnalyzePatchImpactResult {
+  const directChanges = extractDirectChanges(patch, subgraph);
+  const derived: DerivedChange[] = [];
+  const affected: AffectedEntity[] = [];
+  const protectedEntities: ProtectedEntity[] = [];
+  const warnings: BeworkPatchIssue[] = [];
+  const sections = new Set<"TAKEOFF" | "QUOTE" | "PLANNING">(["QUOTE"]);
+  const lineOverrides = new Map<string, { quantity?: number; unitSellHt?: number }>();
+
+  for (const op of patch.operations) {
+    if (op.op !== "update_quote_item") continue;
+    const quote = subgraph.quotes.find((q) => q.id === op.target.quote_id);
+    const line = quote?.lines.find(
+      (l) => l.id === op.target.item_id || l.id === op.target.id,
+    );
+    if (!quote || !line) {
+      warnings.push(
+        issue("TARGET_NOT_FOUND", "Ligne devis introuvable dans le sous-graphe."),
+      );
+      continue;
+    }
+
+    pushAffected(affected, {
+      section: "QUOTE",
+      entityType: "QUOTE_ITEM",
+      id: line.id,
+      label: line.designation,
+      certainty: "CERTAIN",
+    });
+
+    if (isQuoteProtected(quote.status)) {
+      protectedEntities.push({
+        section: "QUOTE",
+        entityType: "COMMERCIAL_QUOTE",
+        id: quote.id,
+        label: quote.number,
+        reason: quoteProtectionReason(quote.status),
+      });
+      continue;
+    }
+
+    const sim = simulateQuoteLine({
+      line,
+      quantity: op.changes.quantity,
+      unitSellHt: op.changes.unit_price_ht,
+      discountPercent: op.changes.discount_percent,
+    });
+    lineOverrides.set(line.id, {
+      quantity: sim.afterQty,
+      unitSellHt: sim.afterUnitSellHt,
+    });
+
+    if (op.changes.unit_price_ht !== undefined) {
+      derived.push({
+        section: "QUOTE",
+        entityType: "QUOTE_ITEM",
+        entityId: line.id,
+        label: `${quote.number} · ${line.designation}`,
+        field: "unit_price_ht",
+        before: sim.beforeUnitSellHt,
+        after: sim.afterUnitSellHt,
+        certainty: "CERTAIN",
+        reason: "Ajustement commercial explicite",
+      });
+    }
+    if (op.changes.quantity !== undefined) {
+      derived.push({
+        section: "QUOTE",
+        entityType: "QUOTE_ITEM",
+        entityId: line.id,
+        label: `${quote.number} · ${line.designation}`,
+        field: "quantity",
+        before: sim.beforeQty,
+        after: sim.afterQty,
+        unit: line.unit,
+        certainty: "CERTAIN",
+        reason: "Quantité commerciale explicite",
+      });
+    }
+    derived.push({
+      section: "QUOTE",
+      entityType: "QUOTE_ITEM",
+      entityId: line.id,
+      label: `${quote.number} · ${line.designation}`,
+      field: "line_ht",
+      before: sim.beforeLineHt,
+      after: sim.afterLineHt,
+      unit: "€ HT",
+      certainty: "CERTAIN",
+      reason: "Recalcul ligne devis",
+    });
+  }
+
+  for (const quote of subgraph.quotes) {
+    if (![...lineOverrides.keys()].some((id) => quote.lines.some((l) => l.id === id))) {
+      continue;
+    }
+    if (isQuoteProtected(quote.status)) continue;
+    const totals = simulateQuoteTotals(quote, lineOverrides);
+    if (Math.abs(totals.beforeHt - totals.afterHt) > 0.001) {
+      derived.push({
+        section: "QUOTE",
+        entityType: "COMMERCIAL_QUOTE",
+        entityId: quote.id,
+        label: quote.number,
+        field: "total_sell_ht",
+        before: totals.beforeHt,
+        after: totals.afterHt,
+        unit: "€ HT",
+        certainty: "CERTAIN",
+        reason: "Recalcul total devis",
+      });
+    }
+  }
+
+  return {
+    directChanges,
+    canonicalResolution: buildCanonicalResolution({}),
+    derivedChanges: derived,
+    affectedEntities: affected,
+    protectedEntities,
+    overrides: [],
+    warnings: [
+      ...warnings,
+      issue(
+        "COMMERCIAL_SCOPE",
+        "COMMERCIAL_ADJUSTMENT : TAKEOFF et PLANNING non affectés.",
+        "warn",
+      ),
+    ],
+    errors: [],
+    impactSummary: summarizeImpact(derived, protectedEntities, [], sections),
+    graph: [
+      {
+        entityType: "COMMERCIAL_QUOTE",
+        id: patch.origin.entity_id,
+        label: "Devis (ajustement commercial)",
+        relationType: null,
+        confidence: "CERTAIN",
+        mutable: protectedEntities.length === 0,
+        protected: protectedEntities.length > 0,
+      },
+    ],
+  };
+}
+
+/* ─── PLANNING local (pas de remontée métré/devis) ─── */
+
+function analyzePlanningLocal(
+  patch: BeworkPatchV1,
+  subgraph: ImpactSubgraph,
+): AnalyzePatchImpactResult {
+  const directChanges = extractDirectChanges(patch, subgraph);
+  const derived: DerivedChange[] = [];
+  const affected: AffectedEntity[] = [];
+  const sections = new Set<"TAKEOFF" | "QUOTE" | "PLANNING">(["PLANNING"]);
+  const durationOverrides = new Map<string, number>();
+
+  for (const op of patch.operations) {
+    if (op.op === "update_duration") {
+      const key = op.target.task_id ?? op.target.step_code ?? op.target.id;
+      if (key) durationOverrides.set(key, op.changes.duration_days);
+    }
+  }
+
+  for (const plan of subgraph.plans) {
+    if (plan.id !== patch.origin.entity_id && subgraph.plans.length > 1) {
+      // ne simuler que le plan ciblé si possible
+      if (plan.id !== patch.origin.entity_id) continue;
+    }
+    const sim = simulatePlanFromQuantityMap(plan, new Map(), durationOverrides);
+    for (const t of sim.tasks) {
+      if (Math.abs(t.afterDuration - t.beforeDuration) < 1e-9) continue;
+      pushAffected(affected, {
+        section: "PLANNING",
+        entityType: "PREP_SCHEDULE_TASK",
+        id: t.taskId,
+        label: `${t.stepCode} · ${t.name}`,
+        certainty: "CERTAIN",
+      });
+      derived.push({
+        section: "PLANNING",
+        entityType: "PREP_SCHEDULE_TASK",
+        entityId: t.taskId,
+        label: `${t.stepCode} · ${t.name}`,
+        field: "duration_days",
+        before: t.beforeDuration,
+        after: t.afterDuration,
+        unit: "j",
+        certainty: "CERTAIN",
+        reason: "Ajustement planning explicite",
+      });
+    }
+    if (
+      sim.beforeDurationWorkingDays != null &&
+      sim.afterDurationWorkingDays != null &&
+      Math.abs(sim.afterDurationWorkingDays - sim.beforeDurationWorkingDays) > 1e-6
+    ) {
+      derived.push({
+        section: "PLANNING",
+        entityType: "PREP_SCHEDULE_PLAN",
+        entityId: plan.id,
+        label: plan.title,
+        field: "base_duration_working_days",
+        before: sim.beforeDurationWorkingDays,
+        after: sim.afterDurationWorkingDays,
+        unit: "j",
+        certainty: "CERTAIN",
+        reason: "Recalcul durée chantier (simulation)",
+      });
+    }
+    if (sim.beforeEndDate !== sim.afterEndDate) {
+      derived.push({
+        section: "PLANNING",
+        entityType: "PREP_SCHEDULE_PLAN",
+        entityId: plan.id,
+        label: plan.title,
+        field: "end_date",
+        before: sim.beforeEndDate,
+        after: sim.afterEndDate,
+        certainty: "PARTIAL",
+        reason: "Date de fin simulée (approximation calendaire V1)",
+      });
+    }
+  }
+
+  return {
+    directChanges,
+    canonicalResolution: buildCanonicalResolution({}),
+    derivedChanges: derived,
+    affectedEntities: affected,
+    protectedEntities: [],
+    overrides: [],
+    warnings: [
+      issue(
+        "PLANNING_SCOPE",
+        "PLANNING_ADJUSTMENT : TAKEOFF et QUOTE inchangés (pas de remontée).",
+        "warn",
+      ),
+    ],
+    errors: [],
+    impactSummary: summarizeImpact(derived, [], [], sections),
+    graph: [
+      {
+        entityType: "PREP_SCHEDULE_PLAN",
+        id: patch.origin.entity_id,
+        label: "Planning",
+        relationType: null,
+        confidence: "CERTAIN",
+        mutable: true,
+        protected: false,
+        children: affected.map((a) => ({
+          entityType: a.entityType,
+          id: a.id,
+          label: a.label,
+          relationType: "task",
+          confidence: "CERTAIN" as const,
+          mutable: true,
+          protected: false,
+        })),
+      },
+    ],
+  };
+}
+
+/* ─── TAKEOFF technical → quote + planning ─── */
+
+function analyzeTakeoffTechnical(
+  patch: BeworkPatchV1,
+  subgraph: ImpactSubgraph,
+): AnalyzePatchImpactResult {
+  const directChanges = extractDirectChanges(patch, subgraph);
+  const derived: DerivedChange[] = [];
+  const affected: AffectedEntity[] = [];
+  const protectedEntities: ProtectedEntity[] = [];
+  const overrides: OverrideFlag[] = [];
+  const warnings: BeworkPatchIssue[] = [];
+  const errors: BeworkPatchIssue[] = [];
+  const sections = new Set<"TAKEOFF" | "QUOTE" | "PLANNING">(["TAKEOFF"]);
+
+  if (!subgraph.study) {
+    return emptyResult({
+      directChanges,
+      errors: [issue("STUDY_MISSING", "Étude métré absente du sous-graphe.", "error")],
+    });
+  }
+
+  const study = subgraph.study;
+  const paramUpdates: Record<string, number | null> = {};
+  const lineDeclared: Record<string, number | null> = {};
+  let resolvedParamKey: string | null = null;
+  let resolvedParamId: string | null = null;
+  let resolvedLineCode: string | null = null;
+
+  for (const op of patch.operations) {
+    if (op.op === "update_parameter") {
+      const key =
+        op.target.parameter_key ??
+        study.params.find(
+          (p) => p.id === op.target.parameter_id || p.id === op.target.id,
+        )?.key ??
+        null;
+      if (!key) {
+        errors.push(
+          issue("TARGET_NOT_FOUND", "Paramètre introuvable pour update_parameter.", "error"),
+        );
+        continue;
+      }
+      if (op.changes.value !== undefined) {
+        paramUpdates[key] = op.changes.value;
+        resolvedParamKey = key;
+        resolvedParamId =
+          study.params.find((p) => p.key === key)?.id ??
+          op.target.parameter_id ??
+          null;
+      }
+    }
+    if (op.op === "update_line" && op.changes.declared_quantity !== undefined) {
+      const code =
+        op.target.line_code ??
+        op.target.code ??
+        study.lines.find((l) => l.id === op.target.id)?.code ??
+        null;
+      if (code) {
+        lineDeclared[code] = op.changes.declared_quantity;
+        resolvedLineCode = code;
+      }
+    }
+  }
+
+  const canonical = buildCanonicalResolution({
+    studyId: study.id,
+    parameterId: resolvedParamId,
+    parameterKey: resolvedParamKey,
+    takeoffLineCode: resolvedLineCode,
+  });
+
+  // EXACT only if parameter resolved; PARTIAL if only line
+  if (!resolvedParamKey && resolvedLineCode) {
+    // keep PARTIAL from builder
+  }
+
+  const sim = simulateTakeoffFromParamChange({
+    study,
+    paramUpdates,
+    lineDeclaredUpdates: lineDeclared,
+  });
+  warnings.push(...sim.unresolved);
+
+  for (const code of sim.changedLineCodes) {
+    const line = study.lines.find((l) => l.code === code);
+    const before = sim.beforeByCode.get(code) ?? null;
+    const after = sim.afterByCode.get(code) ?? null;
+    const certainty =
+      sim.unresolved.some((u) => u.path.includes(code))
+        ? "PARTIAL"
+        : "CERTAIN";
+    derived.push({
+      section: "TAKEOFF",
+      entityType: "PREP_LINE",
+      entityId: line?.id ?? null,
+      label: `${code} · ${line?.designation ?? ""}`.trim(),
+      field: "quantity",
+      before,
+      after,
+      unit: line?.unit ?? null,
+      certainty,
+      reason:
+        certainty === "CERTAIN"
+          ? "Recalcul formule / quantité métré (moteur BeWork)"
+          : "Recalcul partiel — formule non résolue",
+      blocked: certainty !== "CERTAIN",
+      blockReason:
+        certainty !== "CERTAIN" ? "CALCULATION_UNRESOLVED" : null,
+    });
+    pushAffected(affected, {
+      section: "TAKEOFF",
+      entityType: "PREP_LINE",
+      id: line?.id ?? code,
+      label: code,
+      certainty,
+    });
+  }
+
+  // Quote impacts via PrepQuoteLink
+  const qtyMap = new Map<string, number | null>();
+  for (const [code, after] of sim.afterByCode) {
+    qtyMap.set(code, after);
+  }
+
+  for (const link of subgraph.quoteLinks) {
+    if (link.studyId !== study.id) continue;
+    if (!sim.changedLineCodes.includes(link.studyLineCode) && !resolvedLineCode) {
+      // also include if param change affects this line
+      if (!sim.changedLineCodes.includes(link.studyLineCode)) continue;
+    }
+    if (!sim.changedLineCodes.includes(link.studyLineCode)) continue;
+
+    const quote = subgraph.quotes.find((q) => q.id === link.quoteId);
+    const qLine = quote?.lines.find((l) => l.id === link.quoteLineId);
+    if (!quote || !qLine) continue;
+
+    sections.add("QUOTE");
+    const metreAfter = sim.afterByCode.get(link.studyLineCode) ?? null;
+    const metreBefore = sim.beforeByCode.get(link.studyLineCode) ?? null;
+    const classified = classifyQuoteLink({
+      quote,
+      line: qLine,
+      link,
+      metreQty: metreAfter,
+    });
+
+    if (classified.override) overrides.push(classified.override);
+
+    if (classified.class === "PROTECTED") {
+      protectedEntities.push({
+        section: "QUOTE",
+        entityType: "COMMERCIAL_QUOTE",
+        id: quote.id,
+        label: quote.number,
+        reason: quoteProtectionReason(quote.status),
+        gap:
+          metreAfter != null
+            ? {
+                field: "quantity",
+                current: qLine.quantity,
+                wouldBe: metreAfter,
+                unit: qLine.unit,
+              }
+            : undefined,
+      });
+      derived.push({
+        section: "QUOTE",
+        entityType: "QUOTE_ITEM",
+        entityId: qLine.id,
+        label: `${quote.number} · ${qLine.designation}`,
+        field: "quantity",
+        before: qLine.quantity,
+        after: qLine.quantity,
+        unit: qLine.unit,
+        certainty: "NONE",
+        reason: "Devis contractuel impacté — pas d’écrasement simulé.",
+        blocked: true,
+        blockReason: quoteProtectionReason(quote.status),
+        quoteLinkClass: "PROTECTED",
+      });
+      continue;
+    }
+
+    if (classified.class === "LIKELY_OVERRIDE") {
+      derived.push({
+        section: "QUOTE",
+        entityType: "QUOTE_ITEM",
+        entityId: qLine.id,
+        label: `${quote.number} · ${qLine.designation}`,
+        field: "quantity",
+        before: qLine.quantity,
+        after: qLine.quantity,
+        unit: qLine.unit,
+        certainty: "POTENTIAL",
+        reason:
+          "Valeur commerciale différente de la valeur transférée — pas de resync auto.",
+        blocked: true,
+        blockReason: "LIKELY_OVERRIDE",
+        quoteLinkClass: "LIKELY_OVERRIDE",
+      });
+      warnings.push(
+        issue(
+          "LIKELY_OVERRIDE",
+          `⚠ Quantité commerciale probablement modifiée manuellement (${quote.number}). Métré ${metreAfter ?? "—"} · transfert ${link.quantityAtTransfer} · devis ${qLine.quantity}.`,
+        ),
+      );
+      continue;
+    }
+
+    // LINKED_STANDARD — simulate qty sync if CERTAIN takeoff calc
+    const takeoffCertain = derived.some(
+      (d) =>
+        d.section === "TAKEOFF" &&
+        d.label.startsWith(link.studyLineCode) &&
+        d.certainty === "CERTAIN",
+    );
+    if (!takeoffCertain || metreAfter == null) {
+      derived.push({
+        section: "QUOTE",
+        entityType: "QUOTE_ITEM",
+        entityId: qLine.id,
+        label: `${quote.number} · ${qLine.designation}`,
+        field: "quantity",
+        before: qLine.quantity,
+        after: null,
+        certainty: "PARTIAL",
+        reason: "Lien devis connu mais recalcul métré non certain.",
+        blocked: true,
+        blockReason: "CALCULATION_UNRESOLVED",
+        quoteLinkClass: "LINKED_STANDARD",
+      });
+      continue;
+    }
+
+    const qSim = simulateQuoteLine({ line: qLine, quantity: metreAfter });
+    derived.push({
+      section: "QUOTE",
+      entityType: "QUOTE_ITEM",
+      entityId: qLine.id,
+      label: `${quote.number} · ${qLine.designation}`,
+      field: "quantity",
+      before: metreBefore ?? qLine.quantity,
+      after: metreAfter,
+      unit: qLine.unit,
+      certainty: "CERTAIN",
+      reason: "Lien PrepQuoteLink — sync quantité simulée",
+      quoteLinkClass: "LINKED_STANDARD",
+    });
+    derived.push({
+      section: "QUOTE",
+      entityType: "QUOTE_ITEM",
+      entityId: qLine.id,
+      label: `${quote.number} · ${qLine.designation}`,
+      field: "line_ht",
+      before: qSim.beforeLineHt,
+      after: qSim.afterLineHt,
+      unit: "€ HT",
+      certainty: "CERTAIN",
+      reason: "Recalcul ligne devis depuis quantité métré",
+      quoteLinkClass: "LINKED_STANDARD",
+    });
+    pushAffected(affected, {
+      section: "QUOTE",
+      entityType: "QUOTE_ITEM",
+      id: qLine.id,
+      label: qLine.designation,
+      certainty: "CERTAIN",
+    });
+  }
+
+  // Planning via PrepScheduleTakeoffLink
+  for (const plan of subgraph.plans) {
+    const relevantLinks = plan.takeoffLinks.filter((l) =>
+      sim.changedLineCodes.includes(l.studyLineCode),
+    );
+    if (!relevantLinks.length) continue;
+    sections.add("PLANNING");
+    const planSim = simulatePlanFromQuantityMap(plan, qtyMap);
+    for (const t of planSim.tasks) {
+      const linked = relevantLinks.some((l) => l.taskId === t.taskId);
+      if (!linked) continue;
+      if (
+        t.mode === "unchanged" ||
+        (Math.abs(t.afterDuration - t.beforeDuration) < 1e-9 &&
+          t.beforeQty === t.afterQty)
+      ) {
+        if (t.afterQty != null && t.beforeQty !== t.afterQty) {
+          derived.push({
+            section: "PLANNING",
+            entityType: "PREP_SCHEDULE_TASK",
+            entityId: t.taskId,
+            label: `${t.stepCode} · ${t.name}`,
+            field: "quantity_snapshot",
+            before: t.beforeQty,
+            after: t.afterQty,
+            unit: t.quantityUnit,
+            certainty: "CERTAIN",
+            reason: "Quantité pilote liée au métré",
+          });
+        }
+        continue;
+      }
+      if (t.afterQty != null && t.beforeQty !== t.afterQty) {
+        derived.push({
+          section: "PLANNING",
+          entityType: "PREP_SCHEDULE_TASK",
+          entityId: t.taskId,
+          label: `${t.stepCode} · ${t.name}`,
+          field: "quantity_snapshot",
+          before: t.beforeQty,
+          after: t.afterQty,
+          unit: t.quantityUnit,
+          certainty: "CERTAIN",
+          reason: "Quantité pilote liée au métré",
+        });
+      }
+      if (Math.abs(t.afterDuration - t.beforeDuration) >= 1e-9) {
+        const certainty =
+          t.mode === "rate" ? "CERTAIN" : t.mode === "scale" ? "PARTIAL" : "POTENTIAL";
+        derived.push({
+          section: "PLANNING",
+          entityType: "PREP_SCHEDULE_TASK",
+          entityId: t.taskId,
+          label: `${t.stepCode} · ${t.name}`,
+          field: "duration_days",
+          before: t.beforeDuration,
+          after: t.afterDuration,
+          unit: "j",
+          certainty,
+          reason:
+            t.mode === "rate"
+              ? "Recalcul durée via rendement"
+              : t.mode === "locked"
+                ? "Durée verrouillée — non recalculée"
+                : "Recalcul durée proportionnel (rendement non disponible)",
+          blocked: t.mode === "locked",
+          blockReason: t.mode === "locked" ? "DURATION_LOCKED" : null,
+        });
+        pushAffected(affected, {
+          section: "PLANNING",
+          entityType: "PREP_SCHEDULE_TASK",
+          id: t.taskId,
+          label: t.stepCode,
+          certainty,
+        });
+      }
+    }
+    if (
+      planSim.beforeDurationWorkingDays != null &&
+      planSim.afterDurationWorkingDays != null &&
+      Math.abs(
+        planSim.afterDurationWorkingDays - planSim.beforeDurationWorkingDays,
+      ) > 1e-6
+    ) {
+      derived.push({
+        section: "PLANNING",
+        entityType: "PREP_SCHEDULE_PLAN",
+        entityId: plan.id,
+        label: plan.title,
+        field: "base_duration_working_days",
+        before: planSim.beforeDurationWorkingDays,
+        after: planSim.afterDurationWorkingDays,
+        unit: "j",
+        certainty: "PARTIAL",
+        reason: "Durée chantier simulée",
+      });
+    }
+    if (planSim.beforeEndDate !== planSim.afterEndDate) {
+      derived.push({
+        section: "PLANNING",
+        entityType: "PREP_SCHEDULE_PLAN",
+        entityId: plan.id,
+        label: plan.title,
+        field: "end_date",
+        before: planSim.beforeEndDate,
+        after: planSim.afterEndDate,
+        certainty: "PARTIAL",
+        reason: "Fin chantier simulée",
+      });
+    }
+  }
+
+  const graph = buildTakeoffImpactGraph({
+    study,
+    resolvedParamKey,
+    resolvedParamId,
+    changedCodes: sim.changedLineCodes,
+    quoteLinks: subgraph.quoteLinks,
+    quotes: subgraph.quotes,
+    plans: subgraph.plans,
+    derived,
+  });
+
+  return {
+    directChanges,
+    canonicalResolution: canonical,
+    derivedChanges: derived,
+    affectedEntities: affected,
+    protectedEntities,
+    overrides,
+    warnings,
+    errors,
+    impactSummary: summarizeImpact(derived, protectedEntities, overrides, sections),
+    graph,
+  };
+}
+
+/* ─── QUOTE TECHNICAL_CORRECTION → takeoff (EXACT/PARTIAL/NONE) ─── */
+
+function analyzeQuoteTechnical(
+  patch: BeworkPatchV1,
+  subgraph: ImpactSubgraph,
+): AnalyzePatchImpactResult {
+  const directChanges = extractDirectChanges(patch, subgraph);
+  const derived: DerivedChange[] = [];
+  const affected: AffectedEntity[] = [];
+  const protectedEntities: ProtectedEntity[] = [];
+  const warnings: BeworkPatchIssue[] = [];
+  const sections = new Set<"TAKEOFF" | "QUOTE" | "PLANNING">(["QUOTE"]);
+
+  let bestCanonical = buildCanonicalResolution({});
+
+  for (const op of patch.operations) {
+    if (op.op !== "update_quote_item") continue;
+    const quote = subgraph.quotes.find((q) => q.id === op.target.quote_id);
+    const line = quote?.lines.find(
+      (l) => l.id === op.target.item_id || l.id === op.target.id,
+    );
+    if (!quote || !line) continue;
+
+    pushAffected(affected, {
+      section: "QUOTE",
+      entityType: "QUOTE_ITEM",
+      id: line.id,
+      label: line.designation,
+      certainty: "CERTAIN",
+    });
+
+    const link = subgraph.quoteLinks.find((l) => l.quoteLineId === line.id);
+    if (!link) {
+      bestCanonical = buildCanonicalResolution({});
+      warnings.push(
+        issue(
+          "NONE_CANONICAL",
+          "Aucune PrepQuoteLink — aucune propagation métré/planning.",
+        ),
+      );
+      // local quote change only if commercial-compatible fields
+      if (op.changes.quantity !== undefined && !isQuoteProtected(quote.status)) {
+        const sim = simulateQuoteLine({ line, quantity: op.changes.quantity });
+        derived.push({
+          section: "QUOTE",
+          entityType: "QUOTE_ITEM",
+          entityId: line.id,
+          label: line.designation,
+          field: "quantity",
+          before: sim.beforeQty,
+          after: sim.afterQty,
+          unit: line.unit,
+          certainty: "CERTAIN",
+          reason: "Modification locale devis (pas de lien métré)",
+          quoteLinkClass: "UNLINKED",
+        });
+      }
+      continue;
+    }
+
+    // PARTIAL — ligne métré connue, pas de parameter_id
+    bestCanonical = buildCanonicalResolution({
+      studyId: link.studyId,
+      takeoffLineCode: link.studyLineCode,
+    });
+    sections.add("TAKEOFF");
+    warnings.push(
+      issue(
+        "PARTIAL_CANONICAL_RESOLUTION",
+        `Ligne de métré retrouvée (${link.studyLineCode}). Source technique précise non résolue — aucun PrepParameter inventé.`,
+      ),
+    );
+
+    // Si le patch cible explicitement la quantité ligne, simuler update_line declared
+    if (
+      op.changes.quantity !== undefined &&
+      subgraph.study &&
+      bestCanonical.status === "PARTIAL"
+    ) {
+      const takeoffLine = subgraph.study.lines.find(
+        (l) => l.code === link.studyLineCode,
+      );
+      if (takeoffLine && !takeoffLine.formula) {
+        derived.push({
+          section: "TAKEOFF",
+          entityType: "PREP_LINE",
+          entityId: takeoffLine.id,
+          label: takeoffLine.code,
+          field: "declared_quantity",
+          before: takeoffLine.declaredQuantity,
+          after: op.changes.quantity,
+          unit: takeoffLine.unit,
+          certainty: "PARTIAL",
+          reason:
+            "Simulation quantité ligne métré (pas de formule) — paramètre source inconnu",
+        });
+      } else if (takeoffLine?.formula) {
+        warnings.push(
+          issue(
+            "CALCULATION_UNRESOLVED",
+            `Ligne ${link.studyLineCode} a une formule — impossible de propager depuis le devis sans parameter_id.`,
+          ),
+        );
+      }
+    }
+
+    if (isQuoteProtected(quote.status)) {
+      protectedEntities.push({
+        section: "QUOTE",
+        entityType: "COMMERCIAL_QUOTE",
+        id: quote.id,
+        label: quote.number,
+        reason: quoteProtectionReason(quote.status),
+      });
+    } else if (op.changes.quantity !== undefined) {
+      const sim = simulateQuoteLine({ line, quantity: op.changes.quantity });
+      derived.push({
+        section: "QUOTE",
+        entityType: "QUOTE_ITEM",
+        entityId: line.id,
+        label: line.designation,
+        field: "quantity",
+        before: sim.beforeQty,
+        after: sim.afterQty,
+        unit: line.unit,
+        certainty: "CERTAIN",
+        reason: "Modification devis directe",
+      });
+    }
+  }
+
+  return {
+    directChanges,
+    canonicalResolution: bestCanonical,
+    derivedChanges: derived,
+    affectedEntities: affected,
+    protectedEntities,
+    overrides: [],
+    warnings,
+    errors: [],
+    impactSummary: summarizeImpact(derived, protectedEntities, [], sections),
+    graph: [],
+  };
+}
+
+function buildTakeoffImpactGraph(input: {
+  study: ImpactSubgraph["study"];
+  resolvedParamKey: string | null;
+  resolvedParamId: string | null;
+  changedCodes: string[];
+  quoteLinks: ImpactSubgraph["quoteLinks"];
+  quotes: ImpactSubgraph["quotes"];
+  plans: ImpactSubgraph["plans"];
+  derived: DerivedChange[];
+}): ImpactGraphNode[] {
+  if (!input.study) return [];
+  const paramNode: ImpactGraphNode | null = input.resolvedParamKey
+    ? {
+        entityType: "PREP_PARAMETER",
+        id: input.resolvedParamId ?? input.resolvedParamKey,
+        label: input.resolvedParamKey,
+        relationType: null,
+        confidence: "CERTAIN",
+        mutable: true,
+        protected: false,
+        children: [],
+      }
+    : null;
+
+  const lineNodes: ImpactGraphNode[] = input.changedCodes.map((code) => {
+    const line = input.study!.lines.find((l) => l.code === code);
+    const children: ImpactGraphNode[] = [];
+    for (const link of input.quoteLinks.filter((l) => l.studyLineCode === code)) {
+      const quote = input.quotes.find((q) => q.id === link.quoteId);
+      children.push({
+        entityType: "QUOTE_ITEM",
+        id: link.quoteLineId,
+        label: quote?.number ?? link.quoteId,
+        relationType: "PrepQuoteLink",
+        confidence: "CERTAIN",
+        mutable: quote ? !isQuoteProtected(quote.status) : false,
+        protected: quote ? isQuoteProtected(quote.status) : false,
+      });
+    }
+    for (const plan of input.plans) {
+      for (const tl of plan.takeoffLinks.filter((l) => l.studyLineCode === code)) {
+        const task = plan.tasks.find((t) => t.id === tl.taskId);
+        children.push({
+          entityType: "PREP_SCHEDULE_TASK",
+          id: tl.taskId,
+          label: task?.stepCode ?? tl.taskId,
+          relationType: "PrepScheduleTakeoffLink",
+          confidence: "CERTAIN",
+          mutable: true,
+          protected: false,
+          children: [
+            {
+              entityType: "PREP_SCHEDULE_PLAN",
+              id: plan.id,
+              label: plan.title,
+              relationType: "plan",
+              confidence: "CERTAIN",
+              mutable: true,
+              protected: false,
+            },
+          ],
+        });
+      }
+    }
+    return {
+      entityType: "PREP_LINE",
+      id: line?.id ?? code,
+      label: code,
+      relationType: "formula_dependent",
+      confidence: "CERTAIN",
+      mutable: true,
+      protected: false,
+      children,
+    };
+  });
+
+  if (paramNode) {
+    paramNode.children = lineNodes;
+    return [paramNode];
+  }
+  return lineNodes;
+}

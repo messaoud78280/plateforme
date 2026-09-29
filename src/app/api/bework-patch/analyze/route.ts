@@ -2,13 +2,15 @@ import { NextResponse } from "next/server";
 import { requirePrepApiContext, prepErrorResponse } from "@/lib/preparation/access";
 import { analyzeBeworkPatchInput } from "@/lib/bework-patch/analyze";
 import { buildUniversalPatchContext } from "@/lib/bework-patch/build-context";
+import { loadImpactSubgraph } from "@/lib/bework-patch/impact/load-subgraph";
 import { BEWORK_PATCH_SECTIONS, type BeworkPatchSection } from "@/lib/bework-patch/types";
+import { parseBeworkPatch } from "@/lib/bework-patch/parse";
 
 export const dynamic = "force-dynamic";
 
 /**
  * POST { raw, projectId?, entityId?, section?, currentVersion? }
- * Analyse universelle — aucune écriture.
+ * Analyse universelle + Impact Engine V1 — aucune écriture.
  */
 export async function POST(req: Request) {
   const guard = await requirePrepApiContext();
@@ -52,13 +54,37 @@ export async function POST(req: Request) {
           }
         : null;
 
+    let subgraph = null;
+    const parsed = parseBeworkPatch(body.raw);
+    if (
+      parsed.ok &&
+      body.projectId &&
+      (parsed.patch.origin.section === "TAKEOFF" ||
+        parsed.patch.origin.section === "QUOTE" ||
+        parsed.patch.origin.section === "PLANNING")
+    ) {
+      subgraph = await loadImpactSubgraph({
+        orgId: guard.ctx.orgId,
+        projectId: body.projectId,
+        patch: parsed.patch,
+      });
+    }
+
     const result = analyzeBeworkPatchInput({
       raw: body.raw,
       snapshot,
       context,
+      subgraph,
     });
 
-    return NextResponse.json({ analysis: result });
+    return NextResponse.json({
+      analysis: result,
+      meta: {
+        simulationOnly: true,
+        canPropagate: false,
+        phase: "D",
+      },
+    });
   } catch (e) {
     return prepErrorResponse(e);
   }

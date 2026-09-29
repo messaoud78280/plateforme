@@ -23,6 +23,12 @@ import {
   toLegacyQuotePatch,
 } from "@/lib/bework-patch/adapters/quote";
 import { getSectionCapability } from "@/lib/bework-patch/capability";
+import { analyzePatchImpact } from "@/lib/bework-patch/impact/analyze-impact";
+import type {
+  AnalyzePatchImpactResult,
+  ImpactSubgraph,
+} from "@/lib/bework-patch/impact/types";
+import { emptySubgraph } from "@/lib/bework-patch/impact/types";
 
 export type DirectChangePreview = {
   op: string;
@@ -45,6 +51,8 @@ export type BeworkPatchAnalyzeResult = {
   infos: string[];
   directChanges: DirectChangePreview[];
   potentialImpacts: PotentialImpact[];
+  /** Impact Engine V1 (simulation lecture seule). */
+  impact: AnalyzePatchImpactResult | null;
   /** Si délégable vers moteur legacy. */
   legacyDelegate: "quote" | "prep" | null;
   canCommit: boolean;
@@ -146,6 +154,8 @@ export function analyzeBeworkPatchInput(input: {
   raw: unknown;
   snapshot?: PatchContextSnapshot | null;
   context?: BeworkChatgptContextV1 | null;
+  /** Sous-graphe Impact Engine (si chargé). */
+  subgraph?: ImpactSubgraph | null;
 }): BeworkPatchAnalyzeResult {
   const parsed = parseBeworkPatch(input.raw);
   if (!parsed.ok) {
@@ -158,6 +168,7 @@ export function analyzeBeworkPatchInput(input: {
       infos: [],
       directChanges: [],
       potentialImpacts: [],
+      impact: null,
       legacyDelegate: null,
       canCommit: false,
     };
@@ -199,6 +210,26 @@ export function analyzeBeworkPatchInput(input: {
 
   const potentialImpacts = collectPotentialImpacts(patch, input.context ?? null);
 
+  let impact: AnalyzePatchImpactResult | null = null;
+  const section = patch.origin.section;
+  if (
+    section === "TAKEOFF" ||
+    section === "QUOTE" ||
+    section === "PLANNING"
+  ) {
+    const subgraph =
+      input.subgraph ??
+      emptySubgraph(patch.origin.project_id);
+    impact = analyzePatchImpact({ patch, subgraph });
+    warnings = [...warnings, ...impact.warnings];
+    errors = [...errors, ...impact.errors];
+    if (impact.impactSummary.affectedSections.length) {
+      infos.push(
+        `Impact simulé : ${impact.impactSummary.affectedSections.join(" → ")} (${impact.impactSummary.certainCount} certain(s))`,
+      );
+    }
+  }
+
   let legacyDelegate: "quote" | "prep" | null = null;
   if (canDelegateToQuotePatch(patch)) legacyDelegate = "quote";
   else if (canDelegateToPrepPatch(patch)) legacyDelegate = "prep";
@@ -235,6 +266,7 @@ export function analyzeBeworkPatchInput(input: {
     infos,
     directChanges,
     potentialImpacts,
+    impact,
     legacyDelegate: errors.length ? null : legacyDelegate,
     canCommit: capability.mode === "AVAILABLE" && errors.length === 0 && legacyDelegate != null,
   };

@@ -1,14 +1,18 @@
 /**
- * Smoke CTX-02D — REPORT capability + URBAN lecture seule + C-01 inchangé.
+ * Smoke CTX-02E — NOTICE capability + URBAN lecture seule + C-01 inchangé.
+ * Aucune écriture production.
  */
 import { prisma } from "../src/lib/prisma";
 import { getSectionCapability } from "../src/lib/bework-patch/capability";
 import { buildUniversalPatchContext } from "../src/lib/bework-patch/build-context";
-import { computeReportContextVersion } from "../src/lib/bework-context/report-context-version";
 import {
-  docToVersionInput,
-  isReportCommitSupportedOp,
-} from "../src/lib/bework-patch/commit/report-ops";
+  computeNoticeContextVersion,
+  isNoticeCommitSupportedOp,
+  noticeDocToVersionInput,
+  NOTICE_UPDATE_ALLOWED_FIELDS,
+} from "../src/lib/bework-patch/commit/notice-ops";
+import { isReportCommitSupportedOp } from "../src/lib/bework-patch/commit/report-ops";
+import { supportedOperationsForSection } from "../src/lib/bework-patch/operations-catalog";
 
 const ORG_ID = "cmt2nx23j00021k6btoov39gr";
 const C01 = "cmuh69adc00011423ry0hhj7s";
@@ -24,14 +28,16 @@ async function main() {
     REPORT: getSectionCapability("REPORT").mode,
     NOTICE: getSectionCapability("NOTICE").mode,
   };
-  if (caps.REPORT !== "AVAILABLE") throw new Error("REPORT not AVAILABLE");
-  if (caps.NOTICE !== "AVAILABLE") throw new Error("NOTICE");
-  if (!isReportCommitSupportedOp("update_report")) throw new Error("op");
+  for (const [k, v] of Object.entries(caps)) {
+    if (v !== "AVAILABLE") throw new Error(`${k} not AVAILABLE (${v})`);
+  }
+  if (!isNoticeCommitSupportedOp("update_notice")) throw new Error("op notice");
+  if (!isReportCommitSupportedOp("update_report")) throw new Error("op report");
 
   const doc = await prisma.siteDocument.findFirst({
     where: {
       organizationId: ORG_ID,
-      kind: "COMPTE_RENDU",
+      kind: "NOTICE",
     },
     select: {
       id: true,
@@ -43,47 +49,74 @@ async function main() {
       quickNotes: true,
       payloadJson: true,
       pdfStoragePath: true,
+      versionNumber: true,
       _count: { select: { media: true } },
+      project: { select: { title: true } },
     },
     orderBy: { updatedAt: "desc" },
   });
 
-  let urbanReport: unknown =
-    "aucun COMPTE_RENDU URBAN disponible pour smoke réel";
+  let urbanNotice: unknown =
+    "aucune NOTICE URBAN disponible pour smoke réel";
   if (doc) {
-    const v1 = computeReportContextVersion(docToVersionInput(doc));
-    const v2 = computeReportContextVersion(docToVersionInput(doc));
+    const v1 = computeNoticeContextVersion(noticeDocToVersionInput(doc));
+    const v2 = computeNoticeContextVersion(noticeDocToVersionInput(doc));
     if (v1 !== v2) throw new Error("version non déterministe");
     const ctx = await buildUniversalPatchContext({
       orgId: ORG_ID,
-      section: "REPORT",
+      section: "NOTICE",
       projectId: doc.projectId,
       entityId: doc.id,
     });
-    if (!ctx) throw new Error("report context null");
+    if (!ctx) throw new Error("notice context null");
     if (ctx.target.version !== v1) throw new Error("version mismatch");
+    if (ctx.target.base_version !== v1) throw new Error("base_version mismatch");
     const payload =
       doc.payloadJson && typeof doc.payloadJson === "object"
         ? Object.keys(doc.payloadJson as object)
         : [];
-    urbanReport = {
+    urbanNotice = {
       organizationId: doc.organizationId,
       projectId: doc.projectId,
+      projectTitle: doc.project.title,
       documentId: doc.id,
       kind: doc.kind,
       title: doc.title,
       status: doc.status,
-      version: v1,
-      versionSecondRead: v2,
+      versionNumberColumn: doc.versionNumber,
+      version1: v1,
+      version2: v2,
       payloadKeys: payload,
       pdfStoragePath: doc.pdfStoragePath,
       mediaCount: doc._count.media,
+      quickNotesPresent: !!doc.quickNotes,
       contextBaseVersion: ctx.target.base_version,
-      supportedCommitOp: "update_report",
-      whitelist: ["title", "quick_notes", "summary", "additional_notes"],
+      supportedCommitOp: "update_notice",
+      whitelist: [...NOTICE_UPDATE_ALLOWED_FIELDS],
+      catalogOps: supportedOperationsForSection("NOTICE").map((o) => o.op),
       pdfBehavior:
-        "PDF généré on-demand depuis payloadJson (pas de pdfStoragePath écrit) — inchangé par CTX-02D",
+        "PDF généré on-demand depuis payloadJson — pdfStoragePath non utilisé en écriture patch ; inchangé par CTX-02E",
     };
+  }
+
+  // Isolation : un COMPTE_RENDU ne doit pas charger un contexte NOTICE
+  const cr = await prisma.siteDocument.findFirst({
+    where: { organizationId: ORG_ID, kind: "COMPTE_RENDU" },
+    select: { id: true, projectId: true, kind: true },
+  });
+  let isolationReportNotice: unknown = "pas de COMPTE_RENDU pour test isolation";
+  if (cr) {
+    const bad = await buildUniversalPatchContext({
+      orgId: ORG_ID,
+      section: "NOTICE",
+      projectId: cr.projectId,
+      entityId: cr.id,
+    });
+    isolationReportNotice = {
+      compteRenduId: cr.id,
+      noticeContextOnCompteRendu: bad === null ? "REFUS (null)" : "FAIL",
+    };
+    if (bad !== null) throw new Error("NOTICE context loaded COMPTE_RENDU");
   }
 
   const study = await prisma.prepStudy.findFirst({
@@ -117,6 +150,9 @@ async function main() {
   const c01Reports = await prisma.siteDocument.count({
     where: { organizationId: ORG_ID, projectId: C01, kind: "COMPTE_RENDU" },
   });
+  const c01Notices = await prisma.siteDocument.count({
+    where: { organizationId: ORG_ID, projectId: C01, kind: "NOTICE" },
+  });
   const takeoffCtx = await buildUniversalPatchContext({
     orgId: ORG_ID,
     section: "TAKEOFF",
@@ -134,7 +170,8 @@ async function main() {
       {
         writePerformed: false,
         capabilities: caps,
-        urbanReport,
+        urbanNotice,
+        isolationReportNotice,
         c01: {
           studyVersion: study.version,
           planRevision: plan.revisionNumber,
@@ -143,6 +180,7 @@ async function main() {
           visits: c01Visits,
           followUps: c01FollowUps,
           reports: c01Reports,
+          notices: c01Notices,
           takeoff: {
             organization: takeoffCtx.organization?.name,
             scope: takeoffCtx.scope?.name,
@@ -158,7 +196,7 @@ async function main() {
       2,
     ),
   );
-  console.log("CTX-02D smoke URBAN: OK (lecture seule, aucune écriture)");
+  console.log("CTX-02E smoke URBAN: OK (lecture seule, aucune écriture)");
 }
 
 main()

@@ -919,6 +919,38 @@ function parseOperation(
         },
       };
     }
+    case "update_notice": {
+      const documentId = target.document_id ?? target.id;
+      if (!documentId) {
+        issues.push(
+          err("INVALID_TARGET", `${path}.target`, "document_id requis"),
+        );
+        return null;
+      }
+      return {
+        op,
+        target: {
+          ...target,
+          entity_type: "SITE_DOCUMENT",
+          document_id: documentId,
+        },
+        changes: {
+          title: str(changes!.title, 200) ?? undefined,
+          quick_notes:
+            changes!.quick_notes === null
+              ? null
+              : str(changes!.quick_notes, 20000) ?? undefined,
+          summary:
+            changes!.summary === null
+              ? null
+              : str(changes!.summary, 20000) ?? undefined,
+          additional_notes:
+            changes!.additional_notes === null
+              ? null
+              : str(changes!.additional_notes, 20000) ?? undefined,
+        },
+      };
+    }
     case "update_document_section": {
       if (!requireTargetIds(target, `${path}.target`, ["document_id"], issues)) return null;
       return {

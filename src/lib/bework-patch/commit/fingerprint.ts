@@ -22,6 +22,8 @@ export type VersionSnapshot = {
   followUpVersion?: number | null;
   /** CTX-02D — empreinte déterministe REPORT (COMPTE_RENDU exposé). */
   reportVersion?: number | null;
+  /** CTX-02E — empreinte déterministe NOTICE (kind NOTICE exposé). */
+  noticeVersion?: number | null;
 };
 
 export function collectVersionSnapshot(subgraph: ImpactSubgraph): VersionSnapshot {
@@ -37,6 +39,7 @@ export function collectVersionSnapshot(subgraph: ImpactSubgraph): VersionSnapsho
     visitContextVersion: subgraph.visit?.contextVersion ?? null,
     followUpVersion: subgraph.followUp?.contextVersion ?? null,
     reportVersion: subgraph.report?.contextVersion ?? null,
+    noticeVersion: subgraph.notice?.contextVersion ?? null,
   };
 }
 

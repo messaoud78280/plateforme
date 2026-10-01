@@ -103,26 +103,7 @@ export function analyzePatchImpact(input: {
 
   // Sections hors V1 : pas de graphe cross-module
   if (section === "NOTICE") {
-    return emptyResult({
-      warnings: [
-        issue(
-          "SECTION_OUT_OF_SCOPE",
-          `Impact Engine V1 : section ${section} — preview direct uniquement, pas de propagation.`,
-          "warn",
-        ),
-      ],
-      directChanges: extractDirectChanges(patch, subgraph),
-      impactSummary: {
-        affectedSections: [],
-        simulationOnly: true,
-        canPropagate: false,
-        certainCount: 0,
-        partialCount: 0,
-        potentialCount: 0,
-        protectedCount: 0,
-        overrideCount: 0,
-      },
-    });
+    return analyzeNoticeLocal(patch, subgraph);
   }
 
   if (section === "REPORT") {
@@ -428,6 +409,47 @@ function describeDirectOp(
       unit: null,
     };
   }
+  if (op.op === "update_notice") {
+    const notice = subgraph.notice;
+    const targetId = op.target.document_id ?? op.target.id;
+    if (notice && targetId && targetId !== notice.id) {
+      return {
+        op: op.op,
+        section,
+        entityType: "SITE_DOCUMENT",
+        entityId: null,
+        label: "notice hors cible",
+        field: "meta",
+        before: null,
+        after: op.changes,
+        unit: null,
+      };
+    }
+    const payload =
+      notice?.payloadJson &&
+      typeof notice.payloadJson === "object" &&
+      !Array.isArray(notice.payloadJson)
+        ? (notice.payloadJson as Record<string, unknown>)
+        : null;
+    return {
+      op: op.op,
+      section,
+      entityType: "SITE_DOCUMENT",
+      entityId: notice?.id ?? targetId ?? null,
+      label: notice?.title ?? "notice",
+      field: "meta",
+      before: notice
+        ? {
+            title: notice.title,
+            quick_notes: notice.quickNotes,
+            summary: payload?.summary ?? null,
+            additional_notes: payload?.additionalNotes ?? null,
+          }
+        : null,
+      after: op.changes,
+      unit: null,
+    };
+  }
   return {
     op: op.op,
     section,
@@ -717,6 +739,136 @@ function analyzeReportLocal(
         entityType: "SITE_DOCUMENT",
         id: patch.origin.entity_id,
         label: subgraph.report?.title ?? "Compte rendu",
+        relationType: null,
+        confidence: "CERTAIN",
+        mutable: true,
+        protected: false,
+      },
+    ],
+  };
+}
+
+/* ─── NOTICE local (texte sûr kind NOTICE) ─── */
+
+function analyzeNoticeLocal(
+  patch: BeworkPatchV1,
+  subgraph: ImpactSubgraph,
+): AnalyzePatchImpactResult {
+  const errors: BeworkPatchIssue[] = [];
+  const warnings: BeworkPatchIssue[] = [
+    issue(
+      "NOTICE_SCOPE",
+      "NOTICE CTX-02E : sections JSON, médias, statut et PDF non modifiables via patch.",
+      "warn",
+    ),
+  ];
+
+  const supported = new Set(["update_notice"]);
+  const allowedFields = new Set([
+    "title",
+    "quick_notes",
+    "summary",
+    "additional_notes",
+  ]);
+
+  for (const op of patch.operations) {
+    if (!supported.has(op.op)) {
+      errors.push(
+        issue(
+          "OPERATION_NOT_ALLOWED_FOR_SECTION",
+          `Opération ${op.op} non supportée pour le commit NOTICE (CTX-02E).`,
+          "error",
+        ),
+      );
+      continue;
+    }
+    if (op.op === "update_notice") {
+      const targetId = op.target.document_id ?? op.target.id;
+      if (targetId && targetId !== patch.origin.entity_id) {
+        errors.push(
+          issue("PROJECT_MISMATCH", "Cible hors notice.", "error"),
+        );
+      }
+      if (subgraph.notice && targetId && targetId !== subgraph.notice.id) {
+        errors.push(
+          issue("PROJECT_MISMATCH", "Cible hors document chargé.", "error"),
+        );
+      }
+      if (subgraph.notice && subgraph.notice.kind !== "NOTICE") {
+        errors.push(
+          issue("PROJECT_MISMATCH", "Document hors type NOTICE.", "error"),
+        );
+      }
+      const keys = Object.keys(op.changes).filter(
+        (k) => (op.changes as Record<string, unknown>)[k] !== undefined,
+      );
+      if (!keys.length) {
+        errors.push(
+          issue("EMPTY_OPERATIONS", "update_notice sans champ.", "error"),
+        );
+      }
+      for (const key of keys) {
+        if (!allowedFields.has(key)) {
+          errors.push(
+            issue(
+              "INVALID_FIELD",
+              `Champ « ${key} » non autorisé (whitelist: title, quick_notes, summary, additional_notes).`,
+              "error",
+            ),
+          );
+        }
+      }
+      if (
+        op.changes.title !== undefined &&
+        (!op.changes.title || !op.changes.title.trim())
+      ) {
+        errors.push(
+          issue("INVALID_FIELD", "title ne peut pas être vide.", "error"),
+        );
+      }
+    }
+  }
+
+  if (!subgraph.notice) {
+    errors.push(
+      issue(
+        "TARGET_NOT_FOUND",
+        "Notice introuvable dans le sous-graphe.",
+        "error",
+      ),
+    );
+  } else if (subgraph.notice.id !== patch.origin.entity_id) {
+    errors.push(issue("PROJECT_MISMATCH", "Document hors cible.", "error"));
+  }
+
+  const directChanges = extractDirectChanges(patch, subgraph).filter(
+    (dc) => dc.op === "update_notice",
+  );
+
+  return {
+    directChanges,
+    canonicalResolution: buildCanonicalResolution({}),
+    derivedChanges: [],
+    affectedEntities: [],
+    protectedEntities: [],
+    overrides: [],
+    warnings,
+    errors,
+    impactSummary: {
+      affectedSections: [],
+      simulationOnly: true,
+      canPropagate: false,
+      certainCount: directChanges.length,
+      partialCount: 0,
+      potentialCount: 0,
+      protectedCount: 0,
+      overrideCount: 0,
+    },
+    graph: [
+      {
+        entityType: "SITE_DOCUMENT",
+        id: patch.origin.entity_id,
+        label: subgraph.notice?.title ?? "Notice",
         relationType: null,
         confidence: "CERTAIN",
         mutable: true,

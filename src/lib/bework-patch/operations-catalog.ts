@@ -225,6 +225,17 @@ export const OPERATION_CATALOG: Record<
       "additional_notes",
     ],
   },
+  update_notice: {
+    entity_types: ["SITE_DOCUMENT"],
+    sections: ["NOTICE"],
+    compatible_intents: DOCUMENT,
+    allowed_change_fields: [
+      "title",
+      "quick_notes",
+      "summary",
+      "additional_notes",
+    ],
+  },
   update_document_section: {
     entity_types: ["SITE_DOCUMENT"],
     sections: ["REPORT", "NOTICE"],

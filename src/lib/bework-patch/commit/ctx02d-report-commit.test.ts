@@ -118,7 +118,7 @@ function reportPatch(overrides?: {
 
 {
   assert.equal(getSectionCapability("REPORT").mode, "AVAILABLE");
-  assert.equal(getSectionCapability("NOTICE").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("NOTICE").mode, "AVAILABLE");
   assert.equal(getSectionCapability("FOLLOW_UP").mode, "AVAILABLE");
   console.log("  A capability: ok");
 }
@@ -284,6 +284,8 @@ function reportPatch(overrides?: {
 }
 
 {
+  assert.equal(getSectionCapability("NOTICE").mode, "AVAILABLE");
+  const noticeId = "n1";
   const patch: BeworkPatchV1 = {
     type: "bework_patch_v1",
     schema_version: 1,
@@ -291,20 +293,39 @@ function reportPatch(overrides?: {
     origin: {
       section: "NOTICE",
       project_id: PROJECT_ID,
-      entity_id: "n1",
+      entity_id: noticeId,
       base_version: 1,
     },
     change_intent: "DOCUMENT_EDIT",
     reason: "x",
-    operations: [],
+    operations: [
+      {
+        op: "update_notice",
+        target: { entity_type: "SITE_DOCUMENT", document_id: noticeId },
+        changes: { quick_notes: "x" },
+      },
+    ],
+  };
+  const subgraph = {
+    ...reportSubgraph(),
+    notice: {
+      id: noticeId,
+      projectId: PROJECT_ID,
+      kind: "NOTICE" as const,
+      title: "N",
+      status: "DRAFT",
+      quickNotes: null,
+      payloadJson: {},
+      contextVersion: 1,
+    },
   };
   const elig = evaluateCommitEligibility({
     patch,
-    impact: analyzePatchImpact({ patch, subgraph: reportSubgraph() }),
+    impact: analyzePatchImpact({ patch, subgraph }),
   });
-  assert.equal(elig.ok, false);
-  if (!elig.ok) assert.equal(elig.code, "PREVIEW_ONLY");
-  console.log("  K NOTICE PREVIEW_ONLY: ok");
+  assert.equal(elig.ok, true);
+  if (elig.ok) assert.equal(elig.mode, "NOTICE_ONLY");
+  console.log("  K NOTICE AVAILABLE (NOTICE_ONLY): ok");
 }
 
 {

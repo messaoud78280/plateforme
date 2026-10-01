@@ -31,7 +31,7 @@ async function main() {
   if (caps.VISIT !== "PREVIEW_ONLY") throw new Error("VISIT");
   if (caps.FOLLOW_UP !== "PREVIEW_ONLY") throw new Error("FOLLOW_UP");
   if (caps.REPORT !== "PREVIEW_ONLY") throw new Error("REPORT");
-  if (caps.NOTICE !== "PREVIEW_ONLY") throw new Error("NOTICE");
+  if (caps.NOTICE !== "AVAILABLE") throw new Error("NOTICE");
 
   const study = await prisma.prepStudy.findFirst({
     where: {

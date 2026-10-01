@@ -14,6 +14,10 @@ import { computeFollowUpContextVersion } from "@/lib/bework-context/follow-up-co
 import { sheetToVersionInput } from "@/lib/bework-patch/commit/follow-up-ops";
 import { computeReportContextVersion } from "@/lib/bework-context/report-context-version";
 import { docToVersionInput } from "@/lib/bework-patch/commit/report-ops";
+import {
+  computeNoticeContextVersion,
+  noticeDocToVersionInput,
+} from "@/lib/bework-patch/commit/notice-ops";
 
 function asIso(dte: Date | null | undefined): string | null {
   if (!dte) return null;
@@ -168,6 +172,40 @@ export async function loadImpactSubgraph(input: {
         quickNotes: doc.quickNotes,
         payloadJson: doc.payloadJson,
         contextVersion: computeReportContextVersion(docToVersionInput(doc)),
+      };
+    }
+    return graph;
+  } else if (section === "NOTICE") {
+    const documentId = input.patch.origin.entity_id;
+    const doc = await prisma.siteDocument.findFirst({
+      where: {
+        id: documentId,
+        organizationId: input.orgId,
+        projectId: input.projectId,
+        kind: "NOTICE",
+      },
+      select: {
+        id: true,
+        projectId: true,
+        kind: true,
+        title: true,
+        status: true,
+        quickNotes: true,
+        payloadJson: true,
+      },
+    });
+    if (doc) {
+      graph.notice = {
+        id: doc.id,
+        projectId: doc.projectId,
+        kind: doc.kind,
+        title: doc.title,
+        status: doc.status,
+        quickNotes: doc.quickNotes,
+        payloadJson: doc.payloadJson,
+        contextVersion: computeNoticeContextVersion(
+          noticeDocToVersionInput(doc),
+        ),
       };
     }
     return graph;

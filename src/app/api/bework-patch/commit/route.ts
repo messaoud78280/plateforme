@@ -71,7 +71,9 @@ export async function POST(req: Request) {
                 ? "Modification suivi appliquée."
                 : result.syncMode === "REPORT_ONLY"
                   ? "Modification compte rendu appliquée."
-                  : "Modification appliquée et synchronisée.",
+                  : result.syncMode === "NOTICE_ONLY"
+                    ? "Modification notice appliquée."
+                    : "Modification appliquée et synchronisée.",
     });
   } catch (e) {
     return prepErrorResponse(e);

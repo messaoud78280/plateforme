@@ -28,6 +28,7 @@ import { applyPlanningDirectInTx } from "@/lib/bework-patch/commit/planning-ops"
 import { applyVisitDirectInTx } from "@/lib/bework-patch/commit/visit-ops";
 import { applyFollowUpDirectInTx } from "@/lib/bework-patch/commit/follow-up-ops";
 import { applyReportDirectInTx } from "@/lib/bework-patch/commit/report-ops";
+import { applyNoticeDirectInTx } from "@/lib/bework-patch/commit/notice-ops";
 
 export type CommitUniversalResult =
   | {
@@ -43,6 +44,7 @@ export type CommitUniversalResult =
         visitUpdated: boolean;
         followUpUpdated: boolean;
         reportUpdated: boolean;
+        noticeUpdated: boolean;
         quoteProtected: boolean;
       };
       impact: AnalyzePatchImpactResult;
@@ -164,6 +166,7 @@ export async function commitUniversalPatch(input: {
       let visitUpdated = false;
       let followUpUpdated = false;
       let reportUpdated = false;
+      let noticeUpdated = false;
       const quoteProtected = impact.protectedEntities.some((p) => p.section === "QUOTE");
 
       let studyId: string | null = subgraph.study?.id ?? null;
@@ -175,8 +178,26 @@ export async function commitUniversalPatch(input: {
       let followUpVersionAfter: number | null = null;
       let reportId: string | null = subgraph.report?.id ?? null;
       let reportVersionAfter: number | null = null;
+      let noticeId: string | null = subgraph.notice?.id ?? null;
+      let noticeVersionAfter: number | null = null;
 
-      if (eligibility.mode === "REPORT_ONLY") {
+      if (eligibility.mode === "NOTICE_ONLY") {
+        if (!subgraph.notice) {
+          throw Object.assign(
+            new Error("Notice introuvable dans le sous-graphe."),
+            { code: "TARGET_NOT_FOUND" },
+          );
+        }
+        const applied = await applyNoticeDirectInTx(tx, {
+          orgId: input.orgId,
+          projectId: input.projectId,
+          patch,
+          expectedVersion: subgraph.notice.contextVersion,
+        });
+        noticeUpdated = applied.updated;
+        noticeId = applied.documentId;
+        noticeVersionAfter = applied.versionAfter;
+      } else if (eligibility.mode === "REPORT_ONLY") {
         if (!subgraph.report) {
           throw Object.assign(
             new Error("Compte rendu introuvable dans le sous-graphe."),
@@ -297,6 +318,8 @@ export async function commitUniversalPatch(input: {
         followUpVersionOverride: followUpVersionAfter,
         reportId,
         reportVersionOverride: reportVersionAfter,
+        noticeId,
+        noticeVersionOverride: noticeVersionAfter,
       });
 
       const writtenDerived = impact.derivedChanges.filter((d) => {
@@ -309,6 +332,7 @@ export async function commitUniversalPatch(input: {
         if (eligibility.mode === "VISIT_ONLY") return false;
         if (eligibility.mode === "FOLLOW_UP_ONLY") return false;
         if (eligibility.mode === "REPORT_ONLY") return false;
+        if (eligibility.mode === "NOTICE_ONLY") return false;
         return true;
       });
 
@@ -355,6 +379,7 @@ export async function commitUniversalPatch(input: {
             visitUpdated,
             followUpUpdated,
             reportUpdated,
+            noticeUpdated,
             quoteProtected,
           },
         };
@@ -435,6 +460,8 @@ async function readVersionsAfter(
     followUpVersionOverride?: number | null;
     reportId?: string | null;
     reportVersionOverride?: number | null;
+    noticeId?: string | null;
+    noticeVersionOverride?: number | null;
   },
 ): Promise<VersionSnapshot> {
   const [study, quote, plan] = await Promise.all([
@@ -470,6 +497,7 @@ async function readVersionsAfter(
     visitContextVersion: ids.visitContextVersionOverride ?? null,
     followUpVersion: ids.followUpVersionOverride ?? null,
     reportVersion: ids.reportVersionOverride ?? null,
+    noticeVersion: ids.noticeVersionOverride ?? null,
   };
 }
 

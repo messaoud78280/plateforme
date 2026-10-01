@@ -11,7 +11,8 @@ export type SyncMode =
   | "PLANNING_ONLY"
   | "VISIT_ONLY"
   | "FOLLOW_UP_ONLY"
-  | "REPORT_ONLY";
+  | "REPORT_ONLY"
+  | "NOTICE_ONLY";
 
 export type CommitEligibility =
   | {
@@ -176,11 +177,32 @@ export function evaluateCommitEligibility(input: {
     };
   }
 
+  // CTX-02E — NOTICE local (texte sûr kind NOTICE uniquement)
   if (patch.origin.section === "NOTICE") {
+    const unsupported = patch.operations.filter(
+      (op) => op.op !== "update_notice",
+    );
+    if (unsupported.length) {
+      return {
+        ok: false,
+        reason: `Opération ${unsupported[0]!.op} non supportée pour le commit NOTICE (CTX-02E).`,
+        code: "OPERATION_NOT_ALLOWED_FOR_SECTION",
+      };
+    }
+    if (!patch.operations.length) {
+      return {
+        ok: false,
+        reason: "Aucune opération notice.",
+        code: "EMPTY_OPERATIONS",
+      };
+    }
     return {
-      ok: false,
-      reason: `Section NOTICE : preview uniquement (Phase E).`,
-      code: "PREVIEW_ONLY",
+      ok: true,
+      mode: "NOTICE_ONLY",
+      buttonLabel: "Appliquer à la notice",
+      warnings: impact.warnings
+        .filter((w) => w.code === "NOTICE_SCOPE")
+        .map((w) => w.message),
     };
   }
 

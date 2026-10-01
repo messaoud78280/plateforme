@@ -43,8 +43,8 @@ export const SECTION_PATCH_CAPABILITY: Record<
     label: null,
   },
   NOTICE: {
-    mode: "PREVIEW_ONLY",
-    label: "Modification notice : preview uniquement pour le moment.",
+    mode: "AVAILABLE",
+    label: null,
   },
 };
 

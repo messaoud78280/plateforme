@@ -437,6 +437,20 @@ export type OpUpdateReport = {
   };
 };
 
+export type OpUpdateNotice = {
+  op: "update_notice";
+  target: BeworkPatchTargetBase & {
+    entity_type: "SITE_DOCUMENT";
+    document_id: string;
+  };
+  changes: {
+    title?: string;
+    quick_notes?: string | null;
+    summary?: string | null;
+    additional_notes?: string | null;
+  };
+};
+
 export type OpUpdateDocumentSection = {
   op: "update_document_section";
   target: BeworkPatchTargetBase & {
@@ -500,6 +514,7 @@ export type BeworkPatchOperation =
   | OpUpdateFollowUp
   | OpUpdateProgress
   | OpUpdateReport
+  | OpUpdateNotice
   | OpUpdateDocumentSection
   | OpAddDocumentSection
   | OpUpdateText;

@@ -483,7 +483,7 @@ import {
   assert.equal(getSectionCapability("VISIT").mode, "AVAILABLE");
   assert.equal(getSectionCapability("FOLLOW_UP").mode, "AVAILABLE");
   assert.equal(getSectionCapability("REPORT").mode, "AVAILABLE");
-  assert.equal(getSectionCapability("NOTICE").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("NOTICE").mode, "AVAILABLE");
   for (const [section, cap] of Object.entries(SECTION_PATCH_CAPABILITY)) {
     if (cap.mode === "PREVIEW_ONLY") {
       assert.ok(cap.label, `${section} doit exposer un label preview`);

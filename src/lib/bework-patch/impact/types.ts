@@ -233,6 +233,9 @@ export type ImpactReport = {
   contextVersion: number;
 };
 
+/** Même forme que ImpactReport — isolation kind NOTICE vs COMPTE_RENDU. */
+export type ImpactNotice = ImpactReport;
+
 export type ImpactSubgraph = {
   projectId: string;
   study: ImpactStudy | null;
@@ -242,6 +245,7 @@ export type ImpactSubgraph = {
   visit: ImpactVisit | null;
   followUp: ImpactFollowUp | null;
   report: ImpactReport | null;
+  notice: ImpactNotice | null;
 };
 
 export function emptySubgraph(projectId: string): ImpactSubgraph {
@@ -254,5 +258,6 @@ export function emptySubgraph(projectId: string): ImpactSubgraph {
     visit: null,
     followUp: null,
     report: null,
+    notice: null,
   };
 }

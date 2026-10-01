@@ -113,7 +113,7 @@ function followUpPatch(overrides?: {
   assert.equal(getSectionCapability("VISIT").mode, "AVAILABLE");
   assert.equal(getSectionCapability("PLANNING").mode, "AVAILABLE");
   assert.equal(getSectionCapability("REPORT").mode, "AVAILABLE");
-  assert.equal(getSectionCapability("NOTICE").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("NOTICE").mode, "AVAILABLE");
   console.log("  A capability: ok");
 }
 
@@ -275,7 +275,7 @@ function followUpPatch(overrides?: {
   console.log("  I cross-follow-up: ok");
 }
 
-// --- J NOTICE PREVIEW_ONLY ---
+// --- J NOTICE AVAILABLE (empty → EMPTY_OPERATIONS) ---
 {
   const patch: BeworkPatchV1 = {
     type: "bework_patch_v1",
@@ -299,8 +299,8 @@ function followUpPatch(overrides?: {
     }),
   });
   assert.equal(elig.ok, false);
-  if (!elig.ok) assert.equal(elig.code, "PREVIEW_ONLY");
-  console.log("  J NOTICE PREVIEW_ONLY: ok");
+  if (!elig.ok) assert.equal(elig.code, "TARGET_NOT_FOUND");
+  console.log("  J NOTICE TARGET_NOT_FOUND: ok");
 }
 
 // --- K version change ---

@@ -107,7 +107,7 @@ function visitPatch(overrides?: {
   assert.equal(getSectionCapability("VISIT").mode, "AVAILABLE");
   assert.equal(getSectionCapability("PLANNING").mode, "AVAILABLE");
   assert.equal(getSectionCapability("REPORT").mode, "AVAILABLE");
-  assert.equal(getSectionCapability("NOTICE").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("NOTICE").mode, "AVAILABLE");
   console.log("  A capability: ok");
 }
 
@@ -274,7 +274,7 @@ function visitPatch(overrides?: {
   console.log("  H cross-visit: ok");
 }
 
-// --- I NOTICE still PREVIEW_ONLY ---
+// --- I NOTICE AVAILABLE (empty → EMPTY_OPERATIONS) ---
 {
   const patch: BeworkPatchV1 = {
     type: "bework_patch_v1",
@@ -296,11 +296,11 @@ function visitPatch(overrides?: {
   });
   const elig = evaluateCommitEligibility({ patch, impact });
   assert.equal(elig.ok, false);
-  if (!elig.ok) assert.equal(elig.code, "PREVIEW_ONLY");
-  console.log("  I NOTICE PREVIEW_ONLY: ok");
+  if (!elig.ok) assert.equal(elig.code, "TARGET_NOT_FOUND");
+  console.log("  I NOTICE TARGET_NOT_FOUND: ok");
 }
 
-// --- J NOTICE only ---
+// --- J NOTICE empty ops ---
 {
   const patch: BeworkPatchV1 = {
     type: "bework_patch_v1",
@@ -321,8 +321,8 @@ function visitPatch(overrides?: {
     impact: analyzePatchImpact({ patch, subgraph: visitSubgraph() }),
   });
   assert.equal(elig.ok, false);
-  if (!elig.ok) assert.equal(elig.code, "PREVIEW_ONLY");
-  console.log("  J NOTICE PREVIEW_ONLY: ok");
+  if (!elig.ok) assert.equal(elig.code, "TARGET_NOT_FOUND");
+  console.log("  J NOTICE TARGET_NOT_FOUND: ok");
 }
 
 // --- K CTX-07 version change conceptuel ---

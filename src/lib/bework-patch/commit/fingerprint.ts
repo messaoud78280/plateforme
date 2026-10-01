@@ -16,6 +16,8 @@ export type VersionSnapshot = {
   planRevision: number | null;
   /** CTX-02A / CTX-04 — version métré source du planning (pas confondre avec planRevision). */
   studyVersionAtGeneration?: number | null;
+  /** CTX-02B / CTX-07 — empreinte déterministe VISIT. */
+  visitContextVersion?: number | null;
 };
 
 export function collectVersionSnapshot(subgraph: ImpactSubgraph): VersionSnapshot {
@@ -28,6 +30,7 @@ export function collectVersionSnapshot(subgraph: ImpactSubgraph): VersionSnapsho
     quoteStatus: quote?.status ?? null,
     planRevision: plan?.revisionNumber ?? null,
     studyVersionAtGeneration: plan?.studyVersionAtGeneration ?? null,
+    visitContextVersion: subgraph.visit?.contextVersion ?? null,
   };
 }
 

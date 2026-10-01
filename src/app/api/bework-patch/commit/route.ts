@@ -65,7 +65,9 @@ export async function POST(req: Request) {
           ? "Modifications autorisées appliquées. Devis contractuel conservé."
           : result.syncMode === "PLANNING_ONLY"
             ? "Modification planning appliquée."
-            : "Modification appliquée et synchronisée.",
+            : result.syncMode === "VISIT_ONLY"
+              ? "Modification visite appliquée."
+              : "Modification appliquée et synchronisée.",
     });
   } catch (e) {
     return prepErrorResponse(e);

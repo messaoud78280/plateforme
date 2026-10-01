@@ -276,10 +276,10 @@ function fixtureSnapshot(
   console.log("  J legacy survey: ok (buildSiteSurveyJson présent)");
 }
 
-// --- K PREVIEW_ONLY ---
+// --- K VISIT AVAILABLE (CTX-02B) ---
 {
-  assert.equal(getSectionCapability("VISIT").mode, "PREVIEW_ONLY");
-  console.log("  K VISIT PREVIEW_ONLY: ok");
+  assert.equal(getSectionCapability("VISIT").mode, "AVAILABLE");
+  console.log("  K VISIT AVAILABLE: ok");
 }
 
 // --- L aucune mutation ---

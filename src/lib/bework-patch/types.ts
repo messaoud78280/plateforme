@@ -349,6 +349,20 @@ export type OpRemoveTask = {
   };
 };
 
+/** CTX-02B — champs texte SiteVisit (whitelist). */
+export type OpUpdateVisit = {
+  op: "update_visit";
+  target: BeworkPatchTargetBase & {
+    entity_type: "SITE_VISIT";
+    visit_id: string;
+  };
+  changes: {
+    subject?: string;
+    client_need?: string | null;
+    comments?: string | null;
+  };
+};
+
 export type OpUpdateMeasurement = {
   op: "update_measurement";
   target: BeworkPatchTargetBase & {
@@ -453,6 +467,7 @@ export type BeworkPatchOperation =
   | OpUpdateWorkload
   | OpAddTask
   | OpRemoveTask
+  | OpUpdateVisit
   | OpUpdateMeasurement
   | OpAddMeasurement
   | OpUpdateProgress

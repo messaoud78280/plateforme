@@ -171,6 +171,12 @@ export const OPERATION_CATALOG: Record<
     compatible_intents: PLANNING,
     allowed_change_fields: [],
   },
+  update_visit: {
+    entity_types: ["SITE_VISIT"],
+    sections: ["VISIT"],
+    compatible_intents: FIELD,
+    allowed_change_fields: ["subject", "client_need", "comments"],
+  },
   update_measurement: {
     entity_types: ["SITE_VISIT_MEASUREMENT"],
     sections: ["VISIT"],

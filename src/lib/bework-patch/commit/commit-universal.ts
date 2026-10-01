@@ -25,6 +25,7 @@ import {
   type SyncMode,
 } from "@/lib/bework-patch/commit/eligibility";
 import { applyPlanningDirectInTx } from "@/lib/bework-patch/commit/planning-ops";
+import { applyVisitDirectInTx } from "@/lib/bework-patch/commit/visit-ops";
 
 export type CommitUniversalResult =
   | {
@@ -37,6 +38,7 @@ export type CommitUniversalResult =
         takeoffUpdated: boolean;
         quoteUpdated: boolean;
         planningUpdated: boolean;
+        visitUpdated: boolean;
         quoteProtected: boolean;
       };
       impact: AnalyzePatchImpactResult;
@@ -114,7 +116,9 @@ export async function commitUniversalPatch(input: {
       error:
         patch.origin.section === "PLANNING"
           ? "Le planning a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
-          : "Les données ont changé depuis l’analyse. Veuillez relancer la prévisualisation.",
+          : patch.origin.section === "VISIT"
+            ? "La visite a été modifiée depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
+            : "Les données ont changé depuis l’analyse. Veuillez relancer la prévisualisation.",
       code: "PREVIEW_STALE",
       impact,
     };
@@ -149,13 +153,31 @@ export async function commitUniversalPatch(input: {
       let takeoffUpdated = false;
       let quoteUpdated = false;
       let planningUpdated = false;
+      let visitUpdated = false;
       const quoteProtected = impact.protectedEntities.some((p) => p.section === "QUOTE");
 
       let studyId: string | null = subgraph.study?.id ?? null;
       let quoteId: string | null = subgraph.quotes[0]?.id ?? null;
       let planId: string | null = subgraph.plans[0]?.id ?? null;
+      let visitId: string | null = subgraph.visit?.id ?? null;
+      let visitVersionAfter: number | null = null;
 
-      if (eligibility.mode === "PLANNING_ONLY") {
+      if (eligibility.mode === "VISIT_ONLY") {
+        if (!subgraph.visit) {
+          throw Object.assign(new Error("Visite introuvable dans le sous-graphe."), {
+            code: "TARGET_NOT_FOUND",
+          });
+        }
+        const applied = await applyVisitDirectInTx(tx, {
+          orgId: input.orgId,
+          projectId: input.projectId,
+          patch,
+          expectedVersion: subgraph.visit.contextVersion,
+        });
+        visitUpdated = applied.updated;
+        visitId = applied.visitId;
+        visitVersionAfter = applied.versionAfter;
+      } else if (eligibility.mode === "PLANNING_ONLY") {
         const plan = subgraph.plans.find((p) => p.id === patch.origin.entity_id);
         if (!plan) {
           throw Object.assign(new Error("Planning introuvable dans le sous-graphe."), {
@@ -223,6 +245,8 @@ export async function commitUniversalPatch(input: {
         studyId,
         quoteId,
         planId,
+        visitId,
+        visitContextVersionOverride: visitVersionAfter,
       });
 
       const writtenDerived = impact.derivedChanges.filter((d) => {
@@ -232,6 +256,7 @@ export async function commitUniversalPatch(input: {
         }
         if (eligibility.mode === "QUOTE_ONLY") return d.section === "QUOTE";
         if (eligibility.mode === "PLANNING_ONLY") return d.section === "PLANNING";
+        if (eligibility.mode === "VISIT_ONLY") return false;
         return true;
       });
 
@@ -275,6 +300,7 @@ export async function commitUniversalPatch(input: {
             takeoffUpdated,
             quoteUpdated,
             planningUpdated,
+            visitUpdated,
             quoteProtected,
           },
         };
@@ -319,7 +345,9 @@ export async function commitUniversalPatch(input: {
         error:
           e instanceof Error
             ? e.message
-            : "Le planning a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez.",
+            : patch.origin.section === "VISIT"
+              ? "La visite a été modifiée depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
+              : "Le planning a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez.",
         code: code === "VERSION_CONFLICT" ? "VERSION_CONFLICT" : "PREVIEW_STALE",
         impact,
       };
@@ -339,7 +367,13 @@ export async function commitUniversalPatch(input: {
 
 async function readVersionsAfter(
   tx: Prisma.TransactionClient,
-  ids: { studyId: string | null; quoteId: string | null; planId: string | null },
+  ids: {
+    studyId: string | null;
+    quoteId: string | null;
+    planId: string | null;
+    visitId: string | null;
+    visitContextVersionOverride?: number | null;
+  },
 ): Promise<VersionSnapshot> {
   const [study, quote, plan] = await Promise.all([
     ids.studyId
@@ -371,6 +405,9 @@ async function readVersionsAfter(
     quoteStatus: quote?.status ?? null,
     planRevision: plan?.revisionNumber ?? null,
     studyVersionAtGeneration: plan?.studyVersionAtGeneration ?? null,
+    visitContextVersion:
+      ids.visitContextVersionOverride ??
+      (ids.visitId != null ? null : null),
   };
 }
 

@@ -103,7 +103,6 @@ export function analyzePatchImpact(input: {
 
   // Sections hors V1 : pas de graphe cross-module
   if (
-    section === "VISIT" ||
     section === "FOLLOW_UP" ||
     section === "REPORT" ||
     section === "NOTICE"
@@ -128,6 +127,10 @@ export function analyzePatchImpact(input: {
         overrideCount: 0,
       },
     });
+  }
+
+  if (section === "VISIT") {
+    return analyzeVisitLocal(patch, subgraph);
   }
 
   if (section === "QUOTE" && patch.change_intent === "COMMERCIAL_ADJUSTMENT") {
@@ -313,6 +316,40 @@ function describeDirectOp(
       unit: null,
     };
   }
+  if (op.op === "update_visit") {
+    const visit = subgraph.visit;
+    const targetId = op.target.visit_id ?? op.target.id;
+    if (visit && targetId && targetId !== visit.id) {
+      return {
+        op: op.op,
+        section,
+        entityType: "SITE_VISIT",
+        entityId: null,
+        label: "visite hors cible",
+        field: "meta",
+        before: null,
+        after: op.changes,
+        unit: null,
+      };
+    }
+    return {
+      op: op.op,
+      section,
+      entityType: "SITE_VISIT",
+      entityId: visit?.id ?? targetId ?? null,
+      label: visit?.subject ?? "visite",
+      field: "meta",
+      before: visit
+        ? {
+            subject: visit.subject,
+            client_need: visit.clientNeed,
+            comments: visit.comments,
+          }
+        : null,
+      after: op.changes,
+      unit: null,
+    };
+  }
   return {
     op: op.op,
     section,
@@ -472,6 +509,137 @@ function analyzeCommercialQuote(
         confidence: "CERTAIN",
         mutable: protectedEntities.length === 0,
         protected: protectedEntities.length > 0,
+      },
+    ],
+  };
+}
+
+/* ─── VISIT local (champs texte, pas de mesures/médias) ─── */
+
+function analyzeVisitLocal(
+  patch: BeworkPatchV1,
+  subgraph: ImpactSubgraph,
+): AnalyzePatchImpactResult {
+  const errors: BeworkPatchIssue[] = [];
+  const warnings: BeworkPatchIssue[] = [
+    issue(
+      "VISIT_SCOPE",
+      "VISIT CTX-02B : mesures, médias et statut non modifiables via patch.",
+      "warn",
+    ),
+  ];
+
+  const supported = new Set(["update_visit"]);
+  const allowedFields = new Set(["subject", "client_need", "comments"]);
+
+  for (const op of patch.operations) {
+    if (!supported.has(op.op)) {
+      errors.push(
+        issue(
+          "OPERATION_NOT_ALLOWED_FOR_SECTION",
+          `Opération ${op.op} non supportée pour le commit VISIT (CTX-02B).`,
+          "error",
+        ),
+      );
+      continue;
+    }
+    if (op.op === "update_visit") {
+      const targetId = op.target.visit_id ?? op.target.id;
+      if (targetId && targetId !== patch.origin.entity_id) {
+        errors.push(
+          issue("PROJECT_MISMATCH", "Cible hors visite.", "error"),
+        );
+      }
+      if (subgraph.visit && targetId && targetId !== subgraph.visit.id) {
+        errors.push(
+          issue("PROJECT_MISMATCH", "Cible hors visite chargée.", "error"),
+        );
+      }
+      const keys = Object.keys(op.changes).filter(
+        (k) => (op.changes as Record<string, unknown>)[k] !== undefined,
+      );
+      if (!keys.length) {
+        errors.push(
+          issue("EMPTY_OPERATIONS", "update_visit sans champ.", "error"),
+        );
+      }
+      for (const key of keys) {
+        if (!allowedFields.has(key)) {
+          errors.push(
+            issue(
+              "INVALID_FIELD",
+              `Champ « ${key} » non autorisé (whitelist: subject, client_need, comments).`,
+              "error",
+            ),
+          );
+        }
+      }
+      if (
+        op.changes.subject !== undefined &&
+        (!op.changes.subject || !op.changes.subject.trim())
+      ) {
+        errors.push(
+          issue("INVALID_FIELD", "subject ne peut pas être vide.", "error"),
+        );
+      }
+    }
+  }
+
+  if (!subgraph.visit) {
+    errors.push(
+      issue("TARGET_NOT_FOUND", "Visite introuvable dans le sous-graphe.", "error"),
+    );
+  } else if (subgraph.visit.id !== patch.origin.entity_id) {
+    errors.push(
+      issue("PROJECT_MISMATCH", "Visite hors cible.", "error"),
+    );
+  }
+
+  const directChanges = extractDirectChanges(patch, subgraph).filter(
+    (dc) => dc.op === "update_visit",
+  );
+
+  return {
+    directChanges,
+    canonicalResolution: buildCanonicalResolution({}),
+    derivedChanges: [],
+    affectedEntities: [],
+    protectedEntities: [],
+    overrides: [],
+    warnings,
+    errors,
+    impactSummary: {
+      affectedSections: [],
+      simulationOnly: true,
+      canPropagate: false,
+      certainCount: directChanges.length,
+      partialCount: 0,
+      potentialCount: 0,
+      protectedCount: 0,
+      overrideCount: 0,
+    },
+    graph: [
+      {
+        entityType: "SITE_VISIT",
+        id: patch.origin.entity_id,
+        label: subgraph.visit?.subject ?? "Visite",
+        relationType: null,
+        confidence: "CERTAIN",
+        mutable: true,
+        protected: false,
+        before: subgraph.visit
+          ? {
+              subject: subgraph.visit.subject,
+              client_need: subgraph.visit.clientNeed,
+              comments: subgraph.visit.comments,
+            }
+          : undefined,
+        after: Object.assign(
+          {},
+          ...patch.operations
+            .filter((o) => o.op === "update_visit")
+            .map((o) => (o.op === "update_visit" ? o.changes : {})),
+        ),
       },
     ],
   };

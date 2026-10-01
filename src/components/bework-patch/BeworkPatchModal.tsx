@@ -27,7 +27,7 @@ type CommitMeta = {
   eligibility:
     | {
         ok: true;
-        mode: "FULL_SYNC" | "SAFE_PARTIAL_SYNC" | "QUOTE_ONLY" | "PLANNING_ONLY";
+        mode: "FULL_SYNC" | "SAFE_PARTIAL_SYNC" | "QUOTE_ONLY" | "PLANNING_ONLY" | "VISIT_ONLY";
         buttonLabel: string;
         warnings: string[];
       }

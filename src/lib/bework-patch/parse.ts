@@ -763,6 +763,34 @@ function parseOperation(
         },
       };
     }
+    case "update_visit": {
+      const visitId = target.visit_id ?? target.id;
+      if (!visitId) {
+        issues.push(
+          err("INVALID_TARGET", `${path}.target`, "visit_id requis"),
+        );
+        return null;
+      }
+      return {
+        op,
+        target: {
+          ...target,
+          entity_type: "SITE_VISIT",
+          visit_id: visitId,
+        },
+        changes: {
+          subject: str(changes!.subject, 200) ?? undefined,
+          client_need:
+            changes!.client_need === null
+              ? null
+              : str(changes!.client_need, 8000) ?? undefined,
+          comments:
+            changes!.comments === null
+              ? null
+              : str(changes!.comments, 8000) ?? undefined,
+        },
+      };
+    }
     case "update_measurement": {
       if (!requireTargetIds(target, `${path}.target`, ["visit_id"], issues)) return null;
       if (!target.measurement_id && !target.id) {

@@ -132,6 +132,7 @@ export function buildFixtureSubgraph54(opts?: {
         ],
       },
     ],
+    visit: null,
   };
 }
 

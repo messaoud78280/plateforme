@@ -8,6 +8,8 @@ import {
   emptySubgraph,
   type ImpactSubgraph,
 } from "@/lib/bework-patch/impact/types";
+import { computeVisitContextVersion } from "@/lib/bework-context/visit-context-version";
+import { visitRowToVersionInput } from "@/lib/bework-patch/commit/visit-ops";
 
 function asIso(dte: Date | null | undefined): string | null {
   if (!dte) return null;
@@ -37,6 +39,71 @@ export async function loadImpactSubgraph(input: {
     quoteId = input.patch.origin.entity_id;
   } else if (section === "PLANNING") {
     planId = input.patch.origin.entity_id;
+  } else if (section === "VISIT") {
+    const visitId = input.patch.origin.entity_id;
+    const visit = await prisma.siteVisit.findFirst({
+      where: {
+        id: visitId,
+        organizationId: input.orgId,
+      },
+      select: {
+        id: true,
+        projectId: true,
+        subject: true,
+        status: true,
+        clientName: true,
+        siteAddress: true,
+        clientNeed: true,
+        comments: true,
+        measurements: {
+          select: {
+            id: true,
+            zone: true,
+            label: true,
+            measureType: true,
+            unit: true,
+            lengthM: true,
+            widthM: true,
+            heightM: true,
+            quantityValue: true,
+            computedQuantity: true,
+            lot: true,
+            observation: true,
+          },
+        },
+        medias: {
+          select: {
+            id: true,
+            name: true,
+            kind: true,
+            category: true,
+            observation: true,
+            fileUrl: true,
+            storagePath: true,
+          },
+        },
+      },
+    });
+    if (
+      visit &&
+      (!visit.projectId || visit.projectId === input.projectId)
+    ) {
+      const contextVersion = computeVisitContextVersion(
+        visitRowToVersionInput(visit),
+      );
+      graph.visit = {
+        id: visit.id,
+        projectId: visit.projectId,
+        subject: visit.subject,
+        status: visit.status,
+        clientName: visit.clientName,
+        siteAddress: visit.siteAddress,
+        clientNeed: visit.clientNeed,
+        comments: visit.comments,
+        contextVersion,
+      };
+    }
+    return graph;
   } else {
     return graph;
   }

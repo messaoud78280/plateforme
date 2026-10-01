@@ -31,8 +31,8 @@ export const SECTION_PATCH_CAPABILITY: Record<
     label: null,
   },
   VISIT: {
-    mode: "PREVIEW_ONLY",
-    label: "Modification visite : preview uniquement pour le moment.",
+    mode: "AVAILABLE",
+    label: null,
   },
   FOLLOW_UP: {
     mode: "PREVIEW_ONLY",

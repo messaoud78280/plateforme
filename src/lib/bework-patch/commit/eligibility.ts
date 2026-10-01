@@ -8,7 +8,8 @@ export type SyncMode =
   | "FULL_SYNC"
   | "SAFE_PARTIAL_SYNC"
   | "QUOTE_ONLY"
-  | "PLANNING_ONLY";
+  | "PLANNING_ONLY"
+  | "VISIT_ONLY";
 
 export type CommitEligibility =
   | {
@@ -88,8 +89,34 @@ export function evaluateCommitEligibility(input: {
     };
   }
 
+  // CTX-02B — VISIT local (champs texte uniquement)
+  if (patch.origin.section === "VISIT") {
+    const unsupported = patch.operations.filter((op) => op.op !== "update_visit");
+    if (unsupported.length) {
+      return {
+        ok: false,
+        reason: `Opération ${unsupported[0]!.op} non supportée pour le commit VISIT (CTX-02B).`,
+        code: "OPERATION_NOT_ALLOWED_FOR_SECTION",
+      };
+    }
+    if (!patch.operations.length) {
+      return {
+        ok: false,
+        reason: "Aucune opération visite.",
+        code: "EMPTY_OPERATIONS",
+      };
+    }
+    return {
+      ok: true,
+      mode: "VISIT_ONLY",
+      buttonLabel: "Appliquer à la visite",
+      warnings: impact.warnings
+        .filter((w) => w.code === "VISIT_SCOPE")
+        .map((w) => w.message),
+    };
+  }
+
   if (
-    patch.origin.section === "VISIT" ||
     patch.origin.section === "FOLLOW_UP" ||
     patch.origin.section === "REPORT" ||
     patch.origin.section === "NOTICE"

@@ -480,7 +480,7 @@ import {
   assert.equal(getSectionCapability("QUOTE").mode, "AVAILABLE");
   assert.equal(getSectionCapability("TAKEOFF").mode, "AVAILABLE");
   assert.equal(getSectionCapability("PLANNING").mode, "AVAILABLE");
-  assert.equal(getSectionCapability("VISIT").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("VISIT").mode, "AVAILABLE");
   assert.equal(getSectionCapability("FOLLOW_UP").mode, "PREVIEW_ONLY");
   assert.equal(getSectionCapability("REPORT").mode, "PREVIEW_ONLY");
   assert.equal(getSectionCapability("NOTICE").mode, "PREVIEW_ONLY");

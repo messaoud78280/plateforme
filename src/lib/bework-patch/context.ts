@@ -61,6 +61,8 @@ export function buildChatgptContextSkeleton(input: {
     id: string;
     version: number;
     code?: string | null;
+    /** Additif CTX-08/02A — alias explicite pour origin.base_version. */
+    base_version?: number;
   };
   data?: Record<string, unknown>;
   quoteItems?: BeworkContextRelationshipQuoteItem[];

@@ -34,4 +34,5 @@ export {
   adaptTakeoffForChatgptContext,
   adaptQuoteForChatgptContext,
   diffContextKeys,
+  TAKEOFF_CHATGPT_INSTRUCTIONS,
 } from "./adapters";

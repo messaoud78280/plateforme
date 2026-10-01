@@ -325,7 +325,10 @@ console.log("  provenance: ok");
   assert.equal(snap.visits[0].contextVersionNote, "HARDCODED_LEGACY_V1");
   const takeoffView = adaptTakeoffForChatgptContext(snap, "study-a");
   assert.ok(takeoffView);
-  assert.equal((takeoffView as { section: string }).section, "TAKEOFF");
+  assert.equal(takeoffView.section, "TAKEOFF");
+  assert.equal(takeoffView.type, "bework_chatgpt_context_v1");
+  assert.equal(takeoffView.target.version, 3);
+  assert.equal(takeoffView.target.base_version, 3);
   console.log("  A chantier complet: ok");
 }
 

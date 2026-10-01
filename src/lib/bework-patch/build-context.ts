@@ -1,9 +1,14 @@
 /**
  * Construction bework_chatgpt_context_v1 par section — lecture seule.
  * N’invente jamais de parameter_id.
+ * CTX-08 : TAKEOFF dérive du snapshot canonique (buildProjectContext → adapter).
  */
 import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
+import {
+  adaptTakeoffForChatgptContext,
+  buildProjectContext,
+} from "@/lib/bework-context";
 import {
   buildCanonicalResolution,
   buildChatgptContextSkeleton,
@@ -140,123 +145,26 @@ async function buildQuoteContext(
   });
 }
 
+/**
+ * CTX-08 — TAKEOFF via snapshot canonique.
+ * Legacy `buildMetreChatgptContext` reste intact pour rétrocompatibilité.
+ */
 async function buildTakeoffContext(
   orgId: string,
   project: { id: string; title: string },
   studyId: string,
 ): Promise<BeworkChatgptContextV1 | null> {
-  const study = await prisma.prepStudy.findFirst({
-    where: {
-      id: studyId,
-      organizationId: orgId,
-      projectId: project.id,
-      archivedAt: null,
-    },
-    select: {
-      id: true,
-      title: true,
-      version: true,
-      hypothesesJson: true,
-      parameters: {
-        orderBy: { sortOrder: "asc" },
-        select: {
-          id: true,
-          key: true,
-          label: true,
-          unit: true,
-          value: true,
-          formula: true,
-          provenance: true,
-        },
-      },
-      lines: {
-        orderBy: { sortOrder: "asc" },
-        select: {
-          id: true,
-          code: true,
-          designation: true,
-          unit: true,
-          formula: true,
-          declaredQuantity: true,
-          validatedQuantity: true,
-          role: true,
-        },
-      },
-    },
+  const snapshot = await buildProjectContext(project.id, orgId, {
+    includeLines: true,
   });
-  if (!study) return null;
+  if (!snapshot) return null;
 
-  const paramList = study.parameters.map((p) => ({
-    id: p.id,
-    key: p.key,
-    label: p.label,
-    value: p.value != null ? Number(p.value) : null,
-    unit: p.unit,
-    formula: p.formula,
-    provenance: p.provenance,
-  }));
+  const adapted = adaptTakeoffForChatgptContext(snapshot, studyId);
+  if (!adapted) return null;
 
-  const lineList = study.lines.map((l) => ({
-    id: l.id,
-    code: l.code,
-    designation: l.designation,
-    unit: l.unit,
-    formula: l.formula,
-    declared_quantity: l.declaredQuantity != null ? Number(l.declaredQuantity) : null,
-    validated_quantity: l.validatedQuantity != null ? Number(l.validatedQuantity) : null,
-    role: l.role,
-  }));
-
-  const quoteLinks = await prisma.prepQuoteLink.findMany({
-    where: { organizationId: orgId, studyId: study.id },
-    select: { quoteLineId: true, quoteId: true, studyLineCode: true },
-  });
-  const schedLinks = await prisma.prepScheduleTakeoffLink.findMany({
-    where: { organizationId: orgId },
-    select: { planId: true, taskId: true, studyLineCode: true },
-    take: 200,
-  });
-  // Restrict schedule links to plans of this study
-  const plans = await prisma.prepSchedulePlan.findMany({
-    where: { studyId: study.id, organizationId: orgId },
-    select: { id: true },
-  });
-  const planIds = new Set(plans.map((p) => p.id));
-  const relevantSched = schedLinks.filter((s) => planIds.has(s.planId));
-
-  return buildChatgptContextSkeleton({
-    section: "TAKEOFF",
-    project,
-    target: {
-      entity_type: "PREP_STUDY",
-      id: study.id,
-      version: study.version,
-      code: study.title,
-    },
-    data: {
-      title: study.title,
-      parameters: paramList,
-      lines: lineList,
-      quote_links: quoteLinks.map((l) => ({
-        study_line_code: l.studyLineCode,
-        quote_id: l.quoteId,
-        quote_line_id: l.quoteLineId,
-      })),
-      schedule_links: relevantSched.map((s) => ({
-        plan_id: s.planId,
-        task_id: s.taskId,
-        study_line_code: s.studyLineCode,
-      })),
-    },
-    quoteItems: quoteLinks.map((l) => ({
-      quote_item_id: l.quoteLineId,
-      takeoff_link: { study_id: study.id, study_line_code: l.studyLineCode },
-      canonical_resolution: buildCanonicalResolution({
-        studyId: study.id,
-        takeoffLineCode: l.studyLineCode,
-      }),
-    })),
-  });
+  // Garde-fou : l’étude doit appartenir au projet déjà scopé org.
+  if (adapted.project.id !== project.id) return null;
+  return adapted;
 }
 
 async function buildPlanningContext(

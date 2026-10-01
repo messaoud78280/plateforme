@@ -1,14 +1,32 @@
 /**
  * Adapters progressifs — dérivent des vues module depuis le snapshot canonique.
- * Ne remplacent PAS les builders legacy en production (zéro régression CTX-01).
+ * CTX-08 : adaptTakeoffForChatgptContext produit bework_chatgpt_context_v1
+ * (chemin UI principal TAKEOFF). Les autres adapters restent diagnostiques.
  */
+import {
+  buildCanonicalResolution,
+  buildChatgptContextSkeleton,
+} from "@/lib/bework-patch/context";
+import type { BeworkChatgptContextV1 } from "@/lib/bework-patch/types";
 import type {
   ProjectContextQuote,
   ProjectContextSchedule,
   ProjectContextSnapshot,
+  ProjectContextSource,
   ProjectContextTakeoff,
   ProjectContextVisit,
 } from "./types";
+
+/** Instructions compactes TAKEOFF — pas un prompt rédactionnel. */
+export const TAKEOFF_CHATGPT_INSTRUCTIONS = [
+  "Utiliser prioritairement les valeurs réellement présentes dans data.",
+  "Distinguer provenance_kind : MEASURE | PLAN | CALCULATION | HYPOTHESIS | MANUAL | UNKNOWN.",
+  "Ne jamais présenter une HYPOTHESIS ou UNKNOWN comme une mesure réelle.",
+  "Ne pas inventer silencieusement une dimension ou quantité absente.",
+  "Conserver la traçabilité (ids, codes, source_ref, provenance).",
+  "Retourner exclusivement un bework_patch_v1 compatible preview BeWork.",
+  "base_version du patch = target.version (= study.version).",
+] as const;
 
 export function getTakeoffFromContext(
   snapshot: ProjectContextSnapshot,
@@ -64,18 +82,126 @@ export function getTakeoffsForScope(
   return snapshot.takeoffs.filter((t) => t.scopeId === scopeId);
 }
 
+function mapSourceForChatgpt(s: ProjectContextSource) {
+  return {
+    id: s.id,
+    display_title: s.displayTitle,
+    filename: s.filename,
+    plan_number: s.planNumber,
+    title: s.title,
+    revision: s.revision,
+    scale: s.scale,
+    page: s.page,
+    legibility: s.legibility,
+    note: s.note,
+    study_id: s.studyId,
+    scope_id: s.scopeId,
+    chantier_file_id: s.chantierFileId,
+    /** Référence GED — pas de binaire, pas d’URL signée. */
+    ged: s.file
+      ? {
+          id: s.file.id,
+          name: s.file.name,
+          document_type: s.file.documentType,
+          mime_type: s.file.mimeType,
+          status: s.file.status,
+          indice: s.file.indice,
+          version_label: s.file.versionLabel,
+          category: s.file.category,
+          has_url: s.file.hasUrl,
+          preview_href: s.file.previewHref,
+        }
+      : null,
+  };
+}
+
 /**
- * Vue compacte TAKEOFF compatible esprit bework_chatgpt_context_v1
- * (sans remplacer buildUniversalPatchContext).
+ * Adapter TAKEOFF → bework_chatgpt_context_v1 (CTX-08).
+ * Sélectionne uniquement le métré ciblé + org / projet / scope / sources liées.
+ * N’embarque pas les lignes des autres lots ni les devis/planning complets.
  */
 export function adaptTakeoffForChatgptContext(
   snapshot: ProjectContextSnapshot,
   studyId: string,
-): Record<string, unknown> | null {
+): BeworkChatgptContextV1 | null {
   const study = getTakeoffFromContext(snapshot, studyId);
   if (!study) return null;
-  return {
-    source: "bework_project_context_v1",
+
+  const scope = study.scopeId
+    ? snapshot.scopes.find((s) => s.id === study.scopeId) ?? null
+    : null;
+
+  const sources =
+    study.sources.length > 0
+      ? study.sources
+      : snapshot.sources.filter((s) => s.studyId === studyId);
+
+  const studyLineCodes = new Set(study.lines.map((l) => l.code));
+
+  const quoteLinks: Array<{
+    study_line_code: string;
+    quote_id: string;
+    quote_line_id: string;
+  }> = [];
+  const quoteItems: NonNullable<
+    BeworkChatgptContextV1["relationships"]["quote_items"]
+  > = [];
+
+  for (const quote of snapshot.quotes) {
+    for (const section of quote.sections) {
+      for (const line of section.lines) {
+        if (!line.studyLineCode || !studyLineCodes.has(line.studyLineCode)) continue;
+        quoteLinks.push({
+          study_line_code: line.studyLineCode,
+          quote_id: quote.id,
+          quote_line_id: line.id,
+        });
+        quoteItems.push({
+          quote_item_id: line.id,
+          takeoff_link: {
+            study_id: studyId,
+            study_line_code: line.studyLineCode,
+          },
+          canonical_resolution: buildCanonicalResolution({
+            studyId,
+            takeoffLineCode: line.studyLineCode,
+          }),
+        });
+      }
+    }
+  }
+
+  const scheduleLinks: Array<{
+    plan_id: string;
+    task_id: string;
+    study_line_code: string;
+  }> = [];
+  const scheduleTasks: NonNullable<
+    BeworkChatgptContextV1["relationships"]["schedule_tasks"]
+  > = [];
+
+  for (const plan of snapshot.schedules) {
+    if (plan.studyId !== studyId) continue;
+    for (const task of plan.tasks) {
+      const codes = task.takeoffLineCodes.filter((c) => studyLineCodes.has(c));
+      for (const code of codes) {
+        scheduleLinks.push({
+          plan_id: plan.id,
+          task_id: task.id,
+          study_line_code: code,
+        });
+      }
+      if (codes.length === 0) continue;
+      scheduleTasks.push({
+        plan_id: plan.id,
+        task_id: task.id,
+        step_code: task.stepCode ?? task.id,
+        study_line_codes: codes,
+      });
+    }
+  }
+
+  const skeleton = buildChatgptContextSkeleton({
     section: "TAKEOFF",
     project: {
       id: snapshot.project.id,
@@ -89,7 +215,12 @@ export function adaptTakeoffForChatgptContext(
     },
     data: {
       title: study.title,
+      trade: study.trade,
+      mode: study.mode,
+      dossier_status: study.dossierStatus,
       scope_id: study.scopeId,
+      source_format: study.sourceFormat,
+      hypotheses: study.hypothesesJson ?? null,
       parameters: study.parameters.map((p) => ({
         id: p.id,
         key: p.key,
@@ -99,27 +230,81 @@ export function adaptTakeoffForChatgptContext(
         formula: p.formula,
         provenance: p.provenance,
         provenance_kind: p.provenanceKind,
+        note: p.note,
+        /** source_ref : id source plan si note/provenance PLAN — sinon null (pas d’invention). */
+        source_ref: null as string | null,
       })),
       lines: study.lines.map((l) => ({
         id: l.id,
         code: l.code,
+        lot: l.lot,
         designation: l.designation,
         unit: l.unit,
         formula: l.formula,
         declared_quantity: l.declaredQuantity,
+        computed_quantity: l.computedQuantity,
         validated_quantity: l.validatedQuantity,
         provenance: l.provenance,
         provenance_kind: l.provenanceKind,
         role: l.role,
+        source_ref: null as string | null,
       })),
-      sources: study.sources.map((s) => ({
+      sources: sources.map(mapSourceForChatgpt),
+      quote_links: quoteLinks,
+      schedule_links: scheduleLinks,
+      counts: {
+        parameters: study.parameters.length,
+        lines: study.lines.length,
+        sources: sources.length,
+      },
+      instructions: [...TAKEOFF_CHATGPT_INSTRUCTIONS],
+      /** Scopes du projet (métadonnées uniquement — pas les lignes des autres lots). */
+      project_scopes: snapshot.scopes.map((s) => ({
         id: s.id,
-        display_title: s.displayTitle,
-        chantier_file_id: s.chantierFileId,
-        revision: s.revision,
+        code: s.code,
+        name: s.name,
+        status: s.status,
+        is_target: s.id === study.scopeId,
       })),
+      canonical_source: "bework_project_context_v1",
     },
-    versions: snapshot.versions,
+    quoteItems,
+  });
+
+  return {
+    ...skeleton,
+    organization: {
+      id: snapshot.organization.id,
+      name: snapshot.organization.name,
+    },
+    project: {
+      id: snapshot.project.id,
+      title: snapshot.project.title,
+      description: snapshot.project.description,
+      site_address: snapshot.project.siteAddress,
+      site_city: snapshot.project.siteCity,
+      status: snapshot.project.status,
+      chantier_status: snapshot.project.chantierStatus,
+    },
+    scope: scope
+      ? {
+          id: scope.id,
+          code: scope.code,
+          name: scope.name,
+          status: scope.status,
+        }
+      : null,
+    target: {
+      ...skeleton.target,
+      base_version: study.version,
+    },
+    relationships: {
+      ...skeleton.relationships,
+      schedule_tasks: scheduleTasks,
+      notes: [
+        "Provenance : MEASURE/PLAN/CALCULATION/HYPOTHESIS/MANUAL/UNKNOWN mappés depuis les enums BeWork (RELEVE, HYPOTHESE, …). PLAN uniquement si littéral stocké — jamais déduit de la seule présence d’un plan.",
+      ],
+    },
   };
 }
 

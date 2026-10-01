@@ -502,12 +502,32 @@ export type BeworkChatgptContextV1 = {
   project: {
     id: string;
     title: string;
+    /** Champs additifs CTX-08 (rétrocompatibles). */
+    description?: string | null;
+    site_address?: string | null;
+    site_city?: string | null;
+    status?: string | null;
+    chantier_status?: string | null;
   };
+  /** Organisation du chantier — additif CTX-08. */
+  organization?: {
+    id: string;
+    name: string;
+  };
+  /** Scope / lot ciblé — additif CTX-08 (TAKEOFF). */
+  scope?: {
+    id: string;
+    code: string;
+    name: string;
+    status?: string | null;
+  } | null;
   target: {
     entity_type: BeworkEntityType;
     id: string;
     version: number;
     code?: string | null;
+    /** Alias explicite pour base_version patch — additif CTX-08. */
+    base_version?: number;
   };
   data: Record<string, unknown>;
   relationships: {

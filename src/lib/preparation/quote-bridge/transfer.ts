@@ -643,6 +643,7 @@ export async function applyPrepQuoteQuantitySync(input: {
     });
   }
 
+  // upsertLine utilise le client Prisma global (totaux devis) — hors tx nested.
   await upsertLine(input.orgId, link.quoteId, {
     lineId: qLine.id,
     sectionId: qLine.sectionId,
@@ -658,32 +659,76 @@ export async function applyPrepQuoteQuantitySync(input: {
     vatRate: d(qLine.vatRate),
   });
 
-  await prisma.prepQuoteLink.update({
-    where: { id: link.id },
-    data: {
-      quantityAtTransfer: patch.quantity ?? link.quantityAtTransfer,
-      unitAtTransfer: patch.unit ?? link.unitAtTransfer,
-      designationAtTransfer: patch.designation ?? link.designationAtTransfer,
-      descriptionAtTransfer: patch.description ?? link.descriptionAtTransfer,
-    },
-  });
-
-  await prisma.prepStudyEvent.create({
-    data: {
-      studyId: link.studyId,
-      organizationId: input.orgId,
-      kind: "SYNC_QUOTE_LINE",
-      detailJson: {
-        linkId: link.id,
-        quoteId: link.quoteId,
-        code: link.studyLineCode,
-        applyQuantity: input.applyQuantity,
-        applyDesignation: input.applyDesignation,
-        applyUnit: input.applyUnit,
-        applyDescription: input.applyDescription,
+  // CTX-03 — snapshot lien + studyVersion transfer atomiques entre eux.
+  await prisma.$transaction(async (tx) => {
+    await tx.prepQuoteLink.update({
+      where: { id: link.id },
+      data: {
+        quantityAtTransfer: patch.quantity ?? link.quantityAtTransfer,
+        unitAtTransfer: patch.unit ?? link.unitAtTransfer,
+        designationAtTransfer: patch.designation ?? link.designationAtTransfer,
+        descriptionAtTransfer: patch.description ?? link.descriptionAtTransfer,
       },
-      actorUserId: input.userId,
-    },
+    });
+
+    if (input.applyQuantity && qty != null) {
+      const siblingLinks = await tx.prepQuoteLink.findMany({
+        where: {
+          organizationId: input.orgId,
+          quoteId: link.quoteId,
+          studyId: link.studyId,
+        },
+        select: {
+          studyLineCode: true,
+          quantityAtTransfer: true,
+        },
+      });
+      const engineNow = computeStudy({
+        params: study.params,
+        lines: study.lines,
+      });
+      let stillDiff = false;
+      for (const sl of siblingLinks) {
+        const pl = study.lines.find((l) => l.code === sl.studyLineCode);
+        if (!pl) continue;
+        const nodeQty = engineNow.nodes.get(pl.code)?.value ?? null;
+        const atTransfer =
+          sl.quantityAtTransfer != null ? Number(sl.quantityAtTransfer) : null;
+        if (nodeQty == null || atTransfer == null) continue;
+        if (Math.abs(nodeQty - atTransfer) > 1e-9) {
+          stillDiff = true;
+          break;
+        }
+      }
+      if (!stillDiff) {
+        await tx.prepQuoteTransfer.updateMany({
+          where: {
+            organizationId: input.orgId,
+            quoteId: link.quoteId,
+            studyId: link.studyId,
+          },
+          data: { studyVersion: study.version },
+        });
+      }
+    }
+
+    await tx.prepStudyEvent.create({
+      data: {
+        studyId: link.studyId,
+        organizationId: input.orgId,
+        kind: "SYNC_QUOTE_LINE",
+        detailJson: {
+          linkId: link.id,
+          quoteId: link.quoteId,
+          code: link.studyLineCode,
+          applyQuantity: input.applyQuantity,
+          applyDesignation: input.applyDesignation,
+          applyUnit: input.applyUnit,
+          applyDescription: input.applyDescription,
+        },
+        actorUserId: input.userId,
+      },
+    });
   });
 
   return { ok: true };

@@ -177,6 +177,8 @@ export async function commitUniversalPatch(input: {
             orgId: input.orgId,
             impact,
             quotes: subgraph.quotes,
+            studyId: takeoff.studyId,
+            studyVersion: takeoff.studyVersion,
           });
           quoteUpdated = q.updated;
           if (q.quoteId) quoteId = q.quoteId;
@@ -440,6 +442,8 @@ async function applyQuoteDerivedInTx(
     orgId: string;
     impact: AnalyzePatchImpactResult;
     quotes: import("@/lib/bework-patch/impact/types").ImpactQuote[];
+    studyId: string;
+    studyVersion: number;
   },
 ): Promise<{ updated: boolean; quoteId: string | null }> {
   const qtyChanges = input.impact.derivedChanges.filter(
@@ -455,6 +459,7 @@ async function applyQuoteDerivedInTx(
 
   let quoteId: string | null = null;
   const touchedVersions = new Set<string>();
+  const touchedQuoteIds = new Set<string>();
 
   for (const ch of qtyChanges) {
     const quote = input.quotes.find((q) =>
@@ -486,12 +491,36 @@ async function applyQuoteDerivedInTx(
         marginAmount: calc.marginAmount,
       },
     });
+
+    // CTX-03 — garder le snapshot de transfert aligné avec la quantité écrite
+    await tx.prepQuoteLink.updateMany({
+      where: {
+        organizationId: input.orgId,
+        quoteLineId: line.id,
+        studyId: input.studyId,
+      },
+      data: { quantityAtTransfer: ch.after as number },
+    });
+
     quoteId = quote.id;
+    touchedQuoteIds.add(quote.id);
     touchedVersions.add(quote.versionId);
   }
 
   for (const versionId of touchedVersions) {
     await recomputeVersionTotalsInTx(tx, input.orgId, versionId);
+  }
+
+  // CTX-03 — aligner PrepQuoteTransfer.studyVersion dans la même transaction
+  for (const qid of touchedQuoteIds) {
+    await tx.prepQuoteTransfer.updateMany({
+      where: {
+        organizationId: input.orgId,
+        quoteId: qid,
+        studyId: input.studyId,
+      },
+      data: { studyVersion: input.studyVersion },
+    });
   }
 
   return { updated: touchedVersions.size > 0, quoteId };

@@ -26,6 +26,10 @@ import {
   quoteWorkflowActionLabel,
 } from "@/lib/chantier/quote-workflow-status";
 import { evaluatePlanningStudyVersionSync } from "@/lib/preparation/schedule/planning-sync-state";
+import {
+  evaluateQuoteStudySyncState,
+  hasQuantityDiffAgainstTransfer,
+} from "@/lib/preparation/quote-bridge/quote-sync-state";
 
 function cardStatusFromQuote(
   status: string | null | undefined,
@@ -54,6 +58,7 @@ export type CardStatusLabel =
   | "Expiré"
   | "Annulé"
   | "Action requise"
+  | "À revalider"
   | "Non démarré";
 
 export type WorkspaceCardKind = "plan" | "metre" | "devis" | "planning" | "suivi";
@@ -219,7 +224,10 @@ export function statusLabelFromSync(
 ): CardStatusLabel {
   if (sync === "A_JOUR") return "À jour";
   if (sync === "A_VERIFIER") return "À vérifier";
-  if (sync === "MODIFICATION_DISPONIBLE") return "Action requise";
+  if (sync === "MODIFICATION_DISPONIBLE") {
+    // CTX-03 : devis → « À revalider » ; planning → « Action requise »
+    return kind === "devis" ? "À revalider" : "Action requise";
+  }
   if (sync === "DESYNCHRONISE_VOLONTAIREMENT") return "À vérifier";
   if (kind === "suivi") return "Non démarré";
   return "À préparer";
@@ -342,6 +350,16 @@ function buildScopeCards(input: {
    * Ne pas utiliser un métré d’un autre scope.
    */
   planLinkedStudyVersion?: number | null;
+  /**
+   * Provenance métré du devis (PrepQuoteTransfer / liens).
+   * Ne pas utiliser un métré d’un autre scope.
+   */
+  quoteMetreProvenance?: {
+    hasMetreProvenance: boolean;
+    linkedStudyVersion: number | null;
+    transferStudyVersion: number | null;
+    hasSignificantQuantityDiffs?: boolean | null;
+  } | null;
   planSource: Awaited<ReturnType<typeof resolvePrepPlanSource>>;
   refs: {
     studyId: string | null;
@@ -369,8 +387,31 @@ function buildScopeCards(input: {
   const fileMissing = !planSource || planSource.fileMissing;
 
   const metreSync: SyncState = study ? "A_JOUR" : "ABSENT";
-  let devisSync: SyncState = quote ? "A_JOUR" : "ABSENT";
   let devisHint: string | null = null;
+
+  // CTX-03 — sync devis / métré (par devis, via transfer + diffs quantité).
+  const quoteProv = input.quoteMetreProvenance;
+  const devisEval = evaluateQuoteStudySyncState({
+    hasQuote: !!quote,
+    hasMetreProvenance: quoteProv?.hasMetreProvenance ?? false,
+    currentStudyVersion: quoteProv?.linkedStudyVersion ?? null,
+    transferStudyVersion: quoteProv?.transferStudyVersion ?? null,
+    hasSignificantQuantityDiffs: quoteProv?.hasSignificantQuantityDiffs,
+  });
+  const devisSync = devisEval.syncState;
+  devisHint = devisEval.hint;
+
+  if (devisSync === "MODIFICATION_DISPONIBLE") {
+    alerts.push({
+      level: "warning",
+      message: "Le devis doit être revalidé — le métré a évolué.",
+    });
+  } else if (devisSync === "A_VERIFIER" && quote && quoteProv?.hasMetreProvenance) {
+    alerts.push({
+      level: "warning",
+      message: devisHint ?? "Alignement métré / devis à vérifier.",
+    });
+  }
 
   // CTX-04 — comparer uniquement avec le métré lié au plan (pas latest du projet).
   const linkedVersion =
@@ -538,16 +579,21 @@ function buildScopeCards(input: {
         : "À générer",
       syncState: devisSync,
       statusLabel: quote
-        ? cardStatusFromQuote(quote.status)
+        ? devisSync === "MODIFICATION_DISPONIBLE" || devisSync === "A_VERIFIER"
+          ? statusLabelFromSync(devisSync, "devis")
+          : cardStatusFromQuote(quote.status)
         : statusLabelFromSync(devisSync, "devis"),
       actionLabel: quote
-        ? quoteWorkflowActionLabel(quote.status)
+        ? devisSync === "MODIFICATION_DISPONIBLE"
+          ? "Revalider"
+          : quoteWorkflowActionLabel(quote.status)
         : "Générer un devis",
       ready: isQuotePreparationReady(quote?.status),
       syncHint:
-        quotesCount > 1
+        devisHint ??
+        (quotesCount > 1
           ? `${quotesCount} devis sur ce lot — ${quote?.number ?? "—"} en référence`
-          : devisHint,
+          : null),
       isReference: !!(quote && input.refs.quoteId === quote.id),
     },
     {
@@ -698,6 +744,114 @@ async function getProjectWorkspaceUncached(
     orderBy: { updatedAt: "desc" },
   });
 
+  const quoteIdsForProv = quotes.map((q) => q.id);
+  const [quoteTransfers, quoteLinks, takeoffQtyRows] = await Promise.all([
+    quoteIdsForProv.length
+      ? prisma.prepQuoteTransfer.findMany({
+          where: { organizationId: orgId, quoteId: { in: quoteIdsForProv } },
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            quoteId: true,
+            studyId: true,
+            studyVersion: true,
+          },
+        })
+      : Promise.resolve([]),
+    quoteIdsForProv.length
+      ? prisma.prepQuoteLink.findMany({
+          where: { organizationId: orgId, quoteId: { in: quoteIdsForProv } },
+          select: {
+            quoteId: true,
+            studyId: true,
+            studyLineCode: true,
+            quantityAtTransfer: true,
+          },
+        })
+      : Promise.resolve([]),
+    prisma.prepTakeoffLine.findMany({
+      where: {
+        organizationId: orgId,
+        studyId: { in: studyIds.length ? studyIds : ["__none__"] },
+      },
+      select: {
+        studyId: true,
+        code: true,
+        validatedQuantity: true,
+        computedQuantity: true,
+        declaredQuantity: true,
+      },
+    }),
+  ]);
+
+  const latestTransferByQuoteId = new Map<
+    string,
+    (typeof quoteTransfers)[number]
+  >();
+  for (const t of quoteTransfers) {
+    if (!latestTransferByQuoteId.has(t.quoteId)) {
+      latestTransferByQuoteId.set(t.quoteId, t);
+    }
+  }
+
+  const qtyByStudyCode = new Map<string, number | null>();
+  for (const row of takeoffQtyRows) {
+    const raw =
+      row.validatedQuantity ?? row.computedQuantity ?? row.declaredQuantity;
+    qtyByStudyCode.set(
+      `${row.studyId}:${row.code}`,
+      raw != null ? Number(raw) : null,
+    );
+  }
+
+  const studyById = (id: string | null | undefined) =>
+    id ? studies.find((s) => s.id === id) ?? null : null;
+  const planById = (id: string | null | undefined) =>
+    id ? plans.find((p) => p.id === id) ?? null : null;
+
+  function quoteMetreProvenanceFor(quoteId: string | null | undefined): {
+    hasMetreProvenance: boolean;
+    linkedStudyVersion: number | null;
+    transferStudyVersion: number | null;
+    hasSignificantQuantityDiffs: boolean | null;
+  } {
+    if (!quoteId) {
+      return {
+        hasMetreProvenance: false,
+        linkedStudyVersion: null,
+        transferStudyVersion: null,
+        hasSignificantQuantityDiffs: null,
+      };
+    }
+    const transfer = latestTransferByQuoteId.get(quoteId) ?? null;
+    const links = quoteLinks.filter((l) => l.quoteId === quoteId);
+    const hasMetreProvenance = !!transfer || links.length > 0;
+    const studyId =
+      transfer?.studyId ??
+      links[0]?.studyId ??
+      quotes.find((q) => q.id === quoteId)?.sourcePrepStudyId ??
+      null;
+    const linkedStudyVersion = studyId
+      ? studyById(studyId)?.version ?? null
+      : null;
+    let hasSignificantQuantityDiffs: boolean | null = null;
+    if (links.length > 0) {
+      hasSignificantQuantityDiffs = links.some((l) =>
+        hasQuantityDiffAgainstTransfer({
+          quantityAtTransfer:
+            l.quantityAtTransfer != null ? Number(l.quantityAtTransfer) : null,
+          currentQuantity: qtyByStudyCode.get(`${l.studyId}:${l.studyLineCode}`),
+        }),
+      );
+    }
+    return {
+      hasMetreProvenance,
+      linkedStudyVersion,
+      transferStudyVersion: transfer?.studyVersion ?? null,
+      hasSignificantQuantityDiffs,
+    };
+  }
+
   const planSourceByStudyId = new Map<
     string,
     Awaited<ReturnType<typeof resolvePrepPlanSource>>
@@ -715,10 +869,6 @@ async function getProjectWorkspaceUncached(
   );
 
   // Lecture robuste centralisée (CAS global + scopé) — aucune mutation.
-  const studyById = (id: string | null | undefined) =>
-    id ? studies.find((s) => s.id === id) ?? null : null;
-  const planById = (id: string | null | undefined) =>
-    id ? plans.find((p) => p.id === id) ?? null : null;
 
   // Remonter via les tableaux Prisma (titre, version, dates…) — pas le type StudyLike/PlanLike.
   const globalStudy = studyById(
@@ -897,6 +1047,14 @@ async function getProjectWorkspaceUncached(
   const devisReady = isQuotePreparationReady(globalQuote?.status);
   const devisStateLabel = cardStatusFromQuote(globalQuote?.status);
   const devisAmount = globalQuote ? euro(d(globalQuote.totalSellHt)) : null;
+  const globalQuoteProv = quoteMetreProvenanceFor(globalQuote?.id);
+  const globalDevisEval = evaluateQuoteStudySyncState({
+    hasQuote: !!globalQuote,
+    hasMetreProvenance: globalQuoteProv.hasMetreProvenance,
+    currentStudyVersion: globalQuoteProv.linkedStudyVersion,
+    transferStudyVersion: globalQuoteProv.transferStudyVersion,
+    hasSignificantQuantityDiffs: globalQuoteProv.hasSignificantQuantityDiffs,
+  });
 
   const globalDevisCard: WorkspaceCard = {
     kind: "devis",
@@ -906,13 +1064,29 @@ async function getProjectWorkspaceUncached(
       ? quoteEditorHref(globalQuote.id, globalQuote.status)
       : `/dashboard/devis-facturation/devis/nouveau?projectId=${encodeURIComponent(projectId)}`,
     detail: globalQuote
-      ? [devisStateLabel, devisAmount].filter(Boolean).join(" · ")
+      ? [
+          globalDevisEval.syncState === "MODIFICATION_DISPONIBLE" ||
+          globalDevisEval.syncState === "A_VERIFIER"
+            ? statusLabelFromSync(globalDevisEval.syncState, "devis")
+            : devisStateLabel,
+          devisAmount,
+        ]
+          .filter(Boolean)
+          .join(" · ")
       : "À rattacher",
-    syncState: globalQuote ? (devisReady ? "A_JOUR" : "A_VERIFIER") : "ABSENT",
-    statusLabel: globalQuote ? devisStateLabel : "À préparer",
-    actionLabel: quoteWorkflowActionLabel(globalQuote?.status),
+    syncState: globalDevisEval.syncState,
+    statusLabel: globalQuote
+      ? globalDevisEval.syncState === "MODIFICATION_DISPONIBLE" ||
+        globalDevisEval.syncState === "A_VERIFIER"
+        ? statusLabelFromSync(globalDevisEval.syncState, "devis")
+        : devisStateLabel
+      : "À préparer",
+    actionLabel:
+      globalDevisEval.syncState === "MODIFICATION_DISPONIBLE"
+        ? "Revalider"
+        : quoteWorkflowActionLabel(globalQuote?.status),
     ready: devisReady,
-    syncHint: null,
+    syncHint: globalDevisEval.hint,
     isReference: true,
   };
 
@@ -1150,6 +1324,7 @@ async function getProjectWorkspaceUncached(
       planLinkedStudyVersion: refPlan
         ? studyById(refPlan.studyId)?.version ?? null
         : null,
+      quoteMetreProvenance: quoteMetreProvenanceFor(refQuote?.id),
       planSource: refStudy
         ? planSourceByStudyId.get(refStudy.id) ?? null
         : null,

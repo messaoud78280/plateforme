@@ -105,11 +105,13 @@ export function buildFixtureSubgraph54(opts?: {
         endDateBase: "2026-11-27",
         baseDurationWorkingDays: 19.5,
         revisionNumber: 1,
+        studyVersionAtGeneration: 3,
         tasks: [
           {
             id: FIXTURE_TASK_TERR04_ID,
             stepCode: "TERR-04",
             name: "Excavation",
+            description: null,
             durationDays: 1.5,
             durationMode: "computed",
             durationLockedByUser: false,

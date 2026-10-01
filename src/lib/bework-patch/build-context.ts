@@ -207,9 +207,14 @@ async function buildPlanningContext(
       id: plan.id,
       version: plan.revisionNumber,
       code: plan.title,
+      base_version: plan.revisionNumber,
     },
     data: {
       title: plan.title,
+      revision_number: plan.revisionNumber,
+      study_version_at_generation: plan.studyVersionAtGeneration,
+      study_id: plan.studyId,
+      scope_id: plan.scopeId,
       start_date: plan.startDate ? plan.startDate.toISOString().slice(0, 10) : null,
       base_duration_working_days: plan.baseDurationWorkingDays
         ? Number(plan.baseDurationWorkingDays)
@@ -226,6 +231,8 @@ async function buildPlanningContext(
           .filter((l) => l.taskId === t.id)
           .map((l) => l.studyLineCode),
       })),
+      note:
+        "base_version = revisionNumber. studyVersionAtGeneration = alignement métré (CTX-04) — une édition planning ne le synchronise pas.",
     },
   });
 }

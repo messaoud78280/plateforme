@@ -27,8 +27,8 @@ export const SECTION_PATCH_CAPABILITY: Record<
     label: null,
   },
   PLANNING: {
-    mode: "PREVIEW_ONLY",
-    label: "Modification planning : preview uniquement pour le moment.",
+    mode: "AVAILABLE",
+    label: null,
   },
   VISIT: {
     mode: "PREVIEW_ONLY",

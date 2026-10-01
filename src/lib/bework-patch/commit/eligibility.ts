@@ -4,7 +4,11 @@
 import type { BeworkPatchV1 } from "@/lib/bework-patch/types";
 import type { AnalyzePatchImpactResult } from "@/lib/bework-patch/impact/types";
 
-export type SyncMode = "FULL_SYNC" | "SAFE_PARTIAL_SYNC" | "QUOTE_ONLY";
+export type SyncMode =
+  | "FULL_SYNC"
+  | "SAFE_PARTIAL_SYNC"
+  | "QUOTE_ONLY"
+  | "PLANNING_ONLY";
 
 export type CommitEligibility =
   | {
@@ -53,12 +57,34 @@ export function evaluateCommitEligibility(input: {
     };
   }
 
-  // Planning-only / visit etc. — pas de commit cross-module V1 hors takeoff/commercial
+  // CTX-02A — PLANNING local (pas de remontée métré/devis)
   if (patch.origin.section === "PLANNING") {
+    const unsupported = patch.operations.filter(
+      (op) =>
+        op.op !== "update_task" &&
+        op.op !== "update_duration",
+    );
+    if (unsupported.length) {
+      return {
+        ok: false,
+        reason: `Opération ${unsupported[0]!.op} non supportée pour le commit PLANNING (CTX-02A).`,
+        code: "OPERATION_NOT_ALLOWED_FOR_SECTION",
+      };
+    }
+    if (!patch.operations.length) {
+      return {
+        ok: false,
+        reason: "Aucune opération planning.",
+        code: "EMPTY_OPERATIONS",
+      };
+    }
     return {
-      ok: false,
-      reason: "Modification planning : preview uniquement pour le moment.",
-      code: "PREVIEW_ONLY",
+      ok: true,
+      mode: "PLANNING_ONLY",
+      buttonLabel: "Appliquer au planning",
+      warnings: impact.warnings
+        .filter((w) => w.code === "PLANNING_SCOPE")
+        .map((w) => w.message),
     };
   }
 

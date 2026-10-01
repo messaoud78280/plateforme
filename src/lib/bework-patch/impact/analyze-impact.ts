@@ -304,7 +304,11 @@ function describeDirectOp(
       entityId: task?.id ?? null,
       label: task?.name ?? "tâche",
       field: "meta",
-      before: { name: task?.name, lot: task?.lot },
+      before: {
+        name: task?.name,
+        description: task?.description ?? null,
+        lot: task?.lot,
+      },
       after: op.changes,
       unit: null,
     };
@@ -479,7 +483,60 @@ function analyzePlanningLocal(
   patch: BeworkPatchV1,
   subgraph: ImpactSubgraph,
 ): AnalyzePatchImpactResult {
+  const errors: BeworkPatchIssue[] = [];
+  const warnings: BeworkPatchIssue[] = [
+    issue(
+      "PLANNING_SCOPE",
+      "PLANNING_ADJUSTMENT : TAKEOFF et QUOTE inchangés (pas de remontée).",
+      "warn",
+    ),
+  ];
+
+  const supported = new Set(["update_task", "update_duration"]);
+  for (const op of patch.operations) {
+    if (!supported.has(op.op)) {
+      errors.push(
+        issue(
+          "OPERATION_NOT_ALLOWED_FOR_SECTION",
+          `Opération ${op.op} non supportée pour le commit PLANNING (CTX-02A).`,
+          "error",
+        ),
+      );
+    }
+    if (
+      "target" in op &&
+      op.target &&
+      typeof op.target === "object" &&
+      "plan_id" in op.target &&
+      op.target.plan_id &&
+      op.target.plan_id !== patch.origin.entity_id
+    ) {
+      errors.push(
+        issue(
+          "PROJECT_MISMATCH",
+          "Tâche hors planning ciblé.",
+          "error",
+        ),
+      );
+    }
+  }
+
   const directChanges = extractDirectChanges(patch, subgraph);
+  for (const dc of directChanges) {
+    if (
+      (dc.op === "update_task" || dc.op === "update_duration") &&
+      !dc.entityId
+    ) {
+      errors.push(
+        issue(
+          "TARGET_NOT_FOUND",
+          `Tâche introuvable pour ${dc.op} (${dc.label}).`,
+          "error",
+        ),
+      );
+    }
+  }
+
   const derived: DerivedChange[] = [];
   const affected: AffectedEntity[] = [];
   const sections = new Set<"TAKEOFF" | "QUOTE" | "PLANNING">(["PLANNING"]);
@@ -489,14 +546,16 @@ function analyzePlanningLocal(
     if (op.op === "update_duration") {
       const key = op.target.task_id ?? op.target.step_code ?? op.target.id;
       if (key) durationOverrides.set(key, op.changes.duration_days);
+      if (!(op.changes.duration_days > 0)) {
+        errors.push(
+          issue("INVALID_FIELD", "duration_days doit être > 0.", "error"),
+        );
+      }
     }
   }
 
   for (const plan of subgraph.plans) {
-    if (plan.id !== patch.origin.entity_id && subgraph.plans.length > 1) {
-      // ne simuler que le plan ciblé si possible
-      if (plan.id !== patch.origin.entity_id) continue;
-    }
+    if (plan.id !== patch.origin.entity_id) continue;
     const sim = simulatePlanFromQuantityMap(plan, new Map(), durationOverrides);
     for (const t of sim.tasks) {
       if (Math.abs(t.afterDuration - t.beforeDuration) < 1e-9) continue;
@@ -560,14 +619,8 @@ function analyzePlanningLocal(
     affectedEntities: affected,
     protectedEntities: [],
     overrides: [],
-    warnings: [
-      issue(
-        "PLANNING_SCOPE",
-        "PLANNING_ADJUSTMENT : TAKEOFF et QUOTE inchangés (pas de remontée).",
-        "warn",
-      ),
-    ],
-    errors: [],
+    warnings,
+    errors,
     impactSummary: summarizeImpact(derived, [], [], sections),
     graph: [
       {

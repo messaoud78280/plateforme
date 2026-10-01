@@ -162,6 +162,7 @@ export type ImpactScheduleTask = {
   id: string;
   stepCode: string;
   name: string;
+  description?: string | null;
   durationDays: number;
   durationMode: string;
   durationLockedByUser: boolean;
@@ -183,6 +184,8 @@ export type ImpactPlan = {
   endDateBase: string | null;
   baseDurationWorkingDays: number | null;
   revisionNumber: number;
+  /** CTX-04 / CTX-02A — alignement métré source. */
+  studyVersionAtGeneration: number | null;
   tasks: ImpactScheduleTask[];
   takeoffLinks: Array<{ taskId: string; studyLineCode: string }>;
 };

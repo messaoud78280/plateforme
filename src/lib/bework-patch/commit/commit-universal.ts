@@ -24,6 +24,7 @@ import {
   evaluateCommitEligibility,
   type SyncMode,
 } from "@/lib/bework-patch/commit/eligibility";
+import { applyPlanningDirectInTx } from "@/lib/bework-patch/commit/planning-ops";
 
 export type CommitUniversalResult =
   | {
@@ -111,7 +112,9 @@ export async function commitUniversalPatch(input: {
     return {
       ok: false,
       error:
-        "Les données ont changé depuis l’analyse. Veuillez relancer la prévisualisation.",
+        patch.origin.section === "PLANNING"
+          ? "Le planning a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
+          : "Les données ont changé depuis l’analyse. Veuillez relancer la prévisualisation.",
       code: "PREVIEW_STALE",
       impact,
     };
@@ -152,7 +155,25 @@ export async function commitUniversalPatch(input: {
       let quoteId: string | null = subgraph.quotes[0]?.id ?? null;
       let planId: string | null = subgraph.plans[0]?.id ?? null;
 
-      if (eligibility.mode === "QUOTE_ONLY") {
+      if (eligibility.mode === "PLANNING_ONLY") {
+        const plan = subgraph.plans.find((p) => p.id === patch.origin.entity_id);
+        if (!plan) {
+          throw Object.assign(new Error("Planning introuvable dans le sous-graphe."), {
+            code: "TARGET_NOT_FOUND",
+          });
+        }
+        const applied = await applyPlanningDirectInTx(tx, {
+          orgId: input.orgId,
+          projectId: input.projectId,
+          patch,
+          impact,
+          plans: subgraph.plans,
+          expectedRevision: plan.revisionNumber,
+        });
+        planningUpdated = applied.updated;
+        planId = applied.planId;
+        studyId = applied.studyId;
+      } else if (eligibility.mode === "QUOTE_ONLY") {
         quoteUpdated = await applyQuoteOnlyInTx(tx, {
           orgId: input.orgId,
           patch,
@@ -210,6 +231,7 @@ export async function commitUniversalPatch(input: {
           return false;
         }
         if (eligibility.mode === "QUOTE_ONLY") return d.section === "QUOTE";
+        if (eligibility.mode === "PLANNING_ONLY") return d.section === "PLANNING";
         return true;
       });
 
@@ -291,6 +313,17 @@ export async function commitUniversalPatch(input: {
         impact,
       };
     }
+    if (code === "PREVIEW_STALE" || code === "VERSION_CONFLICT") {
+      return {
+        ok: false,
+        error:
+          e instanceof Error
+            ? e.message
+            : "Le planning a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez.",
+        code: code === "VERSION_CONFLICT" ? "VERSION_CONFLICT" : "PREVIEW_STALE",
+        impact,
+      };
+    }
     console.error("[bework-patch/commit]", e);
     return {
       ok: false,
@@ -327,7 +360,7 @@ async function readVersionsAfter(
     ids.planId
       ? tx.prepSchedulePlan.findFirst({
           where: { id: ids.planId },
-          select: { revisionNumber: true },
+          select: { revisionNumber: true, studyVersionAtGeneration: true },
         })
       : null,
   ]);
@@ -337,6 +370,7 @@ async function readVersionsAfter(
     quoteVersionId: quote?.currentVersion?.id ?? null,
     quoteStatus: quote?.status ?? null,
     planRevision: plan?.revisionNumber ?? null,
+    studyVersionAtGeneration: plan?.studyVersionAtGeneration ?? null,
   };
 }
 

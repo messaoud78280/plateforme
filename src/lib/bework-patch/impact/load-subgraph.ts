@@ -223,12 +223,14 @@ export async function loadImpactSubgraph(input: {
         endDateBase: true,
         baseDurationWorkingDays: true,
         revisionNumber: true,
+        studyVersionAtGeneration: true,
         tasks: {
           orderBy: { sortOrder: "asc" },
           select: {
             id: true,
             stepCode: true,
             name: true,
+            description: true,
             durationDays: true,
             durationMode: true,
             durationLockedByUser: true,
@@ -257,6 +259,7 @@ export async function loadImpactSubgraph(input: {
       baseDurationWorkingDays:
         p.baseDurationWorkingDays != null ? d(p.baseDurationWorkingDays) : null,
       revisionNumber: p.revisionNumber,
+      studyVersionAtGeneration: p.studyVersionAtGeneration,
       tasks: p.tasks.map((t) => {
         const depsRaw = Array.isArray(t.dependsOnJson) ? t.dependsOnJson : [];
         const dependsOnStepCodes = depsRaw
@@ -270,6 +273,7 @@ export async function loadImpactSubgraph(input: {
           id: t.id,
           stepCode: t.stepCode,
           name: t.name,
+          description: t.description,
           durationDays: d(t.durationDays),
           durationMode: t.durationMode,
           durationLockedByUser: t.durationLockedByUser,
@@ -355,12 +359,14 @@ export async function loadImpactSubgraph(input: {
         endDateBase: true,
         baseDurationWorkingDays: true,
         revisionNumber: true,
+        studyVersionAtGeneration: true,
         tasks: {
           orderBy: { sortOrder: "asc" },
           select: {
             id: true,
             stepCode: true,
             name: true,
+            description: true,
             durationDays: true,
             durationMode: true,
             durationLockedByUser: true,
@@ -390,10 +396,12 @@ export async function loadImpactSubgraph(input: {
               ? d(plan.baseDurationWorkingDays)
               : null,
           revisionNumber: plan.revisionNumber,
+          studyVersionAtGeneration: plan.studyVersionAtGeneration,
           tasks: plan.tasks.map((t) => ({
             id: t.id,
             stepCode: t.stepCode,
             name: t.name,
+            description: t.description,
             durationDays: d(t.durationDays),
             durationMode: t.durationMode,
             durationLockedByUser: t.durationLockedByUser,

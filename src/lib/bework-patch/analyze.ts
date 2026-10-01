@@ -234,10 +234,18 @@ export function analyzeBeworkPatchInput(input: {
   if (canDelegateToQuotePatch(patch)) legacyDelegate = "quote";
   else if (canDelegateToPrepPatch(patch)) legacyDelegate = "prep";
 
-  const canCommit =
+  const canCommitUniversal =
     capability.mode === "AVAILABLE" &&
     errors.length === 0 &&
-    legacyDelegate != null;
+    (patch.origin.section === "TAKEOFF" ||
+      patch.origin.section === "QUOTE" ||
+      patch.origin.section === "PLANNING");
+
+  const canCommit =
+    canCommitUniversal ||
+    (capability.mode === "AVAILABLE" &&
+      errors.length === 0 &&
+      legacyDelegate != null);
 
   // Vérifier que la conversion legacy fonctionne
   if (canCommit && legacyDelegate === "quote") {
@@ -268,6 +276,12 @@ export function analyzeBeworkPatchInput(input: {
     potentialImpacts,
     impact,
     legacyDelegate: errors.length ? null : legacyDelegate,
-    canCommit: capability.mode === "AVAILABLE" && errors.length === 0 && legacyDelegate != null,
+    canCommit:
+      capability.mode === "AVAILABLE" &&
+      errors.length === 0 &&
+      (legacyDelegate != null ||
+        patch.origin.section === "TAKEOFF" ||
+        patch.origin.section === "QUOTE" ||
+        patch.origin.section === "PLANNING"),
   };
 }

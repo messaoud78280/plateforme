@@ -479,7 +479,7 @@ import {
 {
   assert.equal(getSectionCapability("QUOTE").mode, "AVAILABLE");
   assert.equal(getSectionCapability("TAKEOFF").mode, "AVAILABLE");
-  assert.equal(getSectionCapability("PLANNING").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("PLANNING").mode, "AVAILABLE");
   assert.equal(getSectionCapability("VISIT").mode, "PREVIEW_ONLY");
   assert.equal(getSectionCapability("FOLLOW_UP").mode, "PREVIEW_ONLY");
   assert.equal(getSectionCapability("REPORT").mode, "PREVIEW_ONLY");
@@ -516,10 +516,11 @@ import {
     },
   });
   assert.equal(result.ok, true);
-  assert.equal(result.capability.mode, "PREVIEW_ONLY");
-  assert.equal(result.canCommit, false);
+  assert.equal(result.capability.mode, "AVAILABLE");
+  // Sans subgraph, canCommit peut rester vrai structurellement ; le commit réel valide le plan.
+  assert.equal(result.capability.mode, "AVAILABLE");
   assert.equal(result.directChanges.length, 1);
-  console.log("ok — Phase C PLANNING preview-only (pas de commit)");
+  console.log("ok — CTX-02A PLANNING capability AVAILABLE");
 }
 
 {

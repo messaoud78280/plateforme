@@ -14,6 +14,8 @@ export type VersionSnapshot = {
   quoteVersionId: string | null;
   quoteStatus: string | null;
   planRevision: number | null;
+  /** CTX-02A / CTX-04 — version métré source du planning (pas confondre avec planRevision). */
+  studyVersionAtGeneration?: number | null;
 };
 
 export function collectVersionSnapshot(subgraph: ImpactSubgraph): VersionSnapshot {
@@ -25,6 +27,7 @@ export function collectVersionSnapshot(subgraph: ImpactSubgraph): VersionSnapsho
     quoteVersionId: quote?.versionId ?? null,
     quoteStatus: quote?.status ?? null,
     planRevision: plan?.revisionNumber ?? null,
+    studyVersionAtGeneration: plan?.studyVersionAtGeneration ?? null,
   };
 }
 

@@ -63,7 +63,9 @@ export async function POST(req: Request) {
       message:
         result.syncMode === "SAFE_PARTIAL_SYNC"
           ? "Modifications autorisées appliquées. Devis contractuel conservé."
-          : "Modification appliquée et synchronisée.",
+          : result.syncMode === "PLANNING_ONLY"
+            ? "Modification planning appliquée."
+            : "Modification appliquée et synchronisée.",
     });
   } catch (e) {
     return prepErrorResponse(e);

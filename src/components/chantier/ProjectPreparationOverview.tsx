@@ -20,7 +20,6 @@ import {
   timelineStepCaption,
 } from "@/lib/chantier/pilotage-display";
 import { computeProjectNextAction } from "@/lib/chantier/project-preparation-state";
-import { ProjectSourceDocumentsSection } from "@/components/chantier/ProjectSourceDocumentsSection";
 
 type QuoteSectionPreview = {
   sectionId: string;
@@ -690,13 +689,6 @@ export function ProjectPreparationOverview({
           </p>
         ) : null}
       </div>
-
-      <ProjectSourceDocumentsSection
-        projectId={workspace.projectId}
-        documents={workspace.global.sourceDocuments ?? []}
-        studies={workspace.global.sourceStudyOptions ?? []}
-        canEdit={canEdit}
-      />
 
       {/* 3 colonnes pilotage */}
       <div className="grid gap-3 lg:grid-cols-3">

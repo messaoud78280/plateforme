@@ -112,7 +112,7 @@ function followUpPatch(overrides?: {
   assert.equal(getSectionCapability("FOLLOW_UP").mode, "AVAILABLE");
   assert.equal(getSectionCapability("VISIT").mode, "AVAILABLE");
   assert.equal(getSectionCapability("PLANNING").mode, "AVAILABLE");
-  assert.equal(getSectionCapability("REPORT").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("REPORT").mode, "AVAILABLE");
   assert.equal(getSectionCapability("NOTICE").mode, "PREVIEW_ONLY");
   console.log("  A capability: ok");
 }
@@ -275,34 +275,32 @@ function followUpPatch(overrides?: {
   console.log("  I cross-follow-up: ok");
 }
 
-// --- J REPORT/NOTICE PREVIEW_ONLY ---
+// --- J NOTICE PREVIEW_ONLY ---
 {
-  for (const section of ["REPORT", "NOTICE"] as const) {
-    const patch: BeworkPatchV1 = {
-      type: "bework_patch_v1",
-      schema_version: 1,
-      patch_id: `${section}-x`,
-      origin: {
-        section,
-        project_id: PROJECT_ID,
-        entity_id: "doc_1",
-        base_version: 1,
-      },
-      change_intent: "DOCUMENT_EDIT",
-      reason: "x",
-      operations: [],
-    };
-    const elig = evaluateCommitEligibility({
+  const patch: BeworkPatchV1 = {
+    type: "bework_patch_v1",
+    schema_version: 1,
+    patch_id: "notice-x",
+    origin: {
+      section: "NOTICE",
+      project_id: PROJECT_ID,
+      entity_id: "doc_1",
+      base_version: 1,
+    },
+    change_intent: "DOCUMENT_EDIT",
+    reason: "x",
+    operations: [],
+  };
+  const elig = evaluateCommitEligibility({
+    patch,
+    impact: analyzePatchImpact({
       patch,
-      impact: analyzePatchImpact({
-        patch,
-        subgraph: followUpSubgraph(),
-      }),
-    });
-    assert.equal(elig.ok, false);
-    if (!elig.ok) assert.equal(elig.code, "PREVIEW_ONLY");
-  }
-  console.log("  J REPORT/NOTICE PREVIEW_ONLY: ok");
+      subgraph: followUpSubgraph(),
+    }),
+  });
+  assert.equal(elig.ok, false);
+  if (!elig.ok) assert.equal(elig.code, "PREVIEW_ONLY");
+  console.log("  J NOTICE PREVIEW_ONLY: ok");
 }
 
 // --- K version change ---

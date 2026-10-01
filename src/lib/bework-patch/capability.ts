@@ -39,8 +39,8 @@ export const SECTION_PATCH_CAPABILITY: Record<
     label: null,
   },
   REPORT: {
-    mode: "PREVIEW_ONLY",
-    label: "Modification compte rendu : preview uniquement pour le moment.",
+    mode: "AVAILABLE",
+    label: null,
   },
   NOTICE: {
     mode: "PREVIEW_ONLY",

@@ -106,7 +106,7 @@ function visitPatch(overrides?: {
   assert.equal(getSectionCapability("FOLLOW_UP").mode, "AVAILABLE");
   assert.equal(getSectionCapability("VISIT").mode, "AVAILABLE");
   assert.equal(getSectionCapability("PLANNING").mode, "AVAILABLE");
-  assert.equal(getSectionCapability("REPORT").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("REPORT").mode, "AVAILABLE");
   assert.equal(getSectionCapability("NOTICE").mode, "PREVIEW_ONLY");
   console.log("  A capability: ok");
 }
@@ -274,14 +274,14 @@ function visitPatch(overrides?: {
   console.log("  H cross-visit: ok");
 }
 
-// --- I REPORT still PREVIEW_ONLY ---
+// --- I NOTICE still PREVIEW_ONLY ---
 {
   const patch: BeworkPatchV1 = {
     type: "bework_patch_v1",
     schema_version: 1,
-    patch_id: "report-x",
+    patch_id: "notice-x",
     origin: {
-      section: "REPORT",
+      section: "NOTICE",
       project_id: FIXTURE_PROJECT_ID,
       entity_id: "doc_1",
       base_version: 1,
@@ -297,34 +297,32 @@ function visitPatch(overrides?: {
   const elig = evaluateCommitEligibility({ patch, impact });
   assert.equal(elig.ok, false);
   if (!elig.ok) assert.equal(elig.code, "PREVIEW_ONLY");
-  console.log("  I REPORT PREVIEW_ONLY: ok");
+  console.log("  I NOTICE PREVIEW_ONLY: ok");
 }
 
-// --- J REPORT/NOTICE ---
+// --- J NOTICE only ---
 {
-  for (const section of ["REPORT", "NOTICE"] as const) {
-    const patch: BeworkPatchV1 = {
-      type: "bework_patch_v1",
-      schema_version: 1,
-      patch_id: `${section}-x`,
-      origin: {
-        section,
-        project_id: FIXTURE_PROJECT_ID,
-        entity_id: "doc_1",
-        base_version: 1,
-      },
-      change_intent: "DOCUMENT_EDIT",
-      reason: "x",
-      operations: [],
-    };
-    const elig = evaluateCommitEligibility({
-      patch,
-      impact: analyzePatchImpact({ patch, subgraph: visitSubgraph() }),
-    });
-    assert.equal(elig.ok, false);
-    if (!elig.ok) assert.equal(elig.code, "PREVIEW_ONLY");
-  }
-  console.log("  J REPORT/NOTICE PREVIEW_ONLY: ok");
+  const patch: BeworkPatchV1 = {
+    type: "bework_patch_v1",
+    schema_version: 1,
+    patch_id: "notice-y",
+    origin: {
+      section: "NOTICE",
+      project_id: FIXTURE_PROJECT_ID,
+      entity_id: "doc_1",
+      base_version: 1,
+    },
+    change_intent: "DOCUMENT_EDIT",
+    reason: "x",
+    operations: [],
+  };
+  const elig = evaluateCommitEligibility({
+    patch,
+    impact: analyzePatchImpact({ patch, subgraph: visitSubgraph() }),
+  });
+  assert.equal(elig.ok, false);
+  if (!elig.ok) assert.equal(elig.code, "PREVIEW_ONLY");
+  console.log("  J NOTICE PREVIEW_ONLY: ok");
 }
 
 // --- K CTX-07 version change conceptuel ---

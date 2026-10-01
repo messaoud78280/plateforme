@@ -102,7 +102,7 @@ export function analyzePatchImpact(input: {
   const section = patch.origin.section;
 
   // Sections hors V1 : pas de graphe cross-module
-  if (section === "REPORT" || section === "NOTICE") {
+  if (section === "NOTICE") {
     return emptyResult({
       warnings: [
         issue(
@@ -123,6 +123,10 @@ export function analyzePatchImpact(input: {
         overrideCount: 0,
       },
     });
+  }
+
+  if (section === "REPORT") {
+    return analyzeReportLocal(patch, subgraph);
   }
 
   if (section === "FOLLOW_UP") {
@@ -383,6 +387,47 @@ function describeDirectOp(
       unit: null,
     };
   }
+  if (op.op === "update_report") {
+    const report = subgraph.report;
+    const targetId = op.target.document_id ?? op.target.id;
+    if (report && targetId && targetId !== report.id) {
+      return {
+        op: op.op,
+        section,
+        entityType: "SITE_DOCUMENT",
+        entityId: null,
+        label: "compte rendu hors cible",
+        field: "meta",
+        before: null,
+        after: op.changes,
+        unit: null,
+      };
+    }
+    const payload =
+      report?.payloadJson &&
+      typeof report.payloadJson === "object" &&
+      !Array.isArray(report.payloadJson)
+        ? (report.payloadJson as Record<string, unknown>)
+        : null;
+    return {
+      op: op.op,
+      section,
+      entityType: "SITE_DOCUMENT",
+      entityId: report?.id ?? targetId ?? null,
+      label: report?.title ?? "compte rendu",
+      field: "meta",
+      before: report
+        ? {
+            title: report.title,
+            quick_notes: report.quickNotes,
+            summary: payload?.summary ?? null,
+            additional_notes: payload?.additionalNotes ?? null,
+          }
+        : null,
+      after: op.changes,
+      unit: null,
+    };
+  }
   return {
     op: op.op,
     section,
@@ -542,6 +587,140 @@ function analyzeCommercialQuote(
         confidence: "CERTAIN",
         mutable: protectedEntities.length === 0,
         protected: protectedEntities.length > 0,
+      },
+    ],
+  };
+}
+
+/* ─── REPORT local (texte sûr COMPTE_RENDU) ─── */
+
+function analyzeReportLocal(
+  patch: BeworkPatchV1,
+  subgraph: ImpactSubgraph,
+): AnalyzePatchImpactResult {
+  const errors: BeworkPatchIssue[] = [];
+  const warnings: BeworkPatchIssue[] = [
+    issue(
+      "REPORT_SCOPE",
+      "REPORT CTX-02D : sections JSON, médias, statut et PDF non modifiables via patch.",
+      "warn",
+    ),
+  ];
+
+  const supported = new Set(["update_report"]);
+  const allowedFields = new Set([
+    "title",
+    "quick_notes",
+    "summary",
+    "additional_notes",
+  ]);
+
+  for (const op of patch.operations) {
+    if (!supported.has(op.op)) {
+      errors.push(
+        issue(
+          "OPERATION_NOT_ALLOWED_FOR_SECTION",
+          `Opération ${op.op} non supportée pour le commit REPORT (CTX-02D).`,
+          "error",
+        ),
+      );
+      continue;
+    }
+    if (op.op === "update_report") {
+      const targetId = op.target.document_id ?? op.target.id;
+      if (targetId && targetId !== patch.origin.entity_id) {
+        errors.push(
+          issue("PROJECT_MISMATCH", "Cible hors compte rendu.", "error"),
+        );
+      }
+      if (subgraph.report && targetId && targetId !== subgraph.report.id) {
+        errors.push(
+          issue("PROJECT_MISMATCH", "Cible hors document chargé.", "error"),
+        );
+      }
+      if (subgraph.report && subgraph.report.kind !== "COMPTE_RENDU") {
+        errors.push(
+          issue(
+            "PROJECT_MISMATCH",
+            "Document hors type COMPTE_RENDU.",
+            "error",
+          ),
+        );
+      }
+      const keys = Object.keys(op.changes).filter(
+        (k) => (op.changes as Record<string, unknown>)[k] !== undefined,
+      );
+      if (!keys.length) {
+        errors.push(
+          issue("EMPTY_OPERATIONS", "update_report sans champ.", "error"),
+        );
+      }
+      for (const key of keys) {
+        if (!allowedFields.has(key)) {
+          errors.push(
+            issue(
+              "INVALID_FIELD",
+              `Champ « ${key} » non autorisé (whitelist: title, quick_notes, summary, additional_notes).`,
+              "error",
+            ),
+          );
+        }
+      }
+      if (
+        op.changes.title !== undefined &&
+        (!op.changes.title || !op.changes.title.trim())
+      ) {
+        errors.push(
+          issue("INVALID_FIELD", "title ne peut pas être vide.", "error"),
+        );
+      }
+    }
+  }
+
+  if (!subgraph.report) {
+    errors.push(
+      issue(
+        "TARGET_NOT_FOUND",
+        "Compte rendu introuvable dans le sous-graphe.",
+        "error",
+      ),
+    );
+  } else if (subgraph.report.id !== patch.origin.entity_id) {
+    errors.push(issue("PROJECT_MISMATCH", "Document hors cible.", "error"));
+  }
+
+  const directChanges = extractDirectChanges(patch, subgraph).filter(
+    (dc) => dc.op === "update_report",
+  );
+
+  return {
+    directChanges,
+    canonicalResolution: buildCanonicalResolution({}),
+    derivedChanges: [],
+    affectedEntities: [],
+    protectedEntities: [],
+    overrides: [],
+    warnings,
+    errors,
+    impactSummary: {
+      affectedSections: [],
+      simulationOnly: true,
+      canPropagate: false,
+      certainCount: directChanges.length,
+      partialCount: 0,
+      potentialCount: 0,
+      protectedCount: 0,
+      overrideCount: 0,
+    },
+    graph: [
+      {
+        entityType: "SITE_DOCUMENT",
+        id: patch.origin.entity_id,
+        label: subgraph.report?.title ?? "Compte rendu",
+        relationType: null,
+        confidence: "CERTAIN",
+        mutable: true,
+        protected: false,
       },
     ],
   };

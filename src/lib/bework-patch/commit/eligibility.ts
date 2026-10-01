@@ -10,7 +10,8 @@ export type SyncMode =
   | "QUOTE_ONLY"
   | "PLANNING_ONLY"
   | "VISIT_ONLY"
-  | "FOLLOW_UP_ONLY";
+  | "FOLLOW_UP_ONLY"
+  | "REPORT_ONLY";
 
 export type CommitEligibility =
   | {
@@ -146,13 +147,39 @@ export function evaluateCommitEligibility(input: {
     };
   }
 
-  if (
-    patch.origin.section === "REPORT" ||
-    patch.origin.section === "NOTICE"
-  ) {
+  // CTX-02D — REPORT local (texte sûr COMPTE_RENDU uniquement)
+  if (patch.origin.section === "REPORT") {
+    const unsupported = patch.operations.filter(
+      (op) => op.op !== "update_report",
+    );
+    if (unsupported.length) {
+      return {
+        ok: false,
+        reason: `Opération ${unsupported[0]!.op} non supportée pour le commit REPORT (CTX-02D).`,
+        code: "OPERATION_NOT_ALLOWED_FOR_SECTION",
+      };
+    }
+    if (!patch.operations.length) {
+      return {
+        ok: false,
+        reason: "Aucune opération compte rendu.",
+        code: "EMPTY_OPERATIONS",
+      };
+    }
+    return {
+      ok: true,
+      mode: "REPORT_ONLY",
+      buttonLabel: "Appliquer au compte rendu",
+      warnings: impact.warnings
+        .filter((w) => w.code === "REPORT_SCOPE")
+        .map((w) => w.message),
+    };
+  }
+
+  if (patch.origin.section === "NOTICE") {
     return {
       ok: false,
-      reason: `Section ${patch.origin.section} : preview uniquement (Phase E).`,
+      reason: `Section NOTICE : preview uniquement (Phase E).`,
       code: "PREVIEW_ONLY",
     };
   }

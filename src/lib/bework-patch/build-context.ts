@@ -12,6 +12,8 @@ import {
 } from "@/lib/bework-context";
 import { computeFollowUpContextVersion } from "@/lib/bework-context/follow-up-context-version";
 import { sheetToVersionInput } from "@/lib/bework-patch/commit/follow-up-ops";
+import { computeReportContextVersion } from "@/lib/bework-context/report-context-version";
+import { docToVersionInput } from "@/lib/bework-patch/commit/report-ops";
 import {
   buildCanonicalResolution,
   buildChatgptContextSkeleton,
@@ -367,6 +369,30 @@ async function buildDocumentContext(
   if (!doc) return null;
   if (section === "REPORT" && doc.kind !== "COMPTE_RENDU") return null;
   if (section === "NOTICE" && doc.kind !== "NOTICE") return null;
+
+  if (section === "REPORT") {
+    const version = computeReportContextVersion(docToVersionInput(doc));
+    return buildChatgptContextSkeleton({
+      section,
+      project,
+      target: {
+        entity_type: "SITE_DOCUMENT",
+        id: doc.id,
+        version,
+        base_version: version,
+        code: doc.number,
+      },
+      data: {
+        kind: doc.kind,
+        title: doc.title,
+        status: doc.status,
+        quick_notes: doc.quickNotes,
+        payload: doc.payloadJson,
+        version_note:
+          "target.version = empreinte déterministe (SHA-256→uint48) de l’état ChatGPT REPORT.",
+      },
+    });
+  }
 
   return buildChatgptContextSkeleton({
     section,

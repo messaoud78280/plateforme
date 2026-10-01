@@ -222,6 +222,17 @@ export type ImpactFollowUp = {
   contextVersion: number;
 };
 
+export type ImpactReport = {
+  id: string;
+  projectId: string;
+  kind: string;
+  title: string;
+  status: string;
+  quickNotes: string | null;
+  payloadJson: unknown;
+  contextVersion: number;
+};
+
 export type ImpactSubgraph = {
   projectId: string;
   study: ImpactStudy | null;
@@ -230,6 +241,7 @@ export type ImpactSubgraph = {
   plans: ImpactPlan[];
   visit: ImpactVisit | null;
   followUp: ImpactFollowUp | null;
+  report: ImpactReport | null;
 };
 
 export function emptySubgraph(projectId: string): ImpactSubgraph {
@@ -241,5 +253,6 @@ export function emptySubgraph(projectId: string): ImpactSubgraph {
     plans: [],
     visit: null,
     followUp: null,
+    report: null,
   };
 }

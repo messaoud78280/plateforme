@@ -27,6 +27,7 @@ import {
 import { applyPlanningDirectInTx } from "@/lib/bework-patch/commit/planning-ops";
 import { applyVisitDirectInTx } from "@/lib/bework-patch/commit/visit-ops";
 import { applyFollowUpDirectInTx } from "@/lib/bework-patch/commit/follow-up-ops";
+import { applyReportDirectInTx } from "@/lib/bework-patch/commit/report-ops";
 
 export type CommitUniversalResult =
   | {
@@ -41,6 +42,7 @@ export type CommitUniversalResult =
         planningUpdated: boolean;
         visitUpdated: boolean;
         followUpUpdated: boolean;
+        reportUpdated: boolean;
         quoteProtected: boolean;
       };
       impact: AnalyzePatchImpactResult;
@@ -122,7 +124,9 @@ export async function commitUniversalPatch(input: {
             ? "La visite a été modifiée depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
             : patch.origin.section === "FOLLOW_UP"
               ? "Le suivi a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
-              : "Les données ont changé depuis l’analyse. Veuillez relancer la prévisualisation.",
+              : patch.origin.section === "REPORT"
+                ? "Le compte rendu a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
+                : "Les données ont changé depuis l’analyse. Veuillez relancer la prévisualisation.",
       code: "PREVIEW_STALE",
       impact,
     };
@@ -159,6 +163,7 @@ export async function commitUniversalPatch(input: {
       let planningUpdated = false;
       let visitUpdated = false;
       let followUpUpdated = false;
+      let reportUpdated = false;
       const quoteProtected = impact.protectedEntities.some((p) => p.section === "QUOTE");
 
       let studyId: string | null = subgraph.study?.id ?? null;
@@ -168,8 +173,26 @@ export async function commitUniversalPatch(input: {
       let visitVersionAfter: number | null = null;
       let followUpId: string | null = subgraph.followUp?.id ?? null;
       let followUpVersionAfter: number | null = null;
+      let reportId: string | null = subgraph.report?.id ?? null;
+      let reportVersionAfter: number | null = null;
 
-      if (eligibility.mode === "FOLLOW_UP_ONLY") {
+      if (eligibility.mode === "REPORT_ONLY") {
+        if (!subgraph.report) {
+          throw Object.assign(
+            new Error("Compte rendu introuvable dans le sous-graphe."),
+            { code: "TARGET_NOT_FOUND" },
+          );
+        }
+        const applied = await applyReportDirectInTx(tx, {
+          orgId: input.orgId,
+          projectId: input.projectId,
+          patch,
+          expectedVersion: subgraph.report.contextVersion,
+        });
+        reportUpdated = applied.updated;
+        reportId = applied.documentId;
+        reportVersionAfter = applied.versionAfter;
+      } else if (eligibility.mode === "FOLLOW_UP_ONLY") {
         if (!subgraph.followUp) {
           throw Object.assign(
             new Error("Fiche de suivi introuvable dans le sous-graphe."),
@@ -272,6 +295,8 @@ export async function commitUniversalPatch(input: {
         visitContextVersionOverride: visitVersionAfter,
         followUpId,
         followUpVersionOverride: followUpVersionAfter,
+        reportId,
+        reportVersionOverride: reportVersionAfter,
       });
 
       const writtenDerived = impact.derivedChanges.filter((d) => {
@@ -283,6 +308,7 @@ export async function commitUniversalPatch(input: {
         if (eligibility.mode === "PLANNING_ONLY") return d.section === "PLANNING";
         if (eligibility.mode === "VISIT_ONLY") return false;
         if (eligibility.mode === "FOLLOW_UP_ONLY") return false;
+        if (eligibility.mode === "REPORT_ONLY") return false;
         return true;
       });
 
@@ -328,6 +354,7 @@ export async function commitUniversalPatch(input: {
             planningUpdated,
             visitUpdated,
             followUpUpdated,
+            reportUpdated,
             quoteProtected,
           },
         };
@@ -376,7 +403,9 @@ export async function commitUniversalPatch(input: {
               ? "La visite a été modifiée depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
               : patch.origin.section === "FOLLOW_UP"
                 ? "Le suivi a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
-                : "Le planning a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez.",
+                : patch.origin.section === "REPORT"
+                  ? "Le compte rendu a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
+                  : "Le planning a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez.",
         code: code === "VERSION_CONFLICT" ? "VERSION_CONFLICT" : "PREVIEW_STALE",
         impact,
       };
@@ -404,6 +433,8 @@ async function readVersionsAfter(
     visitContextVersionOverride?: number | null;
     followUpId?: string | null;
     followUpVersionOverride?: number | null;
+    reportId?: string | null;
+    reportVersionOverride?: number | null;
   },
 ): Promise<VersionSnapshot> {
   const [study, quote, plan] = await Promise.all([
@@ -438,6 +469,7 @@ async function readVersionsAfter(
     studyVersionAtGeneration: plan?.studyVersionAtGeneration ?? null,
     visitContextVersion: ids.visitContextVersionOverride ?? null,
     followUpVersion: ids.followUpVersionOverride ?? null,
+    reportVersion: ids.reportVersionOverride ?? null,
   };
 }
 

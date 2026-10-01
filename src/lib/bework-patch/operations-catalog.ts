@@ -214,6 +214,17 @@ export const OPERATION_CATALOG: Record<
       "note",
     ],
   },
+  update_report: {
+    entity_types: ["SITE_DOCUMENT"],
+    sections: ["REPORT"],
+    compatible_intents: DOCUMENT,
+    allowed_change_fields: [
+      "title",
+      "quick_notes",
+      "summary",
+      "additional_notes",
+    ],
+  },
   update_document_section: {
     entity_types: ["SITE_DOCUMENT"],
     sections: ["REPORT", "NOTICE"],

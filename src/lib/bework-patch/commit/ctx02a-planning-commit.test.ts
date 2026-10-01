@@ -61,7 +61,7 @@ function planningPatch(overrides?: {
   assert.equal(getSectionCapability("PLANNING").mode, "AVAILABLE");
   assert.equal(getSectionCapability("VISIT").mode, "AVAILABLE");
   assert.equal(getSectionCapability("FOLLOW_UP").mode, "AVAILABLE");
-  assert.equal(getSectionCapability("REPORT").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("REPORT").mode, "AVAILABLE");
   assert.equal(getSectionCapability("NOTICE").mode, "PREVIEW_ONLY");
   console.log("  A capability: ok");
 }
@@ -221,14 +221,14 @@ function planningPatch(overrides?: {
   console.log("  H CTX-04 snapshot fields: ok");
 }
 
-// --- I REPORT still PREVIEW_ONLY eligibility ---
+// --- I NOTICE still PREVIEW_ONLY eligibility ---
 {
   const patch: BeworkPatchV1 = {
     type: "bework_patch_v1",
     schema_version: 1,
-    patch_id: "report-x",
+    patch_id: "notice-x",
     origin: {
-      section: "REPORT",
+      section: "NOTICE",
       project_id: "proj_1",
       entity_id: "doc_1",
       base_version: 1,
@@ -244,7 +244,7 @@ function planningPatch(overrides?: {
   const elig = evaluateCommitEligibility({ patch, impact });
   assert.equal(elig.ok, false);
   if (!elig.ok) assert.equal(elig.code, "PREVIEW_ONLY");
-  console.log("  I REPORT PREVIEW_ONLY: ok");
+  console.log("  I NOTICE PREVIEW_ONLY: ok");
 }
 
 // --- J update_duration preview ---

@@ -12,6 +12,8 @@ import { computeVisitContextVersion } from "@/lib/bework-context/visit-context-v
 import { visitRowToVersionInput } from "@/lib/bework-patch/commit/visit-ops";
 import { computeFollowUpContextVersion } from "@/lib/bework-context/follow-up-context-version";
 import { sheetToVersionInput } from "@/lib/bework-patch/commit/follow-up-ops";
+import { computeReportContextVersion } from "@/lib/bework-context/report-context-version";
+import { docToVersionInput } from "@/lib/bework-patch/commit/report-ops";
 
 function asIso(dte: Date | null | undefined): string | null {
   if (!dte) return null;
@@ -134,6 +136,38 @@ export async function loadImpactSubgraph(input: {
         contextVersion: computeFollowUpContextVersion(
           sheetToVersionInput(sheet),
         ),
+      };
+    }
+    return graph;
+  } else if (section === "REPORT") {
+    const documentId = input.patch.origin.entity_id;
+    const doc = await prisma.siteDocument.findFirst({
+      where: {
+        id: documentId,
+        organizationId: input.orgId,
+        projectId: input.projectId,
+        kind: "COMPTE_RENDU",
+      },
+      select: {
+        id: true,
+        projectId: true,
+        kind: true,
+        title: true,
+        status: true,
+        quickNotes: true,
+        payloadJson: true,
+      },
+    });
+    if (doc) {
+      graph.report = {
+        id: doc.id,
+        projectId: doc.projectId,
+        kind: doc.kind,
+        title: doc.title,
+        status: doc.status,
+        quickNotes: doc.quickNotes,
+        payloadJson: doc.payloadJson,
+        contextVersion: computeReportContextVersion(docToVersionInput(doc)),
       };
     }
     return graph;

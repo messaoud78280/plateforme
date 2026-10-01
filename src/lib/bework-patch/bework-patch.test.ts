@@ -482,7 +482,7 @@ import {
   assert.equal(getSectionCapability("PLANNING").mode, "AVAILABLE");
   assert.equal(getSectionCapability("VISIT").mode, "AVAILABLE");
   assert.equal(getSectionCapability("FOLLOW_UP").mode, "AVAILABLE");
-  assert.equal(getSectionCapability("REPORT").mode, "PREVIEW_ONLY");
+  assert.equal(getSectionCapability("REPORT").mode, "AVAILABLE");
   assert.equal(getSectionCapability("NOTICE").mode, "PREVIEW_ONLY");
   for (const [section, cap] of Object.entries(SECTION_PATCH_CAPABILITY)) {
     if (cap.mode === "PREVIEW_ONLY") {

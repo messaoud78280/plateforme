@@ -2,23 +2,41 @@
  * Smoke CTX-02E — NOTICE capability + URBAN lecture seule + C-01 inchangé.
  * Aucune écriture production.
  */
-import { prisma } from "../src/lib/prisma";
-import { getSectionCapability } from "../src/lib/bework-patch/capability";
-import { buildUniversalPatchContext } from "../src/lib/bework-patch/build-context";
 import {
-  computeNoticeContextVersion,
-  isNoticeCommitSupportedOp,
-  noticeDocToVersionInput,
-  NOTICE_UPDATE_ALLOWED_FIELDS,
-} from "../src/lib/bework-patch/commit/notice-ops";
-import { isReportCommitSupportedOp } from "../src/lib/bework-patch/commit/report-ops";
-import { supportedOperationsForSection } from "../src/lib/bework-patch/operations-catalog";
+  getScriptDatabaseUrlCandidatesForLongJobs,
+  loadScriptEnv,
+} from "./load-script-env";
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED ??= "0";
+loadScriptEnv();
+process.env.DATABASE_URL =
+  getScriptDatabaseUrlCandidatesForLongJobs()[0] ?? process.env.DATABASE_URL;
 
 const ORG_ID = "cmt2nx23j00021k6btoov39gr";
 const C01 = "cmuh69adc00011423ry0hhj7s";
 const SCOPE_ID = "cmui2yaj20001dli4kof4j59b";
 
 async function main() {
+  const { prisma } = await import("../src/lib/prisma");
+  const { getSectionCapability } = await import(
+    "../src/lib/bework-patch/capability"
+  );
+  const { buildUniversalPatchContext } = await import(
+    "../src/lib/bework-patch/build-context"
+  );
+  const {
+    computeNoticeContextVersion,
+    isNoticeCommitSupportedOp,
+    noticeDocToVersionInput,
+    NOTICE_UPDATE_ALLOWED_FIELDS,
+  } = await import("../src/lib/bework-patch/commit/notice-ops");
+  const { isReportCommitSupportedOp } = await import(
+    "../src/lib/bework-patch/commit/report-ops"
+  );
+  const { supportedOperationsForSection } = await import(
+    "../src/lib/bework-patch/operations-catalog"
+  );
+
   const caps = {
     TAKEOFF: getSectionCapability("TAKEOFF").mode,
     QUOTE: getSectionCapability("QUOTE").mode,
@@ -99,12 +117,12 @@ async function main() {
     };
   }
 
-  // Isolation : un COMPTE_RENDU ne doit pas charger un contexte NOTICE
   const cr = await prisma.siteDocument.findFirst({
     where: { organizationId: ORG_ID, kind: "COMPTE_RENDU" },
     select: { id: true, projectId: true, kind: true },
   });
-  let isolationReportNotice: unknown = "pas de COMPTE_RENDU pour test isolation";
+  let isolationReportNotice: unknown =
+    "pas de COMPTE_RENDU pour test isolation";
   if (cr) {
     const bad = await buildUniversalPatchContext({
       orgId: ORG_ID,
@@ -205,5 +223,6 @@ main()
     process.exit(1);
   })
   .finally(async () => {
+    const { prisma } = await import("../src/lib/prisma");
     await prisma.$disconnect();
   });

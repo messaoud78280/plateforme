@@ -39,6 +39,7 @@ import {
   fmtMoney,
   toInputDate,
 } from "./format";
+import { quoteDetailCommercialLabel } from "@/lib/chantier/quote-detail-state";
 
 const AGING_COLORS: Record<string, string> = {
   not_due: "#2563eb",
@@ -936,10 +937,24 @@ function DocList({
               kind === "quote" ? DEVIS_STATUS_TONE : FACTURE_STATUS_TONE,
               r.status,
             );
+            const quoteStale =
+              kind === "quote" &&
+              (r.needsRevalidation || r.syncState === "A_VERIFIER");
             const statusLabel =
               kind === "quote"
-                ? (COMMERCIAL_QUOTE_STATUS_LABELS[r.status] ?? r.status)
+                ? quoteStale
+                  ? (r.primaryLabel ?? "À revalider")
+                  : (r.commercialLabel ??
+                    quoteDetailCommercialLabel(r.status) ??
+                    COMMERCIAL_QUOTE_STATUS_LABELS[r.status] ??
+                    r.status)
                 : (COMMERCIAL_INVOICE_STATUS_LABELS[r.status] ?? r.status);
+            const secondaryStatus =
+              kind === "quote" && quoteStale
+                ? (r.commercialLabel ?? quoteDetailCommercialLabel(r.status))
+                : kind === "quote" && r.secondaryLabel === "À jour"
+                  ? "À jour"
+                  : null;
             return (
               <li key={r.id} className="group">
                 <div
@@ -956,7 +971,20 @@ function DocList({
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-[13px] font-semibold text-bework-navy">{r.number}</p>
-                          <span className={badgeClassForTone(tone.tone)}>{statusLabel}</span>
+                          <span
+                            className={
+                              quoteStale
+                                ? "inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-950 ring-1 ring-amber-300/80"
+                                : badgeClassForTone(tone.tone)
+                            }
+                          >
+                            {statusLabel}
+                          </span>
+                          {secondaryStatus ? (
+                            <span className={badgeClassForTone(tone.tone)}>
+                              {secondaryStatus}
+                            </span>
+                          ) : null}
                         </div>
                         <p className="mt-0.5 truncate text-[12px] text-bework-muted">
                           {r.client || "—"}

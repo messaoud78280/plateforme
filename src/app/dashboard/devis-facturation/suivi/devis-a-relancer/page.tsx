@@ -5,8 +5,11 @@ import {
 } from "@/lib/commercial/access";
 import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
-import { COMMERCIAL_QUOTE_STATUS_LABELS, roundMoney } from "@/lib/commercial/money";
+import { roundMoney } from "@/lib/commercial/money";
 import { quoteNextActionLabel } from "@/lib/commercial/dashboard-kpis";
+import { loadQuoteDetailStatesBatch } from "@/lib/chantier/load-quote-detail-sync";
+import { formatQuoteSyncStatusLine } from "@/lib/chantier/quote-detail-display";
+import { quoteDetailCommercialLabel } from "@/lib/chantier/quote-detail-state";
 
 export const dynamic = "force-dynamic";
 
@@ -34,9 +37,19 @@ export default async function DevisARelancerPage() {
       updatedAt: true,
       validityDate: true,
       projectId: true,
+      sourcePrepStudyId: true,
       clientExternalOrg: { select: { name: true, tradeName: true } },
     },
   });
+
+  const metreSyncByQuoteId = await loadQuoteDetailStatesBatch(
+    orgId,
+    rows.map((q) => ({
+      id: q.id,
+      status: q.status,
+      sourcePrepStudyId: q.sourcePrepStudyId,
+    })),
+  );
 
   return (
     <div className="space-y-4">
@@ -50,6 +63,10 @@ export default async function DevisARelancerPage() {
             0,
             Math.floor((now.getTime() - since.getTime()) / 86400000),
           );
+          const detail = metreSyncByQuoteId.get(q.id);
+          const statusLine = detail
+            ? formatQuoteSyncStatusLine(detail)
+            : quoteDetailCommercialLabel(q.status);
           return (
             <li key={q.id}>
               <Link
@@ -65,7 +82,7 @@ export default async function DevisARelancerPage() {
                         "—"}
                     </p>
                     <p className="mt-1 text-[11px] text-slate-400">
-                      {COMMERCIAL_QUOTE_STATUS_LABELS[q.status]} · depuis {days} j
+                      {statusLine} · depuis {days} j
                     </p>
                   </div>
                   <div className="text-right">

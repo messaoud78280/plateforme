@@ -8,9 +8,11 @@ import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
 import {
   COMMERCIAL_INVOICE_STATUS_LABELS,
-  COMMERCIAL_QUOTE_STATUS_LABELS,
   roundMoney,
 } from "@/lib/commercial/money";
+import { loadQuoteDetailStatesBatch } from "@/lib/chantier/load-quote-detail-sync";
+import { formatQuoteSyncStatusLine } from "@/lib/chantier/quote-detail-display";
+import { quoteDetailCommercialLabel } from "@/lib/chantier/quote-detail-state";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +48,7 @@ export default async function CommercialClientDetailPage({
         status: true,
         totalSellHt: true,
         updatedAt: true,
+        sourcePrepStudyId: true,
       },
     }),
     prisma.commercialInvoice.findMany({
@@ -86,6 +89,15 @@ export default async function CommercialClientDetailPage({
     }),
   ]);
 
+  const metreSyncByQuoteId = await loadQuoteDetailStatesBatch(
+    orgId,
+    quotes.map((q) => ({
+      id: q.id,
+      status: q.status,
+      sourcePrepStudyId: q.sourcePrepStudyId,
+    })),
+  );
+
   const resteDu = invoices.reduce((s, i) => s + d(i.amountDue), 0);
 
   return (
@@ -114,15 +126,21 @@ export default async function CommercialClientDetailPage({
       </div>
 
       <Section title="Devis">
-        {quotes.map((q) => (
-          <Row
-            key={q.id}
-            href={`/dashboard/devis-facturation/devis/${q.id}`}
-            left={q.number}
-            mid={COMMERCIAL_QUOTE_STATUS_LABELS[q.status] ?? q.status}
-            right={`${roundMoney(d(q.totalSellHt), 0).toLocaleString("fr-FR")} € HT`}
-          />
-        ))}
+        {quotes.map((q) => {
+          const detail = metreSyncByQuoteId.get(q.id);
+          const mid = detail
+            ? formatQuoteSyncStatusLine(detail)
+            : quoteDetailCommercialLabel(q.status);
+          return (
+            <Row
+              key={q.id}
+              href={`/dashboard/devis-facturation/devis/${q.id}`}
+              left={q.number}
+              mid={mid}
+              right={`${roundMoney(d(q.totalSellHt), 0).toLocaleString("fr-FR")} € HT`}
+            />
+          );
+        })}
         {quotes.length === 0 ? <Empty /> : null}
       </Section>
 

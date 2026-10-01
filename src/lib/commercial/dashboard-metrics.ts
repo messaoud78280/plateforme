@@ -32,6 +32,8 @@ import {
   getApplicableFiscalAlerts,
   type FiscalThresholdAlert,
 } from "@/lib/commercial/fiscal-thresholds";
+import { loadQuoteDetailStatesBatch } from "@/lib/chantier/load-quote-detail-sync";
+import { quoteSyncFieldsFromDetail } from "@/lib/chantier/quote-detail-display";
 
 /** TTL court : évite de recalculer le cockpit à chaque navigation / filtre. */
 const DASHBOARD_CACHE_TTL_MS = 25_000;
@@ -110,6 +112,13 @@ export type DashboardDocRow = {
   overdue: boolean;
   daysLate: number;
   action: string | null;
+  /** CTX-03 — présent uniquement pour les lignes devis. */
+  syncState?: string | null;
+  syncLabel?: string | null;
+  commercialLabel?: string | null;
+  primaryLabel?: string | null;
+  secondaryLabel?: string | null;
+  needsRevalidation?: boolean;
 };
 
 export type DashboardSeriesPoint = {
@@ -633,6 +642,7 @@ async function loadCommercialDashboardMetrics(
             issueDate: true,
             projectId: true,
             validityDate: true,
+            sourcePrepStudyId: true,
             clientExternalOrg: { select: { name: true, tradeName: true } },
             project: { select: { title: true } },
           },
@@ -1011,6 +1021,15 @@ async function loadCommercialDashboardMetrics(
         ? trendChange(convNow.rate, 0)
         : null;
 
+  const quoteSyncById = await loadQuoteDetailStatesBatch(
+    orgId,
+    recentQuotes.map((q) => ({
+      id: q.id,
+      status: q.status,
+      sourcePrepStudyId: q.sourcePrepStudyId,
+    })),
+  );
+
   return {
     period: {
       preset: period.preset,
@@ -1065,26 +1084,36 @@ async function loadCommercialDashboardMetrics(
       ),
     },
     alerts: alerts.slice(0, 5),
-    recentQuotes: recentQuotes.map((q) => ({
-      id: q.id,
-      href: `/dashboard/devis-facturation/devis/${q.id}`,
-      number: q.number,
-      client: clientName(q.clientExternalOrg),
-      project: q.project?.title ?? null,
-      date: q.issueDate?.toISOString() ?? null,
-      amountHt: d(q.totalSellHt),
-      amountTtc: null,
-      amountPaid: null,
-      amountDue: null,
-      status: q.status,
-      overdue: false,
-      daysLate: 0,
-      action: quoteNextActionLabel({
+    recentQuotes: recentQuotes.map((q) => {
+      const sync = quoteSyncById.get(q.id);
+      const fields = sync ? quoteSyncFieldsFromDetail(sync) : null;
+      return {
+        id: q.id,
+        href: `/dashboard/devis-facturation/devis/${q.id}`,
+        number: q.number,
+        client: clientName(q.clientExternalOrg),
+        project: q.project?.title ?? null,
+        date: q.issueDate?.toISOString() ?? null,
+        amountHt: d(q.totalSellHt),
+        amountTtc: null,
+        amountPaid: null,
+        amountDue: null,
         status: q.status,
-        projectId: q.projectId,
-        validityDate: q.validityDate,
-      }),
-    })),
+        overdue: false,
+        daysLate: 0,
+        action: quoteNextActionLabel({
+          status: q.status,
+          projectId: q.projectId,
+          validityDate: q.validityDate,
+        }),
+        syncState: fields?.syncState ?? null,
+        syncLabel: fields?.syncLabel ?? null,
+        commercialLabel: fields?.commercialLabel ?? null,
+        primaryLabel: fields?.primaryLabel ?? null,
+        secondaryLabel: fields?.secondaryLabel ?? null,
+        needsRevalidation: fields?.needsRevalidation ?? false,
+      };
+    }),
     recentInvoices: recentInvoices.map((inv) => {
       const late = daysOverdue(inv.dueDate, now);
       return {

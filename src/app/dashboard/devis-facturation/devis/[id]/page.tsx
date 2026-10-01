@@ -17,6 +17,7 @@ import { d } from "@/lib/commercial/decimal";
 import { VisitQuoteMeasurementsPanel } from "@/components/site-visits/VisitQuoteMeasurementsPanel";
 import { ChantierHierarchyNav } from "@/components/chantier/ChantierHierarchyNav";
 import { resolveQuoteChantierNav } from "@/lib/chantier/quote-chantier-nav";
+import { loadQuoteDetailState } from "@/lib/chantier/load-quote-detail-sync";
 import { BackLink } from "@/components/ui/BackLink";
 
 export const dynamic = "force-dynamic";
@@ -54,7 +55,8 @@ export default async function DevisDetailPage({
   });
   const fromVisitId = fromVisit?.id ?? sp.fromVisit ?? null;
 
-  const [summary, invoiceStats, archive, settings, chantierNav] = await Promise.all([
+  const [summary, invoiceStats, archive, settings, chantierNav, metreSync] =
+    await Promise.all([
     quote.status === "ACCEPTED" || quote.acceptedAt
       ? loadDealFinancialSummary(orgId, id)
       : null,
@@ -76,6 +78,11 @@ export default async function DevisDetailPage({
       sourcePrepStudyId: quote.sourcePrepStudyId,
       scopeId: quote.scopeId ?? null,
       project: quote.project,
+    }),
+    loadQuoteDetailState(orgId, {
+      id: quote.id,
+      status: quote.status,
+      sourcePrepStudyId: quote.sourcePrepStudyId,
     }),
   ]);
 
@@ -146,6 +153,7 @@ export default async function DevisDetailPage({
         acceptedPdfAvailable={Boolean(archive?.snapshot)}
         minMarginPercent={minMarginPercent}
         finalizeIntent={finalizeIntent}
+        metreSync={metreSync}
       />
       {archive?.hasAcceptedVersion ? (
         <QuoteAcceptedArchiveCard

@@ -775,6 +775,7 @@ export async function getPrepSchedulePlanView(orgId: string, planId: string) {
         select: {
           id: true,
           title: true,
+          version: true,
           resourcesJson: true,
           scopeId: true,
           scope: { select: { id: true, name: true, code: true } },
@@ -803,13 +804,15 @@ export type SchedulePlanViewPayload = {
   status: string;
   revisionKind: string;
   revisionNumber: number;
+  /** Version métré au moment de la génération — CTX-04. */
+  studyVersionAtGeneration: number;
   startDate: string | null;
   endDateBase: string | null;
   endDateWithConditional: string | null;
   baseDurationWorkingDays: number | null;
   withConditionalWorkingDays: number | null;
   note: string | null;
-  study: { id: string; title: string };
+  study: { id: string; title: string; version: number };
   project: { id: string; title: string };
   scope: { id: string; name: string; code: string } | null;
   quote: {
@@ -1061,6 +1064,7 @@ export async function buildPrepSchedulePlanPayload(
     status: plan.status,
     revisionKind: plan.revisionKind,
     revisionNumber: plan.revisionNumber,
+    studyVersionAtGeneration: plan.studyVersionAtGeneration,
     startDate,
     endDateBase,
     endDateWithConditional: asIsoDate(plan.endDateWithConditional),
@@ -1069,7 +1073,11 @@ export async function buildPrepSchedulePlanPayload(
     withConditionalWorkingDays:
       plan.withConditionalWorkingDays != null ? d(plan.withConditionalWorkingDays) : null,
     note: plan.note,
-    study: { id: plan.study.id, title: plan.study.title },
+    study: {
+      id: plan.study.id,
+      title: plan.study.title,
+      version: plan.study.version,
+    },
     project: { id: plan.project.id, title: plan.project.title },
     scope: plan.study.scope
       ? {

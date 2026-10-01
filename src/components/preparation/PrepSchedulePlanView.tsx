@@ -13,6 +13,7 @@ import { PrepScheduleGantt } from "./PrepScheduleGantt";
 import { PrepScheduleTaskPanel } from "./PrepScheduleTaskPanel";
 import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
 import { getSectionCapability } from "@/lib/bework-patch/capability";
+import { buildPlanningDetailState } from "@/lib/chantier/planning-detail-state";
 
 function asIso(d: string | null): string {
   if (!d) return "—";
@@ -22,6 +23,23 @@ function asIso(d: string | null): string {
 function asStartLabel(d: string | null): string {
   if (!d) return "Date de démarrage à définir";
   return d.slice(0, 10);
+}
+
+function formatStartFr(d: string | null): string | null {
+  if (!d) return null;
+  const raw = d.slice(0, 10);
+  const [y, m, day] = raw.split("-").map(Number);
+  if (!y || !m || !day) return raw;
+  try {
+    return new Date(Date.UTC(y, m - 1, day)).toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC",
+    });
+  } catch {
+    return raw;
+  }
 }
 
 function euro(n: number | null): string {
@@ -152,6 +170,14 @@ export function PrepSchedulePlanView({
     currentLabel: "Planning",
   });
 
+  const metreSync = buildPlanningDetailState({
+    status: plan.status,
+    revisionNumber: plan.revisionNumber,
+    studyVersionAtGeneration: plan.studyVersionAtGeneration,
+    currentStudyVersion: plan.study.version,
+    startDateLabel: formatStartFr(plan.startDate),
+  });
+
   return (
     <div className="relative mx-auto max-w-[1600px] space-y-4 px-4 pb-16 pt-6 sm:px-6">
       <ChantierHierarchyNav
@@ -162,10 +188,31 @@ export function PrepSchedulePlanView({
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-[1.5rem] font-semibold text-[#1e3a5f]">{plan.title}</h1>
-          <p className="mt-1 text-[12px] text-slate-500">
-            {plan.revisionKind} · {plan.status}
-            {plan.quote ? ` · Devis ${plan.quote.number}` : " · Sans devis"}
-          </p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <span
+              className={cn(
+                "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
+                metreSync.primaryVariant === "alert"
+                  ? "bg-amber-100 text-amber-950 ring-1 ring-amber-300/80"
+                  : metreSync.primaryVariant === "warn"
+                    ? "bg-orange-50 text-orange-900 ring-1 ring-orange-200"
+                    : metreSync.primaryVariant === "ok"
+                      ? "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/80"
+                      : "bg-slate-100 text-slate-700 ring-1 ring-slate-200",
+              )}
+            >
+              {metreSync.primaryLabel}
+            </span>
+            {metreSync.secondaryLabel ? (
+              <span className="text-[12px] text-slate-500">
+                Début prévu : {metreSync.secondaryLabel}
+              </span>
+            ) : null}
+            <span className="text-[12px] text-slate-400">
+              {plan.revisionKind} · rév. {plan.revisionNumber}
+              {plan.quote ? ` · Devis ${plan.quote.number}` : " · Sans devis"}
+            </span>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {plan.quote ? (
@@ -223,6 +270,21 @@ export function PrepSchedulePlanView({
       {error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-[13px] text-red-800">
           {error}
+        </div>
+      ) : null}
+
+      {metreSync.syncMessage ? (
+        <div
+          className={cn(
+            "rounded-xl px-4 py-2.5 text-[13px]",
+            metreSync.needsUpdate
+              ? "border border-amber-300 bg-amber-50 text-amber-950"
+              : "border border-orange-200 bg-orange-50 text-orange-950",
+          )}
+        >
+          <span className="font-semibold">{metreSync.primaryLabel}</span>
+          {" — "}
+          {metreSync.syncMessage}
         </div>
       ) : null}
 

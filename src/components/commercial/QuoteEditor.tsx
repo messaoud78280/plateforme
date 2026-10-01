@@ -10,7 +10,6 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import {
-  COMMERCIAL_QUOTE_STATUS_LABELS,
   calculateDocumentTotals,
   calculateLine,
   roundMoney,
@@ -30,6 +29,8 @@ import { LibraryPickerModal } from "@/components/commercial/LibraryPickerModal";
 import { ChatGptBundleImportModal } from "@/components/commercial/ChatGptBundleImportModal";
 import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
 import { getSectionCapability } from "@/lib/bework-patch/capability";
+import type { QuoteDetailState } from "@/lib/chantier/quote-detail-state";
+import { quoteDetailCommercialLabel } from "@/lib/chantier/quote-detail-state";
 import { QuoteClientNotesPreview } from "@/components/commercial/QuoteClientNotesPreview";
 import { IssuerEditModal } from "@/components/commercial/IssuerEditModal";
 import { ClientCoordsEditModal } from "@/components/commercial/ClientCoordsEditModal";
@@ -216,6 +217,7 @@ export function QuoteEditor({
   acceptedPdfAvailable = false,
   minMarginPercent = 15,
   finalizeIntent = false,
+  metreSync = null,
 }: {
   initial: QuoteDetail;
   canEdit: boolean;
@@ -224,6 +226,8 @@ export function QuoteEditor({
   minMarginPercent?: number;
   /** Arrivée depuis la fiche chantier avec CTA « Finaliser le devis ». */
   finalizeIntent?: boolean;
+  /** CTX-03 — sync métré pour ce devis uniquement (null = devis indépendant / non chargé). */
+  metreSync?: QuoteDetailState | null;
 }) {
   const router = useRouter();
   const [quote, setQuote] = useState(initial);
@@ -1117,19 +1121,67 @@ export function QuoteEditor({
           chiffrage puis validez pour marquer l’étape Prêt sur le chantier.
         </div>
       ) : null}
+      {metreSync?.syncMessage ? (
+        <div
+          className={cn(
+            "mx-auto mb-3 max-w-[1500px] rounded-xl px-4 py-2.5 text-[13px]",
+            metreSync.needsRevalidation
+              ? "border border-amber-300 bg-amber-50 text-amber-950"
+              : "border border-orange-200 bg-orange-50 text-orange-950",
+          )}
+        >
+          <span className="font-semibold">{metreSync.primaryLabel}</span>
+          {" — "}
+          {metreSync.syncMessage}
+        </div>
+      ) : null}
       {/* Barre sticky */}
       <div className="sticky top-12 z-30 -mx-1 mb-4 border-b border-slate-200/80 bg-white/95 px-1 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={cn(
-                badgeClassForTone(
-                  DEVIS_STATUS_TONE[quote.status] ?? "neutral",
-                ),
-              )}
-            >
-              {COMMERCIAL_QUOTE_STATUS_LABELS[quote.status] ?? quote.status}
-            </span>
+            {metreSync?.needsRevalidation ||
+            metreSync?.syncState === "A_VERIFIER" ? (
+              <>
+                <span
+                  className={cn(
+                    "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
+                    metreSync.primaryVariant === "alert"
+                      ? "bg-amber-100 text-amber-950 ring-1 ring-amber-300/80"
+                      : "bg-orange-50 text-orange-900 ring-1 ring-orange-200",
+                  )}
+                >
+                  {metreSync.primaryLabel}
+                </span>
+                <span
+                  className={cn(
+                    badgeClassForTone(
+                      DEVIS_STATUS_TONE[quote.status] ?? "neutral",
+                    ),
+                  )}
+                >
+                  {metreSync.commercialLabel}
+                </span>
+              </>
+            ) : (
+              <>
+                <span
+                  className={cn(
+                    badgeClassForTone(
+                      DEVIS_STATUS_TONE[quote.status] ?? "neutral",
+                    ),
+                  )}
+                >
+                  {metreSync
+                    ? metreSync.commercialLabel
+                    : quoteDetailCommercialLabel(quote.status)}
+                </span>
+                {metreSync?.secondaryLabel === "À jour" ? (
+                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-800 ring-1 ring-emerald-200/80">
+                    À jour
+                  </span>
+                ) : null}
+              </>
+            )}
             {saveLabel ? (
               <span
                 className={

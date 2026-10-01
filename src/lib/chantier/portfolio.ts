@@ -430,6 +430,7 @@ export async function loadProjectsPortfolio(opts: {
                 scopeId: true,
                 dossierStatus: true,
                 sourcesJson: true,
+                version: true,
                 _count: { select: { lines: true } },
               },
               orderBy: { updatedAt: "desc" },
@@ -475,6 +476,8 @@ export async function loadProjectsPortfolio(opts: {
                 scopeId: true,
                 status: true,
                 revisionKind: true,
+                studyVersionAtGeneration: true,
+                startDate: true,
               },
               take: 300,
             })
@@ -503,6 +506,38 @@ export async function loadProjectsPortfolio(opts: {
           })
         : [];
     const visits = [...visitRows, ...unlinkedVisits];
+
+    // Batch CTX-03 — transfers devis (1 requête, pas N×getProjectWorkspace).
+    const quoteIds = quoteRows.map((q) => q.id);
+    const transfers =
+      quoteIds.length > 0
+        ? await prisma.prepQuoteTransfer.findMany({
+            where: { quoteId: { in: quoteIds } },
+            select: {
+              quoteId: true,
+              studyId: true,
+              studyVersion: true,
+              createdAt: true,
+            },
+            orderBy: { createdAt: "desc" },
+            take: 400,
+          })
+        : [];
+    const latestTransferByQuote = new Map<
+      string,
+      { studyId: string | null; studyVersion: number | null }
+    >();
+    for (const t of transfers) {
+      if (latestTransferByQuote.has(t.quoteId)) continue;
+      latestTransferByQuote.set(t.quoteId, {
+        studyId: t.studyId,
+        studyVersion: t.studyVersion,
+      });
+    }
+    const studyVersionById: Record<string, number | null> = {};
+    for (const s of studyRows) {
+      studyVersionById[s.id] = s.version;
+    }
 
     // Attention FollowUp : batch unique — loadAttentionForSheets résout l’org par fiche
     // (portfolio multi-tenant). Ne pas forcer un seul organizationId.
@@ -739,6 +774,7 @@ export async function loadProjectsPortfolio(opts: {
             sourcesJson: s.sourcesJson,
             dossierStatus: s.dossierStatus,
             lineCount: s._count.lines,
+            version: s.version,
           })),
         scopes: scopeRows
           .filter((s) => s.projectId === p.id)
@@ -749,7 +785,43 @@ export async function loadProjectsPortfolio(opts: {
             referenceSchedulePlanId: s.referenceSchedulePlanId,
           })),
         quotes: quoteRows.filter((q) => q.projectId === p.id),
-        plans: planRows.filter((plan) => plan.projectId === p.id),
+        plans: planRows
+          .filter((plan) => plan.projectId === p.id)
+          .map((plan) => ({
+            id: plan.id,
+            studyId: plan.studyId,
+            scopeId: plan.scopeId,
+            status: plan.status,
+            revisionKind: plan.revisionKind,
+            studyVersionAtGeneration: plan.studyVersionAtGeneration,
+            startDateLabel: plan.startDate
+              ? plan.startDate.toLocaleDateString("fr-FR", {
+                  day: "numeric",
+                  month: "short",
+                })
+              : null,
+          })),
+        studyVersionById,
+        quoteSyncByQuoteId: Object.fromEntries(
+          quoteRows
+            .filter((q) => q.projectId === p.id)
+            .map((q) => {
+              const t = latestTransferByQuote.get(q.id);
+              const linkedStudyVersion =
+                t?.studyId != null
+                  ? studyVersionById[t.studyId] ?? null
+                  : null;
+              return [
+                q.id,
+                {
+                  quoteId: q.id,
+                  hasMetreProvenance: Boolean(t),
+                  currentStudyVersion: linkedStudyVersion,
+                  transferStudyVersion: t?.studyVersion ?? null,
+                },
+              ];
+            }),
+        ),
       });
       const modules = preparation.modules;
       const progress = buildProgress({

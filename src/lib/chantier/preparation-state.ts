@@ -13,9 +13,9 @@ import {
 } from "@/lib/chantier/resolve-workspace-entities";
 import { normalizePrepSources } from "@/lib/preparation/plan-source";
 import {
-  getQuotePreparationPhase,
-  quotePreparationStateLabel,
-} from "@/lib/chantier/quote-workflow-status";
+  evaluateCorePreparationTriple,
+  type CorePreparationTriple,
+} from "@/lib/chantier/core-preparation-state";
 
 export type PreparationEntryMode = "visite" | "plan" | "mixte" | "devis" | "vide";
 
@@ -54,10 +54,22 @@ export type PreparationStudy = StudyLike & {
   projectId?: string;
   dossierStatus: string | null;
   lineCount: number;
+  /** Version métré — requise pour CTX-03/04 côté liste. */
+  version?: number | null;
 };
 
 export type PreparationPlan = PlanLike & {
   projectId?: string;
+  studyVersionAtGeneration?: number | null;
+  startDateLabel?: string | null;
+};
+
+export type PreparationQuoteSync = {
+  quoteId: string;
+  hasMetreProvenance: boolean;
+  currentStudyVersion: number | null;
+  transferStudyVersion: number | null;
+  hasSignificantQuantityDiffs?: boolean | null;
 };
 
 export type PreparationSnapshot = {
@@ -66,6 +78,8 @@ export type PreparationSnapshot = {
   progressPercent: number;
   nextAction: string | null;
   visitId: string | null;
+  /** États métier communs (métré/devis/planning) — source unique Phase 1. */
+  core: CorePreparationTriple;
 };
 
 const VISIT_RANK = [
@@ -207,11 +221,6 @@ export function resolveProjectQuote<T extends PreparationQuote>(input: {
   return input.quotes.find((q) => q.status !== "CANCELLED") ?? input.quotes[0] ?? null;
 }
 
-function posteSuffix(count: number): string {
-  if (count <= 0) return "";
-  return ` · ${count} poste${count > 1 ? "s" : ""}`;
-}
-
 function visitModule(visit: PreparationVisit | null, required: boolean): PreparationModule {
   if (!required && !visit) {
     return {
@@ -250,77 +259,38 @@ function visitModule(visit: PreparationVisit | null, required: boolean): Prepara
   };
 }
 
-function metreModule(study: PreparationStudy | null): PreparationModule {
-  if (!study) {
-    return {
-      key: "metre",
-      label: "Métré",
-      state: "todo",
-      stateLabel: "À préparer",
-      applicable: true,
-    };
-  }
-  const posts = posteSuffix(study.lineCount);
-  const validated = study.dossierStatus === "PRO_VALIDE" || study.dossierStatus === "DEMONSTRATION";
+function metreModuleFromCore(
+  core: CorePreparationTriple["metre"],
+): PreparationModule {
   return {
     key: "metre",
     label: "Métré",
-    state: validated ? "done" : "progress",
-    stateLabel: `${validated ? "Validé" : "En cours"}${posts}`,
+    state: core.progressBucket === "na" ? "todo" : core.progressBucket,
+    stateLabel: core.displayLabel,
     applicable: true,
   };
 }
 
-function quoteModule(quote: PreparationQuote | null): PreparationModule {
-  if (!quote) {
-    return {
-      key: "devis",
-      label: "Devis",
-      state: "todo",
-      stateLabel: "À préparer",
-      applicable: true,
-    };
-  }
-  const phase = getQuotePreparationPhase(quote.status);
-  const stateLabel = quotePreparationStateLabel(quote.status);
+function quoteModuleFromCore(
+  core: CorePreparationTriple["devis"],
+): PreparationModule {
   return {
     key: "devis",
     label: "Devis",
-    state:
-      phase === "ready" || phase === "accepted"
-        ? "done"
-        : phase === "closed"
-          ? "todo"
-          : "progress",
-    stateLabel,
+    state: core.progressBucket === "na" ? "todo" : core.progressBucket,
+    stateLabel: core.displayLabel,
     applicable: true,
   };
 }
 
-function planningModule(plan: PreparationPlan | null, archivedOnly: boolean): PreparationModule {
-  if (!plan || plan.status === "ARCHIVED" || archivedOnly) {
-    return {
-      key: "planning",
-      label: "Planning",
-      state: "todo",
-      stateLabel: archivedOnly ? "Aucun planning actif" : "À préparer",
-      applicable: true,
-    };
-  }
-  if (plan.status === "DRAFT") {
-    return {
-      key: "planning",
-      label: "Planning",
-      state: "progress",
-      stateLabel: "En préparation",
-      applicable: true,
-    };
-  }
+function planningModuleFromCore(
+  core: CorePreparationTriple["planning"],
+): PreparationModule {
   return {
     key: "planning",
     label: "Planning",
-    state: "done",
-    stateLabel: "Prêt",
+    state: core.progressBucket === "na" ? "todo" : core.progressBucket,
+    stateLabel: core.displayLabel,
     applicable: true,
   };
 }
@@ -357,6 +327,13 @@ export function buildPreparationSnapshot(input: {
   scopes: ScopeLike[];
   quotes: PreparationQuote[];
   plans: PreparationPlan[];
+  /**
+   * Provenance métré par devis (batch portfolio) — CTX-03.
+   * Clé = quoteId.
+   */
+  quoteSyncByQuoteId?: Record<string, PreparationQuoteSync>;
+  /** Version courante des études (id → version) pour CTX-04. */
+  studyVersionById?: Record<string, number | null>;
 }): PreparationSnapshot {
   const quote = resolveProjectQuote({ quotes: input.quotes, scopes: input.scopes });
   const visit = resolveProjectVisit({
@@ -390,9 +367,58 @@ export function buildPreparationSnapshot(input: {
           : "vide";
   const archivedOnly =
     input.plans.length > 0 && input.plans.every((p) => p.status === "ARCHIVED");
-  const metre = metreModule(studyFull);
-  const devis = quoteModule(quote);
-  const planning = planningModule(plan, archivedOnly && plan?.status === "ARCHIVED");
+
+  const quoteSync = quote
+    ? input.quoteSyncByQuoteId?.[quote.id] ?? null
+    : null;
+  const planStudyVersion =
+    plan?.studyId != null
+      ? input.studyVersionById?.[plan.studyId] ??
+        studyFull?.version ??
+        null
+      : studyFull?.version ?? null;
+
+  const core = evaluateCorePreparationTriple({
+    study: studyFull
+      ? {
+          id: studyFull.id,
+          dossierStatus: studyFull.dossierStatus,
+          lineCount: studyFull.lineCount,
+          version: studyFull.version ?? null,
+        }
+      : null,
+    quote: quote ? { id: quote.id, status: quote.status } : null,
+    quoteSync: quoteSync
+      ? {
+          hasMetreProvenance: quoteSync.hasMetreProvenance,
+          currentStudyVersion: quoteSync.currentStudyVersion,
+          transferStudyVersion: quoteSync.transferStudyVersion,
+          hasSignificantQuantityDiffs: quoteSync.hasSignificantQuantityDiffs,
+        }
+      : quote
+        ? {
+            // Sans provenance batch : ne pas inventer un stale ; statut commercial seul.
+            hasMetreProvenance: false,
+            currentStudyVersion: null,
+            transferStudyVersion: null,
+          }
+        : null,
+    plan: plan
+      ? {
+          id: plan.id,
+          status: plan.status,
+          studyId: plan.studyId,
+          studyVersionAtGeneration: plan.studyVersionAtGeneration ?? null,
+          startDateLabel: plan.startDateLabel ?? null,
+        }
+      : null,
+    planStudyVersion,
+    archivedOnly: archivedOnly && plan?.status === "ARCHIVED",
+  });
+
+  const metre = metreModuleFromCore(core.metre);
+  const devis = quoteModuleFromCore(core.devis);
+  const planning = planningModuleFromCore(core.planning);
   const visite = visitModule(visit, entryMode !== "plan");
   const modules = [visite, metre, devis, planning];
   const applicable = modules.filter((m) => m.applicable);
@@ -416,5 +442,6 @@ export function buildPreparationSnapshot(input: {
       planning,
     }),
     visitId: visit?.id ?? null,
+    core,
   };
 }

@@ -45,6 +45,8 @@
     "test:bework-notice-commit-ctx02e": "node --import tsx src/lib/bework-patch/commit/ctx02e-notice-commit.test.ts",
     "test:bework-pipeline-contract-ctx09a": "node --import tsx src/lib/bework-patch/commit/ctx09a-pipeline-contract.test.ts",
     "test:bework-ui-messages-ctx05": "node --import tsx src/lib/bework-patch/ui-messages.test.ts",
+    "test:chantier-core-prep-phase1": "node --import tsx src/lib/chantier/core-preparation-state.test.ts",
+    "test:chantier-preparation-state": "node --import tsx src/lib/chantier/preparation-state.test.ts",
     "test:ctx05-ux-urban": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --import tsx scripts/test-ctx05-ux-smoke-urban.ts",
     "test:bework-project-context:urban": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --import tsx scripts/test-bework-project-context.ts",
     "test:ctx08-takeoff-c01": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --import tsx scripts/test-ctx08-takeoff-context-c01.ts",

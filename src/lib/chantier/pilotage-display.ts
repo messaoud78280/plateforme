@@ -45,6 +45,17 @@ export function humanizeTechnicalStatus(raw: string | null | undefined): string 
 export function timelineStepCaption(step: ChantierWorkflowStep): string {
   if (!step.ready) {
     if (step.id === "visite") return step.title || "Pas de visite liée";
+    if (step.id === "metre") {
+      // Ex. « Version 4 · À valider · 32 postes » → « À valider · 32 postes »
+      const d = humanizeTechnicalStatus(step.detail) || step.title || "";
+      const m = d.match(/(À valider|En cours)[^·]*(?:·\s*\d+\s*postes?)?/i);
+      if (m) return m[0].replace(/\s+/g, " ").trim();
+      if (/À valider|En cours/i.test(d)) {
+        const posts = d.match(/\d+\s*postes?/i);
+        return posts ? `${d.match(/À valider|En cours/i)![0]} · ${posts[0]}` : d;
+      }
+      return d || step.actionLabel || "À préparer";
+    }
     if (step.id === "suivi" && step.actionLabel === "Planning requis") {
       return "Planning requis";
     }
@@ -55,19 +66,32 @@ export function timelineStepCaption(step: ChantierWorkflowStep): string {
   if (step.id === "visite") return step.title || "Visite";
   if (step.id === "metre") {
     const posts = d.match(/(\d+)\s*poste/i);
+    if (/Validé/i.test(d) && posts) return `Validé · ${posts[1]} postes`;
     if (posts) return `${posts[1]} postes`;
     return d.replace(/^Version\s+\d+\s*·\s*/i, "") || "Prêt";
   }
   if (step.id === "devis") {
-    const d = humanizeTechnicalStatus(step.detail) || step.title;
+    const detail = humanizeTechnicalStatus(step.detail) || step.title;
     if (!step.ready) {
-      return d || step.actionLabel || "À préparer";
+      return detail || step.actionLabel || "À préparer";
     }
-    return d || "Prêt";
+    // Priorité sync (À revalider) sur le montant seul
+    if (/À revalider/i.test(detail)) {
+      const amt = detail.match(/[\d\s ,.]+€[^·]*/);
+      return amt ? `À revalider · ${amt[0].trim()}` : "À revalider";
+    }
+    return detail || "Prêt";
   }
   if (step.id === "planning") {
-    const date = d.match(/\d{1,2}\s+\S+/);
-    return date ? date[0] : "Prêt";
+    // Stale visible : « Modification disponible · 12 oct. »
+    const sync =
+      d.match(/Modification disponible|À vérifier|Action requise|Prêt|À jour/i)?.[0] ??
+      null;
+    const date = d.match(/\d{1,2}\s+[a-zéûôî]+/i)?.[0] ?? null;
+    if (sync && date) return `${sync} · ${date}`;
+    if (sync) return sync;
+    if (date) return date;
+    return d || "Prêt";
   }
   if (step.id === "suivi") {
     const hum = humanizeTechnicalStatus(d);

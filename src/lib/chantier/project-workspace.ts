@@ -18,6 +18,12 @@ import {
   resolvePrepStudyForWorkspace,
   workspaceOpenOrGenerateLabel,
 } from "@/lib/chantier/resolve-workspace-entities";
+import { evaluatePlanningStudyVersionSync } from "@/lib/preparation/schedule/planning-sync-state";
+import {
+  evaluateQuoteStudySyncState,
+  hasQuantityDiffAgainstTransfer,
+} from "@/lib/preparation/quote-bridge/quote-sync-state";
+import { evaluateCorePreparationTriple } from "@/lib/chantier/core-preparation-state";
 import { buildPreparationSnapshot } from "@/lib/chantier/preparation-state";
 import {
   isQuotePreparationReady,
@@ -25,11 +31,6 @@ import {
   quotePreparationStateLabel,
   quoteWorkflowActionLabel,
 } from "@/lib/chantier/quote-workflow-status";
-import { evaluatePlanningStudyVersionSync } from "@/lib/preparation/schedule/planning-sync-state";
-import {
-  evaluateQuoteStudySyncState,
-  hasQuantityDiffAgainstTransfer,
-} from "@/lib/preparation/quote-bridge/quote-sync-state";
 
 function cardStatusFromQuote(
   status: string | null | undefined,
@@ -59,6 +60,8 @@ export type CardStatusLabel =
   | "Annulé"
   | "Action requise"
   | "À revalider"
+  | "Modification disponible"
+  | "À valider"
   | "Non démarré";
 
 export type WorkspaceCardKind = "plan" | "metre" | "devis" | "planning" | "suivi";
@@ -995,10 +998,29 @@ async function getProjectWorkspaceUncached(
       sourcesJson: s.sourcesJson,
       dossierStatus: s.dossierStatus,
       lineCount: s._count.lines,
+      version: s.version,
     })),
     scopes,
     quotes,
     plans,
+    studyVersionById: Object.fromEntries(
+      studies.map((s) => [s.id, s.version as number | null]),
+    ),
+    quoteSyncByQuoteId: Object.fromEntries(
+      quotes.map((q) => {
+        const prov = quoteMetreProvenanceFor(q.id);
+        return [
+          q.id,
+          {
+            quoteId: q.id,
+            hasMetreProvenance: prov.hasMetreProvenance,
+            currentStudyVersion: prov.linkedStudyVersion,
+            transferStudyVersion: prov.transferStudyVersion,
+            hasSignificantQuantityDiffs: prov.hasSignificantQuantityDiffs,
+          },
+        ];
+      }),
+    ),
   });
   const visitView = preparation.modules.find((m) => m.key === "visite");
   const resolvedVisitId = visit?.id ?? preparation.visitId;
@@ -1020,6 +1042,41 @@ async function getProjectWorkspaceUncached(
       ? `/dashboard/visites-metres/etudes/${globalPlan.studyId}/planning/${globalPlan.id}`
       : null;
 
+  const globalQuoteProv = quoteMetreProvenanceFor(globalQuote?.id);
+  const globalCore = evaluateCorePreparationTriple({
+    study: globalStudy
+      ? {
+          id: globalStudy.id,
+          dossierStatus: globalStudy.dossierStatus,
+          lineCount: globalStudy._count.lines,
+          version: globalStudy.version,
+        }
+      : null,
+    quote: globalQuote
+      ? { id: globalQuote.id, status: globalQuote.status }
+      : null,
+    quoteSync: {
+      hasMetreProvenance: globalQuoteProv.hasMetreProvenance,
+      currentStudyVersion: globalQuoteProv.linkedStudyVersion,
+      transferStudyVersion: globalQuoteProv.transferStudyVersion,
+      hasSignificantQuantityDiffs: globalQuoteProv.hasSignificantQuantityDiffs,
+    },
+    plan: globalPlan
+      ? {
+          id: globalPlan.id,
+          status: globalPlan.status,
+          studyId: globalPlan.studyId,
+          studyVersionAtGeneration: globalPlan.studyVersionAtGeneration,
+          startDateLabel: globalPlan.startDate
+            ? fmtShortFr(asIso(globalPlan.startDate))
+            : null,
+        }
+      : null,
+    planStudyVersion: globalPlan
+      ? studyById(globalPlan.studyId)?.version ?? null
+      : null,
+  });
+
   const globalMetreCard: WorkspaceCard = {
     kind: "metre",
     label: "Métré & quantitatif",
@@ -1028,33 +1085,46 @@ async function getProjectWorkspaceUncached(
       ? `/dashboard/visites-metres/etudes/${globalStudy.id}`
       : null,
     detail: globalStudy
-      ? `Version ${globalStudy.version}${
-          globalStudy._count.lines > 0
-            ? ` · ${globalStudy._count.lines} poste${globalStudy._count.lines > 1 ? "s" : ""}`
-            : ""
-        }`
+      ? [
+          `Version ${globalStudy.version}`,
+          globalCore.metre.displayLabel,
+        ]
+          .filter(Boolean)
+          .join(" · ")
       : globalQuote
         ? "Générer depuis la visite et/ou le devis — sans nouvelle visite"
         : "Un devis est requis avant de générer le métré",
     syncState: globalStudy ? "A_JOUR" : "ABSENT",
-    statusLabel: globalStudy ? "À jour" : "À préparer",
+    statusLabel: globalCore.metre.exists
+      ? (globalCore.metre.kind === "VALIDATED"
+          ? "À jour"
+          : globalCore.metre.kind === "NEEDS_VALIDATION"
+            ? "À valider"
+            : "En cours")
+      : "À préparer",
     actionLabel: globalStudy ? "Ouvrir" : "Générer le métré",
-    ready: !!globalStudy,
+    ready: globalCore.metre.workflowReady,
     syncHint: null,
     isReference: true,
   };
 
-  const devisReady = isQuotePreparationReady(globalQuote?.status);
-  const devisStateLabel = cardStatusFromQuote(globalQuote?.status);
+  const devisReady = globalCore.devis.workflowReady;
   const devisAmount = globalQuote ? euro(d(globalQuote.totalSellHt)) : null;
-  const globalQuoteProv = quoteMetreProvenanceFor(globalQuote?.id);
-  const globalDevisEval = evaluateQuoteStudySyncState({
-    hasQuote: !!globalQuote,
-    hasMetreProvenance: globalQuoteProv.hasMetreProvenance,
-    currentStudyVersion: globalQuoteProv.linkedStudyVersion,
-    transferStudyVersion: globalQuoteProv.transferStudyVersion,
-    hasSignificantQuantityDiffs: globalQuoteProv.hasSignificantQuantityDiffs,
-  });
+  const globalDevisEval = {
+    syncState: globalCore.devis.syncState,
+    hint:
+      globalCore.devis.needsRevalidation ||
+      globalCore.devis.syncState === "A_VERIFIER"
+        ? evaluateQuoteStudySyncState({
+            hasQuote: !!globalQuote,
+            hasMetreProvenance: globalQuoteProv.hasMetreProvenance,
+            currentStudyVersion: globalQuoteProv.linkedStudyVersion,
+            transferStudyVersion: globalQuoteProv.transferStudyVersion,
+            hasSignificantQuantityDiffs:
+              globalQuoteProv.hasSignificantQuantityDiffs,
+          }).hint
+        : null,
+  };
 
   const globalDevisCard: WorkspaceCard = {
     kind: "devis",
@@ -1064,39 +1134,22 @@ async function getProjectWorkspaceUncached(
       ? quoteEditorHref(globalQuote.id, globalQuote.status)
       : `/dashboard/devis-facturation/devis/nouveau?projectId=${encodeURIComponent(projectId)}`,
     detail: globalQuote
-      ? [
-          globalDevisEval.syncState === "MODIFICATION_DISPONIBLE" ||
-          globalDevisEval.syncState === "A_VERIFIER"
-            ? statusLabelFromSync(globalDevisEval.syncState, "devis")
-            : devisStateLabel,
-          devisAmount,
-        ]
+      ? [globalCore.devis.displayLabel, devisAmount]
           .filter(Boolean)
           .join(" · ")
       : "À rattacher",
-    syncState: globalDevisEval.syncState,
+    syncState: globalCore.devis.syncState,
     statusLabel: globalQuote
-      ? globalDevisEval.syncState === "MODIFICATION_DISPONIBLE" ||
-        globalDevisEval.syncState === "A_VERIFIER"
-        ? statusLabelFromSync(globalDevisEval.syncState, "devis")
-        : devisStateLabel
+      ? (globalCore.devis.displayLabel as CardStatusLabel)
       : "À préparer",
     actionLabel:
-      globalDevisEval.syncState === "MODIFICATION_DISPONIBLE"
+      globalCore.devis.needsRevalidation
         ? "Revalider"
         : quoteWorkflowActionLabel(globalQuote?.status),
     ready: devisReady,
     syncHint: globalDevisEval.hint,
     isReference: true,
   };
-
-  const globalPlanningEval = evaluatePlanningStudyVersionSync({
-    hasPlan: !!globalPlan,
-    currentStudyVersion: globalPlan
-      ? studyById(globalPlan.studyId)?.version ?? null
-      : null,
-    studyVersionAtGeneration: globalPlan?.studyVersionAtGeneration,
-  });
 
   const globalPlanningCard: WorkspaceCard = {
     kind: "planning",
@@ -1107,29 +1160,42 @@ async function getProjectWorkspaceUncached(
       : globalStudy
         ? `/dashboard/visites-metres/etudes/${globalStudy.id}`
         : null,
-      detail: globalPlan
+    detail: globalPlan
       ? [
-          globalPlan.startDate ? fmtShortFr(asIso(globalPlan.startDate)) : null,
-          globalPlan.endDateBase ? `→ ${fmtShortFr(asIso(globalPlan.endDateBase))}` : null,
+          globalCore.planning.displayLabel,
+          globalCore.planning.secondaryLabel,
+          globalPlan.endDateBase
+            ? `→ ${fmtShortFr(asIso(globalPlan.endDateBase))}`
+            : null,
         ]
           .filter(Boolean)
-          .join(" ") || "Planning unique du chantier"
+          .join(" · ")
       : globalStudy
         ? "Générer au niveau chantier — jamais via Nouvelle visite"
         : globalQuote
           ? "Générez d’abord le métré"
           : "À générer",
-    syncState: globalPlanningEval.syncState,
-    statusLabel: statusLabelFromSync(globalPlanningEval.syncState, "planning"),
+    syncState: globalCore.planning.syncState,
+    statusLabel: globalCore.planning.exists
+      ? (globalCore.planning.displayLabel as CardStatusLabel)
+      : "À préparer",
     actionLabel: globalPlan
       ? "Ouvrir"
       : globalStudy
         ? "Générer le planning"
         : "Métré requis",
-    ready: !!globalPlan,
+    ready: globalCore.planning.workflowReady,
     syncHint:
-      globalPlanningEval.hint ??
-      "Un seul planning pour tout le chantier — les lots sont des phases.",
+      globalCore.planning.needsUpdate ||
+      globalCore.planning.syncState === "A_VERIFIER"
+        ? evaluatePlanningStudyVersionSync({
+            hasPlan: !!globalPlan,
+            currentStudyVersion: globalPlan
+              ? studyById(globalPlan.studyId)?.version ?? null
+              : null,
+            studyVersionAtGeneration: globalPlan?.studyVersionAtGeneration,
+          }).hint
+        : "Un seul planning pour tout le chantier — les lots sont des phases.",
     isReference: true,
   };
 

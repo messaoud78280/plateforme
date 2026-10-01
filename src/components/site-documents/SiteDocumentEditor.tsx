@@ -184,6 +184,17 @@ export function SiteDocumentEditor({
       const body = await refreshed.json();
       if (refreshed.ok && body.document) {
         setDoc(body.document);
+        setTitle(body.document.title);
+        setStatus(body.document.status);
+        setQuickNotes(body.document.quickNotes ?? "");
+        setVisitDate(
+          body.document.visitDate
+            ? String(body.document.visitDate).slice(0, 10)
+            : "",
+        );
+        setVisitTime(body.document.visitTime ?? "");
+        setWeather(body.document.weather ?? "");
+        setAuthorName(body.document.authorName ?? "");
         if (body.document.kind === "COMPTE_RENDU" || body.document.kind === "NOTICE") {
           setCr({
             ...emptySiteReportPayload(),
@@ -212,6 +223,16 @@ export function SiteDocumentEditor({
       if (refreshed.ok && body.document) {
         setDoc(body.document);
         setTitle(body.document.title);
+        setStatus(body.document.status);
+        setQuickNotes(body.document.quickNotes ?? "");
+        setVisitDate(
+          body.document.visitDate
+            ? String(body.document.visitDate).slice(0, 10)
+            : "",
+        );
+        setVisitTime(body.document.visitTime ?? "");
+        setWeather(body.document.weather ?? "");
+        setAuthorName(body.document.authorName ?? "");
         if (body.document.kind === "COMPTE_RENDU" || body.document.kind === "NOTICE") {
           setCr({
             ...emptySiteReportPayload(),
@@ -224,7 +245,7 @@ export function SiteDocumentEditor({
           });
         }
         setCanUndo(true);
-        setToast("Réponse ChatGPT importée — vérifiez puis enregistrez.");
+        setToast("Document ChatGPT importé — vérifiez le contenu.");
       }
     })();
   }
@@ -248,53 +269,80 @@ export function SiteDocumentEditor({
                   : `PPSPS · v${doc.versionNumber}`}
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex flex-wrap justify-end gap-2">
+              {canWrite && (doc.kind === "COMPTE_RENDU" || doc.kind === "NOTICE") ? (
+                <BeworkPatchToolbar
+                  section={doc.kind === "NOTICE" ? "NOTICE" : "REPORT"}
+                  projectId={projectId}
+                  entityId={doc.id}
+                  version={doc.versionNumber}
+                  capability={getSectionCapability(
+                    doc.kind === "NOTICE" ? "NOTICE" : "REPORT",
+                  )}
+                  entityLabel={doc.number || doc.title}
+                  primaryActionLabel="Modifier un élément avec ChatGPT"
+                  helpText="Corrigez ou ajustez une information précise du document (titre, résumé, notes)."
+                />
+              ) : null}
+              {canWrite ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setChatgptMode("prepare")}
+                    title={
+                      doc.kind === "PPSPS"
+                        ? "Générer ou compléter le PPSPS structuré via ChatGPT"
+                        : "Générer ou compléter le contenu structuré via ChatGPT"
+                    }
+                    className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-900"
+                  >
+                    {doc.kind === "PPSPS"
+                      ? "✨ Générer / compléter le PPSPS"
+                      : doc.kind === "NOTICE"
+                        ? "✨ Générer / compléter la notice"
+                        : "✨ Générer / compléter le document"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setChatgptMode("import")}
+                    title="Coller et appliquer la réponse JSON générée par ChatGPT"
+                    className="rounded-lg border border-indigo-200 bg-white px-3 py-2 text-xs font-semibold text-indigo-900"
+                  >
+                    ✨ Importer le document généré
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void save()}
+                    className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
+                  >
+                    {busy ? "…" : "Enregistrer"}
+                  </button>
+                </>
+              ) : null}
+              <a
+                href={`${apiBase}/pdf`}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
+              >
+                Générer le PDF
+              </a>
+            </div>
             {canWrite && (doc.kind === "COMPTE_RENDU" || doc.kind === "NOTICE") ? (
-              <BeworkPatchToolbar
-                section={doc.kind === "NOTICE" ? "NOTICE" : "REPORT"}
-                projectId={projectId}
-                entityId={doc.id}
-                version={doc.versionNumber}
-                capability={getSectionCapability(
-                  doc.kind === "NOTICE" ? "NOTICE" : "REPORT",
-                )}
-                entityLabel={doc.number || doc.title}
-              />
+              <p className="max-w-lg text-right text-[11px] leading-snug text-slate-500">
+                « Générer / compléter » remplit le document structuré (participants,
+                travaux, observations, réserves…). « Modifier un élément » ajuste une
+                information précise.
+              </p>
             ) : null}
-            {canWrite ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setChatgptMode("prepare")}
-                  className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-900"
-                >
-                  ✨ Préparer pour ChatGPT
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setChatgptMode("import")}
-                  className="rounded-lg border border-indigo-200 bg-white px-3 py-2 text-xs font-semibold text-indigo-900"
-                >
-                  ✨ Importer la réponse ChatGPT
-                </button>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void save()}
-                  className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
-                >
-                  {busy ? "…" : "Enregistrer"}
-                </button>
-              </>
+            {canWrite && doc.kind === "PPSPS" ? (
+              <p className="max-w-lg text-right text-[11px] leading-snug text-slate-500">
+                Utilisez ChatGPT pour générer ou compléter le PPSPS structuré (risques,
+                EPI, organisation de chantier).
+              </p>
             ) : null}
-            <a
-              href={`${apiBase}/pdf`}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
-            >
-              Générer le PDF
-            </a>
           </div>
         </div>
       </div>
@@ -311,14 +359,16 @@ export function SiteDocumentEditor({
       ) : null}
       {canWrite && canUndo ? (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-indigo-200 bg-indigo-50/80 px-3 py-2">
-          <p className="text-xs font-medium text-indigo-950">Dernier import ChatGPT disponible</p>
+          <p className="text-xs font-medium text-indigo-950">
+            Dernier import document ChatGPT disponible
+          </p>
           <button
             type="button"
             disabled={busy}
             onClick={() => void undoImport()}
             className="text-[11px] font-semibold text-[#1e3a5f] underline-offset-2 hover:underline"
           >
-            Annuler le dernier import
+            Annuler le dernier import document
           </button>
         </div>
       ) : null}

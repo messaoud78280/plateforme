@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireSiteDocumentAccess } from "@/lib/site-documents/access";
 import {
   buildProjectPromptSeed,
+  getDocumentContentVersion,
   getSiteDocument,
 } from "@/lib/site-documents/service";
 import { buildPpspsPrompt, buildSiteReportPrompt } from "@/lib/site-documents/prompt";
@@ -48,6 +49,8 @@ export async function GET(_req: Request, ctx: Ctx) {
   return NextResponse.json({
     text,
     kind: document.kind,
+    documentBaseVersion: getDocumentContentVersion(document),
+    writePerformed: false,
     steps: [
       "Copiez le prompt",
       "Envoyez-le à ChatGPT",

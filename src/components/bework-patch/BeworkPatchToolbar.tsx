@@ -18,6 +18,10 @@ type Props = {
   disabledReason?: string | null;
   onApplied?: () => void;
   className?: string;
+  /** Libellé du bouton principal (défaut : Modifier avec ChatGPT). */
+  primaryActionLabel?: string;
+  /** Aide courte sous la barre (documents chantier). */
+  helpText?: string | null;
 };
 
 const btnBase =
@@ -37,6 +41,8 @@ export function BeworkPatchToolbar({
   disabledReason = null,
   onApplied,
   className = "",
+  primaryActionLabel,
+  helpText = null,
 }: Props) {
   const [toast, setToast] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -92,11 +98,15 @@ export function BeworkPatchToolbar({
         <button
           type="button"
           disabled={blocked}
-          title={blockTitle ?? `Modifier ${sectionLabel} avec ChatGPT`}
+          title={
+            blockTitle ??
+            primaryActionLabel ??
+            `Modifier ${sectionLabel} avec ChatGPT`
+          }
           onClick={openChatgpt}
           className={`${btnBase} border-indigo-200 bg-indigo-50/80 text-indigo-900 hover:bg-indigo-50`}
         >
-          ✨ Modifier avec ChatGPT
+          ✨ {primaryActionLabel ?? "Modifier avec ChatGPT"}
         </button>
         <button
           type="button"
@@ -131,6 +141,11 @@ export function BeworkPatchToolbar({
       ) : null}
       {blocked && blockTitle ? (
         <p className="text-[11px] text-slate-500">{blockTitle}</p>
+      ) : null}
+      {!blocked && helpText ? (
+        <p className="max-w-xl text-[11px] leading-snug text-slate-500">
+          {helpText}
+        </p>
       ) : null}
 
       <BeworkPatchModal

@@ -211,6 +211,17 @@ export type ImpactVisit = {
   contextVersion: number;
 };
 
+export type ImpactFollowUp = {
+  id: string;
+  projectId: string | null;
+  title: string;
+  status: string;
+  notes: string | null;
+  prepSchedulePlanId: string | null;
+  /** Empreinte CTX-02C au moment du chargement. */
+  contextVersion: number;
+};
+
 export type ImpactSubgraph = {
   projectId: string;
   study: ImpactStudy | null;
@@ -218,6 +229,7 @@ export type ImpactSubgraph = {
   quoteLinks: ImpactQuoteLink[];
   plans: ImpactPlan[];
   visit: ImpactVisit | null;
+  followUp: ImpactFollowUp | null;
 };
 
 export function emptySubgraph(projectId: string): ImpactSubgraph {
@@ -228,5 +240,6 @@ export function emptySubgraph(projectId: string): ImpactSubgraph {
     quoteLinks: [],
     plans: [],
     visit: null,
+    followUp: null,
   };
 }

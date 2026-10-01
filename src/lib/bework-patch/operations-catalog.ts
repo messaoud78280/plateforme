@@ -197,6 +197,12 @@ export const OPERATION_CATALOG: Record<
     compatible_intents: FIELD,
     allowed_change_fields: [],
   },
+  update_follow_up: {
+    entity_types: ["FOLLOW_UP_SHEET"],
+    sections: ["FOLLOW_UP"],
+    compatible_intents: [...DOCUMENT, "FIELD_UPDATE", "ADMINISTRATIVE_UPDATE"],
+    allowed_change_fields: ["title", "notes"],
+  },
   update_progress: {
     entity_types: ["FOLLOW_UP_SHEET", "PREP_SCHEDULE_TASK"],
     sections: ["FOLLOW_UP", "PLANNING"],

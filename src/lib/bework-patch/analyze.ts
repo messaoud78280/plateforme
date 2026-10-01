@@ -216,7 +216,8 @@ export function analyzeBeworkPatchInput(input: {
     section === "TAKEOFF" ||
     section === "QUOTE" ||
     section === "PLANNING" ||
-    section === "VISIT"
+    section === "VISIT" ||
+    section === "FOLLOW_UP"
   ) {
     const subgraph =
       input.subgraph ??
@@ -241,7 +242,8 @@ export function analyzeBeworkPatchInput(input: {
     (patch.origin.section === "TAKEOFF" ||
       patch.origin.section === "QUOTE" ||
       patch.origin.section === "PLANNING" ||
-      patch.origin.section === "VISIT");
+      patch.origin.section === "VISIT" ||
+      patch.origin.section === "FOLLOW_UP");
 
   const canCommit =
     canCommitUniversal ||
@@ -285,6 +287,7 @@ export function analyzeBeworkPatchInput(input: {
         patch.origin.section === "TAKEOFF" ||
         patch.origin.section === "QUOTE" ||
         patch.origin.section === "PLANNING" ||
-        patch.origin.section === "VISIT"),
+        patch.origin.section === "VISIT" ||
+        patch.origin.section === "FOLLOW_UP"),
   };
 }

@@ -10,6 +10,8 @@ import {
   adaptVisitForChatgptContext,
   buildProjectContext,
 } from "@/lib/bework-context";
+import { computeFollowUpContextVersion } from "@/lib/bework-context/follow-up-context-version";
+import { sheetToVersionInput } from "@/lib/bework-patch/commit/follow-up-ops";
 import {
   buildCanonicalResolution,
   buildChatgptContextSkeleton,
@@ -280,13 +282,15 @@ async function buildFollowUpContext(
   });
 
   if (sheet) {
+    const version = computeFollowUpContextVersion(sheetToVersionInput(sheet));
     return buildChatgptContextSkeleton({
       section: "FOLLOW_UP",
       project,
       target: {
         entity_type: "FOLLOW_UP_SHEET",
         id: sheet.id,
-        version: Math.floor(sheet.updatedAt.getTime() / 1000),
+        version,
+        base_version: version,
         code: sheet.title,
       },
       data: {
@@ -294,6 +298,8 @@ async function buildFollowUpContext(
         status: sheet.status,
         notes: sheet.notes,
         prep_schedule_plan_id: sheet.prepSchedulePlanId,
+        version_note:
+          "target.version = empreinte déterministe (SHA-256→uint48) de l’état ChatGPT FOLLOW_UP (title/status/notes/plan).",
       },
     });
   }

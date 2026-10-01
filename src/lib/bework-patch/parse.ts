@@ -155,6 +155,7 @@ function parseTarget(
   const plan_id = str(raw.plan_id ?? raw.planId, 80);
   const visit_id = str(raw.visit_id ?? raw.visitId, 80);
   const document_id = str(raw.document_id ?? raw.documentId, 80);
+  const sheet_id = str(raw.sheet_id ?? raw.sheetId, 80);
   const section_id = str(raw.section_id ?? raw.sectionId, 80);
   const task_id = str(raw.task_id ?? raw.taskId, 80);
   const step_code = str(raw.step_code ?? raw.stepCode, 80);
@@ -175,6 +176,7 @@ function parseTarget(
     plan_id,
     visit_id,
     document_id,
+    sheet_id,
     parameter_id,
     parameter_key,
     line_id,
@@ -840,6 +842,30 @@ function parseOperation(
             raw.measurement.quantity_value ?? raw.measurement.quantityValue,
           ),
           observation: str(raw.measurement.observation, 2000),
+        },
+      };
+    }
+    case "update_follow_up": {
+      const sheetId = target.sheet_id ?? target.id;
+      if (!sheetId) {
+        issues.push(
+          err("INVALID_TARGET", `${path}.target`, "sheet_id requis"),
+        );
+        return null;
+      }
+      return {
+        op,
+        target: {
+          ...target,
+          entity_type: "FOLLOW_UP_SHEET",
+          sheet_id: sheetId,
+        },
+        changes: {
+          title: str(changes!.title, 200) ?? undefined,
+          notes:
+            changes!.notes === null
+              ? null
+              : str(changes!.notes, 8000) ?? undefined,
         },
       };
     }

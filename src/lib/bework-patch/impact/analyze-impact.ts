@@ -102,11 +102,7 @@ export function analyzePatchImpact(input: {
   const section = patch.origin.section;
 
   // Sections hors V1 : pas de graphe cross-module
-  if (
-    section === "FOLLOW_UP" ||
-    section === "REPORT" ||
-    section === "NOTICE"
-  ) {
+  if (section === "REPORT" || section === "NOTICE") {
     return emptyResult({
       warnings: [
         issue(
@@ -127,6 +123,10 @@ export function analyzePatchImpact(input: {
         overrideCount: 0,
       },
     });
+  }
+
+  if (section === "FOLLOW_UP") {
+    return analyzeFollowUpLocal(patch, subgraph);
   }
 
   if (section === "VISIT") {
@@ -350,6 +350,39 @@ function describeDirectOp(
       unit: null,
     };
   }
+  if (op.op === "update_follow_up") {
+    const sheet = subgraph.followUp;
+    const targetId = op.target.sheet_id ?? op.target.id;
+    if (sheet && targetId && targetId !== sheet.id) {
+      return {
+        op: op.op,
+        section,
+        entityType: "FOLLOW_UP_SHEET",
+        entityId: null,
+        label: "suivi hors cible",
+        field: "meta",
+        before: null,
+        after: op.changes,
+        unit: null,
+      };
+    }
+    return {
+      op: op.op,
+      section,
+      entityType: "FOLLOW_UP_SHEET",
+      entityId: sheet?.id ?? targetId ?? null,
+      label: sheet?.title ?? "suivi",
+      field: "meta",
+      before: sheet
+        ? {
+            title: sheet.title,
+            notes: sheet.notes,
+          }
+        : null,
+      after: op.changes,
+      unit: null,
+    };
+  }
   return {
     op: op.op,
     section,
@@ -509,6 +542,138 @@ function analyzeCommercialQuote(
         confidence: "CERTAIN",
         mutable: protectedEntities.length === 0,
         protected: protectedEntities.length > 0,
+      },
+    ],
+  };
+}
+
+/* ─── FOLLOW_UP local (title/notes, pas de status/timeline) ─── */
+
+function analyzeFollowUpLocal(
+  patch: BeworkPatchV1,
+  subgraph: ImpactSubgraph,
+): AnalyzePatchImpactResult {
+  const errors: BeworkPatchIssue[] = [];
+  const warnings: BeworkPatchIssue[] = [
+    issue(
+      "FOLLOW_UP_SCOPE",
+      "FOLLOW_UP CTX-02C : status, avancement, dates, timeline et médias non modifiables via patch.",
+      "warn",
+    ),
+  ];
+
+  const supported = new Set(["update_follow_up"]);
+  const allowedFields = new Set(["title", "notes"]);
+
+  for (const op of patch.operations) {
+    if (!supported.has(op.op)) {
+      errors.push(
+        issue(
+          "OPERATION_NOT_ALLOWED_FOR_SECTION",
+          `Opération ${op.op} non supportée pour le commit FOLLOW_UP (CTX-02C).`,
+          "error",
+        ),
+      );
+      continue;
+    }
+    if (op.op === "update_follow_up") {
+      const targetId = op.target.sheet_id ?? op.target.id;
+      if (targetId && targetId !== patch.origin.entity_id) {
+        errors.push(
+          issue("PROJECT_MISMATCH", "Cible hors fiche de suivi.", "error"),
+        );
+      }
+      if (subgraph.followUp && targetId && targetId !== subgraph.followUp.id) {
+        errors.push(
+          issue("PROJECT_MISMATCH", "Cible hors fiche chargée.", "error"),
+        );
+      }
+      const keys = Object.keys(op.changes).filter(
+        (k) => (op.changes as Record<string, unknown>)[k] !== undefined,
+      );
+      if (!keys.length) {
+        errors.push(
+          issue("EMPTY_OPERATIONS", "update_follow_up sans champ.", "error"),
+        );
+      }
+      for (const key of keys) {
+        if (!allowedFields.has(key)) {
+          errors.push(
+            issue(
+              "INVALID_FIELD",
+              `Champ « ${key} » non autorisé (whitelist: title, notes).`,
+              "error",
+            ),
+          );
+        }
+      }
+      if (
+        op.changes.title !== undefined &&
+        (!op.changes.title || !op.changes.title.trim())
+      ) {
+        errors.push(
+          issue("INVALID_FIELD", "title ne peut pas être vide.", "error"),
+        );
+      }
+    }
+  }
+
+  if (!subgraph.followUp) {
+    errors.push(
+      issue(
+        "TARGET_NOT_FOUND",
+        "Fiche de suivi introuvable dans le sous-graphe.",
+        "error",
+      ),
+    );
+  } else if (subgraph.followUp.id !== patch.origin.entity_id) {
+    errors.push(issue("PROJECT_MISMATCH", "Fiche hors cible.", "error"));
+  }
+
+  const directChanges = extractDirectChanges(patch, subgraph).filter(
+    (dc) => dc.op === "update_follow_up",
+  );
+
+  return {
+    directChanges,
+    canonicalResolution: buildCanonicalResolution({}),
+    derivedChanges: [],
+    affectedEntities: [],
+    protectedEntities: [],
+    overrides: [],
+    warnings,
+    errors,
+    impactSummary: {
+      affectedSections: [],
+      simulationOnly: true,
+      canPropagate: false,
+      certainCount: directChanges.length,
+      partialCount: 0,
+      potentialCount: 0,
+      protectedCount: 0,
+      overrideCount: 0,
+    },
+    graph: [
+      {
+        entityType: "FOLLOW_UP_SHEET",
+        id: patch.origin.entity_id,
+        label: subgraph.followUp?.title ?? "Suivi",
+        relationType: null,
+        confidence: "CERTAIN",
+        mutable: true,
+        protected: false,
+        before: subgraph.followUp
+          ? {
+              title: subgraph.followUp.title,
+              notes: subgraph.followUp.notes,
+            }
+          : undefined,
+        after: Object.assign(
+          {},
+          ...patch.operations
+            .filter((o) => o.op === "update_follow_up")
+            .map((o) => (o.op === "update_follow_up" ? o.changes : {})),
+        ),
       },
     ],
   };

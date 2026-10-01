@@ -89,6 +89,7 @@ export type BeworkPatchTargetBase = {
   plan_id?: string | null;
   visit_id?: string | null;
   document_id?: string | null;
+  sheet_id?: string | null;
   /** Alias métier fréquents */
   parameter_id?: string | null;
   parameter_key?: string | null;
@@ -397,6 +398,18 @@ export type OpAddMeasurement = {
   };
 };
 
+export type OpUpdateFollowUp = {
+  op: "update_follow_up";
+  target: BeworkPatchTargetBase & {
+    entity_type: "FOLLOW_UP_SHEET";
+    sheet_id: string;
+  };
+  changes: {
+    title?: string;
+    notes?: string | null;
+  };
+};
+
 export type OpUpdateProgress = {
   op: "update_progress";
   target: BeworkPatchTargetBase & {
@@ -470,6 +483,7 @@ export type BeworkPatchOperation =
   | OpUpdateVisit
   | OpUpdateMeasurement
   | OpAddMeasurement
+  | OpUpdateFollowUp
   | OpUpdateProgress
   | OpUpdateDocumentSection
   | OpAddDocumentSection

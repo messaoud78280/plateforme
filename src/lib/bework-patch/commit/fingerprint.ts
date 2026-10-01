@@ -18,6 +18,8 @@ export type VersionSnapshot = {
   studyVersionAtGeneration?: number | null;
   /** CTX-02B / CTX-07 — empreinte déterministe VISIT. */
   visitContextVersion?: number | null;
+  /** CTX-02C — empreinte déterministe FOLLOW_UP (état exposé ChatGPT). */
+  followUpVersion?: number | null;
 };
 
 export function collectVersionSnapshot(subgraph: ImpactSubgraph): VersionSnapshot {
@@ -31,6 +33,7 @@ export function collectVersionSnapshot(subgraph: ImpactSubgraph): VersionSnapsho
     planRevision: plan?.revisionNumber ?? null,
     studyVersionAtGeneration: plan?.studyVersionAtGeneration ?? null,
     visitContextVersion: subgraph.visit?.contextVersion ?? null,
+    followUpVersion: subgraph.followUp?.contextVersion ?? null,
   };
 }
 

@@ -10,6 +10,8 @@ import {
 } from "@/lib/bework-patch/impact/types";
 import { computeVisitContextVersion } from "@/lib/bework-context/visit-context-version";
 import { visitRowToVersionInput } from "@/lib/bework-patch/commit/visit-ops";
+import { computeFollowUpContextVersion } from "@/lib/bework-context/follow-up-context-version";
+import { sheetToVersionInput } from "@/lib/bework-patch/commit/follow-up-ops";
 
 function asIso(dte: Date | null | undefined): string | null {
   if (!dte) return null;
@@ -101,6 +103,37 @@ export async function loadImpactSubgraph(input: {
         clientNeed: visit.clientNeed,
         comments: visit.comments,
         contextVersion,
+      };
+    }
+    return graph;
+  } else if (section === "FOLLOW_UP") {
+    const sheetId = input.patch.origin.entity_id;
+    const sheet = await prisma.followUpSheet.findFirst({
+      where: {
+        id: sheetId,
+        organizationId: input.orgId,
+        projectId: input.projectId,
+      },
+      select: {
+        id: true,
+        projectId: true,
+        title: true,
+        status: true,
+        notes: true,
+        prepSchedulePlanId: true,
+      },
+    });
+    if (sheet) {
+      graph.followUp = {
+        id: sheet.id,
+        projectId: sheet.projectId,
+        title: sheet.title,
+        status: sheet.status,
+        notes: sheet.notes,
+        prepSchedulePlanId: sheet.prepSchedulePlanId,
+        contextVersion: computeFollowUpContextVersion(
+          sheetToVersionInput(sheet),
+        ),
       };
     }
     return graph;

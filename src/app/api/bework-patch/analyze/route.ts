@@ -68,7 +68,8 @@ export async function POST(req: Request) {
       (parsed.patch.origin.section === "TAKEOFF" ||
         parsed.patch.origin.section === "QUOTE" ||
         parsed.patch.origin.section === "PLANNING" ||
-        parsed.patch.origin.section === "VISIT")
+        parsed.patch.origin.section === "VISIT" ||
+        parsed.patch.origin.section === "FOLLOW_UP")
     ) {
       subgraph = await loadImpactSubgraph({
         orgId: guard.ctx.orgId,

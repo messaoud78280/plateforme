@@ -9,7 +9,8 @@ export type SyncMode =
   | "SAFE_PARTIAL_SYNC"
   | "QUOTE_ONLY"
   | "PLANNING_ONLY"
-  | "VISIT_ONLY";
+  | "VISIT_ONLY"
+  | "FOLLOW_UP_ONLY";
 
 export type CommitEligibility =
   | {
@@ -116,8 +117,36 @@ export function evaluateCommitEligibility(input: {
     };
   }
 
+  // CTX-02C — FOLLOW_UP local (title/notes uniquement)
+  if (patch.origin.section === "FOLLOW_UP") {
+    const unsupported = patch.operations.filter(
+      (op) => op.op !== "update_follow_up",
+    );
+    if (unsupported.length) {
+      return {
+        ok: false,
+        reason: `Opération ${unsupported[0]!.op} non supportée pour le commit FOLLOW_UP (CTX-02C).`,
+        code: "OPERATION_NOT_ALLOWED_FOR_SECTION",
+      };
+    }
+    if (!patch.operations.length) {
+      return {
+        ok: false,
+        reason: "Aucune opération suivi.",
+        code: "EMPTY_OPERATIONS",
+      };
+    }
+    return {
+      ok: true,
+      mode: "FOLLOW_UP_ONLY",
+      buttonLabel: "Appliquer au suivi",
+      warnings: impact.warnings
+        .filter((w) => w.code === "FOLLOW_UP_SCOPE")
+        .map((w) => w.message),
+    };
+  }
+
   if (
-    patch.origin.section === "FOLLOW_UP" ||
     patch.origin.section === "REPORT" ||
     patch.origin.section === "NOTICE"
   ) {

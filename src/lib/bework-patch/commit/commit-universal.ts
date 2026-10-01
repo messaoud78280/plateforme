@@ -128,7 +128,9 @@ export async function commitUniversalPatch(input: {
               ? "Le suivi a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
               : patch.origin.section === "REPORT"
                 ? "Le compte rendu a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
-                : "Les données ont changé depuis l’analyse. Veuillez relancer la prévisualisation.",
+                : patch.origin.section === "NOTICE"
+                  ? "La notice a été modifiée depuis la génération de ce patch. Analysez de nouveau les modifications avant de les appliquer."
+                  : "Les données ont changé depuis l’analyse. Veuillez relancer la prévisualisation.",
       code: "PREVIEW_STALE",
       impact,
     };
@@ -430,7 +432,9 @@ export async function commitUniversalPatch(input: {
                 ? "Le suivi a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
                 : patch.origin.section === "REPORT"
                   ? "Le compte rendu a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
-                  : "Le planning a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez.",
+                  : patch.origin.section === "NOTICE"
+                    ? "La notice a été modifiée depuis la génération de ce patch. Analysez de nouveau les modifications avant de les appliquer."
+                    : "Le planning a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez.",
         code: code === "VERSION_CONFLICT" ? "VERSION_CONFLICT" : "PREVIEW_STALE",
         impact,
       };

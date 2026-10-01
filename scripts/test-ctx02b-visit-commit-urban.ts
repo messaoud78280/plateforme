@@ -32,8 +32,8 @@ async function main() {
   };
   if (caps.PLANNING !== "AVAILABLE") throw new Error("PLANNING");
   if (caps.VISIT !== "AVAILABLE") throw new Error("VISIT not AVAILABLE");
-  if (caps.FOLLOW_UP !== "PREVIEW_ONLY") throw new Error("FOLLOW_UP");
-  if (caps.REPORT !== "PREVIEW_ONLY") throw new Error("REPORT");
+  if (caps.FOLLOW_UP !== "AVAILABLE") throw new Error("FOLLOW_UP");
+  if (caps.REPORT !== "AVAILABLE") throw new Error("REPORT");
   if (caps.NOTICE !== "AVAILABLE") throw new Error("NOTICE");
   if (!isVisitCommitSupportedOp("update_visit")) {
     throw new Error("update_visit not supported");

@@ -28,9 +28,9 @@ async function main() {
     QUOTE: getSectionCapability("QUOTE").mode,
   };
   if (caps.PLANNING !== "AVAILABLE") throw new Error("PLANNING not AVAILABLE");
-  if (caps.VISIT !== "PREVIEW_ONLY") throw new Error("VISIT");
-  if (caps.FOLLOW_UP !== "PREVIEW_ONLY") throw new Error("FOLLOW_UP");
-  if (caps.REPORT !== "PREVIEW_ONLY") throw new Error("REPORT");
+  if (caps.VISIT !== "AVAILABLE") throw new Error("VISIT");
+  if (caps.FOLLOW_UP !== "AVAILABLE") throw new Error("FOLLOW_UP");
+  if (caps.REPORT !== "AVAILABLE") throw new Error("REPORT");
   if (caps.NOTICE !== "AVAILABLE") throw new Error("NOTICE");
 
   const study = await prisma.prepStudy.findFirst({

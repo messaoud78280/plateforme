@@ -19,7 +19,7 @@ const SCOPE_ID = "cmui2yaj20001dli4kof4j59b";
 
 async function main() {
   const capability = getSectionCapability("VISIT");
-  if (capability.mode !== "PREVIEW_ONLY") {
+  if (capability.mode !== "AVAILABLE") {
     throw new Error(`VISIT capability=${capability.mode}`);
   }
 

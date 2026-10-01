@@ -5,6 +5,7 @@ import { buildUniversalPatchContext } from "@/lib/bework-patch/build-context";
 import { loadImpactSubgraph } from "@/lib/bework-patch/impact/load-subgraph";
 import { parseBeworkPatch } from "@/lib/bework-patch/parse";
 import { buildCommitPreviewMeta } from "@/lib/bework-patch/commit/commit-universal";
+import { isUniversalPipelineSection } from "@/lib/bework-patch/universal-pipeline";
 import { BEWORK_PATCH_SECTIONS, type BeworkPatchSection } from "@/lib/bework-patch/types";
 
 export const dynamic = "force-dynamic";
@@ -62,15 +63,11 @@ export async function POST(req: Request) {
 
     let subgraph = null;
     const parsed = parseBeworkPatch(body.raw);
+    // CTX-09A : charger le subgraph pour toute section AVAILABLE (NOTICE inclus).
     if (
       parsed.ok &&
       body.projectId &&
-      (parsed.patch.origin.section === "TAKEOFF" ||
-        parsed.patch.origin.section === "QUOTE" ||
-        parsed.patch.origin.section === "PLANNING" ||
-        parsed.patch.origin.section === "VISIT" ||
-        parsed.patch.origin.section === "FOLLOW_UP" ||
-        parsed.patch.origin.section === "REPORT")
+      isUniversalPipelineSection(parsed.patch.origin.section)
     ) {
       subgraph = await loadImpactSubgraph({
         orgId: guard.ctx.orgId,

@@ -32,7 +32,7 @@ async function main() {
     NOTICE: getSectionCapability("NOTICE").mode,
   };
   if (caps.FOLLOW_UP !== "AVAILABLE") throw new Error("FOLLOW_UP not AVAILABLE");
-  if (caps.REPORT !== "PREVIEW_ONLY") throw new Error("REPORT");
+  if (caps.REPORT !== "AVAILABLE") throw new Error("REPORT");
   if (caps.NOTICE !== "AVAILABLE") throw new Error("NOTICE");
   if (!isFollowUpCommitSupportedOp("update_follow_up")) {
     throw new Error("update_follow_up missing");

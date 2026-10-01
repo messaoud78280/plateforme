@@ -23,6 +23,7 @@ import {
   toLegacyQuotePatch,
 } from "@/lib/bework-patch/adapters/quote";
 import { getSectionCapability } from "@/lib/bework-patch/capability";
+import { isUniversalPipelineSection } from "@/lib/bework-patch/universal-pipeline";
 import { analyzePatchImpact } from "@/lib/bework-patch/impact/analyze-impact";
 import type {
   AnalyzePatchImpactResult,
@@ -212,14 +213,8 @@ export function analyzeBeworkPatchInput(input: {
 
   let impact: AnalyzePatchImpactResult | null = null;
   const section = patch.origin.section;
-  if (
-    section === "TAKEOFF" ||
-    section === "QUOTE" ||
-    section === "PLANNING" ||
-    section === "VISIT" ||
-    section === "FOLLOW_UP" ||
-    section === "REPORT"
-  ) {
+  // CTX-09A : toute section AVAILABLE (incl. NOTICE) passe par l’Impact Engine.
+  if (isUniversalPipelineSection(section)) {
     const subgraph =
       input.subgraph ??
       emptySubgraph(patch.origin.project_id);
@@ -240,12 +235,7 @@ export function analyzeBeworkPatchInput(input: {
   const canCommitUniversal =
     capability.mode === "AVAILABLE" &&
     errors.length === 0 &&
-    (patch.origin.section === "TAKEOFF" ||
-      patch.origin.section === "QUOTE" ||
-      patch.origin.section === "PLANNING" ||
-      patch.origin.section === "VISIT" ||
-      patch.origin.section === "FOLLOW_UP" ||
-      patch.origin.section === "REPORT");
+    isUniversalPipelineSection(section);
 
   const canCommit =
     canCommitUniversal ||
@@ -285,12 +275,6 @@ export function analyzeBeworkPatchInput(input: {
     canCommit:
       capability.mode === "AVAILABLE" &&
       errors.length === 0 &&
-      (legacyDelegate != null ||
-        patch.origin.section === "TAKEOFF" ||
-        patch.origin.section === "QUOTE" ||
-        patch.origin.section === "PLANNING" ||
-        patch.origin.section === "VISIT" ||
-        patch.origin.section === "FOLLOW_UP" ||
-        patch.origin.section === "REPORT"),
+      (legacyDelegate != null || isUniversalPipelineSection(section)),
   };
 }

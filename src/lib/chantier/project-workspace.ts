@@ -19,6 +19,18 @@ import {
   workspaceOpenOrGenerateLabel,
 } from "@/lib/chantier/resolve-workspace-entities";
 import { buildPreparationSnapshot } from "@/lib/chantier/preparation-state";
+import {
+  isQuotePreparationReady,
+  quoteEditorHref,
+  quotePreparationStateLabel,
+  quoteWorkflowActionLabel,
+} from "@/lib/chantier/quote-workflow-status";
+
+function cardStatusFromQuote(
+  status: string | null | undefined,
+): CardStatusLabel {
+  return quotePreparationStateLabel(status) as CardStatusLabel;
+}
 
 export type SyncState =
   | "A_JOUR"
@@ -33,6 +45,13 @@ export type CardStatusLabel =
   | "À vérifier"
   | "À préparer"
   | "En cours"
+  | "Brouillon"
+  | "Prêt"
+  | "Émis"
+  | "Accepté"
+  | "Refusé"
+  | "Expiré"
+  | "Annulé"
   | "Action requise"
   | "Non démarré";
 
@@ -303,6 +322,7 @@ function buildScopeCards(input: {
     number: string;
     totalSellHt: unknown;
     isDemonstration: boolean;
+    status: string;
   } | null;
   /** Nombre total de devis rattachés au lot (référence + autres). */
   quotesCount?: number;
@@ -488,8 +508,8 @@ function buildScopeCards(input: {
           : `/dashboard/devis-facturation/devis/nouveau?projectId=${encodeURIComponent(input.projectId)}`,
       detail: quote
         ? [
+            quotePreparationStateLabel(quote.status),
             euro(d(quote.totalSellHt)),
-            quote.isDemonstration ? "démo" : null,
             quotesCount > 1
               ? `réf. · +${quotesCount - 1} autre${quotesCount - 1 > 1 ? "s" : ""}`
               : null,
@@ -498,9 +518,13 @@ function buildScopeCards(input: {
             .join(" · ") || null
         : "À générer",
       syncState: devisSync,
-      statusLabel: statusLabelFromSync(devisSync, "devis"),
-      actionLabel: quote ? "Ouvrir" : "Générer un devis",
-      ready: !!quote,
+      statusLabel: quote
+        ? cardStatusFromQuote(quote.status)
+        : statusLabelFromSync(devisSync, "devis"),
+      actionLabel: quote
+        ? quoteWorkflowActionLabel(quote.status)
+        : "Générer un devis",
+      ready: isQuotePreparationReady(quote?.status),
       syncHint:
         quotesCount > 1
           ? `${quotesCount} devis sur ce lot — ${quote?.number ?? "—"} en référence`
@@ -851,22 +875,24 @@ async function getProjectWorkspaceUncached(
     isReference: true,
   };
 
+  const devisReady = isQuotePreparationReady(globalQuote?.status);
+  const devisStateLabel = cardStatusFromQuote(globalQuote?.status);
+  const devisAmount = globalQuote ? euro(d(globalQuote.totalSellHt)) : null;
+
   const globalDevisCard: WorkspaceCard = {
     kind: "devis",
     label: "Devis global",
     title: globalQuote?.number ?? "Non créé",
     href: globalQuote
-      ? `/dashboard/devis-facturation/devis/${globalQuote.id}`
+      ? quoteEditorHref(globalQuote.id, globalQuote.status)
       : `/dashboard/devis-facturation/devis/nouveau?projectId=${encodeURIComponent(projectId)}`,
     detail: globalQuote
-      ? [euro(d(globalQuote.totalSellHt)), globalQuote.isDemonstration ? "démo" : null]
-          .filter(Boolean)
-          .join(" · ")
+      ? [devisStateLabel, devisAmount].filter(Boolean).join(" · ")
       : "À rattacher",
-    syncState: globalQuote ? "A_JOUR" : "ABSENT",
-    statusLabel: globalQuote ? "À jour" : "À préparer",
-    actionLabel: globalQuote ? "Ouvrir" : "Créer un devis",
-    ready: !!globalQuote,
+    syncState: globalQuote ? (devisReady ? "A_JOUR" : "A_VERIFIER") : "ABSENT",
+    statusLabel: globalQuote ? devisStateLabel : "À préparer",
+    actionLabel: quoteWorkflowActionLabel(globalQuote?.status),
+    ready: devisReady,
     syncHint: null,
     isReference: true,
   };
@@ -955,10 +981,7 @@ async function getProjectWorkspaceUncached(
       detail: globalDevisCard.detail,
       href: globalDevisCard.href,
       ready: globalDevisCard.ready,
-      actionLabel: workspaceOpenOrGenerateLabel(
-        globalDevisCard.ready,
-        "Créer un devis",
-      ),
+      actionLabel: globalDevisCard.actionLabel,
       primaryAction: "open",
     },
     {

@@ -453,7 +453,7 @@ export const COMMERCIAL_AMENDMENT_STATUS_LABELS: Record<string, string> = {
 export const COMMERCIAL_QUOTE_STATUS_LABELS: Record<string, string> = {
   DRAFT: "Brouillon",
   TO_VALIDATE: "À valider",
-  VALIDATED: "Validé",
+  VALIDATED: "Prêt",
   SENT: "Envoyé",
   VIEWED: "Consulté",
   ACCEPTED: "Accepté",

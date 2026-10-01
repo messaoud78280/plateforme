@@ -26,7 +26,7 @@ export default async function DevisDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ fromVisit?: string }>;
+  searchParams: Promise<{ fromVisit?: string; intent?: string }>;
 }) {
   const session = await requireCommercialSession();
   const orgId = await resolveCommercialOrgId(session.user);
@@ -40,6 +40,8 @@ export default async function DevisDetailPage({
   const canEdit =
     ["DRAFT", "TO_VALIDATE", "VALIDATED"].includes(quote.status) &&
     quote.currentVersion?.lockState === "DRAFT";
+
+  const finalizeIntent = sp.intent === "finalize";
 
   const fromVisit = await prisma.siteVisit.findFirst({
     where: {
@@ -87,13 +89,22 @@ export default async function DevisDetailPage({
   const minMarginPercent =
     settings.minMarginPercent != null ? d(settings.minMarginPercent) : 15;
 
+  const nav =
+    chantierNav && finalizeIntent && quote.projectId
+      ? {
+          ...chantierNav,
+          backHref: `/dashboard/projets/${quote.projectId}`,
+          backLabel: "Retour au chantier",
+        }
+      : chantierNav;
+
   return (
     <div className="space-y-4">
-      {chantierNav ? (
+      {nav ? (
         <ChantierHierarchyNav
-          backHref={chantierNav.backHref}
-          backLabel={chantierNav.backLabel}
-          crumbs={chantierNav.crumbs}
+          backHref={nav.backHref}
+          backLabel={nav.backLabel}
+          crumbs={nav.crumbs}
         />
       ) : (
         <BackLink href="/dashboard/devis-facturation/devis">
@@ -134,6 +145,7 @@ export default async function DevisDetailPage({
         canEdit={canEdit}
         acceptedPdfAvailable={Boolean(archive?.snapshot)}
         minMarginPercent={minMarginPercent}
+        finalizeIntent={finalizeIntent}
       />
       {archive?.hasAcceptedVersion ? (
         <QuoteAcceptedArchiveCard

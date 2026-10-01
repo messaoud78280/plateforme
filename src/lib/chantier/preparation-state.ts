@@ -12,6 +12,10 @@ import {
   type StudyLike,
 } from "@/lib/chantier/resolve-workspace-entities";
 import { normalizePrepSources } from "@/lib/preparation/plan-source";
+import {
+  getQuotePreparationPhase,
+  quotePreparationStateLabel,
+} from "@/lib/chantier/quote-workflow-status";
 
 export type PreparationEntryMode = "visite" | "plan" | "mixte" | "devis" | "vide";
 
@@ -277,26 +281,17 @@ function quoteModule(quote: PreparationQuote | null): PreparationModule {
       applicable: true,
     };
   }
-  const demo = quote.isDemonstration ? " · démo" : "";
-  const ready = ["VALIDATED", "SENT", "VIEWED", "ACCEPTED"].includes(quote.status);
-  const closed = ["REFUSED", "EXPIRED", "CANCELLED"].includes(quote.status);
-  const stateLabel = ready
-    ? quote.status === "ACCEPTED"
-      ? `Accepté${demo}`
-      : quote.status === "VALIDATED"
-        ? `Prêt${demo}`
-        : `Émis${demo}`
-    : closed
-      ? quote.status === "REFUSED"
-        ? `Refusé${demo}`
-        : quote.status === "EXPIRED"
-          ? `Expiré${demo}`
-          : `Annulé${demo}`
-      : `En cours${demo}`;
+  const phase = getQuotePreparationPhase(quote.status);
+  const stateLabel = quotePreparationStateLabel(quote.status);
   return {
     key: "devis",
     label: "Devis",
-    state: ready ? "done" : closed ? "todo" : "progress",
+    state:
+      phase === "ready" || phase === "accepted"
+        ? "done"
+        : phase === "closed"
+          ? "todo"
+          : "progress",
     stateLabel,
     applicable: true,
   };

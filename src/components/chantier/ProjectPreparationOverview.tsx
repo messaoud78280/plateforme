@@ -414,9 +414,11 @@ export function ProjectPreparationOverview({
               Pilotage chantier
             </p>
             <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-              {workspace.global.devis.ready ? (
+              {workspace.global.devis.href &&
+              workspace.global.devis.title !== "Non créé" ? (
                 <p className="text-[1.35rem] font-extrabold tabular-nums tracking-tight text-slate-950">
-                  {workspace.global.devis.detail?.split(" · ")[0] ??
+                  {workspace.global.devis.detail?.match(/[\d\s ,.]+€/)?.[0]?.trim() ??
+                    workspace.global.devis.detail?.split(" · ").find((p) => p.includes("€")) ??
                     workspace.global.devis.title}
                 </p>
               ) : (
@@ -768,7 +770,8 @@ export function ProjectPreparationOverview({
           <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
             Commercial
           </h3>
-          {workspace.global.devis.ready ? (
+          {workspace.global.devis.href &&
+          workspace.global.devis.title !== "Non créé" ? (
             <div className="mt-2 space-y-1.5 text-[13px]">
               <p className="font-semibold text-slate-900">
                 {workspace.global.devis.title}
@@ -781,7 +784,9 @@ export function ProjectPreparationOverview({
                   href={workspace.global.devis.href}
                   className="inline-flex text-[12.5px] font-semibold text-[#1e3a5f] hover:underline"
                 >
-                  Ouvrir le devis →
+                  {workspace.global.devis.ready
+                    ? "Ouvrir le devis →"
+                    : "Finaliser le devis →"}
                 </Link>
               ) : null}
             </div>

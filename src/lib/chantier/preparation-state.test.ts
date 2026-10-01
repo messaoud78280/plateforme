@@ -54,7 +54,7 @@ const morel = buildPreparationSnapshot({
 assert.equal(morel.visitId, "visit-guyancourt");
 assert.equal(morel.modules[0]?.stateLabel, "Relevé en cours");
 assert.equal(morel.modules[1]?.stateLabel, "À préparer");
-assert.equal(morel.modules[2]?.stateLabel, "En cours");
+assert.equal(morel.modules[2]?.stateLabel, "Brouillon");
 assert.equal(morel.nextAction, "Terminer la visite");
 
 const c01 = buildPreparationSnapshot({
@@ -104,7 +104,7 @@ assert.equal(c01.entryMode, "plan");
 assert.equal(c01.modules[0]?.stateLabel, "Dossier sur plan");
 assert.equal(c01.modules[0]?.applicable, false);
 assert.equal(c01.modules[1]?.stateLabel, "Validé · 32 postes");
-assert.equal(c01.modules[2]?.stateLabel, "En cours · démo");
+assert.equal(c01.modules[2]?.stateLabel, "Brouillon");
 assert.equal(c01.modules[3]?.stateLabel, "Prêt");
 assert.equal(c01.nextAction, "Finaliser le devis");
 assert.ok(c01.progressPercent > 50);

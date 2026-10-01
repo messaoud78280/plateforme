@@ -59,8 +59,11 @@ export function timelineStepCaption(step: ChantierWorkflowStep): string {
     return d.replace(/^Version\s+\d+\s*·\s*/i, "") || "Prêt";
   }
   if (step.id === "devis") {
-    const euro = d.match(/[\d\s ,.]+€/);
-    return euro ? euro[0].replace(/\s+/g, " ").trim() : d;
+    const d = humanizeTechnicalStatus(step.detail) || step.title;
+    if (!step.ready) {
+      return d || step.actionLabel || "À préparer";
+    }
+    return d || "Prêt";
   }
   if (step.id === "planning") {
     const date = d.match(/\d{1,2}\s+\S+/);
@@ -105,7 +108,9 @@ export function computePilotageNextAction(input: {
   const firstTodo = wf.find((s) => !s.ready);
   if (firstTodo) {
     const label =
-      firstTodo.primaryAction === "attach_visit"
+      firstTodo.id === "devis" && firstTodo.actionLabel
+        ? firstTodo.actionLabel
+        : firstTodo.primaryAction === "attach_visit"
         ? "Rattacher la visite terrain"
         : firstTodo.primaryAction === "create_global_prep"
           ? firstTodo.id === "planning"

@@ -69,6 +69,8 @@ export function QuoteStatusActions({
     return true;
   });
 
+  const finalizePrimary = primary?.id === "validate";
+
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">
       {primary ? (
@@ -79,7 +81,9 @@ export function QuoteStatusActions({
           className={
             primary.id === "accept"
               ? "rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
-              : "rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
+              : finalizePrimary
+                ? "rounded-lg bg-[#1e3a5f] px-3.5 py-2.5 text-[11px] font-extrabold uppercase tracking-[0.06em] text-white shadow-sm disabled:opacity-60"
+                : "rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
           }
         >
           {busy && (primary.id === "accept" || primary.toStatus) ? "…" : primary.label}

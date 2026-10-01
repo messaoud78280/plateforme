@@ -215,12 +215,15 @@ export function QuoteEditor({
   canEdit,
   acceptedPdfAvailable = false,
   minMarginPercent = 15,
+  finalizeIntent = false,
 }: {
   initial: QuoteDetail;
   canEdit: boolean;
   acceptedPdfAvailable?: boolean;
   /** Seuil d’alerte marge (taux de marque). Défaut 15 % si réglages non passés. */
   minMarginPercent?: number;
+  /** Arrivée depuis la fiche chantier avec CTA « Finaliser le devis ». */
+  finalizeIntent?: boolean;
 }) {
   const router = useRouter();
   const [quote, setQuote] = useState(initial);
@@ -260,6 +263,7 @@ export function QuoteEditor({
   const [priceCheckOpen, setPriceCheckOpen] = useState(false);
   const [issuanceOpen, setIssuanceOpen] = useState(false);
   const [pendingEmitStatus, setPendingEmitStatus] = useState<string | null>(null);
+  const [finalizeSuccess, setFinalizeSuccess] = useState(false);
   const [priceCheckSessionBadge, setPriceCheckSessionBadge] = useState<string | null>(null);
   const [marginOpen, setMarginOpen] = useState(false);
   const [addMenuFor, setAddMenuFor] = useState<string | null>(null);
@@ -284,8 +288,45 @@ export function QuoteEditor({
     if (quote.number) document.title = `${quote.number} — BeWork`;
   }, [quote.number]);
 
+  useEffect(() => {
+    if (!finalizeIntent) return;
+    if (!["DRAFT", "TO_VALIDATE"].includes(quote.status)) return;
+    setPendingEmitStatus("VALIDATED");
+    setIssuanceOpen(true);
+    // Ouverture unique à l’arrivée avec ?intent=finalize
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finalizeIntent]);
+
   const version = quote.currentVersion;
   const lines = version?.lines ?? [];
+
+  const workLineCount = useMemo(
+    () =>
+      lines.filter(
+        (l) =>
+          l.kind === "WORK" ||
+          l.kind === "OPTION" ||
+          (!l.kind && Number(l.quantity) > 0),
+      ).length,
+    [lines],
+  );
+
+  const paymentScheduleLabel = useMemo(() => {
+    const schedule =
+      parsePaymentSchedule(meta.paymentScheduleJson) ?? meta.paymentScheduleJson;
+    if (!schedule?.lines?.length) return meta.paymentTerms?.trim() || null;
+    return schedule.lines.map((l) => `${l.percent} %`).join(" / ");
+  }, [meta.paymentScheduleJson, meta.paymentTerms]);
+
+  const finalizeSummary = useMemo(
+    () => ({
+      amountHtLabel: `${fmtMoney(quote.totalSellHt)} €`,
+      lineCount: workLineCount,
+      paymentScheduleLabel,
+      isDemonstration: quote.isDemonstration === true,
+    }),
+    [quote.totalSellHt, quote.isDemonstration, workLineCount, paymentScheduleLabel],
+  );
 
   const displayLines = useMemo(() => {
     return lines.map((l) => {
@@ -814,6 +855,9 @@ export function QuoteEditor({
         setMeta(metaFromQuote(detail.quote));
         metaDirty.current = false;
       }
+      if (toStatus === "VALIDATED") {
+        setFinalizeSuccess(true);
+      }
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
@@ -1027,6 +1071,52 @@ export function QuoteEditor({
           Chiffrage et PDF autorisés. Envoi client, acceptation et facturation bloqués côté serveur.
         </div>
       ) : null}
+      {finalizeSuccess && quote.status === "VALIDATED" ? (
+        <div className="mx-auto mb-3 flex max-w-[1500px] flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <div>
+            <p className="text-sm font-bold text-emerald-900">Devis finalisé</p>
+            <p className="mt-0.5 text-xs text-emerald-800">
+              Statut Prêt — préparation commerciale terminée
+              {quote.isDemonstration
+                ? ". Envoi client, acceptation et facturation restent bloqués."
+                : "."}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {quote.project?.id ? (
+              <button
+                type="button"
+                onClick={() => {
+                  router.push(`/dashboard/projets/${quote.project!.id}`);
+                  router.refresh();
+                }}
+                className="rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-xs font-bold text-white"
+              >
+                Retour au chantier
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={() =>
+                window.open(
+                  `/api/commercial/quotes/${quote.id}/pdf`,
+                  "_blank",
+                  "noreferrer",
+                )
+              }
+              className="rounded-lg border border-emerald-300 bg-white px-3.5 py-2 text-xs font-semibold text-emerald-900"
+            >
+              Prévisualiser le PDF
+            </button>
+          </div>
+        </div>
+      ) : finalizeIntent &&
+        ["DRAFT", "TO_VALIDATE"].includes(quote.status) ? (
+        <div className="mx-auto mb-3 max-w-[1500px] rounded-xl border border-[#1e3a5f]/20 bg-[#1e3a5f]/[0.04] px-4 py-2.5 text-[13px] text-[#1e3a5f]">
+          <span className="font-semibold">Finaliser le devis</span> — vérifiez le
+          chiffrage puis validez pour marquer l’étape Prêt sur le chantier.
+        </div>
+      ) : null}
       {/* Barre sticky */}
       <div className="sticky top-12 z-30 -mx-1 mb-4 border-b border-slate-200/80 bg-white/95 px-1 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
@@ -1145,7 +1235,7 @@ export function QuoteEditor({
         <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           {/* Émetteur ↔ Client */}
           <div className="grid gap-6 border-b border-slate-100 px-5 py-6 sm:grid-cols-2 sm:px-8">
-            <div className="group space-y-1 text-sm text-slate-700">
+            <div id="quote-issuer" className="group space-y-1 text-sm text-slate-700">
               {issuer?.logoPath ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -1201,7 +1291,7 @@ export function QuoteEditor({
               ) : null}
             </div>
 
-            <div className="space-y-1 text-sm text-slate-700 sm:text-right">
+            <div id="quote-client" className="space-y-1 text-sm text-slate-700 sm:text-right">
               <div className="flex items-center justify-between gap-2 sm:justify-end sm:gap-3">
                 <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
                   Client
@@ -1286,7 +1376,7 @@ export function QuoteEditor({
           </div>
 
           {/* Métadonnées document */}
-          <div className="space-y-4 border-b border-slate-100 px-5 py-5 sm:px-8">
+          <div id="quote-subject" className="space-y-4 border-b border-slate-100 px-5 py-5 sm:px-8">
             <div>
               <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
                 Objet
@@ -1503,7 +1593,7 @@ export function QuoteEditor({
           </div>
 
           {/* Lignes */}
-          <div className="px-2 py-2 sm:px-4">
+          <div id="quote-lines" className="px-2 py-2 sm:px-4">
             {canEdit && verifyAlerts.length > 0 ? (
               <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-2">
                 <p className="text-[10px] font-bold uppercase tracking-wide text-amber-900">
@@ -1787,6 +1877,7 @@ export function QuoteEditor({
               </div>
             ) : null}
 
+            <div id="quote-payment">
             <QuotePaymentScheduleBlock
               schedule={meta.paymentScheduleJson}
               totalTtc={liveTotals.totalTtc}
@@ -1810,6 +1901,7 @@ export function QuoteEditor({
                 placeholder="Délais, modalités particulières…"
                 className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 disabled:bg-slate-50"
               />
+            </div>
             </div>
 
             <div>
@@ -2152,6 +2244,12 @@ export function QuoteEditor({
       <QuoteIssuanceCheckPanel
         quoteId={quote.id}
         open={issuanceOpen}
+        mode={
+          pendingEmitStatus === "VALIDATED" || finalizeIntent
+            ? "finalize"
+            : "emit"
+        }
+        finalizeSummary={finalizeSummary}
         onClose={() => {
           setIssuanceOpen(false);
           setPendingEmitStatus(null);

@@ -49,9 +49,32 @@ export function getQuoteActionsForStatus(input: {
     : { id: "preview_pdf", label: "Prévisualiser PDF" };
 
   if (demo) {
+    /**
+     * Démo : finalisation préparation (→ VALIDATED / Prêt) autorisée.
+     * Envoi client, acceptation et facturation restent bloqués (serveur + UI).
+     */
+    if (status === "DRAFT" || status === "TO_VALIDATE") {
+      primary = {
+        id: "validate",
+        label: "Finaliser le devis",
+        toStatus: "VALIDATED",
+        primary: true,
+      };
+      secondary.push(pdf);
+      secondary.push({ id: "price_check", label: "Vérifier les prix" });
+      if (input.canEdit) {
+        secondary.push({
+          id: "cancel",
+          label: "Annuler le devis",
+          toStatus: "CANCELLED",
+          destructive: true,
+        });
+      }
+      return { primary, secondary };
+    }
     primary = { id: "preview_pdf", label: "Prévisualiser PDF", primary: true };
     secondary.push({ id: "price_check", label: "Vérifier les prix" });
-    if (input.canEdit) {
+    if (input.canEdit && (status === "VALIDATED" || status === "DRAFT")) {
       secondary.push({
         id: "cancel",
         label: "Annuler le devis",

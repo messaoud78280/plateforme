@@ -147,7 +147,10 @@ async function main() {
   if (ctx.type !== "bework_chatgpt_context_v1") throw new Error("type");
   if (ctx.organization?.name !== "URBAN AMÉNAGEMENTS") throw new Error("org");
   if (!ctx.project.title.includes("C-01")) throw new Error("project");
-  if (ctx.scope?.name !== "FONDATIONS") throw new Error("scope");
+  const scopeName = (ctx.scope?.name ?? "").normalize("NFC");
+  if (scopeName.toLocaleUpperCase("fr-FR") !== "FONDATIONS") {
+    throw new Error(`scope=${ctx.scope?.name}`);
+  }
   if (ctx.target.version !== 4) throw new Error("version");
   if (params !== 28) throw new Error(`params=${params}`);
   if (lines !== 32) throw new Error(`lines=${lines}`);

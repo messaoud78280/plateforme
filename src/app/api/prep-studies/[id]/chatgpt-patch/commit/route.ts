@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
-import { prepErrorResponse, readJsonBody, requirePrepApiContext } from "@/lib/preparation/access";
+import {
+  prepErrorResponse,
+  readJsonBody,
+  requirePrepApiContext,
+} from "@/lib/preparation/access";
 import { parsePrepPatchText } from "@/lib/preparation/chatgpt-patch/parse";
 import { applyPrepPatch } from "@/lib/preparation/chatgpt-patch/apply";
 import { getPrepStudyView, PrepError } from "@/lib/preparation/service";
+import {
+  isLegacyChatgptPatchWritesEnabled,
+  legacyChatgptPatchDisabledBody,
+} from "@/lib/bework-patch/legacy-chatgpt-patch-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +19,13 @@ type Ctx = { params: Promise<{ id: string }> };
 export async function POST(req: Request, ctx: Ctx) {
   const guard = await requirePrepApiContext();
   if (!guard.ok) return guard.response;
+
+  if (!isLegacyChatgptPatchWritesEnabled()) {
+    return NextResponse.json(legacyChatgptPatchDisabledBody("prep"), {
+      status: 410,
+    });
+  }
+
   try {
     const { id } = await ctx.params;
     const body = await readJsonBody(req);
@@ -31,7 +46,11 @@ export async function POST(req: Request, ctx: Ctx) {
     });
     if (!result.ok) {
       const status =
-        result.code === "VERSION_MISMATCH" ? 409 : result.code === "ALREADY_APPLIED" ? 409 : 422;
+        result.code === "VERSION_MISMATCH"
+          ? 409
+          : result.code === "ALREADY_APPLIED"
+            ? 409
+            : 422;
       return NextResponse.json(result, { status });
     }
     const study = await getPrepStudyView(guard.ctx.orgId, id);

@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * @deprecated Phase A — modal orpheline non montée.
+ * Écritures via …/chatgpt-patch/commit : LEGACY_CHATGPT_PATCH_WRITES_ENABLED=false (410).
+ * Ne pas réintroduire comme chemin UI sans décision explicite — utiliser BeworkPatchToolbar.
+ */
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import type { PrepPatchPreview } from "@/lib/preparation/chatgpt-patch/apply";

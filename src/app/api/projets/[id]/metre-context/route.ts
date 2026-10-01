@@ -7,6 +7,11 @@ import { buildMetreChatgptContext } from "@/lib/chantier/metre-chatgpt-context";
 
 type Ctx = { params: Promise<{ id: string }> };
 
+/**
+ * @deprecated Phase A — GET lecture seule, sans call site UI actif.
+ * Préférer POST /api/bework-patch/context (bework_chatgpt_context_v1).
+ * Conservé pour rétrocompatibilité ; aucune écriture.
+ */
 /** GET — contexte métré à coller dans ChatGPT (visite + devis + étude). */
 export async function GET(req: Request, ctx: Ctx) {
   const session = await getServerSession(authOptions);

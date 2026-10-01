@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { requireCommercialApiSession } from "@/lib/commercial/access";
 import { parseBeworkQuotePatch } from "@/lib/commercial/chatgpt-patch/parse";
 import { applyQuotePatch } from "@/lib/commercial/chatgpt-patch/apply";
+import {
+  isLegacyChatgptPatchWritesEnabled,
+  legacyChatgptPatchDisabledBody,
+} from "@/lib/bework-patch/legacy-chatgpt-patch-gate";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -12,6 +16,12 @@ export async function POST(req: Request, ctx: Ctx) {
   });
   if (auth.error || !auth.session) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
+  if (!isLegacyChatgptPatchWritesEnabled()) {
+    return NextResponse.json(legacyChatgptPatchDisabledBody("quote"), {
+      status: 410,
+    });
   }
 
   const { id } = await ctx.params;

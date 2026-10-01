@@ -14,11 +14,6 @@ type Props = {
   capability: SectionPatchCapability;
   /** Identifiant métier (n° devis, titre…) pour messages. */
   entityLabel?: string;
-  /** QuoteId / studyId pour commit legacy. */
-  legacyCommit?: {
-    kind: "quote" | "prep";
-    id: string;
-  } | null;
   disabled?: boolean;
   disabledReason?: string | null;
   onApplied?: () => void;
@@ -38,7 +33,6 @@ export function BeworkPatchToolbar({
   version,
   capability,
   entityLabel,
-  legacyCommit = null,
   disabled = false,
   disabledReason = null,
   onApplied,
@@ -148,7 +142,6 @@ export function BeworkPatchToolbar({
         version={version}
         capability={capability}
         entityLabel={entityLabel}
-        legacyCommit={legacyCommit}
         contextAlreadyCopied={contextCopied}
         onClose={() => setModalOpen(false)}
         onApplied={() => {

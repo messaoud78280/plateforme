@@ -240,8 +240,6 @@ export function QuoteEditor({
   const [chatgptImportOpen, setChatgptImportOpen] = useState(false);
   const [chatgptImportUndo, setChatgptImportUndo] = useState(false);
   const [chatgptUndoBusy, setChatgptUndoBusy] = useState(false);
-  const [chatgptPatchUndo, setChatgptPatchUndo] = useState(false);
-  const [chatgptPatchUndoBusy, setChatgptPatchUndoBusy] = useState(false);
   const [chatgptToast, setChatgptToast] = useState<string | null>(null);
   const quotePatchCapability = getSectionCapability("QUOTE");
   const [issuerEditOpen, setIssuerEditOpen] = useState(false);
@@ -1210,9 +1208,7 @@ export function QuoteEditor({
                 version={version?.versionNumber ?? 1}
                 capability={quotePatchCapability}
                 entityLabel={quote.number}
-                legacyCommit={{ kind: "quote", id: quote.id }}
                 onApplied={() => {
-                  setChatgptPatchUndo(true);
                   setChatgptToast("Modifications ChatGPT appliquées.");
                   window.setTimeout(() => {
                     setChatgptToast((t) =>
@@ -1253,7 +1249,7 @@ export function QuoteEditor({
       {error ? (
         <p className="mx-auto mb-3 max-w-[1500px] text-sm text-red-700">{error}</p>
       ) : null}
-      {chatgptToast && !chatgptPatchUndo ? (
+      {chatgptToast ? (
         <p className="mx-auto mb-3 max-w-[1500px] rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2 text-sm text-emerald-900">
           {chatgptToast}
         </p>
@@ -1729,44 +1725,6 @@ export function QuoteEditor({
                 </button>
               </div>
             ) : null}
-            {canEdit && chatgptPatchUndo ? (
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-indigo-200 bg-indigo-50/80 px-3 py-2">
-                <p className="text-xs font-medium text-indigo-950">
-                  {chatgptToast ?? "Modifications ChatGPT appliquées."}
-                </p>
-                <button
-                  type="button"
-                  disabled={chatgptPatchUndoBusy}
-                  onClick={() => {
-                    void (async () => {
-                      setChatgptPatchUndoBusy(true);
-                      try {
-                        const res = await fetch(
-                          `/api/commercial/quotes/${quote.id}/chatgpt-patch/undo`,
-                          { method: "POST" },
-                        );
-                        const data = await res.json();
-                        if (!res.ok) throw new Error(data.error || "Annulation impossible");
-                        setChatgptPatchUndo(false);
-                        setChatgptToast(null);
-                        await refreshQuote();
-                      } catch (e) {
-                        setError(
-                          e instanceof Error ? e.message : "Annulation impossible",
-                        );
-                      } finally {
-                        setChatgptPatchUndoBusy(false);
-                      }
-                    })();
-                  }}
-                  className="text-[11px] font-semibold text-[#1e3a5f] underline-offset-2 hover:underline disabled:opacity-50"
-                >
-                  {chatgptPatchUndoBusy
-                    ? "Annulation…"
-                    : "Annuler la dernière modification ChatGPT"}
-                </button>
-              </div>
-            ) : null}
             {/* En-tête table desktop */}
             <div className="mb-1 hidden grid-cols-[72px_minmax(0,1fr)_56px_48px_72px_48px_80px_56px] gap-1 border-b border-slate-100 px-2 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 md:grid">
               <div>Réf</div>
@@ -1889,9 +1847,7 @@ export function QuoteEditor({
                     version={version?.versionNumber ?? 1}
                     capability={quotePatchCapability}
                     entityLabel={quote.number}
-                    legacyCommit={{ kind: "quote", id: quote.id }}
                     onApplied={() => {
-                      setChatgptPatchUndo(true);
                       setChatgptToast("Modifications ChatGPT appliquées.");
                       window.setTimeout(() => {
                         setChatgptToast((t) =>

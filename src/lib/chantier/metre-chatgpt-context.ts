@@ -1,5 +1,6 @@
 /**
- * Contexte métré pour ChatGPT — export JSON à coller dans le prompt.
+ * @deprecated Phase A — préférer buildUniversalPatchContext / bework_chatgpt_context_v1.
+ * Lecture seule ; aucun call site UI actif. Conservé pour rétrocompatibilité.
  */
 import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";

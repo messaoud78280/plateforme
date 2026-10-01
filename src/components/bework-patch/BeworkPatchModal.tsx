@@ -37,7 +37,6 @@ type Props = {
   version: number;
   capability: SectionPatchCapability;
   entityLabel?: string;
-  legacyCommit?: { kind: "quote" | "prep"; id: string } | null;
   onClose: () => void;
   onApplied: () => void;
   /** Indique que le contexte a déjà été copié depuis la barre d’outils. */

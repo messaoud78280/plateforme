@@ -107,7 +107,6 @@ export function PrepStudyWorkspace({
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [confirmUndo, setConfirmUndo] = useState(false);
-  const [confirmUndoPatch, setConfirmUndoPatch] = useState(false);
   const takeoffPatchCapability = getSectionCapability("TAKEOFF");
 
   const params = useMemo<PrepParamDTO[]>(
@@ -311,22 +310,6 @@ export function PrepStudyWorkspace({
     }
   }
 
-  async function undoPatch() {
-    setBusy(true);
-    setConfirmUndoPatch(false);
-    try {
-      const { res, data } = await callApi(`/api/prep-studies/${study.id}/chatgpt-patch/undo`, "POST");
-      if (!res.ok) {
-        setFlash({ tone: "error", text: data?.error ?? "Annulation du patch impossible" });
-        return;
-      }
-      if (data.study) setStudy(data.study);
-      setFlash({ tone: "ok", text: "Dernière modification ChatGPT annulée — état antérieur rétabli." });
-    } finally {
-      setBusy(false);
-    }
-  }
-
   async function enrichTexts() {
     setBusy(true);
     setFlash(null);
@@ -516,17 +499,6 @@ export function PrepStudyWorkspace({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {study.lastPatch ? (
-            <button
-              type="button"
-              disabled={busy || dirty || !study.lastPatch.canUndo}
-              title={study.lastPatch.undoBlockedReason ?? undefined}
-              onClick={() => setConfirmUndoPatch(true)}
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-[13px] text-slate-700 disabled:opacity-50"
-            >
-              Annuler la dernière modification
-            </button>
-          ) : null}
           {study.lastImport ? (
             <button
               type="button"
@@ -563,7 +535,6 @@ export function PrepStudyWorkspace({
             version={study.version}
             capability={takeoffPatchCapability}
             entityLabel={study.title}
-            legacyCommit={{ kind: "prep", id: study.id }}
             disabled={busy || dirty}
             disabledReason={
               dirty
@@ -623,31 +594,6 @@ export function PrepStudyWorkspace({
             </button>
             <button type="button" onClick={() => setConfirmUndo(false)} className="rounded-full px-3 py-1.5 text-[12px]">
               Garder l&apos;import
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      {confirmUndoPatch && study.lastPatch ? (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-950">
-          <p>
-            Annuler le patch <span className="font-mono">{study.lastPatch.patchId}</span> rétablit l&apos;état
-            de l&apos;étude juste avant cette modification ChatGPT.
-          </p>
-          <div className="mt-2 flex gap-2">
-            <button
-              type="button"
-              onClick={() => void undoPatch()}
-              className="rounded-full bg-[#1e3a5f] px-3 py-1.5 text-[12px] font-medium text-white"
-            >
-              Confirmer l&apos;annulation
-            </button>
-            <button
-              type="button"
-              onClick={() => setConfirmUndoPatch(false)}
-              className="rounded-full px-3 py-1.5 text-[12px]"
-            >
-              Garder la modification
             </button>
           </div>
         </div>

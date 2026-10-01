@@ -4,6 +4,7 @@
 import { Prisma, type SiteVisitStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
+import { computeVisitContextVersion } from "@/lib/bework-context/visit-context-version";
 import {
   computeMeasurement,
   formatQuantityLabel,
@@ -408,6 +409,41 @@ export function serializeVisit(
         : primaryActionFor(v.status, quoteHref),
     createdAt: v.createdAt?.toISOString() ?? null,
     updatedAt: v.updatedAt?.toISOString() ?? null,
+    /**
+     * CTX-07 — version contexte ChatGPT (empreinte déterministe).
+     * Utilisée par BeworkPatchToolbar / base_version VISIT.
+     */
+    patchContextVersion: computeVisitContextVersion({
+      id: v.id,
+      subject: v.subject,
+      status: v.status,
+      clientName: v.clientName,
+      siteAddress: v.siteAddress,
+      clientNeed: v.clientNeed,
+      comments: v.comments,
+      measurements: measurements.map((m) => ({
+        id: m.id,
+        zone: m.zone ?? null,
+        label: m.label,
+        measureType: m.measureType ?? null,
+        unit: m.unit,
+        lengthM: m.lengthM ?? null,
+        widthM: m.widthM ?? null,
+        heightM: m.heightM ?? null,
+        quantityValue: m.quantityValue ?? null,
+        computedQuantity: m.computedQuantity,
+        lot: m.lot ?? null,
+        observation: m.observation ?? null,
+      })),
+      mediaRefs: (v.medias ?? []).map((m) => ({
+        id: m.id,
+        name: m.name ?? null,
+        kind: m.kind ?? null,
+        category: m.category ?? null,
+        observation: m.observation ?? null,
+        hasUrl: Boolean(m.fileUrl || m.storagePath),
+      })),
+    }),
     summary,
     stats: {
       measurementCount: measurements.length,

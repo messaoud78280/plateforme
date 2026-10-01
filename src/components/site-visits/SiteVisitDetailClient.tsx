@@ -68,6 +68,8 @@ type Visit = {
   preparedAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+  /** CTX-07 — version contexte ChatGPT (empreinte déterministe). */
+  patchContextVersion?: number;
   completeness?: {
     done: number;
     total: number;
@@ -561,7 +563,7 @@ export function SiteVisitDetailClient({
               section="VISIT"
               projectId={visit.projectId}
               entityId={visit.id}
-              version={1}
+              version={visit.patchContextVersion ?? 1}
               capability={getSectionCapability("VISIT")}
               entityLabel={visit.siteName || visit.clientName}
             />

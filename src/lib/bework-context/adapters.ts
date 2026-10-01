@@ -16,6 +16,7 @@ import type {
   ProjectContextTakeoff,
   ProjectContextVisit,
 } from "./types";
+import { computeVisitContextVersion } from "./visit-context-version";
 
 /** Instructions compactes TAKEOFF — pas un prompt rédactionnel. */
 export const TAKEOFF_CHATGPT_INSTRUCTIONS = [
@@ -351,6 +352,105 @@ export function adaptQuoteForChatgptContext(
       })),
     })),
     versions: snapshot.versions,
+  };
+}
+
+/**
+ * Adapter VISIT → bework_chatgpt_context_v1 (CTX-07).
+ * Version = empreinte déterministe de l’état exposé (pas hardcodé à 1).
+ */
+export function adaptVisitForChatgptContext(
+  snapshot: ProjectContextSnapshot,
+  visitId: string,
+): BeworkChatgptContextV1 | null {
+  const visit = getVisitFromContext(snapshot, visitId);
+  if (!visit) return null;
+
+  const version =
+    visit.contextVersion ||
+    computeVisitContextVersion({
+      id: visit.id,
+      subject: visit.subject,
+      status: visit.status,
+      clientName: visit.clientName,
+      siteAddress: visit.siteAddress,
+      clientNeed: visit.clientNeed,
+      comments: visit.comments,
+      measurements: visit.measurements,
+      mediaRefs: visit.mediaRefs,
+    });
+
+  const skeleton = buildChatgptContextSkeleton({
+    section: "VISIT",
+    project: {
+      id: snapshot.project.id,
+      title: snapshot.project.title,
+    },
+    target: {
+      entity_type: "SITE_VISIT",
+      id: visit.id,
+      version,
+      code: visit.subject,
+    },
+    data: {
+      subject: visit.subject,
+      status: visit.status,
+      client_name: visit.clientName,
+      site_address: visit.siteAddress,
+      client_need: visit.clientNeed,
+      comments: visit.comments,
+      measurements: visit.measurements.map((m) => ({
+        measurement_id: m.id,
+        zone: m.zone,
+        label: m.label,
+        measure_type: m.measureType,
+        unit: m.unit,
+        length_m: m.lengthM,
+        width_m: m.widthM,
+        height_m: m.heightM,
+        quantity_value: m.quantityValue,
+        quantity: m.computedQuantity,
+        lot: m.lot,
+        observation: m.observation,
+      })),
+      media_refs: visit.mediaRefs.map((m) => ({
+        id: m.id,
+        name: m.name,
+        kind: m.kind,
+        category: m.category,
+        observation: m.observation,
+        has_url: m.hasUrl,
+      })),
+      counts: {
+        measurements: visit.measurements.length,
+        media_refs: visit.mediaRefs.length,
+      },
+      canonical_source: "bework_project_context_v1",
+      note: "Aucune FK mesure → paramètre métré : canonical_resolution = NONE sauf lien explicite futur.",
+      version_note:
+        "target.version = empreinte déterministe (SHA-256→uint48) de l’état ChatGPT VISIT.",
+    },
+  });
+
+  return {
+    ...skeleton,
+    organization: {
+      id: snapshot.organization.id,
+      name: snapshot.organization.name,
+    },
+    project: {
+      id: snapshot.project.id,
+      title: snapshot.project.title,
+      description: snapshot.project.description,
+      site_address: snapshot.project.siteAddress,
+      site_city: snapshot.project.siteCity,
+      status: snapshot.project.status,
+      chantier_status: snapshot.project.chantierStatus,
+    },
+    target: {
+      ...skeleton.target,
+      base_version: version,
+    },
   };
 }
 

@@ -32,7 +32,16 @@ export {
   getQuotesForScope,
   getTakeoffsForScope,
   adaptTakeoffForChatgptContext,
+  adaptVisitForChatgptContext,
   adaptQuoteForChatgptContext,
   diffContextKeys,
   TAKEOFF_CHATGPT_INSTRUCTIONS,
 } from "./adapters";
+
+export {
+  computeVisitContextVersion,
+  canonicalizeVisitContextPayload,
+  digestToBaseVersion,
+  isVisitContextStale,
+  type VisitContextVersionInput,
+} from "./visit-context-version";

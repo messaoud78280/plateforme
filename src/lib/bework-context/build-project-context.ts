@@ -9,6 +9,7 @@ import {
   planSourceDisplayTitle,
 } from "@/lib/preparation/plan-source";
 import { mapProvenanceKind } from "./provenance";
+import { computeVisitContextVersion } from "./visit-context-version";
 import {
   PROJECT_CONTEXT_FORMAT,
   PROJECT_CONTEXT_SCHEMA_VERSION,
@@ -602,19 +603,8 @@ export async function buildProjectContext(
     };
   });
 
-  const visitSnapshots: ProjectContextVisit[] = visits.map((v) => ({
-    id: v.id,
-    subject: v.subject,
-    status: v.status,
-    clientName: v.clientName,
-    siteAddress: v.siteAddress,
-    clientNeed: v.clientNeed,
-    comments: v.comments,
-    projectId: v.projectId,
-    commercialQuoteId: v.commercialQuoteId,
-    contextVersionNote: "HARDCODED_LEGACY_V1",
-    updatedAt: v.updatedAt.toISOString(),
-    measurements: v.measurements.map((m) => ({
+  const visitSnapshots: ProjectContextVisit[] = visits.map((v) => {
+    const measurements = v.measurements.map((m) => ({
       id: m.id,
       zone: m.zone,
       label: m.label,
@@ -627,16 +617,41 @@ export async function buildProjectContext(
       computedQuantity: d(m.computedQuantity),
       lot: m.lot,
       observation: m.observation,
-    })),
-    mediaRefs: v.medias.map((m) => ({
+    }));
+    const mediaRefs = v.medias.map((m) => ({
       id: m.id,
       name: m.name,
       kind: m.kind,
       category: m.category,
       observation: m.observation,
       hasUrl: Boolean(m.fileUrl || m.storagePath),
-    })),
-  }));
+    }));
+    return {
+      id: v.id,
+      subject: v.subject,
+      status: v.status,
+      clientName: v.clientName,
+      siteAddress: v.siteAddress,
+      clientNeed: v.clientNeed,
+      comments: v.comments,
+      projectId: v.projectId,
+      commercialQuoteId: v.commercialQuoteId,
+      contextVersion: computeVisitContextVersion({
+        id: v.id,
+        subject: v.subject,
+        status: v.status,
+        clientName: v.clientName,
+        siteAddress: v.siteAddress,
+        clientNeed: v.clientNeed,
+        comments: v.comments,
+        measurements,
+        mediaRefs,
+      }),
+      updatedAt: v.updatedAt.toISOString(),
+      measurements,
+      mediaRefs,
+    };
+  });
 
   const notices: ProjectContextDocument[] = [];
   const reports: ProjectContextDocument[] = [];

@@ -47,11 +47,16 @@ export async function POST(req: Request) {
     }
 
     const snapshot =
-      body.projectId && body.currentVersion != null
+      body.projectId &&
+      (context?.target.version != null || body.currentVersion != null)
         ? {
             organizationId: guard.ctx.orgId,
             projectId: body.projectId,
-            currentVersion: body.currentVersion,
+            /**
+             * CTX-07 : préférer la version live du contexte (DB) plutôt que
+             * la version UI potentiellement stale / hardcodée.
+             */
+            currentVersion: context?.target.version ?? body.currentVersion!,
           }
         : null;
 

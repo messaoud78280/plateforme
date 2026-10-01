@@ -98,7 +98,7 @@ function fixtureSnapshot(overrides?: Partial<ProjectContextSnapshot>): ProjectCo
         comments: null,
         projectId: "proj-c01",
         commercialQuoteId: null,
-        contextVersionNote: "HARDCODED_LEGACY_V1",
+        contextVersion: 123456789012345,
         updatedAt: "2026-09-01T10:00:00.000Z",
         measurements: [
           {
@@ -322,7 +322,9 @@ console.log("  provenance: ok");
   assert.equal(snap.schedules.length, 1);
   assert.equal(snap.schedules[0].tasks[0].takeoffLineCodes[0], "GO.01");
   assert.equal(snap.versions.takeoffVersions[0].version, 3);
-  assert.equal(snap.visits[0].contextVersionNote, "HARDCODED_LEGACY_V1");
+  assert.equal(snap.visits[0].contextVersion, 123456789012345);
+  assert.ok(Number.isInteger(snap.visits[0].contextVersion));
+  assert.ok(snap.visits[0].contextVersion >= 1);
   const takeoffView = adaptTakeoffForChatgptContext(snap, "study-a");
   assert.ok(takeoffView);
   assert.equal(takeoffView.section, "TAKEOFF");

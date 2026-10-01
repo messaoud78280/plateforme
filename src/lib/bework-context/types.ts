@@ -92,8 +92,11 @@ export type ProjectContextVisit = {
   comments: string | null;
   projectId: string | null;
   commercialQuoteId: string | null;
-  /** CTX-07 : pas de version métier — documenté. */
-  contextVersionNote: "HARDCODED_LEGACY_V1";
+  /**
+   * CTX-07 — version dérivée de l’état ChatGPT (SHA-256 → uint48).
+   * Remplace HARDCODED_LEGACY_V1. Entier ≥ 1 compatible base_version.
+   */
+  contextVersion: number;
   updatedAt: string;
   measurements: ProjectContextVisitMeasurement[];
   mediaRefs: ProjectContextVisitMediaRef[];

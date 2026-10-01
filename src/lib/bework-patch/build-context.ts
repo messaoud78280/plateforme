@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
 import {
   adaptTakeoffForChatgptContext,
+  adaptVisitForChatgptContext,
   buildProjectContext,
 } from "@/lib/bework-context";
 import {
@@ -229,49 +230,24 @@ async function buildPlanningContext(
   });
 }
 
+/**
+ * CTX-07 — VISIT via snapshot canonique + version dérivée.
+ * Legacy bework_site_survey_v1 inchangé.
+ */
 async function buildVisitContext(
   orgId: string,
   project: { id: string; title: string },
   visitId: string,
 ): Promise<BeworkChatgptContextV1 | null> {
-  const visit = await prisma.siteVisit.findFirst({
-    where: {
-      id: visitId,
-      organizationId: orgId,
-      projectId: project.id,
-    },
-    include: {
-      measurements: { orderBy: { sortOrder: "asc" } },
-    },
+  const snapshot = await buildProjectContext(project.id, orgId, {
+    includeLines: true,
   });
-  if (!visit) return null;
+  if (!snapshot) return null;
 
-  return buildChatgptContextSkeleton({
-    section: "VISIT",
-    project,
-    target: {
-      entity_type: "SITE_VISIT",
-      id: visit.id,
-      version: 1,
-      code: visit.subject,
-    },
-    data: {
-      subject: visit.subject,
-      client_name: visit.clientName,
-      site_address: visit.siteAddress,
-      measurements: visit.measurements.map((m) => ({
-        measurement_id: m.id,
-        label: m.label,
-        unit: m.unit,
-        length_m: m.lengthM != null ? Number(m.lengthM) : null,
-        width_m: m.widthM != null ? Number(m.widthM) : null,
-        height_m: m.heightM != null ? Number(m.heightM) : null,
-        quantity: Number(m.computedQuantity),
-        observation: m.observation,
-      })),
-      note: "Aucune FK mesure → paramètre métré : canonical_resolution = NONE sauf lien explicite futur.",
-    },
-  });
+  const adapted = adaptVisitForChatgptContext(snapshot, visitId);
+  if (!adapted) return null;
+  if (adapted.project.id !== project.id) return null;
+  return adapted;
 }
 
 async function buildFollowUpContext(

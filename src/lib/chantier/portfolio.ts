@@ -169,23 +169,22 @@ function attentionHeadline(level: PortfolioAttentionLevel, n: number): string | 
 
 function buildProgress(input: {
   status: ChantierStatus;
-  modules: PortfolioModuleSnapshot[];
+  /** Progression unique (7 étapes) — même formule que la fiche. */
+  preparationPercent: number;
 }): { percent: number; label: string } {
-  const applicable = input.modules.filter((m) => m.applicable !== false && m.state !== "na");
-  const done = applicable.filter((m) => m.state === "done").length;
-  const progress = applicable.filter((m) => m.state === "progress").length;
-  const base = Math.round(((done + progress * 0.45) / Math.max(applicable.length, 1)) * 100);
-
   if (input.status === "TERMINE") {
     return { percent: 100, label: "Avancement global" };
   }
-  if (input.status === "RECEPTION") {
-    return { percent: Math.max(base, 85), label: "Avancement global" };
+  if (input.status === "RECEPTION" || input.status === "EN_COURS") {
+    return {
+      percent: input.preparationPercent,
+      label: "Avancement global",
+    };
   }
-  if (input.status === "EN_COURS") {
-    return { percent: Math.max(base, 40), label: "Avancement global" };
-  }
-  return { percent: base, label: "Avancement préparation" };
+  return {
+    percent: input.preparationPercent,
+    label: "Avancement préparation",
+  };
 }
 
 export async function loadProjectsPortfolio(opts: {
@@ -291,6 +290,7 @@ export async function loadProjectsPortfolio(opts: {
       scopeRows,
       quoteRows,
       planRows,
+      siteDocRows,
     ] = await Promise.all([
         projectIds.length
           ? prisma.task.groupBy({
@@ -480,6 +480,25 @@ export async function loadProjectsPortfolio(opts: {
                 startDate: true,
               },
               take: 300,
+            })
+          : Promise.resolve([]),
+        projectIds.length
+          ? prisma.siteDocument.findMany({
+              where: {
+                projectId: { in: projectIds },
+                kind: { in: ["COMPTE_RENDU", "NOTICE"] },
+              },
+              select: {
+                id: true,
+                projectId: true,
+                kind: true,
+                status: true,
+                number: true,
+                title: true,
+                updatedAt: true,
+              },
+              orderBy: { updatedAt: "desc" },
+              take: 400,
             })
           : Promise.resolve([]),
       ]);
@@ -765,6 +784,8 @@ export async function loadProjectsPortfolio(opts: {
         title: p.title,
         siteAddress: p.siteAddress,
         siteCity: p.siteCity,
+        chantierStatus: p.chantierStatus,
+        hasResponsible: Boolean(responsibleName),
         visits,
         studies: studyRows
           .filter((s) => s.projectId === p.id)
@@ -801,6 +822,31 @@ export async function loadProjectsPortfolio(opts: {
                 })
               : null,
           })),
+        followUps: sheets
+          .filter((s) => s.projectId === p.id)
+          .map((s) => ({
+            id: s.id,
+            status: s.status,
+            title: s.title,
+          })),
+        reports: siteDocRows
+          .filter((d) => d.projectId === p.id && d.kind === "COMPTE_RENDU")
+          .map((d) => ({
+            id: d.id,
+            kind: d.kind,
+            status: d.status,
+            number: d.number,
+            title: d.title,
+          })),
+        notices: siteDocRows
+          .filter((d) => d.projectId === p.id && d.kind === "NOTICE")
+          .map((d) => ({
+            id: d.id,
+            kind: d.kind,
+            status: d.status,
+            number: d.number,
+            title: d.title,
+          })),
         studyVersionById,
         quoteSyncByQuoteId: Object.fromEntries(
           quoteRows
@@ -826,7 +872,7 @@ export async function loadProjectsPortfolio(opts: {
       const modules = preparation.modules;
       const progress = buildProgress({
         status: p.chantierStatus,
-        modules,
+        preparationPercent: preparation.progressPercent,
       });
 
       return {

@@ -4,6 +4,7 @@
  */
 
 import type { ChantierWorkflowStep, ProjectWorkspace } from "@/lib/chantier/project-workspace";
+import { computeProjectNextAction } from "@/lib/chantier/project-preparation-state";
 
 /** Traduit un fragment de statut technique pour l’UI (sans écrire en base). */
 export function humanizeTechnicalStatus(raw: string | null | undefined): string {
@@ -119,6 +120,20 @@ export function computePilotageNextAction(input: {
   missingDocumentsCount?: number;
 }): PilotageNextAction {
   const { workspace, hasResponsible, missingDocumentsCount = 0 } = input;
+  const prep = workspace.global.preparationState;
+  if (prep) {
+    const action = computeProjectNextAction({
+      state: { ...prep, hasResponsible },
+      missingDocumentsCount,
+      chantierStatus: workspace.chantierStatus,
+      projectId: workspace.projectId,
+    });
+    return {
+      label: action.label,
+      href: action.href,
+      stepId: action.stepId as PilotageNextAction["stepId"],
+    };
+  }
   const wf = workspace.global.workflow ?? [];
 
   if (!hasResponsible) {

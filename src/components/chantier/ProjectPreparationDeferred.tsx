@@ -16,7 +16,11 @@ export async function ProjectPreparationDeferred({
   missingDocumentsCount?: number;
 }) {
   const t0 = Date.now();
-  const workspace = await getProjectWorkspace(organizationId, projectId).catch(
+  const workspace = await getProjectWorkspace(
+    organizationId,
+    projectId,
+    hasResponsible,
+  ).catch(
     (e) => {
       console.error("[ProjetDetail] preparation workspace:", e);
       return null;

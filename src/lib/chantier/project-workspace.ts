@@ -25,6 +25,7 @@ import {
 } from "@/lib/preparation/quote-bridge/quote-sync-state";
 import { evaluateCorePreparationTriple } from "@/lib/chantier/core-preparation-state";
 import { buildPreparationSnapshot } from "@/lib/chantier/preparation-state";
+import type { ProjectPreparationState } from "@/lib/chantier/project-preparation-state";
 import {
   isQuotePreparationReady,
   quoteEditorHref,
@@ -171,6 +172,8 @@ export type ProjectGlobalWorkspace = {
   suggestedVisitId: string | null;
   followUpSheetId: string | null;
   compteRenduId: string | null;
+  /** État métier unique liste ↔ fiche (7 étapes + progression + nextAction). */
+  preparationState: ProjectPreparationState;
 };
 
 export type ProjectWorkspace = {
@@ -646,6 +649,7 @@ function buildScopeCards(input: {
 async function getProjectWorkspaceUncached(
   orgId: string,
   projectId: string,
+  hasResponsible = true,
 ): Promise<ProjectWorkspace | null> {
   const t0 = Date.now();
   const project = await prisma.project.findFirst({
@@ -980,6 +984,8 @@ async function getProjectWorkspaceUncached(
     title: project.title,
     siteAddress: project.siteAddress,
     siteCity: project.siteCity,
+    chantierStatus: project.chantierStatus,
+    hasResponsible,
     visits: [
       ...linkedVisits.map((v) => ({
         id: v.id,
@@ -1002,7 +1008,40 @@ async function getProjectWorkspaceUncached(
     })),
     scopes,
     quotes,
-    plans,
+    plans: plans.map((p) => ({
+      id: p.id,
+      studyId: p.studyId,
+      scopeId: p.scopeId,
+      status: p.status,
+      revisionKind: p.revisionKind,
+      studyVersionAtGeneration: p.studyVersionAtGeneration,
+      startDateLabel: p.startDate
+        ? fmtShortFr(asIso(p.startDate))
+        : null,
+    })),
+    followUps: followUpSheets.map((f) => ({
+      id: f.id,
+      status: f.status,
+      title: f.title,
+    })),
+    reports: siteDocs
+      .filter((d) => d.kind === "COMPTE_RENDU")
+      .map((d) => ({
+        id: d.id,
+        kind: d.kind,
+        status: d.status,
+        number: d.number,
+        title: d.title,
+      })),
+    notices: siteDocs
+      .filter((d) => d.kind === "NOTICE")
+      .map((d) => ({
+        id: d.id,
+        kind: d.kind,
+        status: d.status,
+        number: d.number,
+        title: d.title,
+      })),
     studyVersionById: Object.fromEntries(
       studies.map((s) => [s.id, s.version as number | null]),
     ),
@@ -1022,6 +1061,7 @@ async function getProjectWorkspaceUncached(
       }),
     ),
   });
+  const prepState = preparation.preparation;
   const visitView = preparation.modules.find((m) => m.key === "visite");
   const resolvedVisitId = visit?.id ?? preparation.visitId;
   if (!visit) suggestedVisitId = preparation.visitId;
@@ -1103,12 +1143,12 @@ async function getProjectWorkspaceUncached(
             : "En cours")
       : "À préparer",
     actionLabel: globalStudy ? "Ouvrir" : "Générer le métré",
-    ready: globalCore.metre.workflowReady,
+    ready: prepState.takeoff.countsAsCompleted,
     syncHint: null,
     isReference: true,
   };
 
-  const devisReady = globalCore.devis.workflowReady;
+  const devisReady = prepState.quote.countsAsCompleted;
   const devisAmount = globalQuote ? euro(d(globalQuote.totalSellHt)) : null;
   const globalDevisEval = {
     syncState: globalCore.devis.syncState,
@@ -1184,7 +1224,7 @@ async function getProjectWorkspaceUncached(
       : globalStudy
         ? "Générer le planning"
         : "Métré requis",
-    ready: globalCore.planning.workflowReady,
+    ready: prepState.planning.countsAsCompleted,
     syncHint:
       globalCore.planning.needsUpdate ||
       globalCore.planning.syncState === "A_VERIFIER"
@@ -1206,19 +1246,19 @@ async function getProjectWorkspaceUncached(
     {
       id: "visite",
       label: "Visite",
-      title: visitView?.stateLabel ?? (visit ? "Visite rattachée" : "Pas de visite liée"),
+      title: prepState.visit.displayLabel,
       detail:
-        visitView?.state === "na"
+        prepState.visit.kind === "NOT_APPLICABLE"
           ? "La visite terrain n’est pas une étape de ce dossier"
           : visit
-            ? visitView?.stateLabel ?? `Statut ${visit.status}`
+            ? prepState.visit.displayLabel
             : resolvedVisitId
-              ? visitView?.stateLabel ?? "Visite du même chantier, pas encore rattachée"
+              ? prepState.visit.displayLabel
               : "Aucune visite terrain liée",
       href: resolvedVisitId
         ? `/dashboard/visites-metres/${resolvedVisitId}`
         : visitsListHref,
-      ready: visitView?.state === "done" || visitView?.state === "na",
+      ready: prepState.visit.countsAsCompleted || !prepState.visit.applicable,
       actionLabel: resolvedVisitId
         ? visit
           ? "Ouvrir"
@@ -1232,12 +1272,12 @@ async function getProjectWorkspaceUncached(
       title: globalMetreCard.title,
       detail: globalMetreCard.detail,
       href: globalMetreCard.href,
-      ready: globalMetreCard.ready,
+      ready: prepState.takeoff.countsAsCompleted,
       actionLabel: workspaceOpenOrGenerateLabel(
-        globalMetreCard.ready,
+        Boolean(globalStudy),
         globalQuote ? "Générer depuis la visite" : "Devis requis",
       ),
-      primaryAction: globalMetreCard.ready
+      primaryAction: globalStudy
         ? "open"
         : globalQuote
           ? "create_global_prep"
@@ -1249,7 +1289,7 @@ async function getProjectWorkspaceUncached(
       title: globalDevisCard.title,
       detail: globalDevisCard.detail,
       href: globalDevisCard.href,
-      ready: globalDevisCard.ready,
+      ready: prepState.quote.countsAsCompleted,
       actionLabel: globalDevisCard.actionLabel,
       primaryAction: "open",
     },
@@ -1259,12 +1299,12 @@ async function getProjectWorkspaceUncached(
       title: globalPlanningCard.title,
       detail: globalPlanningCard.detail,
       href: globalPlanningCard.href,
-      ready: globalPlanningCard.ready,
+      ready: prepState.planning.countsAsCompleted,
       actionLabel: workspaceOpenOrGenerateLabel(
-        globalPlanningCard.ready,
+        Boolean(globalPlan),
         globalStudy ? "Générer le planning" : "Métré requis",
       ),
-      primaryAction: globalPlanningCard.ready
+      primaryAction: globalPlan
         ? "open"
         : globalStudy
           ? "create_global_prep"
@@ -1275,18 +1315,17 @@ async function getProjectWorkspaceUncached(
       label: "Suivi chantier",
       title: followUp?.title ?? (globalPlan ? "À créer depuis le planning" : "Non créé"),
       detail: followUp
-        ? `Lié au planning · statut ${followUp.status}`
+        ? `Lié au planning · ${prepState.followUp.displayLabel}`
         : globalPlan
           ? "Créer le suivi depuis les tâches du planning global"
           : "Générez d’abord le planning global",
-      // Toujours navigable : écran suivi si planning, sinon prérequis planning/métré.
       href:
         followUp || globalPlan
           ? suiviHref
           : globalPlanningCard.href ??
             globalMetreCard.href ??
             `/dashboard/projets/${projectId}`,
-      ready: !!followUp,
+      ready: prepState.followUp.countsAsCompleted,
       actionLabel: followUp ? "Ouvrir" : globalPlan ? "Créer le suivi" : "Planning requis",
       primaryAction: followUp
         ? "open"
@@ -1299,14 +1338,13 @@ async function getProjectWorkspaceUncached(
       label: "Compte rendu",
       title: compteRendu ? `${compteRendu.number} — ${compteRendu.title}` : "Non créé",
       detail: compteRendu
-        ? `Statut ${compteRendu.status}`
+        ? prepState.report.displayLabel
         : "Ouvrir les documents chantier pour générer le compte rendu",
       href: compteRendu
         ? `/dashboard/projets/${projectId}/documents-chantier/${compteRendu.id}`
         : documentsChantierHref,
-      ready: !!compteRendu,
+      ready: prepState.report.countsAsCompleted,
       actionLabel: compteRendu ? "Ouvrir" : "Générer",
-      // Navigation vers l’écran documents — pas de création auto au clic timeline.
       primaryAction: "open",
     },
     {
@@ -1316,12 +1354,12 @@ async function getProjectWorkspaceUncached(
         ? `${noticeDoc.number} — ${noticeDoc.title}`
         : "Non créée",
       detail: noticeDoc
-        ? `Statut ${noticeDoc.status}`
+        ? prepState.notice.displayLabel
         : "Ouvrir les documents chantier pour générer la notice",
       href: noticeDoc
         ? `/dashboard/projets/${projectId}/documents-chantier/${noticeDoc.id}`
         : documentsChantierHref,
-      ready: !!noticeDoc,
+      ready: prepState.notice.countsAsCompleted,
       actionLabel: noticeDoc ? "Ouvrir" : "Générer",
       primaryAction: "open",
     },
@@ -1493,6 +1531,7 @@ async function getProjectWorkspaceUncached(
       suggestedVisitId,
       followUpSheetId: followUp?.id ?? null,
       compteRenduId: compteRendu?.id ?? null,
+      preparationState: prepState,
     },
     scopes: scopeWorkspaces,
     unscoped: {

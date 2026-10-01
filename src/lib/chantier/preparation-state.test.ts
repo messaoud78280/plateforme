@@ -119,8 +119,10 @@ assert.equal(c01.modules[2]?.stateLabel, "À revalider");
 assert.equal(c01.modules[3]?.stateLabel, "Modification disponible");
 assert.equal(c01.core.devis.syncState, "MODIFICATION_DISPONIBLE");
 assert.equal(c01.core.planning.syncState, "MODIFICATION_DISPONIBLE");
-assert.equal(c01.nextAction, "Finaliser le devis");
-assert.ok(c01.progressPercent > 50);
+assert.equal(c01.nextAction, "Revalider le devis");
+assert.equal(c01.progressPercent, 17);
+assert.equal(c01.completedCount, 1);
+assert.equal(c01.totalCount, 6);
 
 const cuisine = buildPreparationSnapshot({
   projectId: "p-cuisine",
@@ -273,7 +275,9 @@ assert.equal(morelAligned.core.metre.kind, "NEEDS_VALIDATION");
 assert.equal(morelAligned.core.devis.syncState, "MODIFICATION_DISPONIBLE");
 assert.equal(morelAligned.core.planning.syncState, "MODIFICATION_DISPONIBLE");
 assert.equal(morelAligned.nextAction, "Finaliser le métré");
-assert.equal(morelAligned.progressPercent, 86);
+assert.equal(morelAligned.progressPercent, 14);
+assert.equal(morelAligned.completedCount, 1);
+assert.equal(morelAligned.totalCount, 7);
 
 const archivedOnly = buildPreparationSnapshot({
   projectId: "p-arch",

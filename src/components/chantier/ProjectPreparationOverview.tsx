@@ -19,6 +19,8 @@ import {
   computePilotageNextAction,
   timelineStepCaption,
 } from "@/lib/chantier/pilotage-display";
+import { computeProjectNextAction } from "@/lib/chantier/project-preparation-state";
+import { ProjectSourceDocumentsSection } from "@/components/chantier/ProjectSourceDocumentsSection";
 
 type QuoteSectionPreview = {
   sectionId: string;
@@ -59,24 +61,29 @@ export function ProjectPreparationOverview({
   const [globalBusyLabel, setGlobalBusyLabel] = useState<string | null>(null);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const workflow = workspace.global.workflow ?? [];
-  const workflowReady = workflow.filter((s) => s.ready).length;
+  const prepState = workspace.global.preparationState;
+  const workflowReady =
+    prepState?.completedCount ?? workflow.filter((s) => s.ready).length;
+  const workflowTotal =
+    prepState?.totalCount ?? Math.max(workflow.length, 1);
   const quoteId =
     workspace.global.primaryQuoteId ?? primaryUnscopedQuoteId ?? null;
 
   function metreBlockReason(): string | null {
-    if (workspace.global.metre.ready) return null;
+    // Existence (href) ≠ terminé (ready) — ne pas regénérer un métré déjà présent.
+    if (workspace.global.metre.href) return null;
     if (!canEdit) return "Modification du chantier non autorisée";
     if (!quoteId) return "Un devis est requis avant de générer le métré";
     return null;
   }
 
   function planningBlockReason(): string | null {
-    if (workspace.global.planning.ready) return null;
+    if (workspace.global.planning.href) return null;
     if (!canEdit) return "Modification du chantier non autorisée";
-    if (!workspace.global.metre.ready) {
+    if (!workspace.global.metre.href) {
       return "Générez d’abord le métré";
     }
-    if (!quoteId && !workspace.global.metre.ready) {
+    if (!quoteId && !workspace.global.metre.href) {
       return "Un devis ou un métré est requis avant de générer le planning";
     }
     return null;
@@ -87,10 +94,10 @@ export function ProjectPreparationOverview({
     reason: string | null;
     busyLabel: string | null;
   } {
-    if (step.ready && step.href) {
+    if (step.href && (step.ready || step.primaryAction === "open")) {
       return { mode: "open", reason: null, busyLabel: null };
     }
-    if (step.id === "metre" && !step.ready) {
+    if (step.id === "metre" && step.primaryAction === "create_global_prep") {
       const reason = metreBlockReason();
       if (reason) return { mode: "blocked", reason, busyLabel: null };
       return {
@@ -99,7 +106,7 @@ export function ProjectPreparationOverview({
         busyLabel: "Préparation du métré…",
       };
     }
-    if (step.id === "planning" && !step.ready) {
+    if (step.id === "planning" && step.primaryAction === "create_global_prep") {
       const reason = planningBlockReason();
       if (reason) return { mode: "blocked", reason, busyLabel: null };
       return {
@@ -134,15 +141,27 @@ export function ProjectPreparationOverview({
     };
   }
 
-  const nextAction = useMemo(
-    () =>
-      computePilotageNextAction({
-        workspace,
-        hasResponsible,
+  const nextAction = useMemo(() => {
+    if (prepState) {
+      const action = computeProjectNextAction({
+        state: { ...prepState, hasResponsible },
         missingDocumentsCount,
-      }),
-    [workspace, hasResponsible, missingDocumentsCount],
-  );
+        chantierStatus: workspace.chantierStatus,
+        projectId: workspace.projectId,
+      });
+      return {
+        label: action.label,
+        href: action.href,
+        stepId: action.stepId,
+        code: action.code,
+      };
+    }
+    return computePilotageNextAction({
+      workspace,
+      hasResponsible,
+      missingDocumentsCount,
+    });
+  }, [prepState, workspace, hasResponsible, missingDocumentsCount]);
   const todos = useMemo(
     () =>
       buildPilotageTodos({
@@ -189,10 +208,10 @@ export function ProjectPreparationOverview({
           throw new Error(attachData?.error ?? "Rattachement visite impossible");
         }
       }
-      if (!targetQuoteId && !workspace.global.metre.ready) {
+      if (!targetQuoteId && !workspace.global.metre.href) {
         throw new Error("Un devis est requis avant de générer le métré");
       }
-      if (opts?.prefer === "planning" && !workspace.global.metre.ready) {
+      if (opts?.prefer === "planning" && !workspace.global.metre.href) {
         throw new Error("Générez d’abord le métré");
       }
       const res = await fetch(`/api/projets/${workspace.projectId}/global-prep`, {
@@ -435,7 +454,7 @@ export function ProjectPreparationOverview({
               <p className="text-[13px] text-slate-600">
                 Préparation :{" "}
                 <span className="font-semibold tabular-nums text-[#1e3a5f]">
-                  {workflowReady} / {Math.max(workflow.length, 1)}
+                  {workflowReady} / {workflowTotal}
                 </span>
               </p>
             </div>
@@ -657,28 +676,6 @@ export function ProjectPreparationOverview({
           })}
         </ol>
 
-        {workspace.global.planSource?.href ? (
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.03] px-3 py-2.5">
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#1e3a5f]/70">
-                Plan source
-              </p>
-              <p className="mt-0.5 truncate text-[13px] font-semibold text-slate-900">
-                {workspace.global.planSource.fileName}
-              </p>
-              <p className="truncate text-[11.5px] text-slate-500">
-                {workspace.global.planSource.title}
-              </p>
-            </div>
-            <Link
-              href={workspace.global.planSource.href}
-              className="inline-flex shrink-0 items-center rounded-lg bg-[#1e3a5f] px-3 py-2 text-[12.5px] font-semibold text-white hover:bg-[#152a45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/40"
-            >
-              Ouvrir le plan
-            </Link>
-          </div>
-        ) : null}
-
         {globalBusyLabel ? (
           <p className="mt-2 text-[12.5px] font-medium text-[#1e3a5f]">
             {globalBusyLabel}
@@ -693,6 +690,13 @@ export function ProjectPreparationOverview({
           </p>
         ) : null}
       </div>
+
+      <ProjectSourceDocumentsSection
+        projectId={workspace.projectId}
+        documents={workspace.global.sourceDocuments ?? []}
+        studies={workspace.global.sourceStudyOptions ?? []}
+        canEdit={canEdit}
+      />
 
       {/* 3 colonnes pilotage */}
       <div className="grid gap-3 lg:grid-cols-3">
@@ -760,7 +764,7 @@ export function ProjectPreparationOverview({
             <div className="flex justify-between gap-2">
               <dt className="text-slate-500">Chaîne</dt>
               <dd className="font-semibold tabular-nums text-slate-900">
-                {workflowReady}/{Math.max(workflow.length, 1)}
+                {workflowReady}/{workflowTotal}
               </dd>
             </div>
           </dl>

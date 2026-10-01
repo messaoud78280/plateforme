@@ -2,6 +2,7 @@
  * Contrat de concordance liste ↔ fiche — même ProjectPreparationState.
  */
 import assert from "node:assert/strict";
+import { evaluateQuoteCoreState } from "./core-preparation-state";
 import { buildPreparationSnapshot } from "./preparation-state";
 import {
   computeProjectNextAction,
@@ -134,6 +135,7 @@ assert.equal(portfolio.totalCount, 7);
 assert.equal(portfolio.progressPercent, 29);
 assert.equal(portfolio.nextAction.code, "ASSIGN_MANAGER");
 assert.equal(portfolio.nextAction.label, "Affecter un responsable");
+assert.equal(portfolio.nextAction.reason, "PROJECT_MANAGER_MISSING");
 
 const snap = buildPreparationSnapshot(morelInput);
 assert.equal(snap.nextActionCode, "ASSIGN_MANAGER");
@@ -321,6 +323,96 @@ const withMgr = computeProjectNextAction({
   projectId: portfolio.projectId,
 });
 assert.equal(withMgr.code, "VALIDATE_TAKEOFF");
+
+// --- FOLLOW_UP matrix ---
+{
+  const base = {
+    projectId: "p-fu",
+    hasResponsible: true,
+    visits: [] as never[],
+    studies: [] as never[],
+    scopes: [] as never[],
+    quotes: [] as never[],
+    plans: [] as never[],
+  };
+  const absent = computeProjectPreparationState(base);
+  assert.equal(absent.followUp.kind, "ABSENT");
+  assert.equal(absent.followUp.countsAsCompleted, false);
+
+  const intervention = computeProjectPreparationState({
+    ...base,
+    followUps: [{ id: "1", status: "INTERVENTION_PREVUE", title: "S" }],
+  });
+  assert.equal(intervention.followUp.kind, "READY");
+  assert.equal(intervention.followUp.countsAsCompleted, true);
+  assert.equal(intervention.followUp.displayLabel, "Intervention prévue");
+
+  const nouveau = computeProjectPreparationState({
+    ...base,
+    followUps: [{ id: "2", status: "NOUVEAU", title: "S" }],
+  });
+  assert.equal(nouveau.followUp.countsAsCompleted, true);
+
+  const archive = computeProjectPreparationState({
+    ...base,
+    followUps: [{ id: "3", status: "ARCHIVE", title: "S" }],
+  });
+  assert.equal(archive.followUp.kind, "NOT_APPLICABLE");
+  assert.equal(archive.followUp.countsAsCompleted, false);
+  assert.equal(archive.followUp.applicable, false);
+}
+
+// --- REPORT / NOTICE matrix ---
+{
+  const base = {
+    projectId: "p-docs",
+    hasResponsible: true,
+    visits: [] as never[],
+    studies: [] as never[],
+    scopes: [] as never[],
+    quotes: [] as never[],
+    plans: [] as never[],
+  };
+  const empty = computeProjectPreparationState(base);
+  assert.equal(empty.report.kind, "ABSENT");
+  assert.equal(empty.notice.kind, "ABSENT");
+  assert.equal(empty.report.countsAsCompleted, false);
+  assert.equal(empty.notice.countsAsCompleted, false);
+
+  const draft = computeProjectPreparationState({
+    ...base,
+    reports: [{ id: "r", kind: "COMPTE_RENDU", status: "DRAFT" }],
+    notices: [{ id: "n", kind: "NOTICE", status: "DRAFT" }],
+  });
+  assert.equal(draft.report.kind, "IN_PROGRESS");
+  assert.equal(draft.report.countsAsCompleted, false);
+  assert.equal(draft.notice.kind, "IN_PROGRESS");
+  assert.equal(draft.notice.countsAsCompleted, false);
+
+  const final = computeProjectPreparationState({
+    ...base,
+    reports: [{ id: "r", kind: "COMPTE_RENDU", status: "FINALIZED" }],
+    notices: [{ id: "n", kind: "NOTICE", status: "FINALIZED" }],
+  });
+  assert.equal(final.report.kind, "DONE");
+  assert.equal(final.report.countsAsCompleted, true);
+  assert.equal(final.notice.kind, "DONE");
+  assert.equal(final.notice.countsAsCompleted, true);
+}
+
+// --- Devis DRAFT + stale : statut commercial conservé, blocking = revalidation ---
+{
+  const draftStale = evaluateQuoteCoreState({
+    quote: { status: "DRAFT" },
+    hasMetreProvenance: true,
+    currentStudyVersion: 4,
+    transferStudyVersion: 1,
+  });
+  assert.equal(draftStale.commercialStatus, "DRAFT");
+  assert.equal(draftStale.syncState, "MODIFICATION_DISPONIBLE");
+  assert.equal(draftStale.displayLabel, "Brouillon · à revalider");
+  assert.equal(draftStale.needsRevalidation, true);
+}
 
 console.log("project-preparation-state concordance OK");
 console.log(

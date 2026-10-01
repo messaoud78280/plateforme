@@ -103,6 +103,8 @@ export type ProjectNextAction = {
   label: string;
   href: string | null;
   stepId: PreparationStepId | "responsable" | "documents" | null;
+  /** Motif métier stable (debug / UI secondaire). */
+  reason: string;
 };
 
 export type ProjectPreparationState = {
@@ -229,6 +231,23 @@ function followUpKind(sheet: FollowUpLike | null): {
       countsAsCompleted: false,
     };
   }
+  const st = sheet.status?.toUpperCase() ?? "";
+  // ARCHIVE : fiche hors cycle — non applicable au dénominateur préparation.
+  if (st === "ARCHIVE") {
+    return {
+      kind: "NOT_APPLICABLE",
+      displayLabel: "Archivé",
+      countsAsCompleted: false,
+    };
+  }
+  /**
+   * Justification INTERVENTION_PREVUE (et tout statut opérationnel hors ARCHIVE) :
+   * le workflow fiche comptait déjà `ready = !!followUp`. La création de la fiche
+   * de suivi est l’étape « Suivi » de la chaîne préparation ; les transitions
+   * internes (NOUVEAU → … → TERMINE) relèvent du pilotage suivi, pas d’une
+   * nouvelle étape de préparation chantier.
+   * Donc : fiche présente et non archivée → countsAsCompleted = true.
+   */
   return {
     kind: "READY",
     displayLabel: humanizeStatus(sheet.status) || "Prêt",
@@ -263,6 +282,7 @@ export function computeProjectNextAction(input: {
       label: "Affecter un responsable",
       href: null,
       stepId: "responsable",
+      reason: "PROJECT_MANAGER_MISSING",
     };
   }
 
@@ -275,6 +295,7 @@ export function computeProjectNextAction(input: {
           ? `/dashboard/visites-metres/${state.visitId}`
           : `/dashboard/visites-metres?projectId=${encodeURIComponent(projectId)}`,
         stepId: "visite",
+        reason: "VISIT_IN_PROGRESS",
       };
     }
     if (state.visit.displayLabel === "À compléter") {
@@ -285,6 +306,7 @@ export function computeProjectNextAction(input: {
           ? `/dashboard/visites-metres/${state.visitId}`
           : null,
         stepId: "visite",
+        reason: "VISIT_INCOMPLETE",
       };
     }
   }
@@ -295,6 +317,7 @@ export function computeProjectNextAction(input: {
       label: "Préparer le métré",
       href: null,
       stepId: "metre",
+      reason: "TAKEOFF_ABSENT",
     };
   }
   if (state.takeoff.kind === "NEEDS_VALIDATION" || state.takeoff.kind === "IN_PROGRESS") {
@@ -303,6 +326,7 @@ export function computeProjectNextAction(input: {
       label: "Finaliser le métré",
       href: null,
       stepId: "metre",
+      reason: "TAKEOFF_NEEDS_VALIDATION",
     };
   }
 
@@ -312,6 +336,7 @@ export function computeProjectNextAction(input: {
       label: "Préparer le devis",
       href: null,
       stepId: "devis",
+      reason: "QUOTE_ABSENT",
     };
   }
   if (state.quote.kind === "NEEDS_REVALIDATION") {
@@ -320,6 +345,7 @@ export function computeProjectNextAction(input: {
       label: "Revalider le devis",
       href: null,
       stepId: "devis",
+      reason: "QUOTE_STALE_CTX03",
     };
   }
   if (state.quote.kind === "IN_PROGRESS") {
@@ -328,6 +354,7 @@ export function computeProjectNextAction(input: {
       label: "Finaliser le devis",
       href: null,
       stepId: "devis",
+      reason: "QUOTE_IN_PROGRESS",
     };
   }
 
@@ -337,6 +364,7 @@ export function computeProjectNextAction(input: {
       label: "Préparer le planning",
       href: null,
       stepId: "planning",
+      reason: "PLANNING_ABSENT",
     };
   }
   if (
@@ -349,6 +377,7 @@ export function computeProjectNextAction(input: {
       label: "Mettre à jour le planning",
       href: null,
       stepId: "planning",
+      reason: "PLANNING_STALE_CTX04",
     };
   }
 
@@ -359,6 +388,7 @@ export function computeProjectNextAction(input: {
         label: "Planifier la visite",
         href: `/dashboard/visites-metres?projectId=${encodeURIComponent(projectId)}`,
         stepId: "visite",
+        reason: "VISIT_TO_PLAN",
       };
     }
     if (state.visit.displayLabel === "Planifiée") {
@@ -369,6 +399,7 @@ export function computeProjectNextAction(input: {
           ? `/dashboard/visites-metres/${state.visitId}`
           : null,
         stepId: "visite",
+        reason: "VISIT_SCHEDULED",
       };
     }
   }
@@ -379,6 +410,7 @@ export function computeProjectNextAction(input: {
       label: "Créer le suivi de chantier",
       href: null,
       stepId: "suivi",
+      reason: "FOLLOW_UP_ABSENT",
     };
   }
   if (state.report.kind === "ABSENT") {
@@ -387,6 +419,7 @@ export function computeProjectNextAction(input: {
       label: "Générer le compte rendu",
       href: `/dashboard/projets/${projectId}/documents-chantier`,
       stepId: "compte_rendu",
+      reason: "REPORT_ABSENT",
     };
   }
   if (state.notice.kind === "ABSENT") {
@@ -395,6 +428,7 @@ export function computeProjectNextAction(input: {
       label: "Générer la notice explicative",
       href: `/dashboard/projets/${projectId}/documents-chantier`,
       stepId: "notice",
+      reason: "NOTICE_ABSENT",
     };
   }
 
@@ -404,6 +438,7 @@ export function computeProjectNextAction(input: {
       label: `${missingDocumentsCount} pièce${missingDocumentsCount > 1 ? "s" : ""} manquante${missingDocumentsCount > 1 ? "s" : ""}`,
       href: `/dashboard/projets/manquants?chantier=${encodeURIComponent(projectId)}`,
       stepId: "documents",
+      reason: "MISSING_DOCUMENTS",
     };
   }
 
@@ -413,6 +448,7 @@ export function computeProjectNextAction(input: {
       label: "Préparer le démarrage du chantier",
       href: null,
       stepId: "planning",
+      reason: "CHANTIER_ETUDE",
     };
   }
 
@@ -421,6 +457,7 @@ export function computeProjectNextAction(input: {
     label: "Chantier prêt — poursuivre le suivi",
     href: null,
     stepId: "suivi",
+    reason: "ALL_STEPS_READY",
   };
 }
 
@@ -621,7 +658,7 @@ export function computeProjectPreparationState(input: {
     kind: fu.kind,
     displayLabel: fu.displayLabel,
     secondaryLabel: null,
-    applicable: true,
+    applicable: fu.kind !== "NOT_APPLICABLE",
     countsAsCompleted: fu.countsAsCompleted,
     hrefHint: null,
   };

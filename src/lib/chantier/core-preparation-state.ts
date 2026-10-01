@@ -185,7 +185,11 @@ export function evaluateQuoteCoreState(input: {
 
   let displayLabel = commercialLabel;
   if (needsRevalidation) {
-    displayLabel = "À revalider";
+    // Conserver l’info DRAFT sans masquer le blocking sync.
+    displayLabel =
+      phase === "draft" || input.quote.status === "DRAFT"
+        ? "Brouillon · à revalider"
+        : "À revalider";
   } else if (needsVerify && input.hasMetreProvenance) {
     displayLabel = "À vérifier";
   }

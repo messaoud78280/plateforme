@@ -115,7 +115,7 @@ assert.equal(c01.entryMode, "plan");
 assert.equal(c01.modules[0]?.stateLabel, "Dossier sur plan");
 assert.equal(c01.modules[0]?.applicable, false);
 assert.equal(c01.modules[1]?.stateLabel, "Validé · 32 postes");
-assert.equal(c01.modules[2]?.stateLabel, "À revalider");
+assert.equal(c01.modules[2]?.stateLabel, "Brouillon · à revalider");
 assert.equal(c01.modules[3]?.stateLabel, "Modification disponible");
 assert.equal(c01.core.devis.syncState, "MODIFICATION_DISPONIBLE");
 assert.equal(c01.core.planning.syncState, "MODIFICATION_DISPONIBLE");

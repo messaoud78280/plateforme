@@ -1,10 +1,32 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  ClipboardPaste,
+  Eye,
+  Loader2,
+  ShieldAlert,
+  X,
+} from "lucide-react";
 import type { BeworkPatchSection } from "@/lib/bework-patch/types";
 import type { SectionPatchCapability } from "@/lib/bework-patch/capability";
 import type { BeworkPatchAnalyzeResult } from "@/lib/bework-patch/analyze";
-import type { AnalyzePatchImpactResult } from "@/lib/bework-patch/impact/types";
+import type {
+  AnalyzePatchImpactResult,
+  DerivedChange,
+  DirectChange,
+} from "@/lib/bework-patch/impact/types";
+import {
+  fieldMetierLabel,
+  mapPatchErrorToUser,
+  sectionMetierLabel,
+  syncModeUserHint,
+  type UserFacingError,
+} from "@/lib/bework-patch/ui-messages";
 
 type Props = {
   open: boolean;
@@ -18,16 +40,26 @@ type Props = {
   legacyCommit?: { kind: "quote" | "prep"; id: string } | null;
   onClose: () => void;
   onApplied: () => void;
+  /** Indique que le contexte a déjà été copié depuis la barre d’outils. */
+  contextAlreadyCopied?: boolean;
 };
 
-type Step = "paste" | "result" | "confirm" | "success" | "failure";
+type Step = "paste" | "preview" | "confirm" | "success";
 
 type CommitMeta = {
   fingerprint: string;
   eligibility:
     | {
         ok: true;
-        mode: "FULL_SYNC" | "SAFE_PARTIAL_SYNC" | "QUOTE_ONLY" | "PLANNING_ONLY" | "VISIT_ONLY" | "FOLLOW_UP_ONLY" | "REPORT_ONLY" | "NOTICE_ONLY";
+        mode:
+          | "FULL_SYNC"
+          | "SAFE_PARTIAL_SYNC"
+          | "QUOTE_ONLY"
+          | "PLANNING_ONLY"
+          | "VISIT_ONLY"
+          | "FOLLOW_UP_ONLY"
+          | "REPORT_ONLY"
+          | "NOTICE_ONLY";
         buttonLabel: string;
         warnings: string[];
       }
@@ -55,6 +87,62 @@ type CommitSuccess = {
   };
 };
 
+const STEPS = [
+  { id: "context", label: "Contexte" },
+  { id: "paste", label: "Modifications" },
+  { id: "preview", label: "Vérification" },
+  { id: "confirm", label: "Confirmation" },
+] as const;
+
+function formatValue(v: unknown): string {
+  if (v === null || v === undefined) return "—";
+  if (typeof v === "number") {
+    return Number.isInteger(v)
+      ? String(v)
+      : v.toLocaleString("fr-FR", { maximumFractionDigits: 4 });
+  }
+  if (typeof v === "boolean") return v ? "Oui" : "Non";
+  if (typeof v === "string") return v.trim() || "—";
+  try {
+    return JSON.stringify(v);
+  } catch {
+    return String(v);
+  }
+}
+
+function consequenceLabel(d: DerivedChange): string {
+  const section = sectionMetierLabel(
+    d.section as BeworkPatchSection,
+  );
+  if (d.blocked) {
+    return `${section} — élément protégé (non modifié automatiquement)`;
+  }
+  const after = formatValue(d.after);
+  const field = fieldMetierLabel(d.field);
+  if (d.reason && /contractuel|protég|écrasement|revalid|obsolète/i.test(d.reason)) {
+    return `${section} — ${d.reason}`;
+  }
+  if (after !== "—" && formatValue(d.before) !== after) {
+    return `${section} · ${d.label} — ${field} : ${formatValue(d.before)}${
+      d.unit ? ` ${d.unit}` : ""
+    } → ${after}${d.unit ? ` ${d.unit}` : ""}`;
+  }
+  return `${section} · ${d.label}${d.reason ? ` — ${d.reason}` : ""}`;
+}
+
+function groupDerivedBySection(items: DerivedChange[]) {
+  const order = ["TAKEOFF", "QUOTE", "PLANNING"] as const;
+  const map = new Map<string, DerivedChange[]>();
+  for (const d of items) {
+    const list = map.get(d.section) ?? [];
+    list.push(d);
+    map.set(d.section, list);
+  }
+  return order
+    .filter((s) => map.has(s))
+    .map((s) => ({ section: s, items: map.get(s)! }));
+}
+
 export function BeworkPatchModal({
   open,
   mode,
@@ -66,50 +154,129 @@ export function BeworkPatchModal({
   entityLabel,
   onClose,
   onApplied,
+  contextAlreadyCopied = false,
 }: Props) {
+  const titleId = useId();
+  const pasteRef = useRef<HTMLTextAreaElement>(null);
   const [step, setStep] = useState<Step>("paste");
   const [rawText, setRawText] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<"analyze" | "commit" | null>(null);
   const [analysis, setAnalysis] = useState<BeworkPatchAnalyzeResult | null>(null);
   const [commitMeta, setCommitMeta] = useState<CommitMeta | null>(null);
   const [commitSuccess, setCommitSuccess] = useState<CommitSuccess | null>(null);
-  const [banner, setBanner] = useState<string | null>(null);
+  const [userError, setUserError] = useState<UserFacingError | null>(null);
+  const [techDetail, setTechDetail] = useState<string | null>(null);
+  const [showTech, setShowTech] = useState(false);
+  const [showRawJson, setShowRawJson] = useState(false);
+  const analyzingRef = useRef(false);
+  const committingRef = useRef(false);
+
+  const sectionLabel = sectionMetierLabel(section);
 
   const reset = useCallback(() => {
     setStep("paste");
     setRawText("");
+    setBusy(null);
     setAnalysis(null);
     setCommitMeta(null);
     setCommitSuccess(null);
-    setBanner(null);
+    setUserError(null);
+    setTechDetail(null);
+    setShowTech(false);
+    setShowRawJson(false);
+    analyzingRef.current = false;
+    committingRef.current = false;
   }, []);
 
   useEffect(() => {
-    if (!open) reset();
+    if (!open) {
+      reset();
+      return;
+    }
+    const t = window.setTimeout(() => pasteRef.current?.focus(), 50);
+    return () => window.clearTimeout(t);
   }, [open, reset]);
 
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !busy) onClose();
+      if (e.key === "Escape" && busy !== "commit") onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, busy, onClose]);
+  }, [open, onClose, busy]);
 
-  if (!open) return null;
+  const elig = commitMeta?.eligibility ?? null;
+  const canCommit = Boolean(elig && elig.ok);
+  const impact: AnalyzePatchImpactResult | null = analysis?.impact ?? null;
 
-  async function analyze() {
-    setBusy(true);
-    setBanner(null);
-    setCommitMeta(null);
+  const hasUnsupported = useMemo(() => {
+    if (!analysis) return false;
+    if (
+      analysis.errors.some((e) =>
+        /OPERATION_NOT_ALLOWED|UNSUPPORTED|INVALID_FIELD|EMPTY_OPERATIONS/i.test(
+          e.code,
+        ),
+      )
+    ) {
+      return true;
+    }
+    if (elig && !elig.ok) {
+      return /OPERATION_NOT_ALLOWED|UNSUPPORTED|EMPTY_OPERATIONS|INVALID_FIELD/i.test(
+        elig.code,
+      );
+    }
+    return false;
+  }, [analysis, elig]);
+
+  const activeStepIndex = useMemo(() => {
+    if (step === "paste") return 1;
+    if (step === "preview") return 2;
+    if (step === "confirm" || step === "success") return 3;
+    return 1;
+  }, [step]);
+
+  const directCount = impact?.directChanges.length ?? analysis?.directChanges.length ?? 0;
+  const consequenceGroups = impact ? groupDerivedBySection(impact.derivedChanges) : [];
+  const consequenceCount =
+    (impact?.derivedChanges.length ?? 0) + (impact?.protectedEntities.length ?? 0);
+
+  const runAnalyze = useCallback(async () => {
+    if (analyzingRef.current || busy) return;
+    setUserError(null);
+    setTechDetail(null);
+    setShowTech(false);
     setCommitSuccess(null);
+    setCommitMeta(null);
+
+    const trimmed = rawText.trim();
+    if (!trimmed) {
+      setUserError(
+        mapPatchErrorToUser({ code: "INVALID_JSON", section }),
+      );
+      setTechDetail("EMPTY_INPUT");
+      return;
+    }
+
+    // Validation JSON locale avant requête
+    try {
+      JSON.parse(trimmed);
+    } catch {
+      setUserError(
+        mapPatchErrorToUser({ code: "INVALID_JSON", section }),
+      );
+      setTechDetail("JSON.parse failed — INVALID_JSON");
+      return;
+    }
+
+    analyzingRef.current = true;
+    setBusy("analyze");
     try {
       const res = await fetch("/api/bework-patch/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          raw: rawText,
+          raw: trimmed,
           projectId,
           entityId,
           section,
@@ -118,44 +285,69 @@ export function BeworkPatchModal({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setBanner(data?.error ?? "Analyse impossible");
-        setStep("failure");
+        const mapped = mapPatchErrorToUser({
+          code: data?.code,
+          serverMessage: data?.error,
+          section,
+        });
+        setUserError(mapped);
+        setTechDetail(
+          [data?.code, data?.error].filter(Boolean).join(" — ") ||
+            `HTTP ${res.status}`,
+        );
         return;
       }
       setAnalysis(data.analysis as BeworkPatchAnalyzeResult);
       setCommitMeta((data.commit as CommitMeta) ?? null);
-      setStep("result");
-    } catch {
-      setBanner("Erreur réseau lors de l’analyse.");
-      setStep("failure");
+      setStep("preview");
+    } catch (e) {
+      setUserError(
+        mapPatchErrorToUser({
+          code: "SERVER_ERROR",
+          serverMessage: e instanceof Error ? e.message : null,
+          section,
+        }),
+      );
+      setTechDetail(e instanceof Error ? e.message : "network error");
     } finally {
-      setBusy(false);
+      analyzingRef.current = false;
+      setBusy(null);
     }
-  }
+  }, [busy, entityId, projectId, rawText, section, version]);
 
-  async function confirmCommit() {
-    if (!commitMeta?.eligibility || !("ok" in commitMeta.eligibility) || !commitMeta.eligibility.ok) {
-      return;
-    }
-    setBusy(true);
-    setBanner(null);
+  const runCommit = useCallback(async () => {
+    if (committingRef.current || busy) return;
+    if (!elig || !elig.ok || !commitMeta) return;
+
+    committingRef.current = true;
+    setBusy("commit");
+    setUserError(null);
+    setTechDetail(null);
     try {
       const res = await fetch("/api/bework-patch/commit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          raw: rawText,
+          raw: rawText.trim(),
           projectId,
           previewFingerprint: commitMeta.fingerprint,
         }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setBanner(
-          data?.error ??
-            "Synchronisation annulée. Aucune donnée n’a été modifiée.",
+        const mapped = mapPatchErrorToUser({
+          code: data?.code,
+          serverMessage: data?.error,
+          section,
+        });
+        setUserError(mapped);
+        setTechDetail(
+          [data?.code, data?.error].filter(Boolean).join(" — ") ||
+            `HTTP ${res.status}`,
         );
-        setStep("failure");
+        if (data?.code === "PREVIEW_STALE" || data?.code === "VERSION_CONFLICT") {
+          setStep("preview");
+        }
         return;
       }
       setCommitSuccess({
@@ -165,454 +357,638 @@ export function BeworkPatchModal({
         versionsAfter: data.versionsAfter,
       });
       setStep("success");
-      onApplied();
-    } catch {
-      setBanner("Synchronisation annulée. Aucune donnée n’a été modifiée.");
-      setStep("failure");
+      // onApplied différé : l’utilisateur doit voir le succès avant refresh.
+    } catch (e) {
+      setUserError(
+        mapPatchErrorToUser({
+          code: "SERVER_ERROR",
+          serverMessage: e instanceof Error ? e.message : null,
+          section,
+        }),
+      );
+      setTechDetail(e instanceof Error ? e.message : "network error");
     } finally {
-      setBusy(false);
+      committingRef.current = false;
+      setBusy(null);
     }
-  }
+  }, [busy, commitMeta, elig, projectId, rawText, section]);
 
-  const title =
-    mode === "chatgpt" ? "Modifier avec ChatGPT" : "Modifier par bloc JSON";
-  const elig = commitMeta?.eligibility;
+  const handleSuccessClose = useCallback(() => {
+    onApplied();
+    onClose();
+  }, [onApplied, onClose]);
+
+  if (!open) return null;
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-end justify-center bg-slate-900/40 p-3 sm:items-center"
+      className="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="bework-patch-title"
+      aria-labelledby={titleId}
     >
-      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl">
-        <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
-          <div>
-            <h2
-              id="bework-patch-title"
-              className="text-[16px] font-semibold text-[#1e3a5f]"
-            >
-              {title}
-            </h2>
-            <p className="mt-0.5 text-[12px] text-slate-500">
-              Section {section}
-              {entityLabel ? ` · ${entityLabel}` : ""} · v{version}
+      <div className="flex max-h-[95vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl border border-slate-200 bg-white shadow-xl sm:rounded-2xl">
+        <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5">
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+              {mode === "chatgpt"
+                ? "Modifications ChatGPT"
+                : "Modifications par bloc"}
             </p>
+            <h2
+              id={titleId}
+              className="truncate text-base font-semibold text-slate-900"
+            >
+              {sectionLabel}
+              {entityLabel ? (
+                <span className="font-normal text-slate-500">
+                  {" "}
+                  · {entityLabel}
+                </span>
+              ) : null}
+            </h2>
           </div>
           <button
             type="button"
-            className="rounded-lg px-2 py-1 text-[13px] text-slate-500 hover:bg-slate-50"
-            onClick={onClose}
-            disabled={busy}
+            onClick={busy === "commit" ? undefined : onClose}
+            disabled={busy === "commit"}
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
+            aria-label="Fermer"
           >
-            Fermer
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="space-y-4 px-5 py-4">
-          {capability.mode === "PREVIEW_ONLY" && capability.label && !elig?.ok ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12.5px] text-amber-950">
+        {step !== "success" && (
+          <nav
+            className="flex gap-1 border-b border-slate-100 px-4 py-2.5 sm:px-5"
+            aria-label="Étapes"
+          >
+            {STEPS.map((s, i) => {
+              const done =
+                i < activeStepIndex || (i === 0 && contextAlreadyCopied);
+              const current = i === activeStepIndex;
+              return (
+                <div
+                  key={s.id}
+                  className={`flex flex-1 flex-col items-center gap-0.5 ${
+                    current
+                      ? "text-[#1e3a5f]"
+                      : done
+                        ? "text-emerald-700"
+                        : "text-slate-400"
+                  }`}
+                >
+                  <span
+                    className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold ${
+                      current
+                        ? "bg-[#1e3a5f] text-white"
+                        : done
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="hidden text-[10px] font-medium sm:block">
+                    {s.label}
+                  </span>
+                </div>
+              );
+            })}
+          </nav>
+        )}
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+          {capability.mode === "PREVIEW_ONLY" && capability.label ? (
+            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
               {capability.label}
             </div>
           ) : null}
 
-          {step === "paste" ? (
-            <>
-              {mode === "chatgpt" ? (
-                <ol className="list-decimal space-y-1 pl-4 text-[13px] text-slate-700">
-                  <li>Copiez le contexte ChatGPT (bouton de la barre).</li>
-                  <li>Collez-le dans ChatGPT et décrivez la modification.</li>
-                  <li>
-                    Collez ici le bloc{" "}
-                    <code className="text-[12px]">bework_patch_v1</code> retourné.
-                  </li>
-                </ol>
-              ) : (
-                <p className="text-[13px] text-slate-600">
-                  Collez un bloc{" "}
-                  <code className="text-[12px]">bework_patch_v1</code> (ou format
-                  legacy devis/métré via adapter).
-                </p>
-              )}
-              <textarea
-                className="min-h-[220px] w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 font-mono text-[12px] text-slate-800 outline-none focus:ring-2 focus:ring-[#1e3a5f]/25"
-                placeholder='{ "type": "bework_patch_v1", ... }'
-                value={rawText}
-                onChange={(e) => setRawText(e.target.value)}
-                spellCheck={false}
-              />
-              {banner ? (
-                <p className="text-[13px] text-red-700">{banner}</p>
-              ) : null}
-              <div className="flex flex-wrap justify-end gap-2">
-                <button
-                  type="button"
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-[13px] font-medium text-slate-600"
-                  onClick={onClose}
-                  disabled={busy}
-                >
-                  Annuler
-                </button>
-                <button
-                  type="button"
-                  className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
-                  disabled={busy || !rawText.trim()}
-                  onClick={() => void analyze()}
-                >
-                  {busy ? "Analyse…" : "Analyser"}
-                </button>
-              </div>
-            </>
-          ) : null}
-
-          {step === "result" && analysis ? (
-            <>
-              <div className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-[12.5px] text-sky-950">
-                Analyse Impact Engine — fingerprint recalculé au commit.
-              </div>
-
-              {analysis.errors.length ? (
-                <IssueBlock
-                  title="Erreurs"
-                  tone="error"
-                  items={analysis.errors.map((e) => `${e.code} — ${e.message}`)}
-                />
-              ) : null}
-              {analysis.warnings.length ? (
-                <IssueBlock
-                  title="Avertissements"
-                  tone="warn"
-                  items={analysis.warnings.map((w) => `${w.code} — ${w.message}`)}
-                />
-              ) : null}
-
-              {analysis.impact ? (
-                <ImpactPreview impact={analysis.impact} />
-              ) : (
-                <p className="text-[13px] text-slate-500">
-                  Impact Engine non disponible pour cette section.
-                </p>
-              )}
-
-              {elig && !elig.ok ? (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12.5px] text-amber-950">
-                  Commit indisponible : {elig.reason}
-                </div>
-              ) : null}
-              {elig && elig.ok && elig.warnings.length ? (
-                <IssueBlock title="Avant commit" tone="warn" items={elig.warnings} />
-              ) : null}
-
-              {banner ? <p className="text-[13px] text-red-700">{banner}</p> : null}
-
-              <div className="flex flex-wrap justify-end gap-2">
-                <button
-                  type="button"
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-[13px] font-medium"
-                  onClick={() => {
-                    setStep("paste");
-                    setBanner(null);
-                  }}
-                  disabled={busy}
-                >
-                  Retour
-                </button>
-                {elig && elig.ok ? (
+          {userError && (
+            <div
+              className={`mb-4 rounded-xl border px-3 py-3 ${
+                userError.action === "refresh"
+                  ? "border-amber-200 bg-amber-50"
+                  : "border-red-200 bg-red-50"
+              }`}
+              role="alert"
+            >
+              <p className="text-sm font-semibold text-slate-900">
+                {userError.title}
+              </p>
+              <p className="mt-1 text-sm text-slate-700">{userError.message}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {userError.action === "reanalyze" && (
                   <button
                     type="button"
-                    className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
-                    disabled={busy}
-                    onClick={() => setStep("confirm")}
+                    onClick={() => void runAnalyze()}
+                    disabled={busy !== null}
+                    className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#162d4a] disabled:opacity-50"
                   >
-                    {elig.buttonLabel}
+                    {userError.actionLabel}
                   </button>
-                ) : (
+                )}
+                {userError.action === "refresh" && (
                   <button
                     type="button"
-                    className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[13px] font-medium text-slate-400"
-                    disabled
-                    title={elig && !elig.ok ? elig.reason : "Commit non disponible"}
+                    onClick={handleSuccessClose}
+                    className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#162d4a]"
                   >
-                    Appliquer et synchroniser
+                    {userError.actionLabel}
+                  </button>
+                )}
+                {userError.action === "retry_paste" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserError(null);
+                      setStep("paste");
+                    }}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    {userError.actionLabel}
+                  </button>
+                )}
+                {techDetail && (
+                  <button
+                    type="button"
+                    onClick={() => setShowTech((v) => !v)}
+                    className="text-xs text-slate-500 underline"
+                  >
+                    {showTech
+                      ? "Masquer le détail technique"
+                      : "Voir le détail technique"}
                   </button>
                 )}
               </div>
-            </>
-          ) : null}
+              {showTech && techDetail && (
+                <pre className="mt-2 overflow-x-auto rounded-lg bg-slate-900/90 p-2 text-[11px] text-slate-100">
+                  {techDetail}
+                </pre>
+              )}
+            </div>
+          )}
 
-          {step === "confirm" && elig && elig.ok ? (
-            <>
-              <div className="rounded-xl border border-[#1e3a5f]/20 bg-[#1e3a5f]/5 px-4 py-3">
-                <h3 className="text-[14px] font-semibold text-[#1e3a5f]">
-                  Vous allez modifier
+          {step === "paste" && (
+            <div className="space-y-5">
+              {mode === "chatgpt" ? (
+                <>
+                  <section className="rounded-xl border border-slate-100 bg-slate-50/80 p-3">
+                    <p className="text-sm font-semibold text-slate-900">
+                      1 — Copier les informations du chantier
+                    </p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      BeWork prépare les données utiles de cette section (
+                      {sectionLabel}). Copiez-les puis utilisez-les dans votre
+                      conversation ChatGPT.
+                    </p>
+                    {contextAlreadyCopied ? (
+                      <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Contexte copié
+                      </p>
+                    ) : (
+                      <p className="mt-2 text-xs text-slate-500">
+                        Utilisez le bouton « Copier le contexte pour ChatGPT »
+                        dans la barre d’outils.
+                      </p>
+                    )}
+                  </section>
+                  <section>
+                    <p className="text-sm font-semibold text-slate-900">
+                      2 — Demander la modification à ChatGPT
+                    </p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Expliquez à ChatGPT ce que vous souhaitez changer. ChatGPT
+                      vous renverra un bloc de modifications compatible avec
+                      BeWork.
+                    </p>
+                  </section>
+                </>
+              ) : (
+                <p className="text-sm text-slate-600">
+                  Collez un bloc de modifications compatible avec BeWork pour{" "}
+                  {sectionLabel}.
+                </p>
+              )}
+
+              <section>
+                <label
+                  htmlFor="bework-patch-paste"
+                  className="text-sm font-semibold text-slate-900"
+                >
+                  {mode === "chatgpt"
+                    ? "3 — Coller les modifications proposées"
+                    : "Coller les modifications proposées"}
+                </label>
+                <textarea
+                  id="bework-patch-paste"
+                  ref={pasteRef}
+                  value={rawText}
+                  onChange={(e) => setRawText(e.target.value)}
+                  rows={10}
+                  spellCheck={false}
+                  placeholder="Collez ici le bloc de modifications généré par ChatGPT…"
+                  className="mt-2 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-800 placeholder:font-sans placeholder:text-slate-400 focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20"
+                />
+              </section>
+            </div>
+          )}
+
+          {step === "preview" && analysis && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-base font-semibold text-slate-900">
+                  Modifications proposées
                 </h3>
-                <ul className="mt-2 space-y-1 text-[13px] text-slate-700">
-                  {analysis?.impact?.directChanges.map((d, i) => (
-                    <li key={i}>
-                      {d.label} : {fmtVal(d.before)} → {fmtVal(d.after)}
-                      {d.unit ? ` ${d.unit}` : ""}
-                    </li>
+                <p className="mt-0.5 text-sm text-slate-500">
+                  Aucune modification n’est appliquée à cette étape.
+                </p>
+              </div>
+
+              <DirectChangesBlock
+                impact={impact}
+                fallback={analysis.directChanges}
+              />
+
+              {(consequenceCount > 0 ||
+                (analysis.potentialImpacts?.length ?? 0) > 0) && (
+                <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-3">
+                  <h4 className="text-sm font-semibold text-amber-950">
+                    Conséquences sur le chantier
+                  </h4>
+                  <p className="mt-1 text-xs text-amber-900/80">
+                    Cette modification peut rendre certaines données liées
+                    obsolètes.
+                  </p>
+
+                  {consequenceGroups.map(({ section: s, items }) => (
+                    <div key={s} className="mt-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-amber-900/70">
+                        {sectionMetierLabel(s as BeworkPatchSection)}
+                      </p>
+                      <ul className="mt-1.5 space-y-1.5">
+                        {items.map((d, i) => (
+                          <li
+                            key={`${s}-${i}`}
+                            className="rounded-lg border border-amber-100 bg-white/80 px-2.5 py-2 text-sm text-slate-800"
+                          >
+                            {consequenceLabel(d)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+
+                  {impact?.protectedEntities?.length ? (
+                    <ul className="mt-3 space-y-1.5">
+                      {impact.protectedEntities.map((p, i) => (
+                        <li
+                          key={`p-${i}`}
+                          className="flex items-start gap-2 text-sm text-slate-700"
+                        >
+                          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
+                          <span>
+                            <span className="font-medium">
+                              {sectionMetierLabel(
+                                p.section as BeworkPatchSection,
+                              )}{" "}
+                              · {p.label}
+                            </span>
+                            {" — "}
+                            {p.reason}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+
+                  {!impact && analysis.potentialImpacts.length > 0 && (
+                    <ul className="mt-2 space-y-1 text-sm text-amber-950">
+                      {analysis.potentialImpacts.map((p, i) => (
+                        <li key={i}>
+                          {p.label} — {p.detail}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              )}
+
+              {(hasUnsupported ||
+                (analysis.errors.length > 0 && !canCommit)) && (
+                <section className="rounded-xl border border-red-200 bg-red-50/60 p-3">
+                  <h4 className="flex items-center gap-2 text-sm font-semibold text-red-900">
+                    <AlertTriangle className="h-4 w-4" />
+                    Modifications non applicables automatiquement
+                  </h4>
+                  <p className="mt-1 text-sm text-red-800">
+                    Cette proposition contient une modification que BeWork ne
+                    peut pas encore appliquer automatiquement. Aucune
+                    modification n’a été effectuée.
+                  </p>
+                  <ul className="mt-2 space-y-1">
+                    {analysis.errors.map((e, i) => (
+                      <li key={i} className="text-sm text-red-900">
+                        {e.message}
+                      </li>
+                    ))}
+                    {elig && !elig.ok && (
+                      <li className="text-sm text-red-900">{elig.reason}</li>
+                    )}
+                  </ul>
+                </section>
+              )}
+
+              {elig && elig.ok && elig.warnings.length > 0 && (
+                <ul className="space-y-1 text-xs text-slate-500">
+                  {elig.warnings.map((w, i) => (
+                    <li key={i}>• {w}</li>
                   ))}
                 </ul>
-                <p className="mt-3 text-[12.5px] text-slate-600">
-                  Mode : <strong>{elig.mode}</strong> — opération appliquée en une
-                  transaction.
+              )}
+
+              {elig && elig.ok && (
+                <p className="text-xs text-slate-500">
+                  {syncModeUserHint(elig.mode)}
                 </p>
-                {elig.mode === "SAFE_PARTIAL_SYNC" ? (
-                  <p className="mt-2 text-[12.5px] font-medium text-amber-900">
-                    Ce n’est pas une synchronisation totale : les éléments protégés
-                    restent intacts.
+              )}
+
+              <button
+                type="button"
+                onClick={() => setShowRawJson((v) => !v)}
+                className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700"
+              >
+                {showRawJson ? (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronRight className="h-3.5 w-3.5" />
+                )}
+                Afficher le JSON
+              </button>
+              {showRawJson && (
+                <pre className="max-h-40 overflow-auto rounded-lg bg-slate-900 p-2 text-[10px] text-slate-200">
+                  {rawText}
+                </pre>
+              )}
+            </div>
+          )}
+
+          {step === "confirm" && canCommit && elig && elig.ok && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-base font-semibold text-slate-900">
+                  Vérifier avant d’appliquer
+                </h3>
+                <p className="mt-2 text-sm text-slate-700">
+                  {directCount === 1
+                    ? "1 modification sera appliquée."
+                    : `${directCount} modifications seront appliquées.`}
+                </p>
+                {consequenceCount > 0 && (
+                  <p className="mt-1 text-sm text-amber-900">
+                    {consequenceCount === 1
+                      ? "1 élément lié nécessitera une attention (revalidation ou mise à jour)."
+                      : `${consequenceCount} éléments liés nécessiteront une attention (revalidation ou mise à jour).`}
                   </p>
+                )}
+                <p className="mt-3 text-xs text-slate-500">
+                  {syncModeUserHint(elig.mode)} Un historique est conservé ; il
+                  n’y a pas d’annulation automatique depuis cette fenêtre.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {step === "success" && commitSuccess && (
+            <div className="space-y-4 py-2 text-center sm:text-left">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 sm:mx-0">
+                <CheckCircle2 className="h-7 w-7 text-emerald-700" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Modifications appliquées
+                </h3>
+                <p className="mt-1 text-sm text-slate-600">
+                  {commitSuccess.message}
+                </p>
+              </div>
+              <ul className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-left text-sm text-slate-700">
+                {commitSuccess.summary.takeoffUpdated && (
+                  <li>
+                    Métré / quantitatif mis à jour
+                    {commitSuccess.versionsAfter.study != null
+                      ? ` (v${commitSuccess.versionsAfter.study})`
+                      : ""}
+                  </li>
+                )}
+                {commitSuccess.summary.quoteProtected ? (
+                  <li className="text-amber-900">
+                    Devis : contractuel conservé — à revalider si besoin
+                  </li>
+                ) : commitSuccess.summary.quoteUpdated ? (
+                  <li>
+                    Devis mis à jour
+                    {commitSuccess.versionsAfter.quoteVersion != null
+                      ? ` (v${commitSuccess.versionsAfter.quoteVersion})`
+                      : ""}
+                  </li>
                 ) : null}
-              </div>
-              <div className="flex flex-wrap justify-end gap-2">
-                <button
-                  type="button"
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-[13px]"
-                  disabled={busy}
-                  onClick={() => setStep("result")}
-                >
-                  Annuler
-                </button>
-                <button
-                  type="button"
-                  className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
-                  disabled={busy}
-                  onClick={() => void confirmCommit()}
-                >
-                  {busy ? "Application…" : "Confirmer"}
-                </button>
-              </div>
-            </>
-          ) : null}
-
-          {step === "success" && commitSuccess ? (
-            <div className="space-y-3">
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] text-emerald-900">
-                {commitSuccess.message}
-              </div>
-              <ul className="space-y-1 text-[13px] text-slate-700">
-                <li>
-                  Métré {commitSuccess.summary.takeoffUpdated ? "✓" : "—"}
-                  {commitSuccess.versionsAfter.study != null
-                    ? ` · v${commitSuccess.versionsAfter.study}`
-                    : ""}
-                </li>
-                <li>
-                  Devis{" "}
-                  {commitSuccess.summary.quoteProtected
-                    ? "contractuel conservé ⚠"
-                    : commitSuccess.summary.quoteUpdated
-                      ? "✓"
-                      : "—"}
-                  {commitSuccess.versionsAfter.quoteVersion != null
-                    ? ` · v${commitSuccess.versionsAfter.quoteVersion}`
-                    : ""}
-                </li>
-                <li>
-                  Planning {commitSuccess.summary.planningUpdated ? "✓" : "—"}
-                  {commitSuccess.versionsAfter.planRevision != null
-                    ? ` · rev ${commitSuccess.versionsAfter.planRevision}`
-                    : ""}
-                </li>
+                {commitSuccess.summary.planningUpdated && (
+                  <li>
+                    Planning chantier mis à jour
+                    {commitSuccess.versionsAfter.planRevision != null
+                      ? ` (rév. ${commitSuccess.versionsAfter.planRevision})`
+                      : ""}
+                  </li>
+                )}
               </ul>
-              <button
-                type="button"
-                className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-[13px] font-semibold text-white"
-                onClick={onClose}
-              >
-                Fermer
-              </button>
             </div>
-          ) : null}
-
-          {step === "failure" ? (
-            <div className="space-y-3">
-              <p className="text-[13px] text-red-700">
-                {banner ?? "Synchronisation annulée. Aucune donnée n’a été modifiée."}
-              </p>
-              <button
-                type="button"
-                className="rounded-lg border border-slate-200 px-3 py-2 text-[13px]"
-                onClick={() => setStep("paste")}
-              >
-                Réessayer
-              </button>
-            </div>
-          ) : null}
+          )}
         </div>
+
+        <div className="flex flex-shrink-0 flex-wrap items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/50 px-4 py-3 sm:px-5">
+          {step === "paste" && (
+            <>
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={() => void runAnalyze()}
+                disabled={!rawText.trim() || busy !== null}
+                className="inline-flex items-center gap-2 rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#162d4a] disabled:opacity-50"
+              >
+                {busy === "analyze" ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Analyse des modifications…
+                  </>
+                ) : (
+                  <>
+                    <ClipboardPaste className="h-4 w-4" />
+                    Analyser les modifications
+                  </>
+                )}
+              </button>
+            </>
+          )}
+
+          {step === "preview" && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("paste");
+                  setUserError(null);
+                }}
+                disabled={busy !== null}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+              >
+                Retour
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep("confirm")}
+                disabled={!canCommit || busy !== null}
+                title={
+                  !canCommit
+                    ? "Certaines modifications ne peuvent pas être appliquées automatiquement"
+                    : undefined
+                }
+                className="inline-flex items-center gap-2 rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#162d4a] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Eye className="h-4 w-4" />
+                Continuer vers la confirmation
+              </button>
+            </>
+          )}
+
+          {step === "confirm" && (
+            <>
+              <button
+                type="button"
+                onClick={() => setStep("preview")}
+                disabled={busy === "commit"}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={() => void runCommit()}
+                disabled={!canCommit || busy !== null}
+                className="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {busy === "commit" ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Application des modifications…
+                  </>
+                ) : (
+                  "Appliquer les modifications"
+                )}
+              </button>
+            </>
+          )}
+
+          {step === "success" && (
+            <button
+              type="button"
+              onClick={handleSuccessClose}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#162d4a]"
+            >
+              Voir les données mises à jour
+            </button>
+          )}
+        </div>
+
+        {busy === "analyze" && (
+          <p className="sr-only" aria-live="polite">
+            Analyse des modifications en cours. Aucune modification n’est
+            appliquée à cette étape.
+          </p>
+        )}
+        {busy === "commit" && (
+          <p className="sr-only" aria-live="polite">
+            Application des modifications en cours.
+          </p>
+        )}
       </div>
     </div>
   );
 }
 
-function fmtVal(v: unknown): string {
-  if (v == null) return "—";
-  if (typeof v === "number") {
-    return Number.isInteger(v)
-      ? String(v)
-      : v.toLocaleString("fr-FR", { maximumFractionDigits: 4 });
-  }
-  if (typeof v === "object") return JSON.stringify(v);
-  return String(v);
-}
-
-function certaintyBadge(c: string) {
-  const map: Record<string, string> = {
-    CERTAIN: "bg-emerald-100 text-emerald-900",
-    PARTIAL: "bg-amber-100 text-amber-950",
-    POTENTIAL: "bg-orange-100 text-orange-950",
-    NONE: "bg-slate-100 text-slate-600",
-  };
-  return map[c] ?? "bg-slate-100 text-slate-700";
-}
-
-function ImpactPreview({ impact }: { impact: AnalyzePatchImpactResult }) {
-  const takeoff = impact.derivedChanges.filter((d) => d.section === "TAKEOFF");
-  const quote = impact.derivedChanges.filter((d) => d.section === "QUOTE");
-  const planning = impact.derivedChanges.filter((d) => d.section === "PLANNING");
-  const cr = impact.canonicalResolution;
+function DirectChangesBlock({
+  impact,
+  fallback,
+}: {
+  impact: AnalyzePatchImpactResult | null;
+  fallback: BeworkPatchAnalyzeResult["directChanges"];
+}) {
+  const changes: DirectChange[] = impact?.directChanges ?? [];
 
   return (
-    <div className="space-y-3">
-      <Section title="Modification demandée">
-        {impact.directChanges.length === 0 ? (
-          <p className="text-[12.5px] text-slate-500">Aucune</p>
-        ) : (
-          <ul className="space-y-1.5 text-[12.5px]">
-            {impact.directChanges.map((d, i) => (
-              <li key={i} className="font-mono text-emerald-900">
-                <span className="font-sans font-semibold text-slate-800">
-                  {d.label}
-                </span>{" "}
-                {fmtVal(d.before)}
-                {d.unit ? ` ${d.unit}` : ""} → {fmtVal(d.after)}
-                {d.unit ? ` ${d.unit}` : ""}
-              </li>
-            ))}
-          </ul>
-        )}
-      </Section>
-
-      <Section title="Donnée canonique">
-        <p className="text-[12.5px] text-slate-700">
-          Résolution :{" "}
-          <span
-            className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${certaintyBadge(
-              cr.status === "EXACT"
-                ? "CERTAIN"
-                : cr.status === "PARTIAL"
-                  ? "PARTIAL"
-                  : "NONE",
-            )}`}
-          >
-            {cr.status}
-          </span>
-          {cr.resolved_to ? ` · ${cr.resolved_to}` : ""}
-          {cr.parameter_key ? ` · ${cr.parameter_key}` : ""}
-          {cr.study_line_code ? ` · ${cr.study_line_code}` : ""}
+    <section className="rounded-xl border border-slate-200 bg-white p-3">
+      <h4 className="text-sm font-semibold text-slate-900">
+        Modifications demandées
+      </h4>
+      {changes.length === 0 && fallback.length === 0 ? (
+        <p className="mt-2 text-sm text-slate-500">
+          Aucun changement direct détecté.
         </p>
-        {cr.note ? (
-          <p className="mt-1 text-[12px] text-amber-900">{cr.note}</p>
-        ) : null}
-      </Section>
-
-      {takeoff.length ? (
-        <Section title="Recalculs métré">
-          <DerivedList items={takeoff} />
-        </Section>
-      ) : null}
-      {quote.length ? (
-        <Section title="Devis impacté">
-          <DerivedList items={quote} />
-        </Section>
-      ) : null}
-      {planning.length ? (
-        <Section title="Planning impacté">
-          <DerivedList items={planning} />
-        </Section>
-      ) : null}
-
-      <Section title="Protégés">
-        {impact.protectedEntities.length === 0 ? (
-          <p className="text-[12.5px] text-slate-500">aucun</p>
-        ) : (
-          <ul className="space-y-1 text-[12.5px] text-red-900">
-            {impact.protectedEntities.map((p, i) => (
-              <li key={i}>
-                <strong>{p.label}</strong> — {p.reason}
-              </li>
-            ))}
-          </ul>
-        )}
-      </Section>
-    </div>
+      ) : changes.length > 0 ? (
+        <ul className="mt-3 space-y-3">
+          {changes.map((c, i) => (
+            <li
+              key={`${c.entityType}-${c.entityId}-${c.field}-${i}`}
+              className="rounded-lg border border-slate-100 bg-slate-50/60 p-2.5"
+            >
+              <p className="text-xs font-medium text-slate-500">
+                {c.label}
+                <span className="text-slate-300"> · </span>
+                {fieldMetierLabel(c.field)}
+              </p>
+              <div className="mt-1.5 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+                <span className="rounded bg-white px-2 py-1 text-sm text-slate-600 line-through decoration-slate-300 sm:max-w-[45%] sm:truncate">
+                  {formatValue(c.before)}
+                  {c.unit ? ` ${c.unit}` : ""}
+                </span>
+                <span className="hidden text-slate-400 sm:inline" aria-hidden>
+                  →
+                </span>
+                <span className="text-xs font-medium text-slate-400 sm:hidden">
+                  Après
+                </span>
+                <span className="rounded bg-emerald-50 px-2 py-1 text-sm font-medium text-emerald-900 sm:max-w-[45%] sm:truncate">
+                  {formatValue(c.after)}
+                  {c.unit ? ` ${c.unit}` : ""}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <ul className="mt-3 space-y-2">
+          {fallback.map((c, i) => (
+            <li
+              key={i}
+              className="rounded-lg border border-slate-100 bg-slate-50/60 p-2.5 text-sm text-slate-700"
+            >
+              <p className="font-medium text-slate-900">{c.targetSummary}</p>
+              <p className="mt-0.5 text-slate-600">{c.changesSummary}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
-      <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
-        {title}
-      </h3>
-      <div className="mt-1.5">{children}</div>
-    </div>
-  );
-}
-
-function DerivedList({
-  items,
-}: {
-  items: AnalyzePatchImpactResult["derivedChanges"];
-}) {
-  return (
-    <ul className="space-y-1.5 text-[12.5px]">
-      {items.map((d, i) => (
-        <li key={i} className="flex flex-wrap items-baseline gap-2">
-          <span className="font-semibold text-slate-800">{d.label}</span>
-          <span className="font-mono text-emerald-900">
-            {d.field}: {fmtVal(d.before)}
-            {d.unit ? ` ${d.unit}` : ""} → {fmtVal(d.after)}
-            {d.unit ? ` ${d.unit}` : ""}
-          </span>
-          <span
-            className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${certaintyBadge(d.certainty)}`}
-          >
-            {d.certainty}
-          </span>
-          {d.blocked ? (
-            <span className="text-[11px] font-medium text-amber-800">bloqué</span>
-          ) : null}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function IssueBlock({
-  title,
-  tone,
-  items,
-}: {
-  title: string;
-  tone: "error" | "warn" | "info";
-  items: string[];
-}) {
-  const cls =
-    tone === "error"
-      ? "border-red-200 bg-red-50 text-red-900"
-      : tone === "warn"
-        ? "border-amber-200 bg-amber-50 text-amber-950"
-        : "border-sky-200 bg-sky-50 text-sky-950";
-  return (
-    <div className={`rounded-xl border px-3 py-2 ${cls}`}>
-      <p className="text-[12px] font-semibold uppercase tracking-wide">{title}</p>
-      <ul className="mt-1 space-y-1 text-[12.5px]">
-        {items.map((m, i) => (
-          <li key={i}>{m}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+export { sectionMetierLabel };

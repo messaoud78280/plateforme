@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { BeworkPatchSection } from "@/lib/bework-patch/types";
 import type { SectionPatchCapability } from "@/lib/bework-patch/capability";
 import { BeworkPatchModal } from "@/components/bework-patch/BeworkPatchModal";
+import { sectionMetierLabel } from "@/lib/bework-patch/ui-messages";
 
 type Props = {
   section: BeworkPatchSection;
@@ -47,12 +48,14 @@ export function BeworkPatchToolbar({
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"chatgpt" | "json">("chatgpt");
   const [contextBusy, setContextBusy] = useState(false);
+  const [contextCopied, setContextCopied] = useState(false);
 
   const blocked = disabled || capability.mode === "UNAVAILABLE";
   const blockTitle =
     disabledReason ??
     (capability.mode === "UNAVAILABLE" ? capability.label : null) ??
     undefined;
+  const sectionLabel = sectionMetierLabel(section);
 
   async function copyContext() {
     if (blocked) return;
@@ -66,7 +69,8 @@ export function BeworkPatchToolbar({
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "Contexte indisponible");
       await navigator.clipboard.writeText(data.text);
-      setToast("Contexte ChatGPT copié.");
+      setContextCopied(true);
+      setToast("Contexte copié");
       window.setTimeout(() => setToast(null), 3500);
     } catch (e) {
       setToast(e instanceof Error ? e.message : "Copie impossible");
@@ -94,7 +98,7 @@ export function BeworkPatchToolbar({
         <button
           type="button"
           disabled={blocked}
-          title={blockTitle}
+          title={blockTitle ?? `Modifier ${sectionLabel} avec ChatGPT`}
           onClick={openChatgpt}
           className={`${btnBase} border-indigo-200 bg-indigo-50/80 text-indigo-900 hover:bg-indigo-50`}
         >
@@ -103,24 +107,28 @@ export function BeworkPatchToolbar({
         <button
           type="button"
           disabled={blocked}
-          title={blockTitle}
+          title={blockTitle ?? `Modifier ${sectionLabel} par bloc`}
           onClick={openJson}
           className={`${btnBase} border-slate-200 bg-white text-slate-700 hover:bg-slate-50`}
         >
-          {"{ }"} Modifier par bloc JSON
+          {"{ }"} Modifier par bloc
         </button>
         <button
           type="button"
           disabled={blocked || contextBusy}
-          title={blockTitle}
+          title={blockTitle ?? `Copier le contexte ${sectionLabel} pour ChatGPT`}
           onClick={() => void copyContext()}
           className={`${btnBase} border-slate-200 bg-white text-slate-700 hover:bg-slate-50`}
         >
-          {contextBusy ? "Copie…" : "Copier le contexte ChatGPT"}
+          {contextBusy
+            ? "Copie…"
+            : contextCopied
+              ? "Contexte copié"
+              : "Copier le contexte pour ChatGPT"}
         </button>
         {capability.mode === "PREVIEW_ONLY" && capability.label ? (
           <span className="text-[11px] font-medium text-amber-800">
-            Preview uniquement
+            Prévisualisation uniquement
           </span>
         ) : null}
       </div>
@@ -141,9 +149,9 @@ export function BeworkPatchToolbar({
         capability={capability}
         entityLabel={entityLabel}
         legacyCommit={legacyCommit}
+        contextAlreadyCopied={contextCopied}
         onClose={() => setModalOpen(false)}
         onApplied={() => {
-          setModalOpen(false);
           onApplied?.();
         }}
       />

@@ -35,6 +35,8 @@
     "test:platform-isolation-v1-1": "npx tsx scripts/test-platform-isolation-v1-1.ts",
     "test:demo-environment": "node --import tsx scripts/test-demo-environment.ts",
     "test:prep-metre": "node --import tsx scripts/test-prep-metre.ts",
+    "test:bework-project-context": "node --import tsx src/lib/bework-context/build-project-context.test.ts",
+    "test:bework-project-context:urban": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --import tsx scripts/test-bework-project-context.ts",
     "test:follow-up-attention": "npx tsx scripts/test-follow-up-attention.ts",
     "test:planning-board": "npx tsx scripts/test-planning-board.ts",
     "test:fiches-suivi-v2b": "npx tsx scripts/test-fiches-suivi-v2b.ts",

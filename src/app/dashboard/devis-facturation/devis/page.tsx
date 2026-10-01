@@ -5,7 +5,7 @@ import {
   resolveCommercialOrgId,
 } from "@/lib/commercial/access";
 import { listQuotes } from "@/lib/commercial/quotes";
-import { COMMERCIAL_QUOTE_STATUS_LABELS, roundMoney } from "@/lib/commercial/money";
+import { roundMoney } from "@/lib/commercial/money";
 import { quoteNextActionLabel } from "@/lib/commercial/dashboard-kpis";
 import {
   badgeClassForTone,
@@ -13,6 +13,9 @@ import {
 } from "@/lib/design-system/semantic-colors";
 import { cn } from "@/lib/cn";
 import { prisma } from "@/lib/prisma";
+import { loadQuoteDetailStatesBatch } from "@/lib/chantier/load-quote-detail-sync";
+import type { QuoteDetailState } from "@/lib/chantier/quote-detail-state";
+import { quoteDetailCommercialLabel } from "@/lib/chantier/quote-detail-state";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +31,51 @@ const STATUS_FILTERS: Array<{ value: string; label: string }> = [
   { value: "EXPIRED", label: "Expiré" },
   { value: "CANCELLED", label: "Annulé" },
 ];
+
+function QuoteListStatusBadges({
+  status,
+  detail,
+}: {
+  status: string;
+  detail: QuoteDetailState | undefined;
+}) {
+  const commercialTone = DEVIS_STATUS_TONE[status] ?? "neutral";
+  if (
+    detail &&
+    (detail.needsRevalidation || detail.syncState === "A_VERIFIER")
+  ) {
+    return (
+      <span className="inline-flex flex-wrap items-center gap-1">
+        <span
+          className={cn(
+            "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
+            detail.primaryVariant === "alert"
+              ? "bg-amber-100 text-amber-950 ring-1 ring-amber-300/80"
+              : "bg-orange-50 text-orange-900 ring-1 ring-orange-200",
+          )}
+        >
+          {detail.primaryLabel}
+        </span>
+        <span className={cn(badgeClassForTone(commercialTone))}>
+          {detail.commercialLabel}
+        </span>
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex flex-wrap items-center gap-1">
+      <span className={cn(badgeClassForTone(commercialTone))}>
+        {detail?.commercialLabel ?? quoteDetailCommercialLabel(status)}
+      </span>
+      {detail?.secondaryLabel === "À jour" ? (
+        <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-800 ring-1 ring-emerald-200/80">
+          À jour
+        </span>
+      ) : null}
+    </span>
+  );
+}
 
 export default async function DevisListPage({
   searchParams,
@@ -63,6 +111,15 @@ export default async function DevisListPage({
       take: 60,
     }),
   ]);
+
+  const metreSyncByQuoteId = await loadQuoteDetailStatesBatch(
+    orgId,
+    quotes.map((quote) => ({
+      id: quote.id,
+      status: quote.status,
+      sourcePrepStudyId: quote.sourcePrepStudyId,
+    })),
+  );
 
   function hrefWith(overrides: Record<string, string | undefined>) {
     const params = new URLSearchParams();
@@ -265,15 +322,10 @@ export default async function DevisListPage({
                         {roundMoney(quote.totalSellHt, 2).toLocaleString("fr-FR")} €
                       </td>
                       <td className="px-4 py-2.5">
-                        <span
-                          className={cn(
-                            badgeClassForTone(
-                              DEVIS_STATUS_TONE[quote.status] ?? "neutral",
-                            ),
-                          )}
-                        >
-                          {COMMERCIAL_QUOTE_STATUS_LABELS[quote.status] ?? quote.status}
-                        </span>
+                        <QuoteListStatusBadges
+                          status={quote.status}
+                          detail={metreSyncByQuoteId.get(quote.id)}
+                        />
                       </td>
                       <td className="px-4 py-2.5 text-slate-600">
                         {quote.updatedAt
@@ -314,7 +366,23 @@ export default async function DevisListPage({
                       </p>
                     </div>
                     <p className="mt-1 text-xs text-slate-500">
-                      {COMMERCIAL_QUOTE_STATUS_LABELS[quote.status] ?? quote.status}
+                      {(() => {
+                        const detail = metreSyncByQuoteId.get(quote.id);
+                        if (
+                          detail &&
+                          (detail.needsRevalidation ||
+                            detail.syncState === "A_VERIFIER")
+                        ) {
+                          return `${detail.primaryLabel} · ${detail.commercialLabel}`;
+                        }
+                        const commercial =
+                          detail?.commercialLabel ??
+                          quoteDetailCommercialLabel(quote.status);
+                        if (detail?.secondaryLabel === "À jour") {
+                          return `${commercial} · À jour`;
+                        }
+                        return commercial;
+                      })()}
                       {" · "}
                       {quote.clientExternalOrg?.tradeName ||
                         quote.clientExternalOrg?.name ||

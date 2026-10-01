@@ -122,3 +122,143 @@ export async function loadQuoteDetailState(
     hasSignificantQuantityDiffs: sync.hasSignificantQuantityDiffs,
   });
 }
+
+/**
+ * Batch CTX-03 pour une liste de devis — O(1) requêtes (pas de N+1).
+ * Même projection que loadQuoteDetailState / buildQuoteDetailState.
+ */
+export async function loadQuoteDetailStatesBatch(
+  orgId: string,
+  quotes: Array<{
+    id: string;
+    status: string;
+    sourcePrepStudyId?: string | null;
+  }>,
+): Promise<Map<string, QuoteDetailState>> {
+  const out = new Map<string, QuoteDetailState>();
+  if (quotes.length === 0) return out;
+
+  const quoteIds = quotes.map((q) => q.id);
+  const sourceByQuote = new Map(
+    quotes.map((q) => [q.id, q.sourcePrepStudyId ?? null] as const),
+  );
+
+  const [transfers, links] = await Promise.all([
+    prisma.prepQuoteTransfer.findMany({
+      where: { organizationId: orgId, quoteId: { in: quoteIds } },
+      orderBy: { createdAt: "desc" },
+      select: {
+        quoteId: true,
+        studyId: true,
+        studyVersion: true,
+      },
+    }),
+    prisma.prepQuoteLink.findMany({
+      where: { organizationId: orgId, quoteId: { in: quoteIds } },
+      select: {
+        quoteId: true,
+        studyId: true,
+        studyLineCode: true,
+        quantityAtTransfer: true,
+      },
+    }),
+  ]);
+
+  const latestTransferByQuote = new Map<string, (typeof transfers)[number]>();
+  for (const t of transfers) {
+    if (!latestTransferByQuote.has(t.quoteId)) {
+      latestTransferByQuote.set(t.quoteId, t);
+    }
+  }
+
+  const linksByQuote = new Map<string, typeof links>();
+  for (const l of links) {
+    const arr = linksByQuote.get(l.quoteId) ?? [];
+    arr.push(l);
+    linksByQuote.set(l.quoteId, arr);
+  }
+
+  const studyIds = new Set<string>();
+  for (const q of quotes) {
+    const transfer = latestTransferByQuote.get(q.id);
+    const qLinks = linksByQuote.get(q.id) ?? [];
+    const studyId =
+      transfer?.studyId ?? qLinks[0]?.studyId ?? sourceByQuote.get(q.id) ?? null;
+    if (studyId) studyIds.add(studyId);
+  }
+
+  const studies =
+    studyIds.size > 0
+      ? await prisma.prepStudy.findMany({
+          where: { organizationId: orgId, id: { in: [...studyIds] } },
+          select: { id: true, version: true },
+        })
+      : [];
+  const versionByStudy = new Map(studies.map((s) => [s.id, s.version]));
+
+  const takeoffs =
+    links.length > 0 && studyIds.size > 0
+      ? await prisma.prepTakeoffLine.findMany({
+          where: {
+            organizationId: orgId,
+            studyId: { in: [...studyIds] },
+          },
+          select: {
+            studyId: true,
+            code: true,
+            validatedQuantity: true,
+            computedQuantity: true,
+            declaredQuantity: true,
+          },
+        })
+      : [];
+
+  const qtyByStudyCode = new Map<string, number | null>();
+  for (const row of takeoffs) {
+    const raw =
+      row.validatedQuantity ?? row.computedQuantity ?? row.declaredQuantity;
+    qtyByStudyCode.set(
+      `${row.studyId}:${row.code}`,
+      raw != null ? Number(raw) : null,
+    );
+  }
+
+  for (const q of quotes) {
+    const transfer = latestTransferByQuote.get(q.id) ?? null;
+    const qLinks = linksByQuote.get(q.id) ?? [];
+    const hasMetreProvenance = !!transfer || qLinks.length > 0;
+    const studyId =
+      transfer?.studyId ??
+      qLinks[0]?.studyId ??
+      sourceByQuote.get(q.id) ??
+      null;
+    const currentStudyVersion = studyId
+      ? (versionByStudy.get(studyId) ?? null)
+      : null;
+
+    let hasSignificantQuantityDiffs: boolean | null = null;
+    if (qLinks.length > 0) {
+      hasSignificantQuantityDiffs = qLinks.some((l) =>
+        hasQuantityDiffAgainstTransfer({
+          quantityAtTransfer:
+            l.quantityAtTransfer != null ? Number(l.quantityAtTransfer) : null,
+          currentQuantity:
+            qtyByStudyCode.get(`${l.studyId}:${l.studyLineCode}`) ?? null,
+        }),
+      );
+    }
+
+    out.set(
+      q.id,
+      buildQuoteDetailState({
+        commercialStatus: q.status,
+        hasMetreProvenance,
+        currentStudyVersion,
+        transferStudyVersion: transfer?.studyVersion ?? null,
+        hasSignificantQuantityDiffs,
+      }),
+    );
+  }
+
+  return out;
+}

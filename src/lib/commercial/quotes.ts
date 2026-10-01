@@ -400,6 +400,7 @@ export async function listQuotes(
       totalTtc: true,
       marginPercent: true,
       updatedAt: true,
+      sourcePrepStudyId: true,
       currentVersion: { select: { versionNumber: true, label: true } },
       clientExternalOrg: { select: { id: true, name: true, tradeName: true } },
       project: { select: { id: true, title: true } },

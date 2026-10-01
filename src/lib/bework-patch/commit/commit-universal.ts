@@ -183,12 +183,13 @@ export async function commitUniversalPatch(input: {
         }
         // SAFE_PARTIAL: skip protected / override quote lines
 
-        // Planning
+        // Planning — aligne studyVersionAtGeneration uniquement si sync planning écrite
         const p = await applyPlanningDerivedInTx(tx, {
           orgId: input.orgId,
           impact,
           plans: subgraph.plans,
           qtyByCode: takeoff.qtyByCode,
+          studyVersionAtGeneration: takeoff.studyVersion,
         });
         planningUpdated = p.updated;
         if (p.planId) planId = p.planId;
@@ -346,7 +347,7 @@ async function applyTakeoffDirectInTx(
     studyId: string;
     expectedVersion: number;
   },
-): Promise<{ studyId: string; qtyByCode: Map<string, number | null> }> {
+): Promise<{ studyId: string; studyVersion: number; qtyByCode: Map<string, number | null> }> {
   const study = await tx.prepStudy.findFirst({
     where: {
       id: input.studyId,
@@ -430,7 +431,7 @@ async function applyTakeoffDirectInTx(
   for (const l of study.lines) {
     qtyByCode.set(l.code, engine.nodes.get(l.code)?.value ?? null);
   }
-  return { studyId: study.id, qtyByCode };
+  return { studyId: study.id, studyVersion: nextVersion, qtyByCode };
 }
 
 async function applyQuoteDerivedInTx(
@@ -621,6 +622,8 @@ async function applyPlanningDerivedInTx(
     impact: AnalyzePatchImpactResult;
     plans: import("@/lib/bework-patch/impact/types").ImpactPlan[];
     qtyByCode: Map<string, number | null>;
+    /** Version courante du métré après apply takeoff — écrite seulement si le plan est touché. */
+    studyVersionAtGeneration: number;
   },
 ): Promise<{ updated: boolean; planId: string | null }> {
   if (!input.plans.length) return { updated: false, planId: null };
@@ -655,8 +658,10 @@ async function applyPlanningDerivedInTx(
     }
 
     // KPI plan — conserver startDate ; jamais inventer 1970
+    // CTX-04 : studyVersionAtGeneration dans la MÊME update que revisionNumber
     const planData: Prisma.PrepSchedulePlanUpdateInput = {
       revisionNumber: { increment: 1 },
+      studyVersionAtGeneration: input.studyVersionAtGeneration,
     };
     if (sim.afterDurationWorkingDays != null) {
       planData.baseDurationWorkingDays = sim.afterDurationWorkingDays;

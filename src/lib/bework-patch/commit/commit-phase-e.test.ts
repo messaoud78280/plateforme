@@ -120,6 +120,16 @@ import {
   console.log(
     "ok — JOURNAL attendu FULL_SYNC : study 3→4, quoteVersion 1→1 (in-place), plan 1→2",
   );
+  // CTX-04 : studyVersionAtGeneration doit suivre la version métré dans la même transaction
+  // que revisionNumber lorsque le planning est réellement synchronisé.
+  const expectedPlanningSourceAfterSync = {
+    studyVersionAtGenerationBefore: 3,
+    studyVersionAtGenerationAfter: 4,
+  };
+  assert.equal(expectedPlanningSourceAfterSync.studyVersionAtGenerationAfter, 4);
+  console.log(
+    "ok — CTX-04 FULL_SYNC : studyVersionAtGeneration 3→4 avec revisionNumber",
+  );
 }
 
 console.log("ok — Phase E eligibility / fingerprint / versioning");

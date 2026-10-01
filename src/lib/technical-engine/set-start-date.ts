@@ -101,6 +101,7 @@ export async function setStudyScheduleStartDate(input: {
   });
 
   let tasksUpdated = 0;
+  const nextStudyVersion = study.version + 1;
 
   await prisma.$transaction(async (tx) => {
     await tx.prepStudy.update({
@@ -108,7 +109,7 @@ export async function setStudyScheduleStartDate(input: {
       data: {
         scheduleJson: scheduleRaw as Prisma.InputJsonValue,
         updatedById: input.userId,
-        version: { increment: 1 },
+        version: nextStudyVersion,
       },
     });
 
@@ -128,6 +129,8 @@ export async function setStudyScheduleStartDate(input: {
           })(),
           baseDurationWorkingDays: computed.baseDurationWorkingDays,
           withConditionalWorkingDays: computed.withConditionalDurationWorkingDays,
+          // CTX-04 — planning recalculé depuis le métré courant
+          studyVersionAtGeneration: nextStudyVersion,
         },
       });
 

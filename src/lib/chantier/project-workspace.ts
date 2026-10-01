@@ -25,6 +25,7 @@ import {
   quotePreparationStateLabel,
   quoteWorkflowActionLabel,
 } from "@/lib/chantier/quote-workflow-status";
+import { evaluatePlanningStudyVersionSync } from "@/lib/preparation/schedule/planning-sync-state";
 
 function cardStatusFromQuote(
   status: string | null | undefined,
@@ -336,6 +337,11 @@ function buildScopeCards(input: {
     endDateBase: Date | null;
     studyVersionAtGeneration: number;
   } | null;
+  /**
+   * Version du PrepStudy réellement lié au planning (plan.studyId).
+   * Ne pas utiliser un métré d’un autre scope.
+   */
+  planLinkedStudyVersion?: number | null;
   planSource: Awaited<ReturnType<typeof resolvePrepPlanSource>>;
   refs: {
     studyId: string | null;
@@ -364,16 +370,29 @@ function buildScopeCards(input: {
 
   const metreSync: SyncState = study ? "A_JOUR" : "ABSENT";
   let devisSync: SyncState = quote ? "A_JOUR" : "ABSENT";
-  let planningSync: SyncState = plan ? "A_JOUR" : "ABSENT";
   let devisHint: string | null = null;
-  let planningHint: string | null = null;
 
-  if (study && plan && plan.studyVersionAtGeneration < study.version) {
-    planningSync = "MODIFICATION_DISPONIBLE";
-    planningHint = `Métré V${study.version} plus récent que le planning (généré sur V${plan.studyVersionAtGeneration})`;
+  // CTX-04 — comparer uniquement avec le métré lié au plan (pas latest du projet).
+  const linkedVersion =
+    input.planLinkedStudyVersion ??
+    (study && plan && study.id === plan.studyId ? study.version : null);
+  const planningEval = evaluatePlanningStudyVersionSync({
+    hasPlan: !!plan,
+    currentStudyVersion: linkedVersion,
+    studyVersionAtGeneration: plan?.studyVersionAtGeneration,
+  });
+  const planningSync = planningEval.syncState;
+  const planningHint = planningEval.hint;
+
+  if (planningSync === "MODIFICATION_DISPONIBLE") {
     alerts.push({
       level: "warning",
       message: "Le planning doit être recalculé — le métré a évolué.",
+    });
+  } else if (planningSync === "A_VERIFIER" && plan) {
+    alerts.push({
+      level: "warning",
+      message: planningHint ?? "Alignement métré / planning à vérifier.",
     });
   }
 
@@ -897,6 +916,14 @@ async function getProjectWorkspaceUncached(
     isReference: true,
   };
 
+  const globalPlanningEval = evaluatePlanningStudyVersionSync({
+    hasPlan: !!globalPlan,
+    currentStudyVersion: globalPlan
+      ? studyById(globalPlan.studyId)?.version ?? null
+      : null,
+    studyVersionAtGeneration: globalPlan?.studyVersionAtGeneration,
+  });
+
   const globalPlanningCard: WorkspaceCard = {
     kind: "planning",
     label: "Planning chantier",
@@ -918,15 +945,17 @@ async function getProjectWorkspaceUncached(
         : globalQuote
           ? "Générez d’abord le métré"
           : "À générer",
-    syncState: globalPlan ? "A_JOUR" : "ABSENT",
-    statusLabel: globalPlan ? "À jour" : "À préparer",
+    syncState: globalPlanningEval.syncState,
+    statusLabel: statusLabelFromSync(globalPlanningEval.syncState, "planning"),
     actionLabel: globalPlan
       ? "Ouvrir"
       : globalStudy
         ? "Générer le planning"
         : "Métré requis",
     ready: !!globalPlan,
-    syncHint: "Un seul planning pour tout le chantier — les lots sont des phases.",
+    syncHint:
+      globalPlanningEval.hint ??
+      "Un seul planning pour tout le chantier — les lots sont des phases.",
     isReference: true,
   };
 
@@ -1118,6 +1147,9 @@ async function getProjectWorkspaceUncached(
       quote: refQuote,
       quotesCount: Math.max(scopeQuotes.length, refQuote ? 1 : 0),
       plan: refPlan,
+      planLinkedStudyVersion: refPlan
+        ? studyById(refPlan.studyId)?.version ?? null
+        : null,
       planSource: refStudy
         ? planSourceByStudyId.get(refStudy.id) ?? null
         : null,

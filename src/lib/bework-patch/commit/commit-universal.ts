@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
 import { calculateLine, roundMoney } from "@/lib/commercial/money";
 import { computeStudy } from "@/lib/preparation/engine/compute";
+import { invalidateFinalValidationIfNeeded } from "@/lib/preparation/service";
 import { parseBeworkPatch } from "@/lib/bework-patch/parse";
 import { analyzePatchImpact } from "@/lib/bework-patch/impact/analyze-impact";
 import { loadImpactSubgraph } from "@/lib/bework-patch/impact/load-subgraph";
@@ -592,6 +593,15 @@ async function applyTakeoffDirectInTx(
       version: nextVersion,
       updatedById: input.userId,
     },
+  });
+  await invalidateFinalValidationIfNeeded(tx, {
+    studyId: study.id,
+    organizationId: input.orgId,
+    currentStatus: study.dossierStatus,
+    change: "patch_takeoff",
+    actorUserId: input.userId,
+    versionBefore: study.version,
+    versionAfter: nextVersion,
   });
 
   const qtyByCode = new Map<string, number | null>();

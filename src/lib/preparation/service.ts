@@ -8,6 +8,11 @@ import { d } from "@/lib/commercial/decimal";
 import { parsePrepJsonText, type NormalizedPrepBundle } from "@/lib/preparation/bundle/parse";
 import { prepBundleFingerprint } from "@/lib/preparation/bundle/fingerprint";
 import { computeStudy, summarizeBases, type EngineResult } from "@/lib/preparation/engine/compute";
+import {
+  evaluatePrepStudyFinalizationEligibility,
+  shouldInvalidateStudyFinalValidation,
+  type FinalValidationChangeKind,
+} from "@/lib/preparation/finalization";
 import { TECH_REF_KINDS } from "@/lib/preparation/types";
 import type {
   DossierStatus,
@@ -270,6 +275,8 @@ const EVENT_LABELS: Record<string, string> = {
   UNDO_CHATGPT_PATCH: "Annulation patch ChatGPT",
   VALIDATE_LINES: "Validation de quantités",
   UNVALIDATE_LINES: "Retrait de validation",
+  VALIDATE_STUDY: "Validation finale du métré",
+  INVALIDATE_STUDY: "Invalidation de la validation du métré",
   UNDO_IMPORT: "Annulation d'import",
   TRANSFER_TO_QUOTE: "Transfert vers devis",
   TRANSFER_TO_SCHEDULE: "Génération planning de chantier",
@@ -921,6 +928,144 @@ async function loadForEdit(tx: Prisma.TransactionClient, orgId: string, studyId:
   return study;
 }
 
+/**
+ * Si le dossier est PRO_VALIDE et que la mutation est substantielle,
+ * repasse à PRO_A_VALIDER dans la même transaction (sans bump de version séparé).
+ */
+export async function invalidateFinalValidationIfNeeded(
+  tx: Prisma.TransactionClient,
+  input: {
+    studyId: string;
+    organizationId: string;
+    currentStatus: string;
+    change: FinalValidationChangeKind;
+    actorUserId: string | null;
+    versionBefore: number;
+    versionAfter: number;
+  },
+): Promise<boolean> {
+  if (input.currentStatus !== "PRO_VALIDE") return false;
+  if (!shouldInvalidateStudyFinalValidation(input.change)) return false;
+  await tx.prepStudy.update({
+    where: { id: input.studyId },
+    data: { dossierStatus: "PRO_A_VALIDER" },
+  });
+  await tx.prepStudyEvent.create({
+    data: {
+      studyId: input.studyId,
+      organizationId: input.organizationId,
+      kind: "INVALIDATE_STUDY",
+      detailJson: {
+        reason: input.change,
+        versionBefore: input.versionBefore,
+        versionAfter: input.versionAfter,
+        statusBefore: "PRO_VALIDE",
+        statusAfter: "PRO_A_VALIDER",
+      },
+      actorUserId: input.actorUserId,
+    },
+  });
+  return true;
+}
+
+/**
+ * Validation finale du dossier : PRO_A_VALIDER → PRO_VALIDE.
+ * Recalcule l'éligibilité côté serveur ; refuse si version stale.
+ */
+export async function validatePrepStudy(
+  input: {
+    orgId: string;
+    studyId: string;
+    userId: string;
+    expectedVersion: number;
+  },
+  db: Db = prisma,
+): Promise<{
+  version: number;
+  versionBefore: number;
+  dossierStatus: DossierStatus;
+  statusBefore: DossierStatus;
+}> {
+  return inTx(db, async (tx) => {
+    const study = await tx.prepStudy.findFirst({
+      where: { id: input.studyId, organizationId: input.orgId, archivedAt: null },
+      include: { parameters: true, lines: true },
+    });
+    if (!study) throw new PrepError("Étude introuvable", 404);
+    if (study.version !== input.expectedVersion) {
+      throw new PrepError(
+        "Le métré a été modifié depuis son dernier affichage. Vérifiez les quantités avant de le valider.",
+        409,
+      );
+    }
+
+    const engine = computeStudy({
+      params: study.parameters.map(paramRowToDTO),
+      lines: study.lines.map(lineRowToDTO),
+    });
+    const eligibility = evaluatePrepStudyFinalizationEligibility({
+      dossierStatus: study.dossierStatus,
+      mode: study.mode,
+      lines: study.lines.map(lineRowToDTO),
+      engine,
+    });
+
+    if (!eligibility.eligible) {
+      if (eligibility.blockers.some((b) => b.code === "ALREADY_VALIDATED")) {
+        throw new PrepError("Le métré est déjà validé.", 409);
+      }
+      const msg =
+        eligibility.blockers[0]?.message ??
+        "Le métré n'est pas éligible à la validation finale.";
+      throw new PrepError(
+        msg,
+        422,
+        eligibility.blockers.map((b) => ({
+          path: b.code,
+          message: b.message,
+          severity: "error" as const,
+        })),
+      );
+    }
+
+    const versionBefore = study.version;
+    const version = versionBefore + 1;
+    const statusBefore = study.dossierStatus as DossierStatus;
+
+    await tx.prepStudy.update({
+      where: { id: study.id },
+      data: {
+        dossierStatus: "PRO_VALIDE",
+        version,
+        updatedById: input.userId,
+      },
+    });
+    await tx.prepStudyEvent.create({
+      data: {
+        studyId: study.id,
+        organizationId: input.orgId,
+        kind: "VALIDATE_STUDY",
+        detailJson: {
+          versionBefore,
+          versionAfter: version,
+          statusBefore,
+          statusAfter: "PRO_VALIDE",
+          validatedCount: eligibility.validatedCount,
+          quoteLineCount: eligibility.quoteLineCount,
+        },
+        actorUserId: input.userId,
+      },
+    });
+
+    return {
+      version,
+      versionBefore,
+      dossierStatus: "PRO_VALIDE" as DossierStatus,
+      statusBefore,
+    };
+  });
+}
+
 export async function savePrepStudyEdits(input: PrepEditInput, db: Db = prisma) {
   const paramEdits = input.params ?? [];
   const lineEdits = input.lines ?? [];
@@ -1060,9 +1205,24 @@ export async function savePrepStudyEdits(input: PrepEditInput, db: Db = prisma) 
       });
     }
     const version = study.version + 1;
+    const changeKind: FinalValidationChangeKind =
+      paramLog.length || lineLog.length || impacted > 0
+        ? paramLog.length
+          ? "parameter_change"
+          : "quantity_or_formula_change"
+        : "text_only";
     await tx.prepStudy.update({
       where: { id: study.id },
       data: { version, updatedById: input.userId },
+    });
+    await invalidateFinalValidationIfNeeded(tx, {
+      studyId: study.id,
+      organizationId: input.orgId,
+      currentStatus: study.dossierStatus,
+      change: changeKind,
+      actorUserId: input.userId,
+      versionBefore: study.version,
+      versionAfter: version,
     });
     await tx.prepStudyEvent.create({
       data: {
@@ -1278,6 +1438,15 @@ export async function setPrepLinesValidation(
     }
     const version = study.version + 1;
     await tx.prepStudy.update({ where: { id: study.id }, data: { version, updatedById: input.userId } });
+    await invalidateFinalValidationIfNeeded(tx, {
+      studyId: study.id,
+      organizationId: input.orgId,
+      currentStatus: study.dossierStatus,
+      change: input.validated ? "validate_lines" : "unvalidate_lines",
+      actorUserId: input.userId,
+      versionBefore: study.version,
+      versionAfter: version,
+    });
     await tx.prepStudyEvent.create({
       data: {
         studyId: study.id,

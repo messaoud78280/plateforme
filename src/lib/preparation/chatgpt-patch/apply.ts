@@ -9,6 +9,7 @@ import { computeStudy } from "@/lib/preparation/engine/compute";
 import type { BeworkPrepPatchV1, PrepPatchLinePayload } from "@/lib/preparation/chatgpt-patch/types";
 import {
   getPrepStudyView,
+  invalidateFinalValidationIfNeeded,
   PrepError,
   type PrepStudyView,
 } from "@/lib/preparation/service";
@@ -749,6 +750,10 @@ export async function applyPrepPatch(input: {
       }
 
       const version = loaded.version + 1;
+      const quantityImpacts = collectQuantityImpacts(beforeEngine, afterEngine, loaded.state.lines);
+      const structuralChange = preview.operations.some(
+        (o) => o.kind === "add" || o.kind === "delete",
+      );
       await tx.prepStudy.update({
         where: { id: loaded.study.id },
         data: {
@@ -761,6 +766,18 @@ export async function applyPrepPatch(input: {
           version,
           updatedById: input.userId,
         },
+      });
+      await invalidateFinalValidationIfNeeded(tx, {
+        studyId: loaded.study.id,
+        organizationId: input.orgId,
+        currentStatus: loaded.study.dossierStatus,
+        change:
+          quantityImpacts.length > 0 || structuralChange
+            ? "patch_takeoff"
+            : "text_only",
+        actorUserId: input.userId,
+        versionBefore: loaded.version,
+        versionAfter: version,
       });
 
       // Paramètres : update un par un
@@ -857,7 +874,7 @@ export async function applyPrepPatch(input: {
           status: "APPLIED",
           summaryJson: {
             operationsCount: input.patch.operations.length,
-            quantityImpacts: collectQuantityImpacts(beforeEngine, afterEngine, loaded.state.lines),
+            quantityImpacts,
             ops: preview.operations.map((o) => ({ kind: o.kind, target: o.target, label: o.label })),
           },
           snapshotBeforeJson: beforeState as unknown as Prisma.InputJsonValue,
@@ -874,7 +891,7 @@ export async function applyPrepPatch(input: {
             patchId: input.patch.patchId,
             recordId: record.id,
             operations: input.patch.operations.length,
-            quantityImpacts: collectQuantityImpacts(beforeEngine, afterEngine, loaded.state.lines).length,
+            quantityImpacts: quantityImpacts.length,
           },
           actorUserId: input.userId,
         },
@@ -882,7 +899,7 @@ export async function applyPrepPatch(input: {
       return {
         version,
         patchRecordId: record.id,
-        quantityImpacts: collectQuantityImpacts(beforeEngine, afterEngine, loaded.state.lines),
+        quantityImpacts,
       };
     });
 
@@ -951,6 +968,15 @@ export async function undoLastPrepPatch(input: {
           version,
           updatedById: input.userId,
         },
+      });
+      await invalidateFinalValidationIfNeeded(tx, {
+        studyId: input.studyId,
+        organizationId: input.orgId,
+        currentStatus: loaded.study.dossierStatus,
+        change: "patch_takeoff",
+        actorUserId: input.userId,
+        versionBefore: loaded.version,
+        versionAfter: version,
       });
 
       for (const p of snap.params) {

@@ -26,6 +26,11 @@ import {
   type PrepLineDTO,
   type PrepParamDTO,
 } from "@/lib/preparation/types";
+import { prepLineStatus } from "@/lib/preparation/line-status";
+import {
+  evaluatePrepStudyFinalizationEligibility,
+  prepSourceFormatLabel,
+} from "@/lib/preparation/finalization";
 import { displayUnit, formatQty, parseUserNumber } from "@/lib/preparation/units";
 import {
   Chip,
@@ -66,14 +71,7 @@ const PROV_RING: Record<string, string> = {
 };
 
 function lineStatus(line: PrepLineDTO, node: EngineNode | undefined): LineStatus {
-  if (node?.error) return "error";
-  if (line.role === "indicator") return "indicator";
-  if (line.validatedQuantity !== null) {
-    return node?.value !== null && node?.value !== undefined && quantitiesDiffer(node.value, line.validatedQuantity)
-      ? "revalidate"
-      : "validated";
-  }
-  return "theoretical";
+  return prepLineStatus(line, node) as LineStatus;
 }
 
 export function PrepStudyWorkspace({
@@ -290,6 +288,27 @@ export function PrepStudyWorkspace({
     }
   }
 
+  async function validateStudy() {
+    setBusy(true);
+    setFlash(null);
+    try {
+      const { res, data } = await callApi(`/api/prep-studies/${study.id}/validate-study`, "POST", {
+        expectedVersion: study.version,
+      });
+      if (!res.ok || !data?.study) {
+        setFlash({
+          tone: res.status === 409 ? "conflict" : "error",
+          text: data?.error ?? "Validation du métré impossible",
+        });
+        return;
+      }
+      setStudy(data.study);
+      setFlash({ tone: "ok", text: "Métré validé." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function undoImport() {
     setBusy(true);
     setConfirmUndo(false);
@@ -454,6 +473,19 @@ export function PrepStudyWorkspace({
     })
     .map((l) => l.code);
 
+  const finalization = useMemo(
+    () =>
+      evaluatePrepStudyFinalizationEligibility({
+        dossierStatus: study.dossierStatus,
+        mode: study.mode,
+        lines,
+        engine,
+      }),
+    [study.dossierStatus, study.mode, lines, engine],
+  );
+
+  const sourceFormatLabel = prepSourceFormatLabel(study.sourceFormat);
+
   const nav = moduleChantierNav({
     projectId: study.project.id,
     projectTitle: study.project.title,
@@ -485,9 +517,7 @@ export function PrepStudyWorkspace({
             </Chip>
             {study.trade ? <span>{study.trade}</span> : null}
             <span>Version {study.version}</span>
-            {study.sourceFormat && study.sourceFormat !== "bework_prep_bundle_v1" ? (
-              <span>Importé depuis l&apos;ancien format</span>
-            ) : null}
+            {sourceFormatLabel ? <span>{sourceFormatLabel}</span> : null}
           </div>
           <div className="mt-3">
             <PrepPlanSourceActions
@@ -693,16 +723,67 @@ export function PrepStudyWorkspace({
               Tout replier
             </button>
             <span className="ml-auto" />
-            <button
-              type="button"
-              disabled={busy || dirty || !validatableShown.length}
-              title={dirty ? "Enregistrez d'abord vos modifications" : undefined}
-              onClick={() => void setValidation(validatableShown, true)}
-              className="rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-emerald-800 disabled:opacity-40"
-            >
-              Valider les quantités affichées ({validatableShown.length})
-            </button>
+            {validatableShown.length > 0 ? (
+              <button
+                type="button"
+                disabled={busy || dirty}
+                title={dirty ? "Enregistrez d'abord vos modifications" : undefined}
+                onClick={() => void setValidation(validatableShown, true)}
+                className="rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-emerald-800 disabled:opacity-40"
+              >
+                Valider les quantités affichées ({validatableShown.length})
+              </button>
+            ) : (
+              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[12.5px] text-emerald-800">
+                Toutes les quantités affichées sont validées
+              </span>
+            )}
           </div>
+
+          {study.dossierStatus === "PRO_VALIDE" ? (
+            <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] text-emerald-900">
+              <span className="font-medium">Métré validé</span>
+              <span className="text-emerald-700">
+                ✓ {finalization.validatedCount}/{finalization.quoteLineCount} quantités validées
+              </span>
+            </div>
+          ) : study.dossierStatus === "PRO_A_VALIDER" ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.04] px-4 py-3">
+              <div className="min-w-0 text-[13px] text-slate-700">
+                {finalization.eligible ? (
+                  <>
+                    <p className="font-medium text-[#1e3a5f]">
+                      Quantités validées — validation finale du métré requise
+                    </p>
+                    <p className="mt-0.5 text-slate-600">
+                      ✓ {finalization.validatedCount}/{finalization.quoteLineCount} quantités validées
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-medium text-[#1e3a5f]">Validation finale du métré</p>
+                    <p className="mt-0.5 text-slate-600">
+                      {finalization.blockers.find((b) =>
+                        ["LINES_NOT_VALIDATED", "REVALIDATE_REQUIRED", "ENGINE_ERRORS"].includes(b.code),
+                      )?.message ??
+                        `${finalization.validatedCount}/${finalization.quoteLineCount} quantités validées`}
+                    </p>
+                  </>
+                )}
+              </div>
+              {finalization.eligible ? (
+                <button
+                  type="button"
+                  disabled={busy || dirty}
+                  title={dirty ? "Enregistrez ou annulez vos modifications avant" : undefined}
+                  onClick={() => void validateStudy()}
+                  className="shrink-0 rounded-xl bg-emerald-700 px-3.5 py-2 text-[13px] font-medium text-white disabled:opacity-40"
+                >
+                  Valider le métré
+                </button>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className="overflow-x-auto rounded-2xl border border-[#1e3a5f]/10 bg-white">
             <table className="w-full min-w-[1180px] text-[12.5px]">

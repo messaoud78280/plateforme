@@ -123,34 +123,6 @@ async function computeQuantityDiffs(
   return { hasDiffs: diffCodes.length > 0, codes: diffCodes };
 }
 
-/**
- * Quantité métré courante par code — pour rafraîchir quantityAtTransfer
- * (snapshot « dernier alignement », sémantique A).
- */
-async function currentMetreQtyByCode(
-  db: Prisma.TransactionClient | typeof prisma,
-  orgId: string,
-  studyId: string,
-  codes: string[],
-): Promise<Map<string, number | null>> {
-  const takeoffs = await db.prepTakeoffLine.findMany({
-    where: { organizationId: orgId, studyId, code: { in: codes } },
-    select: {
-      code: true,
-      validatedQuantity: true,
-      computedQuantity: true,
-      declaredQuantity: true,
-    },
-  });
-  const map = new Map<string, number | null>();
-  for (const row of takeoffs) {
-    const raw =
-      row.validatedQuantity ?? row.computedQuantity ?? row.declaredQuantity;
-    map.set(row.code, raw != null ? Number(raw) : null);
-  }
-  return map;
-}
-
 export async function revalidateQuoteMetreSync(
   input: RevalidateQuoteMetreSyncInput,
 ): Promise<RevalidateQuoteMetreSyncResult> {
@@ -334,31 +306,14 @@ export async function revalidateQuoteMetreSync(
       data: { studyVersion: toStudyVersion },
     });
 
-    // Snapshot dernier alignement (sémantique A) — cohérent car aucun écart qty
-    const links = await tx.prepQuoteLink.findMany({
-      where: {
-        organizationId: input.orgId,
-        quoteId: input.quoteId,
-        transferId: transfer.id,
-      },
-      select: { id: true, studyLineCode: true },
-    });
-    if (links.length) {
-      const qtyMap = await currentMetreQtyByCode(
-        tx,
-        input.orgId,
-        study.id,
-        [...new Set(links.map((l) => l.studyLineCode))],
-      );
-      for (const link of links) {
-        const qty = qtyMap.get(link.studyLineCode);
-        if (qty == null || !Number.isFinite(qty)) continue;
-        await tx.prepQuoteLink.update({
-          where: { id: link.id },
-          data: { quantityAtTransfer: qty },
-        });
-      }
-    }
+    /**
+     * quantityAtTransfer = snapshot dernier alignement (sémantique A).
+     * Ici aucun écart significatif n’existe déjà (contrôlé avant TX) :
+     * le snapshot est déjà égal aux quantités métré courantes → pas de
+     * réécriture N×1 (timeout PgBouncer / transaction interactive).
+     * Une sync qty (quote-sync / FULL_SYNC) reste le chemin qui réécrit
+     * quantityAtTransfer quand les valeurs changent réellement.
+     */
 
     await tx.commercialStatusEvent.create({
       data: {

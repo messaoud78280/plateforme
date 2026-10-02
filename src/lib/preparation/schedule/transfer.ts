@@ -849,6 +849,8 @@ export type SchedulePlanViewPayload = {
     stepCode: string;
     name: string;
     kind: string;
+    /** Lot recopié depuis le métré (source PrepStudy) — pas de mapping Planning-only. */
+    lot: string | null;
     includeInBase: boolean;
     holdPoint: boolean;
     holdPointStatus: string | null;
@@ -1003,6 +1005,7 @@ export async function buildPrepSchedulePlanPayload(
       stepCode: t.stepCode,
       name: t.name,
       kind: t.kind,
+      lot: t.lot,
       includeInBase: t.includeInBase,
       holdPoint: t.holdPoint,
       holdPointStatus: holdStatus,

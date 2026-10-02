@@ -17,6 +17,8 @@ export type WorkspaceBrandLinkProps = {
   onNavigate?: () => void;
   /** Affiche le monogramme si pas de logo. */
   showMonogram?: boolean;
+  /** Carte organisation premium (sidebar). */
+  premium?: boolean;
 };
 
 function initialsFrom(label: string): string {
@@ -43,10 +45,49 @@ export function WorkspaceBrandLink({
   className,
   onNavigate,
   showMonogram = true,
+  premium = false,
 }: WorkspaceBrandLinkProps) {
   const label = primaryLabel.trim() || "Espace de travail";
   const secondary = secondaryLabel?.trim() || null;
   const initials = initialsFrom(label);
+
+  if (premium) {
+    return (
+      <Link
+        href={WORKSPACE_HOME}
+        title={WORKSPACE_TITLE}
+        aria-label={WORKSPACE_TITLE}
+        onClick={onNavigate}
+        className={cn(
+          collapsed ? "bw-org-card justify-center px-2 py-2" : "bw-org-card",
+          className,
+        )}
+      >
+        {logoUrl && !collapsed ? (
+          <span className="relative flex h-9 w-[6.5rem] shrink-0 items-center overflow-hidden rounded-[10px] bg-white/90 ring-1 ring-[color:var(--bw-sidebar-border)]">
+            <Image
+              src={logoUrl}
+              alt=""
+              width={104}
+              height={36}
+              className="h-8 w-auto max-w-[6.25rem] object-contain object-left px-1.5"
+              priority
+            />
+          </span>
+        ) : showMonogram ? (
+          <span className="bw-org-avatar" aria-hidden>
+            {initials}
+          </span>
+        ) : null}
+        {!collapsed ? (
+          <span className="min-w-0 flex-1">
+            <span className="bw-org-title">{label}</span>
+            {secondary ? <span className="bw-org-subtitle">{secondary}</span> : null}
+          </span>
+        ) : null}
+      </Link>
+    );
+  }
 
   return (
     <Link

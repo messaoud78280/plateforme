@@ -1,7 +1,6 @@
 "use client";
 
-import type { ComponentType, CSSProperties } from "react";
-import Link from "next/link";
+import type { ComponentType } from "react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
@@ -11,7 +10,6 @@ import {
   Building2,
   Calendar,
   CalendarDays,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
@@ -39,9 +37,16 @@ import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
 import { MessagerieNavBadge } from "@/components/dashboard/MessagerieNavBadge";
 import { useATraiterCount } from "@/hooks/useATraiterCount";
 import { WorkspaceBrandLink } from "@/components/dashboard/WorkspaceBrandLink";
+import {
+  SidebarIcon,
+  SidebarItem,
+  SidebarSection,
+  SidebarSectionHeader,
+  type SidebarTone,
+} from "@/components/dashboard/sidebar/SidebarPrimitives";
 
 type RoleKey = "CLIENT" | "MANAGER" | "AGENT" | "AGENCE";
-type FamTone = "navy" | "cyan" | "watch" | "violet" | "ok" | "magenta" | "neutral";
+type FamTone = SidebarTone;
 
 type NavItem = {
   href: string;
@@ -204,16 +209,6 @@ function buildFamilies(): NavFamily[] {
   ];
 }
 
-const FAM_COLOR: Record<FamTone, string> = {
-  navy: "var(--cc-navy)",
-  cyan: "var(--cc-cyan)",
-  watch: "var(--cc-watch)",
-  violet: "var(--cc-intel)",
-  ok: "var(--cc-ok)",
-  magenta: "var(--cc-magenta)",
-  neutral: "color-mix(in srgb, var(--cc-navy) 45%, #94a3b8)",
-};
-
 function isItemActive(pathname: string, item: NavItem): boolean {
   return item.exact
     ? pathname === item.href
@@ -337,11 +332,12 @@ export function AppSidebar({
     <>
       <div
         className={cn(
-          "flex items-center gap-3 border-b border-[color:var(--cc-border)] px-3.5 py-4",
+          "flex items-center gap-2.5 px-3 py-3.5",
           collapsed && "justify-center px-2",
         )}
       >
         <WorkspaceBrandLink
+          premium
           primaryLabel={workspaceLabel}
           secondaryLabel={secondaryLabel}
           logoUrl={brandLogo}
@@ -352,7 +348,7 @@ export function AppSidebar({
         {mobileOpen ? (
           <button
             type="button"
-            className="ml-auto rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden"
+            className="ml-auto rounded-xl p-1.5 text-slate-500 hover:bg-white/70 lg:hidden"
             onClick={() => setMobileOpen(false)}
             aria-label="Fermer"
           >
@@ -361,117 +357,82 @@ export function AppSidebar({
         ) : null}
       </div>
 
-      <nav className="flex-1 space-y-3 overflow-y-auto px-2 py-3" aria-label="Navigation principale">
-        {families.map((family) => {
+      <nav
+        className="flex-1 space-y-1 overflow-y-auto px-2.5 pb-3 pt-1"
+        aria-label="Navigation principale"
+      >
+        {families.map((family, familyIndex) => {
           const hasActive = family.items.some((item) => isItemActive(pathname, item));
           const open = family.pinned || hasActive || familyOpen[family.id] !== false;
-          const color = FAM_COLOR[family.tone];
           return (
-            <div
-              key={family.id}
-              className={cn(
-                !family.pinned && "border-t border-[color:var(--cc-navy)]/[0.07] pt-2.5",
-              )}
-            >
-              {!collapsed && !family.pinned ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (hasActive) return;
-                    persistFamilyOpen({ ...familyOpen, [family.id]: !open });
-                  }}
-                  className="bw-nav-family mb-1 flex w-full items-center gap-1.5 px-2 py-1 text-left"
-                  style={{ "--fam-color": color } as CSSProperties}
-                  aria-expanded={open}
-                >
-                  <span
-                    className="h-1.5 w-1.5 shrink-0 rounded-full"
-                    style={{ background: color }}
-                    aria-hidden
-                  />
-                  <span className="flex-1 text-[11px] font-semibold uppercase tracking-[0.12em]">
-                    {family.label}
-                  </span>
-                  <ChevronDown
-                    className={cn(
-                      "h-3.5 w-3.5 shrink-0 opacity-60 transition-transform duration-150",
-                      !open && "-rotate-90",
-                    )}
-                    aria-hidden
-                  />
-                </button>
-              ) : null}
+            <SidebarSection key={family.id} first={familyIndex === 0}>
               {!collapsed && family.pinned ? (
-                <p
-                  className="bw-nav-family mb-1 flex items-center gap-1.5 px-2 py-0.5"
-                  style={{ "--fam-color": color } as CSSProperties}
-                >
-                  <span
-                    className="h-1.5 w-1.5 shrink-0 rounded-full"
-                    style={{ background: color }}
-                    aria-hidden
-                  />
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.12em]">
-                    {family.label}
-                  </span>
-                </p>
+                <SidebarSectionHeader label={family.label} tone={family.tone} />
+              ) : null}
+              {!collapsed && !family.pinned ? (
+                <SidebarSectionHeader
+                  label={family.label}
+                  tone={family.tone}
+                  collapsible
+                  open={open}
+                  locked={hasActive}
+                  onToggle={() =>
+                    persistFamilyOpen({ ...familyOpen, [family.id]: !open })
+                  }
+                />
               ) : null}
               {collapsed || open ? (
-                <ul className="space-y-px">
+                <ul className="space-y-1.5">
                   {family.items.map((item) => {
-                    const Icon = item.icon;
                     const active = isItemActive(pathname, item);
                     const pending = pendingHref === item.href;
                     return (
                       <li key={item.href}>
-                        <Link
+                        <SidebarItem
                           href={item.href}
+                          label={item.label}
+                          tone={family.tone}
+                          active={active}
+                          pending={pending}
+                          collapsed={collapsed}
+                          emphasis={item.emphasis}
                           title={collapsed ? item.label : undefined}
-                          onClick={() => {
+                          onNavigate={() => {
                             setMobileOpen(false);
                             if (!active) setPendingHref(item.href);
                           }}
-                          prefetch
-                          data-fam={family.tone}
-                          className={cn(
-                            "bw-nav-item active:scale-[0.98]",
-                            collapsed && "justify-center px-2",
-                            item.emphasis === "high" && "is-emphasis",
-                            item.emphasis === "low" && "font-medium text-slate-600",
-                            active && "is-active",
-                            pending && !active && "bw-nav-pending",
-                          )}
-                          aria-current={active ? "page" : undefined}
-                          aria-busy={pending || undefined}
-                        >
-                          <span className="relative inline-flex shrink-0">
-                            <Icon className="h-4 w-4 stroke-[1.75]" />
-                            {collapsed && item.href === "/dashboard/a-traiter" ? (
-                              <ATraiterDot />
-                            ) : null}
-                            {collapsed && item.href === "/dashboard/messagerie" ? (
-                              <MessagerieDot />
-                            ) : null}
-                          </span>
-                          {!collapsed ? <span className="min-w-0 flex-1 truncate">{item.label}</span> : null}
-                          {!collapsed && item.href === "/dashboard/a-traiter" ? (
-                            <ATraiterCountBadge />
-                          ) : null}
-                          {!collapsed && item.href === "/dashboard/messagerie" ? (
-                            <MessagerieNavBadge active={active} />
-                          ) : null}
-                        </Link>
+                          icon={
+                            <SidebarIcon icon={item.icon} active={active}>
+                              {collapsed && item.href === "/dashboard/a-traiter" ? (
+                                <ATraiterDot />
+                              ) : null}
+                              {collapsed && item.href === "/dashboard/messagerie" ? (
+                                <MessagerieDot />
+                              ) : null}
+                            </SidebarIcon>
+                          }
+                          trailing={
+                            <>
+                              {!collapsed && item.href === "/dashboard/a-traiter" ? (
+                                <ATraiterCountBadge />
+                              ) : null}
+                              {!collapsed && item.href === "/dashboard/messagerie" ? (
+                                <MessagerieNavBadge active={active} />
+                              ) : null}
+                            </>
+                          }
+                        />
                       </li>
                     );
                   })}
                 </ul>
               ) : null}
-            </div>
+            </SidebarSection>
           );
         })}
       </nav>
 
-      <div className={cn("border-t border-[color:var(--cc-border)] p-3", collapsed && "px-2")}>
+      <div className={cn("p-3", collapsed && "px-2")}>
         <div
           className={cn(
             "mb-2 flex items-center gap-2.5 bw-user-card px-2.5 py-2",
@@ -483,7 +444,9 @@ export function AppSidebar({
           </span>
           {!collapsed ? (
             <span className="min-w-0">
-              <span className="block truncate text-xs font-semibold text-bework-ink">{userName ?? "Utilisateur"}</span>
+              <span className="block truncate text-xs font-semibold text-bework-ink">
+                {userName ?? "Utilisateur"}
+              </span>
               <span className="block truncate text-[11px] text-bework-muted">
                 {userRoleLabel ?? (isDemo ? roleFallback : role ?? "")}
               </span>
@@ -494,16 +457,22 @@ export function AppSidebar({
           <button
             type="button"
             onClick={toggleCollapsed}
-            className="hidden items-center justify-center rounded-lg border border-bework-navy/15 bg-bework-soft-navy/60 p-2 text-bework-muted hover:bg-bework-soft-accent hover:text-bework-navy lg:inline-flex"
+            className="hidden items-center justify-center rounded-xl border border-bework-navy/15 bg-white/70 p-2 text-bework-muted hover:bg-bework-soft-accent hover:text-bework-navy lg:inline-flex"
             aria-label={collapsed ? "Développer le menu" : "Réduire le menu"}
           >
-            {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
+            {collapsed ? (
+              <ChevronRight className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronLeft className="h-3.5 w-3.5" />
+            )}
           </button>
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: isDemo ? "/connexion/demo" : "/connexion" })}
+            onClick={() =>
+              signOut({ callbackUrl: isDemo ? "/connexion/demo" : "/connexion" })
+            }
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-lg border border-bework-navy/15 bg-bework-soft-navy/50 px-2 py-2 text-[11px] font-semibold text-bework-navy hover:bg-bework-soft-critical hover:border-bework-critical/25 hover:text-bework-critical",
+              "inline-flex items-center justify-center gap-1.5 rounded-xl border border-bework-navy/15 bg-white/70 px-2 py-2 text-[11px] font-semibold text-bework-navy hover:bg-bework-soft-critical hover:border-bework-critical/25 hover:text-bework-critical",
               !collapsed && "flex-1",
             )}
             aria-label="Déconnexion"

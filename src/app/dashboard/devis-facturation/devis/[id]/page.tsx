@@ -18,6 +18,7 @@ import { VisitQuoteMeasurementsPanel } from "@/components/site-visits/VisitQuote
 import { ChantierHierarchyNav } from "@/components/chantier/ChantierHierarchyNav";
 import { resolveQuoteChantierNav } from "@/lib/chantier/quote-chantier-nav";
 import { loadQuoteDetailState } from "@/lib/chantier/load-quote-detail-sync";
+import { loadQuoteRevalidationEligibility } from "@/lib/preparation/quote-bridge/revalidate-quote-service";
 import { BackLink } from "@/components/ui/BackLink";
 
 export const dynamic = "force-dynamic";
@@ -55,7 +56,7 @@ export default async function DevisDetailPage({
   });
   const fromVisitId = fromVisit?.id ?? sp.fromVisit ?? null;
 
-  const [summary, invoiceStats, archive, settings, chantierNav, metreSync] =
+  const [summary, invoiceStats, archive, settings, chantierNav, metreSync, metreRevalidation] =
     await Promise.all([
     quote.status === "ACCEPTED" || quote.acceptedAt
       ? loadDealFinancialSummary(orgId, id)
@@ -80,6 +81,11 @@ export default async function DevisDetailPage({
       project: quote.project,
     }),
     loadQuoteDetailState(orgId, {
+      id: quote.id,
+      status: quote.status,
+      sourcePrepStudyId: quote.sourcePrepStudyId,
+    }),
+    loadQuoteRevalidationEligibility(orgId, {
       id: quote.id,
       status: quote.status,
       sourcePrepStudyId: quote.sourcePrepStudyId,
@@ -154,6 +160,7 @@ export default async function DevisDetailPage({
         minMarginPercent={minMarginPercent}
         finalizeIntent={finalizeIntent}
         metreSync={metreSync}
+        metreRevalidation={metreRevalidation}
       />
       {archive?.hasAcceptedVersion ? (
         <QuoteAcceptedArchiveCard

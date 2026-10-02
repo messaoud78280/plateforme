@@ -343,7 +343,7 @@ export function computeProjectNextAction(input: {
     return {
       code: "REVALIDATE_QUOTE",
       label: "Revalider le devis",
-      href: null,
+      href: state.quote.hrefHint,
       stepId: "devis",
       reason: "QUOTE_STALE_CTX03",
     };
@@ -352,7 +352,7 @@ export function computeProjectNextAction(input: {
     return {
       code: "FINALIZE_QUOTE",
       label: "Finaliser le devis",
-      href: null,
+      href: state.quote.hrefHint,
       stepId: "devis",
       reason: "QUOTE_IN_PROGRESS",
     };
@@ -627,7 +627,9 @@ export function computeProjectPreparationState(input: {
     secondaryLabel: null,
     applicable: true,
     countsAsCompleted: quoteKind === "DONE",
-    hrefHint: null,
+    hrefHint: quote
+      ? `/dashboard/devis-facturation/devis/${quote.id}`
+      : null,
   };
 
   let planningKind: PreparationStepKind = "ABSENT";

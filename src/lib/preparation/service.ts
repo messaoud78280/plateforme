@@ -277,6 +277,7 @@ const EVENT_LABELS: Record<string, string> = {
   UNVALIDATE_LINES: "Retrait de validation",
   VALIDATE_STUDY: "Validation finale du métré",
   INVALIDATE_STUDY: "Invalidation de la validation du métré",
+  REVALIDATE_QUOTE_METRE_SYNC: "Revalidation devis ↔ métré",
   UNDO_IMPORT: "Annulation d'import",
   TRANSFER_TO_QUOTE: "Transfert vers devis",
   TRANSFER_TO_SCHEDULE: "Génération planning de chantier",

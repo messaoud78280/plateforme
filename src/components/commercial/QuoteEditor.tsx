@@ -31,6 +31,7 @@ import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar
 import { getSectionCapability } from "@/lib/bework-patch/capability";
 import type { QuoteDetailState } from "@/lib/chantier/quote-detail-state";
 import { quoteDetailCommercialLabel } from "@/lib/chantier/quote-detail-state";
+import type { QuoteRevalidationEligibility } from "@/lib/preparation/quote-bridge/revalidate-metre-sync";
 import { QuoteClientNotesPreview } from "@/components/commercial/QuoteClientNotesPreview";
 import { IssuerEditModal } from "@/components/commercial/IssuerEditModal";
 import { ClientCoordsEditModal } from "@/components/commercial/ClientCoordsEditModal";
@@ -218,6 +219,7 @@ export function QuoteEditor({
   minMarginPercent = 15,
   finalizeIntent = false,
   metreSync = null,
+  metreRevalidation = null,
 }: {
   initial: QuoteDetail;
   canEdit: boolean;
@@ -228,6 +230,11 @@ export function QuoteEditor({
   finalizeIntent?: boolean;
   /** CTX-03 — sync métré pour ce devis uniquement (null = devis indépendant / non chargé). */
   metreSync?: QuoteDetailState | null;
+  /** Éligibilité revalidation métré (CTX-03) — calcul serveur. */
+  metreRevalidation?: (QuoteRevalidationEligibility & {
+    studyId: string | null;
+    transferId: string | null;
+  }) | null;
 }) {
   const router = useRouter();
   const [quote, setQuote] = useState(initial);
@@ -235,6 +242,16 @@ export function QuoteEditor({
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [busyStatus, setBusyStatus] = useState(false);
+  const [revalidateBusy, setRevalidateBusy] = useState(false);
+  const [metreSyncState, setMetreSyncState] = useState(metreSync);
+  const [revalidationState, setRevalidationState] = useState(metreRevalidation);
+
+  useEffect(() => {
+    setMetreSyncState(metreSync);
+  }, [metreSync]);
+  useEffect(() => {
+    setRevalidationState(metreRevalidation);
+  }, [metreRevalidation]);
   const [accepting, setAccepting] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [chatgptImportOpen, setChatgptImportOpen] = useState(false);
@@ -869,6 +886,72 @@ export function QuoteEditor({
     }
   }
 
+  async function revalidateMetreSync() {
+    if (revalidateBusy || !revalidationState?.eligible) return;
+    const label = revalidationState.actionLabel ?? "Revalider le devis";
+    if (
+      !confirm(
+        `${label}\n\n${revalidationState.userMessage ?? "Cette action confirme que le devis a été contrôlé par rapport à la version actuelle du métré."}`,
+      )
+    ) {
+      return;
+    }
+    if (
+      revalidationState.currentStudyVersion == null ||
+      revalidationState.transferStudyVersion == null
+    ) {
+      setError("Versions métré indisponibles — rechargez la page.");
+      return;
+    }
+    setRevalidateBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/commercial/quotes/${quote.id}/revalidate-metre-sync`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            expectedQuoteVersion: version?.versionNumber ?? 1,
+            expectedStudyVersion: revalidationState.currentStudyVersion,
+            expectedTransferStudyVersion: revalidationState.transferStudyVersion,
+          }),
+        },
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        if (data.code === "REVALIDATION_STALE") {
+          setError(data.error || "État obsolète — rechargez la page.");
+          router.refresh();
+          return;
+        }
+        throw new Error(data.error || "Revalidation impossible");
+      }
+      if (data.metreSync) setMetreSyncState(data.metreSync);
+      if (data.eligibility) {
+        setRevalidationState((prev) =>
+          prev
+            ? {
+                ...prev,
+                ...data.eligibility,
+              }
+            : prev,
+        );
+      }
+      setChatgptToast(
+        quote.status === "VALIDATED"
+          ? "Devis revalidé — référence métré à jour."
+          : "Référence métré mise à jour.",
+      );
+      window.setTimeout(() => setChatgptToast(null), 6000);
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Revalidation impossible");
+    } finally {
+      setRevalidateBusy(false);
+    }
+  }
+
   async function createNewVersion() {
     if (
       !confirm(
@@ -1119,36 +1202,68 @@ export function QuoteEditor({
           chiffrage puis validez pour marquer l’étape Prêt sur le chantier.
         </div>
       ) : null}
-      {metreSync?.syncMessage ? (
+      {metreSyncState?.syncMessage ? (
         <div
           className={cn(
             "mx-auto mb-3 max-w-[1500px] rounded-xl px-4 py-2.5 text-[13px]",
-            metreSync.needsRevalidation
+            metreSyncState.needsRevalidation
               ? "border border-amber-300 bg-amber-50 text-amber-950"
               : "border border-orange-200 bg-orange-50 text-orange-950",
           )}
         >
-          <span className="font-semibold">{metreSync.primaryLabel}</span>
-          {" — "}
-          {metreSync.syncMessage}
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="font-semibold">{metreSyncState.primaryLabel}</span>
+              {" — "}
+              {metreSyncState.syncMessage}
+              {revalidationState?.reason === "QUANTITY_DIFFS" &&
+              revalidationState.userMessage ? (
+                <p className="mt-1 text-[12.5px] text-amber-900">
+                  {revalidationState.userMessage}
+                </p>
+              ) : null}
+              {revalidationState?.reason === "STATUS_LOCKED" &&
+              revalidationState.userMessage ? (
+                <p className="mt-1 text-[12.5px] text-amber-900">
+                  {revalidationState.userMessage}
+                </p>
+              ) : null}
+              {revalidationState?.reason === "FINANCIAL_LOCKED" &&
+              revalidationState.userMessage ? (
+                <p className="mt-1 text-[12.5px] text-amber-900">
+                  {revalidationState.userMessage}
+                </p>
+              ) : null}
+            </div>
+            {revalidationState?.eligible && revalidationState.actionLabel ? (
+              <button
+                type="button"
+                disabled={revalidateBusy}
+                onClick={() => void revalidateMetreSync()}
+                className="shrink-0 rounded-lg bg-emerald-700 px-3.5 py-2 text-[12.5px] font-semibold text-white disabled:opacity-50"
+              >
+                {revalidateBusy ? "…" : revalidationState.actionLabel}
+              </button>
+            ) : null}
+          </div>
         </div>
       ) : null}
       {/* Barre sticky */}
       <div className="sticky top-12 z-30 -mx-1 mb-4 border-b border-slate-200/80 bg-white/95 px-1 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            {metreSync?.needsRevalidation ||
-            metreSync?.syncState === "A_VERIFIER" ? (
+            {metreSyncState?.needsRevalidation ||
+            metreSyncState?.syncState === "A_VERIFIER" ? (
               <>
                 <span
                   className={cn(
                     "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
-                    metreSync.primaryVariant === "alert"
+                    metreSyncState.primaryVariant === "alert"
                       ? "bg-amber-100 text-amber-950 ring-1 ring-amber-300/80"
                       : "bg-orange-50 text-orange-900 ring-1 ring-orange-200",
                   )}
                 >
-                  {metreSync.primaryLabel}
+                  {metreSyncState.primaryLabel}
                 </span>
                 <span
                   className={cn(
@@ -1157,7 +1272,7 @@ export function QuoteEditor({
                     ),
                   )}
                 >
-                  {metreSync.commercialLabel}
+                  {metreSyncState.commercialLabel}
                 </span>
               </>
             ) : (
@@ -1169,11 +1284,11 @@ export function QuoteEditor({
                     ),
                   )}
                 >
-                  {metreSync
-                    ? metreSync.commercialLabel
+                  {metreSyncState
+                    ? metreSyncState.commercialLabel
                     : quoteDetailCommercialLabel(quote.status)}
                 </span>
-                {metreSync?.secondaryLabel === "À jour" ? (
+                {metreSyncState?.secondaryLabel === "À jour" ? (
                   <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-800 ring-1 ring-emerald-200/80">
                     À jour
                   </span>
@@ -1200,6 +1315,16 @@ export function QuoteEditor({
             ) : null}
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {revalidationState?.eligible && revalidationState.actionLabel ? (
+              <button
+                type="button"
+                disabled={revalidateBusy}
+                onClick={() => void revalidateMetreSync()}
+                className="rounded-lg bg-emerald-700 px-3.5 py-2 text-xs font-semibold text-white disabled:opacity-50"
+              >
+                {revalidateBusy ? "…" : revalidationState.actionLabel}
+              </button>
+            ) : null}
             {canEdit && quote.project ? (
               <BeworkPatchToolbar
                 section="QUOTE"

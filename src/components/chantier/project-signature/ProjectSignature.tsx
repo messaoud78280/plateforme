@@ -100,7 +100,13 @@ export function ProjectSignature({
 
         {crafts.length > 0 ? (
           <div className="bw-psig__domains">
-            <p className="bw-psig__domains-label">Domaines du chantier</p>
+            <p className="bw-psig__domains-label">
+              {crafts.every((c) => c.key.startsWith("LOT:"))
+                ? "Lots du chantier"
+                : crafts.some((c) => c.key.startsWith("LOT:"))
+                  ? "Domaines et lots"
+                  : "Domaines du chantier"}
+            </p>
             <ProjectTradeBadgeList crafts={crafts} max={8} size="md" />
           </div>
         ) : null}

@@ -154,7 +154,22 @@ export type ProjectScopeCraftInput = {
   code: string;
   name: string;
   status?: string | null;
+  description?: string | null;
+  referenceQuoteId?: string | null;
 };
+
+/** Lot issu d’une section devis — ne pas dériver un métier depuis le libellé. */
+export function isLotScopeForSignature(scope: ProjectScopeCraftInput): boolean {
+  const desc = scope.description?.trim() ?? "";
+  if (/Lot créé depuis le devis/i.test(desc) && /section\s+«/i.test(desc)) {
+    return true;
+  }
+  const name = scope.name?.trim() ?? "";
+  if (/^Lot\s+\d+/i.test(name)) return true;
+  const code = scope.code?.trim().toUpperCase() ?? "";
+  if (/^L\d{1,3}$/.test(code) && /^Lot\b/i.test(name)) return true;
+  return false;
+}
 
 function toneForKey(key: string, labelOverride?: string): CraftSignatureTone {
   const base = CRAFT_SIGNATURE_PALETTE[key] ?? FALLBACK;
@@ -236,8 +251,8 @@ export function craftToneFromKey(key: string, scopeName?: string): CraftSignatur
 }
 
 /**
- * Domaines du chantier à partir des ProjectScope actifs.
- * Déduplique par clé craft, puis ordre déterministe (palette) pour liste = détail.
+ * Domaines métier du chantier (scopes non-lot).
+ * Les scopes LOT (issus de sections devis) sont exclus — voir resolveLotsFromScopes.
  */
 export function resolveCraftsFromScopes(
   scopes: ProjectScopeCraftInput[],
@@ -247,13 +262,59 @@ export function resolveCraftsFromScopes(
 
   for (const scope of scopes) {
     if (scope.status && scope.status !== "ACTIVE") continue;
+    if (isLotScopeForSignature(scope)) continue;
     const key = resolveCraftKeyFromScope(scope);
     if (seen.has(key)) continue;
     seen.add(key);
     out.push(craftToneFromKey(key, scope.name));
   }
 
-  return out.sort((a, b) => craftSortRank(a.key) - craftSortRank(b.key) || a.label.localeCompare(b.label, "fr"));
+  return out.sort(
+    (a, b) =>
+      craftSortRank(a.key) - craftSortRank(b.key) ||
+      a.label.localeCompare(b.label, "fr"),
+  );
+}
+
+/**
+ * Lots du chantier (scopes issus de sections devis / libellés Lot NN).
+ * Affichés tels quels — jamais remappés en « Démolition » via mot-clé.
+ */
+export function resolveLotsFromScopes(
+  scopes: ProjectScopeCraftInput[],
+): CraftSignatureTone[] {
+  const seen = new Set<string>();
+  const out: CraftSignatureTone[] = [];
+
+  for (const scope of scopes) {
+    if (scope.status && scope.status !== "ACTIVE") continue;
+    if (!isLotScopeForSignature(scope)) continue;
+    const key = `LOT:${scope.code || normalizeBeWorkMatchString(scope.name).slice(0, 24)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({
+      key,
+      label: scope.name.trim() || scope.code,
+      accent: FALLBACK.accent,
+      soft: FALLBACK.soft,
+      border: FALLBACK.border,
+    });
+  }
+
+  return out;
+}
+
+/**
+ * Signature affichable : métiers d’abord, puis lots si aucun métier
+ * (évite une barre vide sur chantiers 100 % lots devis).
+ */
+export function resolveSignatureDomainsFromScopes(
+  scopes: ProjectScopeCraftInput[],
+): { crafts: CraftSignatureTone[]; lots: CraftSignatureTone[]; display: CraftSignatureTone[] } {
+  const crafts = resolveCraftsFromScopes(scopes);
+  const lots = resolveLotsFromScopes(scopes);
+  const display = crafts.length > 0 ? [...crafts, ...lots] : lots;
+  return { crafts, lots, display };
 }
 
 const CRAFT_SORT_ORDER = [

@@ -18,7 +18,7 @@ import {
 import { buildProjectPresentation } from "@/lib/chantier/party-labels";
 import { buildPreparationSnapshot } from "@/lib/chantier/preparation-state";
 import {
-  resolveCraftsFromScopes,
+  resolveSignatureDomainsFromScopes,
   type CraftSignatureTone,
 } from "@/lib/chantier/craft-signature";
 
@@ -793,13 +793,14 @@ export async function loadProjectsPortfolio(opts: {
       const otherCount = primaryReason ? Math.max(0, att.n - 1) : 0;
 
       const projectScopes = scopeRows.filter((s) => s.projectId === p.id);
-      const crafts = resolveCraftsFromScopes(
+      const crafts = resolveSignatureDomainsFromScopes(
         projectScopes.map((s) => ({
           code: s.code,
           name: s.name,
           status: s.status,
+          referenceQuoteId: s.referenceQuoteId,
         })),
-      );
+      ).display;
 
       const preparation = buildPreparationSnapshot({
         projectId: p.id,

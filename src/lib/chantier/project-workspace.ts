@@ -32,6 +32,19 @@ import {
   quotePreparationStateLabel,
   quoteWorkflowActionLabel,
 } from "@/lib/chantier/quote-workflow-status";
+import {
+  classifyFollowUpRelation,
+  classifyPlanRelation,
+  classifyQuoteRelation,
+  classifyStudyRelation,
+  matchQuoteSectionForScope,
+  relationBadgeLabel,
+  sumSectionSellHt,
+  type QuoteSectionAmount,
+  type ScopeCardRelation,
+} from "@/lib/chantier/scope-card-relation";
+import { STATUS_LABELS } from "@/lib/follow-up/types";
+import type { FollowUpSheetStatus } from "@prisma/client";
 
 function cardStatusFromQuote(
   status: string | null | undefined,
@@ -67,6 +80,10 @@ export type CardStatusLabel =
 
 export type WorkspaceCardKind = "plan" | "metre" | "devis" | "planning" | "suivi";
 
+export type {
+  ScopeCardRelation,
+} from "@/lib/chantier/scope-card-relation";
+
 export type WorkspaceCard = {
   kind: WorkspaceCardKind;
   label: string;
@@ -80,6 +97,15 @@ export type WorkspaceCard = {
   ready: boolean;
   syncHint: string | null;
   isReference: boolean;
+  /**
+   * Provenance vs scope courant (vue lot).
+   * Absent sur les cartes purement globales chantier.
+   */
+  relation?: import("@/lib/chantier/scope-card-relation").ScopeCardRelation;
+  /** Badge UI : « Global chantier », « Section devis », … */
+  relationLabel?: string | null;
+  /** Ligne secondaire (ex. total devis multi-lots). */
+  secondaryDetail?: string | null;
   planMeta?: {
     studyId: string | null;
     chantierFileId: string | null;
@@ -325,25 +351,33 @@ export function formatUnscopedHumanMessage(u: {
 function buildScopeCards(input: {
   projectId: string;
   scopeId: string;
+  scopeName: string;
   study: {
     id: string;
     title: string;
     version: number;
+    scopeId: string | null;
     sourcesJson: unknown;
     _count: { lines: number };
   } | null;
+  /** true si study vient d’un fallback chantier (pas rattaché au scope). */
+  studyIsGlobalFallback: boolean;
   quote: {
     id: string;
     number: string;
     totalSellHt: unknown;
     isDemonstration: boolean;
     status: string;
+    scopeId: string | null;
   } | null;
   /** Nombre total de devis rattachés au lot (référence + autres). */
   quotesCount?: number;
+  /** Section devis associée au lot (si multi-lots). */
+  quoteSection: QuoteSectionAmount | null;
   plan: {
     id: string;
     studyId: string;
+    scopeId: string | null;
     title: string;
     revisionKind: string;
     status: string;
@@ -375,6 +409,12 @@ function buildScopeCards(input: {
   /** Métré / planning chantier (fallback — ne jamais renvoyer vers Nouvelle visite). */
   fallbackStudyId?: string | null;
   fallbackPlanHref?: string | null;
+  /** Suivi chantier global (FollowUpSheet n’a pas de scopeId). */
+  globalFollowUp?: {
+    id: string;
+    title: string;
+    status: string;
+  } | null;
 }): { cards: WorkspaceCard[]; alerts: ScopeWorkspace["alerts"] } {
   const alerts: ScopeWorkspace["alerts"] = [];
   const study = input.study;
@@ -385,6 +425,45 @@ function buildScopeCards(input: {
   const plan = input.plan;
   const planSource = input.planSource;
   const primary = planSource?.source ?? primaryPrepSource(study?.sourcesJson ?? null);
+  const section = input.quoteSection;
+  const globalFollowUp = input.globalFollowUp ?? null;
+
+  const metreRelation = study
+    ? classifyStudyRelation({
+        studyScopeId: study.scopeId,
+        currentScopeId: input.scopeId,
+        usedFallback: input.studyIsGlobalFallback || study.scopeId !== input.scopeId,
+      })
+    : fallbackStudyId
+      ? ("GLOBAL_FALLBACK" as const)
+      : ("ABSENT" as const);
+
+  const quoteRelation = classifyQuoteRelation({
+    hasQuote: !!quote,
+    sectionMatched: !!section,
+    quoteScopeId: quote?.scopeId,
+    currentScopeId: input.scopeId,
+  });
+
+  const planRelation = classifyPlanRelation({
+    planScopeId: plan?.scopeId,
+    currentScopeId: input.scopeId,
+    hasPlan: !!plan,
+  });
+
+  const planSourceRelation: ScopeCardRelation =
+    !primary && !planSource
+      ? metreRelation === "GLOBAL_FALLBACK"
+        ? "GLOBAL_FALLBACK"
+        : "ABSENT"
+      : metreRelation === "SCOPE_SPECIFIC"
+        ? "SCOPE_SPECIFIC"
+        : "GLOBAL_FALLBACK";
+
+  const suiviRelation = classifyFollowUpRelation({
+    hasScopeSpecific: false,
+    hasGlobal: !!globalFollowUp,
+  });
 
   const gedHref = `/dashboard/documents?projectId=${encodeURIComponent(input.projectId)}`;
   const openHref = planSource?.file
@@ -392,7 +471,6 @@ function buildScopeCards(input: {
     : null;
   const fileMissing = !planSource || planSource.fileMissing;
 
-  const metreSync: SyncState = study ? "A_JOUR" : "ABSENT";
   let devisHint: string | null = null;
 
   // CTX-03 — sync devis / métré (par devis, via transfer + diffs quantité).
@@ -410,7 +488,10 @@ function buildScopeCards(input: {
   if (devisSync === "MODIFICATION_DISPONIBLE") {
     alerts.push({
       level: "warning",
-      message: "Le devis doit être revalidé — le métré a évolué.",
+      message:
+        metreRelation === "GLOBAL_FALLBACK"
+          ? "Le devis doit être revalidé — le métré global du chantier a évolué."
+          : "Le devis doit être revalidé — le métré a évolué.",
     });
   } else if (devisSync === "A_VERIFIER" && quote && quoteProv?.hasMetreProvenance) {
     alerts.push({
@@ -434,7 +515,10 @@ function buildScopeCards(input: {
   if (planningSync === "MODIFICATION_DISPONIBLE") {
     alerts.push({
       level: "warning",
-      message: "Le planning doit être recalculé — le métré a évolué.",
+      message:
+        planRelation === "GLOBAL_FALLBACK" || metreRelation === "GLOBAL_FALLBACK"
+          ? "Le planning global du chantier doit être recalculé — le métré global a évolué."
+          : "Le planning doit être recalculé — le métré a évolué.",
     });
   } else if (planningSync === "A_VERIFIER" && plan) {
     alerts.push({
@@ -464,7 +548,7 @@ function buildScopeCards(input: {
   } else if (!study) {
     alerts.push({
       level: "info",
-      message: "Aucun métré rattaché à ce lot de travaux.",
+      message: "Aucun métré spécifique n’est rattaché à ce lot.",
     });
   }
   if (primary && fileMissing) {
@@ -479,7 +563,9 @@ function buildScopeCards(input: {
     ? planSource.displayTitle
     : primary
       ? planSourceDisplayTitle(primary)
-      : "Aucun plan";
+      : planSourceRelation === "GLOBAL_FALLBACK"
+        ? "Aucun plan source global rattaché"
+        : "Aucun plan";
 
   const planReady = !!(primary && !fileMissing && planSource?.file);
   const planSync: SyncState = !primary ? "ABSENT" : fileMissing ? "A_VERIFIER" : "A_JOUR";
@@ -493,10 +579,20 @@ function buildScopeCards(input: {
         ? `À partir du ${startLabel}`
         : null;
 
+  const quoteTotalHt = quote ? euro(d(quote.totalSellHt)) : null;
+  const sectionTotalHt = section ? euro(section.totalSellHt) : null;
+  const isMultiLotQuote = !!quote && (!!section || quotesCount > 1);
+
+  const followUpStatusLabel = globalFollowUp
+    ? STATUS_LABELS[globalFollowUp.status as FollowUpSheetStatus] ??
+      globalFollowUp.status
+    : null;
+
   const cards: WorkspaceCard[] = [
     {
       kind: "plan",
-      label: "Plan",
+      label:
+        planSourceRelation === "GLOBAL_FALLBACK" ? "Plan · Global chantier" : "Plan",
       title: planTitle,
       href: planReady
         ? openHref
@@ -507,17 +603,28 @@ function buildScopeCards(input: {
         ? [rev ? `Révision ${rev}` : null, "PDF disponible"].filter(Boolean).join(" · ")
         : primary
           ? "Fichier à rattacher"
-          : "À ajouter",
+          : planSourceRelation === "GLOBAL_FALLBACK"
+            ? "Aucun plan source global rattaché"
+            : "À ajouter",
       syncState: planSync,
       statusLabel: statusLabelFromSync(planSync, "plan"),
-      actionLabel: planReady ? "Ouvrir" : "Ajouter un plan",
+      actionLabel: planReady
+        ? "Ouvrir"
+        : planSourceRelation === "GLOBAL_FALLBACK"
+          ? "Gérer le plan du chantier"
+          : "Ajouter un plan",
       ready: planReady,
       syncHint: fileMissing
         ? "Plan source identifié mais fichier non rattaché"
         : rev
           ? `Révision figée pour le métré : ${rev}`
-          : null,
+          : planSourceRelation === "GLOBAL_FALLBACK"
+            ? "Plan au niveau chantier — pas uniquement ce lot"
+            : null,
       isReference: false,
+      relation: planSourceRelation,
+      relationLabel: relationBadgeLabel(planSourceRelation),
+      secondaryDetail: null,
       planMeta: {
         studyId: study?.id ?? null,
         chantierFileId: planSource?.file?.id ?? null,
@@ -536,8 +643,14 @@ function buildScopeCards(input: {
     },
     {
       kind: "metre",
-      label: "Métré",
-      title: study?.title ?? (fallbackStudyId ? "Métré chantier" : "Non créé"),
+      label:
+        metreRelation === "GLOBAL_FALLBACK"
+          ? "Métré · Global chantier"
+          : "Métré",
+      title:
+        metreRelation === "GLOBAL_FALLBACK"
+          ? "Métré global du chantier"
+          : study?.title ?? (fallbackStudyId ? "Métré chantier" : "Non créé"),
       href: effectiveStudyId
         ? `/dashboard/visites-metres/etudes/${effectiveStudyId}`
         : null,
@@ -545,7 +658,9 @@ function buildScopeCards(input: {
         ? [
             `Version ${study.version}`,
             study._count.lines > 0
-              ? `${study._count.lines} quantité${study._count.lines > 1 ? "s" : ""}`
+              ? metreRelation === "GLOBAL_FALLBACK"
+                ? `${study._count.lines} quantité${study._count.lines > 1 ? "s" : ""} au total`
+                : `${study._count.lines} quantité${study._count.lines > 1 ? "s" : ""}`
               : null,
           ]
             .filter(Boolean)
@@ -560,29 +675,55 @@ function buildScopeCards(input: {
       ),
       actionLabel: effectiveStudyId ? "Ouvrir" : "Générer le métré chantier",
       ready: !!(study || fallbackStudyId),
-      syncHint: null,
+      syncHint:
+        metreRelation === "GLOBAL_FALLBACK"
+          ? "Aucun métré spécifique n’est rattaché à ce lot."
+          : null,
       isReference: !!(study && input.refs.studyId === study.id),
+      relation: metreRelation,
+      relationLabel: relationBadgeLabel(metreRelation),
+      secondaryDetail:
+        metreRelation === "GLOBAL_FALLBACK"
+          ? "Ouverture du métré chantier (pas un métré du lot)."
+          : null,
     },
     {
       kind: "devis",
-      label: "Devis",
-      title: quote?.number ?? "Non créé",
+      label:
+        quoteRelation === "SECTION_SPECIFIC"
+          ? "Devis du lot"
+          : quoteRelation === "GLOBAL_FALLBACK"
+            ? "Devis · Global chantier"
+            : "Devis",
+      title:
+        quoteRelation === "SECTION_SPECIFIC" && section
+          ? sectionTotalHt ?? input.scopeName
+          : quote?.number ?? "Non créé",
       href: quote
         ? `/dashboard/devis-facturation/devis/${quote.id}`
         : study
           ? `/dashboard/visites-metres/etudes/${study.id}`
           : `/dashboard/devis-facturation/devis/nouveau?projectId=${encodeURIComponent(input.projectId)}`,
-      detail: quote
-        ? [
-            quotePreparationStateLabel(quote.status),
-            euro(d(quote.totalSellHt)),
-            quotesCount > 1
-              ? `réf. · +${quotesCount - 1} autre${quotesCount - 1 > 1 ? "s" : ""}`
-              : null,
-          ]
-            .filter(Boolean)
-            .join(" · ") || null
-        : "À générer",
+      detail:
+        quoteRelation === "SECTION_SPECIFIC" && quote && section
+          ? [
+              `Section du devis multi-lots ${quote.number}`,
+              quotePreparationStateLabel(quote.status),
+            ]
+              .filter(Boolean)
+              .join(" · ")
+          : quote
+            ? [
+                isMultiLotQuote ? "Devis multi-lots" : null,
+                quotePreparationStateLabel(quote.status),
+                quoteRelation === "SECTION_SPECIFIC" ? null : quoteTotalHt,
+                quotesCount > 1
+                  ? `réf. · +${quotesCount - 1} autre${quotesCount - 1 > 1 ? "s" : ""}`
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(" · ") || null
+            : "À générer",
       syncState: devisSync,
       statusLabel: quote
         ? devisSync === "MODIFICATION_DISPONIBLE" || devisSync === "A_VERIFIER"
@@ -597,15 +738,31 @@ function buildScopeCards(input: {
       ready: isQuotePreparationReady(quote?.status),
       syncHint:
         devisHint ??
-        (quotesCount > 1
-          ? `${quotesCount} devis sur ce lot — ${quote?.number ?? "—"} en référence`
-          : null),
+        (quoteRelation === "SECTION_SPECIFIC"
+          ? "Montant = total de la section du lot — le devis multi-lots reste unique."
+          : quotesCount > 1
+            ? `${quotesCount} devis sur ce lot — ${quote?.number ?? "—"} en référence`
+            : null),
       isReference: !!(quote && input.refs.quoteId === quote.id),
+      relation: quoteRelation,
+      relationLabel: relationBadgeLabel(quoteRelation),
+      secondaryDetail:
+        quoteRelation === "SECTION_SPECIFIC" && quoteTotalHt
+          ? `Total du devis ${quote?.number ?? ""} : ${quoteTotalHt}`
+          : null,
     },
     {
       kind: "planning",
-      label: "Planning",
-      title: plan ? planningDisplayTitle(plan) : "Non créé",
+      label:
+        planRelation === "GLOBAL_FALLBACK"
+          ? "Planning · Global chantier"
+          : "Planning",
+      title:
+        planRelation === "GLOBAL_FALLBACK"
+          ? "Planning global du chantier"
+          : plan
+            ? planningDisplayTitle(plan)
+            : "Non créé",
       href:
         plan && (study || fallbackStudyId)
           ? `/dashboard/visites-metres/etudes/${plan.studyId}/planning/${plan.id}`
@@ -621,25 +778,42 @@ function buildScopeCards(input: {
           : "À générer au niveau chantier",
       syncState: plan ? planningSync : "ABSENT",
       statusLabel: statusLabelFromSync(plan ? planningSync : "ABSENT", "planning"),
-      actionLabel: plan
-        ? "Ouvrir"
-        : "Générer le planning chantier",
+      actionLabel: plan ? "Ouvrir" : "Générer le planning chantier",
       ready: !!plan,
-      syncHint: planningHint ?? "Un seul planning pour tout le chantier.",
+      syncHint:
+        planRelation === "GLOBAL_FALLBACK"
+          ? "Aucun planning spécifique n’est rattaché à ce lot."
+          : planningHint ?? "Un seul planning pour tout le chantier.",
       isReference: !!(plan && input.refs.planId === plan.id),
+      relation: planRelation,
+      relationLabel: relationBadgeLabel(planRelation),
+      secondaryDetail:
+        planRelation === "GLOBAL_FALLBACK"
+          ? "Ouverture du planning chantier (pas un planning du lot)."
+          : null,
     },
     {
       kind: "suivi",
-      label: "Suivi",
-      title: "Non démarré",
-      href: `/dashboard/projets/${input.projectId}/preparation/${input.scopeId}`,
-      detail: "Préparation du suivi chantier",
+      label: "Suivi du lot",
+      title:
+        suiviRelation === "ABSENT"
+          ? "Aucun suivi spécifique"
+          : "Aucun suivi spécifique",
+      href: globalFollowUp
+        ? `/dashboard/fiches-suivi/${globalFollowUp.id}`
+        : `/dashboard/projets/${input.projectId}`,
+      detail: null,
       syncState: "ABSENT",
-      statusLabel: "Non démarré",
-      actionLabel: "Préparer le suivi",
+      statusLabel: "À préparer",
+      actionLabel: globalFollowUp ? "Voir le suivi chantier" : "Retour chantier",
       ready: false,
       syncHint: null,
       isReference: false,
+      relation: suiviRelation,
+      relationLabel: null,
+      secondaryDetail: globalFollowUp
+        ? `Suivi global du chantier : ${followUpStatusLabel ?? globalFollowUp.status}`
+        : "Aucun suivi chantier démarré.",
     },
   ];
 
@@ -747,12 +921,21 @@ async function getProjectWorkspaceUncached(
       projectId: true,
       scopeId: true,
       status: true,
+      currentVersionId: true,
     },
     orderBy: { updatedAt: "desc" },
   });
 
   const quoteIdsForProv = quotes.map((q) => q.id);
-  const [quoteTransfers, quoteLinks, takeoffQtyRows] = await Promise.all([
+  const versionIdsForSections = [
+    ...new Set(
+      quotes
+        .map((q) => q.currentVersionId)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+  const [quoteTransfers, quoteLinks, takeoffQtyRows, quoteSectionsRaw] =
+    await Promise.all([
     quoteIdsForProv.length
       ? prisma.prepQuoteTransfer.findMany({
           where: { organizationId: orgId, quoteId: { in: quoteIdsForProv } },
@@ -789,7 +972,51 @@ async function getProjectWorkspaceUncached(
         declaredQuantity: true,
       },
     }),
+    versionIdsForSections.length
+      ? prisma.commercialQuoteSection.findMany({
+          where: {
+            organizationId: orgId,
+            versionId: { in: versionIdsForSections },
+          },
+          select: {
+            id: true,
+            versionId: true,
+            title: true,
+            sortOrder: true,
+            lines: {
+              select: {
+                lineSellHt: true,
+                isOptional: true,
+                kind: true,
+              },
+            },
+          },
+          orderBy: { sortOrder: "asc" },
+        })
+      : Promise.resolve([]),
   ]);
+
+  /** quoteId → sections avec totaux HT (batch, pas de N+1). */
+  const sectionsByQuoteId = new Map<string, QuoteSectionAmount[]>();
+  {
+    const versionToQuoteId = new Map<string, string>();
+    for (const q of quotes) {
+      if (q.currentVersionId) versionToQuoteId.set(q.currentVersionId, q.id);
+    }
+    for (const sec of quoteSectionsRaw) {
+      const quoteId = versionToQuoteId.get(sec.versionId);
+      if (!quoteId) continue;
+      const list = sectionsByQuoteId.get(quoteId) ?? [];
+      list.push({
+        sectionId: sec.id,
+        title: sec.title,
+        sortOrder: sec.sortOrder,
+        totalSellHt: sumSectionSellHt(sec.lines),
+        lineCount: sec.lines.length,
+      });
+      sectionsByQuoteId.set(quoteId, list);
+    }
+  }
 
   const latestTransferByQuoteId = new Map<
     string,
@@ -1384,10 +1611,14 @@ async function getProjectWorkspaceUncached(
 
   const scopeWorkspaces: ScopeWorkspace[] = scopes.map((scope) => {
     const scopeStudies = studies.filter((s) => s.scopeId === scope.id);
-    const refStudy =
+    const studyFromScope =
       scopeStudies.find((s) => s.id === scope.referenceStudyId) ??
       studyById(scope.referenceStudyId) ??
       scopeStudies[0] ??
+      null;
+    const studyIsGlobalFallback = !studyFromScope;
+    const refStudy =
+      studyFromScope ??
       // Fallback lecture : même métré chantier affiché depuis le lot (sans duplication).
       (studies.length === 1 ? studies[0]! : null) ??
       globalStudy;
@@ -1403,6 +1634,18 @@ async function getProjectWorkspaceUncached(
       scopeQuotes[0] ??
       globalQuote ??
       null;
+
+    const quoteSection =
+      refQuote != null
+        ? matchQuoteSectionForScope(
+            {
+              name: scope.name,
+              code: scope.code,
+              description: scope.description,
+            },
+            sectionsByQuoteId.get(refQuote.id) ?? [],
+          )
+        : null;
 
     const scopePlans = plans.filter(
       (p) =>
@@ -1421,9 +1664,14 @@ async function getProjectWorkspaceUncached(
     const { cards, alerts } = buildScopeCards({
       projectId,
       scopeId: scope.id,
+      scopeName: scope.name,
       study: refStudy,
+      studyIsGlobalFallback:
+        studyIsGlobalFallback ||
+        (refStudy != null && refStudy.scopeId !== scope.id),
       quote: refQuote,
       quotesCount: Math.max(scopeQuotes.length, refQuote ? 1 : 0),
+      quoteSection,
       plan: refPlan,
       planLinkedStudyVersion: refPlan
         ? studyById(refPlan.studyId)?.version ?? null
@@ -1439,6 +1687,7 @@ async function getProjectWorkspaceUncached(
       },
       fallbackStudyId: globalStudy?.id ?? null,
       fallbackPlanHref: globalPlanHref,
+      globalFollowUp: followUp,
     });
     const ready = cards.filter((c) => c.ready).length;
 
@@ -1456,7 +1705,7 @@ async function getProjectWorkspaceUncached(
         {
           level: "info" as const,
           message:
-            "Phase / filtre du dossier — les éléments ouverts sont ceux du chantier (pas de doublon).",
+            "Vue du lot dans le dossier chantier — les éléments globaux sont signalés comme tels.",
         },
       ],
       progress: { ready, total: Math.max(cards.length, 1) },

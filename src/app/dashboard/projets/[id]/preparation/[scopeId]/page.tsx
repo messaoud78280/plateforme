@@ -77,11 +77,11 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
 
       <div className="rounded-2xl border border-[#1e3a5f]/15 bg-[rgba(30,58,95,0.03)] px-4 py-3">
         <p className="text-[13px] font-semibold text-[#1e3a5f]">
-          Phase du dossier chantier — filtre, pas un nouveau chantier
+          Vue du lot dans le dossier chantier
         </p>
         <p className="mt-1 text-[12.5px] text-slate-600">
-          Affiche les éléments existants liés à « {scope.name} » (métré, devis,
-          planning, plan source). Aucune duplication.
+          Les éléments propres à ce lot sont affichés ici. Les éléments utilisés
+          à l’échelle du chantier sont signalés comme globaux.
         </p>
         <Link
           href={chantierProjectHref(projectId)}
@@ -93,18 +93,45 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((card) => {
+          const isGlobal = card.relation === "GLOBAL_FALLBACK";
           const body = (
             <>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                {card.label}
-                {card.ready ? " · prêt" : ""}
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                  {card.label}
+                  {card.ready && !isGlobal ? " · prêt" : ""}
+                </p>
+                {card.relationLabel ? (
+                  <span
+                    className={cn(
+                      "rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+                      isGlobal
+                        ? "bg-slate-100 text-slate-600"
+                        : card.relation === "SECTION_SPECIFIC"
+                          ? "bg-[rgba(30,58,95,0.08)] text-[#1e3a5f]"
+                          : "bg-slate-50 text-slate-500",
+                    )}
+                  >
+                    {card.relationLabel}
+                  </span>
+                ) : null}
+              </div>
               <p className="mt-1 line-clamp-2 text-[15px] font-semibold text-[#1e3a5f]">
                 {card.title}
               </p>
               {card.detail ? (
-                <p className="mt-1 line-clamp-2 text-[12px] text-slate-600">
+                <p className="mt-1 line-clamp-3 text-[12px] text-slate-600">
                   {card.detail}
+                </p>
+              ) : null}
+              {card.secondaryDetail ? (
+                <p className="mt-1 line-clamp-2 text-[11.5px] text-slate-500">
+                  {card.secondaryDetail}
+                </p>
+              ) : null}
+              {card.syncHint ? (
+                <p className="mt-1.5 line-clamp-2 text-[11.5px] text-amber-800/80">
+                  {card.syncHint}
                 </p>
               ) : null}
               {card.kind === "plan" && card.planMeta?.openHref ? (
@@ -125,7 +152,10 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
               key={`${card.kind}-${card.title}`}
               href={href}
               className={cn(
-                "rounded-2xl border border-[#1e3a5f]/10 bg-white p-4 transition hover:border-[#1e3a5f]/30",
+                "rounded-2xl border bg-white p-4 transition hover:border-[#1e3a5f]/30",
+                isGlobal
+                  ? "border-slate-200 border-dashed"
+                  : "border-[#1e3a5f]/10",
               )}
             >
               {body}
@@ -133,7 +163,12 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
           ) : (
             <div
               key={`${card.kind}-${card.title}`}
-              className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 opacity-80"
+              className={cn(
+                "rounded-2xl border bg-white p-4 opacity-90",
+                isGlobal
+                  ? "border-dashed border-slate-200"
+                  : "border-dashed border-slate-200",
+              )}
             >
               {body}
             </div>

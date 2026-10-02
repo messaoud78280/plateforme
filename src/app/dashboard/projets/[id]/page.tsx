@@ -71,7 +71,7 @@ import { ProjectSignature } from "@/components/chantier/project-signature/Projec
 import { ProjectStatusBadge } from "@/components/chantier/project-signature/ProjectStatusBadge";
 import {
   projectSignatureRef,
-  resolveCraftsFromScopes,
+  resolveSignatureDomainsFromScopes,
 } from "@/lib/chantier/craft-signature";
 import { CHANTIER_FILE_STATUS_LABELS } from "@/lib/chantier-dossier/constants";
 export default async function ProjetDetailPage({
@@ -493,7 +493,8 @@ export default async function ProjetDetailPage({
   ].slice(0, 8);
 
   const responsibleLabel = presentation.responsibleLabel;
-  const craftSignatures = resolveCraftsFromScopes(project.projectScopes ?? []);
+  const { display: craftSignatures } =
+    resolveSignatureDomainsFromScopes(project.projectScopes ?? []);
   const locationLabel = project.siteCity?.trim() || null;
   const secondaryFacts: { value: string; label: string }[] = [];
   if (project.signedQuoteAmount != null) {

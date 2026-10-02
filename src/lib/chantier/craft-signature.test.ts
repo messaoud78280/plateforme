@@ -19,6 +19,18 @@ assert.deepEqual(
 );
 assert.ok(crafts[0]?.accent);
 
+// Ordre déterministe même si insertion désordonnée
+const shuffled = resolveCraftsFromScopes([
+  { code: "L03", name: "Plomberie" },
+  { code: "L01", name: "Terrassement" },
+  { code: "L02", name: "Électricité" },
+  { code: "L02b", name: "Courants forts" },
+]);
+assert.deepEqual(
+  shuffled.map((c) => c.key),
+  ["TER", "ELE", "PLO"],
+);
+
 assert.equal(
   resolveCraftKeyFromScope({ code: "L04", name: "Assainissement EP" }),
   "ASS",

@@ -786,7 +786,7 @@ export default async function ProjetDetailPage({
       />
 
       <ProjectSignature
-        title={project.title}
+        title={presentation.displayTitle}
         projectRef={projectSignatureRef(project.id)}
         clientLabel={presentation.clientLabel}
         locationLabel={locationLabel}

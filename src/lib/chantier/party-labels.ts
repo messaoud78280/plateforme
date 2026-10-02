@@ -29,7 +29,13 @@ export type ProjectPresentationInput = {
 };
 
 export type ProjectPresentation = {
+  /** Titre brut DB (inchangé). */
   title: string;
+  /**
+   * Titre d’affichage Project Signature.
+   * Peut retirer un suffixe client historique « — CLIENT » si correspondance sûre.
+   */
+  displayTitle: string;
   clientLabel: string | null;
   responsibleLabel: string | null;
   responsibleIsInternal: boolean;
@@ -51,6 +57,48 @@ export function isInternalChantierResponsible(u: ChantierPartyUser | null | unde
 function norm(s: string | null | undefined): string | null {
   const t = s?.trim();
   return t || null;
+}
+
+/** Normalise pour comparaison titre ↔ client (casse, accents, espaces). */
+export function normalizePartyLabel(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Titre d’affichage Project Signature.
+ * Retire uniquement un suffixe client historique du type « … — CLIENT »
+ * lorsque le segment après le séparateur correspond exactement au clientLabel.
+ * Ne touche jamais Project.title en base. N’extrait pas la surface.
+ */
+export function resolveProjectDisplayTitle(
+  rawTitle: string,
+  clientLabel: string | null | undefined,
+): string {
+  const title = rawTitle.trim();
+  if (!title) return rawTitle;
+  const client = clientLabel?.trim();
+  if (!client) return title;
+
+  // Séparateurs historiques prudents uniquement (em dash / en dash / hyphen cadrés).
+  const sepMatch = title.match(/^(.*?)(\s+[—–-]\s+)(.+)$/u);
+  if (!sepMatch) return title;
+
+  const head = sepMatch[1]!.trim();
+  const suffix = sepMatch[3]!.trim();
+  if (!head || !suffix) return title;
+
+  // Correspondance exacte normalisée du suffixe entier = client (pas un sous-mot).
+  if (normalizePartyLabel(suffix) !== normalizePartyLabel(client)) {
+    return title;
+  }
+
+  // Garde-fou : ne pas vider le titre.
+  return head || title;
 }
 
 function isHostCompany(
@@ -148,6 +196,7 @@ export function buildProjectPresentation(
 
   return {
     title: input.title,
+    displayTitle: resolveProjectDisplayTitle(input.title, parties.clientLabel),
     clientLabel: parties.clientLabel,
     responsibleLabel: parties.responsibleLabel,
     responsibleIsInternal: parties.responsibleIsInternal,

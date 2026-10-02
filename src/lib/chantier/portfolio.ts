@@ -897,7 +897,7 @@ export async function loadProjectsPortfolio(opts: {
 
       return {
         id: p.id,
-        title: p.title,
+        title: presented.displayTitle,
         chantierStatus: p.chantierStatus,
         statusLabel: CHANTIER_STATUS_LABELS[p.chantierStatus],
         siteAddress: p.siteAddress,

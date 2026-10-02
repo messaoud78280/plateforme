@@ -237,7 +237,7 @@ export function craftToneFromKey(key: string, scopeName?: string): CraftSignatur
 
 /**
  * Domaines du chantier à partir des ProjectScope actifs.
- * Déduplique par clé craft, conserve l’ordre displayOrder / insertion.
+ * Déduplique par clé craft, puis ordre déterministe (palette) pour liste = détail.
  */
 export function resolveCraftsFromScopes(
   scopes: ProjectScopeCraftInput[],
@@ -253,7 +253,37 @@ export function resolveCraftsFromScopes(
     out.push(craftToneFromKey(key, scope.name));
   }
 
-  return out;
+  return out.sort((a, b) => craftSortRank(a.key) - craftSortRank(b.key) || a.label.localeCompare(b.label, "fr"));
+}
+
+const CRAFT_SORT_ORDER = [
+  "TER",
+  "FON",
+  "DAL",
+  "MAC",
+  "DEM",
+  "ECH",
+  "VRD",
+  "ASS",
+  "COU",
+  "ETA",
+  "MEX",
+  "MEN",
+  "PLA",
+  "ISO",
+  "ELE",
+  "PLO",
+  "CHF",
+  "PEI",
+  "ESP",
+  "ADM",
+  "DIV",
+] as const;
+
+function craftSortRank(key: string): number {
+  if (key.startsWith("CUSTOM:")) return 900;
+  const idx = (CRAFT_SORT_ORDER as readonly string[]).indexOf(key);
+  return idx >= 0 ? idx : 800;
 }
 
 /** Identifiant technique court pour la signature (pas un numéro métier inventé). */

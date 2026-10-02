@@ -17,6 +17,7 @@ import {
 } from "@/lib/preparation/schedule/planning-view-model";
 import { PrepScheduleGantt } from "./PrepScheduleGantt";
 import { PrepScheduleTaskPanel } from "./PrepScheduleTaskPanel";
+import { PrepScheduleTransferModal } from "./PrepScheduleTransferModal";
 import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
 import { getSectionCapability } from "@/lib/bework-patch/capability";
 import { buildPlanningDetailState } from "@/lib/chantier/planning-detail-state";
@@ -73,6 +74,7 @@ export function PrepSchedulePlanView({
   const [quoteChoice, setQuoteChoice] = useState<string>("");
   const [startDraft, setStartDraft] = useState("");
   const [startOpen, setStartOpen] = useState(false);
+  const [updateFromMetreOpen, setUpdateFromMetreOpen] = useState(false);
   const [tab, setTab] = useState<PlanningViewTab>("planning");
   const [filter, setFilter] = useState<PlanningFilterId>("all");
   const [query, setQuery] = useState("");
@@ -270,20 +272,34 @@ export function PrepSchedulePlanView({
             </span>
           </div>
           <div className="mt-1.5">
-            <span
-              className={cn(
-                "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold",
-                metreSync.primaryVariant === "alert"
-                  ? "bg-amber-100 text-amber-950 ring-1 ring-amber-300/80"
-                  : metreSync.primaryVariant === "warn"
+            {metreSync.needsUpdate ? (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => setUpdateFromMetreOpen(true)}
+                className={cn(
+                  "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold transition",
+                  "bg-amber-100 text-amber-950 ring-1 ring-amber-300/80",
+                  "hover:bg-amber-200/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500",
+                )}
+                aria-label="Mettre à jour le planning depuis le métré courant"
+              >
+                {metreSync.primaryLabel}
+              </button>
+            ) : (
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold",
+                  metreSync.primaryVariant === "warn"
                     ? "bg-orange-50 text-orange-900 ring-1 ring-orange-200"
                     : metreSync.primaryVariant === "ok"
                       ? "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/80"
                       : "bg-slate-100 text-slate-700 ring-1 ring-slate-200",
-              )}
-            >
-              {metreSync.primaryLabel}
-            </span>
+                )}
+              >
+                {metreSync.primaryLabel}
+              </span>
+            )}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -380,9 +396,20 @@ export function PrepSchedulePlanView({
             {" · "}Version actuelle : {vm.metreSync.currentStudyVersion}
           </p>
           {vm.metreSync.needsUpdate ? (
-            <p className="mt-1 text-[12px] font-medium">
-              Action : Préparer la mise à jour (aucune synchronisation silencieuse).
-            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => setUpdateFromMetreOpen(true)}
+                className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-[12px] font-medium text-white disabled:opacity-50"
+              >
+                Mettre à jour le planning
+              </button>
+              <p className="text-[12px] text-amber-900/80">
+                Prépare une régénération depuis le métré v{vm.metreSync.currentStudyVersion}
+                {" "}(aucune écriture avant confirmation).
+              </p>
+            </div>
           ) : metreSync.syncMessage ? (
             <p className="mt-0.5 text-[12px]">{metreSync.syncMessage}</p>
           ) : null}
@@ -665,6 +692,19 @@ export function PrepSchedulePlanView({
           </div>
         </div>
       ) : null}
+
+      <PrepScheduleTransferModal
+        studyId={studyId}
+        open={updateFromMetreOpen}
+        onClose={() => setUpdateFromMetreOpen(false)}
+        intent="update_from_metre"
+        preferredQuoteId={plan.quote?.id ?? null}
+        replacePlanId={planId}
+        onCommitted={({ href }) => {
+          setUpdateFromMetreOpen(false);
+          window.location.assign(href);
+        }}
+      />
     </div>
   );
 }

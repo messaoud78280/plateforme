@@ -10,6 +10,18 @@ type Props = {
   studyId: string;
   open: boolean;
   onClose: () => void;
+  /**
+   * create = génération initiale (comportement historique).
+   * update_from_metre = régénération depuis métré courant (CTX-04) —
+   * bypass l’écran « planning déjà existant » et propose une vraie mise à jour.
+   */
+  intent?: "create" | "update_from_metre";
+  /** Devis pré-sélectionné (souvent celui déjà lié au planning). */
+  preferredQuoteId?: string | null;
+  /** Plan à remplacer après commit réussi (archivé, pas de doublon CURRENT). */
+  replacePlanId?: string | null;
+  /** Appelé après commit réussi (rediriger / recharger). */
+  onCommitted?: (result: { planId: string; href: string }) => void;
 };
 
 function newKey(): string {
@@ -19,7 +31,16 @@ function newKey(): string {
   return `prep-sched-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export function PrepScheduleTransferModal({ studyId, open, onClose }: Props) {
+export function PrepScheduleTransferModal({
+  studyId,
+  open,
+  onClose,
+  intent = "create",
+  preferredQuoteId = null,
+  replacePlanId = null,
+  onCommitted,
+}: Props) {
+  const isUpdate = intent === "update_from_metre";
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<SchedulePreview | null>(null);
@@ -28,31 +49,34 @@ export function PrepScheduleTransferModal({ studyId, open, onClose }: Props) {
   const [idempotencyKey, setIdempotencyKey] = useState(newKey);
   const [step, setStep] = useState<"existing" | "preview" | "done">("preview");
   const [createdHref, setCreatedHref] = useState<string | null>(null);
-  const [forceCreate, setForceCreate] = useState(false);
+  const [forceCreate, setForceCreate] = useState(isUpdate);
 
   const reset = useCallback(() => {
     setBusy(false);
     setError(null);
     setPreview(null);
     setSelected(new Set());
-    setQuoteId("");
+    setQuoteId(preferredQuoteId?.trim() || "");
     setIdempotencyKey(newKey());
     setStep("preview");
     setCreatedHref(null);
-    setForceCreate(false);
-  }, []);
+    setForceCreate(isUpdate);
+  }, [isUpdate, preferredQuoteId]);
 
   useEffect(() => {
     if (!open) {
       reset();
       return;
     }
+    // Pré-remplir le devis au moment de l’ouverture (après reset de la fermeture).
+    setQuoteId(preferredQuoteId?.trim() || "");
+    setForceCreate(isUpdate);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !busy) onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, busy, onClose, reset]);
+  }, [open, busy, onClose, reset, preferredQuoteId, isUpdate]);
 
   useEffect(() => {
     if (!open) return;
@@ -69,8 +93,9 @@ export function PrepScheduleTransferModal({ studyId, open, onClose }: Props) {
         const p = data as SchedulePreview;
         setPreview(p);
         setSelected(new Set(p.tasks.filter((t) => t.selectedByDefault).map((t) => t.stepId)));
-        if (p.existingPlans.length && !forceCreate) setStep("existing");
-        else setStep("preview");
+        // Mise à jour métré : toujours preview (pas le cul-de-sac « ouvrir l’existant »).
+        if (isUpdate || forceCreate || !p.existingPlans.length) setStep("preview");
+        else setStep("existing");
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : "Erreur");
       } finally {
@@ -80,7 +105,7 @@ export function PrepScheduleTransferModal({ studyId, open, onClose }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [open, studyId, quoteId, forceCreate]);
+  }, [open, studyId, quoteId, forceCreate, isUpdate]);
 
   async function commit() {
     if (!selected.size || busy) return;
@@ -94,12 +119,14 @@ export function PrepScheduleTransferModal({ studyId, open, onClose }: Props) {
           selectedStepIds: [...selected],
           idempotencyKey,
           quoteId: quoteId || null,
+          replacePlanId: isUpdate ? replacePlanId : null,
         }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "Enregistrement impossible");
       setCreatedHref(data.href);
       setStep("done");
+      onCommitted?.({ planId: data.planId, href: data.href });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
     } finally {
@@ -119,11 +146,15 @@ export function PrepScheduleTransferModal({ studyId, open, onClose }: Props) {
         <header className="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4">
           <div>
             <h2 className="text-[1.1rem] font-semibold text-[#1e3a5f]">
-              Générer un planning de chantier
+              {isUpdate
+                ? "Mettre à jour le planning"
+                : "Générer un planning de chantier"}
             </h2>
             {preview ? (
               <p className="mt-0.5 text-[13px] text-slate-500">
-                {preview.studyTitle} · {preview.projectTitle}
+                {isUpdate
+                  ? `Métré v${preview.studyVersion} · ${preview.studyTitle}`
+                  : `${preview.studyTitle} · ${preview.projectTitle}`}
                 {preview.baseDurationWorkingDays != null
                   ? ` · Durée de base ${preview.baseDurationWorkingDays} j ouvrés`
                   : ""}
@@ -155,6 +186,14 @@ export function PrepScheduleTransferModal({ studyId, open, onClose }: Props) {
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
           {busy && !preview ? (
             <p className="text-[13px] text-slate-500">Calcul du planning…</p>
+          ) : null}
+
+          {step === "preview" && preview && isUpdate ? (
+            <p className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-950">
+              Prévisualisation depuis le métré courant. Les enrichissements manuels
+              (équipes, consignes, durées verrouillées) sont repris quand c’est possible.
+              Aucune écriture avant confirmation.
+            </p>
           ) : null}
 
           {step === "existing" && preview ? (
@@ -332,7 +371,11 @@ export function PrepScheduleTransferModal({ studyId, open, onClose }: Props) {
 
           {step === "done" ? (
             <div className="space-y-3 text-[13px] text-slate-700">
-              <p>Planning enregistré. Aucun événement Agenda n&apos;a été créé automatiquement.</p>
+              <p>
+                {isUpdate
+                  ? "Planning mis à jour depuis le métré courant. Aucun événement Agenda n’a été créé automatiquement."
+                  : "Planning enregistré. Aucun événement Agenda n’a été créé automatiquement."}
+              </p>
               {createdHref ? (
                 <Link
                   href={createdHref}
@@ -349,7 +392,7 @@ export function PrepScheduleTransferModal({ studyId, open, onClose }: Props) {
           <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 px-5 py-3">
             <p className="text-[12px] text-slate-500">{selected.size} intervention(s)</p>
             <div className="flex gap-2">
-              {preview.existingPlans.length ? (
+              {preview.existingPlans.length && !isUpdate ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -367,7 +410,11 @@ export function PrepScheduleTransferModal({ studyId, open, onClose }: Props) {
                 onClick={() => void commit()}
                 className="rounded-full bg-[#1e3a5f] px-4 py-2 text-[13px] font-medium text-white disabled:opacity-40"
               >
-                {busy ? "Enregistrement…" : "Enregistrer le planning"}
+                {busy
+                  ? "Enregistrement…"
+                  : isUpdate
+                    ? "Confirmer la mise à jour"
+                    : "Enregistrer le planning"}
               </button>
             </div>
           </footer>

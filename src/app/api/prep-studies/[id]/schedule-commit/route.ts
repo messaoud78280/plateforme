@@ -20,6 +20,10 @@ export async function POST(req: Request, ctx: Ctx) {
       typeof body.idempotencyKey === "string" ? body.idempotencyKey.trim() : "";
     const quoteId = typeof body.quoteId === "string" && body.quoteId ? body.quoteId : null;
     const title = typeof body.title === "string" ? body.title : null;
+    const replacePlanId =
+      typeof body.replacePlanId === "string" && body.replacePlanId.trim()
+        ? body.replacePlanId.trim()
+        : null;
     const durationOverrides =
       body.durationOverrides && typeof body.durationOverrides === "object"
         ? (body.durationOverrides as Record<string, number>)
@@ -34,6 +38,7 @@ export async function POST(req: Request, ctx: Ctx) {
       quoteId,
       title,
       durationOverrides,
+      replacePlanId,
     });
     return NextResponse.json(result, { status: result.action === "created" ? 201 : 200 });
   } catch (e) {

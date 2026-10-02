@@ -454,6 +454,8 @@ export async function commitPrepSchedule(input: {
   quoteId?: string | null;
   title?: string | null;
   durationOverrides?: Record<string, number>;
+  /** Si fourni : archive ce plan (même study) et reprend sa révision +1 / statut CURRENT. */
+  replacePlanId?: string | null;
 }): Promise<ScheduleCommitResult> {
   const key = input.idempotencyKey.trim();
   if (!key || key.length < 8) throw new PrepError("Clé d'idempotence manquante");
@@ -1021,10 +1023,53 @@ export async function commitPrepSchedule(input: {
               planId: created.id,
               taskCount: placed.length,
               isDemonstration: isDemo,
+              replacedPlanId: input.replacePlanId ?? null,
             },
             actorUserId: input.userId,
           },
         });
+
+        // CTX-04 — remplacement explicite d’un planning existant (mise à jour métré)
+        const replaceId = input.replacePlanId?.trim() || null;
+        if (replaceId) {
+          const prev = await tx.prepSchedulePlan.findFirst({
+            where: {
+              id: replaceId,
+              organizationId: input.orgId,
+              studyId: study.id,
+              projectId: study.projectId,
+            },
+            select: { id: true, revisionNumber: true, title: true },
+          });
+          if (prev) {
+            await tx.prepSchedulePlan.update({
+              where: { id: prev.id },
+              data: { status: "ARCHIVED" },
+            });
+            await tx.prepSchedulePlan.update({
+              where: { id: created.id },
+              data: {
+                status: "CURRENT",
+                revisionKind: "CURRENT",
+                revisionNumber: Math.max(1, prev.revisionNumber) + 1,
+                title: prev.title || created.title,
+              },
+            });
+            await tx.prepScheduleEvent.create({
+              data: {
+                organizationId: input.orgId,
+                planId: created.id,
+                kind: "PLAN_REPLACED_FROM_METRE",
+                detailJson: {
+                  replacedPlanId: prev.id,
+                  studyVersion: study.version,
+                  previousRevision: prev.revisionNumber,
+                },
+                actorUserId: input.userId,
+              },
+            });
+          }
+        }
 
         return created;
       },

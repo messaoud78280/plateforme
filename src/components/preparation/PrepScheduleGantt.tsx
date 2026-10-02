@@ -53,6 +53,8 @@ export function PrepScheduleGantt({
   selectedTaskId,
   onSelectTask,
 }: Props) {
+  const [zoom, setZoom] = useState<GanttZoom>("day");
+
   const displayTasks = useMemo(() => {
     const groups = new Map<string, GanttTaskRow[]>();
     for (const t of tasks) {

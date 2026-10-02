@@ -414,9 +414,9 @@ export function computeSchedule(input: {
       ...t,
       depends_on: extra.map((d) => ({
         step_id: d.step_id,
-        type: d.type ?? "FS",
+        type: (d.type ?? "FS") as "FS" | "SS" | "FF",
         lag_days: d.lag_days ?? 0,
-        lag_calendar: "working" as const,
+        lag_calendar: ("working" as "working" | "calendar"),
       })),
     };
   });

@@ -494,7 +494,11 @@ export async function commitPrepSchedule(input: {
 
   const integrity = analyzeSourceIntegrity({
     organizationId: input.orgId,
-    project: study.project,
+    project: {
+      id: study.project.id,
+      organizationId: study.project.organizationId ?? input.orgId,
+      title: study.project.title,
+    },
     study: {
       id: study.id,
       projectId: study.projectId,

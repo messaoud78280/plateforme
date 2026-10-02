@@ -7,9 +7,12 @@ export const UNCLASSIFIED_PHASE = "À classer";
 export type PhaseRole =
   | "preparation"
   | "demolition"
+  | "logistics"
   | "networks"
   | "installation"
+  | "execution"
   | "finishes"
+  | "wait"
   | "controls"
   | "handover"
   | "generic"
@@ -24,6 +27,15 @@ export type CanonicalPhase = {
   /** true si l'ancien lot était la désignation de la tâche */
   wasDesignationFallback: boolean;
   source: "structured" | "inferred" | "unclassified";
+  /** ID phase workflow explicite si connue. */
+  executionPhaseId?: string | null;
+  /**
+   * Origine structurelle :
+   * - execution_phase : workflow.execution_phases
+   * - legacy_fallback : resolver historique (lot / section / texte)
+   * - unstructured : aucune structure exploitable
+   */
+  structureSource?: "execution_phase" | "legacy_fallback" | "unstructured";
 };
 
 function norm(s: string): string {
@@ -120,10 +132,13 @@ function inferRoleFromText(text: string): PhaseRole | null {
 
 const ROLE_ORDER: Record<PhaseRole, number> = {
   preparation: 10,
+  logistics: 15,
   demolition: 20,
   networks: 30,
+  execution: 35,
   installation: 40,
   finishes: 50,
+  wait: 60,
   controls: 70,
   handover: 80,
   generic: 45,
@@ -132,10 +147,13 @@ const ROLE_ORDER: Record<PhaseRole, number> = {
 
 const ROLE_LABEL: Record<PhaseRole, string> = {
   preparation: "Préparation",
+  logistics: "Logistique",
   demolition: "Déposes",
   networks: "Réseaux",
+  execution: "Exécution",
   installation: "Appareillage & pose",
   finishes: "Finitions",
+  wait: "Attente",
   controls: "Contrôles",
   handover: "Remise",
   generic: "Travaux",
@@ -175,6 +193,7 @@ export function resolveCanonicalPhase(input: {
       role: inferredFromName,
       wasDesignationFallback: designationLike || !rawLot,
       source: "inferred",
+      structureSource: "legacy_fallback",
     };
   }
 
@@ -205,6 +224,7 @@ export function resolveCanonicalPhase(input: {
       role,
       wasDesignationFallback: designationLike || !rawLot,
       source: inferredFromName ? "inferred" : "structured",
+      structureSource: "legacy_fallback",
     };
   }
 
@@ -228,6 +248,7 @@ export function resolveCanonicalPhase(input: {
       role,
       wasDesignationFallback: false,
       source: isBroadPhase && inferredFromName ? "inferred" : "structured",
+      structureSource: "legacy_fallback",
     };
   }
 
@@ -238,6 +259,7 @@ export function resolveCanonicalPhase(input: {
       role: inferred,
       wasDesignationFallback: designationLike || !rawLot,
       source: "inferred",
+      structureSource: "legacy_fallback",
     };
   }
 
@@ -247,6 +269,7 @@ export function resolveCanonicalPhase(input: {
     role: "unclassified",
     wasDesignationFallback: designationLike || !rawLot,
     source: "unclassified",
+    structureSource: "unstructured",
   };
 }
 
@@ -257,9 +280,12 @@ export function phaseResourceGroupKey(phase: CanonicalPhase): string {
   if (
     phase.role === "preparation" ||
     phase.role === "demolition" ||
+    phase.role === "logistics" ||
     phase.role === "networks" ||
+    phase.role === "execution" ||
     phase.role === "installation" ||
     phase.role === "finishes" ||
+    phase.role === "wait" ||
     phase.role === "controls" ||
     phase.role === "handover"
   ) {

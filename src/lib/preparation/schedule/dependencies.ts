@@ -1,6 +1,10 @@
 /**
  * Dépendances structurelles planning (phases / contrôles / remise).
  * Complète les depends_on explicites du workflow — n'invente pas de métier hors règles.
+ *
+ * Priorité :
+ * 1. execution_phases explicites (workflowJson) → graphe gate déterministe
+ * 2. fallback legacy par rôle inféré (ROLE_SEQ)
  */
 
 import {
@@ -8,6 +12,10 @@ import {
   type CanonicalPhase,
   type PhaseRole,
 } from "@/lib/preparation/schedule/phase";
+import {
+  buildExplicitPhaseDependencies,
+} from "@/lib/preparation/schedule/execution-structure";
+import type { PrepExecutionPhaseDTO } from "@/lib/preparation/schedule/types";
 
 export type StructuralDep = {
   step_id: string;
@@ -22,22 +30,26 @@ export type StructuralStep = {
   kind?: string | null;
   description?: string | null;
   order?: number;
+  execution_phase_id?: string | null;
   depends_on?: StructuralDep[];
 };
 
 const ROLE_SEQ: PhaseRole[] = [
   "preparation",
+  "logistics",
   "demolition",
   "networks",
+  "execution",
   "installation",
   "finishes",
+  "wait",
   "controls",
   "handover",
 ];
 
 function roleIndex(role: PhaseRole): number {
   const i = ROLE_SEQ.indexOf(role);
-  return i >= 0 ? i : 3; // generic ~ installation
+  return i >= 0 ? i : 3; // generic ~ mid
 }
 
 export function mergeDependsOn(
@@ -51,7 +63,6 @@ export function mergeDependsOn(
   for (const d of extras) {
     const k = `${d.step_id}|${d.type}|${d.lag_days ?? 0}`;
     if (seen.has(k)) continue;
-    // éviter self-dep
     out.push(d);
     seen.add(k);
   }
@@ -59,12 +70,52 @@ export function mergeDependsOn(
 }
 
 /**
- * Génère des FS structurels :
- * - phase aval ← phase amont (tâches amont → tâches aval)
- * - contrôles ← travaux réseaux/installation/finitions
- * - remise ← contrôles (+ travaux si pas de contrôle)
+ * Génère des FS structurels.
+ * Si `executionPhases` non vide → graphe explicite (prioritaire).
+ * Sinon → chaîne legacy par rôle inféré.
  */
 export function buildStructuralDependencies(
+  steps: StructuralStep[],
+  executionPhases?: PrepExecutionPhaseDTO[] | null,
+): Map<string, StructuralDep[]> {
+  const phases = executionPhases ?? [];
+  const hasExplicit = phases.length > 0;
+
+  let extras: Map<string, StructuralDep[]>;
+
+  if (hasExplicit) {
+    extras = buildExplicitPhaseDependencies({
+      phases,
+      steps: steps.map((s) => ({
+        id: s.id,
+        order: s.order ?? 0,
+        execution_phase_id: s.execution_phase_id,
+        kind: s.kind,
+        depends_on: (s.depends_on ?? []).map((d) => ({ step_id: d.step_id })),
+      })),
+    });
+  } else {
+    extras = buildLegacyRoleDependencies(steps);
+  }
+
+  const result = new Map<string, StructuralDep[]>();
+  for (const s of steps) {
+    const existing = (s.depends_on ?? []).map((d) => ({
+      step_id: d.step_id,
+      type: d.type ?? ("FS" as const),
+      lag_days: d.lag_days ?? 0,
+    }));
+    const extra = extras.get(s.id) ?? [];
+    const merged = mergeDependsOn(
+      existing.filter((d) => d.step_id !== s.id),
+      extra.filter((d) => d.step_id !== s.id),
+    );
+    result.set(s.id, merged);
+  }
+  return result;
+}
+
+function buildLegacyRoleDependencies(
   steps: StructuralStep[],
 ): Map<string, StructuralDep[]> {
   const phases = new Map<string, CanonicalPhase>();
@@ -96,9 +147,7 @@ export function buildStructuralDependencies(
     extras.set(succ, list);
   };
 
-  // Chaîne de phases : chaque tâche d'une phase dépend d'au moins une tâche
-  // de la phase précédente (représentants = toutes les tâches amont pour
-  // rester conservateur sur petits chantiers ≤ 300).
+  // Chaîne legacy : gate = toutes les tâches amont (conservateur historiques)
   for (let i = 1; i < ROLE_SEQ.length; i++) {
     const prevRole = ROLE_SEQ[i - 1]!;
     const curRole = ROLE_SEQ[i]!;
@@ -110,17 +159,19 @@ export function buildStructuralDependencies(
     }
   }
 
-  // Contrôles : dépendre aussi des travaux (networks/installation/finishes)
-  // même si la chaîne de phases a un trou.
   const controls = byRole.get("controls") ?? [];
-  const workRoles: PhaseRole[] = ["networks", "installation", "finishes"];
+  const workRoles: PhaseRole[] = [
+    "networks",
+    "execution",
+    "installation",
+    "finishes",
+  ];
   for (const c of controls) {
     for (const role of workRoles) {
       for (const w of byRole.get(role) ?? []) add(c, w);
     }
   }
 
-  // Remise : après contrôles, sinon après travaux
   const handover = byRole.get("handover") ?? [];
   for (const h of handover) {
     if (controls.length) {
@@ -132,23 +183,7 @@ export function buildStructuralDependencies(
     }
   }
 
-  // Fusion avec depends_on déjà présents
-  const result = new Map<string, StructuralDep[]>();
-  for (const s of steps) {
-    const existing = (s.depends_on ?? []).map((d) => ({
-      step_id: d.step_id,
-      type: d.type ?? ("FS" as const),
-      lag_days: d.lag_days ?? 0,
-    }));
-    const extra = extras.get(s.id) ?? [];
-    // Retirer self
-    const merged = mergeDependsOn(
-      existing.filter((d) => d.step_id !== s.id),
-      extra.filter((d) => d.step_id !== s.id),
-    );
-    result.set(s.id, merged);
-  }
-  return result;
+  return extras;
 }
 
 /** Détecte un cycle dans un graphe step_id → preds */

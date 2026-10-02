@@ -45,6 +45,10 @@ export type ConsistencyTask = {
   resourceKey?: string | null;
   dependsOn: StructuralDep[];
   parallelizable?: boolean;
+  /** Phase d'exécution explicite si connue. */
+  executionPhaseId?: string | null;
+  /** Classification structurelle : structured | fallback | unstructured. */
+  structureClass?: "structured" | "fallback" | "unstructured" | null;
 };
 
 export type ConsistencyResult = {
@@ -52,6 +56,12 @@ export type ConsistencyResult = {
   blockers: ConsistencyIssue[];
   warnings: ConsistencyIssue[];
   infos: ConsistencyIssue[];
+  /** Tâches avec execution_phase explicite. */
+  structuredTasks: number;
+  /** Tâches classées via fallback legacy (lot / section / texte). */
+  fallbackTasks: number;
+  /** Tâches generic/unclassified sans structure d'exécution. */
+  unstructuredTasks: number;
 };
 
 function instantKey(date: string | null, half: number): string | null {
@@ -107,6 +117,28 @@ export function analyzeScheduleConsistency(
       kind: t.kind,
       description: t.description,
     });
+
+    const structureClass =
+      t.structureClass ??
+      (t.executionPhaseId
+        ? "structured"
+        : phase.role === "generic" ||
+            phase.role === "unclassified" ||
+            phase.source === "unclassified"
+          ? "unstructured"
+          : "fallback");
+
+    if (
+      structureClass === "unstructured" &&
+      !(t.dependsOn ?? []).length
+    ) {
+      warnings.push({
+        code: "UNSTRUCTURED_EXECUTION_TASK",
+        severity: "WARNING",
+        message: `${t.stepCode} : tâche sans phase d'exécution explicite ni dépendance structurelle — séquencement à valider`,
+        stepCodes: [t.stepCode],
+      });
+    }
 
     if (isDesignationLikeLot(t.lot, t.name)) {
       warnings.push({
@@ -311,10 +343,37 @@ export function analyzeScheduleConsistency(
   void instantKey;
   void isBeforeEnd;
 
+  let structuredTasks = 0;
+  let fallbackTasks = 0;
+  let unstructuredTasks = 0;
+  for (const t of tasks) {
+    const phase = resolveCanonicalPhase({
+      lot: t.lot,
+      name: t.name,
+      kind: t.kind,
+      description: t.description,
+    });
+    const sc =
+      t.structureClass ??
+      (t.executionPhaseId
+        ? "structured"
+        : phase.role === "generic" ||
+            phase.role === "unclassified" ||
+            phase.source === "unclassified"
+          ? "unstructured"
+          : "fallback");
+    if (sc === "structured") structuredTasks += 1;
+    else if (sc === "fallback") fallbackTasks += 1;
+    else unstructuredTasks += 1;
+  }
+
   return {
     ok: blockers.length === 0,
     blockers,
     warnings,
     infos,
+    structuredTasks,
+    fallbackTasks,
+    unstructuredTasks,
   };
 }

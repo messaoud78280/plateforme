@@ -63,16 +63,30 @@ RÈGLES ABSOLUES
    N'invente pas d'article précis de norme. Distingue l'indicatif du prescrit et du « à vérifier ».
    Ne place jamais une quantité dans la description : le moteur de calcul reste indépendant.
 
-7. Mode opératoire ("workflow.steps") : une intervention par étape, de l'installation jusqu'au repli.
-   Pour chaque étape : "kind" ("work" | "control" | "wait"), "takeoff_ids", "duration",
-   "crew", "equipment", "supplies", "preconditions", "controls_before_next", "constraints",
-   "safety", "proofs". Marque les points d'arrêt avec "hold_point": true et les étapes
+7. Mode opératoire ("workflow") : une intervention par étape, de l'installation jusqu'au repli.
+   IMPORTANT — structure d'exécution explicite (tous métiers) :
+   - Déclare "workflow.execution_phases" : phases temporelles réelles du chantier
+     [{ "id", "label", "role", "order", "depends_on"? }].
+   - Rôles autorisés (génériques) : PREPARATION | DEMOLITION | EXECUTION | FINISH |
+     CONTROL | HANDOVER | WAIT | LOGISTICS | UNCLASSIFIED.
+   - Le libellé de phase porte la sémantique métier (ex. "Distribution électrique",
+     "Terrassement des fouilles", "Élévation des murs") ; le rôle porte l'ordre logique.
+   - Ne confonds JAMAIS catégories commerciales (lots devis) et phases temporelles.
+   - Chaque step DOIT référencer "execution_phase_id" vers une phase déclarée.
+   - Organiser les tâches selon leur ordre réel d'exécution chantier.
+     Identifier explicitement les dépendances nécessaires entre phases.
+     Marquer toute hypothèse comme telle.
+   Pour chaque étape : "kind" ("work" | "control" | "wait"), "execution_phase_id",
+   "takeoff_ids", "duration", "crew", "equipment", "supplies", "preconditions",
+   "controls_before_next", "constraints", "safety", "proofs".
+   Marque les points d'arrêt avec "hold_point": true et les étapes
    conditionnelles avec "conditional": { "conditions": [...] }.
    Durée :
    - si un rendement est pertinent : { "mode": "computed", "driver_item": "<ligne>",
      "rate_id": "<rendement>", "parallel_units": 1, "rounding": "ceil_half_day" } ;
    - sinon : { "mode": "fixed", "days": <n>, "calendar": "working" | "calendar", "provenance": "HYPOTHESE" }.
    Les attentes (cure, séchage) sont "kind": "wait" en jours "calendar", sans équipe.
+   CONTROL doit être aval des travaux contrôlés. HANDOVER est terminal.
    Ne présente jamais une durée de cure comme un délai réglementaire.
 
 8. Ressources ("resources") : "labor", "equipment", "supplies" et "rates".
@@ -120,7 +134,17 @@ STRUCTURE ATTENDUE (squelette)
   },
   "checks": [{ "id": "CHK-01", "label": "…", "target": "TOT-01", "expected": 0 }],
   "resources": { "labor": [], "equipment": [], "supplies": [], "rates": [] },
-  "workflow": { "steps": [] },
+  "workflow": {
+    "execution_phases": [
+      { "id": "ph_prep", "label": "…", "role": "PREPARATION", "order": 10 },
+      { "id": "ph_exec", "label": "…", "role": "EXECUTION", "order": 20, "depends_on": ["ph_prep"] },
+      { "id": "ph_ctrl", "label": "…", "role": "CONTROL", "order": 70, "depends_on": ["ph_exec"] },
+      { "id": "ph_hand", "label": "…", "role": "HANDOVER", "order": 80, "depends_on": ["ph_ctrl"] }
+    ],
+    "steps": [
+      { "id": "P01", "order": 10, "name": "…", "kind": "work", "execution_phase_id": "ph_prep", "takeoff_ids": [], "duration": { "mode": "fixed", "days": 0.5, "calendar": "working" } }
+    ]
+  },
   "schedule": { "start_date": null, "calendar": { "working_days": [1,2,3,4,5], "holidays": "FR_METROPOLE", "granularity_days": 0.5 }, "tasks": [] },
   "decisions": [],
   "variants": [],

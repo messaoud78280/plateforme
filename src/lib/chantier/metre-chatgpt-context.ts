@@ -298,6 +298,12 @@ export async function buildMetreChatgptContext(input: {
       "Ne transforme jamais une hypothèse ou dimension projetée en mesure relevée.",
       "Structure par zones (Cuisine, Salle de bain, …) et ouvrages.",
       "N’invente pas de montants de devis — le devis existant reste la référence financière.",
+      "Organiser les tâches selon leur ordre réel d'exécution chantier.",
+      "Créer des phases d'exécution métier cohérentes dans workflow.execution_phases (id, label, role, order, depends_on).",
+      "Rattacher chaque step à une phase via execution_phase_id.",
+      "Ne pas confondre catégories commerciales (lots devis) et phases temporelles.",
+      "Identifier explicitement les dépendances nécessaires. CONTROL aval des travaux. HANDOVER terminal.",
+      "Marquer toute hypothèse comme telle.",
     ],
   };
 }

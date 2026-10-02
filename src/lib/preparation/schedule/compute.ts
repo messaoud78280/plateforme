@@ -23,7 +23,11 @@ import {
   resolveCanonicalPhase,
 } from "@/lib/preparation/schedule/phase";
 import { buildStructuralDependencies } from "@/lib/preparation/schedule/dependencies";
+import {
+  canonicalPhaseFromExecution,
+} from "@/lib/preparation/schedule/execution-structure";
 import type {
+  PrepExecutionPhaseDTO,
   PrepResourcesDTO,
   PrepScheduleDTO,
   PrepScheduleTaskDTO,
@@ -134,7 +138,10 @@ export function normalizeLotResourceLabel(lot: string): string {
 export function resolveScheduleResourceKey(
   step: PrepWorkflowStepDTO,
   sched?: PrepScheduleTaskDTO | null,
-  opts?: { forceDefault?: boolean },
+  opts?: {
+    forceDefault?: boolean;
+    executionPhases?: PrepExecutionPhaseDTO[] | null;
+  },
 ): ScheduleResourceKey {
   const explicit =
     (sched?.crew_id && sched.crew_id.trim()) ||
@@ -157,17 +164,25 @@ export function resolveScheduleResourceKey(
     };
   }
 
-  const phase = resolveCanonicalPhase({
-    lot: step.lot,
-    name: step.name,
-    kind: step.kind,
-    description: step.description,
-  });
+  const execId = (step.execution_phase_id ?? "").trim();
+  const execPhase =
+    execId && opts?.executionPhases?.length
+      ? opts.executionPhases.find((p) => p.id === execId) ?? null
+      : null;
+  const phase = execPhase
+    ? canonicalPhaseFromExecution(execPhase)
+    : resolveCanonicalPhase({
+        lot: step.lot,
+        name: step.name,
+        kind: step.kind,
+        description: step.description,
+      });
   // Désignation unique / non classée → une seule ressource logique
   if (
-    phase.wasDesignationFallback ||
-    phase.role === "unclassified" ||
-    isDesignationLikeLot(step.lot, step.name)
+    !execPhase &&
+    (phase.wasDesignationFallback ||
+      phase.role === "unclassified" ||
+      isDesignationLikeLot(step.lot, step.name))
   ) {
     return {
       key: "DEFAULT-A",
@@ -361,6 +376,8 @@ export function computeSchedule(input: {
   qtyUnitOf?: (code: string) => string | null;
   /** overrides manuels { stepId: durationDays } — durationLocked */
   durationOverrides?: Record<string, number>;
+  /** Phases d'exécution explicites (workflowJson.execution_phases). */
+  executionPhases?: PrepExecutionPhaseDTO[] | null;
 }): ScheduleComputeResult {
   const warnings: string[] = [];
   const errors: string[] = [];
@@ -399,6 +416,7 @@ export function computeSchedule(input: {
           kind: s.kind,
           description: s.description,
           order: s.order,
+          execution_phase_id: s.execution_phase_id,
           depends_on: (sched?.depends_on ?? []).map((d) => ({
             step_id: d.step_id,
             type: d.type,
@@ -406,6 +424,7 @@ export function computeSchedule(input: {
           })),
         };
       }),
+    input.executionPhases ?? null,
   );
 
   const enrichedScheduleTasks = scheduleTasks.map((t) => {
@@ -513,6 +532,7 @@ export function computeSchedule(input: {
 
     const resource = resolveScheduleResourceKey(step, sched, {
       forceDefault: forceDefaultResource,
+      executionPhases: input.executionPhases,
     });
     const parallelizable =
       sched.parallelizable === true || step.parallelizable === true;
@@ -603,12 +623,19 @@ export function computeSchedule(input: {
         : "Tâche conditionnelle — hors durée de base";
     }
 
-    const phase = resolveCanonicalPhase({
-      lot: step.lot,
-      name: step.name,
-      kind: step.kind,
-      description: step.description,
-    });
+    const execPhases = input.executionPhases ?? [];
+    const execId = (step.execution_phase_id ?? "").trim();
+    const execPhase = execId
+      ? execPhases.find((p) => p.id === execId) ?? null
+      : null;
+    const phase = execPhase
+      ? canonicalPhaseFromExecution(execPhase)
+      : resolveCanonicalPhase({
+          lot: step.lot,
+          name: step.name,
+          kind: step.kind,
+          description: step.description,
+        });
 
     placedMap.set(stepId, {
       stepId,

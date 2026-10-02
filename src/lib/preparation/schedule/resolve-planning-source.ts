@@ -10,6 +10,8 @@ import {
   isDesignationLikeLot,
   resolveCanonicalPhase,
 } from "./phase";
+import type { PrepExecutionPhaseDTO } from "./types";
+import { canonicalPhaseFromExecution } from "./execution-structure";
 
 /** Provenance quantité (alignée sur le métré / devis). */
 export type QuantityProvenance =
@@ -57,6 +59,10 @@ export type PlanningTaskSourceInput = {
   commercialSectionTitle?: string | null;
   /** Metadata workflow explicite (phase / groupe). */
   workflowPhase?: string | null;
+  /** Référence phase d'exécution explicite (workflow.execution_phases). */
+  executionPhaseId?: string | null;
+  /** Catalogue des phases d'exécution du workflow. */
+  executionPhases?: PrepExecutionPhaseDTO[] | null;
   line?: TakeoffLineQuantitySource | null;
   engineValue?: number | null;
 };
@@ -71,6 +77,7 @@ export type PlanningTaskSourceResolved = {
   /** Phase d'exécution résolue. */
   phase: CanonicalPhase;
   phaseSource:
+    | "execution_phase"
     | "workflow"
     | "commercial_section"
     | "takeoff_lot"
@@ -78,6 +85,8 @@ export type PlanningTaskSourceResolved = {
     | "unclassified";
   classificationConfidence: "high" | "medium" | "low";
   driverTakeoffCode: string | null;
+  /** structured | fallback | unstructured — pour qualité planning. */
+  structureClass: "structured" | "fallback" | "unstructured";
 };
 
 function asFiniteNumber(n: unknown): number | null {
@@ -187,7 +196,15 @@ function isBroadCatchAllPhase(lot: string): boolean {
 
 /**
  * Résout identité + quantité + phase d'exécution pour une tâche planning.
- * Matching texte = fallback uniquement (via resolveCanonicalPhase).
+ *
+ * Priorité phase :
+ * 1. execution_phase_id explicite (workflow.execution_phases)
+ * 2. metadata workflow (lot workflow non désignation)
+ * 3. section commerciale / lot takeoff (legacy fallback)
+ * 4. inférence texte (legacy)
+ * 5. UNCLASSIFIED
+ *
+ * Matching texte = fallback uniquement.
  */
 export function resolvePlanningTaskSource(
   input: PlanningTaskSourceInput,
@@ -210,12 +227,35 @@ export function resolvePlanningTaskSource(
   const takeoffLot = (input.line?.lot ?? input.stepLot ?? "").trim() || null;
   const designation = input.stepName;
 
+  // 0. Phase d'exécution explicite — prioritaire, tous métiers
+  const execId = (input.executionPhaseId ?? "").trim();
+  const execPhases = input.executionPhases ?? [];
+  if (execId && execPhases.length) {
+    const ep = execPhases.find((p) => p.id === execId);
+    if (ep) {
+      const phase = canonicalPhaseFromExecution(ep);
+      return {
+        sourceLineCode: qty.sourceLineCode ?? primaryCode,
+        quantity: qty.quantity,
+        unit: qty.unit,
+        quantityProvenance: qty.provenance,
+        commercialGroup,
+        phase,
+        phaseSource: "execution_phase",
+        classificationConfidence: "high",
+        driverTakeoffCode:
+          qty.quantity != null ? qty.sourceLineCode ?? primaryCode : primaryCode,
+        structureClass: "structured",
+      };
+    }
+  }
+
   let phaseLotCandidate: string | null = null;
   let phaseSource: PlanningTaskSourceResolved["phaseSource"] = "unclassified";
   let confidence: PlanningTaskSourceResolved["classificationConfidence"] =
     "low";
 
-  // 1. Workflow metadata explicite
+  // 1. Workflow metadata explicite (lot step — pas commercial)
   if (
     workflowPhase &&
     !isDesignationLikeLot(workflowPhase, designation)
@@ -283,16 +323,30 @@ export function resolvePlanningTaskSource(
     confidence = "low";
   }
 
+  const structureClass: PlanningTaskSourceResolved["structureClass"] =
+    phase.structureSource === "unstructured" ||
+    phase.role === "unclassified" ||
+    phase.role === "generic"
+      ? "unstructured"
+      : "fallback";
+
   return {
     sourceLineCode: qty.sourceLineCode ?? primaryCode,
     quantity: qty.quantity,
     unit: qty.unit,
     quantityProvenance: qty.provenance,
     commercialGroup,
-    phase,
+    phase: {
+      ...phase,
+      structureSource:
+        structureClass === "unstructured"
+          ? "unstructured"
+          : "legacy_fallback",
+    },
     phaseSource,
     classificationConfidence: confidence,
     driverTakeoffCode:
       qty.quantity != null ? qty.sourceLineCode ?? primaryCode : primaryCode,
+    structureClass,
   };
 }

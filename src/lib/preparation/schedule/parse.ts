@@ -7,6 +7,7 @@ import type {
   PrepDurationComputed,
   PrepDurationFixed,
   PrepEquipmentDTO,
+  PrepExecutionPhaseDTO,
   PrepLaborDTO,
   PrepRateDTO,
   PrepRatePer,
@@ -18,8 +19,10 @@ import type {
   PrepStepDuration,
   PrepStepKind,
   PrepSupplyDTO,
+  PrepWorkflowDTO,
   PrepWorkflowStepDTO,
 } from "@/lib/preparation/schedule/types";
+import { normalizeExecutionPhaseRole } from "@/lib/preparation/schedule/execution-structure";
 
 function isObj(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === "object" && !Array.isArray(v);
@@ -154,6 +157,46 @@ export function parsePrepResources(raw: unknown): PrepResourcesDTO {
   return { labor, equipment, supplies, rates };
 }
 
+export function parsePrepExecutionPhases(raw: unknown): PrepExecutionPhaseDTO[] {
+  if (!isObj(raw)) return [];
+  const arr = Array.isArray(raw.execution_phases)
+    ? raw.execution_phases
+    : Array.isArray(raw.executionPhases)
+      ? raw.executionPhases
+      : [];
+  const out: PrepExecutionPhaseDTO[] = [];
+  for (const item of arr) {
+    if (!isObj(item)) continue;
+    const id = str(item.id);
+    const label = str(item.label) ?? str(item.name);
+    if (!id || !label) continue;
+    const depends_on = Array.isArray(item.depends_on)
+      ? item.depends_on
+          .map((d) => str(d))
+          .filter((d): d is string => !!d)
+      : Array.isArray(item.dependsOn)
+        ? item.dependsOn
+            .map((d) => str(d))
+            .filter((d): d is string => !!d)
+        : [];
+    out.push({
+      id,
+      label,
+      role: normalizeExecutionPhaseRole(item.role),
+      order: num(item.order) ?? out.length * 10 + 10,
+      depends_on: depends_on.length ? depends_on : undefined,
+    });
+  }
+  return out.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+}
+
+export function parsePrepWorkflow(raw: unknown): PrepWorkflowDTO {
+  return {
+    steps: parsePrepWorkflowSteps(raw),
+    execution_phases: parsePrepExecutionPhases(raw),
+  };
+}
+
 export function parsePrepWorkflowSteps(raw: unknown): PrepWorkflowStepDTO[] {
   if (!isObj(raw) || !Array.isArray(raw.steps)) return [];
   const steps: PrepWorkflowStepDTO[] = [];
@@ -195,6 +238,9 @@ export function parsePrepWorkflowSteps(raw: unknown): PrepWorkflowStepDTO[] {
       lot: str(item.lot),
       kind: parseKind(item.kind),
       description: str(item.description),
+      execution_phase_id: str(
+        item.execution_phase_id ?? item.executionPhaseId,
+      ),
       takeoff_ids: strArr(item.takeoff_ids),
       duration,
       crew,

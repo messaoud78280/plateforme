@@ -32,6 +32,31 @@ export type PrepResourcesDTO = {
 
 export type PrepStepKind = "work" | "control" | "wait";
 
+/**
+ * Rôles d'exécution génériques (tous métiers).
+ * Le libellé de phase porte la sémantique métier ; le rôle porte l'ordre logique.
+ */
+export type ExecutionPhaseRole =
+  | "PREPARATION"
+  | "DEMOLITION"
+  | "EXECUTION"
+  | "FINISH"
+  | "CONTROL"
+  | "HANDOVER"
+  | "WAIT"
+  | "LOGISTICS"
+  | "UNCLASSIFIED";
+
+/** Phase d'exécution explicite dans workflowJson (pas de migration). */
+export type PrepExecutionPhaseDTO = {
+  id: string;
+  label: string;
+  role: ExecutionPhaseRole;
+  order: number;
+  /** IDs de phases amont — graphe de phases, pas commercial / lot métré. */
+  depends_on?: string[];
+};
+
 export type PrepDurationFixed = {
   mode: "fixed";
   days: number;
@@ -56,6 +81,11 @@ export type PrepWorkflowStepDTO = {
   lot?: string | null;
   kind: PrepStepKind;
   description?: string | null;
+  /**
+   * Référence explicite à une phase d'exécution (workflow.execution_phases).
+   * Prioritaire sur lot / section commerciale pour le séquencement.
+   */
+  execution_phase_id?: string | null;
   takeoff_ids: string[];
   duration: PrepStepDuration;
   crew: Array<{ labor_id: string; count: number }>;
@@ -83,6 +113,12 @@ export type PrepWorkflowStepDTO = {
   proofs: string[];
   hold_point?: boolean;
   conditional?: { conditions: string[] } | null;
+};
+
+/** Contenu workflowJson : steps + phases d'exécution optionnelles. */
+export type PrepWorkflowDTO = {
+  steps: PrepWorkflowStepDTO[];
+  execution_phases: PrepExecutionPhaseDTO[];
 };
 
 export type PrepDependencyType = "FS" | "SS" | "FF";

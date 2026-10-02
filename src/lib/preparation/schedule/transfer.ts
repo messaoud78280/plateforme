@@ -11,6 +11,7 @@ import { displayUnit } from "@/lib/preparation/units";
 import {
   parsePrepResources,
   parsePrepSchedule,
+  parsePrepWorkflow,
   parsePrepWorkflowSteps,
 } from "@/lib/preparation/schedule/parse";
 import { normalizeCivilStartDate } from "@/lib/preparation/schedule/calendar";
@@ -280,7 +281,9 @@ export async function previewPrepSchedule(input: {
   if (!row) throw new PrepError("Étude introuvable", 404);
 
   const resources = parsePrepResources(row.resourcesJson);
-  const workflow = parsePrepWorkflowSteps(row.workflowJson);
+  const workflowParsed = parsePrepWorkflow(row.workflowJson);
+  const workflow = workflowParsed.steps;
+  const executionPhases = workflowParsed.execution_phases;
   const schedule = parsePrepSchedule(row.scheduleJson);
   if (!schedule || !workflow.length) {
     throw new PrepError(
@@ -312,6 +315,7 @@ export async function previewPrepSchedule(input: {
     resources,
     qtyOf,
     qtyUnitOf,
+    executionPhases,
   });
 
   const finance = await loadQuoteFinanceByTakeoff(
@@ -620,7 +624,9 @@ export async function commitPrepSchedule(input: {
   const studyView = await getPrepStudyView(input.orgId, input.studyId);
   if (!studyView) throw new PrepError("Étude introuvable", 404);
   const resources = parsePrepResources(study.resourcesJson);
-  const workflow = parsePrepWorkflowSteps(study.workflowJson);
+  const workflowParsed = parsePrepWorkflow(study.workflowJson);
+  const workflow = workflowParsed.steps;
+  const executionPhases = workflowParsed.execution_phases;
   const schedule = parsePrepSchedule(study.scheduleJson)!;
   const engine = computeStudy({ params: studyView.params, lines: studyView.lines });
   const lineByCode = new Map(studyView.lines.map((l) => [l.code, l]));
@@ -643,6 +649,7 @@ export async function commitPrepSchedule(input: {
       return l ? displayUnit(l.unit) || l.unit : null;
     },
     durationOverrides: input.durationOverrides,
+    executionPhases,
   });
   const placed = computed.placed.filter((t) => selected.has(t.stepId));
   if (computed.errors.length) {
@@ -813,6 +820,7 @@ export async function commitPrepSchedule(input: {
             engineQty != null && Number.isFinite(engineQty)
               ? Number(engineQty)
               : null;
+          const wfStep = workflow.find((s) => s.id === t.stepId);
           const source = resolvePlanningTaskSource({
             stepId: t.stepId,
             stepName: t.name,
@@ -824,6 +832,8 @@ export async function commitPrepSchedule(input: {
               ? commercialByLineCode.get(primaryCode) ?? null
               : null,
             workflowPhase: t.lot,
+            executionPhaseId: wfStep?.execution_phase_id ?? null,
+            executionPhases,
             line: line ? lineToQtySource(line, engNum) : null,
             engineValue: engNum,
           });

@@ -11,10 +11,12 @@ export function ChantierStatusSelect({
   projectId,
   value,
   canEdit,
+  className,
 }: {
   projectId: string;
   value: ChantierStatus;
   canEdit: boolean;
+  className?: string;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +55,7 @@ export function ChantierStatusSelect({
   }
 
   return (
-    <div className="inline-flex flex-col items-end gap-1">
+    <div className={`inline-flex flex-col items-end gap-1 ${className ?? ""}`}>
       <label className="sr-only" htmlFor={`chantier-status-${projectId}`}>
         Statut du chantier
       </label>
@@ -62,7 +64,7 @@ export function ChantierStatusSelect({
         disabled={pending}
         value={local}
         onChange={(e) => onChange(e.target.value as ChantierStatus)}
-        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 disabled:opacity-60"
+        className="rounded-xl border border-[color:rgba(80,160,210,0.22)] bg-white/85 px-2.5 py-1.5 text-xs font-semibold text-slate-800 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset] disabled:opacity-60"
         aria-busy={pending}
       >
         {STATUSES.map((s) => (

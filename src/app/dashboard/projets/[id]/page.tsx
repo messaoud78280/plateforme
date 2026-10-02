@@ -69,6 +69,11 @@ import {
   ProjectProfitabilityDeferred,
   ProjectProfitabilitySkeleton,
 } from "@/components/chantier/ProjectProfitabilityDeferred";
+import { ProjectSignature } from "@/components/chantier/project-signature/ProjectSignature";
+import {
+  projectSignatureRef,
+  resolveCraftsFromScopes,
+} from "@/lib/chantier/craft-signature";
 import { CHANTIER_FILE_STATUS_LABELS } from "@/lib/chantier-dossier/constants";
 export default async function ProjetDetailPage({
   params,
@@ -163,6 +168,12 @@ export default async function ProjetDetailPage({
             mimeType: true,
             fileUrl: true,
           },
+        },
+        projectScopes: {
+          where: { status: "ACTIVE" },
+          select: { code: true, name: true, status: true, displayOrder: true },
+          orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
+          take: 24,
         },
       },
     }),
@@ -483,6 +494,30 @@ export default async function ProjetDetailPage({
   ].slice(0, 8);
 
   const responsibleLabel = presentation.responsibleLabel;
+  const craftSignatures = resolveCraftsFromScopes(project.projectScopes ?? []);
+  const locationLabel =
+    project.siteCity?.trim() ||
+    project.siteAddress?.trim() ||
+    null;
+  const secondaryFacts: { value: string; label: string }[] = [];
+  if (project.signedQuoteAmount != null) {
+    secondaryFacts.push({
+      value: Number(project.signedQuoteAmount).toLocaleString("fr-FR", {
+        style: "currency",
+        currency: "EUR",
+        maximumFractionDigits: 0,
+      }),
+      label: "HT signé",
+    });
+  }
+  if (project.plannedStartDate || project.dateSouhaitee) {
+    secondaryFacts.push({
+      value: new Date(
+        project.plannedStartDate ?? project.dateSouhaitee!,
+      ).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }),
+      label: "Début",
+    });
+  }
 
   const contextCard = (
     <div className="rounded-xl border border-slate-200/90 bg-white p-4 sm:p-5">
@@ -754,137 +789,75 @@ export default async function ProjetDetailPage({
         ]}
       />
 
-      <header className="rounded-2xl border border-slate-200/90 bg-white px-4 py-4 sm:px-5 sm:py-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-              Chantier
-            </p>
-            <h1 className="mt-1 text-[1.25rem] font-extrabold tracking-tight text-slate-950 sm:text-[1.45rem]">
-              {project.title}
-            </h1>
-            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-slate-600">
-              {project.siteCity ? (
-                <span className="font-medium text-slate-800">{project.siteCity}</span>
-              ) : project.siteAddress ? (
-                <span className="font-medium text-slate-800">{project.siteAddress}</span>
+      <ProjectSignature
+        title={project.title}
+        projectRef={projectSignatureRef(project.id)}
+        clientLabel={presentation.clientLabel}
+        locationLabel={locationLabel}
+        responsibleLabel={responsibleLabel}
+        crafts={craftSignatures}
+        secondaryFacts={secondaryFacts}
+        statusSlot={
+          isStaff ? (
+            <ChantierStatusSelect
+              projectId={project.id}
+              value={project.chantierStatus}
+              canEdit
+              className="bw-psig-status-select"
+            />
+          ) : (
+            <Badge tone={chantierStatusBadgeTone(project.chantierStatus)}>
+              {chantierStatusDisplayLabel(project.chantierStatus)}
+            </Badge>
+          )
+        }
+        teamHref={
+          !isExternalViewer
+            ? withReturnTo(projectTeamHref(project.id), `/dashboard/projets/${project.id}`)
+            : null
+        }
+        agendaHref={`/dashboard/agenda?projectId=${encodeURIComponent(id)}`}
+        overflowSlot={
+          <details className="relative">
+            <summary>•••</summary>
+            <div className="absolute right-0 z-20 mt-1 min-w-[200px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+              {!isExternalViewer && isStaff ? (
+                <Link
+                  href="/dashboard/a-traiter"
+                  className="block px-3.5 py-2 text-sm text-slate-800 hover:bg-slate-50"
+                >
+                  À traiter
+                </Link>
               ) : null}
-              {(project.siteCity || project.siteAddress) && (
-                <span className="text-slate-300" aria-hidden>
-                  ·
-                </span>
-              )}
-              {isStaff ? (
-                <ChantierStatusSelect projectId={project.id} value={project.chantierStatus} canEdit />
-              ) : (
-                <Badge tone={chantierStatusBadgeTone(project.chantierStatus)}>
-                  {chantierStatusDisplayLabel(project.chantierStatus)}
-                </Badge>
-              )}
-              <span className="text-slate-300" aria-hidden>
-                ·
-              </span>
-              {responsibleLabel ? (
-                <span>
-                  Responsable :{" "}
-                  <strong className="font-semibold text-slate-900">{responsibleLabel}</strong>
-                </span>
-              ) : (
-                <span className="text-slate-500">Responsable à définir</span>
-              )}
+              {!isExternalViewer ? (
+                <div className="border-b border-slate-100 px-2 py-2">
+                  <ProjectMessagerieLinks projectId={project.id} />
+                </div>
+              ) : null}
+              {missingCount > 0 ? (
+                <Link
+                  href={`/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`}
+                  className="block px-3.5 py-2 text-sm text-red-700 hover:bg-red-50"
+                >
+                  {missingCount} pièce{missingCount > 1 ? "s" : ""} manquante
+                  {missingCount > 1 ? "s" : ""}
+                </Link>
+              ) : null}
+              {canDeleteChantier ? (
+                <div className="px-2 py-1">
+                  <DeleteChantierButton
+                    projectId={id}
+                    projectTitle={project.title}
+                    redirectTo="/dashboard/projets"
+                    label="Supprimer le chantier"
+                    className="w-full px-2 py-2 text-left text-sm"
+                  />
+                </div>
+              ) : null}
             </div>
-            {(project.signedQuoteAmount != null ||
-              project.plannedStartDate ||
-              project.dateSouhaitee) && (
-              <div className="mt-2.5 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[13px]">
-                {project.signedQuoteAmount != null ? (
-                  <p className="text-[1.15rem] font-extrabold tabular-nums tracking-tight text-slate-950">
-                    {Number(project.signedQuoteAmount).toLocaleString("fr-FR", {
-                      style: "currency",
-                      currency: "EUR",
-                      maximumFractionDigits: 0,
-                    })}{" "}
-                    <span className="text-[12px] font-semibold text-slate-500">HT</span>
-                  </p>
-                ) : null}
-                {project.plannedStartDate || project.dateSouhaitee ? (
-                  <p className="text-slate-600">
-                    Début :{" "}
-                    <span className="font-semibold text-slate-900">
-                      {new Date(
-                        project.plannedStartDate ?? project.dateSouhaitee!,
-                      ).toLocaleDateString("fr-FR", {
-                        day: "numeric",
-                        month: "short",
-                      })}
-                    </span>
-                  </p>
-                ) : null}
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {!isExternalViewer ? (
-              <Link
-                href={withReturnTo(
-                  projectTeamHref(project.id),
-                  `/dashboard/projets/${project.id}`,
-                )}
-                className="inline-flex min-h-10 items-center rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#152a45]"
-              >
-                Message équipe
-              </Link>
-            ) : null}
-            <Link
-              href={`/dashboard/agenda?projectId=${encodeURIComponent(id)}`}
-              className="inline-flex min-h-10 items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#1e3a5f] hover:bg-slate-50"
-            >
-              Agenda
-            </Link>
-            <details className="relative">
-              <summary className="list-none cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
-                •••
-              </summary>
-              <div className="absolute right-0 z-20 mt-1 min-w-[200px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
-                {!isExternalViewer && isStaff ? (
-                  <Link
-                    href="/dashboard/a-traiter"
-                    className="block px-3.5 py-2 text-sm text-slate-800 hover:bg-slate-50"
-                  >
-                    À traiter
-                  </Link>
-                ) : null}
-                {!isExternalViewer ? (
-                  <div className="border-b border-slate-100 px-2 py-2">
-                    <ProjectMessagerieLinks projectId={project.id} />
-                  </div>
-                ) : null}
-                {missingCount > 0 ? (
-                  <Link
-                    href={`/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`}
-                    className="block px-3.5 py-2 text-sm text-red-700 hover:bg-red-50"
-                  >
-                    {missingCount} pièce{missingCount > 1 ? "s" : ""} manquante
-                    {missingCount > 1 ? "s" : ""}
-                  </Link>
-                ) : null}
-                {canDeleteChantier ? (
-                  <div className="px-2 py-1">
-                    <DeleteChantierButton
-                      projectId={id}
-                      projectTitle={project.title}
-                      redirectTo="/dashboard/projets"
-                      label="Supprimer le chantier"
-                      className="w-full px-2 py-2 text-left text-sm"
-                    />
-                  </div>
-                ) : null}
-              </div>
-            </details>
-          </div>
-        </div>
-      </header>
+          </details>
+        }
+      />
 
       {!isExternalViewer && project.organizationId ? (
         <Suspense fallback={<ProjectPreparationSkeleton />}>

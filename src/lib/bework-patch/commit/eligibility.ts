@@ -3,6 +3,7 @@
  */
 import type { BeworkPatchV1 } from "@/lib/bework-patch/types";
 import type { AnalyzePatchImpactResult } from "@/lib/bework-patch/impact/types";
+import { isPlanningCommitSupportedOp } from "@/lib/bework-patch/commit/planning-capability";
 
 export type SyncMode =
   | "FULL_SYNC"
@@ -64,9 +65,7 @@ export function evaluateCommitEligibility(input: {
   // CTX-02A — PLANNING local (pas de remontée métré/devis)
   if (patch.origin.section === "PLANNING") {
     const unsupported = patch.operations.filter(
-      (op) =>
-        op.op !== "update_task" &&
-        op.op !== "update_duration",
+      (op) => !isPlanningCommitSupportedOp(op.op),
     );
     if (unsupported.length) {
       return {

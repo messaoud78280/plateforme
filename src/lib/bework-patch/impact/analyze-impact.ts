@@ -301,6 +301,72 @@ function describeDirectOp(
       unit: null,
     };
   }
+  if (op.op === "update_crew") {
+    const plan = subgraph.plans.find((p) => p.id === op.target.plan_id);
+    const task = plan?.tasks.find(
+      (t) =>
+        t.id === op.target.task_id ||
+        t.id === op.target.id ||
+        t.stepCode === op.target.step_code ||
+        t.stepCode === op.target.code,
+    );
+    return {
+      op: op.op,
+      section,
+      entityType: "PREP_SCHEDULE_TASK",
+      entityId: task?.id ?? op.target.task_id ?? null,
+      label: task?.name ?? op.target.step_code ?? "tâche",
+      field: "crew",
+      before: null,
+      after: op.changes,
+      unit: null,
+    };
+  }
+  if (op.op === "update_productivity") {
+    const plan = subgraph.plans.find((p) => p.id === op.target.plan_id);
+    const task = plan?.tasks.find(
+      (t) =>
+        t.id === op.target.task_id ||
+        t.id === op.target.id ||
+        t.stepCode === op.target.step_code ||
+        t.stepCode === op.target.code,
+    );
+    return {
+      op: op.op,
+      section,
+      entityType: "PREP_SCHEDULE_TASK",
+      entityId: task?.id ?? op.target.task_id ?? null,
+      label: task?.name ?? op.target.step_code ?? "tâche",
+      field: "productivity",
+      before: {
+        rate_value: task?.rateValue ?? null,
+        parallel_units: task?.parallelUnits ?? null,
+      },
+      after: op.changes,
+      unit: null,
+    };
+  }
+  if (op.op === "update_workload") {
+    const plan = subgraph.plans.find((p) => p.id === op.target.plan_id);
+    const task = plan?.tasks.find(
+      (t) =>
+        t.id === op.target.task_id ||
+        t.id === op.target.id ||
+        t.stepCode === op.target.step_code ||
+        t.stepCode === op.target.code,
+    );
+    return {
+      op: op.op,
+      section,
+      entityType: "PREP_SCHEDULE_TASK",
+      entityId: task?.id ?? op.target.task_id ?? null,
+      label: task?.name ?? op.target.step_code ?? "tâche",
+      field: "workload_person_days",
+      before: null,
+      after: op.changes.workload_person_days ?? null,
+      unit: "h.j",
+    };
+  }
   if (op.op === "update_visit") {
     const visit = subgraph.visit;
     const targetId = op.target.visit_id ?? op.target.id;
@@ -1156,7 +1222,13 @@ function analyzePlanningLocal(
     ),
   ];
 
-  const supported = new Set(["update_task", "update_duration"]);
+  const supported = new Set([
+    "update_task",
+    "update_duration",
+    "update_crew",
+    "update_productivity",
+    "update_workload",
+  ]);
   for (const op of patch.operations) {
     if (!supported.has(op.op)) {
       errors.push(
@@ -1188,7 +1260,11 @@ function analyzePlanningLocal(
   const directChanges = extractDirectChanges(patch, subgraph);
   for (const dc of directChanges) {
     if (
-      (dc.op === "update_task" || dc.op === "update_duration") &&
+      (dc.op === "update_task" ||
+        dc.op === "update_duration" ||
+        dc.op === "update_crew" ||
+        dc.op === "update_productivity" ||
+        dc.op === "update_workload") &&
       !dc.entityId
     ) {
       errors.push(

@@ -27,6 +27,10 @@ import type {
   BeworkPatchSection,
 } from "@/lib/bework-patch/types";
 import { parsePrepWorkflowSteps } from "@/lib/preparation/schedule/parse";
+import {
+  parseCrewJson,
+  resolveWorkloadPersonDays,
+} from "@/lib/preparation/schedule/crew";
 
 function isObj(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === "object" && !Array.isArray(v);
@@ -190,12 +194,22 @@ async function buildPlanningContext(
           id: true,
           stepCode: true,
           name: true,
+          description: true,
           durationDays: true,
+          durationMode: true,
           lot: true,
           startDate: true,
           endDate: true,
           crewJson: true,
           dependsOnJson: true,
+          quantitySnapshot: true,
+          quantityUnit: true,
+          driverTakeoffCode: true,
+          rateId: true,
+          rateValue: true,
+          rateUnit: true,
+          ratePer: true,
+          parallelUnits: true,
         },
       },
     },
@@ -227,20 +241,42 @@ async function buildPlanningContext(
       base_duration_working_days: plan.baseDurationWorkingDays
         ? Number(plan.baseDurationWorkingDays)
         : null,
-      tasks: plan.tasks.map((t) => ({
-        task_id: t.id,
-        step_code: t.stepCode,
-        name: t.name,
-        duration_days: Number(t.durationDays),
-        lot: t.lot,
-        start_date: t.startDate ? t.startDate.toISOString().slice(0, 10) : null,
-        end_date: t.endDate ? t.endDate.toISOString().slice(0, 10) : null,
-        takeoff_codes: takeoffLinks
-          .filter((l) => l.taskId === t.id)
-          .map((l) => l.studyLineCode),
-      })),
+      tasks: plan.tasks.map((t) => {
+        const crew = parseCrewJson(t.crewJson);
+        const wl = resolveWorkloadPersonDays({
+          crewJson: t.crewJson,
+          durationDays: Number(t.durationDays),
+        });
+        return {
+          task_id: t.id,
+          step_code: t.stepCode,
+          name: t.name,
+          description: t.description,
+          duration_days: Number(t.durationDays),
+          duration_mode: t.durationMode,
+          lot: t.lot,
+          start_date: t.startDate ? t.startDate.toISOString().slice(0, 10) : null,
+          end_date: t.endDate ? t.endDate.toISOString().slice(0, 10) : null,
+          quantity:
+            t.quantitySnapshot != null ? Number(t.quantitySnapshot) : null,
+          unit: t.quantityUnit,
+          rate_id: t.rateId,
+          rate: t.rateValue != null ? Number(t.rateValue) : null,
+          rate_unit: t.rateUnit,
+          rate_per: t.ratePer,
+          parallel_units: t.parallelUnits,
+          crew_id: crew.crewId,
+          crew_size: crew.crewSize,
+          crew: crew.members,
+          workload_person_days: wl.value,
+          workload_source: wl.source,
+          takeoff_codes: takeoffLinks
+            .filter((l) => l.taskId === t.id)
+            .map((l) => l.studyLineCode),
+        };
+      }),
       note:
-        "base_version = revisionNumber. studyVersionAtGeneration = alignement métré (CTX-04) — une édition planning ne le synchronise pas.",
+        "base_version = revisionNumber. studyVersionAtGeneration = alignement métré (CTX-04) — une édition planning ne le synchronise pas. Ops exposées = ops commitables uniquement.",
     },
   });
 }

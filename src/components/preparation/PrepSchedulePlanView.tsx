@@ -299,9 +299,9 @@ export function PrepSchedulePlanView({
         <Kpi label="Démarrage" value={asStartLabel(plan.startDate)} />
         <Kpi label="Fin de base" value={asIso(plan.endDateBase)} />
         <Kpi
-          label="A · Charge de travail cumulée"
+          label="A · Durées cumulées des tâches"
           value={`${ind.workloadDays} j`}
-          hint="Somme des durées travaux / contrôles du chemin de base"
+          hint="Somme des durées travaux / contrôles (≠ charge hommes-jours)"
         />
         <Kpi
           label="B · Durée ouvrée du planning"
@@ -318,6 +318,31 @@ export function PrepSchedulePlanView({
           value={`${ind.waitDays} j cal.`}
           hint="Somme des tâches d'attente (ex. cure)"
         />
+        <Kpi
+          label="Équipes renseignées"
+          value={`${plan.tasks.filter((t) => t.crewSize != null && t.crewSize > 0).length} / ${plan.tasks.length}`}
+          hint="Tâches avec effectif — pas un effectif chantier global"
+        />
+        {(() => {
+          const wl = plan.tasks
+            .filter((t) => t.includeInBase && t.workloadPersonDays != null)
+            .reduce((s, t) => s + (t.workloadPersonDays ?? 0), 0);
+          const hasProvided = plan.tasks.some(
+            (t) => t.workloadSource === "PROVIDED" && t.workloadPersonDays != null,
+          );
+          if (!hasProvided && wl <= 0) return null;
+          return (
+            <Kpi
+              label="Charge totale (h.j)"
+              value={`${Math.round(wl * 10) / 10} h.j`}
+              hint={
+                hasProvided
+                  ? "Somme des charges hommes-jours (fournie ou dérivée)"
+                  : "Charges dérivées (durée × effectif) — indicatif"
+              }
+            />
+          );
+        })()}
       </div>
 
       {!plan.startDate || startOpen ? (

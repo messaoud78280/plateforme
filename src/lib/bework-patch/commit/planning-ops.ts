@@ -1,38 +1,43 @@
 /**
  * CTX-02A — Opérations PLANNING supportées au commit universel.
- * Sous-ensemble conservateur : pas d’add/remove/dépendances.
+ * Phase 1 : update_task | update_duration | update_crew | update_productivity | update_workload
  */
 import type { Prisma } from "@prisma/client";
 import type { BeworkPatchV1 } from "@/lib/bework-patch/types";
 import type { AnalyzePatchImpactResult } from "@/lib/bework-patch/impact/types";
 import type { ImpactPlan } from "@/lib/bework-patch/impact/types";
-import { simulatePlanFromQuantityMap } from "@/lib/bework-patch/impact/simulate-planning";
+import {
+  PLANNING_COMMIT_SUPPORTED_OPS,
+  PLANNING_COMMIT_UNSUPPORTED_OPS,
+  isPlanningCommitSupportedOp,
+  type PlanningCommitSupportedOp,
+} from "@/lib/bework-patch/commit/planning-capability";
+import {
+  applyCrewPatch,
+  applyWorkloadPatch,
+  parseCrewJson,
+} from "@/lib/preparation/schedule/crew";
+import { resolveTaskDurationDays } from "@/lib/preparation/schedule/duration-resolve";
+import { recomputePersistedPlanDatesInTx } from "@/lib/preparation/schedule/recompute-plan-dates";
+import { d } from "@/lib/commercial/decimal";
 
-export const PLANNING_COMMIT_SUPPORTED_OPS = [
-  "update_task",
-  "update_duration",
-] as const;
+export {
+  PLANNING_COMMIT_SUPPORTED_OPS,
+  PLANNING_COMMIT_UNSUPPORTED_OPS,
+  isPlanningCommitSupportedOp,
+};
+export type { PlanningCommitSupportedOp };
 
-export type PlanningCommitSupportedOp =
-  (typeof PLANNING_COMMIT_SUPPORTED_OPS)[number];
-
-export function isPlanningCommitSupportedOp(
-  op: string,
-): op is PlanningCommitSupportedOp {
-  return (PLANNING_COMMIT_SUPPORTED_OPS as readonly string[]).includes(op);
+function findTask(plan: ImpactPlan, op: { target: Record<string, unknown> }) {
+  const t = op.target;
+  return plan.tasks.find(
+    (task) =>
+      task.id === t.task_id ||
+      task.id === t.id ||
+      task.stepCode === t.step_code ||
+      task.stepCode === t.code,
+  );
 }
-
-/** Ops annoncées au catalogue mais non commitables CTX-02A. */
-export const PLANNING_COMMIT_UNSUPPORTED_OPS = [
-  "update_productivity",
-  "update_crew",
-  "update_dependency",
-  "update_start_date",
-  "update_workload",
-  "add_task",
-  "remove_task",
-  "update_progress",
-] as const;
 
 /**
  * Applique un patch PLANNING local dans une transaction.
@@ -101,6 +106,7 @@ export async function applyPlanningDirectInTx(
   }
 
   let touched = false;
+  let needsDateRecompute = false;
   const durationOverrides = new Map<string, number>();
 
   for (const op of input.patch.operations) {
@@ -119,13 +125,7 @@ export async function applyPlanningDirectInTx(
     }
 
     if (op.op === "update_task") {
-      const task = subgraphPlan.tasks.find(
-        (t) =>
-          t.id === op.target.task_id ||
-          t.id === op.target.id ||
-          t.stepCode === op.target.step_code ||
-          t.stepCode === op.target.code,
-      );
+      const task = findTask(subgraphPlan, op);
       if (!task) {
         throw Object.assign(new Error("Tâche introuvable sur ce planning."), {
           code: "TARGET_NOT_FOUND",
@@ -146,13 +146,7 @@ export async function applyPlanningDirectInTx(
     }
 
     if (op.op === "update_duration") {
-      const task = subgraphPlan.tasks.find(
-        (t) =>
-          t.id === op.target.task_id ||
-          t.id === op.target.id ||
-          t.stepCode === op.target.step_code ||
-          t.stepCode === op.target.code,
-      );
+      const task = findTask(subgraphPlan, op);
       if (!task) {
         throw Object.assign(new Error("Tâche introuvable sur ce planning."), {
           code: "TARGET_NOT_FOUND",
@@ -175,6 +169,201 @@ export async function applyPlanningDirectInTx(
       });
       durationOverrides.set(task.id, days);
       durationOverrides.set(task.stepCode, days);
+      needsDateRecompute = true;
+      touched = true;
+    }
+
+    if (op.op === "update_crew") {
+      const task = findTask(subgraphPlan, op);
+      if (!task) {
+        throw Object.assign(new Error("Tâche introuvable sur ce planning."), {
+          code: "TARGET_NOT_FOUND",
+        });
+      }
+      const row = await tx.prepScheduleTask.findFirst({
+        where: { id: task.id, organizationId: input.orgId },
+        select: {
+          id: true,
+          stepCode: true,
+          crewJson: true,
+          durationDays: true,
+          durationMode: true,
+          durationLockedByUser: true,
+          quantitySnapshot: true,
+          rateValue: true,
+          parallelUnits: true,
+        },
+      });
+      if (!row) {
+        throw Object.assign(new Error("Tâche introuvable sur ce planning."), {
+          code: "TARGET_NOT_FOUND",
+        });
+      }
+      const nextCrew = applyCrewPatch(row.crewJson, {
+        crew_id: op.changes.crew_id,
+        crew_size: op.changes.crew_size,
+        parallelizable: op.changes.parallelizable,
+      });
+      const crewParsed = parseCrewJson(nextCrew);
+      const data: Prisma.PrepScheduleTaskUpdateInput = {
+        crewJson: nextCrew as Prisma.InputJsonValue,
+      };
+
+      // Mode workload : l'effectif change la durée. Mode fixed : durée inchangée.
+      if (
+        !row.durationLockedByUser &&
+        (row.durationMode === "computed_workload" ||
+          row.durationMode === "workload")
+      ) {
+        const resolved = resolveTaskDurationDays({
+          durationMode: "computed_workload",
+          durationDays: d(row.durationDays),
+          workloadPersonDays: crewParsed.workloadPersonDays,
+          crewSize: crewParsed.crewSize,
+        });
+        if (resolved.modeUsed === "computed_workload") {
+          data.durationDays = resolved.durationDays;
+          data.computedDurationDays = resolved.durationDays;
+          durationOverrides.set(row.id, resolved.durationDays);
+          durationOverrides.set(row.stepCode, resolved.durationDays);
+          needsDateRecompute = true;
+        }
+      }
+
+      await tx.prepScheduleTask.update({ where: { id: row.id }, data });
+      // Leveling crew_id peut changer le séquençage même sans durée.
+      needsDateRecompute = true;
+      touched = true;
+    }
+
+    if (op.op === "update_productivity") {
+      const task = findTask(subgraphPlan, op);
+      if (!task) {
+        throw Object.assign(new Error("Tâche introuvable sur ce planning."), {
+          code: "TARGET_NOT_FOUND",
+        });
+      }
+      const row = await tx.prepScheduleTask.findFirst({
+        where: { id: task.id, organizationId: input.orgId },
+        select: {
+          id: true,
+          stepCode: true,
+          durationDays: true,
+          durationMode: true,
+          durationLockedByUser: true,
+          quantitySnapshot: true,
+          rateId: true,
+          rateValue: true,
+          parallelUnits: true,
+        },
+      });
+      if (!row) {
+        throw Object.assign(new Error("Tâche introuvable sur ce planning."), {
+          code: "TARGET_NOT_FOUND",
+        });
+      }
+      const rateId =
+        op.changes.rate_id !== undefined ? op.changes.rate_id : row.rateId;
+      const rateValue =
+        op.changes.rate_value !== undefined
+          ? op.changes.rate_value
+          : row.rateValue != null
+            ? d(row.rateValue)
+            : null;
+      const parallelUnits =
+        op.changes.parallel_units !== undefined
+          ? Math.max(1, op.changes.parallel_units)
+          : row.parallelUnits;
+
+      const data: Prisma.PrepScheduleTaskUpdateInput = {
+        rateId: rateId ?? null,
+        rateValue: rateValue,
+        parallelUnits,
+      };
+
+      const qty = row.quantitySnapshot != null ? d(row.quantitySnapshot) : null;
+      const canCompute =
+        !row.durationLockedByUser &&
+        qty != null &&
+        qty >= 0 &&
+        rateValue != null &&
+        rateValue > 0;
+
+      if (canCompute) {
+        const resolved = resolveTaskDurationDays({
+          durationMode: "computed",
+          durationDays: d(row.durationDays),
+          quantitySnapshot: qty,
+          rateValue,
+          parallelUnits,
+        });
+        data.durationMode = "computed";
+        data.durationDays = resolved.durationDays;
+        data.computedDurationDays = resolved.durationDays;
+        durationOverrides.set(row.id, resolved.durationDays);
+        durationOverrides.set(row.stepCode, resolved.durationDays);
+        needsDateRecompute = true;
+      }
+
+      await tx.prepScheduleTask.update({ where: { id: row.id }, data });
+      touched = true;
+    }
+
+    if (op.op === "update_workload") {
+      const task = findTask(subgraphPlan, op);
+      if (!task) {
+        throw Object.assign(new Error("Tâche introuvable sur ce planning."), {
+          code: "TARGET_NOT_FOUND",
+        });
+      }
+      const row = await tx.prepScheduleTask.findFirst({
+        where: { id: task.id, organizationId: input.orgId },
+        select: {
+          id: true,
+          stepCode: true,
+          crewJson: true,
+          durationDays: true,
+          durationLockedByUser: true,
+        },
+      });
+      if (!row) {
+        throw Object.assign(new Error("Tâche introuvable sur ce planning."), {
+          code: "TARGET_NOT_FOUND",
+        });
+      }
+      const wl =
+        op.changes.workload_person_days !== undefined
+          ? op.changes.workload_person_days
+          : null;
+      if (wl != null && (!Number.isFinite(wl) || wl < 0)) {
+        throw Object.assign(new Error("Charge hommes-jours invalide."), {
+          code: "INVALID_FIELD",
+        });
+      }
+      const nextCrew = applyWorkloadPatch(row.crewJson, wl);
+      const crewParsed = parseCrewJson(nextCrew);
+      const data: Prisma.PrepScheduleTaskUpdateInput = {
+        crewJson: nextCrew as Prisma.InputJsonValue,
+        durationMode: "computed_workload",
+      };
+
+      if (!row.durationLockedByUser && wl != null && crewParsed.crewSize) {
+        const resolved = resolveTaskDurationDays({
+          durationMode: "computed_workload",
+          durationDays: d(row.durationDays),
+          workloadPersonDays: wl,
+          crewSize: crewParsed.crewSize,
+        });
+        if (resolved.modeUsed === "computed_workload") {
+          data.durationDays = resolved.durationDays;
+          data.computedDurationDays = resolved.durationDays;
+          durationOverrides.set(row.id, resolved.durationDays);
+          durationOverrides.set(row.stepCode, resolved.durationDays);
+          needsDateRecompute = true;
+        }
+      }
+
+      await tx.prepScheduleTask.update({ where: { id: row.id }, data });
       touched = true;
     }
   }
@@ -185,27 +374,17 @@ export async function applyPlanningDirectInTx(
     });
   }
 
-  const planData: Prisma.PrepSchedulePlanUpdateInput = {
-    revisionNumber: { increment: 1 },
-  };
-
-  if (durationOverrides.size > 0) {
-    const sim = simulatePlanFromQuantityMap(
-      subgraphPlan,
-      new Map(),
+  if (needsDateRecompute) {
+    await recomputePersistedPlanDatesInTx(tx, {
+      orgId: input.orgId,
+      planId: plan.id,
       durationOverrides,
-    );
-    if (sim.afterDurationWorkingDays != null) {
-      planData.baseDurationWorkingDays = sim.afterDurationWorkingDays;
-    }
-    if (plan.startDate && sim.afterEndDate) {
-      planData.endDateBase = new Date(`${sim.afterEndDate}T12:00:00.000Z`);
-    }
+    });
   }
 
   await tx.prepSchedulePlan.update({
     where: { id: plan.id },
-    data: planData,
+    data: { revisionNumber: { increment: 1 } },
   });
 
   return {

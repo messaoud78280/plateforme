@@ -22,6 +22,20 @@ type Props = {
   onHoldStatusChange: (status: "A_CONTROLER" | "VALIDE" | "RESERVES") => void;
 };
 
+function durationModeLabel(mode: string | undefined): string {
+  switch ((mode ?? "fixed").toLowerCase()) {
+    case "computed":
+      return "Calculée (quantité / rendement)";
+    case "computed_workload":
+    case "workload":
+      return "Calculée (charge / effectif)";
+    case "manual":
+      return "Manuelle";
+    default:
+      return "Fixe";
+  }
+}
+
 export function PrepScheduleTaskPanel({
   task,
   nextBlockedStepCode,
@@ -37,6 +51,7 @@ export function PrepScheduleTaskPanel({
           <h3 className="text-[15px] font-semibold text-[#1e3a5f]">{task.name}</h3>
           <p className="mt-0.5 text-[12px] text-slate-500">
             {kindLabel(task.kind)}
+            {task.lot ? ` · Lot (source métré) : ${task.lot}` : ""}
             {task.conditional ? " · Conditionnel · Hors planning de base" : ""}
           </p>
         </div>
@@ -119,6 +134,7 @@ export function PrepScheduleTaskPanel({
             label="Durée"
             value={`${task.durationDays} j ${task.durationCalendar === "calendar" ? "calendaires" : "ouvrés"}`}
           />
+          <Row label="Mode durée" value={durationModeLabel(task.durationMode)} />
         </Section>
 
         <Section title="Quantité / rendement">
@@ -130,6 +146,8 @@ export function PrepScheduleTaskPanel({
                 : "—"
             }
           />
+          <Row label="Unité" value={task.quantityUnit ?? "—"} />
+          <Row label="Code métré" value={task.driverTakeoffCode ?? "—"} />
           <Row
             label="Rendement"
             value={
@@ -138,7 +156,6 @@ export function PrepScheduleTaskPanel({
                 : "—"
             }
           />
-          <Row label="Code pilote" value={task.driverTakeoffCode ?? "—"} />
         </Section>
 
         <Section title="Équipe">
@@ -150,9 +167,28 @@ export function PrepScheduleTaskPanel({
                 </li>
               ))}
             </ul>
+          ) : task.crewSize != null ? (
+            <p className="text-slate-700">Effectif : {task.crewSize} personne{task.crewSize > 1 ? "s" : ""}</p>
           ) : (
             <p className="text-slate-500">—</p>
           )}
+          {task.crewId ? (
+            <Row label="Équipe (id)" value={task.crewId} />
+          ) : null}
+          {task.crewSize != null ? (
+            <Row
+              label="Effectif"
+              value={`${task.crewSize} personne${task.crewSize > 1 ? "s" : ""}`}
+            />
+          ) : null}
+          {task.workloadPersonDays != null ? (
+            <Row
+              label="Charge h.j"
+              value={`${task.workloadPersonDays} h.j${
+                task.workloadSource === "DERIVED" ? " (dérivée)" : ""
+              }`}
+            />
+          ) : null}
         </Section>
 
         <Section title="Engins">
@@ -251,19 +287,19 @@ function kindLabel(kind: string) {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div>
-      <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
         {title}
       </p>
-      {children}
+      <div className="space-y-1">{children}</div>
     </div>
   );
 }
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-3 py-0.5">
+    <div className="flex items-baseline justify-between gap-3">
       <span className="text-slate-500">{label}</span>
-      <span className="text-right font-medium tabular-nums text-slate-800">{value}</span>
+      <span className="text-right font-medium text-slate-800">{value}</span>
     </div>
   );
 }

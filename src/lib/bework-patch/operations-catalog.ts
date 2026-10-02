@@ -8,6 +8,7 @@ import type {
   BeworkPatchSection,
   BeworkSupportedOperationSpec,
 } from "@/lib/bework-patch/types";
+import { isPlanningCommitSupportedOp } from "@/lib/bework-patch/commit/planning-capability";
 
 const ALL_TECHNICAL: BeworkChangeIntent[] = [
   "TECHNICAL_CORRECTION",
@@ -303,6 +304,8 @@ export function supportedOperationsForSection(
     [BeworkPatchOpName, (typeof OPERATION_CATALOG)[BeworkPatchOpName]]
   >) {
     if (!cat.sections.includes(section)) continue;
+    // Contrat honnête : PLANNING n'expose que les ops réellement commitables.
+    if (section === "PLANNING" && !isPlanningCommitSupportedOp(op)) continue;
     out.push({
       op,
       entity_types: cat.entity_types,

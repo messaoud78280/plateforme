@@ -24,6 +24,12 @@ import {
   holdPointBlocksSuccessor,
   normalizeHoldPointStatus,
 } from "@/lib/preparation/schedule/gantt-layout";
+import {
+  parseCrewJson,
+  parseCrewMembers,
+  resolveWorkloadPersonDays,
+  serializeCrewJson as serializeCrewCanonical,
+} from "@/lib/preparation/schedule/crew";
 
 export type SchedulePreviewQuoteOption = {
   id: string;
@@ -119,35 +125,21 @@ function crewLabel(
 
 /** Persistance crewJson compatible array legacy + métadonnées crew_id. */
 function serializeCrewJson(task: PlacedTask): unknown {
-  const members = task.crew;
-  if (task.crewId || task.crewSize != null || task.parallelizable || task.workloadPersonDays != null) {
-    return {
-      crew_id: task.crewId,
-      crew_size: task.crewSize,
-      parallelizable: task.parallelizable || undefined,
-      workload_person_days: task.workloadPersonDays,
-      members,
-    };
-  }
-  return members;
+  return serializeCrewCanonical({
+    crewId: task.crewId,
+    crewSize: task.crewSize,
+    parallelizable: task.parallelizable,
+    workloadPersonDays: task.workloadPersonDays,
+    workloadSource: task.workloadPersonDays != null ? "PROVIDED" : null,
+    members: task.crew.map((c) => ({ labor_id: c.labor_id, count: c.count })),
+  });
 }
 
 function parseCrewJsonMembers(raw: unknown): Array<{ labor_id: string; count: number }> {
-  if (Array.isArray(raw)) {
-    return raw
-      .map((c) => {
-        if (!c || typeof c !== "object") return null;
-        const o = c as { labor_id?: string; count?: number };
-        if (!o.labor_id) return null;
-        return { labor_id: o.labor_id, count: o.count ?? 1 };
-      })
-      .filter((x): x is { labor_id: string; count: number } => !!x);
-  }
-  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    const o = raw as { members?: unknown };
-    return parseCrewJsonMembers(o.members);
-  }
-  return [];
+  return parseCrewMembers(raw).map((m) => ({
+    labor_id: m.labor_id,
+    count: m.count,
+  }));
 }
 
 function equipmentLabel(
@@ -583,6 +575,24 @@ export async function commitPrepSchedule(input: {
 
         for (const [i, t] of placed.entries()) {
           const fin = financeForTask(t.takeoffIds, finance);
+          const primaryCode =
+            t.duration.driverItem ?? t.takeoffIds[0] ?? null;
+          const line = primaryCode ? lineByCode.get(primaryCode) : null;
+          const engineQty =
+            primaryCode != null
+              ? (engine.nodes.get(primaryCode)?.value ?? null)
+              : null;
+          const quantitySnapshot =
+            t.duration.quantity ??
+            line?.validatedQuantity ??
+            (engineQty != null && Number.isFinite(engineQty) ? Number(engineQty) : null);
+          const quantityUnit =
+            t.duration.quantityUnit ??
+            (line ? displayUnit(line.unit) || line.unit : null);
+          const driverTakeoffCode =
+            t.duration.driverItem ??
+            (quantitySnapshot != null ? primaryCode : null);
+
           const row = await tx.prepScheduleTask.create({
             data: {
               organizationId: input.orgId,
@@ -609,9 +619,9 @@ export async function commitPrepSchedule(input: {
               durationCalendar: t.duration.calendar,
               durationLockedByUser: input.durationOverrides?.[t.stepId] != null,
               computedDurationDays: t.duration.durationDays,
-              driverTakeoffCode: t.duration.driverItem,
-              quantitySnapshot: t.duration.quantity,
-              quantityUnit: t.duration.quantityUnit,
+              driverTakeoffCode,
+              quantitySnapshot,
+              quantityUnit,
               rateId: t.duration.rateId,
               rateValue: t.duration.rateValue,
               rateUnit: t.duration.rateUnit,
@@ -851,14 +861,21 @@ export type SchedulePlanViewPayload = {
     endHalf: number;
     durationDays: number;
     durationCalendar: string;
+    durationMode: string;
     quantitySnapshot: number | null;
     quantityUnit: string | null;
     driverTakeoffCode: string | null;
+    rateId: string | null;
     rateValue: number | null;
     rateUnit: string | null;
     ratePer: string | null;
     ratePerLabel: string | null;
     parallelUnits: number;
+    crewId: string | null;
+    crewSize: number | null;
+    parallelizable: boolean;
+    workloadPersonDays: number | null;
+    workloadSource: "PROVIDED" | "DERIVED" | null;
     crew: Array<{ labor_id: string; count: number; label: string }>;
     equipment: Array<{ equipment_id: string; count: number; label: string }>;
     supplies: Array<{ supply_id: string; count?: number; label: string }>;
@@ -960,15 +977,7 @@ export async function buildPrepSchedulePlanPayload(
 
   const tasks = plan.tasks.map((t) => {
     const holdStatus = normalizeHoldPointStatus(t.holdPointStatus, t.holdPoint);
-    const crewMeta =
-      t.crewJson && typeof t.crewJson === "object" && !Array.isArray(t.crewJson)
-        ? (t.crewJson as {
-            crew_id?: string | null;
-            crew_size?: number | null;
-            parallelizable?: boolean;
-            workload_person_days?: number | null;
-          })
-        : null;
+    const crewParsed = parseCrewJson(t.crewJson);
     const crewRaw = parseCrewJsonMembers(t.crewJson);
     const eqRaw = Array.isArray(t.equipmentJson) ? t.equipmentJson : [];
     const suppliesRaw = Array.isArray(t.suppliesJson) ? t.suppliesJson : [];
@@ -982,6 +991,12 @@ export async function buildPrepSchedulePlanPayload(
           })
           .filter((x): x is { stepId: string; type: string } => !!x)
       : [];
+
+    const durationDays = d(t.durationDays);
+    const workload = resolveWorkloadPersonDays({
+      crewJson: t.crewJson,
+      durationDays,
+    });
 
     return {
       id: t.id,
@@ -998,11 +1013,13 @@ export async function buildPrepSchedulePlanPayload(
       endDate: asIsoDate(t.endDate),
       startHalf: t.startHalf,
       endHalf: t.endHalf,
-      durationDays: d(t.durationDays),
+      durationDays,
       durationCalendar: t.durationCalendar,
+      durationMode: t.durationMode,
       quantitySnapshot: t.quantitySnapshot != null ? d(t.quantitySnapshot) : null,
       quantityUnit: t.quantityUnit,
       driverTakeoffCode: t.driverTakeoffCode,
+      rateId: t.rateId,
       rateValue: t.rateValue != null ? d(t.rateValue) : null,
       rateUnit: t.rateUnit,
       ratePer: t.ratePer,
@@ -1010,10 +1027,11 @@ export async function buildPrepSchedulePlanPayload(
         ? RATE_PER_LABELS[t.ratePer as "engin" | "equipe"] ?? t.ratePer
         : null,
       parallelUnits: t.parallelUnits,
-      crewId: crewMeta?.crew_id ?? null,
-      crewSize: crewMeta?.crew_size ?? null,
-      parallelizable: crewMeta?.parallelizable === true,
-      workloadPersonDays: crewMeta?.workload_person_days ?? null,
+      crewId: crewParsed.crewId,
+      crewSize: crewParsed.crewSize,
+      parallelizable: crewParsed.parallelizable,
+      workloadPersonDays: workload.value,
+      workloadSource: workload.source,
       crew: crewRaw.map((c) => ({
         labor_id: c.labor_id,
         count: c.count,

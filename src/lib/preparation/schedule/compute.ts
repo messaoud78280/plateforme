@@ -16,6 +16,7 @@ import {
   type CalendarConfig,
   type Instant,
 } from "@/lib/preparation/schedule/calendar";
+import { ceilDay, ceilHalfDay } from "@/lib/preparation/schedule/duration-math";
 import type {
   PrepResourcesDTO,
   PrepScheduleDTO,
@@ -106,14 +107,6 @@ export type ScheduleComputeResult = {
   warnings: string[];
   errors: string[];
 };
-
-function ceilHalfDay(days: number): number {
-  return Math.ceil(days * 2 - 1e-12) / 2;
-}
-
-function ceilDay(days: number): number {
-  return Math.ceil(days - 1e-12);
-}
 
 /** Normalise un libellé de lot pour une clé de ressource stable. */
 export function normalizeLotResourceLabel(lot: string): string {

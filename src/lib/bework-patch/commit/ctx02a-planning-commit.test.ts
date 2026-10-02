@@ -70,12 +70,18 @@ function planningPatch(overrides?: {
 {
   assert.ok(isPlanningCommitSupportedOp("update_task"));
   assert.ok(isPlanningCommitSupportedOp("update_duration"));
+  assert.ok(isPlanningCommitSupportedOp("update_crew"));
+  assert.ok(isPlanningCommitSupportedOp("update_productivity"));
+  assert.ok(isPlanningCommitSupportedOp("update_workload"));
   for (const op of PLANNING_COMMIT_UNSUPPORTED_OPS) {
     assert.equal(isPlanningCommitSupportedOp(op), false);
   }
   assert.deepEqual([...PLANNING_COMMIT_SUPPORTED_OPS], [
     "update_task",
     "update_duration",
+    "update_crew",
+    "update_productivity",
+    "update_workload",
   ]);
   console.log("  catalog SUPPORTED/UNSUPPORTED: ok");
 }

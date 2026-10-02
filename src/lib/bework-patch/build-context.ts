@@ -36,6 +36,7 @@ import {
   asStringListJson,
   asSuppliesJson,
   normalizeDependsOnJson,
+  UPDATE_DEPENDENCY_DEPENDS_ON_CONTRACT,
 } from "@/lib/bework-patch/operation-contracts";
 
 function isObj(v: unknown): v is Record<string, unknown> {
@@ -269,6 +270,18 @@ async function buildPlanningContext(
         role: p.role,
         order: p.order,
       })),
+      /** Contrat parser réel — source operation-contracts (pas une doc dupliquée). */
+      operation_contracts: {
+        update_dependency: {
+          ...UPDATE_DEPENDENCY_DEPENDS_ON_CONTRACT,
+          invalid_forms: {
+            string_array: {
+              example: ["S-Q01-02"],
+              result: "normalisé en [] — objets { step_id } requis",
+            },
+          },
+        },
+      },
       tasks: plan.tasks.map((t) => {
         const crew = parseCrewJson(t.crewJson);
         const wl = resolveWorkloadPersonDays({
@@ -314,7 +327,7 @@ async function buildPlanningContext(
         };
       }),
       note:
-        "base_version = revisionNumber. studyVersionAtGeneration = alignement métré (CTX-04) — une édition planning ne le synchronise pas. Ops exposées = ops commitables uniquement. Après update_duration / update_crew / update_productivity / update_dependency / update_workload (si durée impactée), les dates sont recalculées via computeSchedule (phases + leveling). depends_on : voir field_contracts de update_dependency (parser réel).",
+        "base_version = revisionNumber. studyVersionAtGeneration = alignement métré (CTX-04) — une édition planning ne le synchronise pas. Ops exposées = ops commitables uniquement. Après update_duration / update_crew / update_productivity / update_dependency / update_workload (si durée impactée), les dates sont recalculées via computeSchedule (phases + leveling). depends_on : objets { step_id, type?, lag_days? } — voir data.operation_contracts.update_dependency et supported_operations[].field_contracts (pas un tableau de strings).",
     },
   });
 }

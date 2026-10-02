@@ -1,6 +1,7 @@
 /**
  * CTX-02A — Opérations PLANNING supportées au commit universel.
  * Phase 1 : update_task | update_duration | update_crew | update_productivity | update_workload
+ * + update_dependency (écritures batchées pour rester dans la fenêtre transactionnelle).
  */
 import type { Prisma } from "@prisma/client";
 import type { BeworkPatchV1 } from "@/lib/bework-patch/types";
@@ -29,6 +30,14 @@ export {
 };
 export type { PlanningCommitSupportedOp };
 
+type DepEdge = { stepId: string; type: "FS" | "SS" | "FF"; lagDays: number };
+
+type PendingDepWrite = {
+  taskId: string;
+  stepCode: string;
+  dependsOn: DepEdge[];
+};
+
 function findTask(plan: ImpactPlan, op: { target: Record<string, unknown> }) {
   const t = op.target;
   return plan.tasks.find(
@@ -40,11 +49,25 @@ function findTask(plan: ImpactPlan, op: { target: Record<string, unknown> }) {
   );
 }
 
+function parsePersistedDeps(raw: unknown): Array<{ step_id: string }> {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((x) => {
+      if (!x || typeof x !== "object") return null;
+      const o = x as { stepId?: string; step_id?: string };
+      const id = o.stepId ?? o.step_id;
+      return id ? { step_id: id } : null;
+    })
+    .filter((x): x is { step_id: string } => !!x);
+}
+
 /**
  * Applique un patch PLANNING local dans une transaction.
  * - Vérifie org / project / revision (base_version)
  * - N’incrémente revisionNumber qu’une fois
  * - Ne touche PAS studyVersionAtGeneration (édition ≠ sync métré CTX-04)
+ * - update_dependency : 1 findMany + validation cycles en mémoire + flush batch
+ *   (évite N×findMany/create qui faisait expirer la tx interactive Prisma ~5s)
  */
 export async function applyPlanningDirectInTx(
   tx: Prisma.TransactionClient,
@@ -110,6 +133,26 @@ export async function applyPlanningDirectInTx(
   let needsDateRecompute = false;
   const durationOverrides = new Map<string, number>();
 
+  let allTasksCache: Array<{
+    id: string;
+    stepCode: string;
+    dependsOnJson: unknown;
+  }> | null = null;
+  let depsMapWorking: Map<string, Array<{ step_id: string }>> | null = null;
+  const pendingDepWrites = new Map<string, PendingDepWrite>();
+
+  const ensureDepGraph = async () => {
+    if (allTasksCache && depsMapWorking) return;
+    allTasksCache = await tx.prepScheduleTask.findMany({
+      where: { planId: plan.id, organizationId: input.orgId },
+      select: { id: true, stepCode: true, dependsOnJson: true },
+    });
+    depsMapWorking = new Map();
+    for (const row of allTasksCache) {
+      depsMapWorking.set(row.stepCode, parsePersistedDeps(row.dependsOnJson));
+    }
+  };
+
   for (const op of input.patch.operations) {
     if (!isPlanningCommitSupportedOp(op.op)) {
       throw Object.assign(
@@ -168,39 +211,18 @@ export async function applyPlanningDirectInTx(
           code: "TARGET_NOT_FOUND",
         });
       }
-      const dependsOn = (op.changes.depends_on ?? []).map((d) => ({
+      const dependsOn: DepEdge[] = (op.changes.depends_on ?? []).map((d) => ({
         stepId: d.step_id,
         type: d.type ?? "FS",
         lagDays: d.lag_days ?? 0,
       }));
 
-      // Cycle check sur le plan entier avec la nouvelle arête
-      const allTasks = await tx.prepScheduleTask.findMany({
-        where: { planId: plan.id, organizationId: input.orgId },
-        select: { id: true, stepCode: true, dependsOnJson: true },
-      });
-      const depsMap = new Map<string, Array<{ step_id: string }>>();
-      for (const row of allTasks) {
-        if (row.id === task.id || row.stepCode === task.stepCode) {
-          depsMap.set(
-            row.stepCode,
-            dependsOn.map((d) => ({ step_id: d.stepId })),
-          );
-        } else {
-          const raw = Array.isArray(row.dependsOnJson) ? row.dependsOnJson : [];
-          depsMap.set(
-            row.stepCode,
-            raw
-              .map((x) => {
-                if (!x || typeof x !== "object") return null;
-                const o = x as { stepId?: string; step_id?: string };
-                const id = o.stepId ?? o.step_id;
-                return id ? { step_id: id } : null;
-              })
-              .filter((x): x is { step_id: string } => !!x),
-          );
-        }
-      }
+      await ensureDepGraph();
+      const depsMap = depsMapWorking!;
+      depsMap.set(
+        task.stepCode,
+        dependsOn.map((d) => ({ step_id: d.stepId })),
+      );
       const cycle = detectDependencyCycle(depsMap);
       if (cycle.hasCycle) {
         throw Object.assign(
@@ -211,32 +233,11 @@ export async function applyPlanningDirectInTx(
         );
       }
 
-      await tx.prepScheduleTask.update({
-        where: { id: task.id },
-        data: { dependsOnJson: dependsOn as unknown as Prisma.InputJsonValue },
+      pendingDepWrites.set(task.id, {
+        taskId: task.id,
+        stepCode: task.stepCode,
+        dependsOn,
       });
-
-      // Resynchroniser table relationnelle pour cette tâche
-      await tx.prepScheduleDependency.deleteMany({
-        where: { planId: plan.id, successorId: task.id },
-      });
-      const idByStep = new Map(allTasks.map((t) => [t.stepCode, t.id]));
-      idByStep.set(task.stepCode, task.id);
-      for (const d of dependsOn) {
-        const predId = idByStep.get(d.stepId);
-        if (!predId) continue;
-        await tx.prepScheduleDependency.create({
-          data: {
-            organizationId: input.orgId,
-            planId: plan.id,
-            predecessorId: predId,
-            successorId: task.id,
-            type: d.type,
-            lagDays: d.lagDays,
-          },
-        });
-      }
-
       needsDateRecompute = true;
       touched = true;
     }
@@ -305,7 +306,6 @@ export async function applyPlanningDirectInTx(
         crewJson: nextCrew as Prisma.InputJsonValue,
       };
 
-      // Mode workload : l'effectif change la durée. Mode fixed : durée inchangée.
       if (
         !row.durationLockedByUser &&
         (row.durationMode === "computed_workload" ||
@@ -327,7 +327,6 @@ export async function applyPlanningDirectInTx(
       }
 
       await tx.prepScheduleTask.update({ where: { id: row.id }, data });
-      // Leveling crew_id peut changer le séquençage même sans durée.
       needsDateRecompute = true;
       touched = true;
     }
@@ -470,6 +469,15 @@ export async function applyPlanningDirectInTx(
     });
   }
 
+  if (pendingDepWrites.size > 0) {
+    await flushDependencyWritesInTx(tx, {
+      orgId: input.orgId,
+      planId: plan.id,
+      allTasks: allTasksCache ?? [],
+      pending: [...pendingDepWrites.values()],
+    });
+  }
+
   if (needsDateRecompute) {
     await recomputePersistedPlanDatesInTx(tx, {
       orgId: input.orgId,
@@ -489,4 +497,62 @@ export async function applyPlanningDirectInTx(
     studyId: plan.studyId,
     studyVersionAtGeneration: plan.studyVersionAtGeneration,
   };
+}
+
+/** Écritures relationnelles dépendances — batch, même client transactionnel. */
+export async function flushDependencyWritesInTx(
+  tx: Prisma.TransactionClient,
+  input: {
+    orgId: string;
+    planId: string;
+    allTasks: Array<{ id: string; stepCode: string }>;
+    pending: PendingDepWrite[];
+  },
+): Promise<{ tasksUpdated: number; edgesCreated: number }> {
+  const idByStep = new Map(input.allTasks.map((t) => [t.stepCode, t.id]));
+  for (const p of input.pending) {
+    idByStep.set(p.stepCode, p.taskId);
+  }
+
+  const successorIds = input.pending.map((p) => p.taskId);
+
+  for (const p of input.pending) {
+    await tx.prepScheduleTask.update({
+      where: { id: p.taskId },
+      data: {
+        dependsOnJson: p.dependsOn as unknown as Prisma.InputJsonValue,
+      },
+    });
+  }
+
+  if (successorIds.length) {
+    await tx.prepScheduleDependency.deleteMany({
+      where: {
+        planId: input.planId,
+        successorId: { in: successorIds },
+      },
+    });
+  }
+
+  const rows: Prisma.PrepScheduleDependencyCreateManyInput[] = [];
+  for (const p of input.pending) {
+    for (const d of p.dependsOn) {
+      const predId = idByStep.get(d.stepId);
+      if (!predId) continue;
+      rows.push({
+        organizationId: input.orgId,
+        planId: input.planId,
+        predecessorId: predId,
+        successorId: p.taskId,
+        type: d.type,
+        lagDays: d.lagDays,
+      });
+    }
+  }
+
+  if (rows.length) {
+    await tx.prepScheduleDependency.createMany({ data: rows });
+  }
+
+  return { tasksUpdated: input.pending.length, edgesCreated: rows.length };
 }

@@ -148,7 +148,8 @@ export async function commitUniversalPatch(input: {
   }
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(
+      async (tx) => {
       // Re-check duplicate inside TX
       const dup = await tx.beworkUniversalPatch.findUnique({
         where: {
@@ -397,7 +398,14 @@ export async function commitUniversalPatch(input: {
         }
         throw e;
       }
-    });
+    },
+      {
+        // Cause historique : timeout défaut 5s sous N×create séquentiels.
+        // Le batch deps réduit les round-trips ; timeout = filet réseau Supabase.
+        maxWait: 15_000,
+        timeout: 60_000,
+      },
+    );
 
     return {
       ok: true,

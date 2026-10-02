@@ -36,6 +36,9 @@ export type ConsistencyTask = {
   durationDays: number;
   durationMode?: string | null;
   quantitySnapshot?: number | null;
+  /** Quantité validée métré liée — pour détecter snapshot manquant. */
+  validatedTakeoffQuantity?: number | null;
+  driverTakeoffCode?: string | null;
   rateValue?: number | null;
   crewJson?: unknown;
   crewId?: string | null;
@@ -152,6 +155,19 @@ export function analyzeScheduleConsistency(
         code: "PRODUCTIVITY_INCOMPLETE",
         severity: "WARNING",
         message: `${t.stepCode} : mode computed sans quantité/rendement complets`,
+        stepCodes: [t.stepCode],
+      });
+    }
+
+    if (
+      t.validatedTakeoffQuantity != null &&
+      t.quantitySnapshot == null &&
+      (t.driverTakeoffCode || t.kind === "work")
+    ) {
+      warnings.push({
+        code: "MISSING_QUANTITY_DESPITE_VALIDATED",
+        severity: "WARNING",
+        message: `${t.stepCode} : quantité validée au métré mais absente du planning`,
         stepCodes: [t.stepCode],
       });
     }

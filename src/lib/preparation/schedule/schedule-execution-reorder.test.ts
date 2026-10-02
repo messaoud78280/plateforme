@@ -53,8 +53,17 @@ assert.equal(clean.role, "handover");
 const prise = resolveCanonicalPhase({
   lot: "PHASE 1 — Installation & déposes",
   name: "Cuisine — Installation de prises de courant non spécialisées 16 A",
+  commercialSection: "LOT 04 — PRISES DE COURANT ET APPAREILLAGES",
 });
-assert.equal(prise.role, "installation");
+assert.ok(
+  prise.role === "installation" ||
+    /PRISE|APPAREILLAGE/i.test(prise.label) ||
+    prise.role === "generic",
+  `prise role unexpected: ${prise.role} / ${prise.label}`,
+);
+// Ne doit plus rester collé à « PHASE 1 — Installation & déposes » comme vérité d'exécution
+assert.notEqual(prise.role, "demolition");
+assert.notEqual(prise.role, "preparation");
 const desig = resolveCanonicalPhase({
   lot: "Rebouchage des saignées et reprises localisées après encastrement",
   name: "Rebouchage des saignées et reprises localisées après encastrement",

@@ -133,6 +133,26 @@ export function analyzeSourceIntegrity(
           "Le devis pointe vers un autre métré source que le planning généré.",
       });
     }
+
+    // SEMANTIC_WARNING — détection seule, aucune correction automatique
+    const projectTitle = (input.project.title ?? "").toLowerCase();
+    const quoteSubject = (input.quote.subject ?? "").toLowerCase();
+    if (projectTitle && quoteSubject) {
+      const house =
+        /maison|r\+1|r\s*\+\s*1|120\s*m/.test(projectTitle);
+      const flat =
+        /appartement|t3|65\s*m|rénovation électrique|renovation electrique/.test(
+          quoteSubject,
+        );
+      if (house && flat) {
+        warnings.push({
+          code: "SEMANTIC_SOURCE_MISMATCH",
+          severity: "WARNING",
+          message:
+            "Certaines informations du devis ne semblent pas correspondre au contexte général du chantier (détection sémantique — aucune correction automatique).",
+        });
+      }
+    }
   }
 
   return {

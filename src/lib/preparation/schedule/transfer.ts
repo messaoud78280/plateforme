@@ -38,8 +38,36 @@ import {
   type EnrichmentSnapshot,
 } from "@/lib/preparation/schedule/merge-tasks";
 import { analyzeScheduleConsistency } from "@/lib/preparation/schedule/consistency";
-import { resolveCanonicalPhase } from "@/lib/preparation/schedule/phase";
+import {
+  makeTakeoffQuantityResolver,
+  resolvePlanningTaskSource,
+  type TakeoffLineQuantitySource,
+} from "@/lib/preparation/schedule/resolve-planning-source";
 
+function lineToQtySource(
+  line: {
+    code: string;
+    unit: string;
+    lot?: string | null;
+    designation?: string | null;
+    validatedQuantity?: number | null;
+    declaredQuantity?: number | null;
+    provenance?: string | null;
+  },
+  engineValue: number | null,
+): TakeoffLineQuantitySource {
+  return {
+    code: line.code,
+    unit: line.unit,
+    lot: line.lot ?? null,
+    designation: line.designation ?? null,
+    validatedQuantity: line.validatedQuantity ?? null,
+    declaredQuantity: line.declaredQuantity ?? null,
+    computedQuantity: engineValue,
+    engineValue,
+    provenance: line.provenance ?? null,
+  };
+}
 export type SchedulePreviewQuoteOption = {
   id: string;
   number: string;
@@ -263,7 +291,16 @@ export async function previewPrepSchedule(input: {
 
   const engine = computeStudy({ params: study.params, lines: study.lines });
   const lineByCode = new Map(study.lines.map((l) => [l.code, l]));
-  const qtyOf = (code: string) => engine.nodes.get(code)?.value ?? null;
+  const qtySourceByCode = new Map(
+    study.lines.map((l) => {
+      const eng = engine.nodes.get(l.code)?.value ?? null;
+      return [l.code, lineToQtySource(l, eng != null && Number.isFinite(eng) ? Number(eng) : null)];
+    }),
+  );
+  const qtyOf = makeTakeoffQuantityResolver(qtySourceByCode, (c) => {
+    const v = engine.nodes.get(c)?.value ?? null;
+    return v != null && Number.isFinite(v) ? Number(v) : null;
+  });
   const qtyUnitOf = (code: string) => {
     const l = lineByCode.get(code);
     return l ? displayUnit(l.unit) || l.unit : null;
@@ -587,11 +624,20 @@ export async function commitPrepSchedule(input: {
   const schedule = parsePrepSchedule(study.scheduleJson)!;
   const engine = computeStudy({ params: studyView.params, lines: studyView.lines });
   const lineByCode = new Map(studyView.lines.map((l) => [l.code, l]));
+  const qtySourceByCode = new Map(
+    studyView.lines.map((l) => {
+      const eng = engine.nodes.get(l.code)?.value ?? null;
+      return [l.code, lineToQtySource(l, eng != null && Number.isFinite(eng) ? Number(eng) : null)];
+    }),
+  );
   const computed = computeSchedule({
     workflowSteps: workflow,
     schedule,
     resources,
-    qtyOf: (c) => engine.nodes.get(c)?.value ?? null,
+    qtyOf: makeTakeoffQuantityResolver(qtySourceByCode, (c) => {
+      const v = engine.nodes.get(c)?.value ?? null;
+      return v != null && Number.isFinite(v) ? Number(v) : null;
+    }),
     qtyUnitOf: (c) => {
       const l = lineByCode.get(c);
       return l ? displayUnit(l.unit) || l.unit : null;
@@ -640,6 +686,34 @@ export async function commitPrepSchedule(input: {
     study.id,
     input.quoteId ?? null,
   );
+
+  // Sections commerciales devis → classification phase (liens structurels PrepQuoteLink)
+  const commercialByLineCode = new Map<string, string>();
+  {
+    const links = await prisma.prepQuoteLink.findMany({
+      where: { organizationId: input.orgId, studyId: study.id },
+      select: { studyLineCode: true, quoteLineId: true },
+    });
+    if (links.length) {
+      const quoteLines = await prisma.commercialQuoteLine.findMany({
+        where: {
+          organizationId: input.orgId,
+          id: { in: [...new Set(links.map((l) => l.quoteLineId))] },
+        },
+        select: {
+          id: true,
+          section: { select: { title: true } },
+        },
+      });
+      const sectionByQuoteLine = new Map(
+        quoteLines.map((ql) => [ql.id, ql.section?.title ?? null]),
+      );
+      for (const link of links) {
+        const title = sectionByQuoteLine.get(link.quoteLineId);
+        if (title) commercialByLineCode.set(link.studyLineCode, title);
+      }
+    }
+  }
 
   const isDemo = study.mode === "DEMONSTRATION";
   const title =
@@ -735,23 +809,34 @@ export async function commitPrepSchedule(input: {
             primaryCode != null
               ? (engine.nodes.get(primaryCode)?.value ?? null)
               : null;
+          const engNum =
+            engineQty != null && Number.isFinite(engineQty)
+              ? Number(engineQty)
+              : null;
+          const source = resolvePlanningTaskSource({
+            stepId: t.stepId,
+            stepName: t.name,
+            stepKind: t.kind,
+            stepLot: t.lot,
+            stepDescription: t.description,
+            takeoffIds: t.takeoffIds,
+            commercialSectionTitle: primaryCode
+              ? commercialByLineCode.get(primaryCode) ?? null
+              : null,
+            workflowPhase: t.lot,
+            line: line ? lineToQtySource(line, engNum) : null,
+            engineValue: engNum,
+          });
           const quantitySnapshot =
-            t.duration.quantity ??
-            line?.validatedQuantity ??
-            (engineQty != null && Number.isFinite(engineQty) ? Number(engineQty) : null);
+            t.duration.quantity ?? source.quantity;
           const quantityUnit =
             t.duration.quantityUnit ??
-            (line ? displayUnit(line.unit) || line.unit : null);
+            (source.unit
+              ? displayUnit(source.unit) || source.unit
+              : null);
           const driverTakeoffCode =
-            t.duration.driverItem ??
-            (quantitySnapshot != null ? primaryCode : null);
-
-          const phase = resolveCanonicalPhase({
-            lot: t.lot,
-            name: t.name,
-            kind: t.kind,
-            description: t.description,
-          });
+            t.duration.driverItem ?? source.driverTakeoffCode;
+          const phase = source.phase;
 
           const prev = findEnrichment(
             enrichmentIndex,

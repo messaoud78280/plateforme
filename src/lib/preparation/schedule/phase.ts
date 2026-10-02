@@ -59,46 +59,57 @@ function parsePhaseNumber(lot: string): number | null {
 
 function inferRoleFromText(text: string): PhaseRole | null {
   const t = norm(text);
+  // Contrôles avant remise : « réception technique / contrôles » ≠ handover client
   if (
-    /nettoyage|remise.*(client|installation)|reception|réception|livraison/.test(
+    (/controle|contrôle|essais|verification|vérification|inspection/.test(t) &&
+      /final|finaux|finale|globaux|globale|conformite|conformité|reception technique|réception technique/.test(
+        t,
+      )) ||
+    /^controles?\b|^contrôles?\b/.test(t)
+  ) {
+    return "controls";
+  }
+  if (
+    /nettoyage|remise.*(client|ouvrage|installation|cles|clés)|livraison|handover/.test(
       t,
-    )
+    ) ||
+    (/reception|réception/.test(t) &&
+      !/controle|contrôle|technique/.test(t))
   ) {
     return "handover";
   }
   if (
-    /controle final|contrôles? electrique|essais de fonctionnement|verifications finales|vérifications finales/.test(
-      t,
-    ) ||
-    (/controle|contrôle|essais|verification|vérification/.test(t) &&
-      /final/.test(t))
+    /\bfinitions?\b|rebouchage|reprise de finition|enduits? de finition/.test(t)
   ) {
-    return "controls";
-  }
-  if (/rebouchage|finitions?|reprise.*saignee|reprise.*saignée/.test(t)) {
     return "finishes";
   }
   if (
-    /distribution|gaine|saignee|saignée|circuit specialise|circuit spécialisé|reseaux|réseaux|cheminement/.test(
+    /depose|dépose|demolition|démolition|curage|deconstruction|déconstruction/.test(
+      t,
+    ) &&
+    !/installation de chantier|preparation du chantier|préparation du chantier/.test(
+      t,
+    )
+  ) {
+    return "demolition";
+  }
+  if (
+    /installation de chantier|base vie|preparation du chantier|préparation du chantier|protection des ouvrages|installations? provisoires/.test(
+      t,
+    )
+  ) {
+    return "preparation";
+  }
+  // Libellés de section / phase structurés (pas des produits)
+  if (
+    /\breseaux\b|\bréseaux\b|\bdistribution\b|\bcheminements?\b|\bcanalisations?\b|\bfouilles?\b|\bterrassements?\b/.test(
       t,
     )
   ) {
     return "networks";
   }
   if (
-    /depose|dépose|consignation|demolition|démolition/.test(t)
-  ) {
-    return "demolition";
-  }
-  if (
-    /installation de chantier|protection des ouvrages|preparation du chantier|préparation du chantier/.test(
-      t,
-    )
-  ) {
-    return "preparation";
-  }
-  if (
-    /prise|interrupteur|appareillage|tableau electrique|tableau électrique|commande d.eclairage|va-et-vient|point lumineux/.test(
+    /\bappareillages?\b|\belevation\b|\bélévation\b|\bfondations?\b|\bmaconnerie\b|\bmaçonnerie\b/.test(
       t,
     )
   ) {
@@ -140,14 +151,21 @@ export function resolveCanonicalPhase(input: {
   name: string;
   kind?: string | null;
   description?: string | null;
+  /** Section commerciale devis — n'est pas une phase temporelle seule. */
+  commercialSection?: string | null;
 }): CanonicalPhase {
   const rawLot = (input.lot ?? "").trim();
+  const commercial = (input.commercialSection ?? "").trim();
   const designationLike = isDesignationLikeLot(rawLot, input.name);
   const inferredFromName = inferRoleFromText(
     `${input.name} ${input.description ?? ""}`,
   );
   const inferredFromLot = rawLot ? inferRoleFromText(rawLot) : null;
-  const inferred = inferredFromName ?? inferredFromLot;
+  const inferredFromCommercial = commercial
+    ? inferRoleFromText(commercial)
+    : null;
+  const inferred =
+    inferredFromName ?? inferredFromLot ?? inferredFromCommercial;
 
   // Contrôles / remise : priorité à l'inférence nom même si section source est mauvaise
   if (inferredFromName === "controls" || inferredFromName === "handover") {
@@ -160,15 +178,44 @@ export function resolveCanonicalPhase(input: {
     };
   }
 
+  // Section commerciale structurée si lot absent / désignation / catch-all PHASE n
+  const lotIsBroad =
+    !!rawLot &&
+    (parsePhaseNumber(rawLot) != null || /^phase\s*\d+/i.test(rawLot));
+  const preferCommercial =
+    commercial &&
+    !isDesignationLikeLot(commercial, input.name) &&
+    (!rawLot || designationLike || lotIsBroad);
+
+  if (preferCommercial) {
+    const role =
+      inferredFromName ||
+      inferredFromCommercial ||
+      inferredFromLot ||
+      "generic";
+    const useInferredLabel =
+      role === "controls" ||
+      role === "handover" ||
+      role === "finishes" ||
+      role === "preparation" ||
+      role === "demolition";
+    return {
+      label: useInferredLabel && inferredFromName ? ROLE_LABEL[role] : commercial,
+      order: ROLE_ORDER[role] ?? ROLE_ORDER.generic,
+      role,
+      wasDesignationFallback: designationLike || !rawLot,
+      source: inferredFromName ? "inferred" : "structured",
+    };
+  }
+
   if (rawLot && !designationLike) {
     const phaseNum = parsePhaseNumber(rawLot);
     const isBroadPhase = phaseNum != null || /^phase\s*\d+/i.test(rawLot);
-    // Sur un libellé de phase large (« PHASE 1 — … »), le nom de tâche prime
-    const role =
-      (isBroadPhase && inferredFromName) ||
-      inferredFromLot ||
-      inferredFromName ||
-      "generic";
+    // Phase large « PHASE n — … » : le nom de tâche prime ; le libellé catch-all
+    // ne doit pas imposer dépose/prep à toutes les tâches.
+    const role = isBroadPhase
+      ? inferredFromName || "generic"
+      : inferredFromLot || inferredFromName || "generic";
     const order =
       role === "controls" || role === "handover" || role === "finishes"
         ? ROLE_ORDER[role]

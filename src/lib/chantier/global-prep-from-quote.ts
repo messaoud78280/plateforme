@@ -408,8 +408,9 @@ function phaseLotFromSection(title: string): string {
 }
 
 /**
- * Lot / métier pour regroupement et resource leveling (pas pour inventer des FS).
- * Heuristiques de durée Cuisine/SDB conservées si détectables ; sinon section devis.
+ * Lot / phase d'exécution : priorité à la section commerciale structurée.
+ * Pas de hardcode produit métier (prise→…, béton→…).
+ * Seuls les rôles terminaux génériques (contrôle / remise) surclassent la section.
  */
 function taskMetaForLine(designation: string, unit: string, qty: number, sectionTitle: string): {
   phase: string;
@@ -418,102 +419,46 @@ function taskMetaForLine(designation: string, unit: string, qty: number, section
 } {
   const dsg = designation.toLowerCase();
   const sectionLot = phaseLotFromSection(sectionTitle);
+  const safePhase =
+    sectionLot && sectionLot !== designation.trim() ? sectionLot : "À classer";
 
-  // Rôles terminaux / critiques : ne pas hériter d'une mauvaise section devis
-  if (/nettoyage|remise (de l'|au )?client|réception|reception/.test(dsg)) {
+  // Rôles terminaux génériques — ne pas hériter d'une mauvaise section
+  if (
+    /nettoyage|remise (de l'|au )?client|remise des clés|remise des cles|réception|reception|livraison/.test(
+      dsg,
+    )
+  ) {
     return { phase: "Remise", duration: { mode: "fixed", days: 0.5 }, orderBoost: 800 };
   }
   if (
-    /contrôles? électriques?|controles? electriques?|vérifications finales|verifications finales|essais de fonctionnement/.test(
-      dsg,
-    ) ||
-    (/contrôle|controle|essais|vérification|verification/.test(dsg) && /final/.test(dsg))
+    (/contrôle|controle|essais|vérification|verification|inspection/.test(dsg) &&
+      /final|finaux|finale|conformite|conformité/.test(dsg)) ||
+    /^contrôles?\b|^controles?\b/.test(dsg)
   ) {
     return { phase: "Contrôles", duration: { mode: "fixed", days: 1 }, orderBoost: 700 };
   }
-  if (/rebouchage|reprises localisées|reprises localisees/.test(dsg)) {
-    return { phase: "Finitions", duration: { mode: "fixed", days: 1 }, orderBoost: 500 };
-  }
 
-  // Étanchéité / SPEC avant « protection » générique
-  if (/protection à l'eau|etancheit|étanchéité|\bspec\b/.test(dsg)) {
-    return { phase: sectionLot || "Salle de bain", duration: { mode: "fixed", days: 1 }, orderBoost: 100 };
-  }
-  if (/installation de chantier|préparation du chantier|preparation du chantier|protection des ouvrages|protections et préparation/.test(dsg)) {
-    return { phase: sectionLot || "Préparation", duration: { mode: "fixed", days: 0.5 }, orderBoost: 10 };
-  }
-  if (/dépose.*cuisine|depose.*cuisine/.test(dsg)) {
-    return { phase: sectionLot || "Déposes", duration: { mode: "fixed", days: 1 }, orderBoost: 20 };
-  }
-  if (/dépose|depose|consignation/.test(dsg)) {
-    return { phase: sectionLot || "Déposes", duration: { mode: "fixed", days: 1 }, orderBoost: 30 };
-  }
-  if (/préparation.*cuisine|preparation.*cuisine|reprise.*cuisine/.test(dsg)) {
-    return { phase: sectionLot || "Préparation", duration: { mode: "fixed", days: 1 }, orderBoost: 40 };
-  }
-  if (/préparation.*salle|preparation.*salle|reprise.*salle/.test(dsg)) {
-    return { phase: sectionLot || "Préparation", duration: { mode: "fixed", days: 1 }, orderBoost: 50 };
-  }
-  if (/alimentation|évacuation.*cuisine|evacuation.*cuisine|plomberie.*cuisine/.test(dsg) && /cuisine/.test(dsg)) {
-    return { phase: sectionLot || "Plomberie", duration: { mode: "fixed", days: 0.5 }, orderBoost: 60 };
-  }
-  if (/distribution|gaine|saignée|saignee|circuit spécialisé|circuit specialise/.test(dsg)) {
-    return { phase: sectionLot || "Réseaux", duration: { mode: "fixed", days: 1 }, orderBoost: 200 };
-  }
-  if (/prise|interrupteur|appareillage|tableau électrique|tableau electrique|va-et-vient|point lumineux|commande d.éclairage|commande d.eclairage/.test(dsg)) {
-    return { phase: sectionLot || "Appareillage & pose", duration: { mode: "fixed", days: 0.5 }, orderBoost: 300 };
-  }
-  if (/électri|electri/.test(dsg)) {
-    return { phase: sectionLot || "Électricité", duration: { mode: "fixed", days: 1 }, orderBoost: 70 };
-  }
-  if (/plomberie.*salle|adaptation plomberie/.test(dsg)) {
-    return { phase: sectionLot || "Plomberie", duration: { mode: "fixed", days: 1 }, orderBoost: 80 };
-  }
-  if (/ventilation/.test(dsg)) {
-    return { phase: sectionLot || "Ventilation", duration: { mode: "fixed", days: 0.5 }, orderBoost: 90 };
-  }
-  if (/paroi/.test(dsg)) {
-    return { phase: sectionLot || "Salle de bain", duration: { mode: "fixed", days: 0.5 }, orderBoost: 140 };
-  }
-  if (/douche|receveur/.test(dsg)) {
-    return { phase: sectionLot || "Salle de bain", duration: { mode: "fixed", days: 1 }, orderBoost: 110 };
-  }
-  if (/revêtement.*mur|revetement.*mur|faïence|faience/.test(dsg)) {
-    return {
-      phase: sectionLot || "Salle de bain",
-      duration: { mode: "computed", rateId: "rate_faience_m2j", driver: "TO_USE_LINE" },
-      orderBoost: 120,
-    };
-  }
-  if (/carrelage.*sol|sol de la salle/.test(dsg)) {
-    return {
-      phase: sectionLot || "Salle de bain",
-      duration: { mode: "computed", rateId: "rate_carrelage_sol_m2j", driver: "TO_USE_LINE" },
-      orderBoost: 130,
-    };
-  }
-  if (/meuble vasque|vasque/.test(dsg)) {
-    return { phase: sectionLot || "Salle de bain", duration: { mode: "fixed", days: 0.5 }, orderBoost: 150 };
-  }
-  if (/cuisine équipée|cuisine equipee|pose d'une cuisine/.test(dsg)) {
-    return { phase: sectionLot || "Cuisine", duration: { mode: "fixed", days: 2 }, orderBoost: 160 };
-  }
-  if (/finition|nettoyage|essais/.test(dsg)) {
-    return { phase: sectionLot || "Finitions", duration: { mode: "fixed", days: 1 }, orderBoost: 170 };
-  }
-  // Fallback forfait / quantité — jamais phase = désignation
-  const safePhase =
-    sectionLot && sectionLot !== designation.trim() ? sectionLot : "À classer";
+  // Durées : heuristiques légères génériques (unité / forfait) — phase = section
   if (/m²|m2/i.test(unit) && qty > 0) {
     return {
       phase: safePhase,
       duration: { mode: "computed", rateId: "rate_carrelage_sol_m2j", driver: "TO_USE_LINE" },
-      orderBoost: 125,
+      orderBoost: 100 + Math.min(200, Math.round(qty)),
+    };
+  }
+  if (/ml|m\.l/i.test(unit) && qty > 0) {
+    return {
+      phase: safePhase,
+      duration: { mode: "fixed", days: Math.max(0.5, Math.min(5, Math.ceil(qty / 30))) },
+      orderBoost: 100,
     };
   }
   return {
     phase: safePhase,
-    duration: { mode: "fixed", days: Math.max(0.5, qty >= 1 && /forfait/i.test(unit) ? 1 : 0.5) },
+    duration: {
+      mode: "fixed",
+      days: Math.max(0.5, qty >= 1 && /forfait/i.test(unit) ? 1 : 0.5),
+    },
     orderBoost: 100,
   };
 }

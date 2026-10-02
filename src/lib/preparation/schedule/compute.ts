@@ -471,7 +471,27 @@ export function computeSchedule(input: {
     const step = stepById.get(stepId)!;
     const sched = schedById.get(stepId)!;
     let duration = computeStepDuration(step, input.resources, input.qtyOf);
-    if (input.qtyUnitOf && duration.driverItem) {
+    // Même en durée fixed : rattacher la quantité métré via liens takeoff (pas d'invention).
+    if (duration.quantity == null) {
+      const primary =
+        duration.driverItem ??
+        step.takeoff_ids?.[0] ??
+        null;
+      if (primary) {
+        const q = input.qtyOf(primary);
+        if (q != null) {
+          duration = {
+            ...duration,
+            quantity: q,
+            driverItem: duration.driverItem ?? primary,
+            quantityUnit:
+              duration.quantityUnit ??
+              (input.qtyUnitOf ? input.qtyUnitOf(primary) : null),
+          };
+        }
+      }
+    }
+    if (input.qtyUnitOf && duration.driverItem && duration.quantityUnit == null) {
       duration = {
         ...duration,
         quantityUnit: input.qtyUnitOf(duration.driverItem),

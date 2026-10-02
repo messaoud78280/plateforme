@@ -411,10 +411,26 @@ export function PrepScheduleTaskPanel({
             label="Quantité"
             value={
               task.driverTakeoffCode
-                ? `Métré ${task.driverTakeoffCode}`
+                ? `Métré ${task.driverTakeoffCode}${
+                    task.quantitySnapshot != null
+                      ? ` · ${task.quantityDisplay}`
+                      : " · absente du planning (à régénérer)"
+                  }`
                 : task.quantitySnapshot != null
                   ? "Saisie planning"
                   : "Absente"
+            }
+          />
+          <Row
+            label="Phase"
+            value={
+              task.missing.unclassifiedPhase
+                ? "Phase à classer"
+                : task.phase.source === "structured"
+                  ? "Phase issue de structure source"
+                  : task.phase.source === "inferred"
+                    ? "Phase résolue (inférence)"
+                    : "Phase à classer"
             }
           />
           <Row

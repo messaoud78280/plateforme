@@ -4,9 +4,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { formatQty } from "@/lib/preparation/units";
 import { halfLabel } from "@/lib/preparation/schedule/gantt-layout";
-import type { SchedulePlanViewPayload } from "@/lib/preparation/schedule/transfer";
-
-type Task = SchedulePlanViewPayload["tasks"][number];
+import type { PlanningTaskVM } from "@/lib/preparation/schedule/planning-view-model";
 
 const HOLD_OPTIONS = [
   { value: "A_CONTROLER", label: "À contrôler" },
@@ -15,25 +13,48 @@ const HOLD_OPTIONS = [
 ] as const;
 
 type Props = {
-  task: Task;
+  task: PlanningTaskVM;
   nextBlockedStepCode: string | null;
   busy: boolean;
   onClose: () => void;
   onHoldStatusChange: (status: "A_CONTROLER" | "VALIDE" | "RESERVES") => void;
+  onFocusStep?: (stepCode: string) => void;
 };
 
-function durationModeLabel(mode: string | undefined): string {
-  switch ((mode ?? "fixed").toLowerCase()) {
-    case "computed":
-      return "Calculée (quantité / rendement)";
-    case "computed_workload":
-    case "workload":
-      return "Calculée (charge / effectif)";
-    case "manual":
-      return "Manuelle";
-    default:
-      return "Fixe";
+function kindLabel(kind: string) {
+  if (kind === "wait") return "Attente technique";
+  if (kind === "control") return "Contrôle";
+  return "Travaux";
+}
+
+function Empty({ children }: { children: ReactNode }) {
+  return <p className="text-[12px] text-slate-500">{children}</p>;
+}
+
+function formatOpText(raw: string): ReactNode {
+  const lines = raw.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+  if (lines.length <= 1) {
+    return <p className="whitespace-pre-wrap text-[12px] text-slate-700">{raw}</p>;
   }
+  const looksLikeSteps = lines.filter((l) => /^[-•*\d]+[.)\s]/.test(l)).length >= 2;
+  if (looksLikeSteps) {
+    return (
+      <ul className="list-inside list-disc space-y-1 text-[12px] text-slate-700">
+        {lines.map((l) => (
+          <li key={l}>{l.replace(/^[-•*\d]+[.)\s]+/, "")}</li>
+        ))}
+      </ul>
+    );
+  }
+  return (
+    <div className="space-y-2 text-[12px] text-slate-700">
+      {lines.map((l) => (
+        <p key={l} className="whitespace-pre-wrap">
+          {l}
+        </p>
+      ))}
+    </div>
+  );
 }
 
 export function PrepScheduleTaskPanel({
@@ -42,22 +63,46 @@ export function PrepScheduleTaskPanel({
   busy,
   onClose,
   onHoldStatusChange,
+  onFocusStep,
 }: Props) {
   return (
-    <aside className="flex h-full max-h-[min(85vh,820px)] w-full max-w-md flex-col border-l border-slate-200 bg-white shadow-xl">
+    <aside
+      className="flex h-full max-h-[min(90vh,900px)] w-full max-w-md flex-col border-l border-slate-200 bg-white shadow-xl"
+      aria-label={`Fiche tâche ${task.stepCode}`}
+    >
       <div className="flex items-start justify-between gap-2 border-b border-slate-100 px-4 py-3">
-        <div>
+        <div className="min-w-0">
           <p className="font-mono text-[12px] text-slate-500">{task.stepCode}</p>
-          <h3 className="text-[15px] font-semibold text-[#1e3a5f]">{task.name}</h3>
-          <p className="mt-0.5 text-[12px] text-slate-500">
-            {kindLabel(task.kind)}
-            {task.conditional ? " · Conditionnel · Hors planning de base" : ""}
-          </p>
+          <h3 className="text-[15px] font-semibold leading-snug text-[#1e3a5f]">
+            {task.name}
+          </h3>
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+              {kindLabel(task.kind)}
+            </span>
+            {task.visualKind === "incomplete" ? (
+              <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900">
+                À COMPLÉTER
+              </span>
+            ) : null}
+            {task.visualKind === "blocked" ? (
+              <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-800">
+                BLOQUANT
+              </span>
+            ) : null}
+            {task.durationMode !== "fixed" ? (
+              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+                {task.durationMode === "computed" || task.durationMode === "computed_workload"
+                  ? "CALCULÉ"
+                  : "FIXE"}
+              </span>
+            ) : null}
+          </div>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="rounded-full px-2 py-1 text-[13px] text-slate-500 hover:bg-slate-50"
+          className="rounded-lg px-2 py-1 text-[13px] text-slate-500 hover:bg-slate-50"
         >
           Fermer
         </button>
@@ -65,7 +110,7 @@ export function PrepScheduleTaskPanel({
 
       <div className="flex-1 space-y-4 overflow-y-auto px-4 py-3 text-[13px]">
         {task.holdPoint ? (
-          <div className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5">
+          <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-900">
               Point d&apos;arrêt
             </p>
@@ -102,32 +147,26 @@ export function PrepScheduleTaskPanel({
           </div>
         ) : null}
 
-        {task.conditional ? (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-[12px] text-slate-700">
-            <span className="font-semibold">Conditionnel</span> — date indicative, hors durée de
-            base tant que non activé.
-            {task.conditionalConditions.length ? (
-              <ul className="mt-1 list-inside list-disc text-[11px] text-slate-600">
-                {task.conditionalConditions.map((c) => (
-                  <li key={c}>{c}</li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-        ) : null}
-
-        <Section title="Intervention">
-          <Row label="Réf." value={task.stepCode} />
+        {/* 1. Identité */}
+        <Section title="Identité">
+          <Row label="Référence" value={task.stepCode} />
           <Row label="Nature" value={kindLabel(task.kind)} />
-        </Section>
-
-        <Section title="Phase">
           <Row
-            label="Phase"
-            value={task.lot ? `${task.lot} (source métré / workflow)` : "À classer"}
+            label="Source métré"
+            value={
+              task.driverTakeoffCode
+                ? `Métré ${task.driverTakeoffCode}`
+                : "Non renseignée"
+            }
           />
         </Section>
 
+        {/* 2. Phase */}
+        <Section title="Phase">
+          <Row label="Phase" value={task.phaseLabel} />
+        </Section>
+
+        {/* 3. Planning */}
         <Section title="Planning">
           <Row
             label="Dates"
@@ -138,114 +177,160 @@ export function PrepScheduleTaskPanel({
             }
           />
           <Row
-            label="Créneaux"
+            label="Créneau"
             value={`${halfLabel(task.startHalf)} → ${halfLabel(task.endHalf)}`}
           />
           <Row
             label="Durée"
-            value={`${task.durationDays} j ${task.durationCalendar === "calendar" ? "calendaires" : "ouvrés"}`}
+            value={`${task.durationLabel} ${
+              task.durationCalendar === "calendar" ? "calendaires" : "ouvrés"
+            }`}
           />
-          <Row label="Mode durée" value={durationModeLabel(task.durationMode)} />
+          <Row label="Mode durée" value={task.durationModeLabel} />
         </Section>
 
-        <Section title="Quantité / rendement">
+        {/* 4. Production */}
+        <Section title="Production">
           <Row
-            label="Quantité pilote"
+            label="Quantité"
             value={
               task.quantitySnapshot != null
                 ? `${formatQty(task.quantitySnapshot)} ${task.quantityUnit ?? ""}`.trim()
-                : "—"
+                : "Quantité non disponible"
             }
           />
-          <Row label="Unité" value={task.quantityUnit ?? "—"} />
-          <Row label="Code métré" value={task.driverTakeoffCode ?? "—"} />
           <Row
             label="Rendement"
             value={
               task.rateValue != null
-                ? `${task.rateValue} ${task.rateUnit ?? ""}${task.ratePerLabel ? ` (${task.ratePerLabel})` : ""}`
-                : "Rendement non renseigné"
+                ? `${task.rateValue} ${task.rateUnit ?? ""}${
+                    task.ratePerLabel ? ` / ${task.ratePerLabel}` : ""
+                  }`.trim()
+                : "Rendement à renseigner"
             }
           />
-        </Section>
-
-        <Section title="Charge h.j">
+          <Row label="Unités parallèles" value={String(task.parallelUnits)} />
           <Row
-            label="Charge"
+            label="Charge h.j"
             value={
               task.workloadPersonDays != null
-                ? `${task.workloadPersonDays} h.j${
-                    task.workloadSource === "DERIVED" ? " (dérivée)" : ""
-                  }`
-                : "—"
+                ? task.workloadDisplay
+                : "Charge non renseignée"
             }
           />
         </Section>
 
+        {/* 5. Équipe */}
         <Section title="Équipe">
-          {task.crew.length ? (
-            <ul className="space-y-0.5">
-              {task.crew.map((c) => (
-                <li key={c.labor_id}>
-                  {c.count}× {c.label}
-                </li>
-              ))}
-            </ul>
-          ) : task.crewSize != null ? (
-            <p className="text-slate-700">
-              Effectif : {task.crewSize} personne{task.crewSize > 1 ? "s" : ""}
-            </p>
+          {task.missing.crew ? (
+            <Empty>Équipe non renseignée</Empty>
           ) : (
-            <p className="text-slate-500">—</p>
+            <>
+              <Row label="Équipe" value={task.crewId ?? "Sans identifiant"} />
+              <Row
+                label="Effectif"
+                value={
+                  task.crewSize != null
+                    ? `${task.crewSize} personne${task.crewSize > 1 ? "s" : ""}`
+                    : "Non renseigné"
+                }
+              />
+              {task.crewMembers.length ? (
+                <div className="mt-1">
+                  <p className="mb-0.5 text-[11px] text-slate-500">Composition</p>
+                  <ul className="space-y-0.5 text-[12px] text-slate-700">
+                    {task.crewMembers.map((c) => (
+                      <li key={c.labor_id}>
+                        {c.count} {c.label || c.labor_id}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </>
           )}
-          {task.crewId ? <Row label="Équipe (id)" value={task.crewId} /> : null}
-          {task.crewSize != null ? (
-            <Row
-              label="Effectif"
-              value={`${task.crewSize} personne${task.crewSize > 1 ? "s" : ""}`}
-            />
-          ) : null}
         </Section>
 
+        {/* 6. Dépendances */}
         <Section title="Dépendances">
-          {task.dependsOn.length ? (
-            <ul className="space-y-0.5">
-              {task.dependsOn.map((d) => (
-                <li key={`${d.stepId}-${d.type}`}>
-                  {d.type} ← {d.stepId}
-                </li>
-              ))}
-            </ul>
+          {!task.dependsOn.length && !task.successors.length ? (
+            <Empty>Aucune dépendance définie</Empty>
           ) : (
-            <p className="text-slate-500">—</p>
+            <>
+              {task.dependsOn.length ? (
+                <div>
+                  <p className="mb-0.5 text-[11px] text-slate-500">Après</p>
+                  <ul className="space-y-0.5">
+                    {task.dependsOn.map((d) => (
+                      <li key={`pred-${d.stepId}-${d.type}`}>
+                        <button
+                          type="button"
+                          className="text-left text-[12px] font-medium text-[#1e3a5f] underline-offset-2 hover:underline"
+                          onClick={() => onFocusStep?.(d.stepId)}
+                        >
+                          {d.stepId}
+                          {d.name ? ` · ${d.name}` : ""}
+                        </button>
+                        <span className="ml-1 text-[11px] text-slate-500">
+                          {d.type} · lag 0 j
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <Empty>Aucun prédécesseur</Empty>
+              )}
+              {task.successors.length ? (
+                <div className="mt-2">
+                  <p className="mb-0.5 text-[11px] text-slate-500">Avant</p>
+                  <ul className="space-y-0.5">
+                    {task.successors.map((d) => (
+                      <li key={`suc-${d.stepId}-${d.type}`}>
+                        <button
+                          type="button"
+                          className="text-left text-[12px] font-medium text-[#1e3a5f] underline-offset-2 hover:underline"
+                          onClick={() => onFocusStep?.(d.stepId)}
+                        >
+                          {d.stepId}
+                          {d.name ? ` · ${d.name}` : ""}
+                        </button>
+                        <span className="ml-1 text-[11px] text-slate-500">{d.type}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </>
           )}
         </Section>
 
+        {/* 7. Prérequis */}
         <Section title="Prérequis">
           {task.preconditions.length ? (
-            <ul className="list-inside list-disc space-y-0.5 text-[12px]">
+            <ul className="list-inside list-disc space-y-0.5 text-[12px] text-slate-700">
               {task.preconditions.map((p) => (
                 <li key={p}>{p}</li>
               ))}
             </ul>
           ) : (
-            <p className="text-slate-500">—</p>
+            <Empty>Aucun prérequis renseigné</Empty>
           )}
         </Section>
 
-        <Section title="Description / mode opératoire">
+        {/* 8. Mode opératoire */}
+        <Section title="Mode opératoire">
           {task.description ? (
-            <p className="whitespace-pre-wrap text-[12px] text-slate-600">
-              {task.description}
-            </p>
+            formatOpText(task.description)
           ) : (
-            <p className="text-slate-500">—</p>
+            <Empty>Mode opératoire non renseigné</Empty>
           )}
         </Section>
 
-        <Section title="Moyens / outillage">
+        {/* 9. Moyens / outillage */}
+        <Section title="Outillage / engins">
           {task.equipment.length ? (
-            <ul className="space-y-0.5">
+            <ul className="space-y-0.5 text-[12px] text-slate-700">
               {task.equipment.map((e) => (
                 <li key={e.equipment_id}>
                   {e.count}× {e.label}
@@ -253,58 +338,102 @@ export function PrepScheduleTaskPanel({
               ))}
             </ul>
           ) : (
-            <p className="text-slate-500">—</p>
+            <Empty>Non renseigné</Empty>
           )}
+        </Section>
+        <Section title="Matériaux / consommables">
           {task.supplies.length ? (
-            <ul className="mt-1 space-y-0.5 text-[12px] text-slate-600">
+            <ul className="space-y-0.5 text-[12px] text-slate-700">
               {task.supplies.map((s) => (
                 <li key={s.supply_id}>
                   {(s.count ?? 1)}× {s.label}
                 </li>
               ))}
             </ul>
-          ) : null}
+          ) : (
+            <Empty>Non renseigné</Empty>
+          )}
         </Section>
 
+        {/* 10. Contrôles */}
         <Section title="Contrôles">
           {task.controls.length ? (
-            <ul className="list-inside list-disc space-y-0.5 text-[12px]">
+            <ul className="list-inside list-disc space-y-0.5 text-[12px] text-slate-700">
               {task.controls.map((p) => (
                 <li key={p}>{p}</li>
               ))}
             </ul>
           ) : (
-            <p className="text-slate-500">—</p>
+            <Empty>Aucun contrôle renseigné</Empty>
           )}
         </Section>
 
+        {/* 11. Sécurité */}
         <Section title="Sécurité">
-          {Array.isArray(task.safety) && task.safety.length ? (
-            <ul className="list-inside list-disc space-y-0.5 text-[12px]">
+          {task.safety.length ? (
+            <ul className="list-inside list-disc space-y-0.5 text-[12px] text-slate-700">
               {task.safety.map((p) => (
                 <li key={p}>{p}</li>
               ))}
             </ul>
           ) : (
-            <p className="text-slate-500">—</p>
+            <Empty>Aucune consigne de sécurité renseignée</Empty>
           )}
         </Section>
 
+        {/* 12. Montants */}
         <Section title="Montants">
           <Row
             label="Vente HT"
             value={
               task.sellHtSnapshot != null
-                ? `${task.sellHtSnapshot.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €`
-                : "—"
+                ? `${task.sellHtSnapshot.toLocaleString("fr-FR", {
+                    minimumFractionDigits: 2,
+                  })} €`
+                : "Non renseigné"
             }
           />
           <Row
             label="Déboursé HT"
             value={
               task.costHtSnapshot != null
-                ? `${task.costHtSnapshot.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €`
-                : "—"
+                ? `${task.costHtSnapshot.toLocaleString("fr-FR", {
+                    minimumFractionDigits: 2,
+                  })} €`
+                : "Non renseigné"
+            }
+          />
+        </Section>
+
+        {/* 13. Provenance */}
+        <Section title="Provenance">
+          <Row
+            label="Quantité"
+            value={
+              task.driverTakeoffCode
+                ? `Métré ${task.driverTakeoffCode}`
+                : task.quantitySnapshot != null
+                  ? "Saisie planning"
+                  : "Absente"
+            }
+          />
+          <Row
+            label="Durée"
+            value={
+              task.durationMode === "computed" ||
+              task.durationMode === "computed_workload"
+                ? "Calculé"
+                : "Fixe / manuel"
+            }
+          />
+          <Row
+            label="Charge"
+            value={
+              task.workloadSource === "DERIVED"
+                ? "Calculée"
+                : task.workloadSource === "PROVIDED"
+                  ? "Fournie"
+                  : "Absente"
             }
           />
         </Section>
@@ -317,12 +446,6 @@ export function PrepScheduleTaskPanel({
       </div>
     </aside>
   );
-}
-
-function kindLabel(kind: string) {
-  if (kind === "wait") return "Attente technique";
-  if (kind === "control") return "Contrôle";
-  return "Travaux";
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {

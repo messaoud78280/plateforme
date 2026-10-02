@@ -612,6 +612,10 @@ export function BeworkPatchModal({
                 fallback={analysis.directChanges}
               />
 
+              {section === "PLANNING" && impact ? (
+                <PlanningPreviewSummary impact={impact} />
+              ) : null}
+
               {(consequenceCount > 0 ||
                 (analysis.potentialImpacts?.length ?? 0) > 0) && (
                 <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-3">
@@ -921,6 +925,129 @@ export function BeworkPatchModal({
         )}
       </div>
     </div>
+  );
+}
+
+/** Synthèse métier Planning — pas de JSON brut. */
+function PlanningPreviewSummary({
+  impact,
+}: {
+  impact: AnalyzePatchImpactResult;
+}) {
+  const tasks = new Set<string>();
+  const durations: string[] = [];
+  const crews: string[] = [];
+  const deps: string[] = [];
+  let endBefore: unknown = undefined;
+  let endAfter: unknown = undefined;
+
+  for (const c of impact.directChanges) {
+    if (c.label) tasks.add(c.label);
+    const f = (c.field ?? "").toLowerCase();
+    if (f.includes("duration")) {
+      durations.push(
+        `${c.label} : ${formatValue(c.before)} → ${formatValue(c.after)}${c.unit ? ` ${c.unit}` : ""}`,
+      );
+    }
+    if (f.includes("crew") || f.includes("effectif")) {
+      crews.push(
+        `${c.label} : ${formatValue(c.before)} → ${formatValue(c.after)}`,
+      );
+    }
+    if (f.includes("depend")) {
+      deps.push(`${c.label} : ${formatValue(c.after)}`);
+    }
+  }
+  for (const d of impact.derivedChanges) {
+    if (d.label) tasks.add(d.label);
+    if (d.field === "duration_days") {
+      durations.push(
+        `${d.label} : ${formatValue(d.before)} → ${formatValue(d.after)} j`,
+      );
+    }
+    if (d.field === "end_date") {
+      endBefore = d.before;
+      endAfter = d.after;
+    }
+    if (d.field === "base_duration_working_days") {
+      durations.push(
+        `Durée chantier : ${formatValue(d.before)} → ${formatValue(d.after)} j`,
+      );
+    }
+  }
+
+  if (
+    tasks.size === 0 &&
+    durations.length === 0 &&
+    crews.length === 0 &&
+    deps.length === 0 &&
+    endBefore === undefined
+  ) {
+    return null;
+  }
+
+  return (
+    <section className="rounded-xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.03] p-3">
+      <h4 className="text-sm font-semibold text-[#1e3a5f]">
+        Impact planning
+      </h4>
+      <dl className="mt-2 space-y-2 text-sm text-slate-700">
+        {tasks.size > 0 ? (
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Tâches concernées
+            </dt>
+            <dd className="mt-0.5">{tasks.size} intervention{tasks.size > 1 ? "s" : ""}</dd>
+          </div>
+        ) : null}
+        {durations.length > 0 ? (
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Durées changées
+            </dt>
+            <dd className="mt-0.5 space-y-0.5">
+              {durations.slice(0, 8).map((l) => (
+                <p key={l}>{l}</p>
+              ))}
+            </dd>
+          </div>
+        ) : null}
+        {crews.length > 0 ? (
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Équipes changées
+            </dt>
+            <dd className="mt-0.5 space-y-0.5">
+              {crews.slice(0, 8).map((l) => (
+                <p key={l}>{l}</p>
+              ))}
+            </dd>
+          </div>
+        ) : null}
+        {deps.length > 0 ? (
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Dépendances changées
+            </dt>
+            <dd className="mt-0.5 space-y-0.5">
+              {deps.slice(0, 8).map((l) => (
+                <p key={l}>{l}</p>
+              ))}
+            </dd>
+          </div>
+        ) : null}
+        {endBefore !== undefined || endAfter !== undefined ? (
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Impact sur fin chantier
+            </dt>
+            <dd className="mt-0.5">
+              {formatValue(endBefore)} → {formatValue(endAfter)}
+            </dd>
+          </div>
+        ) : null}
+      </dl>
+    </section>
   );
 }
 

@@ -600,29 +600,39 @@ function parseOperation(
         v: unknown,
       ): Array<{ equipment_id: string; count?: number }> | undefined => {
         if (!Array.isArray(v)) return undefined;
-        return v
-          .map((x) => {
-            if (!x || typeof x !== "object") return null;
-            const o = x as { equipment_id?: string; equipmentId?: string; count?: number };
-            const id = o.equipment_id ?? o.equipmentId;
-            if (!id || typeof id !== "string") return null;
-            return { equipment_id: id, count: typeof o.count === "number" ? o.count : 1 };
-          })
-          .filter((x): x is { equipment_id: string; count?: number } => !!x);
+        const out: Array<{ equipment_id: string; count?: number }> = [];
+        for (const x of v) {
+          if (!x || typeof x !== "object") continue;
+          const o = x as {
+            equipment_id?: string;
+            equipmentId?: string;
+            count?: number;
+          };
+          const id = o.equipment_id ?? o.equipmentId;
+          if (!id || typeof id !== "string") continue;
+          out.push({
+            equipment_id: id,
+            count: typeof o.count === "number" ? o.count : 1,
+          });
+        }
+        return out;
       };
       const asSupply = (
         v: unknown,
       ): Array<{ supply_id: string; count?: number }> | undefined => {
         if (!Array.isArray(v)) return undefined;
-        return v
-          .map((x) => {
-            if (!x || typeof x !== "object") return null;
-            const o = x as { supply_id?: string; supplyId?: string; count?: number };
-            const id = o.supply_id ?? o.supplyId;
-            if (!id || typeof id !== "string") return null;
-            return { supply_id: id, count: typeof o.count === "number" ? o.count : 1 };
-          })
-          .filter((x): x is { supply_id: string; count?: number } => !!x);
+        const out: Array<{ supply_id: string; count?: number }> = [];
+        for (const x of v) {
+          if (!x || typeof x !== "object") continue;
+          const o = x as { supply_id?: string; supplyId?: string; count?: number };
+          const id = o.supply_id ?? o.supplyId;
+          if (!id || typeof id !== "string") continue;
+          out.push({
+            supply_id: id,
+            count: typeof o.count === "number" ? o.count : 1,
+          });
+        }
+        return out;
       };
       return {
         op,

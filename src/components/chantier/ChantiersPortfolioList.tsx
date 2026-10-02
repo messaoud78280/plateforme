@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ChantierStatus } from "@prisma/client";
 import { DeleteChantierButton } from "@/components/chantier/DeleteChantierButton";
+import { ProjectSignatureCompact } from "@/components/chantier/project-signature/ProjectSignatureCompact";
 import type {
   PortfolioModuleSnapshot,
   PortfolioProjectRow,
@@ -203,37 +204,6 @@ function AttentionChip({ row }: { row: PortfolioProjectRow }) {
   );
 }
 
-function Tags({ row }: { row: PortfolioProjectRow }) {
-  const tags: string[] = [];
-  if (row.clientLabel) tags.push(row.clientLabel);
-  if (row.responsibleName) {
-    tags.push(row.responsibleName);
-  } else {
-    tags.push("Responsable à définir");
-  }
-  if (row.documentsCount > 0) {
-    tags.push(`${row.documentsCount} doc${row.documentsCount > 1 ? "s" : ""}`);
-  }
-  if (tags.length === 0) return null;
-  return (
-    <div className="mt-2.5 flex flex-wrap gap-1.5">
-      {tags.slice(0, 3).map((t) => (
-        <span
-          key={t}
-          className={cn(
-            "rounded-full px-2.5 py-0.5 text-[11px] font-medium",
-            t === "Responsable à définir"
-              ? "bg-amber-50 text-amber-800"
-              : "bg-slate-100 text-slate-600",
-          )}
-        >
-          {t}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 function ModulesColumn({ modules }: { modules: PortfolioModuleSnapshot[] }) {
   return (
     <ul className="space-y-1.5">
@@ -316,14 +286,15 @@ function ChantierCard({
   return (
     <article
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200",
-        "hover:border-slate-300/90 hover:shadow-[0_8px_24px_rgba(15,23,42,0.07)]",
+        "group relative overflow-hidden rounded-2xl border border-[color:rgba(80,160,210,0.14)] bg-gradient-to-br from-white/96 via-[#f8fbff]/92 to-[#eef6fc]/88 shadow-[0_10px_28px_rgba(20,60,110,0.05)] transition duration-200",
+        "hover:-translate-y-px hover:border-[color:rgba(31,182,213,0.28)] hover:shadow-[0_14px_34px_rgba(20,60,110,0.08)]",
+        "motion-reduce:transform-none motion-reduce:transition-none",
         featured && "ring-1 ring-[#3b6cf0]/15",
-        row.attentionLevel !== "none" && "border-l-[2px] border-l-amber-400/80",
+        row.attentionLevel !== "none" && "border-l-[3px] border-l-amber-400/80",
       )}
     >
       <span
-        className={cn("absolute inset-y-0 left-0 w-[4px]", visual.rail)}
+        className={cn("absolute inset-y-0 left-0 w-[3px]", visual.rail)}
         aria-hidden
       />
       <Link
@@ -334,7 +305,7 @@ function ChantierCard({
 
       <div
         className={cn(
-          "relative z-[1] pointer-events-none pl-5 pr-4 py-4 sm:pl-6 sm:pr-5",
+          "relative z-[1] pointer-events-none pl-4 pr-4 py-4 sm:pl-5 sm:pr-5",
           isGrid ? "space-y-4" : "sm:py-5",
         )}
       >
@@ -342,46 +313,29 @@ function ChantierCard({
           className={cn(
             isGrid
               ? "space-y-4"
-              : "grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)_minmax(160px,0.7fr)_minmax(140px,0.55fr)] lg:items-center lg:gap-6",
+              : "grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.85fr)_minmax(160px,0.7fr)_minmax(140px,0.55fr)] lg:items-center lg:gap-6",
           )}
         >
-          {/* Identité */}
+          {/* Identité — Project Signature compacte */}
           <div className="min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <span
-                className={cn(
-                  "inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em]",
-                  visual.badge,
-                )}
-              >
-                {visual.short}
-              </span>
-              <div className="pointer-events-auto lg:hidden">
+              <div className="min-w-0 flex-1">
+                <ProjectSignatureCompact
+                  title={row.title}
+                  status={row.chantierStatus}
+                  statusLabel={row.statusLabel}
+                  clientLabel={row.clientLabel}
+                  cityLabel={row.cityLabel}
+                  addressTitle={row.locationLabel}
+                  crafts={row.crafts}
+                  density={isGrid ? "grid" : "list"}
+                  showResponsible={false}
+                />
+              </div>
+              <div className="pointer-events-auto shrink-0 lg:hidden">
                 <RowMenu row={row} />
               </div>
             </div>
-            <h2 className="mt-2 text-[15px] font-semibold tracking-tight text-slate-900 sm:text-[16px]">
-              {row.title}
-            </h2>
-            {row.locationLabel ? (
-              <p className="mt-1.5 flex items-start gap-1.5 text-[12.5px] text-slate-500">
-                <svg
-                  className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  aria-hidden
-                >
-                  <path
-                    d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                  />
-                  <circle cx="12" cy="10" r="2.2" stroke="currentColor" strokeWidth="1.6" />
-                </svg>
-                <span className="line-clamp-2">{row.locationLabel}</span>
-              </p>
-            ) : null}
-            <Tags row={row} />
           </div>
 
           {/* Progression */}
@@ -411,6 +365,15 @@ function ChantierCard({
                   : ""}
               </p>
             ) : null}
+            {!row.responsibleName ? (
+              <p className="text-[11.5px] font-medium text-amber-800/90">
+                Affecter un responsable
+              </p>
+            ) : (
+              <p className="truncate text-[11.5px] text-slate-500">
+                {row.responsibleName}
+              </p>
+            )}
             <p className="text-[11.5px] text-slate-400">
               Dernière activité {formatRelativeActivity(row.lastActivityAt)}
             </p>

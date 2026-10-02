@@ -1,5 +1,6 @@
 import type { CraftSignatureTone } from "@/lib/chantier/craft-signature";
 import { cn } from "@/lib/cn";
+import { ProjectTradeBadgeList } from "./ProjectTradeBadge";
 
 /** Barre segmentée — signature visuelle des domaines présents. */
 export function CraftSignatureBar({
@@ -36,7 +37,7 @@ export function CraftSignatureBar({
   );
 }
 
-/** Pastilles domaines du chantier. */
+/** @deprecated Préférer ProjectTradeBadgeList — alias de compatibilité. */
 export function CraftDomainChips({
   crafts,
   className,
@@ -46,32 +47,9 @@ export function CraftDomainChips({
   className?: string;
   max?: number;
 }) {
-  if (crafts.length === 0) return null;
-  const visible = crafts.slice(0, max);
-  const rest = crafts.length - visible.length;
-
   return (
-    <ul className={cn("bw-craft-chips", className)}>
-      {visible.map((craft) => (
-        <li key={craft.key}>
-          <span
-            className="bw-craft-chip"
-            style={{
-              ["--craft-accent" as string]: craft.accent,
-              ["--craft-soft" as string]: craft.soft,
-              ["--craft-border" as string]: craft.border,
-            }}
-          >
-            <span className="bw-craft-chip__dot" aria-hidden />
-            {craft.label}
-          </span>
-        </li>
-      ))}
-      {rest > 0 ? (
-        <li>
-          <span className="bw-craft-chip bw-craft-chip--more">+{rest}</span>
-        </li>
-      ) : null}
-    </ul>
+    <ProjectTradeBadgeList crafts={crafts} max={max} size="md" className={className} />
   );
 }
+
+export { ProjectTradeBadge, ProjectTradeBadgeList } from "./ProjectTradeBadge";

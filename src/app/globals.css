@@ -1709,10 +1709,104 @@ body {
     background: var(--craft-accent, #64748b);
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--craft-accent, #64748b) 18%, transparent);
   }
+  .bw-craft-chip--md {
+    padding: 0.35rem 0.75rem 0.35rem 0.55rem;
+    font-size: 0.75rem;
+  }
   .bw-craft-chip--more {
     border-color: rgba(100, 116, 139, 0.18);
     background: rgba(255, 255, 255, 0.65);
     color: #64748b;
+  }
+
+  .bw-psig--embedded {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+  .bw-psig--embedded .bw-psig__grid {
+    display: none;
+  }
+  .bw-psig--compact .bw-psig__inner--compact {
+    gap: 0.55rem;
+    padding: 0;
+  }
+  .bw-psig__title--compact {
+    font-size: clamp(0.95rem, 0.9rem + 0.35vw, 1.05rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: #0f1c33;
+    margin: 0;
+  }
+  .bw-psig__bar--compact {
+    max-width: 11rem;
+    height: 2.5px;
+  }
+  .bw-psig__identity--compact {
+    gap: 0.55rem 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bw-psig__cell--empty .bw-psig__cell-value {
+    color: #94a3b8;
+    font-weight: 500;
+  }
+  .bw-psig__status-slot {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .bw-psig-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+    border: 1px solid rgba(100, 116, 139, 0.18);
+    background: rgba(248, 250, 252, 0.95);
+    padding: 0.2rem 0.55rem 0.2rem 0.4rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #334155;
+  }
+  .bw-psig-status--md {
+    font-size: 0.6875rem;
+    padding: 0.28rem 0.65rem 0.28rem 0.45rem;
+  }
+  .bw-psig-status__dot {
+    width: 0.35rem;
+    height: 0.35rem;
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 18%, transparent);
+  }
+  .bw-psig-status--etude {
+    color: #475569;
+    background: rgba(241, 245, 249, 0.95);
+    border-color: rgba(148, 163, 184, 0.35);
+  }
+  .bw-psig-status--attente {
+    color: #9a3412;
+    background: rgba(255, 247, 237, 0.95);
+    border-color: rgba(251, 146, 60, 0.28);
+  }
+  .bw-psig-status--cours {
+    color: #047857;
+    background: rgba(236, 253, 245, 0.95);
+    border-color: rgba(52, 211, 153, 0.3);
+  }
+  .bw-psig-status--reception {
+    color: #0f766e;
+    background: rgba(240, 253, 250, 0.95);
+    border-color: rgba(45, 212, 191, 0.3);
+  }
+  .bw-psig-status--termine {
+    color: #5b21b6;
+    background: rgba(245, 243, 255, 0.95);
+    border-color: rgba(167, 139, 250, 0.3);
   }
 
   @media (prefers-reduced-motion: reduce) {

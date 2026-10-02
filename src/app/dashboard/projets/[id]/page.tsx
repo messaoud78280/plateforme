@@ -33,7 +33,6 @@ import {
 } from "@/lib/chantier-dossier/sync-mission-documents";
 import { ChantierOrphanMissionBanner } from "@/components/chantier/ChantierOrphanMissionBanner";
 import { ChantierStatusSelect } from "@/components/chantier/ChantierStatusSelect";
-import { Badge } from "@/components/ui/Badge";
 import { TaskStatus } from "@prisma/client";
 import { ProjectMessagerieLinks } from "@/components/messagerie/MessagerieContextLinks";
 import {
@@ -47,7 +46,6 @@ import { projectTeamHref } from "@/lib/messagerie/resolve-conversation";
 import {
   CHANTIER_MISSING_STATUSES,
 } from "@/lib/chantier-dossier/constants";
-import { chantierStatusBadgeTone } from "@/lib/chantier-lifecycle";
 import { ChantierContractuelPanel } from "@/components/chantier/ChantierContractuelPanel";
 import { ChantierSubcontractorsPanel } from "@/components/chantier/ChantierSubcontractorsPanel";
 import { canEditPilotageOperational } from "@/lib/pilotage/access";
@@ -70,6 +68,7 @@ import {
   ProjectProfitabilitySkeleton,
 } from "@/components/chantier/ProjectProfitabilityDeferred";
 import { ProjectSignature } from "@/components/chantier/project-signature/ProjectSignature";
+import { ProjectStatusBadge } from "@/components/chantier/project-signature/ProjectStatusBadge";
 import {
   projectSignatureRef,
   resolveCraftsFromScopes,
@@ -495,10 +494,7 @@ export default async function ProjetDetailPage({
 
   const responsibleLabel = presentation.responsibleLabel;
   const craftSignatures = resolveCraftsFromScopes(project.projectScopes ?? []);
-  const locationLabel =
-    project.siteCity?.trim() ||
-    project.siteAddress?.trim() ||
-    null;
+  const locationLabel = project.siteCity?.trim() || null;
   const secondaryFacts: { value: string; label: string }[] = [];
   if (project.signedQuoteAmount != null) {
     secondaryFacts.push({
@@ -806,9 +802,11 @@ export default async function ProjetDetailPage({
               className="bw-psig-status-select"
             />
           ) : (
-            <Badge tone={chantierStatusBadgeTone(project.chantierStatus)}>
-              {chantierStatusDisplayLabel(project.chantierStatus)}
-            </Badge>
+            <ProjectStatusBadge
+              status={project.chantierStatus}
+              label={chantierStatusDisplayLabel(project.chantierStatus)}
+              size="md"
+            />
           )
         }
         teamHref={

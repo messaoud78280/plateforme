@@ -2,7 +2,9 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import type { CraftSignatureTone } from "@/lib/chantier/craft-signature";
 import { cn } from "@/lib/cn";
-import { CraftDomainChips, CraftSignatureBar } from "./CraftSignature";
+import { CraftSignatureBar } from "./CraftSignature";
+import { ProjectMetaItem } from "./ProjectMetaItem";
+import { ProjectTradeBadgeList } from "./ProjectTradeBadge";
 
 export type ProjectSignatureFact = {
   value: string;
@@ -27,18 +29,8 @@ export type ProjectSignatureProps = {
   className?: string;
 };
 
-function IdentityCell({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="bw-psig__cell">
-      <p className="bw-psig__cell-value">{value}</p>
-      <p className="bw-psig__cell-label">{label}</p>
-    </div>
-  );
-}
-
 /**
- * PROJECT SIGNATURE — identité numérique chantier BeWork.
- * Composition éditoriale ; données structurées uniquement.
+ * PROJECT SIGNATURE étendue — identité numérique chantier (fiche détail).
  */
 export function ProjectSignature({
   title,
@@ -57,7 +49,7 @@ export function ProjectSignature({
 }: ProjectSignatureProps) {
   const location = locationLabel?.trim() || null;
   const client = clientLabel?.trim() || null;
-  const responsible = responsibleLabel?.trim() || "À définir";
+  const responsible = responsibleLabel?.trim() || null;
 
   return (
     <header className={cn("bw-psig", className)}>
@@ -76,7 +68,7 @@ export function ProjectSignature({
               </>
             ) : null}
           </div>
-          <div className="bw-psig__status">{statusSlot}</div>
+          <div className="bw-psig__status-slot">{statusSlot}</div>
         </div>
 
         <div className="bw-psig__title-row">
@@ -89,15 +81,27 @@ export function ProjectSignature({
         <CraftSignatureBar crafts={crafts} className="bw-psig__bar" />
 
         <div className="bw-psig__identity">
-          {client ? <IdentityCell value={client} label="Client" /> : null}
-          {location ? <IdentityCell value={location} label="Localisation" /> : null}
-          <IdentityCell value={responsible} label="Responsable" />
+          <ProjectMetaItem
+            value={client || "À définir"}
+            label="Client"
+            empty={!client}
+          />
+          <ProjectMetaItem
+            value={location || "À définir"}
+            label="Localisation"
+            empty={!location}
+          />
+          <ProjectMetaItem
+            value={responsible || "À définir"}
+            label="Responsable"
+            empty={!responsible}
+          />
         </div>
 
         {crafts.length > 0 ? (
           <div className="bw-psig__domains">
             <p className="bw-psig__domains-label">Domaines du chantier</p>
-            <CraftDomainChips crafts={crafts} />
+            <ProjectTradeBadgeList crafts={crafts} max={8} size="md" />
           </div>
         ) : null}
 

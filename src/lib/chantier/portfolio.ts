@@ -17,6 +17,10 @@ import {
 } from "@/lib/chantier/portfolio-delivery";
 import { buildProjectPresentation } from "@/lib/chantier/party-labels";
 import { buildPreparationSnapshot } from "@/lib/chantier/preparation-state";
+import {
+  resolveCraftsFromScopes,
+  type CraftSignatureTone,
+} from "@/lib/chantier/craft-signature";
 
 const PO_WATCH: PurchaseOrderStatus[] = [
   "A_VALIDER",
@@ -49,10 +53,14 @@ export type PortfolioProjectRow = {
   statusLabel: string;
   siteAddress: string | null;
   siteCity: string | null;
+  /** Ville seule — identité Project Signature. */
+  cityLabel: string | null;
   locationLabel: string | null;
   clientLabel: string | null;
   responsibleName: string | null;
   responsibleRoleLabel: string | null;
+  /** Domaines métier (ProjectScope → craft-signature), batch serveur. */
+  crafts: CraftSignatureTone[];
   /** Source: assignedTo | internalManager | null */
   responsibleSource: "assignedTo" | "internalManager" | null;
   attentionCount: number;
@@ -443,10 +451,15 @@ export async function loadProjectsPortfolio(opts: {
               select: {
                 id: true,
                 projectId: true,
+                code: true,
+                name: true,
+                status: true,
+                displayOrder: true,
                 referenceStudyId: true,
                 referenceQuoteId: true,
                 referenceSchedulePlanId: true,
               },
+              orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
               take: 400,
             })
           : Promise.resolve([]),
@@ -779,6 +792,15 @@ export async function loadProjectsPortfolio(opts: {
       const primaryReason = att.primaryReason;
       const otherCount = primaryReason ? Math.max(0, att.n - 1) : 0;
 
+      const projectScopes = scopeRows.filter((s) => s.projectId === p.id);
+      const crafts = resolveCraftsFromScopes(
+        projectScopes.map((s) => ({
+          code: s.code,
+          name: s.name,
+          status: s.status,
+        })),
+      );
+
       const preparation = buildPreparationSnapshot({
         projectId: p.id,
         title: p.title,
@@ -797,9 +819,7 @@ export async function loadProjectsPortfolio(opts: {
             lineCount: s._count.lines,
             version: s.version,
           })),
-        scopes: scopeRows
-          .filter((s) => s.projectId === p.id)
-          .map((s) => ({
+        scopes: projectScopes.map((s) => ({
             id: s.id,
             referenceStudyId: s.referenceStudyId,
             referenceQuoteId: s.referenceQuoteId,
@@ -882,10 +902,12 @@ export async function loadProjectsPortfolio(opts: {
         statusLabel: CHANTIER_STATUS_LABELS[p.chantierStatus],
         siteAddress: p.siteAddress,
         siteCity: p.siteCity,
+        cityLabel: p.siteCity?.trim() || null,
         locationLabel: locationLabel(p.siteAddress, p.siteCity),
         clientLabel,
         responsibleName,
         responsibleRoleLabel,
+        crafts,
         responsibleSource,
         attentionCount: att.n,
         criticalCount: att.crit,

@@ -260,3 +260,9 @@ export function resolveCraftsFromScopes(
 export function projectSignatureRef(projectId: string): string {
   return projectId.replace(/[^a-zA-Z0-9]/g, "").slice(-6).toUpperCase();
 }
+
+/**
+ * Alias design system — source unique pour badges / barre / chips.
+ * Préférer ce nom dans les nouveaux modules (métré, devis, planning…).
+ */
+export const tradeVisualConfig = CRAFT_SIGNATURE_PALETTE;

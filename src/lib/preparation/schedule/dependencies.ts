@@ -73,6 +73,9 @@ export function mergeDependsOn(
  * Génère des FS structurels.
  * Si `executionPhases` non vide → graphe explicite (prioritaire).
  * Sinon → chaîne legacy par rôle inféré.
+ *
+ * Les arêtes structurelles qui créeraient un cycle avec les depends_on
+ * explicites déjà persistés sont ignorées (les explicites priment).
  */
 export function buildStructuralDependencies(
   steps: StructuralStep[],
@@ -98,20 +101,57 @@ export function buildStructuralDependencies(
     extras = buildLegacyRoleDependencies(steps);
   }
 
+  // Base = depends_on explicites (prioritaires).
   const result = new Map<string, StructuralDep[]>();
   for (const s of steps) {
-    const existing = (s.depends_on ?? []).map((d) => ({
-      step_id: d.step_id,
-      type: d.type ?? ("FS" as const),
-      lag_days: d.lag_days ?? 0,
-    }));
-    const extra = extras.get(s.id) ?? [];
-    const merged = mergeDependsOn(
-      existing.filter((d) => d.step_id !== s.id),
-      extra.filter((d) => d.step_id !== s.id),
-    );
-    result.set(s.id, merged);
+    const existing = (s.depends_on ?? [])
+      .filter((d) => d.step_id !== s.id)
+      .map((d) => ({
+        step_id: d.step_id,
+        type: d.type ?? ("FS" as const),
+        lag_days: d.lag_days ?? 0,
+      }));
+    result.set(s.id, existing);
   }
+
+  // Ajouter les structurelles une par une sans créer de cycle.
+  for (const s of steps) {
+    const extra = extras.get(s.id) ?? [];
+    for (const d of extra) {
+      if (!d.step_id || d.step_id === s.id) continue;
+      const current = result.get(s.id) ?? [];
+      if (
+        current.some(
+          (x) =>
+            x.step_id === d.step_id &&
+            x.type === (d.type ?? "FS") &&
+            (x.lag_days ?? 0) === (d.lag_days ?? 0),
+        )
+      ) {
+        continue;
+      }
+      const candidate = new Map(result);
+      candidate.set(s.id, [
+        ...current,
+        {
+          step_id: d.step_id,
+          type: d.type ?? "FS",
+          lag_days: d.lag_days ?? 0,
+        },
+      ]);
+      const cycle = detectDependencyCycle(
+        new Map(
+          [...candidate.entries()].map(([k, v]) => [
+            k,
+            v.map((x) => ({ step_id: x.step_id })),
+          ]),
+        ),
+      );
+      if (cycle.hasCycle) continue;
+      result.set(s.id, candidate.get(s.id)!);
+    }
+  }
+
   return result;
 }
 
@@ -160,11 +200,14 @@ function buildLegacyRoleDependencies(
   }
 
   const controls = byRole.get("controls") ?? [];
+  /** Travaux d'exécution — y compris generic/unclassified (circuits, poses non étiquetés). */
   const workRoles: PhaseRole[] = [
     "networks",
     "execution",
     "installation",
     "finishes",
+    "generic",
+    "unclassified",
   ];
   for (const c of controls) {
     for (const role of workRoles) {
@@ -174,12 +217,10 @@ function buildLegacyRoleDependencies(
 
   const handover = byRole.get("handover") ?? [];
   for (const h of handover) {
-    if (controls.length) {
-      for (const c of controls) add(h, c);
-    } else {
-      for (const role of workRoles) {
-        for (const w of byRole.get(role) ?? []) add(h, w);
-      }
+    // Remise après contrôles ET après tout travail restant (pas seulement workRoles « étiquetés »).
+    for (const c of controls) add(h, c);
+    for (const role of workRoles) {
+      for (const w of byRole.get(role) ?? []) add(h, w);
     }
   }
 

@@ -11,6 +11,7 @@ import {
   isIntentCompatibleWithOp,
   OPERATION_CATALOG,
 } from "@/lib/bework-patch/operations-catalog";
+import { normalizeDependsOnJson } from "@/lib/bework-patch/operation-contracts";
 import {
   BEWORK_CHANGE_INTENTS,
   BEWORK_ENTITY_TYPES,
@@ -710,20 +711,8 @@ function parseOperation(
         issues.push(err("INVALID_FIELD", `${path}.changes.depends_on`, "tableau requis"));
         return null;
       }
-      const depends_on: Array<{ step_id: string; type?: "FS" | "SS" | "FF"; lag_days?: number }> =
-        [];
-      for (const d of changes!.depends_on) {
-        if (!isObj(d)) continue;
-        const step_id = str(d.step_id ?? d.stepId, 80);
-        if (!step_id) continue;
-        const type =
-          d.type === "SS" || d.type === "FF" || d.type === "FS" ? d.type : "FS";
-        depends_on.push({
-          step_id,
-          type,
-          lag_days: num(d.lag_days ?? d.lagDays) ?? 0,
-        });
-      }
+      // Source unique = operation-contracts.normalizeDependsOnJson (contrat ChatGPT).
+      const depends_on = normalizeDependsOnJson(changes!.depends_on);
       return {
         op,
         target: {

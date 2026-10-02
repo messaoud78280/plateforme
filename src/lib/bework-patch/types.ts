@@ -557,6 +557,17 @@ export type BeworkSupportedOperationSpec = {
   entity_types: BeworkEntityType[];
   allowed_change_fields?: string[];
   compatible_intents: BeworkChangeIntent[];
+  /** Contrats JSON détaillés (ex. structure de depends_on) — source parser. */
+  field_contracts?: Array<{
+    field: string;
+    required?: boolean;
+    type: string;
+    item?: Record<string, unknown>;
+    example?: unknown;
+    target?: Record<string, unknown>;
+    minimal_operation_example?: unknown;
+    meaning?: string;
+  }>;
 };
 
 export type BeworkChatgptContextV1 = {

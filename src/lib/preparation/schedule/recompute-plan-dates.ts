@@ -1,11 +1,13 @@
 /**
- * Recalcule dates / halves / baseDuration d'un plan persisté après édition durée.
- * Réutilise computeSchedule (deps + resource leveling + calendrier).
+ * Recalcule dates / halves / baseDuration d'un plan persisté après édition structurelle.
+ * Réutilise computeSchedule (deps + resource leveling + calendrier + execution_phases).
  */
 import type { Prisma } from "@prisma/client";
 import { d } from "@/lib/commercial/decimal";
 import { computeSchedule } from "@/lib/preparation/schedule/compute";
 import { parseCrewJson } from "@/lib/preparation/schedule/crew";
+import { normalizeDependsOnJson } from "@/lib/bework-patch/operation-contracts";
+import { parsePrepWorkflow } from "@/lib/preparation/schedule/parse";
 import type {
   PrepScheduleDTO,
   PrepWorkflowStepDTO,
@@ -30,6 +32,8 @@ type TaskRow = {
   conditional: boolean;
   durationDays: unknown;
   durationCalendar: string;
+  durationLockedByUser: boolean;
+  durationMode: string;
   startHalf: number;
   endHalf: number;
   crewJson: unknown;
@@ -72,6 +76,8 @@ export async function recomputePersistedPlanDatesInTx(
           conditional: true,
           durationDays: true,
           durationCalendar: true,
+          durationLockedByUser: true,
+          durationMode: true,
           startHalf: true,
           endHalf: true,
           crewJson: true,
@@ -88,7 +94,7 @@ export async function recomputePersistedPlanDatesInTx(
 
   const study = await tx.prepStudy.findFirst({
     where: { id: plan.studyId, organizationId: input.orgId },
-    select: { scheduleJson: true },
+    select: { scheduleJson: true, workflowJson: true },
   });
 
   const scheduleRaw =
@@ -100,6 +106,12 @@ export async function recomputePersistedPlanDatesInTx(
           start_date?: string | null;
         })
       : null;
+
+  const workflowParsed = parsePrepWorkflow(study?.workflowJson ?? null);
+  const phaseByStep = new Map(
+    workflowParsed.steps.map((s) => [s.id, s.execution_phase_id ?? null]),
+  );
+  const executionPhases = workflowParsed.execution_phases;
 
   const calendar: PrepScheduleDTO["calendar"] = scheduleRaw?.calendar ?? {
     working_days: [1, 2, 3, 4, 5],
@@ -130,6 +142,7 @@ export async function recomputePersistedPlanDatesInTx(
         | "control"
         | "wait",
       description: t.description,
+      execution_phase_id: phaseByStep.get(t.stepCode) ?? null,
       takeoff_ids: takeoffIds,
       duration: {
         mode: "fixed",
@@ -155,25 +168,7 @@ export async function recomputePersistedPlanDatesInTx(
 
   const scheduleTasks = plan.tasks.map((t: TaskRow) => {
     const crew = parseCrewJson(t.crewJson);
-    const depsRaw = Array.isArray(t.dependsOnJson) ? t.dependsOnJson : [];
-    const depends_on = depsRaw
-      .map((x) => {
-        if (!x || typeof x !== "object") return null;
-        const o = x as { stepId?: string; type?: string; lagDays?: number };
-        if (!o.stepId) return null;
-        return {
-          step_id: o.stepId,
-          type: (o.type === "SS" || o.type === "FF" ? o.type : "FS") as
-            | "FS"
-            | "SS"
-            | "FF",
-          lag_days: typeof o.lagDays === "number" ? o.lagDays : 0,
-        };
-      })
-      .filter(
-        (x): x is { step_id: string; type: "FS" | "SS" | "FF"; lag_days: number } =>
-          !!x,
-      );
+    const depends_on = normalizeDependsOnJson(t.dependsOnJson);
     return {
       step_id: t.stepCode,
       depends_on,
@@ -192,6 +187,7 @@ export async function recomputePersistedPlanDatesInTx(
     },
     resources: { labor: [], equipment: [], supplies: [], rates: [] },
     qtyOf: () => null,
+    executionPhases: executionPhases.length ? executionPhases : null,
   });
 
   if (computed.errors.length) {
@@ -205,16 +201,20 @@ export async function recomputePersistedPlanDatesInTx(
   for (const t of plan.tasks) {
     const placed = byStep.get(t.stepCode);
     if (!placed) continue;
+    const data: Prisma.PrepScheduleTaskUpdateInput = {
+      startDate: placed.startDate ? new Date(placed.startDate) : null,
+      endDate: placed.endDate ? new Date(placed.endDate) : null,
+      startHalf: placed.start.half,
+      endHalf: placed.end.half,
+    };
+    // Ne pas écraser une durée verrouillée manuellement (override déjà injecté en entrée).
+    if (!t.durationLockedByUser) {
+      data.durationDays = placed.duration.durationDays;
+      data.computedDurationDays = placed.duration.durationDays;
+    }
     await tx.prepScheduleTask.update({
       where: { id: t.id },
-      data: {
-        startDate: placed.startDate ? new Date(placed.startDate) : null,
-        endDate: placed.endDate ? new Date(placed.endDate) : null,
-        startHalf: placed.start.half,
-        endHalf: placed.end.half,
-        durationDays: placed.duration.durationDays,
-        computedDurationDays: placed.duration.durationDays,
-      },
+      data,
     });
     tasksUpdated += 1;
   }

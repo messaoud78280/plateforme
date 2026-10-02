@@ -9,6 +9,7 @@ import type {
   BeworkSupportedOperationSpec,
 } from "@/lib/bework-patch/types";
 import { isPlanningCommitSupportedOp } from "@/lib/bework-patch/commit/planning-capability";
+import { fieldContractsForOp } from "@/lib/bework-patch/operation-contracts";
 
 const ALL_TECHNICAL: BeworkChangeIntent[] = [
   "TECHNICAL_CORRECTION",
@@ -320,6 +321,7 @@ export function supportedOperationsForSection(
       entity_types: cat.entity_types,
       allowed_change_fields: cat.allowed_change_fields,
       compatible_intents: cat.compatible_intents,
+      field_contracts: fieldContractsForOp(op),
     });
   }
   return out;

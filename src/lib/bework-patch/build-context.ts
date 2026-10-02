@@ -26,11 +26,17 @@ import type {
   BeworkChatgptContextV1,
   BeworkPatchSection,
 } from "@/lib/bework-patch/types";
-import { parsePrepWorkflowSteps } from "@/lib/preparation/schedule/parse";
+import { parsePrepWorkflow, parsePrepWorkflowSteps } from "@/lib/preparation/schedule/parse";
 import {
   parseCrewJson,
   resolveWorkloadPersonDays,
 } from "@/lib/preparation/schedule/crew";
+import {
+  asEquipmentJson,
+  asStringListJson,
+  asSuppliesJson,
+  normalizeDependsOnJson,
+} from "@/lib/bework-patch/operation-contracts";
 
 function isObj(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === "object" && !Array.isArray(v);
@@ -200,8 +206,15 @@ async function buildPlanningContext(
           lot: true,
           startDate: true,
           endDate: true,
+          startHalf: true,
+          endHalf: true,
           crewJson: true,
           dependsOnJson: true,
+          preconditionsJson: true,
+          controlsJson: true,
+          safetyJson: true,
+          equipmentJson: true,
+          suppliesJson: true,
           quantitySnapshot: true,
           quantityUnit: true,
           driverTakeoffCode: true,
@@ -220,6 +233,15 @@ async function buildPlanningContext(
     where: { planId: plan.id, organizationId: orgId },
     select: { taskId: true, studyLineCode: true },
   });
+
+  const study = await prisma.prepStudy.findFirst({
+    where: { id: plan.studyId, organizationId: orgId },
+    select: { workflowJson: true },
+  });
+  const workflow = parsePrepWorkflow(study?.workflowJson ?? null);
+  const phaseByStep = new Map(
+    workflow.steps.map((s) => [s.id, s.execution_phase_id ?? null]),
+  );
 
   return buildChatgptContextSkeleton({
     section: "PLANNING",
@@ -241,6 +263,12 @@ async function buildPlanningContext(
       base_duration_working_days: plan.baseDurationWorkingDays
         ? Number(plan.baseDurationWorkingDays)
         : null,
+      execution_phases: workflow.execution_phases.map((p) => ({
+        id: p.id,
+        label: p.label,
+        role: p.role,
+        order: p.order,
+      })),
       tasks: plan.tasks.map((t) => {
         const crew = parseCrewJson(t.crewJson);
         const wl = resolveWorkloadPersonDays({
@@ -255,8 +283,11 @@ async function buildPlanningContext(
           duration_days: Number(t.durationDays),
           duration_mode: t.durationMode,
           lot: t.lot,
+          execution_phase_id: phaseByStep.get(t.stepCode) ?? null,
           start_date: t.startDate ? t.startDate.toISOString().slice(0, 10) : null,
           end_date: t.endDate ? t.endDate.toISOString().slice(0, 10) : null,
+          start_half: t.startHalf,
+          end_half: t.endHalf,
           quantity:
             t.quantitySnapshot != null ? Number(t.quantitySnapshot) : null,
           unit: t.quantityUnit,
@@ -268,15 +299,22 @@ async function buildPlanningContext(
           crew_id: crew.crewId,
           crew_size: crew.crewSize,
           crew: crew.members,
+          parallelizable: crew.parallelizable,
           workload_person_days: wl.value,
           workload_source: wl.source,
+          preconditions: asStringListJson(t.preconditionsJson),
+          controls: asStringListJson(t.controlsJson),
+          safety: asStringListJson(t.safetyJson),
+          equipment: asEquipmentJson(t.equipmentJson),
+          supplies: asSuppliesJson(t.suppliesJson),
+          depends_on: normalizeDependsOnJson(t.dependsOnJson),
           takeoff_codes: takeoffLinks
             .filter((l) => l.taskId === t.id)
             .map((l) => l.studyLineCode),
         };
       }),
       note:
-        "base_version = revisionNumber. studyVersionAtGeneration = alignement métré (CTX-04) — une édition planning ne le synchronise pas. Ops exposées = ops commitables uniquement.",
+        "base_version = revisionNumber. studyVersionAtGeneration = alignement métré (CTX-04) — une édition planning ne le synchronise pas. Ops exposées = ops commitables uniquement. Après update_duration / update_crew / update_productivity / update_dependency / update_workload (si durée impactée), les dates sont recalculées via computeSchedule (phases + leveling). depends_on : voir field_contracts de update_dependency (parser réel).",
     },
   });
 }

@@ -8,13 +8,13 @@ export const PLANNING_COMMIT_SUPPORTED_OPS = [
   "update_crew",
   "update_productivity",
   "update_workload",
+  "update_dependency",
 ] as const;
 
 export type PlanningCommitSupportedOp =
   (typeof PLANNING_COMMIT_SUPPORTED_OPS)[number];
 
 export const PLANNING_COMMIT_UNSUPPORTED_OPS = [
-  "update_dependency",
   "update_start_date",
   "add_task",
   "remove_task",

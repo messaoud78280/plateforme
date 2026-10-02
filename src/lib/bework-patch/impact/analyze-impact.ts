@@ -367,6 +367,27 @@ function describeDirectOp(
       unit: "h.j",
     };
   }
+  if (op.op === "update_dependency") {
+    const plan = subgraph.plans.find((p) => p.id === op.target.plan_id);
+    const task = plan?.tasks.find(
+      (t) =>
+        t.id === op.target.task_id ||
+        t.id === op.target.id ||
+        t.stepCode === op.target.step_code ||
+        t.stepCode === op.target.code,
+    );
+    return {
+      op: op.op,
+      section,
+      entityType: "PREP_SCHEDULE_TASK",
+      entityId: task?.id ?? op.target.task_id ?? null,
+      label: task?.name ?? op.target.step_code ?? "tâche",
+      field: "depends_on",
+      before: task?.dependsOnStepCodes ?? null,
+      after: op.changes.depends_on,
+      unit: null,
+    };
+  }
   if (op.op === "update_visit") {
     const visit = subgraph.visit;
     const targetId = op.target.visit_id ?? op.target.id;
@@ -1228,6 +1249,7 @@ function analyzePlanningLocal(
     "update_crew",
     "update_productivity",
     "update_workload",
+    "update_dependency",
   ]);
   for (const op of patch.operations) {
     if (!supported.has(op.op)) {
@@ -1264,7 +1286,8 @@ function analyzePlanningLocal(
         dc.op === "update_duration" ||
         dc.op === "update_crew" ||
         dc.op === "update_productivity" ||
-        dc.op === "update_workload") &&
+        dc.op === "update_workload" ||
+        dc.op === "update_dependency") &&
       !dc.entityId
     ) {
       errors.push(

@@ -250,6 +250,11 @@ export type OpUpdateTask = {
     name?: string;
     description?: string | null;
     lot?: string | null;
+    preconditions?: string[];
+    controls?: string[];
+    safety?: string[];
+    equipment?: Array<{ equipment_id: string; count?: number }>;
+    supplies?: Array<{ supply_id: string; count?: number }>;
   };
 };
 

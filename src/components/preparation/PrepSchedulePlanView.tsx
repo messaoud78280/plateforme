@@ -457,6 +457,8 @@ export function PrepSchedulePlanView({
                 <td className="px-3 py-2">
                   <p className="font-medium text-slate-900">{t.name}</p>
                   <p className="text-[11px] text-slate-500">
+                    {t.lot ? `Phase : ${t.lot}` : "Phase : À classer"}
+                    {" · "}
                     {t.kind}
                     {t.holdPoint ? " · Point d'arrêt" : ""}
                     {t.conditional ? " · Conditionnel · Hors base" : ""}
@@ -494,9 +496,13 @@ export function PrepSchedulePlanView({
                   ) : null}
                 </td>
                 <td className="px-3 py-2 text-[11px] text-slate-600">
-                  {t.crew.length
-                    ? t.crew.map((c) => `${c.count}× ${c.label}`).join(", ")
-                    : "—"}
+                  {t.crewId
+                    ? `Équipe ${t.crewId}${t.crewSize != null ? ` · ${t.crewSize} pers.` : ""}`
+                    : t.crewSize != null
+                      ? `${t.crewSize} pers.`
+                      : t.crew.length
+                        ? t.crew.map((c) => `${c.count}× ${c.label}`).join(", ")
+                        : "—"}
                   {t.equipment.length ? (
                     <span className="block">
                       {t.equipment.map((e) => `${e.count}× ${e.label}`).join(", ")}

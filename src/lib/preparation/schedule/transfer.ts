@@ -30,6 +30,15 @@ import {
   resolveWorkloadPersonDays,
   serializeCrewJson as serializeCrewCanonical,
 } from "@/lib/preparation/schedule/crew";
+import { analyzeSourceIntegrity } from "@/lib/preparation/schedule/source-integrity";
+import {
+  findEnrichment,
+  indexEnrichments,
+  mergeTaskOnRegeneration,
+  type EnrichmentSnapshot,
+} from "@/lib/preparation/schedule/merge-tasks";
+import { analyzeScheduleConsistency } from "@/lib/preparation/schedule/consistency";
+import { resolveCanonicalPhase } from "@/lib/preparation/schedule/phase";
 
 export type SchedulePreviewQuoteOption = {
   id: string;
@@ -455,12 +464,116 @@ export async function commitPrepSchedule(input: {
       version: true,
       mode: true,
       projectId: true,
+      organizationId: true,
+      scopeId: true,
       resourcesJson: true,
       workflowJson: true,
       scheduleJson: true,
+      project: { select: { id: true, organizationId: true, title: true } },
     },
   });
   if (!study) throw new PrepError("Étude introuvable", 404);
+
+  let quoteMeta: {
+    id: string;
+    projectId: string | null;
+    organizationId: string;
+    sourcePrepStudyId: string | null;
+  } | null = null;
+  if (input.quoteId) {
+    quoteMeta = await prisma.commercialQuote.findFirst({
+      where: { id: input.quoteId, organizationId: input.orgId },
+      select: {
+        id: true,
+        projectId: true,
+        organizationId: true,
+        sourcePrepStudyId: true,
+      },
+    });
+  }
+
+  const integrity = analyzeSourceIntegrity({
+    organizationId: input.orgId,
+    project: study.project,
+    study: {
+      id: study.id,
+      projectId: study.projectId,
+      organizationId: study.organizationId,
+      version: study.version,
+      scopeId: study.scopeId,
+    },
+    quote: quoteMeta,
+  });
+  if (!integrity.ok) {
+    throw new PrepError(
+      integrity.blockers.map((b) => b.message).join(" · ") ||
+        "Sources planning incohérentes",
+      422,
+    );
+  }
+
+  // Enrichissements du planning précédent (même study) — merge safe
+  const previousPlan = await prisma.prepSchedulePlan.findFirst({
+    where: {
+      organizationId: input.orgId,
+      studyId: study.id,
+      projectId: study.projectId,
+      status: { in: ["CURRENT", "INITIAL", "ARCHIVED"] },
+    },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      tasks: {
+        select: {
+          stepCode: true,
+          driverTakeoffCode: true,
+          crewJson: true,
+          equipmentJson: true,
+          suppliesJson: true,
+          preconditionsJson: true,
+          controlsJson: true,
+          constraintsJson: true,
+          safetyJson: true,
+          description: true,
+          rateId: true,
+          rateValue: true,
+          rateUnit: true,
+          ratePer: true,
+          parallelUnits: true,
+          durationMode: true,
+          durationDays: true,
+          durationLockedByUser: true,
+          computedDurationDays: true,
+        },
+      },
+    },
+  });
+  const enrichmentIndex = indexEnrichments(
+    (previousPlan?.tasks ?? []).map(
+      (t): EnrichmentSnapshot => ({
+        stepCode: t.stepCode,
+        driverTakeoffCode: t.driverTakeoffCode,
+        crewJson: t.crewJson,
+        equipmentJson: t.equipmentJson,
+        suppliesJson: t.suppliesJson,
+        preconditionsJson: t.preconditionsJson,
+        controlsJson: t.controlsJson,
+        constraintsJson: t.constraintsJson,
+        safetyJson: t.safetyJson,
+        description: t.description,
+        rateId: t.rateId,
+        rateValue: t.rateValue != null ? d(t.rateValue) : null,
+        rateUnit: t.rateUnit,
+        ratePer: t.ratePer,
+        parallelUnits: t.parallelUnits,
+        durationMode: t.durationMode,
+        durationDays: d(t.durationDays),
+        durationLockedByUser: t.durationLockedByUser,
+        computedDurationDays:
+          t.computedDurationDays != null ? d(t.computedDurationDays) : null,
+      }),
+    ),
+  );
 
   // Recalcul exact pour snapshots (avec overrides)
   const studyView = await getPrepStudyView(input.orgId, input.studyId);
@@ -482,6 +595,42 @@ export async function commitPrepSchedule(input: {
     durationOverrides: input.durationOverrides,
   });
   const placed = computed.placed.filter((t) => selected.has(t.stepId));
+  if (computed.errors.length) {
+    throw new PrepError(computed.errors[0]!, 422);
+  }
+
+  const consistency = analyzeScheduleConsistency(
+    placed.map((t) => ({
+      stepCode: t.stepId,
+      name: t.name,
+      lot: t.lot,
+      kind: t.kind,
+      description: t.description,
+      startDate: t.startDate,
+      endDate: t.endDate,
+      startHalf: t.start.half,
+      endHalf: t.end.half,
+      durationDays: t.duration.durationDays,
+      durationMode: t.duration.mode,
+      quantitySnapshot: t.duration.quantity,
+      rateValue: t.duration.rateValue,
+      crewId: t.crewId,
+      resourceKey: t.resourceKey,
+      dependsOn: t.dependsOn.map((d) => ({
+        step_id: d.stepId,
+        type: (d.type as "FS" | "SS" | "FF") || "FS",
+        lag_days: d.lagDays,
+      })),
+      parallelizable: t.parallelizable,
+    })),
+  );
+  if (!consistency.ok) {
+    throw new PrepError(
+      `Planning incohérent : ${consistency.blockers.map((b) => b.message).join(" · ")}`,
+      422,
+    );
+  }
+
   const finance = await loadQuoteFinanceByTakeoff(
     input.orgId,
     study.id,
@@ -593,16 +742,61 @@ export async function commitPrepSchedule(input: {
             t.duration.driverItem ??
             (quantitySnapshot != null ? primaryCode : null);
 
+          const phase = resolveCanonicalPhase({
+            lot: t.lot,
+            name: t.name,
+            kind: t.kind,
+            description: t.description,
+          });
+
+          const prev = findEnrichment(
+            enrichmentIndex,
+            t.stepId,
+            driverTakeoffCode,
+          );
+          const merged = mergeTaskOnRegeneration(
+            {
+              stepCode: t.stepId,
+              driverTakeoffCode,
+              quantitySnapshot,
+              quantityUnit,
+              lot: phase.label,
+              name: t.name,
+              kind: t.kind,
+              description: t.description,
+              takeoffCodesJson: t.takeoffIds,
+              dependsOnJson: t.dependsOn,
+              preconditionsJson: t.preconditions,
+              controlsJson: t.controlsBeforeNext,
+              constraintsJson: t.constraints,
+              safetyJson: t.safety,
+              equipmentJson: t.equipment,
+              suppliesJson: t.supplies,
+              rateId: t.duration.rateId,
+              rateValue: t.duration.rateValue,
+              rateUnit: t.duration.rateUnit,
+              ratePer: t.duration.ratePer,
+              parallelUnits: t.duration.parallelUnits,
+              durationMode:
+                input.durationOverrides?.[t.stepId] != null
+                  ? "manual"
+                  : t.duration.mode,
+              durationDays: t.duration.durationDays,
+              crewJson: serializeCrewJson(t),
+            },
+            prev,
+          );
+
           const row = await tx.prepScheduleTask.create({
             data: {
               organizationId: input.orgId,
               planId: created.id,
               stepCode: t.stepId,
-              name: t.name,
-              kind: t.kind,
+              name: merged.name,
+              kind: merged.kind,
               sortOrder: i,
-              lot: t.lot,
-              description: t.description,
+              lot: merged.lot,
+              description: merged.description,
               includeInBase: t.includeInBase,
               holdPoint: t.holdPoint,
               conditional: t.conditional,
@@ -613,30 +807,32 @@ export async function commitPrepSchedule(input: {
               endDate: t.endDate ? new Date(t.endDate) : null,
               startHalf: t.start.half,
               endHalf: t.end.half,
-              durationMode:
-                input.durationOverrides?.[t.stepId] != null ? "manual" : t.duration.mode,
-              durationDays: t.duration.durationDays,
+              durationMode: merged.durationMode,
+              durationDays: merged.durationDays,
               durationCalendar: t.duration.calendar,
-              durationLockedByUser: input.durationOverrides?.[t.stepId] != null,
-              computedDurationDays: t.duration.durationDays,
-              driverTakeoffCode,
-              quantitySnapshot,
-              quantityUnit,
-              rateId: t.duration.rateId,
-              rateValue: t.duration.rateValue,
-              rateUnit: t.duration.rateUnit,
-              ratePer: t.duration.ratePer,
-              parallelUnits: t.duration.parallelUnits,
-              takeoffCodesJson: t.takeoffIds,
-              crewJson: serializeCrewJson(t) as Prisma.InputJsonValue,
-              equipmentJson: t.equipment,
-              suppliesJson: t.supplies,
-              preconditionsJson: t.preconditions,
-              controlsJson: t.controlsBeforeNext,
-              constraintsJson: t.constraints,
-              safetyJson: t.safety,
+              durationLockedByUser:
+                merged.durationLockedByUser ||
+                input.durationOverrides?.[t.stepId] != null,
+              computedDurationDays:
+                merged.computedDurationDays ?? merged.durationDays,
+              driverTakeoffCode: merged.driverTakeoffCode,
+              quantitySnapshot: merged.quantitySnapshot,
+              quantityUnit: merged.quantityUnit,
+              rateId: merged.rateId,
+              rateValue: merged.rateValue,
+              rateUnit: merged.rateUnit,
+              ratePer: merged.ratePer,
+              parallelUnits: merged.parallelUnits,
+              takeoffCodesJson: merged.takeoffCodesJson as Prisma.InputJsonValue,
+              crewJson: merged.crewJson as Prisma.InputJsonValue,
+              equipmentJson: merged.equipmentJson as Prisma.InputJsonValue,
+              suppliesJson: merged.suppliesJson as Prisma.InputJsonValue,
+              preconditionsJson: merged.preconditionsJson as Prisma.InputJsonValue,
+              controlsJson: merged.controlsJson as Prisma.InputJsonValue,
+              constraintsJson: merged.constraintsJson as Prisma.InputJsonValue,
+              safetyJson: merged.safetyJson as Prisma.InputJsonValue,
               proofsJson: t.proofs,
-              dependsOnJson: t.dependsOn,
+              dependsOnJson: merged.dependsOnJson as Prisma.InputJsonValue,
               blockingReason: t.blockingReason,
               sellHtSnapshot: fin.sellHt,
               costHtSnapshot: fin.costHt,
@@ -883,6 +1079,7 @@ export type SchedulePlanViewPayload = {
     supplies: Array<{ supply_id: string; count?: number; label: string }>;
     preconditions: string[];
     controls: string[];
+    safety: string[];
     dependsOn: Array<{ stepId: string; type: string }>;
     blockingReason: string | null;
     sellHtSnapshot: number | null;
@@ -1069,6 +1266,7 @@ export async function buildPrepSchedulePlanPayload(
         ),
       preconditions: asStringList(t.preconditionsJson),
       controls: asStringList(t.controlsJson),
+      safety: asStringList(t.safetyJson),
       dependsOn,
       blockingReason: t.blockingReason,
       sellHtSnapshot: t.sellHtSnapshot != null ? d(t.sellHtSnapshot) : null,

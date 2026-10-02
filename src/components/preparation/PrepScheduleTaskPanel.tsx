@@ -51,7 +51,6 @@ export function PrepScheduleTaskPanel({
           <h3 className="text-[15px] font-semibold text-[#1e3a5f]">{task.name}</h3>
           <p className="mt-0.5 text-[12px] text-slate-500">
             {kindLabel(task.kind)}
-            {task.lot ? ` · Lot (source métré) : ${task.lot}` : ""}
             {task.conditional ? " · Conditionnel · Hors planning de base" : ""}
           </p>
         </div>
@@ -117,6 +116,18 @@ export function PrepScheduleTaskPanel({
           </div>
         ) : null}
 
+        <Section title="Intervention">
+          <Row label="Réf." value={task.stepCode} />
+          <Row label="Nature" value={kindLabel(task.kind)} />
+        </Section>
+
+        <Section title="Phase">
+          <Row
+            label="Phase"
+            value={task.lot ? `${task.lot} (source métré / workflow)` : "À classer"}
+          />
+        </Section>
+
         <Section title="Planning">
           <Row
             label="Dates"
@@ -153,6 +164,19 @@ export function PrepScheduleTaskPanel({
             value={
               task.rateValue != null
                 ? `${task.rateValue} ${task.rateUnit ?? ""}${task.ratePerLabel ? ` (${task.ratePerLabel})` : ""}`
+                : "Rendement non renseigné"
+            }
+          />
+        </Section>
+
+        <Section title="Charge h.j">
+          <Row
+            label="Charge"
+            value={
+              task.workloadPersonDays != null
+                ? `${task.workloadPersonDays} h.j${
+                    task.workloadSource === "DERIVED" ? " (dérivée)" : ""
+                  }`
                 : "—"
             }
           />
@@ -168,41 +192,19 @@ export function PrepScheduleTaskPanel({
               ))}
             </ul>
           ) : task.crewSize != null ? (
-            <p className="text-slate-700">Effectif : {task.crewSize} personne{task.crewSize > 1 ? "s" : ""}</p>
+            <p className="text-slate-700">
+              Effectif : {task.crewSize} personne{task.crewSize > 1 ? "s" : ""}
+            </p>
           ) : (
             <p className="text-slate-500">—</p>
           )}
-          {task.crewId ? (
-            <Row label="Équipe (id)" value={task.crewId} />
-          ) : null}
+          {task.crewId ? <Row label="Équipe (id)" value={task.crewId} /> : null}
           {task.crewSize != null ? (
             <Row
               label="Effectif"
               value={`${task.crewSize} personne${task.crewSize > 1 ? "s" : ""}`}
             />
           ) : null}
-          {task.workloadPersonDays != null ? (
-            <Row
-              label="Charge h.j"
-              value={`${task.workloadPersonDays} h.j${
-                task.workloadSource === "DERIVED" ? " (dérivée)" : ""
-              }`}
-            />
-          ) : null}
-        </Section>
-
-        <Section title="Engins">
-          {task.equipment.length ? (
-            <ul className="space-y-0.5">
-              {task.equipment.map((e) => (
-                <li key={e.equipment_id}>
-                  {e.count}× {e.label}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-slate-500">—</p>
-          )}
         </Section>
 
         <Section title="Dépendances">
@@ -231,10 +233,55 @@ export function PrepScheduleTaskPanel({
           )}
         </Section>
 
+        <Section title="Description / mode opératoire">
+          {task.description ? (
+            <p className="whitespace-pre-wrap text-[12px] text-slate-600">
+              {task.description}
+            </p>
+          ) : (
+            <p className="text-slate-500">—</p>
+          )}
+        </Section>
+
+        <Section title="Moyens / outillage">
+          {task.equipment.length ? (
+            <ul className="space-y-0.5">
+              {task.equipment.map((e) => (
+                <li key={e.equipment_id}>
+                  {e.count}× {e.label}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-slate-500">—</p>
+          )}
+          {task.supplies.length ? (
+            <ul className="mt-1 space-y-0.5 text-[12px] text-slate-600">
+              {task.supplies.map((s) => (
+                <li key={s.supply_id}>
+                  {(s.count ?? 1)}× {s.label}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </Section>
+
         <Section title="Contrôles">
           {task.controls.length ? (
             <ul className="list-inside list-disc space-y-0.5 text-[12px]">
               {task.controls.map((p) => (
+                <li key={p}>{p}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-slate-500">—</p>
+          )}
+        </Section>
+
+        <Section title="Sécurité">
+          {Array.isArray(task.safety) && task.safety.length ? (
+            <ul className="list-inside list-disc space-y-0.5 text-[12px]">
+              {task.safety.map((p) => (
                 <li key={p}>{p}</li>
               ))}
             </ul>
@@ -266,12 +313,6 @@ export function PrepScheduleTaskPanel({
           <p className="rounded-lg bg-amber-50 px-3 py-2 text-[12px] text-amber-950">
             {task.blockingReason}
           </p>
-        ) : null}
-
-        {task.description ? (
-          <Section title="Description">
-            <p className="whitespace-pre-wrap text-[12px] text-slate-600">{task.description}</p>
-          </Section>
         ) : null}
       </div>
     </aside>

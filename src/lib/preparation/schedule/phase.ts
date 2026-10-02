@@ -1,0 +1,229 @@
+/**
+ * Phases canoniques planning — jamais lot = désignation de tâche.
+ */
+
+export const UNCLASSIFIED_PHASE = "À classer";
+
+export type PhaseRole =
+  | "preparation"
+  | "demolition"
+  | "networks"
+  | "installation"
+  | "finishes"
+  | "controls"
+  | "handover"
+  | "generic"
+  | "unclassified";
+
+export type CanonicalPhase = {
+  /** Libellé affiché / stocké dans lot */
+  label: string;
+  /** Ordre déterministe (plus petit = plus tôt) */
+  order: number;
+  role: PhaseRole;
+  /** true si l'ancien lot était la désignation de la tâche */
+  wasDesignationFallback: boolean;
+  source: "structured" | "inferred" | "unclassified";
+};
+
+function norm(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Lot qui n'est qu'une copie du nom de tâche → faux lot. */
+export function isDesignationLikeLot(
+  lot: string | null | undefined,
+  name: string | null | undefined,
+): boolean {
+  const l = (lot ?? "").trim();
+  const n = (name ?? "").trim();
+  if (!l) return false;
+  if (!n) return false;
+  if (norm(l) === norm(n)) return true;
+  // Désignation longue collée comme « phase » unique
+  if (l.length >= 48 && norm(n).startsWith(norm(l).slice(0, 40))) return true;
+  return false;
+}
+
+function parsePhaseNumber(lot: string): number | null {
+  const m = lot.match(/phase\s*(\d+)/i);
+  if (!m) return null;
+  const n = Number(m[1]);
+  return Number.isFinite(n) ? n : null;
+}
+
+function inferRoleFromText(text: string): PhaseRole | null {
+  const t = norm(text);
+  if (
+    /nettoyage|remise.*(client|installation)|reception|réception|livraison/.test(
+      t,
+    )
+  ) {
+    return "handover";
+  }
+  if (
+    /controle final|contrôles? electrique|essais de fonctionnement|verifications finales|vérifications finales/.test(
+      t,
+    ) ||
+    (/controle|contrôle|essais|verification|vérification/.test(t) &&
+      /final/.test(t))
+  ) {
+    return "controls";
+  }
+  if (/rebouchage|finitions?|reprise.*saignee|reprise.*saignée/.test(t)) {
+    return "finishes";
+  }
+  if (
+    /distribution|gaine|saignee|saignée|circuit specialise|circuit spécialisé|reseaux|réseaux|cheminement/.test(
+      t,
+    )
+  ) {
+    return "networks";
+  }
+  if (
+    /depose|dépose|consignation|demolition|démolition/.test(t)
+  ) {
+    return "demolition";
+  }
+  if (
+    /installation de chantier|protection des ouvrages|preparation du chantier|préparation du chantier/.test(
+      t,
+    )
+  ) {
+    return "preparation";
+  }
+  if (
+    /prise|interrupteur|appareillage|tableau electrique|tableau électrique|commande d.eclairage|va-et-vient|point lumineux/.test(
+      t,
+    )
+  ) {
+    return "installation";
+  }
+  return null;
+}
+
+const ROLE_ORDER: Record<PhaseRole, number> = {
+  preparation: 10,
+  demolition: 20,
+  networks: 30,
+  installation: 40,
+  finishes: 50,
+  controls: 70,
+  handover: 80,
+  generic: 45,
+  unclassified: 90,
+};
+
+const ROLE_LABEL: Record<PhaseRole, string> = {
+  preparation: "Préparation",
+  demolition: "Déposes",
+  networks: "Réseaux",
+  installation: "Appareillage & pose",
+  finishes: "Finitions",
+  controls: "Contrôles",
+  handover: "Remise",
+  generic: "Travaux",
+  unclassified: UNCLASSIFIED_PHASE,
+};
+
+/**
+ * Résout une phase exploitable pour affichage, Gantt et resource leveling.
+ * Ne renvoie jamais le nom de la tâche comme phase.
+ */
+export function resolveCanonicalPhase(input: {
+  lot?: string | null;
+  name: string;
+  kind?: string | null;
+  description?: string | null;
+}): CanonicalPhase {
+  const rawLot = (input.lot ?? "").trim();
+  const designationLike = isDesignationLikeLot(rawLot, input.name);
+  const inferredFromName = inferRoleFromText(
+    `${input.name} ${input.description ?? ""}`,
+  );
+  const inferredFromLot = rawLot ? inferRoleFromText(rawLot) : null;
+  const inferred = inferredFromName ?? inferredFromLot;
+
+  // Contrôles / remise : priorité à l'inférence nom même si section source est mauvaise
+  if (inferredFromName === "controls" || inferredFromName === "handover") {
+    return {
+      label: ROLE_LABEL[inferredFromName],
+      order: ROLE_ORDER[inferredFromName],
+      role: inferredFromName,
+      wasDesignationFallback: designationLike || !rawLot,
+      source: "inferred",
+    };
+  }
+
+  if (rawLot && !designationLike) {
+    const phaseNum = parsePhaseNumber(rawLot);
+    const isBroadPhase = phaseNum != null || /^phase\s*\d+/i.test(rawLot);
+    // Sur un libellé de phase large (« PHASE 1 — … »), le nom de tâche prime
+    const role =
+      (isBroadPhase && inferredFromName) ||
+      inferredFromLot ||
+      inferredFromName ||
+      "generic";
+    const order =
+      role === "controls" || role === "handover" || role === "finishes"
+        ? ROLE_ORDER[role]
+        : phaseNum != null
+          ? phaseNum * 10 + (ROLE_ORDER[role] % 10)
+          : ROLE_ORDER[role] ?? ROLE_ORDER.generic;
+    return {
+      label: isBroadPhase && inferredFromName ? ROLE_LABEL[role] : rawLot,
+      order,
+      role,
+      wasDesignationFallback: false,
+      source: isBroadPhase && inferredFromName ? "inferred" : "structured",
+    };
+  }
+
+  if (inferred) {
+    return {
+      label: ROLE_LABEL[inferred],
+      order: ROLE_ORDER[inferred],
+      role: inferred,
+      wasDesignationFallback: designationLike || !rawLot,
+      source: "inferred",
+    };
+  }
+
+  return {
+    label: UNCLASSIFIED_PHASE,
+    order: ROLE_ORDER.unclassified,
+    role: "unclassified",
+    wasDesignationFallback: designationLike || !rawLot,
+    source: "unclassified",
+  };
+}
+
+/** Clé de resource leveling stable (pas une désignation unique). */
+export function phaseResourceGroupKey(phase: CanonicalPhase): string {
+  if (phase.role === "unclassified") return "DEFAULT-A";
+  // Groupes métier large pour éviter faux parallèle entre sous-libellés
+  if (
+    phase.role === "preparation" ||
+    phase.role === "demolition" ||
+    phase.role === "networks" ||
+    phase.role === "installation" ||
+    phase.role === "finishes" ||
+    phase.role === "controls" ||
+    phase.role === "handover"
+  ) {
+    return `ROLE:${phase.role}`;
+  }
+  const normLabel = phase.label
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_|_$/g, "")
+    .slice(0, 48);
+  return normLabel ? `LOT:${normLabel}` : "DEFAULT-A";
+}

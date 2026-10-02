@@ -592,6 +592,38 @@ function parseOperation(
         issues.push(err("INVALID_TARGET", `${path}.target`, "task_id ou step_code requis"));
         return null;
       }
+      const asStringArray = (v: unknown): string[] | undefined => {
+        if (!Array.isArray(v)) return undefined;
+        return v.filter((x): x is string => typeof x === "string");
+      };
+      const asEquip = (
+        v: unknown,
+      ): Array<{ equipment_id: string; count?: number }> | undefined => {
+        if (!Array.isArray(v)) return undefined;
+        return v
+          .map((x) => {
+            if (!x || typeof x !== "object") return null;
+            const o = x as { equipment_id?: string; equipmentId?: string; count?: number };
+            const id = o.equipment_id ?? o.equipmentId;
+            if (!id || typeof id !== "string") return null;
+            return { equipment_id: id, count: typeof o.count === "number" ? o.count : 1 };
+          })
+          .filter((x): x is { equipment_id: string; count?: number } => !!x);
+      };
+      const asSupply = (
+        v: unknown,
+      ): Array<{ supply_id: string; count?: number }> | undefined => {
+        if (!Array.isArray(v)) return undefined;
+        return v
+          .map((x) => {
+            if (!x || typeof x !== "object") return null;
+            const o = x as { supply_id?: string; supplyId?: string; count?: number };
+            const id = o.supply_id ?? o.supplyId;
+            if (!id || typeof id !== "string") return null;
+            return { supply_id: id, count: typeof o.count === "number" ? o.count : 1 };
+          })
+          .filter((x): x is { supply_id: string; count?: number } => !!x);
+      };
       return {
         op,
         target: {
@@ -602,9 +634,14 @@ function parseOperation(
         changes: {
           name: str(changes!.name, 200) ?? undefined,
           description:
-            str(changes!.description, 2000) ??
+            str(changes!.description, 4000) ??
             (changes!.description === null ? null : undefined),
           lot: str(changes!.lot, 120) ?? (changes!.lot === null ? null : undefined),
+          preconditions: asStringArray(changes!.preconditions),
+          controls: asStringArray(changes!.controls),
+          safety: asStringArray(changes!.safety),
+          equipment: asEquip(changes!.equipment),
+          supplies: asSupply(changes!.supplies),
         },
       };
     }

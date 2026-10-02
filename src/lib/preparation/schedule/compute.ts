@@ -17,6 +17,12 @@ import {
   type Instant,
 } from "@/lib/preparation/schedule/calendar";
 import { ceilDay, ceilHalfDay } from "@/lib/preparation/schedule/duration-math";
+import {
+  isDesignationLikeLot,
+  phaseResourceGroupKey,
+  resolveCanonicalPhase,
+} from "@/lib/preparation/schedule/phase";
+import { buildStructuralDependencies } from "@/lib/preparation/schedule/dependencies";
 import type {
   PrepResourcesDTO,
   PrepScheduleDTO,
@@ -122,10 +128,8 @@ export function normalizeLotResourceLabel(lot: string): string {
 
 /**
  * Résout la ressource logique d’ordonnancement.
- * Fallback lot / DEFAULT-A = règle de sécurité interne — pas une équipe métier inventée.
- *
- * @param opts.forceDefault — true si le planning a des lots trop fragmentés
- *   (désignations uniques) : une seule ressource logique pour éviter un faux parallèle.
+ * Priorité : crew_id → groupe de phase stable → DEFAULT-A.
+ * INTERDIT : désignation de tâche comme ressource exclusive.
  */
 export function resolveScheduleResourceKey(
   step: PrepWorkflowStepDTO,
@@ -152,11 +156,31 @@ export function resolveScheduleResourceKey(
       exclusive: true,
     };
   }
-  const lot = step.lot?.trim();
-  if (lot) {
-    const norm = normalizeLotResourceLabel(lot);
+
+  const phase = resolveCanonicalPhase({
+    lot: step.lot,
+    name: step.name,
+    kind: step.kind,
+    description: step.description,
+  });
+  // Désignation unique / non classée → une seule ressource logique
+  if (
+    phase.wasDesignationFallback ||
+    phase.role === "unclassified" ||
+    isDesignationLikeLot(step.lot, step.name)
+  ) {
     return {
-      key: `LOT:${norm || "UNKNOWN"}`,
+      key: "DEFAULT-A",
+      crewId: null,
+      source: "default",
+      exclusive: true,
+    };
+  }
+
+  const group = phaseResourceGroupKey(phase);
+  if (group.startsWith("LOT:") || group.startsWith("ROLE:")) {
+    return {
+      key: group,
       crewId: null,
       source: "lot",
       exclusive: true,
@@ -188,12 +212,28 @@ export function detectFragmentedLotFallback(
     return !crew;
   });
   if (withoutCrew.length < 4) return false;
+
+  const designationLike = withoutCrew.filter((s) =>
+    isDesignationLikeLot(s.lot, s.name),
+  );
+  if (designationLike.length >= Math.ceil(withoutCrew.length * 0.3)) {
+    return true;
+  }
+
   const lots = withoutCrew
-    .map((s) => s.lot?.trim() || "")
+    .map((s) => {
+      if (isDesignationLikeLot(s.lot, s.name)) return "";
+      return resolveCanonicalPhase({
+        lot: s.lot,
+        name: s.name,
+        kind: s.kind,
+        description: s.description,
+      }).label;
+    })
     .filter(Boolean);
   if (lots.length < 4) return false;
   const unique = new Set(lots);
-  // ≥ 50 % de lots distincts → fragmentation (ex. lot = désignation ligne)
+  // ≥ 50 % de lots distincts → fragmentation
   return unique.size >= Math.max(3, Math.ceil(lots.length * 0.5));
 }
 
@@ -346,15 +386,50 @@ export function computeSchedule(input: {
     holidaySet: buildHolidaySet(input.schedule.calendar.holidays, [year - 1, year, year + 1]),
   };
 
+  // Enrichir depends_on avec dépendances structurelles (phases / contrôles / remise)
+  const structural = buildStructuralDependencies(
+    input.workflowSteps
+      .filter((s) => scheduleTasks.some((t) => t.step_id === s.id))
+      .map((s) => {
+        const sched = scheduleTasks.find((t) => t.step_id === s.id);
+        return {
+          id: s.id,
+          name: s.name,
+          lot: s.lot,
+          kind: s.kind,
+          description: s.description,
+          order: s.order,
+          depends_on: (sched?.depends_on ?? []).map((d) => ({
+            step_id: d.step_id,
+            type: d.type,
+            lag_days: d.lag_days,
+          })),
+        };
+      }),
+  );
+
+  const enrichedScheduleTasks = scheduleTasks.map((t) => {
+    const extra = structural.get(t.step_id) ?? t.depends_on;
+    return {
+      ...t,
+      depends_on: extra.map((d) => ({
+        step_id: d.step_id,
+        type: d.type ?? "FS",
+        lag_days: d.lag_days ?? 0,
+        lag_calendar: "working" as const,
+      })),
+    };
+  });
+
   const preds = new Map<string, string[]>();
-  for (const t of scheduleTasks) {
+  for (const t of enrichedScheduleTasks) {
     preds.set(
       t.step_id,
       t.depends_on.map((d) => d.step_id).filter((id) => stepById.has(id)),
     );
   }
   const { order, error } = topoSort(
-    scheduleTasks.map((t) => t.step_id),
+    enrichedScheduleTasks.map((t) => t.step_id),
     preds,
   );
   if (error) {
@@ -377,12 +452,14 @@ export function computeSchedule(input: {
     : { date: RELATIVE_ANCHOR, half: 0 };
 
   const placedMap = new Map<string, PlacedTask>();
-  const schedById = new Map(scheduleTasks.map((t) => [t.step_id, t]));
+  const schedById = new Map(enrichedScheduleTasks.map((t) => [t.step_id, t]));
   /** Prochaine disponibilité par ressource exclusive. */
   const resourceNextFree = new Map<string, Instant>();
   const forceDefaultResource = detectFragmentedLotFallback(
-    input.workflowSteps.filter((s) => scheduleTasks.some((t) => t.step_id === s.id)),
-    scheduleTasks,
+    input.workflowSteps.filter((s) =>
+      enrichedScheduleTasks.some((t) => t.step_id === s.id),
+    ),
+    enrichedScheduleTasks,
   );
   if (forceDefaultResource) {
     warnings.push(
@@ -506,13 +583,20 @@ export function computeSchedule(input: {
         : "Tâche conditionnelle — hors durée de base";
     }
 
+    const phase = resolveCanonicalPhase({
+      lot: step.lot,
+      name: step.name,
+      kind: step.kind,
+      description: step.description,
+    });
+
     placedMap.set(stepId, {
       stepId,
       name: step.name,
       kind: step.kind,
       kindLabel: STEP_KIND_LABELS[step.kind],
       order: step.order,
-      lot: step.lot ?? null,
+      lot: phase.label,
       description: step.description ?? null,
       includeInBase,
       holdPoint: !!step.hold_point,

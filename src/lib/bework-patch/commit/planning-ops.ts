@@ -19,6 +19,7 @@ import {
 } from "@/lib/preparation/schedule/crew";
 import { resolveTaskDurationDays } from "@/lib/preparation/schedule/duration-resolve";
 import { recomputePersistedPlanDatesInTx } from "@/lib/preparation/schedule/recompute-plan-dates";
+import { detectDependencyCycle } from "@/lib/preparation/schedule/dependencies";
 import { d } from "@/lib/commercial/decimal";
 
 export {
@@ -137,11 +138,106 @@ export async function applyPlanningDirectInTx(
         data.description = op.changes.description;
       }
       if (op.changes.lot !== undefined) data.lot = op.changes.lot;
+      if (op.changes.preconditions !== undefined) {
+        data.preconditionsJson = op.changes.preconditions as Prisma.InputJsonValue;
+      }
+      if (op.changes.controls !== undefined) {
+        data.controlsJson = op.changes.controls as Prisma.InputJsonValue;
+      }
+      if (op.changes.safety !== undefined) {
+        data.safetyJson = op.changes.safety as Prisma.InputJsonValue;
+      }
+      if (op.changes.equipment !== undefined) {
+        data.equipmentJson = op.changes.equipment as Prisma.InputJsonValue;
+      }
+      if (op.changes.supplies !== undefined) {
+        data.suppliesJson = op.changes.supplies as Prisma.InputJsonValue;
+      }
       if (Object.keys(data).length === 0) continue;
       await tx.prepScheduleTask.update({
         where: { id: task.id },
         data,
       });
+      touched = true;
+    }
+
+    if (op.op === "update_dependency") {
+      const task = findTask(subgraphPlan, op);
+      if (!task) {
+        throw Object.assign(new Error("Tâche introuvable sur ce planning."), {
+          code: "TARGET_NOT_FOUND",
+        });
+      }
+      const dependsOn = (op.changes.depends_on ?? []).map((d) => ({
+        stepId: d.step_id,
+        type: d.type ?? "FS",
+        lagDays: d.lag_days ?? 0,
+      }));
+
+      // Cycle check sur le plan entier avec la nouvelle arête
+      const allTasks = await tx.prepScheduleTask.findMany({
+        where: { planId: plan.id, organizationId: input.orgId },
+        select: { id: true, stepCode: true, dependsOnJson: true },
+      });
+      const depsMap = new Map<string, Array<{ step_id: string }>>();
+      for (const row of allTasks) {
+        if (row.id === task.id || row.stepCode === task.stepCode) {
+          depsMap.set(
+            row.stepCode,
+            dependsOn.map((d) => ({ step_id: d.stepId })),
+          );
+        } else {
+          const raw = Array.isArray(row.dependsOnJson) ? row.dependsOnJson : [];
+          depsMap.set(
+            row.stepCode,
+            raw
+              .map((x) => {
+                if (!x || typeof x !== "object") return null;
+                const o = x as { stepId?: string; step_id?: string };
+                const id = o.stepId ?? o.step_id;
+                return id ? { step_id: id } : null;
+              })
+              .filter((x): x is { step_id: string } => !!x),
+          );
+        }
+      }
+      const cycle = detectDependencyCycle(depsMap);
+      if (cycle.hasCycle) {
+        throw Object.assign(
+          new Error(
+            `Cycle de dépendances refusé : ${cycle.path.join(" → ")}`,
+          ),
+          { code: "DEP_CYCLE" },
+        );
+      }
+
+      await tx.prepScheduleTask.update({
+        where: { id: task.id },
+        data: { dependsOnJson: dependsOn as unknown as Prisma.InputJsonValue },
+      });
+
+      // Resynchroniser table relationnelle pour cette tâche
+      await tx.prepScheduleDependency.deleteMany({
+        where: { planId: plan.id, successorId: task.id },
+      });
+      const idByStep = new Map(allTasks.map((t) => [t.stepCode, t.id]));
+      idByStep.set(task.stepCode, task.id);
+      for (const d of dependsOn) {
+        const predId = idByStep.get(d.stepId);
+        if (!predId) continue;
+        await tx.prepScheduleDependency.create({
+          data: {
+            organizationId: input.orgId,
+            planId: plan.id,
+            predecessorId: predId,
+            successorId: task.id,
+            type: d.type,
+            lagDays: d.lagDays,
+          },
+        });
+      }
+
+      needsDateRecompute = true;
       touched = true;
     }
 

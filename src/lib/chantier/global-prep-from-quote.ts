@@ -419,17 +419,33 @@ function taskMetaForLine(designation: string, unit: string, qty: number, section
   const dsg = designation.toLowerCase();
   const sectionLot = phaseLotFromSection(sectionTitle);
 
+  // Rôles terminaux / critiques : ne pas hériter d'une mauvaise section devis
+  if (/nettoyage|remise (de l'|au )?client|réception|reception/.test(dsg)) {
+    return { phase: "Remise", duration: { mode: "fixed", days: 0.5 }, orderBoost: 800 };
+  }
+  if (
+    /contrôles? électriques?|controles? electriques?|vérifications finales|verifications finales|essais de fonctionnement/.test(
+      dsg,
+    ) ||
+    (/contrôle|controle|essais|vérification|verification/.test(dsg) && /final/.test(dsg))
+  ) {
+    return { phase: "Contrôles", duration: { mode: "fixed", days: 1 }, orderBoost: 700 };
+  }
+  if (/rebouchage|reprises localisées|reprises localisees/.test(dsg)) {
+    return { phase: "Finitions", duration: { mode: "fixed", days: 1 }, orderBoost: 500 };
+  }
+
   // Étanchéité / SPEC avant « protection » générique
   if (/protection à l'eau|etancheit|étanchéité|\bspec\b/.test(dsg)) {
     return { phase: sectionLot || "Salle de bain", duration: { mode: "fixed", days: 1 }, orderBoost: 100 };
   }
-  if (/installation|préparation du chantier|preparation du chantier|protection du chantier|protections et préparation/.test(dsg)) {
-    return { phase: sectionLot || "Installation", duration: { mode: "fixed", days: 0.5 }, orderBoost: 10 };
+  if (/installation de chantier|préparation du chantier|preparation du chantier|protection des ouvrages|protections et préparation/.test(dsg)) {
+    return { phase: sectionLot || "Préparation", duration: { mode: "fixed", days: 0.5 }, orderBoost: 10 };
   }
   if (/dépose.*cuisine|depose.*cuisine/.test(dsg)) {
     return { phase: sectionLot || "Déposes", duration: { mode: "fixed", days: 1 }, orderBoost: 20 };
   }
-  if (/dépose|depose/.test(dsg)) {
+  if (/dépose|depose|consignation/.test(dsg)) {
     return { phase: sectionLot || "Déposes", duration: { mode: "fixed", days: 1 }, orderBoost: 30 };
   }
   if (/préparation.*cuisine|preparation.*cuisine|reprise.*cuisine/.test(dsg)) {
@@ -440,6 +456,12 @@ function taskMetaForLine(designation: string, unit: string, qty: number, section
   }
   if (/alimentation|évacuation.*cuisine|evacuation.*cuisine|plomberie.*cuisine/.test(dsg) && /cuisine/.test(dsg)) {
     return { phase: sectionLot || "Plomberie", duration: { mode: "fixed", days: 0.5 }, orderBoost: 60 };
+  }
+  if (/distribution|gaine|saignée|saignee|circuit spécialisé|circuit specialise/.test(dsg)) {
+    return { phase: sectionLot || "Réseaux", duration: { mode: "fixed", days: 1 }, orderBoost: 200 };
+  }
+  if (/prise|interrupteur|appareillage|tableau électrique|tableau electrique|va-et-vient|point lumineux|commande d.éclairage|commande d.eclairage/.test(dsg)) {
+    return { phase: sectionLot || "Appareillage & pose", duration: { mode: "fixed", days: 0.5 }, orderBoost: 300 };
   }
   if (/électri|electri/.test(dsg)) {
     return { phase: sectionLot || "Électricité", duration: { mode: "fixed", days: 1 }, orderBoost: 70 };
@@ -479,16 +501,18 @@ function taskMetaForLine(designation: string, unit: string, qty: number, section
   if (/finition|nettoyage|essais/.test(dsg)) {
     return { phase: sectionLot || "Finitions", duration: { mode: "fixed", days: 1 }, orderBoost: 170 };
   }
-  // Fallback forfait / quantité
+  // Fallback forfait / quantité — jamais phase = désignation
+  const safePhase =
+    sectionLot && sectionLot !== designation.trim() ? sectionLot : "À classer";
   if (/m²|m2/i.test(unit) && qty > 0) {
     return {
-      phase: sectionLot,
+      phase: safePhase,
       duration: { mode: "computed", rateId: "rate_carrelage_sol_m2j", driver: "TO_USE_LINE" },
       orderBoost: 125,
     };
   }
   return {
-    phase: sectionLot,
+    phase: safePhase,
     duration: { mode: "fixed", days: Math.max(0.5, qty >= 1 && /forfait/i.test(unit) ? 1 : 0.5) },
     orderBoost: 100,
   };

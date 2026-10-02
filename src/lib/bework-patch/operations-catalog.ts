@@ -122,7 +122,16 @@ export const OPERATION_CATALOG: Record<
     entity_types: ["PREP_SCHEDULE_TASK"],
     sections: ["PLANNING"],
     compatible_intents: [...PLANNING, "DOCUMENT_EDIT"],
-    allowed_change_fields: ["name", "description", "lot"],
+    allowed_change_fields: [
+      "name",
+      "description",
+      "lot",
+      "preconditions",
+      "controls",
+      "safety",
+      "equipment",
+      "supplies",
+    ],
   },
   update_duration: {
     entity_types: ["PREP_SCHEDULE_TASK"],

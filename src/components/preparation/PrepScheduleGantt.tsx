@@ -15,6 +15,7 @@ export type GanttTaskRow = {
   stepCode: string;
   name: string;
   kind: string;
+  lot?: string | null;
   includeInBase: boolean;
   holdPoint: boolean;
   holdPointStatus: string | null;
@@ -52,12 +53,29 @@ export function PrepScheduleGantt({
   selectedTaskId,
   onSelectTask,
 }: Props) {
-  const [zoom, setZoom] = useState<GanttZoom>("day");
+  const displayTasks = useMemo(() => {
+    const groups = new Map<string, GanttTaskRow[]>();
+    for (const t of tasks) {
+      const key = (t.lot ?? "").trim() || "À classer";
+      const list = groups.get(key) ?? [];
+      list.push(t);
+      groups.set(key, list);
+    }
+    return [...groups.entries()].flatMap(([phase, list]) => [
+      { type: "phase" as const, phase, id: `phase:${phase}` },
+      ...list.map((t) => ({ type: "task" as const, task: t })),
+    ]);
+  }, [tasks]);
+
+  const taskRows = useMemo(
+    () => displayTasks.filter((r) => r.type === "task").map((r) => r.task),
+    [displayTasks],
+  );
 
   const dayWidth = dayWidthForZoom(zoom);
 
   const { days, bars, chartWidth } = useMemo(() => {
-    const dated = tasks.filter((t) => t.startDate && t.endDate);
+    const dated = taskRows.filter((t) => t.startDate && t.endDate);
     if (!dated.length) {
       return { days: [], bars: [], chartWidth: 0 };
     }
@@ -67,7 +85,7 @@ export function PrepScheduleGantt({
     const axisEnd = ends.reduce((a, b) => (a > b ? a : b));
     const days = enumerateCalendarDays(axisStartIso, axisEnd);
     const bars = buildGanttBars(
-      tasks.map((t) => ({
+      taskRows.map((t) => ({
         id: t.id,
         stepCode: t.stepCode,
         startDate: t.startDate,
@@ -89,7 +107,7 @@ export function PrepScheduleGantt({
       bars,
       chartWidth: days.length * dayWidth,
     };
-  }, [tasks, dayWidth]);
+  }, [taskRows, dayWidth]);
 
   const barByCode = useMemo(() => {
     const m = new Map<string, (typeof bars)[0]>();
@@ -99,9 +117,9 @@ export function PrepScheduleGantt({
 
   const taskByCode = useMemo(() => {
     const m = new Map<string, GanttTaskRow>();
-    for (const t of tasks) m.set(t.stepCode, t);
+    for (const t of taskRows) m.set(t.stepCode, t);
     return m;
-  }, [tasks]);
+  }, [taskRows]);
 
   const connectors = useMemo(() => {
     const lines: Array<{ key: string; d: string; type: string }> = [];
@@ -111,8 +129,12 @@ export function PrepScheduleGantt({
       const fromTask = taskByCode.get(dep.predecessorStepCode);
       const toTask = taskByCode.get(dep.successorStepCode);
       if (!from || !to || !fromTask || !toTask) continue;
-      const fromIdx = tasks.findIndex((t) => t.stepCode === dep.predecessorStepCode);
-      const toIdx = tasks.findIndex((t) => t.stepCode === dep.successorStepCode);
+      const fromIdx = displayTasks.findIndex(
+        (r) => r.type === "task" && r.task.stepCode === dep.predecessorStepCode,
+      );
+      const toIdx = displayTasks.findIndex(
+        (r) => r.type === "task" && r.task.stepCode === dep.successorStepCode,
+      );
       if (fromIdx < 0 || toIdx < 0) continue;
 
       const y1 = fromIdx * ROW_H + ROW_H / 2;
@@ -134,7 +156,7 @@ export function PrepScheduleGantt({
       lines.push({ key: dep.id, d, type: dep.type });
     }
     return lines;
-  }, [dependencies, barByCode, taskByCode, tasks]);
+  }, [dependencies, barByCode, taskByCode, displayTasks]);
 
   if (!days.length) {
     return (
@@ -227,9 +249,9 @@ export function PrepScheduleGantt({
             {/* Liens dépendances */}
             <svg
               className="pointer-events-none absolute top-0 z-[5]"
-              style={{ left: LABEL_COL, width: chartWidth, height: tasks.length * ROW_H }}
+              style={{ left: LABEL_COL, width: chartWidth, height: displayTasks.length * ROW_H }}
               width={chartWidth}
-              height={tasks.length * ROW_H}
+              height={displayTasks.length * ROW_H}
             >
               {connectors.map((c) => (
                 <g key={c.key}>
@@ -257,7 +279,27 @@ export function PrepScheduleGantt({
               </defs>
             </svg>
 
-            {tasks.map((t) => {
+            {displayTasks.map((row) => {
+              if (row.type === "phase") {
+                return (
+                  <div
+                    key={row.id}
+                    className="relative flex border-b border-slate-200 bg-slate-50"
+                    style={{ height: ROW_H }}
+                  >
+                    <div
+                      className="sticky left-0 z-10 flex shrink-0 items-center border-r border-slate-200 bg-slate-50 px-2.5"
+                      style={{ width: LABEL_COL }}
+                    >
+                      <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-[#1e3a5f]">
+                        {row.phase}
+                      </span>
+                    </div>
+                    <div style={{ width: chartWidth, height: ROW_H }} />
+                  </div>
+                );
+              }
+              const t = row.task;
               const bar = bars.find((b) => b.taskId === t.id);
               return (
                 <div

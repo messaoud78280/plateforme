@@ -18,6 +18,8 @@ import {
 import { PrepScheduleGantt } from "./PrepScheduleGantt";
 import { PrepScheduleTaskPanel } from "./PrepScheduleTaskPanel";
 import { PrepScheduleTransferModal } from "./PrepScheduleTransferModal";
+import { TruncatedTextWithPopover } from "./TruncatedTextWithPopover";
+import { PlanningTaskHoverCard } from "./PlanningTaskHoverCard";
 import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
 import { getSectionCapability } from "@/lib/bework-patch/capability";
 import { buildPlanningDetailState } from "@/lib/chantier/planning-detail-state";
@@ -856,7 +858,7 @@ function TaskTable({
 }: {
   tasks: ReturnType<typeof filterPlanningTasks>;
   selectedId: string | null;
-  onSelect: (id: string) => void;
+  onSelect: (id: string | null) => void;
 }) {
   return (
     <section className="overflow-x-auto rounded-lg border border-[#1e3a5f]/10 bg-white">
@@ -880,16 +882,21 @@ function TaskTable({
             <tr
               key={t.id}
               className={cn(
-                "cursor-pointer border-t border-slate-100 align-top hover:bg-slate-50/80",
+                "cursor-pointer border-t border-slate-100 align-top transition-colors duration-150 hover:bg-slate-50/80",
                 selectedId === t.id && "bg-[#1e3a5f]/[0.04]",
               )}
-              onClick={() => onSelect(t.id)}
+              onClick={() => onSelect(selectedId === t.id ? null : t.id)}
             >
               <td className="px-2.5 py-1.5 font-mono text-[11px] text-slate-500">
                 {t.stepCode}
               </td>
-              <td className="px-2.5 py-1.5">
-                <p className="font-medium text-slate-900">{t.name}</p>
+              <td className="max-w-[320px] px-2.5 py-1.5">
+                <TruncatedTextWithPopover
+                  text={t.name}
+                  alwaysShowPopover
+                  className="font-medium text-slate-900"
+                  popover={<PlanningTaskHoverCard task={t} />}
+                />
                 {t.visualKind === "incomplete" ? (
                   <p className="text-[10px] font-medium text-amber-800">À compléter</p>
                 ) : null}
@@ -897,7 +904,9 @@ function TaskTable({
                   <p className="text-[10px] font-medium text-red-700">Bloquant</p>
                 ) : null}
               </td>
-              <td className="px-2.5 py-1.5 text-slate-600">{t.phaseLabel}</td>
+              <td className="max-w-[160px] px-2.5 py-1.5 text-slate-600">
+                <TruncatedTextWithPopover text={t.phaseLabel} />
+              </td>
               <td className="px-2.5 py-1.5 tabular-nums">{t.durationLabel}</td>
               <td className="px-2.5 py-1.5 tabular-nums">{asIso(t.startDate)}</td>
               <td className="px-2.5 py-1.5 tabular-nums">{asIso(t.endDate)}</td>

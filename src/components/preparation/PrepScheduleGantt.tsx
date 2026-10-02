@@ -1,15 +1,20 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/cn";
 import {
   buildGanttBars,
   dayWidthForZoom,
   enumerateCalendarDays,
-  halfLabel,
   type GanttZoom,
 } from "@/lib/preparation/schedule/gantt-layout";
-import type { PlanningPhaseVM, PlanningTaskVM } from "@/lib/preparation/schedule/planning-view-model";
+import type {
+  PlanningPhaseVM,
+  PlanningTaskVM,
+} from "@/lib/preparation/schedule/planning-view-model";
+import { TruncatedTextWithPopover } from "./TruncatedTextWithPopover";
+import { PlanningTaskHoverCard } from "./PlanningTaskHoverCard";
 
 export type GanttDependency = {
   id: string;
@@ -18,16 +23,19 @@ export type GanttDependency = {
   successorStepCode: string;
 };
 
-const LABEL_COL = 360;
-const ROW_H = 34;
-const PHASE_H = 32;
+/** Sticky left: Réf 80 + Intervention ~360 + Équipe 90 + Durée 70 ≈ 600 */
+const LABEL_COL = 600;
+const ROW_H = 46;
+const PHASE_H = 44;
+const BAR_H = 20;
+const TRANS = "duration-150 ease-out";
 
 type Props = {
   phases: PlanningPhaseVM[];
   tasks: PlanningTaskVM[];
   dependencies: GanttDependency[];
   selectedTaskId: string | null;
-  onSelectTask: (taskId: string) => void;
+  onSelectTask: (taskId: string | null) => void;
 };
 
 function barTone(kind: PlanningTaskVM["visualKind"]): string {
@@ -41,7 +49,7 @@ function barTone(kind: PlanningTaskVM["visualKind"]): string {
     case "wait":
       return "bg-slate-400 text-white";
     case "handover":
-      return "bg-slate-600 text-white";
+      return "bg-emerald-700 text-white";
     default:
       return "bg-[#1e3a5f] text-white";
   }
@@ -49,8 +57,8 @@ function barTone(kind: PlanningTaskVM["visualKind"]): string {
 
 function formatShortDate(iso: string | null): string {
   if (!iso) return "—";
-  const [y, m, d] = iso.slice(0, 10).split("-");
-  if (!y || !m || !d) return iso.slice(0, 10);
+  const [, m, d] = iso.slice(0, 10).split("-");
+  if (!m || !d) return iso.slice(0, 10);
   const months = [
     "jan.",
     "fév.",
@@ -68,6 +76,17 @@ function formatShortDate(iso: string | null): string {
   return `${Number(d)} ${months[Number(m) - 1] ?? m}`;
 }
 
+function formatDayHeader(iso: string): { wd: string; day: string } {
+  const date = new Date(`${iso.slice(0, 10)}T12:00:00`);
+  const wdLabels = ["DIM", "LUN", "MAR", "MER", "JEU", "VEN", "SAM"];
+  const wd = wdLabels[date.getDay()] ?? "";
+  return { wd, day: formatShortDate(iso) };
+}
+
+function cleanPhaseTitle(label: string): string {
+  return label.replace(/^PHASE\s*\d+\s*[—–\-:]\s*/i, "").trim() || label;
+}
+
 function barLabel(t: PlanningTaskVM, widthPx: number): string {
   const dur = t.durationLabel;
   if (widthPx < 40) return dur.replace(" j", "");
@@ -76,24 +95,24 @@ function barLabel(t: PlanningTaskVM, widthPx: number): string {
   return dur;
 }
 
-function tooltipLines(t: PlanningTaskVM): string {
-  const lines = [
-    t.name,
-    `Phase : ${t.phaseLabel}`,
-    t.missing.crew ? "Équipe : non renseignée" : `Équipe : ${t.crewDisplay}`,
-    t.crewSize != null ? `Effectif : ${t.crewSize}` : null,
-    t.quantitySnapshot != null
-      ? `Quantité : ${t.quantityDisplay}`
-      : "Quantité : non disponible",
-    t.rateValue != null ? `Rendement : ${t.rateDisplay}` : "Rendement : non renseigné",
-    t.workloadPersonDays != null ? `Charge : ${t.workloadDisplay}` : null,
-    `Durée : ${t.durationLabel} · ${t.durationModeLabel}`,
-    t.startDate && t.endDate
-      ? `Dates : ${t.startDate} (${halfLabel(t.startHalf)}) → ${t.endDate} (${halfLabel(t.endHalf)})`
-      : "Dates : à définir",
-  ];
-  return lines.filter(Boolean).join("\n");
+function todayIso(): string {
+  const n = new Date();
+  const y = n.getFullYear();
+  const m = String(n.getMonth() + 1).padStart(2, "0");
+  const d = String(n.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
+
+function isMonday(iso: string): boolean {
+  return new Date(`${iso.slice(0, 10)}T12:00:00`).getDay() === 1;
+}
+
+type FloatingCard = {
+  task: PlanningTaskVM;
+  top: number;
+  left: number;
+  mode: "row" | "bar";
+};
 
 export function PrepScheduleGantt({
   phases,
@@ -104,47 +123,71 @@ export function PrepScheduleGantt({
 }: Props) {
   const [zoom, setZoom] = useState<GanttZoom>("week");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
+  const [hoveredPhaseKey, setHoveredPhaseKey] = useState<string | null>(null);
+  const [floating, setFloating] = useState<FloatingCard | null>(null);
 
   const selected = useMemo(
     () => tasks.find((t) => t.id === selectedTaskId) ?? null,
     [tasks, selectedTaskId],
   );
 
+  const hovered = useMemo(
+    () => tasks.find((t) => t.id === hoveredTaskId) ?? null,
+    [tasks, hoveredTaskId],
+  );
+
+  const focusTask = selected ?? hovered;
+
   const relatedCodes = useMemo(() => {
-    if (!selected) return new Set<string>();
-    const s = new Set<string>([selected.stepCode]);
-    for (const d of selected.dependsOn) s.add(d.stepId);
-    for (const d of selected.successors) s.add(d.stepId);
+    if (!focusTask) return new Set<string>();
+    const s = new Set<string>([focusTask.stepCode]);
+    for (const d of focusTask.dependsOn) s.add(d.stepId);
+    for (const d of focusTask.successors) s.add(d.stepId);
     return s;
-  }, [selected]);
+  }, [focusTask]);
 
   const displayRows = useMemo(() => {
     const out: Array<
-      | { type: "phase"; phase: PlanningPhaseVM }
-      | { type: "task"; task: PlanningTaskVM }
+      | { type: "phase"; phase: PlanningPhaseVM; phaseIndex: number }
+      | { type: "task"; task: PlanningTaskVM; phaseKey: string }
     > = [];
-    for (const phase of phases) {
-      const phaseTasks = phase.tasks.filter((t) => tasks.some((x) => x.id === t.id));
-      if (!phaseTasks.length) continue;
-      out.push({ type: "phase", phase: { ...phase, tasks: phaseTasks, taskCount: phaseTasks.length } });
+    phases.forEach((phase, idx) => {
+      const phaseTasks = phase.tasks.filter((t) =>
+        tasks.some((x) => x.id === t.id),
+      );
+      if (!phaseTasks.length) return;
+      out.push({
+        type: "phase",
+        phase: { ...phase, tasks: phaseTasks, taskCount: phaseTasks.length },
+        phaseIndex: idx,
+      });
       if (!collapsed[phase.key]) {
-        for (const t of phaseTasks) out.push({ type: "task", task: t });
+        for (const t of phaseTasks) {
+          out.push({ type: "task", task: t, phaseKey: phase.key });
+        }
       }
-    }
+    });
     return out;
   }, [phases, tasks, collapsed]);
 
   const taskRows = useMemo(
-    () => displayRows.filter((r): r is { type: "task"; task: PlanningTaskVM } => r.type === "task").map((r) => r.task),
+    () =>
+      displayRows
+        .filter(
+          (r): r is { type: "task"; task: PlanningTaskVM; phaseKey: string } =>
+            r.type === "task",
+        )
+        .map((r) => r.task),
     [displayRows],
   );
 
   const dayWidth = dayWidthForZoom(zoom);
+  const today = todayIso();
 
   const { days, bars, chartWidth } = useMemo(() => {
     const dated = taskRows.filter((t) => t.startDate && t.endDate);
     if (!dated.length) {
-      // Still show axis from all filtered tasks if any dates in full set
       const allDated = tasks.filter((t) => t.startDate && t.endDate);
       if (!allDated.length) return { days: [], bars: [], chartWidth: 0 };
       const starts = allDated.map((t) => t.startDate!);
@@ -192,25 +235,29 @@ export function PrepScheduleGantt({
       d: string;
       type: string;
       highlight: boolean;
+      muted: boolean;
     }> = [];
-    // Limit connector noise: only FS by default; when selected, show related
+    const hasFocus = !!focusTask;
     for (const dep of dependencies) {
-      if (dep.type !== "FS" && !selected) continue;
+      if (dep.type !== "FS" && !hasFocus) continue;
       const from = barByCode.get(dep.predecessorStepCode);
       const to = barByCode.get(dep.successorStepCode);
       if (!from || !to) continue;
       const fromIdx = displayRows.findIndex(
-        (r) => r.type === "task" && r.task.stepCode === dep.predecessorStepCode,
+        (r) =>
+          r.type === "task" && r.task.stepCode === dep.predecessorStepCode,
       );
       const toIdx = displayRows.findIndex(
         (r) => r.type === "task" && r.task.stepCode === dep.successorStepCode,
       );
       if (fromIdx < 0 || toIdx < 0) continue;
       const highlight =
-        !!selected &&
+        hasFocus &&
         (relatedCodes.has(dep.predecessorStepCode) ||
-          relatedCodes.has(dep.successorStepCode));
-      if (selected && !highlight) continue;
+          relatedCodes.has(dep.successorStepCode)) &&
+        (focusTask!.stepCode === dep.predecessorStepCode ||
+          focusTask!.stepCode === dep.successorStepCode);
+      const muted = hasFocus && !highlight;
 
       const rowY = (idx: number) => {
         let y = 0;
@@ -236,15 +283,45 @@ export function PrepScheduleGantt({
         Math.abs(yy2 - yy1) < 2
           ? `M ${x1} ${yy1} L ${x2} ${yy2}`
           : `M ${x1} ${yy1} L ${midX} ${yy1} L ${midX} ${yy2} L ${x2} ${yy2}`;
-      lines.push({ key: dep.id, d, type: dep.type, highlight });
+      lines.push({ key: dep.id, d, type: dep.type, highlight, muted });
     }
     return lines;
-  }, [dependencies, barByCode, displayRows, selected, relatedCodes]);
+  }, [dependencies, barByCode, displayRows, focusTask, relatedCodes]);
 
   const totalHeight = displayRows.reduce(
     (s, r) => s + (r.type === "phase" ? PHASE_H : ROW_H),
     0,
   );
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setFloating(null);
+        setHoveredTaskId(null);
+        if (selectedTaskId) onSelectTask(null);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedTaskId, onSelectTask]);
+
+  const openFloating = (
+    task: PlanningTaskVM,
+    el: HTMLElement,
+    mode: "row" | "bar",
+  ) => {
+    const r = el.getBoundingClientRect();
+    const width = 480;
+    let left = mode === "bar" ? r.left : r.left + 80;
+    if (left + width > window.innerWidth - 12) {
+      left = Math.max(12, window.innerWidth - width - 12);
+    }
+    let top = r.bottom + 8;
+    if (top + 280 > window.innerHeight) {
+      top = Math.max(12, r.top - 12);
+    }
+    setFloating({ task, top, left, mode });
+  };
 
   if (!days.length) {
     return (
@@ -254,10 +331,14 @@ export function PrepScheduleGantt({
     );
   }
 
+  const todayIdx = days.findIndex((d) => d.iso === today);
+
   return (
     <div className="overflow-hidden rounded-xl border border-[#1e3a5f]/12 bg-white">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-3 py-2">
-        <h2 className="text-[13px] font-semibold text-[#1e3a5f]">Gantt par phase</h2>
+        <h2 className="text-[13px] font-semibold text-[#1e3a5f]">
+          Gantt par phase
+        </h2>
         <div
           className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-slate-50 p-0.5"
           role="group"
@@ -277,6 +358,7 @@ export function PrepScheduleGantt({
               aria-pressed={zoom === z}
               className={cn(
                 "rounded-md px-2.5 py-1 text-[11px] font-medium transition",
+                TRANS,
                 zoom === z
                   ? "bg-[#1e3a5f] text-white"
                   : "text-slate-600 hover:bg-white",
@@ -288,13 +370,18 @@ export function PrepScheduleGantt({
         </div>
       </div>
 
-      {/* Desktop Gantt — hidden on very small screens */}
       <div className="hidden md:block">
-        <div className="max-h-[min(68vh,680px)] overflow-auto">
+        <div
+          className="max-h-[min(72vh,720px)] overflow-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) onSelectTask(null);
+          }}
+        >
           <div style={{ minWidth: LABEL_COL + chartWidth }} className="relative">
-            <div className="sticky top-0 z-20 flex border-b border-slate-200 bg-white/95 backdrop-blur">
+            {/* Header sticky */}
+            <div className="sticky top-0 z-30 flex border-b border-slate-200 bg-white/95 shadow-[0_1px_0_rgba(15,23,42,0.04)] backdrop-blur">
               <div
-                className="sticky left-0 z-30 grid shrink-0 grid-cols-[52px_minmax(0,1fr)_72px_48px] gap-1 border-r border-slate-200 bg-white px-2 py-1.5 text-[10px] font-medium uppercase tracking-wide text-slate-500"
+                className="sticky left-0 z-40 grid shrink-0 grid-cols-[80px_minmax(0,1fr)_90px_70px] gap-1.5 border-r border-slate-200 bg-white px-2.5 py-2 text-[10px] font-medium uppercase tracking-wide text-slate-500 shadow-[2px_0_6px_-2px_rgba(15,23,42,0.08)]"
                 style={{ width: LABEL_COL }}
               >
                 <span>Réf.</span>
@@ -303,29 +390,52 @@ export function PrepScheduleGantt({
                 <span>Durée</span>
               </div>
               <div className="relative flex" style={{ width: chartWidth }}>
-                {days.map((day) => (
-                  <div
-                    key={day.iso}
-                    className={cn(
-                      "shrink-0 border-r border-slate-100 px-0.5 py-1 text-center",
-                      (day.isWeekend || day.isHoliday) && "bg-slate-200/70",
-                    )}
-                    style={{ width: dayWidth }}
-                    title={day.iso}
-                  >
-                    <div className="text-[9px] uppercase text-slate-400">
-                      {day.weekdayLabel}
-                    </div>
+                {days.map((day) => {
+                  const h = formatDayHeader(day.iso);
+                  const isToday = day.iso === today;
+                  return (
                     <div
+                      key={day.iso}
                       className={cn(
-                        "text-[10px] font-medium tabular-nums",
-                        day.isWeekend ? "text-slate-400" : "text-slate-700",
+                        "shrink-0 border-r border-slate-100 px-0.5 py-1.5 text-center",
+                        (day.isWeekend || day.isHoliday) && "bg-slate-100/90",
+                        isMonday(day.iso) && "border-l border-l-slate-300/80",
+                        isToday && "bg-[#1e3a5f]/[0.06]",
                       )}
+                      style={{ width: dayWidth }}
                     >
-                      {zoom === "month" ? day.label.slice(0, 2) : day.label}
+                      <div
+                        className={cn(
+                          "text-[9px] font-semibold uppercase tracking-wide",
+                          isToday ? "text-[#1e3a5f]" : "text-slate-400",
+                        )}
+                      >
+                        {zoom === "month" ? h.wd.slice(0, 1) : h.wd}
+                      </div>
+                      <div
+                        className={cn(
+                          "text-[10px] font-medium tabular-nums",
+                          day.isWeekend ? "text-slate-400" : "text-slate-700",
+                          isToday && "text-[#1e3a5f]",
+                        )}
+                      >
+                        {zoom === "month" ? day.label.slice(0, 2) : h.day}
+                      </div>
+                      {isToday && zoom !== "month" ? (
+                        <div className="mt-0.5 text-[8px] font-medium text-[#1e3a5f]">
+                          Aujourd&apos;hui
+                        </div>
+                      ) : null}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
+                {todayIdx >= 0 ? (
+                  <div
+                    className="pointer-events-none absolute bottom-0 top-0 z-[1] w-px bg-[#1e3a5f]/55"
+                    style={{ left: todayIdx * dayWidth + dayWidth / 2 }}
+                    aria-hidden
+                  />
+                ) : null}
               </div>
             </div>
 
@@ -338,16 +448,26 @@ export function PrepScheduleGantt({
                   day.isWeekend || day.isHoliday ? (
                     <div
                       key={`bg-${day.iso}`}
-                      className="absolute inset-y-0 bg-slate-100/90"
+                      className="absolute inset-y-0 bg-slate-50"
                       style={{ left: i * dayWidth, width: dayWidth }}
                     />
                   ) : null,
                 )}
+                {todayIdx >= 0 ? (
+                  <div
+                    className="absolute inset-y-0 w-px bg-[#1e3a5f]/40"
+                    style={{ left: todayIdx * dayWidth + dayWidth / 2 }}
+                  />
+                ) : null}
               </div>
 
               <svg
                 className="pointer-events-none absolute top-0 z-[5]"
-                style={{ left: LABEL_COL, width: chartWidth, height: totalHeight }}
+                style={{
+                  left: LABEL_COL,
+                  width: chartWidth,
+                  height: totalHeight,
+                }}
                 width={chartWidth}
                 height={totalHeight}
                 aria-hidden
@@ -358,9 +478,18 @@ export function PrepScheduleGantt({
                     d={c.d}
                     fill="none"
                     stroke={c.highlight ? "#1e3a5f" : "#94a3b8"}
-                    strokeWidth={c.highlight ? 1.75 : 1}
-                    strokeOpacity={c.highlight ? 1 : 0.55}
-                    markerEnd={c.highlight ? "url(#gantt-arrow-hi)" : "url(#gantt-arrow)"}
+                    strokeWidth={c.highlight ? 2 : 1}
+                    strokeOpacity={
+                      c.highlight ? 1 : c.muted ? 0.12 : 0.35
+                    }
+                    className={cn("transition-opacity", TRANS)}
+                    markerEnd={
+                      c.highlight
+                        ? "url(#gantt-arrow-hi)"
+                        : c.muted
+                          ? undefined
+                          : "url(#gantt-arrow)"
+                    }
                   />
                 ))}
                 <defs>
@@ -372,17 +501,17 @@ export function PrepScheduleGantt({
                     refY="2.5"
                     orient="auto"
                   >
-                    <path d="M0,0 L5,2.5 L0,5 Z" fill="#94a3b8" />
+                    <path d="M0,0 L5,2.5 L0,5 Z" fill="#94a3b8" opacity="0.5" />
                   </marker>
                   <marker
                     id="gantt-arrow-hi"
-                    markerWidth="5"
-                    markerHeight="5"
-                    refX="4"
-                    refY="2.5"
+                    markerWidth="6"
+                    markerHeight="6"
+                    refX="5"
+                    refY="3"
                     orient="auto"
                   >
-                    <path d="M0,0 L5,2.5 L0,5 Z" fill="#1e3a5f" />
+                    <path d="M0,0 L6,3 L0,6 Z" fill="#1e3a5f" />
                   </marker>
                 </defs>
               </svg>
@@ -391,33 +520,58 @@ export function PrepScheduleGantt({
                 if (row.type === "phase") {
                   const p = row.phase;
                   const isCollapsed = !!collapsed[p.key];
+                  const num = String(row.phaseIndex + 1).padStart(2, "0");
+                  const title = cleanPhaseTitle(p.label);
+                  const phaseHover = hoveredPhaseKey === p.key;
                   return (
                     <div
                       key={`phase:${p.key}`}
-                      className="relative flex border-b border-slate-200 bg-[#1e3a5f]/[0.04]"
+                      className={cn(
+                        "relative flex border-b border-slate-200/80 transition-colors",
+                        TRANS,
+                        phaseHover
+                          ? "bg-[#1e3a5f]/[0.07]"
+                          : "bg-[#f7f9fc]",
+                      )}
                       style={{ height: PHASE_H }}
+                      onMouseEnter={() => setHoveredPhaseKey(p.key)}
+                      onMouseLeave={() => setHoveredPhaseKey(null)}
                     >
                       <button
                         type="button"
                         onClick={() =>
-                          setCollapsed((c) => ({ ...c, [p.key]: !c[p.key] }))
+                          setCollapsed((c) => ({
+                            ...c,
+                            [p.key]: !c[p.key],
+                          }))
                         }
-                        className="sticky left-0 z-10 flex shrink-0 items-center gap-2 border-r border-slate-200 bg-[#f4f7fb] px-2 text-left"
+                        className="sticky left-0 z-20 flex shrink-0 items-center gap-2.5 border-r border-slate-200 bg-inherit px-2.5 text-left shadow-[2px_0_6px_-2px_rgba(15,23,42,0.06)]"
                         style={{ width: LABEL_COL }}
                         aria-expanded={!isCollapsed}
-                        aria-label={`${isCollapsed ? "Déplier" : "Replier"} phase ${p.label}`}
+                        aria-label={`${isCollapsed ? "Déplier" : "Replier"} phase ${title}`}
                       >
-                        <span className="text-[11px] text-slate-500" aria-hidden>
+                        <span
+                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white text-[11px] font-semibold tabular-nums text-[#1e3a5f] ring-1 ring-[#1e3a5f]/15"
+                          aria-hidden
+                        >
+                          {num}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[12px] font-semibold text-[#1e3a5f]">
+                            {title}
+                          </span>
+                          <span className="block truncate text-[10px] text-slate-500">
+                            {p.taskCount} tâche{p.taskCount > 1 ? "s" : ""}
+                            {p.startDate && p.endDate
+                              ? ` · ${formatShortDate(p.startDate)} → ${formatShortDate(p.endDate)}`
+                              : ""}
+                          </span>
+                        </span>
+                        <span
+                          className="shrink-0 text-[10px] text-slate-400"
+                          aria-hidden
+                        >
                           {isCollapsed ? "▶" : "▼"}
-                        </span>
-                        <span className="min-w-0 truncate text-[11px] font-semibold text-[#1e3a5f]">
-                          {p.label}
-                        </span>
-                        <span className="shrink-0 text-[10px] text-slate-500">
-                          {p.taskCount} tâche{p.taskCount > 1 ? "s" : ""}
-                          {p.startDate && p.endDate
-                            ? ` · ${formatShortDate(p.startDate)} → ${formatShortDate(p.endDate)}`
-                            : ""}
                         </span>
                       </button>
                       <div style={{ width: chartWidth, height: PHASE_H }} />
@@ -428,64 +582,168 @@ export function PrepScheduleGantt({
                 const t = row.task;
                 const bar = bars.find((b) => b.taskId === t.id);
                 const isSelected = selectedTaskId === t.id;
+                const isHovered = hoveredTaskId === t.id;
                 const isRelated = relatedCodes.has(t.stepCode);
-                const dimmed = selected && !isRelated;
+                const phaseAccent =
+                  hoveredPhaseKey != null && row.phaseKey === hoveredPhaseKey;
+                const dimmed =
+                  (focusTask && !isRelated && !isHovered) ||
+                  (hoveredPhaseKey != null &&
+                    row.phaseKey !== hoveredPhaseKey &&
+                    !isSelected);
+
+                const qtyLine = [
+                  t.quantitySnapshot != null ? t.quantityDisplay : null,
+                  t.crewId ?? null,
+                  t.durationLabel,
+                ]
+                  .filter(Boolean)
+                  .join(" · ");
 
                 return (
                   <div
                     key={t.id}
                     className={cn(
-                      "relative flex border-b border-slate-50 transition-opacity",
-                      isSelected && "bg-[#1e3a5f]/[0.05]",
-                      dimmed && "opacity-35",
+                      "group relative flex border-b border-slate-100/90 transition-[background-color,opacity,box-shadow]",
+                      TRANS,
+                      isSelected && "bg-[#1e3a5f]/[0.07] shadow-[inset_3px_0_0_0_#1e3a5f]",
+                      isHovered && !isSelected && "bg-[#1e3a5f]/[0.04]",
+                      phaseAccent && !isSelected && "bg-[#1e3a5f]/[0.03]",
+                      dimmed && "opacity-[0.38]",
                     )}
                     style={{ height: ROW_H }}
+                    onMouseEnter={() => setHoveredTaskId(t.id)}
+                    onMouseLeave={() => {
+                      setHoveredTaskId((cur) => (cur === t.id ? null : cur));
+                      setFloating((f) =>
+                        f?.task.id === t.id && f.mode === "row" ? null : f,
+                      );
+                    }}
                   >
-                    <button
-                      type="button"
-                      onClick={() => onSelectTask(t.id)}
-                      className="sticky left-0 z-10 grid shrink-0 grid-cols-[52px_minmax(0,1fr)_72px_48px] items-center gap-1 border-r border-slate-100 bg-white px-2 text-left hover:bg-slate-50"
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => onSelectTask(isSelected ? null : t.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onSelectTask(isSelected ? null : t.id);
+                        }
+                      }}
+                      onFocus={() => setHoveredTaskId(t.id)}
+                      onMouseEnter={(e) =>
+                        openFloating(t, e.currentTarget, "row")
+                      }
+                      className={cn(
+                        "sticky left-0 z-20 grid shrink-0 cursor-pointer grid-cols-[80px_minmax(0,1fr)_90px_70px] items-center gap-1.5 border-r border-slate-100 px-2.5 text-left shadow-[2px_0_6px_-2px_rgba(15,23,42,0.06)] transition-colors",
+                        TRANS,
+                        isSelected || isHovered
+                          ? "bg-[#f3f6fa]"
+                          : "bg-white group-hover:bg-[#f8fafc]",
+                      )}
                       style={{ width: LABEL_COL }}
+                      aria-pressed={isSelected}
                       aria-label={`Tâche ${t.stepCode} ${t.name}`}
                     >
-                      <span className="font-mono text-[10px] text-slate-500">
-                        {t.stepCode}
-                      </span>
-                      <span className="min-w-0 truncate text-[11px] font-medium text-slate-800">
-                        {t.name}
-                      </span>
                       <span
                         className={cn(
-                          "truncate text-[10px]",
-                          t.missing.crew ? "text-amber-700" : "text-slate-600",
+                          "font-mono text-[10px] tabular-nums transition-colors",
+                          TRANS,
+                          isSelected || isHovered
+                            ? "font-semibold text-[#1e3a5f]"
+                            : "text-slate-500",
                         )}
                       >
-                        {t.missing.crew ? "À rens." : t.crewId ?? `${t.crewSize ?? "?"}p`}
+                        {t.stepCode}
                       </span>
-                      <span className="tabular-nums text-[10px] text-slate-600">
+                      <span className="min-w-0">
+                        <span
+                          className={cn(
+                            "block truncate text-[12px] font-medium leading-snug transition-colors",
+                            TRANS,
+                            isSelected || isHovered
+                              ? "text-[#0f2744]"
+                              : "text-slate-800",
+                          )}
+                        >
+                          {t.name}
+                        </span>
+                        <span className="mt-0.5 block truncate text-[10px] text-slate-400">
+                          {qtyLine}
+                        </span>
+                      </span>
+                      <TruncatedTextWithPopover
+                        text={
+                          t.missing.crew
+                            ? "À renseigner"
+                            : t.crewId ?? `${t.crewSize ?? "?"}p`
+                        }
+                        className={cn(
+                          "text-[11px]",
+                          t.missing.crew
+                            ? "text-amber-700"
+                            : "text-slate-600",
+                        )}
+                      />
+                      <span className="tabular-nums text-[11px] text-slate-600">
                         {t.durationLabel}
                       </span>
-                    </button>
+                    </div>
 
-                    <div className="relative" style={{ width: chartWidth, height: ROW_H }}>
+                    <div
+                      className="relative"
+                      style={{ width: chartWidth, height: ROW_H }}
+                      onClick={() => {
+                        if (!bar) onSelectTask(null);
+                      }}
+                    >
                       {bar ? (
                         <button
                           type="button"
-                          onClick={() => onSelectTask(t.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectTask(isSelected ? null : t.id);
+                          }}
+                          onMouseEnter={(e) => {
+                            setHoveredTaskId(t.id);
+                            openFloating(t, e.currentTarget, "bar");
+                          }}
+                          onMouseLeave={() => {
+                            setFloating((f) =>
+                              f?.task.id === t.id && f.mode === "bar"
+                                ? null
+                                : f,
+                            );
+                          }}
+                          onFocus={(e) => {
+                            setHoveredTaskId(t.id);
+                            openFloating(t, e.currentTarget, "bar");
+                          }}
+                          onBlur={() =>
+                            setFloating((f) =>
+                              f?.task.id === t.id ? null : f,
+                            )
+                          }
                           className={cn(
-                            "absolute top-1 flex h-[26px] items-center overflow-hidden rounded px-1.5 text-left text-[10px] font-medium transition",
+                            "absolute flex items-center overflow-hidden rounded-md px-1.5 text-left text-[10px] font-medium shadow-sm transition-[transform,box-shadow,filter]",
+                            TRANS,
                             barTone(t.visualKind),
-                            t.conditional && "border border-dashed border-slate-400 opacity-90",
-                            isSelected && "ring-2 ring-[#1e3a5f]/50 ring-offset-1",
+                            t.conditional &&
+                              "border border-dashed border-white/50 opacity-90",
+                            (isSelected || isHovered) &&
+                              "z-[6] scale-[1.03] ring-2 ring-[#1e3a5f]/35 ring-offset-1",
                           )}
                           style={{
                             left: bar.leftPx,
                             width: Math.max(bar.widthPx, dayWidth * 0.45),
+                            top: (ROW_H - BAR_H) / 2,
+                            height: BAR_H,
                           }}
-                          title={tooltipLines(t)}
-                          aria-label={`${t.stepCode}, durée ${t.durationLabel}`}
+                          aria-label={`${t.stepCode}, ${t.name}, ${t.durationLabel}, ${formatShortDate(t.startDate)} → ${formatShortDate(t.endDate)}`}
                         >
-                          <span className="truncate">{barLabel(t, bar.widthPx)}</span>
+                          <span className="truncate">
+                            {barLabel(t, bar.widthPx)}
+                          </span>
                         </button>
                       ) : null}
                     </div>
@@ -497,32 +755,46 @@ export function PrepScheduleGantt({
         </div>
       </div>
 
-      {/* Mobile chronological list */}
+      {/* Mobile */}
       <div className="space-y-1 p-2 md:hidden">
-        {phases.map((phase) => {
-          const list = phase.tasks.filter((t) => tasks.some((x) => x.id === t.id));
+        {phases.map((phase, idx) => {
+          const list = phase.tasks.filter((t) =>
+            tasks.some((x) => x.id === t.id),
+          );
           if (!list.length) return null;
+          const title = cleanPhaseTitle(phase.label);
+          const num = String(idx + 1).padStart(2, "0");
           return (
             <div key={phase.key} className="rounded-lg border border-slate-100">
-              <p className="border-b border-slate-100 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-[#1e3a5f]">
-                {phase.label} · {list.length} tâche{list.length > 1 ? "s" : ""}
+              <p className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2 text-[11px] font-semibold text-[#1e3a5f]">
+                <span className="flex h-5 w-5 items-center justify-center rounded bg-white text-[10px] ring-1 ring-slate-200">
+                  {num}
+                </span>
+                {title} · {list.length} tâche{list.length > 1 ? "s" : ""}
               </p>
               {list.map((t) => (
                 <button
                   key={t.id}
                   type="button"
-                  onClick={() => onSelectTask(t.id)}
+                  onClick={() =>
+                    onSelectTask(selectedTaskId === t.id ? null : t.id)
+                  }
                   className={cn(
-                    "flex w-full items-start justify-between gap-2 border-t border-slate-50 px-3 py-2 text-left",
+                    "flex w-full items-start justify-between gap-2 border-t border-slate-50 px-3 py-2.5 text-left transition-colors",
+                    TRANS,
                     selectedTaskId === t.id && "bg-[#1e3a5f]/[0.04]",
                   )}
                 >
                   <div className="min-w-0">
-                    <p className="font-mono text-[10px] text-slate-500">{t.stepCode}</p>
-                    <p className="truncate text-[12px] font-medium text-slate-800">{t.name}</p>
+                    <p className="font-mono text-[10px] text-slate-500">
+                      {t.stepCode}
+                    </p>
+                    <p className="text-[12px] font-medium leading-snug text-slate-800">
+                      {t.name}
+                    </p>
                     <p
                       className={cn(
-                        "text-[11px]",
+                        "mt-0.5 text-[11px]",
                         t.missing.crew ? "text-amber-700" : "text-slate-500",
                       )}
                     >
@@ -550,7 +822,7 @@ export function PrepScheduleGantt({
           <span className="h-2 w-3 rounded bg-slate-400" /> Attente
         </span>
         <span className="inline-flex items-center gap-1">
-          <span className="h-2 w-3 rounded bg-slate-600" /> Remise
+          <span className="h-2 w-3 rounded bg-emerald-700" /> Remise
         </span>
         <span className="inline-flex items-center gap-1">
           <span className="h-2 w-3 rounded bg-amber-600" /> À compléter
@@ -563,6 +835,32 @@ export function PrepScheduleGantt({
           Week-end
         </span>
       </div>
+
+      {floating &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            role="tooltip"
+            className="fixed z-[85] max-h-[min(70vh,440px)] overflow-y-auto rounded-xl border border-[#1e3a5f]/15 bg-white p-4 shadow-[0_16px_48px_-16px_rgba(30,58,95,0.4)]"
+            style={{
+              top: floating.top,
+              left: floating.left,
+              width: 480,
+              maxWidth: "calc(100vw - 24px)",
+            }}
+            onMouseEnter={() => setHoveredTaskId(floating.task.id)}
+            onMouseLeave={() => {
+              setFloating(null);
+              setHoveredTaskId(null);
+            }}
+          >
+            <PlanningTaskHoverCard
+              task={floating.task}
+              compact={floating.mode === "bar"}
+            />
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

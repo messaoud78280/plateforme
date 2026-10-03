@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { cn } from "@/lib/cn";
 import {
   buildGanttBars,
@@ -16,7 +15,6 @@ import type {
   PlanningPhaseVM,
   PlanningTaskVM,
 } from "@/lib/preparation/schedule/planning-view-model";
-import { PlanningTaskHoverCard } from "./PlanningTaskHoverCard";
 
 export type GanttDependency = {
   id: string;
@@ -158,12 +156,6 @@ export function PrepScheduleGantt({
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
   const [hoveredPhaseKey, setHoveredPhaseKey] = useState<string | null>(null);
-  const [floating, setFloating] = useState<{
-    task: PlanningTaskVM;
-    top: number;
-    left: number;
-  } | null>(null);
-  const [floatDetails, setFloatDetails] = useState(false);
   const [scrollRatio, setScrollRatio] = useState({ left: 0, width: 1 });
   const zoomInit = useRef(false);
 
@@ -400,7 +392,6 @@ export function PrepScheduleGantt({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setFloating(null);
         setHoveredTaskId(null);
         if (selectedTaskId) onSelectTask(null);
       }
@@ -408,22 +399,6 @@ export function PrepScheduleGantt({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [selectedTaskId, onSelectTask]);
-
-  function openFloating(task: PlanningTaskVM, el: HTMLElement) {
-    const r = el.getBoundingClientRect();
-    const width = 340;
-    // Préférer le panneau latéral droit pour ne pas masquer le Gantt.
-    let left = Math.min(
-      window.innerWidth - width - 16,
-      Math.max(labelCol + 24, r.right + 12),
-    );
-    if (left + width > window.innerWidth - 12) {
-      left = Math.max(12, window.innerWidth - width - 12);
-    }
-    let top = Math.max(12, Math.min(r.top, window.innerHeight - 360));
-    setFloatDetails(false);
-    setFloating({ task, top, left });
-  }
 
   const mobileDays = useMemo(() => {
     const map = new Map<string, PlanningTaskVM[]>();
@@ -526,7 +501,6 @@ export function PrepScheduleGantt({
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               onSelectTask(null);
-              setFloating(null);
             }
           }}
         >
@@ -834,10 +808,8 @@ export function PrepScheduleGantt({
                     <div
                       role="button"
                       tabIndex={0}
-                      onClick={(e) => {
+                      onClick={() => {
                         onSelectTask(isSelected ? null : t.id);
-                        if (!isSelected) openFloating(t, e.currentTarget);
-                        else setFloating(null);
                       }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
@@ -918,7 +890,6 @@ export function PrepScheduleGantt({
                       onClick={() => {
                         if (!bar) {
                           onSelectTask(null);
-                          setFloating(null);
                         }
                       }}
                     >
@@ -928,7 +899,6 @@ export function PrepScheduleGantt({
                           onClick={(e) => {
                             e.stopPropagation();
                             onSelectTask(isSelected ? null : t.id);
-                            openFloating(t, e.currentTarget);
                           }}
                           className={cn(
                             "absolute z-[6] flex items-center justify-center text-[18px] leading-none",
@@ -952,10 +922,10 @@ export function PrepScheduleGantt({
                       ) : bar ? (
                         <button
                           type="button"
+                          title={t.name}
                           onClick={(e) => {
                             e.stopPropagation();
                             onSelectTask(isSelected ? null : t.id);
-                            openFloating(t, e.currentTarget);
                           }}
                           className={cn(
                             "absolute flex items-center overflow-hidden rounded-[4px] px-2 text-left text-[11px] font-semibold shadow-sm transition-[transform,box-shadow]",
@@ -1080,55 +1050,6 @@ export function PrepScheduleGantt({
         </span>
       </div>
 
-      {floating &&
-        typeof document !== "undefined" &&
-        createPortal(
-          <div
-            role="dialog"
-            aria-label={`Détail ${floating.task.stepCode}`}
-            className="fixed z-[85] max-h-[min(60vh,420px)] overflow-y-auto rounded-xl border border-[#1e3a5f]/20 bg-white p-3 shadow-[0_12px_36px_-12px_rgba(30,58,95,0.4)]"
-            style={{
-              top: floating.top,
-              left: floating.left,
-              width: 340,
-              maxWidth: "calc(100vw - 24px)",
-            }}
-          >
-            <div className="mb-2 flex items-start justify-between gap-2">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                Intervention
-              </p>
-              <button
-                type="button"
-                className="rounded px-1.5 py-0.5 text-[11px] font-medium text-slate-500 hover:bg-slate-100"
-                onClick={() => {
-                  setFloating(null);
-                  setFloatDetails(false);
-                }}
-                aria-label="Fermer"
-              >
-                ✕
-              </button>
-            </div>
-            <PlanningTaskHoverCard
-              task={floating.task}
-              compact={!floatDetails}
-            />
-            {taskAlert(floating.task) ? (
-              <p className="mt-2 text-[12px] font-medium text-amber-800">
-                ⚠ {taskAlert(floating.task)}
-              </p>
-            ) : null}
-            <button
-              type="button"
-              className="mt-2 text-[12px] font-semibold text-[#1e3a5f] hover:underline"
-              onClick={() => setFloatDetails((v) => !v)}
-            >
-              {floatDetails ? "Réduire" : "Voir détails"}
-            </button>
-          </div>,
-          document.body,
-        )}
     </div>
   );
 }

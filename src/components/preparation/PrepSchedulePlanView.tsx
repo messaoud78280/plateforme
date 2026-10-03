@@ -20,7 +20,6 @@ import { PrepScheduleGantt } from "./PrepScheduleGantt";
 import { PrepScheduleTaskPanel } from "./PrepScheduleTaskPanel";
 import { PrepScheduleTransferModal } from "./PrepScheduleTransferModal";
 import { TruncatedTextWithPopover } from "./TruncatedTextWithPopover";
-import { PlanningTaskHoverCard } from "./PlanningTaskHoverCard";
 import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
 import { getSectionCapability } from "@/lib/bework-patch/capability";
 import { buildPlanningDetailState } from "@/lib/chantier/planning-detail-state";
@@ -1050,9 +1049,7 @@ function TaskTable({
               <td className="max-w-[320px] px-2.5 py-1.5">
                 <TruncatedTextWithPopover
                   text={t.name}
-                  alwaysShowPopover
                   className="font-medium text-slate-900"
-                  popover={<PlanningTaskHoverCard task={t} />}
                 />
                 {t.visualKind === "incomplete" ? (
                   <p className="text-[10px] font-medium text-amber-800">À compléter</p>

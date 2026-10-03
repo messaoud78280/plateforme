@@ -12,6 +12,7 @@ import { invalidateFinalValidationIfNeeded } from "@/lib/preparation/service";
 import { parseBeworkPatch } from "@/lib/bework-patch/parse";
 import { analyzePatchImpact } from "@/lib/bework-patch/impact/analyze-impact";
 import { loadImpactSubgraph } from "@/lib/bework-patch/impact/load-subgraph";
+import { evaluatePatchSourceProtection } from "@/lib/bework-patch/impact/source-protection";
 import { simulatePlanFromQuantityMap } from "@/lib/bework-patch/impact/simulate-planning";
 import type { BeworkPatchV1 } from "@/lib/bework-patch/types";
 import type { AnalyzePatchImpactResult } from "@/lib/bework-patch/impact/types";
@@ -540,7 +541,62 @@ async function applyTakeoffDirectInTx(
     throw Object.assign(new Error("PREVIEW_STALE"), { code: "PREVIEW_STALE" });
   }
 
+  // Hard-guard provenance (défense en profondeur — même si analyze a été contourné).
+  const guard = evaluatePatchSourceProtection({
+    patch: input.patch,
+    subgraph: {
+      projectId: study.projectId,
+      study: {
+        id: study.id,
+        title: study.title,
+        version: study.version,
+        params: study.parameters.map((p) => ({
+          id: p.id,
+          key: p.key,
+          label: p.label,
+          value: p.value != null ? d(p.value) : null,
+          unit: p.unit,
+          formula: p.formula,
+          provenance: p.provenance,
+          note: p.note,
+          sourceRef: p.sourceRef,
+          hypothesisId: p.hypothesisId,
+        })),
+        lines: study.lines.map((l) => ({
+          id: l.id,
+          code: l.code,
+          designation: l.designation,
+          unit: l.unit,
+          formula: l.formula,
+          declaredQuantity: l.declaredQuantity != null ? d(l.declaredQuantity) : null,
+          computedQuantity: l.computedQuantity != null ? d(l.computedQuantity) : null,
+          validatedQuantity: l.validatedQuantity != null ? d(l.validatedQuantity) : null,
+          provenance: l.provenance,
+          role: l.role,
+        })),
+      },
+      quotes: [],
+      quoteLinks: [],
+      plans: [],
+      visit: null,
+      followUp: null,
+      report: null,
+      notice: null,
+    },
+  });
+  if (guard.blocked) {
+    throw Object.assign(
+      new Error(guard.errors[0]?.message ?? "PROTECTED_SOURCE_CONFLICT"),
+      { code: "PROTECTED_SOURCE_CONFLICT" },
+    );
+  }
+
   const paramUpdates = new Map<string, number | null>();
+  const isOverride =
+    input.patch.change_intent === "TECHNICAL_OVERRIDE" &&
+    typeof input.patch.reason === "string" &&
+    input.patch.reason.trim().length > 0;
+
   for (const op of input.patch.operations) {
     if (op.op !== "update_parameter") continue;
     const key =
@@ -557,7 +613,12 @@ async function applyTakeoffDirectInTx(
       where: { studyId_key: { studyId: study.id, key } },
       data: {
         value,
-        provenance: "SAISIE_MANUELLE",
+        // Override explicite → SAISIE_MANUELLE ; sinon conserver la provenance existante
+        // si la valeur ne change pas de catégorie (premier remplissage → SAISIE_MANUELLE).
+        provenance: isOverride
+          ? "SAISIE_MANUELLE"
+          : (study.parameters.find((p) => p.key === key)?.provenance ??
+            "SAISIE_MANUELLE"),
         modifiedAt: new Date(),
         modifiedById: input.userId,
       },

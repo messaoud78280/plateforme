@@ -114,6 +114,16 @@ export function mapPatchErrorToUser(input: {
         action: "close",
         actionLabel: "Fermer",
       };
+    case "PROTECTED_SOURCE_CONFLICT":
+      return {
+        title: "Donnée protégée",
+        message:
+          !serverIsTechnical && server
+            ? server
+            : "Cette valeur a été saisie ou validée par l'utilisateur. Une hypothèse ou une donnée non confirmée ne peut pas la remplacer automatiquement.",
+        action: "retry_paste",
+        actionLabel: "Modifier le bloc",
+      };
     case "INVALID_JSON":
     case "INVALID_PATCH_TYPE":
     case "UNSUPPORTED_SCHEMA_VERSION":

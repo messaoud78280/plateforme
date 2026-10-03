@@ -5,6 +5,7 @@
  * Chaîne : Quote → Takeoff → Planning
  */
 
+import { mapProvenanceKind } from "@/lib/bework-context/provenance";
 import type { CanonicalPhase } from "./phase";
 import {
   isDesignationLikeLot,
@@ -38,6 +39,20 @@ export type TakeoffLineQuantitySource = {
   designation?: string | null;
   provenance?: string | null;
 };
+
+/** Conserve la provenance métré (ex. HYPOTHESIS) — jamais promue en VALIDATED. */
+function lineSourceProvenance(
+  line: TakeoffLineQuantitySource,
+  fallback: QuantityProvenance,
+): QuantityProvenance {
+  const kind = mapProvenanceKind({ provenance: line.provenance });
+  if (kind === "HYPOTHESIS") return "HYPOTHESIS";
+  if (kind === "MANUAL") return "MANUAL";
+  if (kind === "MEASURE") return "MEASURE";
+  if (kind === "PLAN") return "PLAN";
+  if (kind === "CALCULATION") return "CALCULATION";
+  return fallback;
+}
 
 export type ResolvedTakeoffQuantity = {
   quantity: number | null;
@@ -136,7 +151,7 @@ export function resolveCanonicalTakeoffQuantity(
     return {
       quantity: engine,
       unit,
-      provenance: "ENGINE",
+      provenance: lineSourceProvenance(line, "ENGINE"),
       sourceLineCode: line.code,
       isForfait,
     };
@@ -147,7 +162,7 @@ export function resolveCanonicalTakeoffQuantity(
     return {
       quantity: computed,
       unit,
-      provenance: "COMPUTED",
+      provenance: lineSourceProvenance(line, "COMPUTED"),
       sourceLineCode: line.code,
       isForfait,
     };
@@ -158,7 +173,7 @@ export function resolveCanonicalTakeoffQuantity(
     return {
       quantity: declared,
       unit,
-      provenance: "DECLARED",
+      provenance: lineSourceProvenance(line, "DECLARED"),
       sourceLineCode: line.code,
       isForfait,
     };

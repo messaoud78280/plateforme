@@ -23,6 +23,10 @@ export const TAKEOFF_CHATGPT_INSTRUCTIONS = [
   "Utiliser prioritairement les valeurs réellement présentes dans data.",
   "Distinguer provenance_kind : MEASURE | PLAN | CALCULATION | HYPOTHESIS | MANUAL | UNKNOWN.",
   "Ne jamais présenter une HYPOTHESIS ou UNKNOWN comme une mesure réelle.",
+  "MANUAL, MEASURE, PLAN et validated_quantity sont des données protégées. Ne jamais les remplacer par HYPOTHESIS ou UNKNOWN.",
+  "Une hypothèse est uniquement informative tant qu'elle n'est pas explicitement validée par l'utilisateur.",
+  "Si une donnée manque, demander confirmation ou laisser la valeur indéterminée — ne pas inventer de dimension.",
+  "Pour remplacer une donnée protégée : change_intent TECHNICAL_OVERRIDE + reason obligatoire + confirmation utilisateur.",
   "Ne pas inventer silencieusement une dimension ou quantité absente.",
   "Conserver la traçabilité (ids, codes, source_ref, provenance).",
   "Retourner exclusivement un bework_patch_v1 compatible preview BeWork.",
@@ -232,8 +236,12 @@ export function adaptTakeoffForChatgptContext(
         provenance: p.provenance,
         provenance_kind: p.provenanceKind,
         note: p.note,
-        /** source_ref : id source plan si note/provenance PLAN — sinon null (pas d’invention). */
-        source_ref: null as string | null,
+        source_ref: p.sourceRef ?? null,
+        hypothesis_id: p.hypothesisId ?? null,
+        protected:
+          p.provenanceKind === "MANUAL" ||
+          p.provenanceKind === "MEASURE" ||
+          p.provenanceKind === "PLAN",
       })),
       lines: study.lines.map((l) => ({
         id: l.id,
@@ -249,6 +257,11 @@ export function adaptTakeoffForChatgptContext(
         provenance_kind: l.provenanceKind,
         role: l.role,
         source_ref: null as string | null,
+        protected:
+          l.validatedQuantity != null ||
+          l.provenanceKind === "MANUAL" ||
+          l.provenanceKind === "MEASURE" ||
+          l.provenanceKind === "PLAN",
       })),
       sources: sources.map(mapSourceForChatgpt),
       quote_links: quoteLinks,

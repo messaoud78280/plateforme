@@ -21,7 +21,15 @@ export {
   type ProjectContextVisit,
 } from "./types";
 
-export { mapProvenanceKind } from "./provenance";
+export {
+  mapProvenanceKind,
+  evaluateSourceProtection,
+  compareProvenance,
+  isProtectedSource,
+  provenanceLabelFr,
+  PROVENANCE_RANK,
+  PROTECTED_PROVENANCE_KINDS,
+} from "./provenance";
 
 export {
   getTakeoffFromContext,

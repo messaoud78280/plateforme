@@ -112,6 +112,8 @@ export type ProjectContextParameter = {
   provenance: string | null;
   provenanceKind: ProjectContextProvenanceKind;
   note: string | null;
+  sourceRef?: string | null;
+  hypothesisId?: string | null;
 };
 
 export type ProjectContextTakeoffLine = {

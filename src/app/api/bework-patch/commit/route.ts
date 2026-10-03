@@ -40,7 +40,8 @@ export async function POST(req: Request) {
       const status =
         result.code === "DUPLICATE_PATCH" || result.code === "PREVIEW_STALE"
           ? 409
-          : result.code === "PROTECTED_ENTITY"
+          : result.code === "PROTECTED_ENTITY" ||
+              result.code === "PROTECTED_SOURCE_CONFLICT"
             ? 403
             : 422;
       return NextResponse.json(

@@ -12,6 +12,11 @@ import {
   isQuoteProtected,
   quoteProtectionReason,
 } from "@/lib/bework-patch/impact/protection";
+import {
+  annotateDirectChangesWithProtection,
+  detectValidatedQuantityDivergences,
+  evaluatePatchSourceProtection,
+} from "@/lib/bework-patch/impact/source-protection";
 import { simulateTakeoffFromParamChange } from "@/lib/bework-patch/impact/simulate-takeoff";
 import {
   simulateQuoteLine,
@@ -1414,7 +1419,7 @@ function analyzeTakeoffTechnical(
   patch: BeworkPatchV1,
   subgraph: ImpactSubgraph,
 ): AnalyzePatchImpactResult {
-  const directChanges = extractDirectChanges(patch, subgraph);
+  let directChanges = extractDirectChanges(patch, subgraph);
   const derived: DerivedChange[] = [];
   const affected: AffectedEntity[] = [];
   const protectedEntities: ProtectedEntity[] = [];
@@ -1429,6 +1434,33 @@ function analyzeTakeoffTechnical(
       errors: [issue("STUDY_MISSING", "Étude métré absente du sous-graphe.", "error")],
     });
   }
+
+  // Garde centrale provenance — avant toute simulation / commit.
+  const sourceGuard = evaluatePatchSourceProtection({ patch, subgraph });
+  errors.push(...sourceGuard.errors);
+  warnings.push(...sourceGuard.warnings);
+  directChanges = annotateDirectChangesWithProtection(
+    directChanges,
+    sourceGuard.results,
+  );
+  for (const r of sourceGuard.results) {
+    if (r.decision.status === "BLOCKED") {
+      protectedEntities.push({
+        section: "TAKEOFF",
+        entityType: "PREP_PARAMETER",
+        id: String(r.opIndex),
+        label: r.label,
+        reason: r.decision.message,
+        gap: {
+          field: r.field,
+          current: r.before,
+          wouldBe: r.after,
+          unit: r.unit,
+        },
+      });
+    }
+  }
+  warnings.push(...detectValidatedQuantityDivergences(subgraph.study));
 
   const study = subgraph.study;
   const paramUpdates: Record<string, number | null> = {};

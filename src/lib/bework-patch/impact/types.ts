@@ -22,6 +22,13 @@ export type DirectChange = {
   before: unknown;
   after: unknown;
   unit?: string | null;
+  /** Provenance actuelle (preview protection sources). */
+  currentProvenanceKind?: string | null;
+  proposalProvenanceKind?: string | null;
+  currentProvenanceLabel?: string | null;
+  proposalProvenanceLabel?: string | null;
+  protectionStatus?: "ALLOW" | "BLOCKED" | "OVERRIDE_OK" | null;
+  protectionMessage?: string | null;
 };
 
 export type DerivedChange = {
@@ -116,6 +123,10 @@ export type ImpactParam = {
   value: number | null;
   unit: string;
   formula: string | null;
+  provenance?: string | null;
+  note?: string | null;
+  sourceRef?: string | null;
+  hypothesisId?: string | null;
 };
 
 export type ImpactLine = {
@@ -125,6 +136,9 @@ export type ImpactLine = {
   unit: string;
   formula: string | null;
   declaredQuantity: number | null;
+  computedQuantity?: number | null;
+  validatedQuantity?: number | null;
+  provenance?: string | null;
   role: string;
 };
 

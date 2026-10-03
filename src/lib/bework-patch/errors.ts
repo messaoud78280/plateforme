@@ -25,6 +25,7 @@ export const BEWORK_PATCH_ERROR_CODES = [
   "INVALID_FIELD_TYPE",
   "OPERATION_NOT_ALLOWED_FOR_SECTION",
   "STUDY_MISSING",
+  "PROTECTED_SOURCE_CONFLICT",
 ] as const;
 export type BeworkPatchErrorCode = (typeof BEWORK_PATCH_ERROR_CODES)[number];
 
@@ -49,6 +50,8 @@ export const BEWORK_PATCH_WARNING_CODES = [
   "NOTICE_SCOPE",
   "IMPACT_UNSUPPORTED",
   "NONE_CANONICAL",
+  "PROTECTED_SOURCE_OVERRIDE",
+  "VALIDATED_QUANTITY_DIVERGENCE",
 ] as const;
 export type BeworkPatchWarningCode = (typeof BEWORK_PATCH_WARNING_CODES)[number];
 

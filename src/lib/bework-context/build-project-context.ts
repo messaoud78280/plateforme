@@ -151,6 +151,8 @@ export async function buildProjectContext(
             formula: true,
             provenance: true,
             note: true,
+            sourceRef: true,
+            hypothesisId: true,
           },
         },
         ...(includeLines
@@ -475,6 +477,9 @@ export async function buildProjectContext(
           formula: p.formula,
         }),
         note: p.note,
+        sourceRef: "sourceRef" in p ? (p.sourceRef as string | null) : null,
+        hypothesisId:
+          "hypothesisId" in p ? (p.hypothesisId as string | null) : null,
       })),
       lines: lines.map((l) => ({
         id: l.id,

@@ -1092,11 +1092,42 @@ function DirectChangesBlock({
                 <span className="text-xs font-medium text-slate-400 sm:hidden">
                   Après
                 </span>
-                <span className="rounded bg-emerald-50 px-2 py-1 text-sm font-medium text-emerald-900 sm:max-w-[45%] sm:truncate">
+                <span
+                  className={`rounded px-2 py-1 text-sm font-medium sm:max-w-[45%] sm:truncate ${
+                    c.protectionStatus === "BLOCKED"
+                      ? "bg-red-50 text-red-900"
+                      : c.protectionStatus === "OVERRIDE_OK"
+                        ? "bg-amber-50 text-amber-950"
+                        : "bg-emerald-50 text-emerald-900"
+                  }`}
+                >
                   {formatValue(c.after)}
                   {c.unit ? ` ${c.unit}` : ""}
                 </span>
               </div>
+              {(c.currentProvenanceLabel || c.proposalProvenanceLabel) && (
+                <p className="mt-1.5 text-xs text-slate-500">
+                  {c.currentProvenanceLabel
+                    ? `Source actuelle : ${c.currentProvenanceLabel}`
+                    : null}
+                  {c.currentProvenanceLabel && c.proposalProvenanceLabel
+                    ? " · "
+                    : null}
+                  {c.proposalProvenanceLabel
+                    ? `Proposition : ${c.proposalProvenanceLabel}`
+                    : null}
+                </p>
+              )}
+              {c.protectionStatus === "BLOCKED" && c.protectionMessage ? (
+                <p className="mt-1.5 text-xs font-medium text-red-700">
+                  ⛔ Modification bloquée — {c.protectionMessage}
+                </p>
+              ) : null}
+              {c.protectionStatus === "OVERRIDE_OK" && c.protectionMessage ? (
+                <p className="mt-1.5 text-xs font-medium text-amber-800">
+                  {c.protectionMessage}
+                </p>
+              ) : null}
             </li>
           ))}
         </ul>

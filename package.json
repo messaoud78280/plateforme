@@ -45,6 +45,8 @@
     "test:bework-notice-commit-ctx02e": "node --import tsx src/lib/bework-patch/commit/ctx02e-notice-commit.test.ts",
     "test:bework-pipeline-contract-ctx09a": "node --import tsx src/lib/bework-patch/commit/ctx09a-pipeline-contract.test.ts",
     "test:bework-ui-messages-ctx05": "node --import tsx src/lib/bework-patch/ui-messages.test.ts",
+    "test:bework-source-protection": "node --import tsx src/lib/bework-patch/impact/source-protection.test.ts",
+    "test:source-protection-c01": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --import tsx scripts/test-source-protection-c01-dryrun.ts",
     "test:chantier-core-prep-phase1": "node --import tsx src/lib/chantier/core-preparation-state.test.ts",
     "test:chantier-preparation-state": "node --import tsx src/lib/chantier/preparation-state.test.ts",
     "test:chantier-preparation-concordance": "node --import tsx src/lib/chantier/project-preparation-state.test.ts",

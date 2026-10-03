@@ -208,13 +208,7 @@ export function PrepScheduleTaskPanel({
           />
           <Row
             label="Rendement"
-            value={
-              task.rateValue != null
-                ? `${task.rateValue} ${task.rateUnit ?? ""}${
-                    task.ratePerLabel ? ` / ${task.ratePerLabel}` : ""
-                  }`.trim()
-                : "Rendement à renseigner"
-            }
+            value={task.rateDisplay}
           />
           <Row label="Unités parallèles" value={String(task.parallelUnits)} />
           <Row

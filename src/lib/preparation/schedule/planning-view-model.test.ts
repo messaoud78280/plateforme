@@ -279,9 +279,10 @@ assert.match(complete.durationModeLabel, /rendement/i);
 
 const incomplete = vm.tasks.find((x) => x.stepCode === "Q01-01")!;
 assert.equal(incomplete.missing.crew, true);
-assert.equal(incomplete.missing.rate, true);
+// FIXED sans rendement : non exigé (référence optionnelle)
+assert.equal(incomplete.missing.rate, false);
 assert.equal(incomplete.crewDisplay, "Équipe à renseigner");
-assert.equal(incomplete.rateDisplay, "Rendement à renseigner");
+assert.equal(incomplete.rateDisplay, "—");
 assert.equal(incomplete.quantityDisplay, "À renseigner");
 
 const half = vm.tasks.find((x) => x.stepCode === "Q08-01")!;

@@ -152,7 +152,7 @@ function barDurationText(t: PlanningTaskVM): string {
 function taskAlert(t: PlanningTaskVM): string | null {
   if (t.visualKind === "blocked") return "Bloqué";
   if (t.missing.crew) return "Équipe manquante";
-  if (t.missing.rate) return "Rendement à confirmer";
+  if (t.missing.rate) return "Rendement à renseigner";
   if (t.issueCodes.includes("DEP_DATE_VIOLATION")) return "Dépendance";
   return null;
 }

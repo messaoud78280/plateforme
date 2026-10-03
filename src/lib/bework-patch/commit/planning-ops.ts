@@ -370,37 +370,16 @@ export async function applyPlanningDirectInTx(
           ? Math.max(1, op.changes.parallel_units)
           : row.parallelUnits;
 
-      const data: Prisma.PrepScheduleTaskUpdateInput = {
-        rateId: rateId ?? null,
-        rateValue: rateValue,
-        parallelUnits,
-      };
-
-      const qty = row.quantitySnapshot != null ? d(row.quantitySnapshot) : null;
-      const canCompute =
-        !row.durationLockedByUser &&
-        qty != null &&
-        qty >= 0 &&
-        rateValue != null &&
-        rateValue > 0;
-
-      if (canCompute) {
-        const resolved = resolveTaskDurationDays({
-          durationMode: "computed",
-          durationDays: d(row.durationDays),
-          quantitySnapshot: qty,
-          rateValue,
+      // Contrat update_productivity : rate_id / rate_value / parallel_units uniquement.
+      // Référence de production — ne jamais basculer le mode durée ni recalculer.
+      await tx.prepScheduleTask.update({
+        where: { id: row.id },
+        data: {
+          rateId: rateId ?? null,
+          rateValue: rateValue,
           parallelUnits,
-        });
-        data.durationMode = "computed";
-        data.durationDays = resolved.durationDays;
-        data.computedDurationDays = resolved.durationDays;
-        durationOverrides.set(row.id, resolved.durationDays);
-        durationOverrides.set(row.stepCode, resolved.durationDays);
-        needsDateRecompute = true;
-      }
-
-      await tx.prepScheduleTask.update({ where: { id: row.id }, data });
+        },
+      });
       touched = true;
     }
 

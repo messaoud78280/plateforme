@@ -14,6 +14,10 @@ import {
   UNCLASSIFIED_PHASE,
 } from "@/lib/preparation/schedule/phase";
 import { parseCrewJson } from "@/lib/preparation/schedule/crew";
+import {
+  formatProductivityDisplay,
+  isMissingProductivity,
+} from "@/lib/preparation/schedule/productivity";
 
 export type PlanningViewTab = "planning" | "resources" | "preparation";
 
@@ -385,7 +389,12 @@ export function buildPlanningViewModel(
     const crewId = t.crewId ?? crewParsed.crewId;
     const missing = {
       crew: !(crewId || (crewSize != null && crewSize > 0) || t.crew.length),
-      rate: t.rateValue == null,
+      rate: isMissingProductivity({
+        rateValue: t.rateValue,
+        durationMode: t.durationMode,
+        kind: t.kind,
+        phaseRole: phase.role,
+      }),
       quantity: t.quantitySnapshot == null,
       preconditions: t.preconditions.length === 0,
       controls: t.controls.length === 0,
@@ -422,14 +431,15 @@ export function buildPlanningViewModel(
       quantityDisplay = emptyState("quantity");
     }
 
-    let rateDisplay: string;
-    if (t.rateValue != null) {
-      rateDisplay = `${t.rateValue} ${t.rateUnit ?? ""}${t.ratePerLabel ? ` (${t.ratePerLabel})` : ""}`.trim();
-    } else if (t.quantitySnapshot != null) {
-      rateDisplay = emptyState("rate");
-    } else {
-      rateDisplay = emptyState("rate");
-    }
+    const rateDisplay = formatProductivityDisplay({
+      rateValue: t.rateValue,
+      rateUnit: t.rateUnit,
+      ratePerLabel: t.ratePerLabel,
+      quantityUnit: t.quantityUnit,
+      durationMode: t.durationMode,
+      kind: t.kind,
+      phaseRole: phase.role,
+    });
 
     let workloadDisplay: string;
     if (t.workloadPersonDays != null) {

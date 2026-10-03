@@ -34,6 +34,15 @@ function asIso(d: string | null): string {
   return d.slice(0, 10);
 }
 
+/** Date tableau lisible — une seule ligne, jamais 2026- / 10-21 empilés. */
+function formatTableDate(d: string | null): string {
+  if (!d) return "—";
+  const raw = d.slice(0, 10);
+  const [y, m, day] = raw.split("-");
+  if (!y || !m || !day) return raw;
+  return `${day}/${m}/${y}`;
+}
+
 function formatStartFr(d: string | null): string | null {
   if (!d) return null;
   const raw = d.slice(0, 10);
@@ -542,6 +551,8 @@ export function PrepSchedulePlanView({
           warnings={vm.quality.warnings}
           infos={vm.quality.infos}
           incompleteCount={vm.quality.incompleteCount}
+          missingRateCount={vm.preparation.noRate.length}
+          missingCrewCount={vm.preparation.noCrew.length}
           onFilter={(f) => {
             setTab("planning");
             setFilter(f);
@@ -964,7 +975,9 @@ function QualityPanel({
   blockers,
   warnings,
   infos: _infos,
-  incompleteCount,
+  incompleteCount: _incompleteCount,
+  missingRateCount,
+  missingCrewCount,
   onFilter,
   onSeeSteps,
 }: {
@@ -972,15 +985,27 @@ function QualityPanel({
   warnings: QualityGroup[];
   infos: QualityGroup[];
   incompleteCount: number;
+  missingRateCount: number;
+  missingCrewCount: number;
   onFilter: (f: PlanningFilterId) => void;
   onSeeSteps: (codes: string[]) => void;
 }) {
-  const warnCount = incompleteCount + warnings.reduce((s, g) => s + g.count, 0);
   const blockCount = blockers.reduce((s, g) => s + g.count, 0);
   const top = [...blockers, ...warnings].slice(0, 1);
   const parts: string[] = [];
-  if (blockCount) parts.push(`${blockCount} contrôle${blockCount > 1 ? "s" : ""} à revoir`);
-  if (warnCount) parts.push(`${warnCount} rendement${warnCount > 1 ? "s" : ""} à compléter`);
+  if (blockCount) {
+    parts.push(`${blockCount} contrôle${blockCount > 1 ? "s" : ""} à revoir`);
+  }
+  if (missingRateCount > 0) {
+    parts.push(
+      `${missingRateCount} rendement${missingRateCount > 1 ? "s" : ""} à compléter`,
+    );
+  }
+  if (missingCrewCount > 0) {
+    parts.push(
+      `${missingCrewCount} équipe${missingCrewCount > 1 ? "s" : ""} à renseigner`,
+    );
+  }
   const summary = parts.length ? parts.join(" · ") : "Aucune alerte";
 
   return (
@@ -990,19 +1015,21 @@ function QualityPanel({
         {" · "}
         {summary}
       </p>
-      {top.length ? (
+      {parts.length ? (
         <button
           type="button"
           className="text-[13px] font-medium text-[#1e3a5f] hover:underline"
           onClick={() => {
-            const g = top[0]!;
-            if (g.code === "CREW_ABSENT" || g.code.includes("CREW")) {
-              onFilter("no_crew");
-            } else if (g.code.includes("RATE") || g.code.includes("PRODUCTIVITY")) {
+            if (missingRateCount > 0) {
               onFilter("no_rate");
-            } else {
-              onSeeSteps(g.stepCodes);
+              return;
             }
+            if (missingCrewCount > 0) {
+              onFilter("no_crew");
+              return;
+            }
+            const g = top[0];
+            if (g) onSeeSteps(g.stepCodes);
           }}
         >
           Voir
@@ -1022,9 +1049,22 @@ function TaskTable({
   onSelect: (id: string | null) => void;
 }) {
   return (
-    <section className="overflow-x-auto rounded-lg border border-[#1e3a5f]/10 bg-white">
-      <table className="w-full min-w-[980px] text-[12px]">
-        <thead className="bg-slate-50 text-left text-[10px] uppercase tracking-wide text-slate-500">
+    <section className="w-full overflow-x-auto rounded-[14px] border border-slate-200/80 bg-white">
+      <table className="w-max min-w-[1520px] table-fixed border-collapse text-[12px]">
+        <colgroup>
+          <col style={{ width: 80 }} />
+          <col style={{ width: 320 }} />
+          <col style={{ width: 220 }} />
+          <col style={{ width: 80 }} />
+          <col style={{ width: 110 }} />
+          <col style={{ width: 110 }} />
+          <col style={{ width: 100 }} />
+          <col style={{ width: 150 }} />
+          <col style={{ width: 130 }} />
+          <col style={{ width: 110 }} />
+          <col style={{ width: 110 }} />
+        </colgroup>
+        <thead className="bg-slate-50 text-left text-[11px] font-medium text-slate-500">
           <tr>
             <th className="px-2.5 py-2">Réf.</th>
             <th className="px-2.5 py-2">Intervention</th>
@@ -1032,10 +1072,11 @@ function TaskTable({
             <th className="px-2.5 py-2">Durée</th>
             <th className="px-2.5 py-2">Début</th>
             <th className="px-2.5 py-2">Fin</th>
-            <th className="px-2.5 py-2">Quantité / rendement</th>
+            <th className="px-2.5 py-2">Quantité</th>
+            <th className="px-2.5 py-2">Rendement</th>
             <th className="px-2.5 py-2">Équipe</th>
             <th className="px-2.5 py-2">Charge</th>
-            <th className="px-2.5 py-2 text-right">Vente HT</th>
+            <th className="px-2.5 py-2 text-right">Montant</th>
           </tr>
         </thead>
         <tbody>
@@ -1043,61 +1084,73 @@ function TaskTable({
             <tr
               key={t.id}
               className={cn(
-                "cursor-pointer border-t border-slate-100 align-top transition-colors duration-150 hover:bg-slate-50/80",
+                "cursor-pointer border-t border-slate-100 transition-colors duration-150 hover:bg-slate-50/80",
                 selectedId === t.id && "bg-[#1e3a5f]/[0.04]",
               )}
               onClick={() => onSelect(selectedId === t.id ? null : t.id)}
             >
-              <td className="px-2.5 py-1.5 font-mono text-[11px] text-slate-500">
-                {t.stepCode}
+              <td className="overflow-hidden px-2.5 py-2 align-middle font-mono text-[11px] tabular-nums text-slate-500">
+                <span className="block truncate">{t.stepCode}</span>
               </td>
-              <td className="max-w-[320px] px-2.5 py-1.5">
+              <td className="overflow-hidden px-2.5 py-2 align-middle">
                 <TruncatedTextWithPopover
                   text={t.name}
-                  className="font-medium text-slate-900"
+                  className="block max-w-full font-medium text-slate-900"
                 />
                 {t.visualKind === "incomplete" ? (
-                  <p className="text-[10px] font-medium text-amber-800">À compléter</p>
+                  <p className="mt-0.5 truncate text-[10px] font-medium text-amber-800">
+                    À compléter
+                  </p>
                 ) : null}
                 {t.visualKind === "blocked" ? (
-                  <p className="text-[10px] font-medium text-red-700">Bloquant</p>
+                  <p className="mt-0.5 truncate text-[10px] font-medium text-red-700">
+                    Bloquant
+                  </p>
                 ) : null}
               </td>
-              <td className="max-w-[160px] px-2.5 py-1.5 text-slate-600">
-                <TruncatedTextWithPopover text={t.phaseLabel} />
+              <td className="overflow-hidden px-2.5 py-2 align-middle text-slate-600">
+                <TruncatedTextWithPopover
+                  text={t.phaseLabel}
+                  className="block max-w-full"
+                />
               </td>
-              <td className="px-2.5 py-1.5 tabular-nums">{t.durationLabel}</td>
-              <td className="px-2.5 py-1.5 tabular-nums">{asIso(t.startDate)}</td>
-              <td className="px-2.5 py-1.5 tabular-nums">{asIso(t.endDate)}</td>
-              <td className="px-2.5 py-1.5 text-slate-600">
-                <span
-                  className={cn(
-                    t.missing.quantity && "text-amber-700",
-                  )}
-                >
-                  {t.quantityDisplay}
-                </span>
-                <span
-                  className={cn(
-                    "block text-[11px]",
-                    t.missing.rate ? "text-amber-700" : "text-slate-500",
-                  )}
-                >
-                  {t.rateDisplay}
-                </span>
+              <td className="overflow-hidden whitespace-nowrap px-2.5 py-2 align-middle tabular-nums">
+                {t.durationLabel}
+              </td>
+              <td className="overflow-hidden whitespace-nowrap px-2.5 py-2 align-middle tabular-nums text-slate-700">
+                {formatTableDate(t.startDate)}
+              </td>
+              <td className="overflow-hidden whitespace-nowrap px-2.5 py-2 align-middle tabular-nums text-slate-700">
+                {formatTableDate(t.endDate)}
               </td>
               <td
                 className={cn(
-                  "px-2.5 py-1.5",
+                  "overflow-hidden whitespace-nowrap px-2.5 py-2 align-middle",
+                  t.missing.quantity ? "text-amber-700" : "text-slate-700",
+                )}
+              >
+                <span className="block truncate">{t.quantityDisplay}</span>
+              </td>
+              <td
+                className={cn(
+                  "overflow-hidden whitespace-nowrap px-2.5 py-2 align-middle",
+                  t.missing.rate ? "text-amber-700" : "text-slate-700",
+                )}
+              >
+                <span className="block truncate">{t.rateDisplay}</span>
+              </td>
+              <td
+                className={cn(
+                  "overflow-hidden px-2.5 py-2 align-middle",
                   t.missing.crew ? "text-amber-700" : "text-slate-700",
                 )}
               >
-                {t.crewDisplay}
+                <span className="block truncate">{t.crewDisplay}</span>
               </td>
-              <td className="px-2.5 py-1.5 tabular-nums text-slate-600">
+              <td className="overflow-hidden whitespace-nowrap px-2.5 py-2 align-middle tabular-nums text-slate-600">
                 {t.workloadDisplay}
               </td>
-              <td className="px-2.5 py-1.5 text-right tabular-nums">
+              <td className="overflow-hidden whitespace-nowrap px-2.5 py-2 align-middle text-right tabular-nums">
                 {t.sellHtSnapshot != null ? euro(t.sellHtSnapshot) : "—"}
               </td>
             </tr>

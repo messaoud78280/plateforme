@@ -353,6 +353,7 @@ export function PrepSchedulePlanView({
             version={plan.revisionNumber}
             capability={getSectionCapability("PLANNING")}
             entityLabel={plan.title}
+            primaryActionLabel="Modifier avec ChatGPT"
           />
         </div>
       </header>

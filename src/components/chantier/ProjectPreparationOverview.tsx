@@ -22,6 +22,7 @@ import {
 import { computeProjectNextAction } from "@/lib/chantier/project-preparation-state";
 import { TakeoffCreateFromChatgptModal } from "@/components/chantier/TakeoffCreateFromChatgptModal";
 import { QuoteCreateFromChatgptModal } from "@/components/chantier/QuoteCreateFromChatgptModal";
+import { PlanningCreateFromChatgptModal } from "@/components/chantier/PlanningCreateFromChatgptModal";
 
 type QuoteSectionPreview = {
   sectionId: string;
@@ -54,6 +55,7 @@ export function ProjectPreparationOverview({
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [takeoffCreateOpen, setTakeoffCreateOpen] = useState(false);
   const [quoteCreateOpen, setQuoteCreateOpen] = useState(false);
+  const [planningCreateOpen, setPlanningCreateOpen] = useState(false);
 
   const unscopedMsg = formatUnscopedHumanMessage(workspace.unscoped);
   const hasUnscoped = workspace.unscoped.items.length > 0;
@@ -130,6 +132,20 @@ export function ProjectPreparationOverview({
         busyLabel: "Ouverture ChatGPT…",
       };
     }
+    if (step.id === "planning" && step.primaryAction === "prepare_planning_chatgpt") {
+      if (!workspace.global.metre.href) {
+        return {
+          mode: "blocked",
+          reason: "Préparez d’abord le métré avant le planning",
+          busyLabel: null,
+        };
+      }
+      return {
+        mode: "generate",
+        reason: null,
+        busyLabel: "Ouverture ChatGPT…",
+      };
+    }
     if (step.id === "planning" && step.primaryAction === "create_global_prep") {
       const reason = planningBlockReason();
       if (reason) return { mode: "blocked", reason, busyLabel: null };
@@ -146,6 +162,7 @@ export function ProjectPreparationOverview({
         step.primaryAction === "create_global_prep" ||
         step.primaryAction === "prepare_takeoff_chatgpt" ||
         step.primaryAction === "prepare_quote_chatgpt" ||
+        step.primaryAction === "prepare_planning_chatgpt" ||
         step.primaryAction === "create_follow_up" ||
         step.primaryAction === "create_compte_rendu" ||
         step.primaryAction === "create_notice")
@@ -418,6 +435,10 @@ export function ProjectPreparationOverview({
     }
     if (step.primaryAction === "prepare_quote_chatgpt") {
       setQuoteCreateOpen(true);
+      return;
+    }
+    if (step.primaryAction === "prepare_planning_chatgpt") {
+      setPlanningCreateOpen(true);
       return;
     }
     if (step.primaryAction === "create_global_prep") {
@@ -1010,6 +1031,18 @@ export function ProjectPreparationOverview({
           onClose={() => setQuoteCreateOpen(false)}
           onCreated={() => {
             setQuoteCreateOpen(false);
+            router.refresh();
+          }}
+        />
+      ) : null}
+
+      {planningCreateOpen ? (
+        <PlanningCreateFromChatgptModal
+          projectId={workspace.projectId}
+          studyId={workspace.global.metre.href?.match(/etudes\/([^/?#]+)/)?.[1] ?? null}
+          onClose={() => setPlanningCreateOpen(false)}
+          onCreated={() => {
+            setPlanningCreateOpen(false);
             router.refresh();
           }}
         />

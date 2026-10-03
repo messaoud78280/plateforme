@@ -155,27 +155,30 @@ export function computePilotageNextAction(input: {
           ? "Préparer le métré avec ChatGPT"
           : firstTodo.primaryAction === "prepare_quote_chatgpt"
             ? "Préparer le devis avec ChatGPT"
-            : firstTodo.primaryAction === "create_global_prep"
-              ? firstTodo.id === "planning"
-                ? "Générer le planning chantier"
-                : "Générer le métré / planning"
-              : firstTodo.primaryAction === "create_follow_up" ||
-                  (firstTodo.id === "suivi" && !firstTodo.ready)
-                ? "Créer le suivi depuis le planning"
-                : firstTodo.id === "compte_rendu"
-                  ? "Générer le compte rendu"
-                  : firstTodo.id === "notice"
-                    ? "Générer la notice explicative"
-                    : firstTodo.id === "visite"
-                      ? firstTodo.actionLabel || "Ouvrir les visites"
-                      : firstTodo.actionLabel || `Préparer : ${firstTodo.label}`;
+            : firstTodo.primaryAction === "prepare_planning_chatgpt"
+              ? "Préparer le planning avec ChatGPT"
+              : firstTodo.primaryAction === "create_global_prep"
+                ? firstTodo.id === "planning"
+                  ? "Générer le planning chantier"
+                  : "Générer le métré / planning"
+                : firstTodo.primaryAction === "create_follow_up" ||
+                    (firstTodo.id === "suivi" && !firstTodo.ready)
+                  ? "Créer le suivi depuis le planning"
+                  : firstTodo.id === "compte_rendu"
+                    ? "Générer le compte rendu"
+                    : firstTodo.id === "notice"
+                      ? "Générer la notice explicative"
+                      : firstTodo.id === "visite"
+                        ? firstTodo.actionLabel || "Ouvrir les visites"
+                        : firstTodo.actionLabel || `Préparer : ${firstTodo.label}`;
     return {
       label,
       href:
         firstTodo.primaryAction === "attach_visit" ||
         firstTodo.primaryAction === "create_global_prep" ||
         firstTodo.primaryAction === "prepare_takeoff_chatgpt" ||
-        firstTodo.primaryAction === "prepare_quote_chatgpt"
+        firstTodo.primaryAction === "prepare_quote_chatgpt" ||
+        firstTodo.primaryAction === "prepare_planning_chatgpt"
           ? null
           : firstTodo.href,
       stepId: firstTodo.id,

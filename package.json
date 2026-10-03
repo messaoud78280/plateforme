@@ -39,6 +39,7 @@
     "test:bework-takeoff-chatgpt-context": "node --import tsx src/lib/bework-context/adapt-takeoff-chatgpt.test.ts",
     "test:bework-takeoff-create": "node --import tsx src/lib/bework-context/adapt-takeoff-create.test.ts",
     "test:bework-quote-create": "node --import tsx src/lib/bework-context/adapt-quote-create.test.ts",
+    "test:bework-planning-create": "node --import tsx src/lib/bework-context/adapt-planning-create.test.ts",
     "test:bework-visit-context-version": "node --import tsx src/lib/bework-context/visit-context-version.test.ts",
     "test:bework-planning-commit-ctx02a": "node --import tsx src/lib/bework-patch/commit/ctx02a-planning-commit.test.ts",
     "test:bework-visit-commit-ctx02b": "node --import tsx src/lib/bework-patch/commit/ctx02b-visit-commit.test.ts",

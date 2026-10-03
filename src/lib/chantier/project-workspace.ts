@@ -168,6 +168,7 @@ export type ChantierWorkflowStep = {
     | "create_global_prep"
     | "prepare_takeoff_chatgpt"
     | "prepare_quote_chatgpt"
+    | "prepare_planning_chatgpt"
     | "create_follow_up"
     | "create_compte_rendu"
     | "create_notice"
@@ -1453,18 +1454,20 @@ async function getProjectWorkspaceUncached(
           .filter(Boolean)
           .join(" · ")
       : globalStudy
-        ? "Générer au niveau chantier — jamais via Nouvelle visite"
+        ? "Métré disponible — préparez le planning avec ChatGPT (devis facultatif)"
         : globalQuote
           ? "Générez d’abord le métré"
-          : "À générer",
+          : "À préparer",
     syncState: globalCore.planning.syncState,
     statusLabel: globalCore.planning.exists
       ? (globalCore.planning.displayLabel as CardStatusLabel)
       : "À préparer",
     actionLabel: globalPlan
-      ? "Ouvrir"
+      ? globalCore.planning.needsUpdate
+        ? "Mettre à jour avec ChatGPT"
+        : "Ouvrir"
       : globalStudy
-        ? "Générer le planning"
+        ? "Préparer avec ChatGPT"
         : "Métré requis",
     ready: prepState.planning.countsAsCompleted,
     syncHint:
@@ -1549,18 +1552,23 @@ async function getProjectWorkspaceUncached(
     {
       id: "planning",
       label: "Planning chantier",
-      title: globalPlanningCard.title,
+      title: globalPlan
+        ? globalPlanningCard.title
+        : "À préparer",
       detail: globalPlanningCard.detail,
-      href: globalPlanningCard.href,
+      href: globalPlan ? globalPlanningCard.href : null,
       ready: prepState.planning.countsAsCompleted,
-      actionLabel: workspaceOpenOrGenerateLabel(
-        Boolean(globalPlan),
-        globalStudy ? "Générer le planning" : "Métré requis",
-      ),
+      actionLabel: globalPlan
+        ? globalCore.planning.needsUpdate
+          ? "Mettre à jour avec ChatGPT"
+          : "Ouvrir"
+        : globalStudy
+          ? "Préparer avec ChatGPT"
+          : "Métré requis",
       primaryAction: globalPlan
         ? "open"
         : globalStudy
-          ? "create_global_prep"
+          ? "prepare_planning_chatgpt"
           : "open",
     },
     {

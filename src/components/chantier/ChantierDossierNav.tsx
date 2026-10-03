@@ -26,6 +26,15 @@ function statusHint(step: DossierNavStep): string {
   return step.exists ? step.summary : "À préparer";
 }
 
+function stepSummary(step: DossierNavStep): string {
+  if (step.visual === "active") {
+    return step.summary && step.summary !== "À préparer"
+      ? step.summary
+      : "En cours";
+  }
+  return step.summary;
+}
+
 export function ChantierDossierNav({
   snapshot,
   variant = "compact",
@@ -38,18 +47,17 @@ export function ChantierDossierNav({
   variant?: DossierNavVariant;
   sticky?: boolean;
   busy?: boolean;
-  /** Actions CREATE / prepare lorsque href null ou primaryAction ≠ open. */
   onStepAction?: (step: DossierNavStep) => void | Promise<void>;
   className?: string;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const active = snapshot.steps.find((s) => s.id === snapshot.activeStep);
+  const roomy = variant === "full";
 
   function isNavigable(step: DossierNavStep): boolean {
     if (step.visual === "active") return false;
     if (step.href) return true;
     if (step.primaryAction && step.primaryAction !== "open") return true;
-    // Documents hub / liste visites même si « à préparer »
     if (step.href === null && step.primaryAction === "open") return false;
     return Boolean(step.href);
   }
@@ -60,7 +68,7 @@ export function ChantierDossierNav({
       return;
     }
     if (step.href && (!step.primaryAction || step.primaryAction === "open")) {
-      return; // Link navigation
+      return;
     }
     if (onStepAction && step.primaryAction && step.primaryAction !== "open") {
       e.preventDefault();
@@ -75,56 +83,25 @@ export function ChantierDossierNav({
 
   const shell = cn(
     sticky &&
-      "sticky top-0 z-30 border-b border-slate-200/90 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85",
+      "sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/90",
     className,
   );
 
-  if (variant === "full") {
-    return (
-      <nav
-        aria-label="Dossier chantier"
-        className={cn(
-          "rounded-2xl border border-slate-200/90 bg-white px-3 py-3 sm:px-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]",
-          shell,
-        )}
-      >
-        {snapshot.scopeName ? (
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-            Lot · {snapshot.scopeName}
-          </p>
-        ) : null}
-        <ol className="flex gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {snapshot.steps.map((step, idx) => (
-            <FullStep
-              key={step.id}
-              step={step}
-              idx={idx}
-              busy={busy}
-              navigable={isNavigable(step)}
-              onClick={handleClick}
-            />
-          ))}
-        </ol>
-      </nav>
-    );
-  }
-
-  // COMPACT
   return (
     <nav aria-label="Dossier chantier" className={cn("w-full", shell)}>
-      {/* Mobile : disclosure */}
+      {/* Mobile */}
       <div className="sm:hidden">
         <button
           type="button"
-          className="flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left"
+          className="flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200/90 bg-white px-3.5 py-3 text-left"
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen((v) => !v)}
         >
           <span className="min-w-0">
-            <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+            <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
               Dossier chantier
             </span>
-            <span className="mt-0.5 block truncate text-[13px] font-semibold text-[#1e3a5f]">
+            <span className="mt-0.5 block truncate text-[14px] font-semibold text-[#1e3a5f]">
               {active
                 ? `${statusGlyph(active)} ${active.shortLabel} · ${statusHint(active)}`
                 : snapshot.projectTitle}
@@ -138,10 +115,10 @@ export function ChantierDossierNav({
           />
         </button>
         {mobileOpen ? (
-          <ol className="mt-2 space-y-1 rounded-xl border border-slate-200 bg-white p-2">
+          <ol className="mt-2 divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200/90 bg-white">
             {snapshot.steps.map((step) => (
               <li key={step.id}>
-                <CompactStep
+                <NavStep
                   step={step}
                   busy={busy}
                   navigable={isNavigable(step)}
@@ -157,27 +134,39 @@ export function ChantierDossierNav({
         ) : null}
       </div>
 
-      {/* Desktop / tablette */}
-      <div className="hidden sm:block rounded-xl border border-slate-200/90 bg-white px-2 py-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+      {/* Desktop / tablette — barre unique horizontale */}
+      <div
+        className={cn(
+          "hidden overflow-hidden rounded-xl border border-slate-200/90 bg-white sm:block",
+          roomy ? "px-1 py-1" : "px-0.5 py-0.5",
+        )}
+      >
         {snapshot.scopeName ? (
-          <p className="mb-1 px-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
-            {snapshot.scopeName}
+          <p className="border-b border-slate-100 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+            Lot · {snapshot.scopeName}
           </p>
         ) : null}
-        <ol className="flex items-stretch gap-0.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <ol
+          className={cn(
+            "flex items-stretch overflow-x-auto",
+            "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            roomy ? "min-h-[96px]" : "min-h-[84px]",
+          )}
+        >
           {snapshot.steps.map((step, idx) => (
-            <li key={step.id} className="flex min-w-0 flex-1 items-stretch">
-              {idx > 0 ? (
-                <span
-                  className="mx-0.5 mt-3 hidden h-px w-2 shrink-0 self-start bg-slate-200 md:block"
-                  aria-hidden
-                />
-              ) : null}
-              <CompactStep
+            <li
+              key={step.id}
+              className={cn(
+                "flex min-w-[6.5rem] flex-1 items-stretch",
+                idx > 0 && "border-l border-slate-100",
+              )}
+            >
+              <NavStep
                 step={step}
                 busy={busy}
                 navigable={isNavigable(step)}
                 onClick={handleClick}
+                roomy={roomy}
               />
             </li>
           ))}
@@ -187,155 +176,58 @@ export function ChantierDossierNav({
   );
 }
 
-function FullStep({
-  step,
-  idx,
-  busy,
-  navigable,
-  onClick,
-}: {
-  step: DossierNavStep;
-  idx: number;
-  busy: boolean;
-  navigable: boolean;
-  onClick: (step: DossierNavStep, e: MouseEvent) => void;
-}) {
-  const active = step.visual === "active";
-  const cardClass = cn(
-    "flex w-full flex-col rounded-xl border px-2.5 py-2 text-left transition",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/40 focus-visible:ring-offset-1",
-    active
-      ? "cursor-default border-[#1e3a5f] bg-[#1e3a5f]/[0.06] ring-1 ring-[#1e3a5f]/25"
-      : navigable
-        ? cn(
-            "cursor-pointer hover:-translate-y-0.5 hover:shadow-md",
-            step.ready
-              ? "border-slate-200/90 bg-white hover:border-[#1e3a5f]/35"
-              : "border-dashed border-slate-200 bg-slate-50/60 hover:border-[#1e3a5f]/30 hover:bg-white",
-          )
-        : "cursor-default border-dashed border-slate-200 bg-slate-50/80 opacity-90",
-  );
-
-  const inner = (
-    <>
-      <span
-        className={cn(
-          "flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold",
-          active
-            ? "bg-[#1e3a5f] text-white"
-            : step.ready
-              ? "bg-emerald-100 text-emerald-800"
-              : step.visual === "needs_attention"
-                ? "bg-amber-100 text-amber-800"
-                : "bg-slate-100 text-slate-500",
-        )}
-      >
-        {step.ready && !active ? "✓" : active ? "●" : idx + 1}
-      </span>
-      <span className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-        {step.shortLabel}
-      </span>
-      <span className="mt-0.5 line-clamp-2 text-[12px] font-semibold leading-snug text-slate-800">
-        {active ? "En cours" : step.summary}
-      </span>
-      {!active ? (
-        <span className="mt-1.5 text-[10.5px] font-semibold text-[#1e3a5f]">
-          {step.href || step.primaryAction
-            ? step.ready
-              ? "Ouvrir →"
-              : `${step.actionLabel} →`
-            : "—"}
-        </span>
-      ) : (
-        <span className="mt-1.5 text-[10.5px] font-semibold text-[#1e3a5f]">
-          Page ouverte
-        </span>
-      )}
-    </>
-  );
-
-  return (
-    <li className="flex min-w-[7.5rem] flex-1 items-stretch">
-      {idx > 0 ? (
-        <span
-          className="mt-3 hidden w-2 shrink-0 self-start border-t border-slate-200 sm:block"
-          aria-hidden
-        />
-      ) : null}
-      {active ? (
-        <div
-          className={cardClass}
-          aria-current="page"
-          aria-label={`${step.label} — en cours`}
-        >
-          {inner}
-        </div>
-      ) : step.href && (!step.primaryAction || step.primaryAction === "open") ? (
-        <Link
-          href={step.href}
-          className={cardClass}
-          aria-label={`${step.label} — ${step.actionLabel}`}
-          onClick={(e) => onClick(step, e)}
-        >
-          {inner}
-        </Link>
-      ) : navigable ? (
-        <button
-          type="button"
-          disabled={busy}
-          className={cn(cardClass, "disabled:cursor-wait disabled:opacity-60")}
-          aria-label={`${step.label} — ${step.actionLabel}`}
-          onClick={(e) => onClick(step, e)}
-        >
-          {inner}
-        </button>
-      ) : (
-        <div className={cardClass} aria-label={`${step.label} — indisponible`}>
-          {inner}
-        </div>
-      )}
-    </li>
-  );
-}
-
-function CompactStep({
+function NavStep({
   step,
   busy,
   navigable,
   onClick,
   stacked = false,
+  roomy = false,
 }: {
   step: DossierNavStep;
   busy: boolean;
   navigable: boolean;
   onClick: (step: DossierNavStep, e: MouseEvent) => void;
   stacked?: boolean;
+  roomy?: boolean;
 }) {
   const active = step.visual === "active";
+  const summary = stepSummary(step);
+
   const className = cn(
-    "flex min-w-[5.5rem] flex-1 flex-col justify-center rounded-lg px-2 py-1.5 text-left transition",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/40",
-    stacked && "w-full min-w-0 flex-row items-center gap-2 py-2",
+    "group flex w-full text-left outline-none transition-colors",
+    "focus-visible:bg-[#1e3a5f]/[0.04] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#1e3a5f]/30",
+    stacked
+      ? "items-center gap-3 px-3.5 py-3"
+      : cn(
+          "h-full flex-col justify-center",
+          roomy ? "px-3 py-[18px]" : "px-2.5 py-3.5",
+        ),
     active
-      ? "bg-[#1e3a5f]/[0.08] ring-1 ring-[#1e3a5f]/30"
+      ? "bg-[#1e3a5f]/[0.045] shadow-[inset_0_-2.5px_0_0_#1e3a5f]"
       : navigable
-        ? "hover:bg-slate-50"
-        : "opacity-80",
+        ? "hover:bg-slate-50/90"
+        : "opacity-75",
   );
 
   const body = (
     <>
-      <span className="flex items-center gap-1">
+      <span
+        className={cn(
+          "flex items-center gap-1.5",
+          stacked && "min-w-0 flex-1",
+        )}
+      >
         <span
           className={cn(
-            "text-[11px] font-bold",
+            "shrink-0 text-[13px] font-semibold leading-none",
             active
               ? "text-[#1e3a5f]"
-              : step.ready
-                ? "text-emerald-700"
+              : step.visual === "ready"
+                ? "text-emerald-600"
                 : step.visual === "needs_attention"
-                  ? "text-amber-700"
-                  : "text-slate-400",
+                  ? "text-amber-600"
+                  : "text-slate-300",
           )}
           aria-hidden
         >
@@ -343,32 +235,41 @@ function CompactStep({
         </span>
         <span
           className={cn(
-            "text-[11px] font-bold uppercase tracking-[0.06em]",
-            active ? "text-[#1e3a5f]" : "text-slate-600",
+            "truncate text-[13px] font-semibold uppercase tracking-[0.06em]",
+            active ? "text-[#1e3a5f]" : "text-slate-700",
+            roomy && "text-[13.5px]",
           )}
         >
           {step.shortLabel}
         </span>
-        {active ? (
-          <span className="rounded bg-[#1e3a5f]/10 px-1 py-px text-[9px] font-semibold uppercase tracking-wide text-[#1e3a5f]">
-            En cours
+        {navigable && !active && !stacked ? (
+          <span
+            className="ml-auto hidden text-[12px] font-medium text-[#1e3a5f]/0 transition group-hover:text-[#1e3a5f]/70 lg:inline"
+            aria-hidden
+          >
+            →
           </span>
         ) : null}
       </span>
       <span
         className={cn(
-          "line-clamp-1 text-[10px] text-slate-500",
-          stacked && "ml-auto shrink-0",
+          "line-clamp-1 text-[13px] leading-snug",
+          stacked ? "shrink-0 text-slate-500" : "mt-1 text-slate-500",
+          active && "font-medium text-slate-700",
         )}
       >
-        {active ? "Page ouverte" : step.summary}
+        {summary}
       </span>
     </>
   );
 
   if (active) {
     return (
-      <div className={className} aria-current="page" aria-label={`${step.label} — en cours`}>
+      <div
+        className={className}
+        aria-current="page"
+        aria-label={`${step.label} — en cours`}
+      >
         {body}
       </div>
     );
@@ -379,7 +280,7 @@ function CompactStep({
       <Link
         href={step.href}
         className={className}
-        aria-label={`${step.label} — ${step.summary}`}
+        aria-label={`${step.label} — ${summary}`}
         onClick={(e) => onClick(step, e)}
       >
         {body}
@@ -392,7 +293,7 @@ function CompactStep({
       <button
         type="button"
         disabled={busy}
-        className={cn(className, "disabled:opacity-60")}
+        className={cn(className, "disabled:cursor-wait disabled:opacity-60")}
         aria-label={`${step.label} — ${step.actionLabel}`}
         onClick={(e) => onClick(step, e)}
       >
@@ -402,7 +303,7 @@ function CompactStep({
   }
 
   return (
-    <div className={className} aria-label={`${step.label} — ${step.summary}`}>
+    <div className={className} aria-label={`${step.label} — ${summary}`}>
       {body}
     </div>
   );

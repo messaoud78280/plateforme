@@ -5,11 +5,6 @@ import { HomeHeroCollage } from "@/components/home/HomeHeroCollage";
 
 const INTRO_VIDEOS = [
   {
-    src: "/video/bework-hero-pub.mp4",
-    poster: "/marketing/bework-hero-pub-poster.png",
-    title: "Présentation BeWork — Au départ, une idée",
-  },
-  {
     src: "/video/bework-hero-artisan.mp4",
     poster: "/marketing/bework-hero-artisan-poster.png",
     title: "Présentation BeWork — Artisan",
@@ -39,7 +34,7 @@ function hasUserActivation() {
 }
 
 /**
- * Intro hero : vidéo 1 → vidéo 2 → collage animé.
+ * Intro hero : une seule vidéo (artisan) → collage animé.
  * Son dès qu’un geste le permet (politique navigateur).
  */
 export function HomeHeroMedia() {
@@ -195,7 +190,7 @@ function HomeHeroIntroVideo({ onEnded }: { onEnded: () => void }) {
     <div
       id="presentation"
       role="region"
-      aria-label="Vidéos de présentation BeWork"
+      aria-label="Vidéo de présentation BeWork"
       className="relative isolate mx-auto flex w-full max-w-full shrink-0 justify-center"
     >
       <div

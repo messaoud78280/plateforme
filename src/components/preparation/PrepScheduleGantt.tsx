@@ -376,16 +376,12 @@ export function PrepScheduleGantt({
   }
 
   useEffect(() => {
-    if (!days.length) return;
-    const t = todayIso();
-    if (days.some((d) => d.iso === t)) {
-      const id = window.setTimeout(() => scrollToIso(t), 80);
-      return () => window.clearTimeout(id);
-    }
-    if (days[0]) {
-      const id = window.setTimeout(() => scrollToIso(days[0]!.iso), 80);
-      return () => window.clearTimeout(id);
-    }
+    if (!days.length) return undefined;
+    const target =
+      days.find((d) => d.iso === todayIso())?.iso ?? days[0]?.iso ?? null;
+    if (!target) return undefined;
+    const id = window.setTimeout(() => scrollToIso(target), 80);
+    return () => window.clearTimeout(id);
   }, [axisStartIso, zoom, days, dayWidth, labelCol]);
 
   useEffect(() => {

@@ -573,7 +573,8 @@ export function computeProjectPreparationState(input: {
         }
       : null,
     planStudyVersion,
-    archivedOnly: archivedOnly && plan?.status === "ARCHIVED",
+    // Tous les plans sont ARCHIVED → pas de planning actif (même sans plan résolu).
+    archivedOnly,
   });
 
   const visitReq = entryMode !== "plan";

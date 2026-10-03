@@ -13,9 +13,9 @@ import {
 import {
   extractVisitSearchBits,
   isGlobalStudySources,
-  pickBestPlan,
   resolvePrepSchedulePlanForWorkspace,
   resolvePrepStudyForWorkspace,
+  resolveSchedulePlanForScope,
   workspaceOpenOrGenerateLabel,
 } from "@/lib/chantier/resolve-workspace-entities";
 import { evaluatePlanningStudyVersionSync } from "@/lib/preparation/schedule/planning-sync-state";
@@ -867,11 +867,16 @@ async function getProjectWorkspaceUncached(
           title: true,
           revisionKind: true,
           status: true,
+          revisionNumber: true,
           startDate: true,
           endDateBase: true,
           studyVersionAtGeneration: true,
+          createdAt: true,
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: [
+          { revisionNumber: "desc" },
+          { createdAt: "desc" },
+        ],
       }),
       prisma.followUpSheet.findMany({
         where: {
@@ -1647,15 +1652,14 @@ async function getProjectWorkspaceUncached(
           )
         : null;
 
-    const scopePlans = plans.filter(
-      (p) =>
-        p.scopeId === scope.id ||
-        p.id === scope.referenceSchedulePlanId ||
-        (refStudy != null && p.studyId === refStudy.id),
-    );
+    // Helper canonique : CURRENT > non archivé > revisionNumber > createdAt.
+    // Ne jamais préférer referenceSchedulePlanId s’il pointe vers un ARCHIVED.
     const refPlan =
-      planById(scope.referenceSchedulePlanId) ??
-      pickBestPlan(scopePlans) ??
+      resolveSchedulePlanForScope({
+        plans,
+        scope,
+        studyId: refStudy?.id ?? null,
+      }) ??
       (refStudy && globalPlan && globalPlan.studyId === refStudy.id
         ? globalPlan
         : null) ??
@@ -1683,7 +1687,8 @@ async function getProjectWorkspaceUncached(
       refs: {
         studyId: scope.referenceStudyId,
         quoteId: scope.referenceQuoteId,
-        planId: scope.referenceSchedulePlanId,
+        // Affichage « référence » = plan réellement résolu (CURRENT), pas le pointeur stale.
+        planId: refPlan?.id ?? scope.referenceSchedulePlanId,
       },
       fallbackStudyId: globalStudy?.id ?? null,
       fallbackPlanHref: globalPlanHref,

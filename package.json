@@ -49,6 +49,8 @@
     "test:source-protection-c01": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --import tsx scripts/test-source-protection-c01-dryrun.ts",
     "test:chantier-core-prep-phase1": "node --import tsx src/lib/chantier/core-preparation-state.test.ts",
     "test:chantier-preparation-state": "node --import tsx src/lib/chantier/preparation-state.test.ts",
+    "test:current-plan-resolution": "node --import tsx src/lib/chantier/resolve-workspace-entities.test.ts",
+    "test:current-plan-resolution-c01": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --import tsx scripts/test-current-plan-resolution-c01.ts",
     "test:chantier-preparation-concordance": "node --import tsx src/lib/chantier/project-preparation-state.test.ts",
     "test:ctx05-ux-urban": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --import tsx scripts/test-ctx05-ux-smoke-urban.ts",
     "test:bework-project-context:urban": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --import tsx scripts/test-bework-project-context.ts",

@@ -1039,11 +1039,27 @@ export async function commitPrepSchedule(input: {
               studyId: study.id,
               projectId: study.projectId,
             },
-            select: { id: true, revisionNumber: true, title: true },
+            select: {
+              id: true,
+              revisionNumber: true,
+              title: true,
+              scopeId: true,
+            },
           });
           if (prev) {
             await tx.prepSchedulePlan.update({
               where: { id: prev.id },
+              data: { status: "ARCHIVED" },
+            });
+            // Archiver les autres CURRENT/INITIAL du même study (évite multi-CURRENT).
+            await tx.prepSchedulePlan.updateMany({
+              where: {
+                organizationId: input.orgId,
+                studyId: study.id,
+                projectId: study.projectId,
+                id: { notIn: [created.id, prev.id] },
+                status: { in: ["CURRENT", "INITIAL"] },
+              },
               data: { status: "ARCHIVED" },
             });
             await tx.prepSchedulePlan.update({
@@ -1053,7 +1069,24 @@ export async function commitPrepSchedule(input: {
                 revisionKind: "CURRENT",
                 revisionNumber: Math.max(1, prev.revisionNumber) + 1,
                 title: prev.title || created.title,
+                // Conserver le scope du plan remplacé si le nouveau n’en a pas.
+                ...(prev.scopeId || study.scopeId
+                  ? { scopeId: prev.scopeId ?? study.scopeId }
+                  : {}),
               },
+            });
+            // Pointer le lot vers le nouveau CURRENT (évite referenceSchedulePlanId stale).
+            await tx.projectScope.updateMany({
+              where: {
+                organizationId: input.orgId,
+                projectId: study.projectId,
+                OR: [
+                  { referenceSchedulePlanId: prev.id },
+                  ...(study.scopeId ? [{ id: study.scopeId }] : []),
+                  ...(prev.scopeId ? [{ id: prev.scopeId }] : []),
+                ],
+              },
+              data: { referenceSchedulePlanId: created.id },
             });
             await tx.prepScheduleEvent.create({
               data: {

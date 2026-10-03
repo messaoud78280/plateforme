@@ -151,25 +151,28 @@ export function computePilotageNextAction(input: {
         ? firstTodo.actionLabel
         : firstTodo.primaryAction === "attach_visit"
         ? "Rattacher la visite terrain"
-        : firstTodo.primaryAction === "create_global_prep"
-          ? firstTodo.id === "planning"
-            ? "Générer le planning chantier"
-            : "Générer le métré / planning"
-          : firstTodo.primaryAction === "create_follow_up" ||
-              (firstTodo.id === "suivi" && !firstTodo.ready)
-            ? "Créer le suivi depuis le planning"
-            : firstTodo.id === "compte_rendu"
-              ? "Générer le compte rendu"
-              : firstTodo.id === "notice"
-                ? "Générer la notice explicative"
-                : firstTodo.id === "visite"
-                  ? firstTodo.actionLabel || "Ouvrir les visites"
-                  : firstTodo.actionLabel || `Préparer : ${firstTodo.label}`;
+        : firstTodo.primaryAction === "prepare_takeoff_chatgpt"
+          ? "Préparer le métré avec ChatGPT"
+          : firstTodo.primaryAction === "create_global_prep"
+            ? firstTodo.id === "planning"
+              ? "Générer le planning chantier"
+              : "Générer le métré / planning"
+            : firstTodo.primaryAction === "create_follow_up" ||
+                (firstTodo.id === "suivi" && !firstTodo.ready)
+              ? "Créer le suivi depuis le planning"
+              : firstTodo.id === "compte_rendu"
+                ? "Générer le compte rendu"
+                : firstTodo.id === "notice"
+                  ? "Générer la notice explicative"
+                  : firstTodo.id === "visite"
+                    ? firstTodo.actionLabel || "Ouvrir les visites"
+                    : firstTodo.actionLabel || `Préparer : ${firstTodo.label}`;
     return {
       label,
       href:
         firstTodo.primaryAction === "attach_visit" ||
-        firstTodo.primaryAction === "create_global_prep"
+        firstTodo.primaryAction === "create_global_prep" ||
+        firstTodo.primaryAction === "prepare_takeoff_chatgpt"
           ? null
           : firstTodo.href,
       stepId: firstTodo.id,

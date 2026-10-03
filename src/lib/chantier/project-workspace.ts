@@ -166,6 +166,7 @@ export type ChantierWorkflowStep = {
   primaryAction:
     | "open"
     | "create_global_prep"
+    | "prepare_takeoff_chatgpt"
     | "create_follow_up"
     | "create_compte_rendu"
     | "create_notice"
@@ -1502,19 +1503,20 @@ async function getProjectWorkspaceUncached(
     {
       id: "metre",
       label: "Métré & quantitatif",
-      title: globalMetreCard.title,
-      detail: globalMetreCard.detail,
+      title: globalStudy
+        ? globalMetreCard.title
+        : "À préparer",
+      detail: globalStudy
+        ? globalMetreCard.detail
+        : resolvedVisitId || visit
+          ? "Visite disponible — préparez le métré avec ChatGPT (plan facultatif)"
+          : "Saisissez une visite, puis préparez le métré avec ChatGPT",
       href: globalMetreCard.href,
       ready: prepState.takeoff.countsAsCompleted,
-      actionLabel: workspaceOpenOrGenerateLabel(
-        Boolean(globalStudy),
-        globalQuote ? "Générer depuis la visite" : "Devis requis",
-      ),
-      primaryAction: globalStudy
-        ? "open"
-        : globalQuote
-          ? "create_global_prep"
-          : "open",
+      actionLabel: globalStudy
+        ? "Ouvrir"
+        : "Préparer avec ChatGPT",
+      primaryAction: globalStudy ? "open" : "prepare_takeoff_chatgpt",
     },
     {
       id: "devis",

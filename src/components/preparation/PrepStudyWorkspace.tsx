@@ -565,6 +565,7 @@ export function PrepStudyWorkspace({
             version={study.version}
             capability={takeoffPatchCapability}
             entityLabel={study.title}
+            primaryActionLabel="Modifier avec ChatGPT"
             disabled={busy || dirty}
             disabledReason={
               dirty

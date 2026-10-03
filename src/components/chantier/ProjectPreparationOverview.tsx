@@ -20,6 +20,7 @@ import {
   timelineStepCaption,
 } from "@/lib/chantier/pilotage-display";
 import { computeProjectNextAction } from "@/lib/chantier/project-preparation-state";
+import { TakeoffCreateFromChatgptModal } from "@/components/chantier/TakeoffCreateFromChatgptModal";
 
 type QuoteSectionPreview = {
   sectionId: string;
@@ -50,6 +51,7 @@ export function ProjectPreparationOverview({
   const [fromQuoteId, setFromQuoteId] = useState<string | null>(null);
   const [createPrefill, setCreatePrefill] = useState("");
   const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [takeoffCreateOpen, setTakeoffCreateOpen] = useState(false);
 
   const unscopedMsg = formatUnscopedHumanMessage(workspace.unscoped);
   const hasUnscoped = workspace.unscoped.items.length > 0;
@@ -72,7 +74,7 @@ export function ProjectPreparationOverview({
     // Existence (href) ≠ terminé (ready) — ne pas regénérer un métré déjà présent.
     if (workspace.global.metre.href) return null;
     if (!canEdit) return "Modification du chantier non autorisée";
-    if (!quoteId) return "Un devis est requis avant de générer le métré";
+    // CREATE via ChatGPT : visite recommandée mais non bloquante (plan facultatif).
     return null;
   }
 
@@ -96,13 +98,20 @@ export function ProjectPreparationOverview({
     if (step.href && (step.ready || step.primaryAction === "open")) {
       return { mode: "open", reason: null, busyLabel: null };
     }
-    if (step.id === "metre" && step.primaryAction === "create_global_prep") {
+    if (
+      step.id === "metre" &&
+      (step.primaryAction === "create_global_prep" ||
+        step.primaryAction === "prepare_takeoff_chatgpt")
+    ) {
       const reason = metreBlockReason();
       if (reason) return { mode: "blocked", reason, busyLabel: null };
       return {
         mode: "generate",
         reason: null,
-        busyLabel: "Préparation du métré…",
+        busyLabel:
+          step.primaryAction === "prepare_takeoff_chatgpt"
+            ? "Ouverture ChatGPT…"
+            : "Préparation du métré…",
       };
     }
     if (step.id === "planning" && step.primaryAction === "create_global_prep") {
@@ -119,6 +128,7 @@ export function ProjectPreparationOverview({
       !step.ready &&
       (step.primaryAction === "attach_visit" ||
         step.primaryAction === "create_global_prep" ||
+        step.primaryAction === "prepare_takeoff_chatgpt" ||
         step.primaryAction === "create_follow_up" ||
         step.primaryAction === "create_compte_rendu" ||
         step.primaryAction === "create_notice")
@@ -383,6 +393,10 @@ export function ProjectPreparationOverview({
     }
     if (step.primaryAction === "attach_visit") {
       await attachSuggestedVisit();
+      return;
+    }
+    if (step.primaryAction === "prepare_takeoff_chatgpt") {
+      setTakeoffCreateOpen(true);
       return;
     }
     if (step.primaryAction === "create_global_prep") {
@@ -933,6 +947,18 @@ export function ProjectPreparationOverview({
           onDone={() => {
             setFromQuoteOpen(false);
             setFromQuoteId(null);
+            router.refresh();
+          }}
+        />
+      ) : null}
+
+      {takeoffCreateOpen ? (
+        <TakeoffCreateFromChatgptModal
+          projectId={workspace.projectId}
+          visitId={workspace.global.visitId ?? null}
+          onClose={() => setTakeoffCreateOpen(false)}
+          onCreated={() => {
+            setTakeoffCreateOpen(false);
             router.refresh();
           }}
         />

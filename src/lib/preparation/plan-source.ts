@@ -117,20 +117,81 @@ export async function resolvePrepPlanSource(input: {
   projectId: string;
   sourcesJson: unknown;
 }): Promise<ResolvedPlanSource | null> {
-  const source = primaryPrepSource(input.sourcesJson);
-  if (!source) return null;
+  const all = await resolveAllPrepPlanSources(input);
+  return all[0] ?? null;
+}
 
-  const file = source.chantierFileId
-    ? await loadFile(input.projectId, source.chantierFileId)
-    : null;
+/** Toutes les sources plan du métré (pas seulement la primaire). */
+export async function resolveAllPrepPlanSources(input: {
+  projectId: string;
+  sourcesJson: unknown;
+}): Promise<ResolvedPlanSource[]> {
+  const sources = asSources(input.sourcesJson);
+  if (sources.length === 0) return [];
 
-  return {
-    source,
-    file,
-    fileMissing: !file || !file.fileUrl,
-    displayTitle: planSourceDisplayTitle(source),
-    revisionLabel: planSourceRevisionLabel(source, file),
-  };
+  const out: ResolvedPlanSource[] = [];
+  for (const source of sources) {
+    const file = source.chantierFileId
+      ? await loadFile(input.projectId, source.chantierFileId)
+      : null;
+    out.push({
+      source,
+      file,
+      fileMissing: !file || !file.fileUrl,
+      displayTitle: planSourceDisplayTitle(source),
+      revisionLabel: planSourceRevisionLabel(source, file),
+    });
+  }
+  return out;
+}
+
+/**
+ * Détache un document source du métré.
+ * Ne supprime pas le fichier GED — uniquement le lien préparation.
+ */
+export async function detachPrepStudyPlanSource(input: {
+  orgId: string;
+  studyId: string;
+  sourceId: string;
+  actorUserId: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const study = await prisma.prepStudy.findFirst({
+    where: {
+      id: input.studyId,
+      organizationId: input.orgId,
+      archivedAt: null,
+    },
+    select: { id: true, sourcesJson: true },
+  });
+  if (!study) return { ok: false, error: "Étude introuvable" };
+
+  const sources = asSources(study.sourcesJson);
+  const target = sources.find((s) => s.id === input.sourceId);
+  if (!target) return { ok: false, error: "Document source introuvable" };
+
+  const next = sources.filter((s) => s.id !== input.sourceId);
+  const fileId = target.chantierFileId;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.prepStudy.update({
+      where: { id: study.id },
+      data: {
+        sourcesJson: next as never,
+        updatedById: input.actorUserId,
+      },
+    });
+    if (fileId) {
+      await tx.chantierFileLink.deleteMany({
+        where: {
+          fileId,
+          entityType: PREP_STUDY_FILE_LINK,
+          entityId: study.id,
+        },
+      });
+    }
+  });
+
+  return { ok: true };
 }
 
 /**
@@ -143,7 +204,7 @@ export async function attachPrepStudyPlanSource(input: {
   chantierFileId: string;
   sourceId?: string | null;
   actorUserId: string;
-  /** Préremplissage / correction métadonnée source (ex. C-01). */
+  /** Préremplissage / correction métadonnée source. */
   planNumber?: string | null;
   revision?: string | null;
   title?: string | null;
@@ -187,7 +248,7 @@ export async function attachPrepStudyPlanSource(input: {
   const titleHint = input.title?.trim() || null;
 
   const sources = asSources(study.sourcesJson);
-  const targetId = input.sourceId?.trim() || sources[0]?.id || "SRC-C01";
+  const targetId = input.sourceId?.trim() || sources[0]?.id || "SRC-PLAN";
   let found = false;
   const next = sources.map((s) => {
     if (s.id !== targetId) return s;
@@ -286,8 +347,8 @@ export async function listProjectPlanCandidateFiles(input: {
         { subcategory: { contains: "plan", mode: "insensitive" } },
         { documentType: { contains: "plan", mode: "insensitive" } },
         { name: { contains: "plan", mode: "insensitive" } },
-        { name: { contains: "C-01", mode: "insensitive" } },
-        { name: { contains: "fondation", mode: "insensitive" } },
+        { mimeType: { startsWith: "application/pdf" } },
+        { mimeType: { startsWith: "image/" } },
       ],
     },
     orderBy: [{ isCurrentVersion: "desc" }, { updatedAt: "desc" }],

@@ -2,6 +2,8 @@
  * Simulation planning — copie mémoire + recalcul durée / dates (aucune écriture).
  */
 import type { ImpactPlan, ImpactScheduleTask } from "@/lib/bework-patch/impact/types";
+import { computeSchedule } from "@/lib/preparation/schedule/compute";
+import type { PrepWorkflowStepDTO } from "@/lib/preparation/schedule/types";
 
 function ceilHalfDay(days: number): number {
   return Math.ceil(days * 2) / 2;
@@ -150,5 +152,143 @@ export function simulatePlanFromQuantityMap(
     afterDurationWorkingDays: afterDur,
     beforeEndDate: plan.endDateBase,
     afterEndDate: addWorkingDays(plan.endDateBase, deltaDays),
+  };
+}
+
+export type TaskDateSim = {
+  taskId: string;
+  stepCode: string;
+  name: string;
+  beforeStart: string | null;
+  afterStart: string | null;
+  beforeEnd: string | null;
+  afterEnd: string | null;
+};
+
+/**
+ * Simule l’impact dates d’un update_dependency via le même computeSchedule
+ * que le commit (pas un second calculateur).
+ */
+export function simulateDependencyDateImpact(
+  plan: ImpactPlan,
+  dependencyOverrides: Map<
+    string,
+    Array<{ step_id: string; type: "FS" | "SS" | "FF"; lag_days: number }>
+  >,
+): {
+  moved: TaskDateSim[];
+  beforeEndDate: string | null;
+  afterEndDate: string | null;
+  errors: string[];
+} {
+  if (!plan.startDate || plan.tasks.length === 0) {
+    return {
+      moved: [],
+      beforeEndDate: plan.endDateBase,
+      afterEndDate: plan.endDateBase,
+      errors: [],
+    };
+  }
+
+  const depsByStep = new Map<
+    string,
+    Array<{ step_id: string; type: "FS" | "SS" | "FF"; lag_days: number }>
+  >();
+  for (const t of plan.tasks) {
+    const override = dependencyOverrides.get(t.id) ?? dependencyOverrides.get(t.stepCode);
+    if (override) {
+      depsByStep.set(t.stepCode, override);
+    } else {
+      depsByStep.set(
+        t.stepCode,
+        t.dependsOnStepCodes.map((step_id) => ({
+          step_id,
+          type: "FS" as const,
+          lag_days: 0,
+        })),
+      );
+    }
+  }
+
+  const workflowSteps: PrepWorkflowStepDTO[] = plan.tasks.map((t, i) => ({
+    id: t.stepCode,
+    order: i + 1,
+    name: t.name,
+    lot: t.lot,
+    kind: "work",
+    description: t.description ?? null,
+    execution_phase_id: null,
+    takeoff_ids: t.driverTakeoffCode ? [t.driverTakeoffCode] : [],
+    duration: {
+      mode: "fixed",
+      days: t.durationDays,
+      calendar: "working",
+    },
+    crew: [],
+    crew_id: null,
+    crew_size: null,
+    workload_person_days: null,
+    parallelizable: false,
+    equipment: [],
+    supplies: [],
+    preconditions: [],
+    controls_before_next: [],
+    constraints: [],
+    safety: [],
+    proofs: [],
+    hold_point: false,
+    conditional: null,
+  }));
+
+  const computed = computeSchedule({
+    workflowSteps,
+    schedule: {
+      start_date: plan.startDate,
+      calendar: {
+        working_days: [1, 2, 3, 4, 5],
+        holidays: "FR_METROPOLE",
+        granularity_days: 0.5,
+      },
+      tasks: plan.tasks.map((t) => ({
+        step_id: t.stepCode,
+        depends_on: depsByStep.get(t.stepCode) ?? [],
+        include_in_base: true,
+      })),
+    },
+    resources: { labor: [], equipment: [], supplies: [], rates: [] },
+    qtyOf: () => null,
+  });
+
+  if (computed.errors.length) {
+    return {
+      moved: [],
+      beforeEndDate: plan.endDateBase,
+      afterEndDate: plan.endDateBase,
+      errors: computed.errors,
+    };
+  }
+
+  const byStep = new Map(computed.placed.map((p) => [p.stepId, p]));
+  const moved: TaskDateSim[] = [];
+  for (const t of plan.tasks) {
+    const p = byStep.get(t.stepCode);
+    if (!p) continue;
+    if (t.startDate === p.startDate && t.endDate === p.endDate) continue;
+    moved.push({
+      taskId: t.id,
+      stepCode: t.stepCode,
+      name: t.name,
+      beforeStart: t.startDate,
+      afterStart: p.startDate,
+      beforeEnd: t.endDate,
+      afterEnd: p.endDate,
+    });
+  }
+
+  return {
+    moved,
+    beforeEndDate: plan.endDateBase,
+    afterEndDate: computed.baseEnd?.date ?? plan.endDateBase,
+    errors: [],
   };
 }

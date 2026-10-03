@@ -3,10 +3,15 @@
  * Complète les depends_on explicites du workflow — n'invente pas de métier hors règles.
  *
  * Priorité :
- * 1. depends_on métier explicites (après purge des inversions rôle)
+ * 1. depends_on métier EXPLICITES — source de vérité pour le placement
+ *    (purge uniquement des inversions dures : remise / contrôle final → travaux)
  * 2. execution_phases explicites (workflowJson) → graphe gate déterministe
- * 3. fallback legacy par rôle inféré (ROLE_SEQ)
+ * 3. fallback legacy par rôle inféré (ROLE_SEQ) — n’écrase jamais une FS explicite
  * 4. réduction transitive (graphe minimal)
+ *
+ * IMPORTANT : une FS utilisateur ne doit jamais être effacée parce qu’un rôle
+ * inféré (ex. « finishes ») est mal classé. Sinon computeSchedule ignore le
+ * graphe persisté et les dates restent incohérentes (DEP_DATE_VIOLATION).
  */
 
 import {
@@ -189,44 +194,10 @@ export function sanitizeInvertedRoleDependencies(
       ) {
         continue;
       }
-      // Préparation = entrée de chantier : seuls logistique / attente amont sont plausibles
-      if (
-        succPhase.role === "preparation" &&
-        predPhase.role !== "logistics" &&
-        predPhase.role !== "wait" &&
-        predPhase.role !== "preparation"
-      ) {
-        continue;
-      }
 
-      // Ordre ROLE_SEQ : un rôle aval ne précède pas un rôle amont
-      // (exception : contrôle intermédiaire → travaux suivants)
-      const predIdx = roleIndex(predPhase.role);
-      const succIdx = roleIndex(succPhase.role);
-      const intermediateControlPred =
-        predPhase.role === "controls" &&
-        !isFinalControlStep(
-          stepById.get(d.step_id) ?? {
-            name: d.step_id,
-            lot: null,
-            kind: null,
-            description: null,
-          },
-          predPhase,
-          executionPhases,
-        ) &&
-        isWorkRole(succPhase.role);
-      if (
-        !intermediateControlPred &&
-        predPhase.role !== "generic" &&
-        predPhase.role !== "unclassified" &&
-        succPhase.role !== "generic" &&
-        succPhase.role !== "unclassified" &&
-        predIdx > succIdx
-      ) {
-        continue;
-      }
-
+      // Toute autre FS explicite est conservée (y compris entre rôles travail
+      // dont l’ordre ROLE_SEQ inféré serait trompeur — ex. rebouchage « finishes »
+      // avant pose appareillage « installation »).
       kept.push({
         step_id: d.step_id,
         type: d.type ?? "FS",

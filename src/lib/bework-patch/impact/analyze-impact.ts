@@ -22,7 +22,10 @@ import {
   simulateQuoteLine,
   simulateQuoteTotals,
 } from "@/lib/bework-patch/impact/simulate-quote";
-import { simulatePlanFromQuantityMap } from "@/lib/bework-patch/impact/simulate-planning";
+import {
+  simulateDependencyDateImpact,
+  simulatePlanFromQuantityMap,
+} from "@/lib/bework-patch/impact/simulate-planning";
 import type {
   AffectedEntity,
   AnalyzePatchImpactResult,
@@ -1322,6 +1325,25 @@ function analyzePlanningLocal(
     }
   }
 
+  const dependencyOverrides = new Map<
+    string,
+    Array<{ step_id: string; type: "FS" | "SS" | "FF"; lag_days: number }>
+  >();
+  for (const op of patch.operations) {
+    if (op.op !== "update_dependency") continue;
+    const key =
+      op.target.task_id ?? op.target.step_code ?? op.target.id ?? op.target.code;
+    if (!key) continue;
+    dependencyOverrides.set(
+      key,
+      (op.changes.depends_on ?? []).map((d) => ({
+        step_id: d.step_id,
+        type: (d.type ?? "FS") as "FS" | "SS" | "FF",
+        lag_days: d.lag_days ?? 0,
+      })),
+    );
+  }
+
   for (const plan of subgraph.plans) {
     if (plan.id !== patch.origin.entity_id) continue;
     const sim = simulatePlanFromQuantityMap(plan, new Map(), durationOverrides);
@@ -1377,6 +1399,71 @@ function analyzePlanningLocal(
         certainty: "PARTIAL",
         reason: "Date de fin simulée (approximation calendaire V1)",
       });
+    }
+
+    if (dependencyOverrides.size > 0) {
+      const dateSim = simulateDependencyDateImpact(plan, dependencyOverrides);
+      for (const err of dateSim.errors) {
+        errors.push(issue("SCHEDULE_RECOMPUTE_FAILED", err, "error"));
+      }
+      for (const t of dateSim.moved) {
+        pushAffected(affected, {
+          section: "PLANNING",
+          entityType: "PREP_SCHEDULE_TASK",
+          id: t.taskId,
+          label: `${t.stepCode} · ${t.name}`,
+          certainty: "CERTAIN",
+        });
+        if (t.beforeStart !== t.afterStart) {
+          derived.push({
+            section: "PLANNING",
+            entityType: "PREP_SCHEDULE_TASK",
+            entityId: t.taskId,
+            label: `${t.stepCode} · ${t.name}`,
+            field: "start_date",
+            before: t.beforeStart,
+            after: t.afterStart,
+            unit: null,
+            certainty: "CERTAIN",
+            reason: "Replanification après dépendance (FS/SS/FF)",
+          });
+        }
+        if (t.beforeEnd !== t.afterEnd) {
+          derived.push({
+            section: "PLANNING",
+            entityType: "PREP_SCHEDULE_TASK",
+            entityId: t.taskId,
+            label: `${t.stepCode} · ${t.name}`,
+            field: "end_date",
+            before: t.beforeEnd,
+            after: t.afterEnd,
+            unit: null,
+            certainty: "CERTAIN",
+            reason: "Replanification après dépendance (FS/SS/FF)",
+          });
+        }
+      }
+      if (
+        dateSim.beforeEndDate !== dateSim.afterEndDate &&
+        !derived.some(
+          (d) =>
+            d.entityType === "PREP_SCHEDULE_PLAN" &&
+            d.field === "end_date" &&
+            d.entityId === plan.id,
+        )
+      ) {
+        derived.push({
+          section: "PLANNING",
+          entityType: "PREP_SCHEDULE_PLAN",
+          entityId: plan.id,
+          label: plan.title,
+          field: "end_date",
+          before: dateSim.beforeEndDate,
+          after: dateSim.afterEndDate,
+          certainty: "CERTAIN",
+          reason: "Fin chantier après replanification des dépendances",
+        });
+      }
     }
   }
 

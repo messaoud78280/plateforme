@@ -19,6 +19,7 @@ import {
   noticeDocToVersionInput,
 } from "@/lib/bework-patch/commit/notice-ops";
 import { resolveCurrentSchedulePlan } from "@/lib/chantier/resolve-workspace-entities";
+import { normalizeDependsOnJson } from "@/lib/bework-patch/operation-contracts";
 
 function asIso(dte: Date | null | undefined): string | null {
   if (!dte) return null;
@@ -502,14 +503,9 @@ export async function loadImpactSubgraph(input: {
       revisionNumber: p.revisionNumber,
       studyVersionAtGeneration: p.studyVersionAtGeneration,
       tasks: p.tasks.map((t) => {
-        const depsRaw = Array.isArray(t.dependsOnJson) ? t.dependsOnJson : [];
-        const dependsOnStepCodes = depsRaw
-          .map((x) =>
-            x && typeof x === "object" && "stepId" in x
-              ? String((x as { stepId: string }).stepId)
-              : null,
-          )
-          .filter((x): x is string => !!x);
+        const dependsOnStepCodes = normalizeDependsOnJson(t.dependsOnJson).map(
+          (d) => d.step_id,
+        );
         return {
           id: t.id,
           stepCode: t.stepCode,
@@ -654,7 +650,9 @@ export async function loadImpactSubgraph(input: {
             parallelUnits: t.parallelUnits,
             startDate: asIso(t.startDate),
             endDate: asIso(t.endDate),
-            dependsOnStepCodes: [],
+            dependsOnStepCodes: normalizeDependsOnJson(t.dependsOnJson).map(
+              (dep) => dep.step_id,
+            ),
             lot: t.lot,
           })),
           takeoffLinks: plan.tasks.flatMap((t) =>

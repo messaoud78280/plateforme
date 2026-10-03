@@ -22,6 +22,7 @@ import {
   enumerateCalendarDays,
   halfIndexOnAxis,
   holdPointBlocksSuccessor,
+  isoWeekNumber,
   normalizeHoldPointStatus,
 } from "../src/lib/preparation/schedule/gantt-layout";
 
@@ -100,6 +101,8 @@ section("Axe temporel + positionnement barres");
 
   const dayW = dayWidthForZoom("day");
   assert.equal(dayW, 56);
+  assert.equal(dayWidthForZoom("3weeks"), 20);
+  assert.equal(isoWeekNumber("2026-10-12"), 42);
 
   // P03 : 07-08 octobre, jour plein
   const p03 = barGeometry(

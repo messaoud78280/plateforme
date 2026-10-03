@@ -5,7 +5,7 @@
 
 import { addCalendarDays, isoWeekday, parseIsoDate, toIsoDate } from "./calendar";
 
-export type GanttZoom = "day" | "week" | "month";
+export type GanttZoom = "day" | "week" | "3weeks" | "month";
 
 export type GanttTaskInput = {
   id: string;
@@ -53,8 +53,50 @@ export type PlanIndicators = {
 const DAY_WIDTH: Record<GanttZoom, number> = {
   day: 56,
   week: 28,
+  "3weeks": 20,
   month: 12,
 };
+
+/** Semaine ISO (lundi → dimanche) — affichage axe uniquement. */
+export function isoWeekNumber(iso: string): number {
+  const d = new Date(`${iso.slice(0, 10)}T12:00:00Z`);
+  const day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7);
+}
+
+export type GanttWeekBand = {
+  week: number;
+  year: number;
+  startIso: string;
+  endIso: string;
+  dayCount: number;
+};
+
+export function groupDaysByIsoWeek(
+  days: Array<{ iso: string }>,
+): GanttWeekBand[] {
+  const bands: GanttWeekBand[] = [];
+  for (const day of days) {
+    const week = isoWeekNumber(day.iso);
+    const year = Number(day.iso.slice(0, 4));
+    const last = bands[bands.length - 1];
+    if (last && last.week === week && last.year === year) {
+      last.endIso = day.iso;
+      last.dayCount += 1;
+    } else {
+      bands.push({
+        week,
+        year,
+        startIso: day.iso,
+        endIso: day.iso,
+        dayCount: 1,
+      });
+    }
+  }
+  return bands;
+}
 
 export function dayWidthForZoom(zoom: GanttZoom): number {
   return DAY_WIDTH[zoom];

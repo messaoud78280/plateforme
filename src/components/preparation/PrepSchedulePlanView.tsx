@@ -80,6 +80,13 @@ export function PrepSchedulePlanView({
   const [tab, setTab] = useState<PlanningViewTab>("planning");
   const [filter, setFilter] = useState<PlanningFilterId>("all");
   const [query, setQuery] = useState("");
+  const [crewFilter, setCrewFilter] = useState<string>("all");
+  const [phaseFilter, setPhaseFilter] = useState<string>("all");
+  const [conductMode, setConductMode] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [density, setDensity] = useState<"comfortable" | "compact">(
+    "comfortable",
+  );
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/prep-studies/${studyId}/schedule/${planId}`);
@@ -106,8 +113,15 @@ export function PrepSchedulePlanView({
 
   const filteredTasks = useMemo(() => {
     if (!vm) return [];
-    return filterPlanningTasks(vm.tasks, filter, query);
-  }, [vm, filter, query]);
+    let list = filterPlanningTasks(vm.tasks, filter, query);
+    if (crewFilter !== "all") {
+      list = list.filter((t) => (t.crewId ?? "") === crewFilter);
+    }
+    if (phaseFilter !== "all") {
+      list = list.filter((t) => t.phaseLabel === phaseFilter);
+    }
+    return list;
+  }, [vm, filter, query, crewFilter, phaseFilter]);
 
   const filteredPhases = useMemo(() => {
     if (!vm) return [];
@@ -131,6 +145,21 @@ export function PrepSchedulePlanView({
     const dep = plan.dependencies.find((d) => d.predecessorStepCode === selected.stepCode);
     return dep?.successorStepCode ?? null;
   }, [plan, selected]);
+
+  const crewOptions = useMemo(() => {
+    if (!vm) return [] as string[];
+    const ids = [
+      ...new Set(vm.tasks.map((t) => t.crewId).filter((x): x is string => !!x)),
+    ];
+    return ids.sort((a, b) => a.localeCompare(b, "fr"));
+  }, [vm]);
+
+  useEffect(() => {
+    const cls = "bework-planning-expanded";
+    if (expanded) document.body.classList.add(cls);
+    else document.body.classList.remove(cls);
+    return () => document.body.classList.remove(cls);
+  }, [expanded]);
 
   function focusStep(stepCode: string) {
     const t = vm?.tasks.find((x) => x.stepCode === stepCode);
@@ -220,9 +249,21 @@ export function PrepSchedulePlanView({
   });
 
   const s = vm.summary;
+  const controlCount = vm.tasks.filter(
+    (t) => t.visualKind === "control" || t.phase.role === "controls",
+  ).length;
+  const crewCount = crewOptions.length;
+
+  const hideCommercial = conductMode || expanded;
+  const shell = cn(
+    "relative space-y-3",
+    expanded
+      ? "h-dvh overflow-hidden px-3 py-3"
+      : "mx-auto max-w-[1920px] px-3 pb-16 pt-4 sm:px-5",
+  );
 
   return (
-    <div className="relative mx-auto max-w-[1600px] space-y-3 px-4 pb-16 pt-5 sm:px-6">
+    <div className={shell}>
       <ChantierHierarchyNav
         backHref={nav.backHref}
         backLabel={nav.backLabel}
@@ -265,13 +306,17 @@ export function PrepSchedulePlanView({
               Source métré{" "}
               <strong className="font-medium text-slate-700">v{plan.study.version}</strong>
             </span>
-            <span className="text-slate-300">·</span>
-            <span>
-              Devis{" "}
-              <strong className="font-medium text-slate-700">
-                {plan.quote ? plan.quote.number : "Aucun"}
-              </strong>
-            </span>
+            {!hideCommercial ? (
+              <>
+                <span className="text-slate-300">·</span>
+                <span>
+                  Devis{" "}
+                  <strong className="font-medium text-slate-700">
+                    {plan.quote ? plan.quote.number : "Aucun"}
+                  </strong>
+                </span>
+              </>
+            ) : null}
           </div>
           <div className="mt-1.5">
             {metreSync.needsUpdate ? (
@@ -305,7 +350,28 @@ export function PrepSchedulePlanView({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {plan.quote ? (
+          <button
+            type="button"
+            onClick={() => setConductMode((v) => !v)}
+            aria-pressed={conductMode}
+            className={cn(
+              "rounded-lg px-3 py-1.5 text-[12px] font-semibold",
+              conductMode
+                ? "bg-[#1e3a5f] text-white"
+                : "border border-[#1e3a5f]/30 bg-white text-[#1e3a5f]",
+            )}
+          >
+            Vue chantier
+          </button>
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            aria-pressed={expanded}
+            className="rounded-lg border border-[#1e3a5f]/30 bg-white px-3 py-1.5 text-[12px] font-semibold text-[#1e3a5f]"
+          >
+            {expanded ? "Réduire" : "Agrandir"}
+          </button>
+          {!hideCommercial && plan.quote ? (
             <>
               <button
                 type="button"
@@ -327,7 +393,7 @@ export function PrepSchedulePlanView({
                 Retirer le devis
               </button>
             </>
-          ) : (
+          ) : !hideCommercial ? (
             <button
               type="button"
               disabled={busy}
@@ -339,22 +405,26 @@ export function PrepSchedulePlanView({
             >
               Lier un devis
             </button>
-          )}
-          <Link
-            href={`/dashboard/visites-metres/etudes/${studyId}`}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-[12px] text-slate-700"
-          >
-            Voir le métré
-          </Link>
-          <BeworkPatchToolbar
-            section="PLANNING"
-            projectId={plan.project.id}
-            entityId={plan.id}
-            version={plan.revisionNumber}
-            capability={getSectionCapability("PLANNING")}
-            entityLabel={plan.title}
-            primaryActionLabel="Modifier avec ChatGPT"
-          />
+          ) : null}
+          {!hideCommercial ? (
+            <Link
+              href={`/dashboard/visites-metres/etudes/${studyId}`}
+              className="rounded-lg border border-slate-200 px-3 py-1.5 text-[12px] text-slate-700"
+            >
+              Voir le métré
+            </Link>
+          ) : null}
+          {!hideCommercial ? (
+            <BeworkPatchToolbar
+              section="PLANNING"
+              projectId={plan.project.id}
+              entityId={plan.id}
+              version={plan.revisionNumber}
+              capability={getSectionCapability("PLANNING")}
+              entityLabel={plan.title}
+              primaryActionLabel="Modifier avec ChatGPT"
+            />
+          ) : null}
         </div>
       </header>
 
@@ -452,55 +522,48 @@ export function PrepSchedulePlanView({
         </div>
       ) : null}
 
-      {/* KPI synthèse */}
-      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 lg:grid-cols-8">
-        <Kpi label="Début" value={formatStartFr(s.startDate) ?? "À définir"} />
-        <Kpi label="Fin prévue" value={formatStartFr(s.endDate) ?? "—"} />
-        <Kpi
-          label="Durée chantier"
-          value={
-            s.workingSpanDays != null ? `${s.workingSpanDays} j ouvrés` : "—"
-          }
+      {/* Bandeau synthèse chantier */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-[#1e3a5f]/15 bg-white px-3 py-2 text-[12px]">
+        <span className="text-[11px] font-bold uppercase tracking-wide text-[#1e3a5f]">
+          Planning chantier
+        </span>
+        <SynthItem label="Début" value={formatStartFr(s.startDate) ?? "À définir"} />
+        <SynthItem label="Fin prévue" value={formatStartFr(s.endDate) ?? "—"} />
+        <SynthItem
+          label="Durée"
+          value={s.workingSpanDays != null ? `${s.workingSpanDays} j ouvrés` : "—"}
         />
-        <Kpi
-          label="Durées cumulées"
-          value={`${s.durationCumulatedDays} j`}
-          hint="Somme des durées tâches — ≠ charge h.j"
-        />
-        <Kpi
-          label="Charge connue"
-          value={s.workloadKnownHj != null ? `${s.workloadKnownHj} h.j` : "—"}
-        />
-        <Kpi label="Tâches" value={String(s.taskCount)} />
-        <Kpi
-          label="Équipes"
-          value={`${s.crewsFilled} / ${s.taskCount}`}
-          hint="Tâches avec équipe renseignée"
-        />
-        <Kpi
+        <SynthItem label="Tâches" value={String(s.taskCount)} />
+        <SynthItem label="Équipes" value={String(crewCount)} />
+        <SynthItem label="Contrôles" value={String(controlCount)} />
+        <SynthItem label="À compléter" value={String(s.incompleteCount)} />
+        <SynthItem
           label="Alertes"
           value={String(s.blockerCount)}
-          tone={s.blockerCount > 0 ? "danger" : undefined}
+          danger={s.blockerCount > 0}
         />
       </div>
 
-      {/* Qualité */}
-      <QualityPanel
-        blockers={vm.quality.blockers}
-        warnings={vm.quality.warnings}
-        infos={vm.quality.infos}
-        incompleteCount={vm.quality.incompleteCount}
-        onFilter={(f) => {
-          setTab("planning");
-          setFilter(f);
-        }}
-        onSeeSteps={(codes) => {
-          setTab("planning");
-          setFilter("with_alert");
-          if (codes[0]) focusStep(codes[0]);
-        }}
-      />
+      {!expanded ? (
+        <QualityPanel
+          blockers={vm.quality.blockers}
+          warnings={vm.quality.warnings}
+          infos={vm.quality.infos}
+          incompleteCount={vm.quality.incompleteCount}
+          onFilter={(f) => {
+            setTab("planning");
+            setFilter(f);
+          }}
+          onSeeSteps={(codes) => {
+            setTab("planning");
+            setFilter("with_alert");
+            if (codes[0]) focusStep(codes[0]);
+          }}
+        />
+      ) : null}
 
+      {!expanded ? (
+      <>
       {/* Date démarrage */}
       {!plan.startDate || startOpen ? (
         <div className="flex flex-wrap items-end gap-3 rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-2.5">
@@ -555,6 +618,8 @@ export function PrepSchedulePlanView({
           Modifier la date de démarrage
         </button>
       )}
+      </>
+      ) : null}
 
       {/* Tabs */}
       <div
@@ -601,6 +666,66 @@ export function PrepSchedulePlanView({
               onChange={(e) => setQuery(e.target.value)}
               className="rounded-lg border border-slate-200 px-3 py-1.5 text-[12px] outline-none focus:border-[#1e3a5f]/40"
             />
+            <label className="flex items-center gap-1 text-[11px] text-slate-600">
+              Équipe
+              <select
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[12px]"
+                value={crewFilter}
+                onChange={(e) => setCrewFilter(e.target.value)}
+              >
+                <option value="all">Toutes les équipes</option>
+                {crewOptions.map((id) => (
+                  <option key={id} value={id}>
+                    {id}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-1 text-[11px] text-slate-600">
+              Phase
+              <select
+                className="max-w-[180px] rounded-md border border-slate-200 bg-white px-2 py-1 text-[12px]"
+                value={phaseFilter}
+                onChange={(e) => setPhaseFilter(e.target.value)}
+              >
+                <option value="all">Toutes les phases</option>
+                {vm.phases.map((p) => (
+                  <option key={p.key} value={p.label}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div
+              className="flex rounded-md border border-slate-200 p-0.5"
+              role="group"
+              aria-label="Densité"
+            >
+              <button
+                type="button"
+                onClick={() => setDensity("comfortable")}
+                className={cn(
+                  "rounded px-2 py-1 text-[11px] font-medium",
+                  density === "comfortable"
+                    ? "bg-[#1e3a5f] text-white"
+                    : "text-slate-600",
+                )}
+              >
+                Confortable
+              </button>
+              <button
+                type="button"
+                onClick={() => setDensity("compact")}
+                className={cn(
+                  "rounded px-2 py-1 text-[11px] font-medium",
+                  density === "compact"
+                    ? "bg-[#1e3a5f] text-white"
+                    : "text-slate-600",
+                )}
+              >
+                Compact
+              </button>
+            </div>
             <div className="flex flex-wrap gap-1">
               {FILTERS.map((f) => (
                 <button
@@ -626,13 +751,18 @@ export function PrepSchedulePlanView({
             dependencies={plan.dependencies}
             selectedTaskId={selectedId}
             onSelectTask={setSelectedId}
+            density={density}
+            expanded={expanded}
+            conductMode={conductMode}
           />
 
-          <TaskTable
-            tasks={filteredTasks}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
+          {!hideCommercial ? (
+            <TaskTable
+              tasks={filteredTasks}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+            />
+          ) : null}
         </>
       ) : null}
 
@@ -736,37 +866,29 @@ export function PrepSchedulePlanView({
   );
 }
 
-function Kpi({
+function SynthItem({
   label,
   value,
-  hint,
-  tone,
+  danger,
 }: {
   label: string;
   value: string;
-  hint?: string;
-  tone?: "danger";
+  danger?: boolean;
 }) {
   return (
-    <div
-      className={cn(
-        "rounded-lg border bg-white px-2.5 py-2",
-        tone === "danger"
-          ? "border-red-200"
-          : "border-[#1e3a5f]/10",
-      )}
-      title={hint}
-    >
-      <p
+    <span className="inline-flex items-baseline gap-1.5">
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+        {label}
+      </span>
+      <span
         className={cn(
-          "text-[14px] font-semibold tabular-nums",
-          tone === "danger" ? "text-red-700" : "text-[#1e3a5f]",
+          "text-[13px] font-semibold tabular-nums",
+          danger ? "text-red-700" : "text-[#1e3a5f]",
         )}
       >
         {value}
-      </p>
-      <p className="text-[10px] leading-snug text-slate-500">{label}</p>
-    </div>
+      </span>
+    </span>
   );
 }
 

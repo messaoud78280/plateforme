@@ -1639,11 +1639,13 @@ body {
     background: linear-gradient(145deg, #152a45 0%, #173f73 50%, #1d4ed8 140%);
     border-color: transparent;
   }
-  .bw-psig__overflow summary {
+  .bw-psig__overflow summary,
+  .bw-psig__overflow-trigger {
     list-style: none;
     cursor: pointer;
     display: inline-flex;
     min-height: 2.35rem;
+    min-width: 2.35rem;
     align-items: center;
     justify-content: center;
     border-radius: 12px;
@@ -1652,13 +1654,19 @@ body {
     padding: 0.45rem 0.75rem;
     font-size: 0.75rem;
     font-weight: 700;
-    color: #475569;
+    letter-spacing: 0.12em;
+    color: #173f73;
   }
   .bw-psig__overflow summary::-webkit-details-marker {
     display: none;
   }
-  .bw-psig__overflow summary:hover {
+  .bw-psig__overflow summary:hover,
+  .bw-psig__overflow-trigger:hover {
     background: rgba(238, 246, 252, 0.95);
+  }
+  .bw-psig__overflow-trigger[aria-expanded="true"] {
+    border-color: rgba(31, 182, 213, 0.35);
+    background: rgba(238, 246, 252, 0.98);
   }
 
   .bw-craft-bar {
@@ -2991,4 +2999,15 @@ html::before {
 .bw-footer-blend {
   border-top: none !important;
   position: relative;
+}
+
+/* Planning — mode agrandi / conduite : maximiser le Gantt */
+body.bework-planning-expanded aside.bw-sidebar-shell {
+  display: none !important;
+}
+body.bework-planning-expanded .cc-header {
+  display: none !important;
+}
+body.bework-planning-expanded {
+  overflow: hidden;
 }

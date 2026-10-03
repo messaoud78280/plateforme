@@ -321,7 +321,7 @@ export function TakeoffCreateFromChatgptModal({
               </button>
               <button
                 type="button"
-                disabled={busy || (preview?.duplicate && !allowDuplicate)}
+                disabled={busy || (Boolean(preview?.duplicate) && !allowDuplicate)}
                 onClick={() => void commit()}
                 className={cn(
                   "rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-[12.5px] font-semibold text-white",

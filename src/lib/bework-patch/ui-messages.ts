@@ -92,6 +92,7 @@ export function mapPatchErrorToUser(input: {
         actionLabel: "Coller un autre bloc",
       };
     case "OPERATION_NOT_ALLOWED_FOR_SECTION":
+    case "SCHEDULE_RECOMPUTE_FAILED":
     case "UNSUPPORTED":
     case "INVALID_FIELD":
     case "EMPTY_OPERATIONS":

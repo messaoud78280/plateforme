@@ -150,7 +150,7 @@ export function ChantierDossierNav({
           className={cn(
             "flex items-stretch overflow-x-auto",
             "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-            roomy ? "min-h-[96px]" : "min-h-[84px]",
+            roomy ? "min-h-[88px]" : "min-h-[72px]",
           )}
         >
           {snapshot.steps.map((step, idx) => (
@@ -201,7 +201,7 @@ function NavStep({
       ? "items-center gap-3 px-3.5 py-3"
       : cn(
           "h-full flex-col justify-center",
-          roomy ? "px-3 py-[18px]" : "px-2.5 py-3.5",
+          roomy ? "px-3 py-4" : "px-2.5 py-3",
         ),
     active
       ? "bg-[#1e3a5f]/[0.045] shadow-[inset_0_-2.5px_0_0_#1e3a5f]"
@@ -235,9 +235,8 @@ function NavStep({
         </span>
         <span
           className={cn(
-            "truncate text-[13px] font-semibold uppercase tracking-[0.06em]",
+            "truncate text-[13px] font-semibold tracking-tight",
             active ? "text-[#1e3a5f]" : "text-slate-700",
-            roomy && "text-[13.5px]",
           )}
         >
           {step.shortLabel}

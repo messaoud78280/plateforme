@@ -19,13 +19,13 @@ assert.ok(dayWidthForZoom("day") >= 90 && dayWidthForZoom("day") <= 110);
 assert.ok(dayWidthForZoom("week") >= 70 && dayWidthForZoom("week") <= 85);
 assert.ok(dayWidthForZoom("3weeks") >= 55 && dayWidthForZoom("3weeks") <= 70);
 assert.ok(dayWidthForZoom("month") >= 35 && dayWidthForZoom("month") <= 45);
-assert.ok(GANTT_LABEL_PANEL_WIDTH >= 420 && GANTT_LABEL_PANEL_WIDTH <= 550);
+assert.ok(GANTT_LABEL_PANEL_WIDTH >= 570 && GANTT_LABEL_PANEL_WIDTH <= 630);
 
 const w = dayWidthForZoom("3weeks");
-assert.equal(w, 60);
+assert.equal(w, 64);
 
-// Exemple 21 jours × 60 px = 1260 px (scroll si viewport < 1260)
-assert.equal(21 * w, 1260);
+// Exemple 21 jours × 64 px = 1344 px (scroll si viewport plus étroit)
+assert.equal(21 * w, 1344);
 
 const half = barGeometry(
   "2026-10-12",

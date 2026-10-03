@@ -47,7 +47,6 @@ export default async function ProjectPlanningSuiviPage({ params, searchParams }:
         projectId={projectId}
         activeStep="suivi"
         variant="compact"
-        sticky
       />
       <PlanningSuiviClient
         projectId={projectId}

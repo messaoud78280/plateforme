@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/cn";
 import {
   ChantierHierarchyNav,
@@ -87,6 +88,7 @@ export function PrepSchedulePlanView({
   const [density, setDensity] = useState<"comfortable" | "compact">(
     "comfortable",
   );
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/prep-studies/${studyId}/schedule/${planId}`);
@@ -249,17 +251,13 @@ export function PrepSchedulePlanView({
   });
 
   const s = vm.summary;
-  const controlCount = vm.tasks.filter(
-    (t) => t.visualKind === "control" || t.phase.role === "controls",
-  ).length;
-  const crewCount = crewOptions.length;
 
   const hideCommercial = conductMode || expanded;
   const shell = cn(
-    "relative space-y-3",
+    "relative space-y-4",
     expanded
       ? "h-dvh overflow-hidden px-3 py-3"
-      : "mx-auto max-w-none px-3 pb-16 pt-4 sm:px-4 lg:px-5",
+      : "mx-auto max-w-none px-3 pb-16 pt-3 sm:px-4 lg:px-5",
   );
 
   return (
@@ -275,154 +273,40 @@ export function PrepSchedulePlanView({
           scopeId={plan.scope?.id ?? null}
           activeStep="planning"
           variant="compact"
-          sticky
+          sticky={false}
         />
       ) : null}
 
       {/* En-tête */}
-      <header className="flex flex-wrap items-start justify-between gap-3">
+      <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-            Planning global
-          </p>
-          <h1 className="text-[1.35rem] font-semibold leading-tight text-[#1e3a5f]">
-            {plan.project.title}
+          <h1 className="text-[1.5rem] font-semibold leading-tight tracking-tight text-[#1e3a5f]">
+            Planning chantier
           </h1>
-          <p className="mt-0.5 text-[13px] text-slate-600">{plan.title}</p>
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-slate-500">
-            <span>
-              Début{" "}
-              <strong className="font-medium text-slate-700">
-                {formatStartFr(plan.startDate) ?? "à définir"}
-              </strong>
-            </span>
-            <span className="text-slate-300">·</span>
-            <span>
-              Fin prévisionnelle{" "}
-              <strong className="font-medium text-slate-700">
-                {formatStartFr(plan.endDateBase) ?? "—"}
-              </strong>
-            </span>
-            <span className="text-slate-300">·</span>
-            <span>
-              Révision{" "}
-              <strong className="font-medium text-slate-700">
-                {plan.revisionKind} {plan.revisionNumber}
-              </strong>
-            </span>
-            <span className="text-slate-300">·</span>
-            <span>
-              Source métré{" "}
-              <strong className="font-medium text-slate-700">v{plan.study.version}</strong>
-            </span>
+          <p className="mt-1 text-[15px] text-slate-700">{plan.project.title}</p>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-slate-500">
+            {formatStartFr(plan.startDate) ?? "Début à définir"}
+            {" → "}
+            {formatStartFr(plan.endDateBase) ?? "—"}
+            {" · "}Révision {plan.revisionNumber}
+            {" · "}Métré v{plan.study.version}
             {!hideCommercial ? (
               <>
-                <span className="text-slate-300">·</span>
-                <span>
-                  Devis{" "}
-                  <strong className="font-medium text-slate-700">
-                    {plan.quote ? plan.quote.number : "Aucun"}
-                  </strong>
+                {" · "}
+                {plan.quote ? plan.quote.number : "Devis non lié"}
+              </>
+            ) : null}
+            {s.incompleteCount > 0 ? (
+              <>
+                {" · "}
+                <span className="text-amber-800">
+                  {s.incompleteCount} à compléter
                 </span>
               </>
             ) : null}
-          </div>
-          <div className="mt-1.5">
-            {metreSync.needsUpdate ? (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => setUpdateFromMetreOpen(true)}
-                className={cn(
-                  "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold transition",
-                  "bg-amber-100 text-amber-950 ring-1 ring-amber-300/80",
-                  "hover:bg-amber-200/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500",
-                )}
-                aria-label="Mettre à jour le planning depuis le métré courant"
-              >
-                {metreSync.primaryLabel}
-              </button>
-            ) : (
-              <span
-                className={cn(
-                  "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold",
-                  metreSync.primaryVariant === "warn"
-                    ? "bg-orange-50 text-orange-900 ring-1 ring-orange-200"
-                    : metreSync.primaryVariant === "ok"
-                      ? "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/80"
-                      : "bg-slate-100 text-slate-700 ring-1 ring-slate-200",
-                )}
-              >
-                {metreSync.primaryLabel}
-              </span>
-            )}
-          </div>
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setConductMode((v) => !v)}
-            aria-pressed={conductMode}
-            className={cn(
-              "rounded-lg px-3 py-1.5 text-[12px] font-semibold",
-              conductMode
-                ? "bg-[#1e3a5f] text-white"
-                : "border border-[#1e3a5f]/30 bg-white text-[#1e3a5f]",
-            )}
-          >
-            Vue chantier
-          </button>
-          <button
-            type="button"
-            onClick={() => setExpanded((v) => !v)}
-            aria-pressed={expanded}
-            className="rounded-lg border border-[#1e3a5f]/30 bg-white px-3 py-1.5 text-[12px] font-semibold text-[#1e3a5f]"
-          >
-            {expanded ? "Réduire" : "Agrandir"}
-          </button>
-          {!hideCommercial && plan.quote ? (
-            <>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => {
-                  setQuoteChoice(plan.quote!.id);
-                  setQuoteModal(true);
-                }}
-                className="rounded-lg border border-[#1e3a5f]/30 bg-white px-3 py-1.5 text-[12px] font-medium text-[#1e3a5f] disabled:opacity-50"
-              >
-                Changer le devis
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => patchQuote(null)}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-[12px] text-slate-700 disabled:opacity-50"
-              >
-                Retirer le devis
-              </button>
-            </>
-          ) : !hideCommercial ? (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => {
-                setQuoteChoice(plan.quoteOptions[0]?.id ?? "");
-                setQuoteModal(true);
-              }}
-              className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-[12px] font-medium text-white disabled:opacity-50"
-            >
-              Lier un devis
-            </button>
-          ) : null}
-          {!hideCommercial ? (
-            <Link
-              href={`/dashboard/visites-metres/etudes/${studyId}`}
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-[12px] text-slate-700"
-            >
-              Voir le métré
-            </Link>
-          ) : null}
           {!hideCommercial ? (
             <BeworkPatchToolbar
               section="PLANNING"
@@ -432,7 +316,112 @@ export function PrepSchedulePlanView({
               capability={getSectionCapability("PLANNING")}
               entityLabel={plan.title}
               primaryActionLabel="Modifier avec ChatGPT"
+              compact
             />
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setConductMode((v) => !v)}
+            aria-pressed={conductMode}
+            className={cn(
+              "h-9 rounded-[10px] px-3 text-[13px] font-medium transition-colors duration-150",
+              conductMode
+                ? "bg-[#1e3a5f] text-white"
+                : "border border-slate-200 bg-white text-[#1e3a5f] hover:bg-slate-50",
+            )}
+          >
+            Vue chantier
+          </button>
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            aria-pressed={expanded}
+            className="h-9 rounded-[10px] border border-slate-200 bg-white px-3 text-[13px] font-medium text-[#1e3a5f] hover:bg-slate-50"
+          >
+            {expanded ? "Réduire" : "Agrandir"}
+          </button>
+          {!hideCommercial ? (
+            <div className="relative">
+              <button
+                type="button"
+                aria-expanded={moreOpen}
+                aria-haspopup="menu"
+                onClick={() => setMoreOpen((v) => !v)}
+                className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Autres actions</span>
+              </button>
+              {moreOpen ? (
+                <div
+                  role="menu"
+                  className="absolute right-0 z-20 mt-1 w-56 overflow-hidden rounded-[12px] border border-slate-200 bg-white py-1 shadow-[0_12px_32px_-16px_rgba(15,23,42,0.35)]"
+                >
+                  {plan.quote ? (
+                    <>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="block w-full px-3 py-2 text-left text-[13px] text-slate-700 hover:bg-slate-50"
+                        onClick={() => {
+                          setQuoteChoice(plan.quote!.id);
+                          setQuoteModal(true);
+                          setMoreOpen(false);
+                        }}
+                      >
+                        Changer le devis
+                      </button>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="block w-full px-3 py-2 text-left text-[13px] text-slate-700 hover:bg-slate-50"
+                        onClick={() => {
+                          void patchQuote(null);
+                          setMoreOpen(false);
+                        }}
+                      >
+                        Retirer le devis
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="block w-full px-3 py-2 text-left text-[13px] text-slate-700 hover:bg-slate-50"
+                      onClick={() => {
+                        setQuoteChoice(plan.quoteOptions[0]?.id ?? "");
+                        setQuoteModal(true);
+                        setMoreOpen(false);
+                      }}
+                    >
+                      Lier un devis
+                    </button>
+                  )}
+                  <Link
+                    role="menuitem"
+                    href={`/dashboard/visites-metres/etudes/${studyId}`}
+                    className="block px-3 py-2 text-[13px] text-slate-700 hover:bg-slate-50"
+                    onClick={() => setMoreOpen(false)}
+                  >
+                    Voir le métré
+                  </Link>
+                  {plan.startDate ? (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="block w-full px-3 py-2 text-left text-[13px] text-slate-700 hover:bg-slate-50"
+                      onClick={() => {
+                        setStartDraft(plan.startDate ?? "");
+                        setStartOpen(true);
+                        setMoreOpen(false);
+                      }}
+                    >
+                      Date de démarrage
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
           ) : null}
         </div>
       </header>
@@ -531,27 +520,7 @@ export function PrepSchedulePlanView({
         </div>
       ) : null}
 
-      {/* Bandeau synthèse chantier */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-[#1e3a5f]/15 bg-white px-3 py-2 text-[12px]">
-        <span className="text-[11px] font-bold uppercase tracking-wide text-[#1e3a5f]">
-          Planning chantier
-        </span>
-        <SynthItem label="Début" value={formatStartFr(s.startDate) ?? "À définir"} />
-        <SynthItem label="Fin prévue" value={formatStartFr(s.endDate) ?? "—"} />
-        <SynthItem
-          label="Durée"
-          value={s.workingSpanDays != null ? `${s.workingSpanDays} j ouvrés` : "—"}
-        />
-        <SynthItem label="Tâches" value={String(s.taskCount)} />
-        <SynthItem label="Équipes" value={String(crewCount)} />
-        <SynthItem label="Contrôles" value={String(controlCount)} />
-        <SynthItem label="À compléter" value={String(s.incompleteCount)} />
-        <SynthItem
-          label="Alertes"
-          value={String(s.blockerCount)}
-          danger={s.blockerCount > 0}
-        />
-      </div>
+      {/* Bandeau synthèse retiré — dates / tâches déjà dans le titre */}
 
       {!expanded ? (
         <QualityPanel
@@ -615,18 +584,7 @@ export function PrepSchedulePlanView({
             </button>
           ) : null}
         </div>
-      ) : (
-        <button
-          type="button"
-          className="rounded-lg border border-[#1e3a5f]/20 bg-white px-3 py-1.5 text-[12px] font-medium text-[#1e3a5f]"
-          onClick={() => {
-            setStartDraft(plan.startDate ?? "");
-            setStartOpen(true);
-          }}
-        >
-          Modifier la date de démarrage
-        </button>
-      )}
+      ) : null}
       </>
       ) : null}
 
@@ -754,6 +712,8 @@ export function PrepSchedulePlanView({
             </div>
           </div>
 
+          <div className={cn("flex min-w-0 gap-0", selected && "lg:pr-0")}>
+            <div className="min-w-0 flex-1">
           <PrepScheduleGantt
             phases={filteredPhases}
             tasks={filteredTasks}
@@ -764,6 +724,21 @@ export function PrepSchedulePlanView({
             expanded={expanded}
             conductMode={conductMode}
           />
+            </div>
+            {selected ? (
+              <div className="hidden w-[400px] shrink-0 lg:block">
+                <PrepScheduleTaskPanel
+                  task={selected}
+                  nextBlockedStepCode={nextBlockedStepCode}
+                  busy={busy}
+                  onClose={() => setSelectedId(null)}
+                  onHoldStatusChange={patchHold}
+                  onFocusStep={focusStep}
+                  docked
+                />
+              </div>
+            ) : null}
+          </div>
 
           {!hideCommercial ? (
             <TaskTable
@@ -795,11 +770,11 @@ export function PrepSchedulePlanView({
       ) : null}
 
       {selected ? (
-        <div className="fixed inset-y-0 right-0 z-40 flex">
+        <div className="fixed inset-y-0 right-0 z-40 flex lg:hidden">
           <button
             type="button"
             aria-label="Fermer le panneau"
-            className="flex-1 bg-slate-900/20 backdrop-blur-[1px]"
+            className="flex-1 bg-slate-900/20"
             onClick={() => setSelectedId(null)}
           />
           <PrepScheduleTaskPanel
@@ -875,36 +850,10 @@ export function PrepSchedulePlanView({
   );
 }
 
-function SynthItem({
-  label,
-  value,
-  danger,
-}: {
-  label: string;
-  value: string;
-  danger?: boolean;
-}) {
-  return (
-    <span className="inline-flex items-baseline gap-1.5">
-      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-        {label}
-      </span>
-      <span
-        className={cn(
-          "text-[13px] font-semibold tabular-nums",
-          danger ? "text-red-700" : "text-[#1e3a5f]",
-        )}
-      >
-        {value}
-      </span>
-    </span>
-  );
-}
-
 function QualityPanel({
   blockers,
   warnings,
-  infos,
+  infos: _infos,
   incompleteCount,
   onFilter,
   onSeeSteps,
@@ -916,95 +865,41 @@ function QualityPanel({
   onFilter: (f: PlanningFilterId) => void;
   onSeeSteps: (codes: string[]) => void;
 }) {
-  const top = [...blockers, ...warnings, ...infos].slice(0, 6);
-  return (
-    <section className="rounded-lg border border-[#1e3a5f]/10 bg-white px-3 py-2.5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-[12px] font-semibold uppercase tracking-wide text-[#1e3a5f]">
-          Qualité du planning
-        </h2>
-        <div className="flex flex-wrap gap-2 text-[11px]">
-          <SeverityChip
-            level="BLOQUANT"
-            count={blockers.reduce((s, g) => s + g.count, 0)}
-          />
-          <SeverityChip level="À COMPLÉTER" count={incompleteCount + warnings.reduce((s, g) => s + g.count, 0)} />
-          <SeverityChip
-            level="INFORMATION"
-            count={infos.reduce((s, g) => s + g.count, 0)}
-          />
-        </div>
-      </div>
-      {top.length === 0 ? (
-        <p className="mt-2 text-[12px] text-slate-500">
-          Aucune alerte détectée par le validateur.
-        </p>
-      ) : (
-        <ul className="mt-2 space-y-1">
-          {top.map((g) => (
-            <li
-              key={g.code}
-              className="flex flex-wrap items-center justify-between gap-2 text-[12px]"
-            >
-              <span className="text-slate-700">
-                <SeverityIcon severity={g.severity} />{" "}
-                <strong className="font-medium">{g.count}</strong> {g.title.toLowerCase()}
-                {g.count > 1 ? "s" : ""}
-              </span>
-              <button
-                type="button"
-                className="text-[11px] font-medium text-[#1e3a5f] underline-offset-2 hover:underline"
-                onClick={() => {
-                  if (g.code === "CREW_ABSENT" || g.code.includes("CREW")) {
-                    onFilter("no_crew");
-                  } else if (g.code.includes("RATE") || g.code.includes("PRODUCTIVITY")) {
-                    onFilter("no_rate");
-                  } else {
-                    onSeeSteps(g.stepCodes);
-                  }
-                }}
-              >
-                Voir les tâches
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  );
-}
+  const warnCount = incompleteCount + warnings.reduce((s, g) => s + g.count, 0);
+  const blockCount = blockers.reduce((s, g) => s + g.count, 0);
+  const top = [...blockers, ...warnings].slice(0, 1);
+  const parts: string[] = [];
+  if (blockCount) parts.push(`${blockCount} contrôle${blockCount > 1 ? "s" : ""} à revoir`);
+  if (warnCount) parts.push(`${warnCount} rendement${warnCount > 1 ? "s" : ""} à compléter`);
+  const summary = parts.length ? parts.join(" · ") : "Aucune alerte";
 
-function SeverityChip({
-  level,
-  count,
-}: {
-  level: "BLOQUANT" | "À COMPLÉTER" | "INFORMATION";
-  count: number;
-}) {
-  const tone =
-    level === "BLOQUANT"
-      ? "bg-red-50 text-red-800 ring-red-200"
-      : level === "À COMPLÉTER"
-        ? "bg-amber-50 text-amber-900 ring-amber-200"
-        : "bg-slate-50 text-slate-700 ring-slate-200";
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-medium ring-1",
-        tone,
-      )}
-    >
-      {level === "BLOQUANT" ? "⚠" : level === "À COMPLÉTER" ? "◇" : "ℹ"} {count}{" "}
-      {level.toLowerCase()}
-      {count > 1 ? "s" : ""}
-    </span>
+    <div className="flex flex-wrap items-center justify-between gap-2 text-[13px] text-slate-600">
+      <p>
+        <span className="font-medium text-slate-800">Qualité</span>
+        {" · "}
+        {summary}
+      </p>
+      {top.length ? (
+        <button
+          type="button"
+          className="text-[13px] font-medium text-[#1e3a5f] hover:underline"
+          onClick={() => {
+            const g = top[0]!;
+            if (g.code === "CREW_ABSENT" || g.code.includes("CREW")) {
+              onFilter("no_crew");
+            } else if (g.code.includes("RATE") || g.code.includes("PRODUCTIVITY")) {
+              onFilter("no_rate");
+            } else {
+              onSeeSteps(g.stepCodes);
+            }
+          }}
+        >
+          Voir
+        </button>
+      ) : null}
+    </div>
   );
-}
-
-function SeverityIcon({ severity }: { severity: QualityGroup["severity"] }) {
-  if (severity === "BLOCKER") return <span className="text-red-700">⚠</span>;
-  if (severity === "WARNING") return <span className="text-amber-700">◇</span>;
-  return <span className="text-slate-500">ℹ</span>;
 }
 
 function TaskTable({

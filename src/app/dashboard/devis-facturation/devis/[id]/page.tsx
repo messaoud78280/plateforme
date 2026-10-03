@@ -131,7 +131,6 @@ export default async function DevisDetailPage({
           scopeId={quote.scopeId ?? null}
           activeStep="devis"
           variant="compact"
-          sticky
         />
       ) : null}
       <QuoteCommercialFlow

@@ -29,7 +29,7 @@ export function ChantierDossierNavHost({
   activeStep,
   scopeId = null,
   variant = "compact",
-  sticky = true,
+  sticky = false,
   initialSnapshot = null,
   className,
 }: Props) {

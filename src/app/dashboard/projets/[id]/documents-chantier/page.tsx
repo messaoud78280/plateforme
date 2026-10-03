@@ -78,7 +78,6 @@ export default async function DocumentsChantierPage({ params, searchParams }: Pr
         scopeId={scope?.id ?? null}
         activeStep={null}
         variant="compact"
-        sticky
       />
       <SiteDocumentsHub
         projectId={id}

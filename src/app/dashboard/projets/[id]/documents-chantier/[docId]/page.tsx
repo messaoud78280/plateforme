@@ -101,7 +101,6 @@ export default async function SiteDocumentPage({ params, searchParams }: Props) 
           scopeId={scope?.id ?? null}
           activeStep={activeStep}
           variant="compact"
-          sticky
         />
       ) : null}
       <SiteDocumentEditor

@@ -797,7 +797,6 @@ export function SiteVisitSimpleClient({
             projectId={visit.projectId}
             activeStep="visite"
             variant="compact"
-            sticky
           />
         </div>
       ) : null}

@@ -508,7 +508,6 @@ export function PrepStudyWorkspace({
         scopeId={study.scope?.id ?? null}
         activeStep="metre"
         variant="compact"
-        sticky
       />
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">

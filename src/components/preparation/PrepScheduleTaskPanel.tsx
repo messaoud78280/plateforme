@@ -19,6 +19,7 @@ type Props = {
   onClose: () => void;
   onHoldStatusChange: (status: "A_CONTROLER" | "VALIDE" | "RESERVES") => void;
   onFocusStep?: (stepCode: string) => void;
+  docked?: boolean;
 };
 
 function kindLabel(kind: string) {
@@ -64,10 +65,16 @@ export function PrepScheduleTaskPanel({
   onClose,
   onHoldStatusChange,
   onFocusStep,
+  docked = false,
 }: Props) {
   return (
     <aside
-      className="flex h-full max-h-[min(90vh,900px)] w-full max-w-md flex-col border-l border-slate-200 bg-white shadow-xl"
+      className={cn(
+        "flex w-full flex-col border-l border-slate-200/80 bg-white",
+        docked
+          ? "h-full max-h-[min(82vh,920px)] w-[400px]"
+          : "h-full max-h-[min(90vh,900px)] max-w-[400px] shadow-[0_16px_40px_-20px_rgba(15,23,42,0.35)]",
+      )}
       aria-label={`Fiche tâche ${task.stepCode}`}
     >
       <div className="flex items-start justify-between gap-2 border-b border-slate-100 px-4 py-3">

@@ -548,7 +548,6 @@ export function SiteVisitDetailClient({
           projectId={visit.projectId}
           activeStep="visite"
           variant="compact"
-          sticky
         />
       ) : null}
 

@@ -7,6 +7,7 @@ import {
   calendarDaysInclusive,
   dayWidthForZoom,
   enumerateCalendarDays,
+  GANTT_LABEL_GRID,
   GANTT_LABEL_PANEL_WIDTH,
   groupDaysByIsoWeek,
   type GanttZoom,
@@ -161,8 +162,9 @@ export function PrepScheduleGantt({
 
   /** Panneau gauche fixe — jamais compressé pour « remplir » l’écran. */
   const labelCol = expanded
-    ? Math.min(520, GANTT_LABEL_PANEL_WIDTH + 20)
+    ? Math.min(630, GANTT_LABEL_PANEL_WIDTH + 20)
     : GANTT_LABEL_PANEL_WIDTH;
+  const labelGrid = { gridTemplateColumns: GANTT_LABEL_GRID };
 
   const selected = useMemo(
     () => tasks.find((t) => t.id === selectedTaskId) ?? null,
@@ -431,11 +433,11 @@ export function PrepScheduleGantt({
   return (
     <div
       ref={wrapRef}
-      className="overflow-hidden rounded-xl border border-[#1e3a5f]/15 bg-white"
+      className="overflow-hidden rounded-[16px] border border-slate-200/80 bg-white"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-[#f4f7fb] px-3 py-2">
-        <h2 className="text-[13px] font-semibold tracking-tight text-[#1e3a5f]">
-          Planning chantier
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-slate-50/70 px-3 py-2">
+        <h2 className="text-[14px] font-semibold tracking-tight text-[#1e3a5f]">
+          Planning
         </h2>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -508,28 +510,28 @@ export function PrepScheduleGantt({
             style={{ minWidth: labelCol + chartWidth }}
             className="relative"
           >
-            <div className="sticky top-0 z-30 border-b border-[#1e3a5f]/20 bg-[#eef2f7] shadow-[0_1px_0_rgba(15,23,42,0.08)]">
+            <div className="sticky top-0 z-30 border-b border-slate-200/90 bg-[#f7f8fa]">
               <div className="flex">
                 <div
-                  className="sticky left-0 z-40 shrink-0 border-r border-[#1e3a5f]/15 bg-[#eef2f7]"
+                  className="sticky left-0 z-40 shrink-0 border-r border-slate-200/80 bg-[#f7f8fa]"
                   style={{ width: labelCol }}
                 />
                 <div className="relative flex" style={{ width: chartWidth }}>
                   {weekBands.map((band) => (
                     <div
                       key={`${band.year}-w${band.week}-${band.startIso}`}
-                      className="flex items-center justify-center border-r-2 border-[#1e3a5f]/25 px-1 py-1 text-[11px] font-bold tracking-wide text-[#1e3a5f]"
+                      className="flex items-center justify-center border-r border-[#1e3a5f]/20 px-1 py-1.5 text-[11px] font-semibold tracking-[0.04em] text-[#1e3a5f]"
                       style={{ width: band.dayCount * dayWidth }}
                     >
-                      SEMAINE {band.week}
+                      Semaine {band.week}
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="flex border-t border-slate-200/80">
+              <div className="flex border-t border-slate-200/70">
                 <div
-                  className="sticky left-0 z-40 grid shrink-0 grid-cols-[70px_minmax(0,1fr)_110px_72px] gap-1.5 border-r border-[#1e3a5f]/15 bg-[#eef2f7] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500"
-                  style={{ width: labelCol }}
+                  className="sticky left-0 z-40 grid shrink-0 gap-2 border-r border-slate-200/80 bg-[#f7f8fa] px-3 py-2 text-[11px] font-medium text-slate-500"
+                  style={{ width: labelCol, ...labelGrid }}
                 >
                   <span>Réf.</span>
                   <span>Intervention</span>
@@ -546,17 +548,17 @@ export function PrepScheduleGantt({
                       <div
                         key={day.iso}
                         className={cn(
-                          "shrink-0 border-r border-slate-200/70 px-0.5 py-1 text-center",
+                          "shrink-0 border-r border-slate-200/60 px-1 py-1.5 text-center",
                           (day.isWeekend || day.isHoliday) &&
-                            "bg-slate-300/35",
-                          monday && "border-l-2 border-l-[#1e3a5f]/30",
-                          isToday && "bg-[#1e3a5f]/10",
+                            "bg-slate-100/80",
+                          monday && "border-l border-l-[#1e3a5f]/35",
+                          isToday && "bg-[#1e3a5f]/[0.06]",
                         )}
                         style={{ width: dayWidth, minWidth: dayWidth }}
                       >
                         <div
                           className={cn(
-                            "text-[10px] font-bold uppercase tracking-wide",
+                            "text-[10px] font-semibold uppercase tracking-[0.08em]",
                             isToday ? "text-[#1e3a5f]" : "text-slate-500",
                           )}
                         >
@@ -581,7 +583,7 @@ export function PrepScheduleGantt({
                   })}
                   {todayIdx >= 0 ? (
                     <div
-                      className="pointer-events-none absolute bottom-0 top-0 z-[2] w-[2px] bg-[#c2410c]"
+                      className="pointer-events-none absolute bottom-0 top-0 z-[2] w-px bg-[#1e3a5f]/45"
                       style={{ left: todayIdx * dayWidth + dayWidth / 2 }}
                       aria-hidden
                     />
@@ -599,18 +601,18 @@ export function PrepScheduleGantt({
                   day.isWeekend || day.isHoliday ? (
                     <div
                       key={`bg-${day.iso}`}
-                      className="absolute inset-y-0 bg-slate-200/40"
+                      className="absolute inset-y-0 bg-slate-100/70"
                       style={{ left: i * dayWidth, width: dayWidth }}
                     />
                   ) : null,
                 )}
                 {todayIdx >= 0 ? (
                   <div
-                    className="absolute inset-y-0 z-[4] w-[2px] bg-[#c2410c]"
+                    className="absolute inset-y-0 z-[4] w-px bg-[#1e3a5f]/45"
                     style={{ left: todayIdx * dayWidth + dayWidth / 2 }}
                   >
-                    <span className="absolute left-1/2 top-1 z-[5] -translate-x-1/2 whitespace-nowrap rounded bg-[#c2410c] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
-                      Aujourd&apos;hui · {formatShortDate(today)}
+                    <span className="absolute left-1/2 top-1 z-[5] -translate-x-1/2 whitespace-nowrap rounded-md bg-[#1e3a5f] px-1.5 py-0.5 text-[10px] font-medium text-white">
+                      Aujourd&apos;hui
                     </span>
                   </div>
                 ) : null}
@@ -684,9 +686,9 @@ export function PrepScheduleGantt({
                     <div
                       key={`phase:${p.key}`}
                       className={cn(
-                        "relative flex border-b border-[#1e3a5f]/15 transition-colors",
+                        "relative flex border-b border-slate-200/70 transition-colors",
                         TRANS,
-                        phaseHover ? "bg-[#d9e3ef]" : "bg-[#e4ebf3]",
+                        phaseHover ? "bg-slate-100" : "bg-slate-50/90",
                       )}
                       style={{ height: sizes.phaseH }}
                       onMouseEnter={() => setHoveredPhaseKey(p.key)}
@@ -700,22 +702,22 @@ export function PrepScheduleGantt({
                             [p.key]: !c[p.key],
                           }))
                         }
-                        className="sticky left-0 z-20 flex shrink-0 items-center gap-2.5 border-r border-[#1e3a5f]/15 bg-inherit px-2.5 text-left"
+                        className="sticky left-0 z-20 flex shrink-0 items-center gap-2.5 border-r border-slate-200/80 bg-inherit px-3 text-left"
                         style={{ width: labelCol }}
                         aria-expanded={!isCollapsed}
                         aria-label={`${isCollapsed ? "Déplier" : "Replier"} phase ${title}`}
                       >
                         <span
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#1e3a5f] text-[11px] font-bold tabular-nums text-white"
+                          className="flex h-7 w-7 shrink-0 items-center justify-center text-[12px] font-semibold tabular-nums text-[#1e3a5f]"
                           aria-hidden
                         >
                           {num}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[13px] font-bold uppercase tracking-wide text-[#1e3a5f]">
+                          <span className="block truncate text-[13px] font-semibold tracking-tight text-slate-800">
                             {title}
                           </span>
-                          <span className="block truncate text-[11px] text-slate-600">
+                          <span className="block truncate text-[12px] text-slate-500">
                             {p.taskCount} tâche{p.taskCount > 1 ? "s" : ""}
                             {p.startDate && p.endDate
                               ? ` · ${formatShortDate(p.startDate)} → ${formatShortDate(p.endDate)}`
@@ -735,24 +737,15 @@ export function PrepScheduleGantt({
                       >
                         {phaseBar ? (
                           <div
-                            className="absolute flex items-center overflow-hidden rounded-md bg-[#1e3a5f]/22 px-2"
+                            className="absolute rounded-md bg-[#1e3a5f]/12"
                             style={{
                               left: phaseBar.left,
                               width: phaseBar.width,
-                              top: Math.max(6, sizes.phaseH / 2 - 12),
-                              height: 24,
+                              top: Math.max(10, sizes.phaseH / 2 - 4),
+                              height: 8,
                             }}
                             title={`${title} · ${p.taskCount} tâches`}
-                          >
-                            {phaseBar.width >= 120 ? (
-                              <span className="truncate text-[11px] font-semibold text-[#1e3a5f]">
-                                {num} — {title}
-                                {p.startDate && p.endDate
-                                  ? ` · ${formatShortDate(p.startDate)} → ${formatShortDate(p.endDate)}`
-                                  : ""}
-                              </span>
-                            ) : null}
-                          </div>
+                          />
                         ) : null}
                       </div>
                     </div>
@@ -818,11 +811,11 @@ export function PrepScheduleGantt({
                         }
                       }}
                       className={cn(
-                        "sticky left-0 z-20 grid shrink-0 cursor-pointer grid-cols-[70px_minmax(0,1fr)_110px_72px] items-center gap-1.5 border-r border-slate-200 px-2.5 text-left",
+                        "sticky left-0 z-20 grid shrink-0 cursor-pointer items-center gap-2 border-r border-slate-200/80 px-3 text-left",
                         TRANS,
-                        isSelected || isHovered ? "bg-[#f1f5f9]" : "bg-white",
+                        isSelected || isHovered ? "bg-[#f4f6f8]" : "bg-white",
                       )}
-                      style={{ width: labelCol }}
+                      style={{ width: labelCol, ...labelGrid }}
                       aria-pressed={isSelected}
                       aria-label={`Tâche ${t.stepCode} ${t.name}`}
                     >
@@ -849,7 +842,7 @@ export function PrepScheduleGantt({
                         >
                           {t.name}
                         </span>
-                        <span className="mt-0.5 hidden truncate text-[11px] text-slate-500 sm:block">
+                        <span className="mt-0.5 hidden truncate text-[12px] text-slate-500 lg:block">
                           {subLine}
                         </span>
                       </span>
@@ -928,7 +921,7 @@ export function PrepScheduleGantt({
                             onSelectTask(isSelected ? null : t.id);
                           }}
                           className={cn(
-                            "absolute flex items-center overflow-hidden rounded-[4px] px-2 text-left text-[11px] font-semibold shadow-sm transition-[transform,box-shadow]",
+                            "absolute flex items-center overflow-hidden rounded-[7px] px-2 text-left text-[11px] font-semibold shadow-none transition-[box-shadow]",
                             TRANS,
                             barToneClass(t.visualKind),
                             t.conditional && "opacity-90",
@@ -1027,7 +1020,7 @@ export function PrepScheduleGantt({
         })}
       </div>
 
-      <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-slate-200 bg-[#f8fafc] px-3 py-1.5 text-[11px] text-slate-600">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-slate-100 bg-slate-50/50 px-3 py-1.5 text-[11px] text-slate-600">
         <span className="inline-flex items-center gap-1">
           <span className="h-2.5 w-4 rounded-sm bg-[#1e3a5f]" /> Travail
         </span>
@@ -1059,7 +1052,7 @@ function barToneClass(kind: PlanningTaskVM["visualKind"]): string {
     case "blocked":
       return "bg-red-700 text-white";
     case "incomplete":
-      return "border border-dashed border-amber-700 bg-amber-50 text-amber-950";
+      return "bg-amber-400/90 text-amber-950";
     case "control":
       return "border-2 border-[#3d5a80] bg-white text-[#1e3a5f]";
     case "wait":

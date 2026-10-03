@@ -22,6 +22,7 @@ type Props = {
   primaryActionLabel?: string;
   /** Aide courte sous la barre (documents chantier). */
   helpText?: string | null;
+  compact?: boolean;
 };
 
 const btnBase =
@@ -43,6 +44,7 @@ export function BeworkPatchToolbar({
   className = "",
   primaryActionLabel,
   helpText = null,
+  compact = false,
 }: Props) {
   const [toast, setToast] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -104,10 +106,16 @@ export function BeworkPatchToolbar({
             `Modifier ${sectionLabel} avec ChatGPT`
           }
           onClick={openChatgpt}
-          className={`${btnBase} border-indigo-200 bg-indigo-50/80 text-indigo-900 hover:bg-indigo-50`}
+          className={
+            compact
+              ? "h-9 rounded-[10px] bg-[#1e3a5f] px-3.5 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-[#152a45] disabled:cursor-not-allowed disabled:opacity-45"
+              : `${btnBase} border-indigo-200 bg-indigo-50/80 text-indigo-900 hover:bg-indigo-50`
+          }
         >
-          ✨ {primaryActionLabel ?? "Modifier avec ChatGPT"}
+          {primaryActionLabel ?? "Modifier avec ChatGPT"}
         </button>
+        {!compact ? (
+          <>
         <button
           type="button"
           disabled={blocked}
@@ -130,6 +138,29 @@ export function BeworkPatchToolbar({
               ? "Contexte copié"
               : "Copier le contexte pour ChatGPT"}
         </button>
+          </>
+        ) : (
+          <>
+            <button
+              type="button"
+              disabled={blocked}
+              title={blockTitle ?? `Modifier ${sectionLabel} par bloc`}
+              onClick={openJson}
+              className="h-9 rounded-[10px] border border-slate-200 bg-white px-3 text-[13px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-45"
+            >
+              Par bloc
+            </button>
+            <button
+              type="button"
+              disabled={blocked || contextBusy}
+              title={blockTitle ?? `Copier le contexte ${sectionLabel} pour ChatGPT`}
+              onClick={() => void copyContext()}
+              className="h-9 rounded-[10px] border border-slate-200 bg-white px-3 text-[13px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-45"
+            >
+              {contextCopied ? "Copié" : "Copier"}
+            </button>
+          </>
+        )}
         {capability.mode === "PREVIEW_ONLY" && capability.label ? (
           <span className="text-[11px] font-medium text-amber-800">
             Prévisualisation uniquement

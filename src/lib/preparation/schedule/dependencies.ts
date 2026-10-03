@@ -3,17 +3,21 @@
  * Complète les depends_on explicites du workflow — n'invente pas de métier hors règles.
  *
  * Priorité :
- * 1. execution_phases explicites (workflowJson) → graphe gate déterministe
- * 2. fallback legacy par rôle inféré (ROLE_SEQ)
+ * 1. depends_on métier explicites (après purge des inversions rôle)
+ * 2. execution_phases explicites (workflowJson) → graphe gate déterministe
+ * 3. fallback legacy par rôle inféré (ROLE_SEQ)
+ * 4. réduction transitive (graphe minimal)
  */
 
 import {
+  hasFinalControlMarkers,
   resolveCanonicalPhase,
   type CanonicalPhase,
   type PhaseRole,
 } from "@/lib/preparation/schedule/phase";
 import {
   buildExplicitPhaseDependencies,
+  canonicalPhaseFromExecution,
 } from "@/lib/preparation/schedule/execution-structure";
 import type { PrepExecutionPhaseDTO } from "@/lib/preparation/schedule/types";
 
@@ -47,6 +51,19 @@ const ROLE_SEQ: PhaseRole[] = [
   "handover",
 ];
 
+/** Rôles « travaux » — une remise / contrôle final ne doit jamais les précéder. */
+export const WORK_PHASE_ROLES: PhaseRole[] = [
+  "preparation",
+  "logistics",
+  "demolition",
+  "networks",
+  "execution",
+  "installation",
+  "finishes",
+  "generic",
+  "unclassified",
+];
+
 function roleIndex(role: PhaseRole): number {
   const i = ROLE_SEQ.indexOf(role);
   return i >= 0 ? i : 3; // generic ~ mid
@@ -69,13 +86,215 @@ export function mergeDependsOn(
   return out;
 }
 
+function isWorkRole(role: PhaseRole): boolean {
+  return WORK_PHASE_ROLES.includes(role);
+}
+
+const EXEC_WORK_ROLES = new Set([
+  "EXECUTION",
+  "FINISH",
+  "DEMOLITION",
+  "PREPARATION",
+  "LOGISTICS",
+]);
+
+/**
+ * Contrôle FINAL — ne doit pas précéder des travaux restants.
+ * Contrôle intermédiaire (hold-point / phase suivie d'une EXECUTION) : autorisé avant travaux.
+ */
+export function isFinalControlStep(
+  step: Pick<StructuralStep, "name" | "lot" | "kind" | "description">,
+  phase: CanonicalPhase,
+  executionPhases?: PrepExecutionPhaseDTO[] | null,
+): boolean {
+  if (phase.role !== "controls") return false;
+
+  // Phase d'exécution explicite : intermédiaire si une phase travaux dépend d'elle
+  if (phase.executionPhaseId && executionPhases?.length) {
+    const successorWork = executionPhases.some(
+      (p) =>
+        EXEC_WORK_ROLES.has(p.role) &&
+        (p.depends_on ?? []).includes(phase.executionPhaseId!),
+    );
+    if (successorWork) return false;
+  }
+
+  const blob = `${step.name} ${step.description ?? ""}`;
+  const t = blob
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  if (
+    /intermediaire|hold.?point|avant\s+(pose|coulage|chape|reprise|travaux)|point\s+d['']arret/.test(
+      t,
+    )
+  ) {
+    return false;
+  }
+  if (hasFinalControlMarkers(blob)) return true;
+  const lot = (step.lot ?? "").trim();
+  if (/^contr[oô]les?\s*$/i.test(lot)) return true;
+  // Rôle controls legacy sans successeur travaux → final (conservateur)
+  return true;
+}
+
+/**
+ * Purge les arêtes qui inversent l'ordre logique des rôles terminaux.
+ * Les depends_on métier non contradictoires sont conservés.
+ */
+export function sanitizeInvertedRoleDependencies(
+  steps: StructuralStep[],
+  phasesById: Map<string, CanonicalPhase>,
+  executionPhases?: PrepExecutionPhaseDTO[] | null,
+): Map<string, StructuralDep[]> {
+  const stepById = new Map(steps.map((s) => [s.id, s]));
+  const result = new Map<string, StructuralDep[]>();
+  for (const s of steps) {
+    const succPhase = phasesById.get(s.id)!;
+    const kept: StructuralDep[] = [];
+    for (const d of s.depends_on ?? []) {
+      if (!d.step_id || d.step_id === s.id) continue;
+      const predPhase = phasesById.get(d.step_id);
+      if (!predPhase) {
+        kept.push({
+          step_id: d.step_id,
+          type: d.type ?? "FS",
+          lag_days: d.lag_days ?? 0,
+        });
+        continue;
+      }
+
+      // HANDOVER / REMISE finale ne précède jamais des travaux restants
+      if (predPhase.role === "handover" && isWorkRole(succPhase.role)) {
+        continue;
+      }
+      // Remise avant contrôle final
+      if (predPhase.role === "handover" && succPhase.role === "controls") {
+        continue;
+      }
+      // Contrôle FINAL ne précède pas des travaux encore à exécuter
+      if (
+        predPhase.role === "controls" &&
+        isWorkRole(succPhase.role) &&
+        isFinalControlStep(
+          stepById.get(d.step_id) ?? {
+            name: d.step_id,
+            lot: null,
+            kind: null,
+            description: null,
+          },
+          predPhase,
+          executionPhases,
+        )
+      ) {
+        continue;
+      }
+      // Préparation = entrée de chantier : seuls logistique / attente amont sont plausibles
+      if (
+        succPhase.role === "preparation" &&
+        predPhase.role !== "logistics" &&
+        predPhase.role !== "wait" &&
+        predPhase.role !== "preparation"
+      ) {
+        continue;
+      }
+
+      // Ordre ROLE_SEQ : un rôle aval ne précède pas un rôle amont
+      // (exception : contrôle intermédiaire → travaux suivants)
+      const predIdx = roleIndex(predPhase.role);
+      const succIdx = roleIndex(succPhase.role);
+      const intermediateControlPred =
+        predPhase.role === "controls" &&
+        !isFinalControlStep(
+          stepById.get(d.step_id) ?? {
+            name: d.step_id,
+            lot: null,
+            kind: null,
+            description: null,
+          },
+          predPhase,
+          executionPhases,
+        ) &&
+        isWorkRole(succPhase.role);
+      if (
+        !intermediateControlPred &&
+        predPhase.role !== "generic" &&
+        predPhase.role !== "unclassified" &&
+        succPhase.role !== "generic" &&
+        succPhase.role !== "unclassified" &&
+        predIdx > succIdx
+      ) {
+        continue;
+      }
+
+      kept.push({
+        step_id: d.step_id,
+        type: d.type ?? "FS",
+        lag_days: d.lag_days ?? 0,
+      });
+    }
+    result.set(s.id, kept);
+  }
+  return result;
+}
+
+/**
+ * Réduction transitive : si D dépend de A et de C, et C dépend (transitivement) de A,
+ * retire D←A (redondant). Conserve SS/FF et le graphe minimal FS.
+ */
+export function reduceTransitiveDependencies(
+  depsByStep: Map<string, StructuralDep[]>,
+): Map<string, StructuralDep[]> {
+  const preds = new Map<string, Set<string>>();
+  for (const [succ, list] of depsByStep) {
+    const set = new Set<string>();
+    for (const d of list) {
+      if (d.type === "FS" || !d.type) set.add(d.step_id);
+    }
+    preds.set(succ, set);
+  }
+
+  /** true si `from` dépend transitivement de `target` (from ← … ← target). */
+  const reaches = (from: string, target: string): boolean => {
+    const stack = [...(preds.get(from) ?? [])];
+    const seen = new Set<string>();
+    while (stack.length) {
+      const n = stack.pop()!;
+      if (n === target) return true;
+      if (seen.has(n)) continue;
+      seen.add(n);
+      for (const p of preds.get(n) ?? []) stack.push(p);
+    }
+    return false;
+  };
+
+  const out = new Map<string, StructuralDep[]>();
+  for (const [succ, list] of depsByStep) {
+    const kept: StructuralDep[] = [];
+    for (const d of list) {
+      if (d.type && d.type !== "FS") {
+        kept.push(d);
+        continue;
+      }
+      const others = list
+        .filter((x) => x.step_id !== d.step_id && (!x.type || x.type === "FS"))
+        .map((x) => x.step_id);
+      // D←A redondant si un autre prédécesseur B vérifie B←…←A
+      if (others.some((other) => reaches(other, d.step_id))) continue;
+      kept.push(d);
+    }
+    out.set(succ, kept);
+  }
+  return out;
+}
+
 /**
  * Génère des FS structurels.
  * Si `executionPhases` non vide → graphe explicite (prioritaire).
  * Sinon → chaîne legacy par rôle inféré.
  *
- * Les arêtes structurelles qui créeraient un cycle avec les depends_on
- * explicites déjà persistés sont ignorées (les explicites priment).
+ * Les arêtes explicites qui inversent HANDOVER/CONTROL final → travaux
+ * sont purgées avant fusion. Les structurelles cycliques sont ignorées.
  */
 export function buildStructuralDependencies(
   steps: StructuralStep[],
@@ -83,6 +302,33 @@ export function buildStructuralDependencies(
 ): Map<string, StructuralDep[]> {
   const phases = executionPhases ?? [];
   const hasExplicit = phases.length > 0;
+
+  const phasesById = new Map<string, CanonicalPhase>();
+  for (const s of steps) {
+    const exec = s.execution_phase_id
+      ? phases.find((p) => p.id === s.execution_phase_id)
+      : null;
+    if (exec) {
+      phasesById.set(s.id, canonicalPhaseFromExecution(exec));
+    } else {
+      phasesById.set(
+        s.id,
+        resolveCanonicalPhase({
+          lot: s.lot,
+          name: s.name,
+          kind: s.kind,
+          description: s.description,
+        }),
+      );
+    }
+  }
+
+  // 1. Purger les inversions explicites (ChatGPT / regen) avant toute fusion
+  const sanitized = sanitizeInvertedRoleDependencies(
+    steps,
+    phasesById,
+    phases,
+  );
 
   let extras: Map<string, StructuralDep[]>;
 
@@ -94,27 +340,22 @@ export function buildStructuralDependencies(
         order: s.order ?? 0,
         execution_phase_id: s.execution_phase_id,
         kind: s.kind,
-        depends_on: (s.depends_on ?? []).map((d) => ({ step_id: d.step_id })),
+        depends_on: (sanitized.get(s.id) ?? []).map((d) => ({
+          step_id: d.step_id,
+        })),
       })),
     });
   } else {
-    extras = buildLegacyRoleDependencies(steps);
+    extras = buildLegacyRoleDependencies(steps, phasesById, phases);
   }
 
-  // Base = depends_on explicites (prioritaires).
+  // 2. Base = depends_on explicites assainis
   const result = new Map<string, StructuralDep[]>();
   for (const s of steps) {
-    const existing = (s.depends_on ?? [])
-      .filter((d) => d.step_id !== s.id)
-      .map((d) => ({
-        step_id: d.step_id,
-        type: d.type ?? ("FS" as const),
-        lag_days: d.lag_days ?? 0,
-      }));
-    result.set(s.id, existing);
+    result.set(s.id, [...(sanitized.get(s.id) ?? [])]);
   }
 
-  // Ajouter les structurelles une par une sans créer de cycle.
+  // 3. Ajouter les structurelles une par une sans créer de cycle
   for (const s of steps) {
     const extra = extras.get(s.id) ?? [];
     for (const d of extra) {
@@ -152,25 +393,15 @@ export function buildStructuralDependencies(
     }
   }
 
-  return result;
+  // 4. Graphe minimal
+  return reduceTransitiveDependencies(result);
 }
 
 function buildLegacyRoleDependencies(
   steps: StructuralStep[],
+  phases: Map<string, CanonicalPhase>,
+  executionPhases?: PrepExecutionPhaseDTO[] | null,
 ): Map<string, StructuralDep[]> {
-  const phases = new Map<string, CanonicalPhase>();
-  for (const s of steps) {
-    phases.set(
-      s.id,
-      resolveCanonicalPhase({
-        lot: s.lot,
-        name: s.name,
-        kind: s.kind,
-        description: s.description,
-      }),
-    );
-  }
-
   const byRole = new Map<PhaseRole, string[]>();
   for (const s of steps) {
     const p = phases.get(s.id)!;
@@ -200,26 +431,31 @@ function buildLegacyRoleDependencies(
   }
 
   const controls = byRole.get("controls") ?? [];
-  /** Travaux d'exécution — y compris generic/unclassified (circuits, poses non étiquetés). */
-  const workRoles: PhaseRole[] = [
-    "networks",
-    "execution",
-    "installation",
-    "finishes",
-    "generic",
-    "unclassified",
-  ];
   for (const c of controls) {
-    for (const role of workRoles) {
+    const cStep = steps.find((s) => s.id === c)!;
+    const cPhase = phases.get(c)!;
+    // Contrôle intermédiaire : ne pas forcer l'attente de tous les travaux
+    if (!isFinalControlStep(cStep, cPhase, executionPhases)) continue;
+    for (const role of WORK_PHASE_ROLES) {
+      if (role === "preparation" || role === "logistics") continue;
       for (const w of byRole.get(role) ?? []) add(c, w);
     }
   }
 
   const handover = byRole.get("handover") ?? [];
   for (const h of handover) {
-    // Remise après contrôles ET après tout travail restant (pas seulement workRoles « étiquetés »).
-    for (const c of controls) add(h, c);
-    for (const role of workRoles) {
+    for (const c of controls) {
+      const cStep = steps.find((s) => s.id === c);
+      const cPhase = phases.get(c);
+      if (
+        cStep &&
+        cPhase &&
+        isFinalControlStep(cStep, cPhase, executionPhases)
+      ) {
+        add(h, c);
+      }
+    }
+    for (const role of WORK_PHASE_ROLES) {
       for (const w of byRole.get(role) ?? []) add(h, w);
     }
   }

@@ -6,6 +6,8 @@
 import { parseCrewJson } from "@/lib/preparation/schedule/crew";
 import {
   detectDependencyCycle,
+  isFinalControlStep,
+  WORK_PHASE_ROLES,
   type StructuralDep,
 } from "@/lib/preparation/schedule/dependencies";
 import {
@@ -235,7 +237,7 @@ export function analyzeScheduleConsistency(
     }
   }
 
-  // Contrôle final / remise avant travaux
+  // Contrôle FINAL / remise avant travaux encore à exécuter
   for (const t of tasks) {
     const phase = resolveCanonicalPhase({
       lot: t.lot,
@@ -244,6 +246,21 @@ export function analyzeScheduleConsistency(
       description: t.description,
     });
     if (phase.role !== "controls" && phase.role !== "handover") continue;
+    // Contrôle intermédiaire peut légitimement précéder des travaux
+    if (
+      phase.role === "controls" &&
+      !isFinalControlStep(
+        {
+          name: t.name,
+          lot: t.lot,
+          kind: t.kind,
+          description: t.description,
+        },
+        phase,
+      )
+    ) {
+      continue;
+    }
     for (const other of tasks) {
       if (other.stepCode === t.stepCode) continue;
       const op = resolveCanonicalPhase({
@@ -252,8 +269,11 @@ export function analyzeScheduleConsistency(
         kind: other.kind,
         description: other.description,
       });
+      // Travaux restants (hors préparation pure déjà amont)
       if (
-        !["networks", "installation", "finishes", "demolition"].includes(op.role)
+        !WORK_PHASE_ROLES.includes(op.role) ||
+        op.role === "preparation" ||
+        op.role === "logistics"
       ) {
         continue;
       }

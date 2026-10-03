@@ -69,30 +69,74 @@ function parsePhaseNumber(lot: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+/** Marqueurs de contrôle FINAL (pas un contrôle intermédiaire / hold-point). */
+export function hasFinalControlMarkers(text: string): boolean {
+  const t = norm(text);
+  return /final|finaux|finale|globaux|globale|conformite|conformité|reception technique|réception technique/.test(
+    t,
+  );
+}
+
+/** Remise client / handover terminal — pas « livraison », ni nettoyage courant. */
+export function hasTerminalHandoverMarkers(text: string): boolean {
+  const t = norm(text);
+  if (
+    /remise\s+(de\s+l'|au\s+)?client|remise\s+des\s+cl[eé]s|remise\s+de\s+l['']installation|handover/.test(
+      t,
+    )
+  ) {
+    return true;
+  }
+  // Nettoyage de fin de chantier sans finitions métier → remise
+  if (
+    /nettoyage/.test(t) &&
+    /fin\s+de\s+chantier/.test(t) &&
+    !/\bfinitions?\b|rebouchage|joints?\b|enduits?/.test(t)
+  ) {
+    return true;
+  }
+  if (
+    (/reception|réception/.test(t) &&
+      !/controle|contrôle|technique/.test(t) &&
+      /client|ouvrage|cles|clés|cles/.test(t))
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Inférence de rôle depuis libellé — prudente :
+ * - « livraison », « nettoyage » courant, « Contrôle X » intermédiaire ≠ rôles terminaux
+ * - seuls les marqueurs finaux / lots exacts Contrôles|Remise imposent controls/handover
+ */
 function inferRoleFromText(text: string): PhaseRole | null {
   const t = norm(text);
-  // Contrôles avant remise : « réception technique / contrôles » ≠ handover client
+
+  // Lots / libellés de phase exacts
+  if (/^contr[oô]les?\s*$/.test(t)) return "controls";
+  if (/^remise\s*$/.test(t)) return "handover";
+
+  // Contrôle FINAL uniquement — un « Contrôle étanchéité » intermédiaire reste générique
   if (
     (/controle|contrôle|essais|verification|vérification|inspection/.test(t) &&
-      /final|finaux|finale|globaux|globale|conformite|conformité|reception technique|réception technique/.test(
-        t,
-      )) ||
-    /^controles?\b|^contrôles?\b/.test(t)
+      hasFinalControlMarkers(t))
   ) {
     return "controls";
   }
-  if (
-    /nettoyage|remise.*(client|ouvrage|installation|cles|clés)|livraison|handover/.test(
-      t,
-    ) ||
-    (/reception|réception/.test(t) &&
-      !/controle|contrôle|technique/.test(t))
-  ) {
+
+  const finishesCue =
+    /\bfinitions?\b|rebouchage|reprise de finition|enduits? de finition/.test(t);
+  const terminalHandover = hasTerminalHandoverMarkers(t);
+
+  // Finitions + nettoyage de fin sans remise client → finitions (pas Remise)
+  if (finishesCue && !terminalHandover) {
+    return "finishes";
+  }
+  if (terminalHandover) {
     return "handover";
   }
-  if (
-    /\bfinitions?\b|rebouchage|reprise de finition|enduits? de finition/.test(t)
-  ) {
+  if (finishesCue) {
     return "finishes";
   }
   if (

@@ -424,17 +424,25 @@ function taskMetaForLine(designation: string, unit: string, qty: number, section
     sectionLot && sectionLot !== designation.trim() ? sectionLot : "À classer";
 
   // Rôles terminaux génériques — ne pas hériter d'une mauvaise section
+  // Attention : « livraison », « nettoyage » courant, « Contrôle X » intermédiaire ≠ terminaux
   if (
-    /nettoyage|remise (de l'|au )?client|remise des clés|remise des cles|réception|reception|livraison/.test(
+    /remise (de l'|au )?client|remise des clés|remise des cles|remise de l['']installation|handover/.test(
       dsg,
-    )
+    ) ||
+    (/nettoyage/.test(dsg) &&
+      /fin de chantier/.test(dsg) &&
+      !/\bfinitions?\b|joints?\b|rebouchage/.test(dsg)) ||
+    (/réception|reception/.test(dsg) &&
+      /client|ouvrage|clés|cles/.test(dsg) &&
+      !/contrôle|controle|technique/.test(dsg))
   ) {
     return { phase: "Remise", duration: { mode: "fixed", days: 0.5 }, orderBoost: 800 };
   }
   if (
-    (/contrôle|controle|essais|vérification|verification|inspection/.test(dsg) &&
-      /final|finaux|finale|conformite|conformité/.test(dsg)) ||
-    /^contrôles?\b|^controles?\b/.test(dsg)
+    /contrôle|controle|essais|vérification|verification|inspection/.test(dsg) &&
+    /final|finaux|finale|globaux|globale|conformite|conformité|réception technique|reception technique/.test(
+      dsg,
+    )
   ) {
     return { phase: "Contrôles", duration: { mode: "fixed", days: 1 }, orderBoost: 700 };
   }

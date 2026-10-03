@@ -50,12 +50,20 @@ export type PlanIndicators = {
   waitDays: number;
 };
 
+/**
+ * Largeurs MINIMUMS par jour (px).
+ * Ne jamais compresser pour « tenir » dans le viewport —
+ * le dépassement se gère par scroll horizontal.
+ */
 const DAY_WIDTH: Record<GanttZoom, number> = {
-  day: 56,
-  week: 28,
-  "3weeks": 20,
-  month: 12,
+  day: 100,
+  week: 78,
+  "3weeks": 60,
+  month: 40,
 };
+
+/** Panneau gauche sticky (Réf. · Intervention · Équipe · Durée). */
+export const GANTT_LABEL_PANEL_WIDTH = 500;
 
 /** Semaine ISO (lundi → dimanche) — affichage axe uniquement. */
 export function isoWeekNumber(iso: string): number {

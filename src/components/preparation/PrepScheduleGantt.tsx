@@ -8,6 +8,7 @@ import {
   calendarDaysInclusive,
   dayWidthForZoom,
   enumerateCalendarDays,
+  GANTT_LABEL_PANEL_WIDTH,
   groupDaysByIsoWeek,
   type GanttZoom,
 } from "@/lib/preparation/schedule/gantt-layout";
@@ -47,9 +48,9 @@ const ZOOM_BTNS: Array<[GanttZoom, string]> = [
 
 function densitySizes(d: GanttDensity) {
   if (d === "compact") {
-    return { rowH: 44, phaseH: 40, barH: 22 };
+    return { rowH: 52, phaseH: 46, barH: 26 };
   }
-  return { rowH: 60, phaseH: 52, barH: 30 };
+  return { rowH: 64, phaseH: 54, barH: 30 };
 }
 
 function formatShortDate(iso: string | null): string {
@@ -73,11 +74,33 @@ function formatShortDate(iso: string | null): string {
   return `${Number(d)} ${months[Number(m) - 1] ?? m}`;
 }
 
-function formatDayHeader(iso: string): { wd: string; day: string } {
+function formatDayHeader(iso: string): {
+  wd: string;
+  day: string;
+  month: string;
+} {
   const date = new Date(`${iso.slice(0, 10)}T12:00:00`);
   const wdLabels = ["DIM", "LUN", "MAR", "MER", "JEU", "VEN", "SAM"];
+  const months = [
+    "JAN.",
+    "FÉV.",
+    "MARS",
+    "AVR.",
+    "MAI",
+    "JUIN",
+    "JUIL.",
+    "AOÛT",
+    "SEPT.",
+    "OCT.",
+    "NOV.",
+    "DÉC.",
+  ];
   const wd = wdLabels[date.getDay()] ?? "";
-  return { wd, day: String(date.getDate()) };
+  return {
+    wd,
+    day: String(date.getDate()),
+    month: months[date.getMonth()] ?? "",
+  };
 }
 
 function cleanPhaseTitle(label: string): string {
@@ -129,10 +152,8 @@ export function PrepScheduleGantt({
   conductMode = false,
 }: Props) {
   const sizes = densitySizes(density);
-  const labelPct = expanded ? 0.32 : conductMode ? 0.34 : 0.38;
   const scrollRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const [wrapW, setWrapW] = useState(1100);
   const [zoom, setZoom] = useState<GanttZoom>("3weeks");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
@@ -142,22 +163,14 @@ export function PrepScheduleGantt({
     top: number;
     left: number;
   } | null>(null);
+  const [floatDetails, setFloatDetails] = useState(false);
   const [scrollRatio, setScrollRatio] = useState({ left: 0, width: 1 });
   const zoomInit = useRef(false);
 
-  const labelCol = Math.max(
-    300,
-    Math.min(expanded ? 420 : 520, Math.round(wrapW * labelPct)),
-  );
-
-  useEffect(() => {
-    const el = wrapRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => setWrapW(el.clientWidth || 1100));
-    ro.observe(el);
-    setWrapW(el.clientWidth || 1100);
-    return () => ro.disconnect();
-  }, []);
+  /** Panneau gauche fixe — jamais compressé pour « remplir » l’écran. */
+  const labelCol = expanded
+    ? Math.min(520, GANTT_LABEL_PANEL_WIDTH + 20)
+    : GANTT_LABEL_PANEL_WIDTH;
 
   const selected = useMemo(
     () => tasks.find((t) => t.id === selectedTaskId) ?? null,
@@ -398,15 +411,17 @@ export function PrepScheduleGantt({
 
   function openFloating(task: PlanningTaskVM, el: HTMLElement) {
     const r = el.getBoundingClientRect();
-    const width = 420;
-    let left = r.left + 24;
+    const width = 340;
+    // Préférer le panneau latéral droit pour ne pas masquer le Gantt.
+    let left = Math.min(
+      window.innerWidth - width - 16,
+      Math.max(labelCol + 24, r.right + 12),
+    );
     if (left + width > window.innerWidth - 12) {
       left = Math.max(12, window.innerWidth - width - 12);
     }
-    let top = r.bottom + 8;
-    if (top + 300 > window.innerHeight) {
-      top = Math.max(12, r.top - 12);
-    }
+    let top = Math.max(12, Math.min(r.top, window.innerHeight - 360));
+    setFloatDetails(false);
     setFloating({ task, top, left });
   }
 
@@ -450,8 +465,27 @@ export function PrepScheduleGantt({
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={scrollThisWeek}
+            onClick={() => {
+              if (todayIdx >= 0) scrollToIso(today);
+              else scrollThisWeek();
+            }}
             className="rounded-md border border-[#1e3a5f]/25 bg-white px-2.5 py-1 text-[11px] font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
+          >
+            Aujourd&apos;hui
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (days[0]) scrollToIso(days[0].iso);
+            }}
+            className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Début chantier
+          </button>
+          <button
+            type="button"
+            onClick={scrollThisWeek}
+            className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
           >
             Cette semaine
           </button>
@@ -485,7 +519,10 @@ export function PrepScheduleGantt({
       <div className="hidden md:block">
         <div
           ref={scrollRef}
-          className={cn("overflow-auto", ganttMaxH)}
+          className={cn(
+            "overflow-x-scroll overflow-y-auto overscroll-x-contain",
+            ganttMaxH,
+          )}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               onSelectTask(null);
@@ -517,7 +554,7 @@ export function PrepScheduleGantt({
               </div>
               <div className="flex border-t border-slate-200/80">
                 <div
-                  className="sticky left-0 z-40 grid shrink-0 grid-cols-[72px_minmax(0,1fr)_88px_64px] gap-1.5 border-r border-[#1e3a5f]/15 bg-[#eef2f7] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500"
+                  className="sticky left-0 z-40 grid shrink-0 grid-cols-[70px_minmax(0,1fr)_110px_72px] gap-1.5 border-r border-[#1e3a5f]/15 bg-[#eef2f7] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500"
                   style={{ width: labelCol }}
                 >
                   <span>Réf.</span>
@@ -541,7 +578,7 @@ export function PrepScheduleGantt({
                           monday && "border-l-2 border-l-[#1e3a5f]/30",
                           isToday && "bg-[#1e3a5f]/10",
                         )}
-                        style={{ width: dayWidth }}
+                        style={{ width: dayWidth, minWidth: dayWidth }}
                       >
                         <div
                           className={cn(
@@ -549,16 +586,21 @@ export function PrepScheduleGantt({
                             isToday ? "text-[#1e3a5f]" : "text-slate-500",
                           )}
                         >
-                          {zoom === "month" ? h.wd.slice(0, 1) : h.wd}
+                          {zoom === "month" ? h.wd.slice(0, 3) : h.wd}
                         </div>
                         <div
                           className={cn(
-                            "text-[12px] font-semibold tabular-nums",
+                            "text-[12px] font-semibold tabular-nums leading-tight",
                             day.isWeekend ? "text-slate-400" : "text-slate-800",
                             isToday && "text-[#1e3a5f]",
                           )}
                         >
                           {h.day}
+                          {dayWidth >= 48 ? (
+                            <span className="mt-0.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
+                              {h.month}
+                            </span>
+                          ) : null}
                         </div>
                       </div>
                     );
@@ -619,7 +661,7 @@ export function PrepScheduleGantt({
                     stroke={c.highlight ? "#1e3a5f" : "#94a3b8"}
                     strokeWidth={c.highlight ? 2.5 : 1}
                     strokeOpacity={
-                      c.highlight ? 1 : c.muted ? 0.06 : 0.18
+                      c.highlight ? 1 : c.muted ? 0.14 : 0.22
                     }
                     className={cn("transition-opacity", TRANS)}
                     markerEnd={
@@ -719,15 +761,24 @@ export function PrepScheduleGantt({
                       >
                         {phaseBar ? (
                           <div
-                            className="absolute rounded-sm bg-[#1e3a5f]/35"
+                            className="absolute flex items-center overflow-hidden rounded-md bg-[#1e3a5f]/22 px-2"
                             style={{
                               left: phaseBar.left,
                               width: phaseBar.width,
-                              top: sizes.phaseH / 2 - 5,
-                              height: 10,
+                              top: Math.max(6, sizes.phaseH / 2 - 12),
+                              height: 24,
                             }}
-                            title={title}
-                          />
+                            title={`${title} · ${p.taskCount} tâches`}
+                          >
+                            {phaseBar.width >= 120 ? (
+                              <span className="truncate text-[11px] font-semibold text-[#1e3a5f]">
+                                {num} — {title}
+                                {p.startDate && p.endDate
+                                  ? ` · ${formatShortDate(p.startDate)} → ${formatShortDate(p.endDate)}`
+                                  : ""}
+                              </span>
+                            ) : null}
+                          </div>
                         ) : null}
                       </div>
                     </div>
@@ -741,11 +792,9 @@ export function PrepScheduleGantt({
                 const isRelated = relatedCodes.has(t.stepCode);
                 const phaseAccent =
                   hoveredPhaseKey != null && row.phaseKey === hoveredPhaseKey;
-                const dimmed =
-                  (focusTask && !isRelated && !isHovered) ||
-                  (hoveredPhaseKey != null &&
-                    row.phaseKey !== hoveredPhaseKey &&
-                    !isSelected);
+                // Sélection : renforcer la tâche + deps — ne jamais pâler le reste.
+                const emphasize =
+                  !!focusTask && (isRelated || isHovered || isSelected);
                 const alert = taskAlert(t);
                 const crewLine = t.missing.crew
                   ? "Équipe à définir"
@@ -765,13 +814,16 @@ export function PrepScheduleGantt({
                   <div
                     key={t.id}
                     className={cn(
-                      "group relative flex border-b border-slate-200/80 transition-[background-color,opacity]",
+                      "group relative flex border-b border-slate-200/80 transition-colors",
                       TRANS,
                       isSelected &&
                         "bg-[#1e3a5f]/[0.08] shadow-[inset_3px_0_0_0_#1e3a5f]",
                       isHovered && !isSelected && "bg-[#1e3a5f]/[0.04]",
                       phaseAccent && !isSelected && "bg-[#1e3a5f]/[0.03]",
-                      dimmed && "opacity-[0.42]",
+                      emphasize &&
+                        !isSelected &&
+                        isRelated &&
+                        "bg-[#1e3a5f]/[0.03]",
                     )}
                     style={{ height: sizes.rowH }}
                     onMouseEnter={() => setHoveredTaskId(t.id)}
@@ -794,7 +846,7 @@ export function PrepScheduleGantt({
                         }
                       }}
                       className={cn(
-                        "sticky left-0 z-20 grid shrink-0 cursor-pointer grid-cols-[72px_minmax(0,1fr)_88px_64px] items-center gap-1.5 border-r border-slate-200 px-2.5 text-left",
+                        "sticky left-0 z-20 grid shrink-0 cursor-pointer grid-cols-[70px_minmax(0,1fr)_110px_72px] items-center gap-1.5 border-r border-slate-200 px-2.5 text-left",
                         TRANS,
                         isSelected || isHovered ? "bg-[#f1f5f9]" : "bg-white",
                       )}
@@ -934,10 +986,11 @@ export function PrepScheduleGantt({
           </div>
         </div>
 
-        {days.length > 21 ? (
+        {days.length * dayWidth > 600 ? (
           <div className="border-t border-slate-200 bg-slate-50 px-3 py-2">
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-              Navigation
+              Défiler horizontalement · {days.length} jours ·{" "}
+              {Math.round(days.length * dayWidth)} px
             </p>
             <button
               type="button"
@@ -1032,20 +1085,47 @@ export function PrepScheduleGantt({
         createPortal(
           <div
             role="dialog"
-            className="fixed z-[85] max-h-[min(70vh,480px)] overflow-y-auto rounded-xl border border-[#1e3a5f]/20 bg-white p-4 shadow-[0_16px_48px_-16px_rgba(30,58,95,0.45)]"
+            aria-label={`Détail ${floating.task.stepCode}`}
+            className="fixed z-[85] max-h-[min(60vh,420px)] overflow-y-auto rounded-xl border border-[#1e3a5f]/20 bg-white p-3 shadow-[0_12px_36px_-12px_rgba(30,58,95,0.4)]"
             style={{
               top: floating.top,
               left: floating.left,
-              width: 420,
+              width: 340,
               maxWidth: "calc(100vw - 24px)",
             }}
           >
-            <PlanningTaskHoverCard task={floating.task} />
+            <div className="mb-2 flex items-start justify-between gap-2">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                Intervention
+              </p>
+              <button
+                type="button"
+                className="rounded px-1.5 py-0.5 text-[11px] font-medium text-slate-500 hover:bg-slate-100"
+                onClick={() => {
+                  setFloating(null);
+                  setFloatDetails(false);
+                }}
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+            </div>
+            <PlanningTaskHoverCard
+              task={floating.task}
+              compact={!floatDetails}
+            />
             {taskAlert(floating.task) ? (
-              <p className="mt-3 text-[12px] font-medium text-amber-800">
+              <p className="mt-2 text-[12px] font-medium text-amber-800">
                 ⚠ {taskAlert(floating.task)}
               </p>
             ) : null}
+            <button
+              type="button"
+              className="mt-2 text-[12px] font-semibold text-[#1e3a5f] hover:underline"
+              onClick={() => setFloatDetails((v) => !v)}
+            >
+              {floatDetails ? "Réduire" : "Voir détails"}
+            </button>
           </div>,
           document.body,
         )}

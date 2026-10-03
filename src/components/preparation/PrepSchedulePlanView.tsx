@@ -260,7 +260,7 @@ export function PrepSchedulePlanView({
     "relative space-y-3",
     expanded
       ? "h-dvh overflow-hidden px-3 py-3"
-      : "mx-auto max-w-[1920px] px-3 pb-16 pt-4 sm:px-5",
+      : "mx-auto max-w-none px-3 pb-16 pt-4 sm:px-4 lg:px-5",
   );
 
   return (

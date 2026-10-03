@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { cn } from "@/lib/cn";
 import type { PlanningTaskVM } from "@/lib/preparation/schedule/planning-view-model";
 import { halfLabel } from "@/lib/preparation/schedule/gantt-layout";
 
@@ -142,13 +143,18 @@ export function PlanningTaskHoverCard({
         </>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-2 border-t border-slate-100 pt-2 sm:grid-cols-2">
+      <div
+        className={cn(
+          "grid gap-2 border-t border-slate-100 pt-2",
+          compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2",
+        )}
+      >
         <Section title={`Prédécesseurs (${preds.length})`}>
           {preds.length === 0 ? (
             <span className="text-slate-400">Aucun</span>
           ) : (
             <ul className="space-y-0.5">
-              {preds.map((d) => (
+              {preds.slice(0, compact ? 4 : preds.length).map((d) => (
                 <li key={`p-${d.stepId}`} className="font-mono text-[11px]">
                   <span className="text-[#1e3a5f]">{d.stepId}</span>
                   <span className="text-slate-400"> · {d.type}</span>
@@ -159,34 +165,43 @@ export function PlanningTaskHoverCard({
                   ) : null}
                 </li>
               ))}
-            </ul>
-          )}
-        </Section>
-        <Section title={`Successeurs (${succs.length})`}>
-          {succs.length === 0 ? (
-            <span className="text-slate-400">Aucun</span>
-          ) : (
-            <ul className="space-y-0.5">
-              {succs.map((d) => (
-                <li key={`s-${d.stepId}`} className="font-mono text-[11px]">
-                  <span className="text-[#1e3a5f]">{d.stepId}</span>
-                  <span className="text-slate-400"> · {d.type}</span>
-                  {d.name ? (
-                    <span className="block truncate text-[11px] text-slate-600">
-                      {d.name}
-                    </span>
-                  ) : null}
+              {compact && preds.length > 4 ? (
+                <li className="text-[11px] text-slate-400">
+                  +{preds.length - 4} autre{preds.length - 4 > 1 ? "s" : ""}
                 </li>
-              ))}
+              ) : null}
             </ul>
           )}
         </Section>
+        {!compact ? (
+          <Section title={`Successeurs (${succs.length})`}>
+            {succs.length === 0 ? (
+              <span className="text-slate-400">Aucun</span>
+            ) : (
+              <ul className="space-y-0.5">
+                {succs.map((d) => (
+                  <li key={`s-${d.stepId}`} className="font-mono text-[11px]">
+                    <span className="text-[#1e3a5f]">{d.stepId}</span>
+                    <span className="text-slate-400"> · {d.type}</span>
+                    {d.name ? (
+                      <span className="block truncate text-[11px] text-slate-600">
+                        {d.name}
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Section>
+        ) : null}
       </div>
 
-      <p className="text-[11px] text-slate-400">
-        Dépend de {preds.length} tâche{preds.length > 1 ? "s" : ""} · Bloque{" "}
-        {succs.length} tâche{succs.length > 1 ? "s" : ""}
-      </p>
+      {!compact ? (
+        <p className="text-[11px] text-slate-400">
+          Dépend de {preds.length} tâche{preds.length > 1 ? "s" : ""} · Bloque{" "}
+          {succs.length} tâche{succs.length > 1 ? "s" : ""}
+        </p>
+      ) : null}
     </div>
   );
 }

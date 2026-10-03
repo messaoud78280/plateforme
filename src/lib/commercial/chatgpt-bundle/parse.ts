@@ -151,6 +151,29 @@ function parseLine(raw: unknown, path: string, issues: BundleParseIssue[]): Bund
     normalizeMoneyOrQty(o.vat_rate ?? o.vatRate ?? o.tva) ??
     null;
   const discount = normalizeMoneyOrQty(o.discount_percent ?? o.discountPercent ?? o.remise);
+  const sourcePrepLineCode =
+    asString(
+      o.source_prep_line_code ??
+        o.sourcePrepLineCode ??
+        o.prep_line_code ??
+        o.study_line_code ??
+        o.reference ??
+        o.code,
+    ) ?? null;
+  const priceProvRaw = asString(
+    o.price_provenance ?? o.priceProvenance ?? o.pu_provenance ?? o.origin_prix,
+  );
+  const priceProvenance =
+    priceProvRaw === "USER" ||
+    priceProvRaw === "LIBRARY" ||
+    priceProvRaw === "HISTORICAL" ||
+    priceProvRaw === "AI_PROPOSAL" ||
+    priceProvRaw === "MARKET_REFERENCE" ||
+    priceProvRaw === "UNKNOWN"
+      ? priceProvRaw
+      : priceProvRaw
+        ? ("UNKNOWN" as const)
+        : null;
   return {
     designation,
     description: asString(o.description ?? o.desc),
@@ -159,6 +182,8 @@ function parseLine(raw: unknown, path: string, issues: BundleParseIssue[]): Bund
     unitPriceHt,
     vatRate: vat,
     discountPercent: discount,
+    sourcePrepLineCode,
+    priceProvenance,
   };
 }
 

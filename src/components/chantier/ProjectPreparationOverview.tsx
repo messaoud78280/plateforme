@@ -21,6 +21,7 @@ import {
 } from "@/lib/chantier/pilotage-display";
 import { computeProjectNextAction } from "@/lib/chantier/project-preparation-state";
 import { TakeoffCreateFromChatgptModal } from "@/components/chantier/TakeoffCreateFromChatgptModal";
+import { QuoteCreateFromChatgptModal } from "@/components/chantier/QuoteCreateFromChatgptModal";
 
 type QuoteSectionPreview = {
   sectionId: string;
@@ -52,6 +53,7 @@ export function ProjectPreparationOverview({
   const [createPrefill, setCreatePrefill] = useState("");
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [takeoffCreateOpen, setTakeoffCreateOpen] = useState(false);
+  const [quoteCreateOpen, setQuoteCreateOpen] = useState(false);
 
   const unscopedMsg = formatUnscopedHumanMessage(workspace.unscoped);
   const hasUnscoped = workspace.unscoped.items.length > 0;
@@ -114,6 +116,20 @@ export function ProjectPreparationOverview({
             : "Préparation du métré…",
       };
     }
+    if (step.id === "devis" && step.primaryAction === "prepare_quote_chatgpt") {
+      if (!workspace.global.metre.href) {
+        return {
+          mode: "blocked",
+          reason: "Préparez d’abord le métré avant le devis",
+          busyLabel: null,
+        };
+      }
+      return {
+        mode: "generate",
+        reason: null,
+        busyLabel: "Ouverture ChatGPT…",
+      };
+    }
     if (step.id === "planning" && step.primaryAction === "create_global_prep") {
       const reason = planningBlockReason();
       if (reason) return { mode: "blocked", reason, busyLabel: null };
@@ -129,6 +145,7 @@ export function ProjectPreparationOverview({
       (step.primaryAction === "attach_visit" ||
         step.primaryAction === "create_global_prep" ||
         step.primaryAction === "prepare_takeoff_chatgpt" ||
+        step.primaryAction === "prepare_quote_chatgpt" ||
         step.primaryAction === "create_follow_up" ||
         step.primaryAction === "create_compte_rendu" ||
         step.primaryAction === "create_notice")
@@ -397,6 +414,10 @@ export function ProjectPreparationOverview({
     }
     if (step.primaryAction === "prepare_takeoff_chatgpt") {
       setTakeoffCreateOpen(true);
+      return;
+    }
+    if (step.primaryAction === "prepare_quote_chatgpt") {
+      setQuoteCreateOpen(true);
       return;
     }
     if (step.primaryAction === "create_global_prep") {
@@ -789,16 +810,34 @@ export function ProjectPreparationOverview({
               <p className="text-slate-600">
                 {workspace.global.devis.detail ?? "—"}
               </p>
-              {workspace.global.devis.href ? (
+              <div className="flex flex-wrap gap-3">
                 <Link
                   href={workspace.global.devis.href}
                   className="inline-flex text-[12.5px] font-semibold text-[#1e3a5f] hover:underline"
                 >
                   {workspace.global.devis.ready
-                    ? "Ouvrir le devis →"
-                    : "Finaliser le devis →"}
+                    ? "Ouvrir →"
+                    : "Finaliser →"}
                 </Link>
-              ) : null}
+                <span className="text-[12.5px] text-slate-500">
+                  Modifier avec ChatGPT depuis le devis
+                </span>
+              </div>
+            </div>
+          ) : workspace.global.metre.href ? (
+            <div className="mt-2 space-y-1.5 text-[13px]">
+              <p className="text-slate-600">À préparer depuis le métré</p>
+              {canEdit ? (
+                <button
+                  type="button"
+                  onClick={() => setQuoteCreateOpen(true)}
+                  className="inline-flex text-[12.5px] font-semibold text-[#1e3a5f] hover:underline"
+                >
+                  Préparer avec ChatGPT →
+                </button>
+              ) : (
+                <p className="text-slate-500">Lecture seule</p>
+              )}
             </div>
           ) : (
             <p className="mt-2 text-[13px] text-slate-500">Aucun devis de référence.</p>
@@ -959,6 +998,18 @@ export function ProjectPreparationOverview({
           onClose={() => setTakeoffCreateOpen(false)}
           onCreated={() => {
             setTakeoffCreateOpen(false);
+            router.refresh();
+          }}
+        />
+      ) : null}
+
+      {quoteCreateOpen ? (
+        <QuoteCreateFromChatgptModal
+          projectId={workspace.projectId}
+          studyId={workspace.global.metre.href?.match(/etudes\/([^/?#]+)/)?.[1] ?? null}
+          onClose={() => setQuoteCreateOpen(false)}
+          onCreated={() => {
+            setQuoteCreateOpen(false);
             router.refresh();
           }}
         />

@@ -167,6 +167,7 @@ export type ChantierWorkflowStep = {
     | "open"
     | "create_global_prep"
     | "prepare_takeoff_chatgpt"
+    | "prepare_quote_chatgpt"
     | "create_follow_up"
     | "create_compte_rendu"
     | "create_notice"
@@ -1406,20 +1407,27 @@ async function getProjectWorkspaceUncached(
     title: globalQuote?.number ?? "Non créé",
     href: globalQuote
       ? quoteEditorHref(globalQuote.id, globalQuote.status)
-      : `/dashboard/devis-facturation/devis/nouveau?projectId=${encodeURIComponent(projectId)}`,
+      : globalStudy
+        ? null
+        : `/dashboard/devis-facturation/devis/nouveau?projectId=${encodeURIComponent(projectId)}`,
     detail: globalQuote
       ? [globalCore.devis.displayLabel, devisAmount]
           .filter(Boolean)
           .join(" · ")
-      : "À rattacher",
+      : globalStudy
+        ? "Métré disponible — préparez le devis avec ChatGPT"
+        : "Métré requis avant le devis",
     syncState: globalCore.devis.syncState,
     statusLabel: globalQuote
       ? (globalCore.devis.displayLabel as CardStatusLabel)
       : "À préparer",
-    actionLabel:
-      globalCore.devis.needsRevalidation
+    actionLabel: globalQuote
+      ? globalCore.devis.needsRevalidation
         ? "Revalider"
-        : quoteWorkflowActionLabel(globalQuote?.status),
+        : quoteWorkflowActionLabel(globalQuote.status)
+      : globalStudy
+        ? "Préparer avec ChatGPT"
+        : "Métré requis",
     ready: devisReady,
     syncHint: globalDevisEval.hint,
     isReference: true,
@@ -1521,12 +1529,22 @@ async function getProjectWorkspaceUncached(
     {
       id: "devis",
       label: "Devis",
-      title: globalDevisCard.title,
+      title: globalQuote
+        ? globalDevisCard.title
+        : "À préparer",
       detail: globalDevisCard.detail,
       href: globalDevisCard.href,
       ready: prepState.quote.countsAsCompleted,
-      actionLabel: globalDevisCard.actionLabel,
-      primaryAction: "open",
+      actionLabel: globalQuote
+        ? "Ouvrir"
+        : globalStudy
+          ? "Préparer avec ChatGPT"
+          : "Métré requis",
+      primaryAction: globalQuote
+        ? "open"
+        : globalStudy
+          ? "prepare_quote_chatgpt"
+          : "open",
     },
     {
       id: "planning",

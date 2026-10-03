@@ -57,6 +57,15 @@ export type BundleQuoteMeta = {
   vatRequiresConfirmation: boolean;
 };
 
+/** Origine du PU — metadata (pas de colonne dédiée). */
+export type BundlePriceProvenance =
+  | "USER"
+  | "LIBRARY"
+  | "HISTORICAL"
+  | "AI_PROPOSAL"
+  | "MARKET_REFERENCE"
+  | "UNKNOWN";
+
 export type BundleLine = {
   designation: string;
   description: string | null;
@@ -65,6 +74,10 @@ export type BundleLine = {
   unitPriceHt: number;
   vatRate: number | null;
   discountPercent: number | null;
+  /** Code ligne métré source (CREATE depuis PrepStudy) — stocké en `reference`. */
+  sourcePrepLineCode?: string | null;
+  /** Provenance commerciale du PU — note descriptive, pas de migration. */
+  priceProvenance?: BundlePriceProvenance | null;
 };
 
 export type BundleSection = {

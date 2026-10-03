@@ -61,3 +61,15 @@ export {
   TAKEOFF_CREATE_INSTRUCTIONS,
   type BeworkTakeoffCreateContextV1,
 } from "./adapt-takeoff-create";
+
+export {
+  buildQuoteCreateContext,
+  computeQuoteCreateSourcesFingerprint,
+  loadCurrentQuoteCreateSourcesFingerprint,
+  previewQuoteCreateFromBundle,
+  commitQuoteCreateFromBundle,
+  QUOTE_CREATE_INSTRUCTIONS,
+  type BeworkQuoteCreateContextV1,
+  type QuoteCreatePreviewResult,
+  type QuoteCreateQuantityDrift,
+} from "./adapt-quote-create";

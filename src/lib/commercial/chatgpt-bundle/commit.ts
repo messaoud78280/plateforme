@@ -549,11 +549,27 @@ export async function commitBundleIntoQuote(opts: {
       const section = await addSection(opts.orgId, opts.quoteId, sec.title);
       createdSectionIds.push(section.id);
       for (const item of sec.items) {
+        const priceNote =
+          item.priceProvenance === "AI_PROPOSAL"
+            ? "Prix : proposition ChatGPT — validé à la création du devis."
+            : item.priceProvenance === "MARKET_REFERENCE"
+              ? "Prix : référence marché — à confirmer si besoin."
+              : item.priceProvenance === "LIBRARY"
+                ? "Prix : bibliothèque BeWork."
+                : item.priceProvenance === "HISTORICAL"
+                  ? "Prix : historique."
+                  : item.priceProvenance === "USER"
+                    ? "Prix : saisi / validé par le professionnel."
+                    : null;
+        const description = [item.description?.trim() || null, priceNote]
+          .filter(Boolean)
+          .join("\n");
         const line = await upsertLine(opts.orgId, opts.quoteId, {
           sectionId: section.id,
           kind: "WORK",
+          reference: item.sourcePrepLineCode?.trim() || null,
           designation: item.designation,
-          description: item.description,
+          description: description || null,
           quantity: item.quantity,
           unit: item.unit,
           unitSellHt: item.unitPriceHt,

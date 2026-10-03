@@ -1333,6 +1333,7 @@ export function QuoteEditor({
                 version={version?.versionNumber ?? 1}
                 capability={quotePatchCapability}
                 entityLabel={quote.number}
+                primaryActionLabel="Modifier avec ChatGPT"
                 onApplied={() => {
                   setChatgptToast("Modifications ChatGPT appliquées.");
                   window.setTimeout(() => {
@@ -1972,6 +1973,7 @@ export function QuoteEditor({
                     version={version?.versionNumber ?? 1}
                     capability={quotePatchCapability}
                     entityLabel={quote.number}
+                    primaryActionLabel="Modifier avec ChatGPT"
                     onApplied={() => {
                       setChatgptToast("Modifications ChatGPT appliquées.");
                       window.setTimeout(() => {

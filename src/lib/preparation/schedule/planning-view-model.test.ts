@@ -207,6 +207,7 @@ function basePlan(
     status: "READY",
     revisionKind: "BASE",
     revisionNumber: 1,
+    siblingCurrentPlanId: null,
     studyVersionAtGeneration: 1,
     startDate: "2026-10-12",
     endDateBase: "2026-10-16",

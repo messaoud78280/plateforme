@@ -18,6 +18,7 @@ import {
   computeNoticeContextVersion,
   noticeDocToVersionInput,
 } from "@/lib/bework-patch/commit/notice-ops";
+import { resolveCurrentSchedulePlan } from "@/lib/chantier/resolve-workspace-entities";
 
 function asIso(dte: Date | null | undefined): string | null {
   if (!dte) return null;
@@ -392,50 +393,104 @@ export async function loadImpactSubgraph(input: {
       }));
     }
 
-    // Plans liés à l’étude
-    const plans = await prisma.prepSchedulePlan.findMany({
-      where: {
-        organizationId: input.orgId,
-        projectId: input.projectId,
-        studyId,
-        ...(planId ? { id: planId } : {}),
-      },
-      orderBy: { createdAt: "desc" },
-      take: planId ? 1 : 5,
-      select: {
-        id: true,
-        title: true,
-        startDate: true,
-        endDateBase: true,
-        baseDurationWorkingDays: true,
-        revisionNumber: true,
-        studyVersionAtGeneration: true,
-        tasks: {
-          orderBy: { sortOrder: "asc" },
-          select: {
-            id: true,
-            stepCode: true,
-            name: true,
-            description: true,
-            durationDays: true,
-            durationMode: true,
-            durationLockedByUser: true,
-            driverTakeoffCode: true,
-            quantitySnapshot: true,
-            quantityUnit: true,
-            rateValue: true,
-            parallelUnits: true,
-            startDate: true,
-            endDate: true,
-            lot: true,
-            dependsOnJson: true,
-            takeoffLinks: {
-              select: { taskId: true, studyLineCode: true },
-            },
+    // Plans liés à l’étude — cible explicite (origin.entity_id) ou CURRENT canonique.
+    // Jamais « les 5 plus récents par createdAt » pour fingerprint / impact.
+    const planSelect = {
+      id: true,
+      title: true,
+      startDate: true,
+      endDateBase: true,
+      baseDurationWorkingDays: true,
+      revisionNumber: true,
+      studyVersionAtGeneration: true,
+      status: true,
+      revisionKind: true,
+      scopeId: true,
+      studyId: true,
+      createdAt: true,
+      tasks: {
+        orderBy: { sortOrder: "asc" as const },
+        select: {
+          id: true,
+          stepCode: true,
+          name: true,
+          description: true,
+          durationDays: true,
+          durationMode: true,
+          durationLockedByUser: true,
+          driverTakeoffCode: true,
+          quantitySnapshot: true,
+          quantityUnit: true,
+          rateValue: true,
+          parallelUnits: true,
+          startDate: true,
+          endDate: true,
+          lot: true,
+          dependsOnJson: true,
+          takeoffLinks: {
+            select: { taskId: true, studyLineCode: true },
           },
         },
       },
-    });
+    };
+
+    let plans: Array<{
+      id: string;
+      title: string;
+      startDate: Date | null;
+      endDateBase: Date | null;
+      baseDurationWorkingDays: unknown;
+      revisionNumber: number;
+      studyVersionAtGeneration: number | null;
+      status: string;
+      revisionKind: string;
+      scopeId: string | null;
+      studyId: string;
+      createdAt: Date;
+      tasks: Array<{
+        id: string;
+        stepCode: string;
+        name: string;
+        description: string | null;
+        durationDays: unknown;
+        durationMode: string;
+        durationLockedByUser: boolean;
+        driverTakeoffCode: string | null;
+        quantitySnapshot: unknown;
+        quantityUnit: string | null;
+        rateValue: unknown;
+        parallelUnits: number;
+        startDate: Date | null;
+        endDate: Date | null;
+        lot: string | null;
+        dependsOnJson: unknown;
+        takeoffLinks: Array<{ taskId: string; studyLineCode: string }>;
+      }>;
+    }> = [];
+
+    if (planId) {
+      const exact = await prisma.prepSchedulePlan.findFirst({
+        where: {
+          id: planId,
+          organizationId: input.orgId,
+          projectId: input.projectId,
+          studyId,
+        },
+        select: planSelect,
+      });
+      if (exact) plans = [exact];
+    } else {
+      const candidates = await prisma.prepSchedulePlan.findMany({
+        where: {
+          organizationId: input.orgId,
+          projectId: input.projectId,
+          studyId,
+        },
+        select: planSelect,
+      });
+      const current = resolveCurrentSchedulePlan(candidates);
+      if (current) plans = [current];
+    }
 
     graph.plans = plans.map((p) => ({
       id: p.id,

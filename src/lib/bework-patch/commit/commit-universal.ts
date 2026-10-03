@@ -109,7 +109,9 @@ export async function commitUniversalPatch(input: {
     patch,
   });
   const impact = analyzePatchImpact({ patch, subgraph });
-  const versionsBefore = collectVersionSnapshot(subgraph);
+  const preferredPlanId =
+    patch.origin.section === "PLANNING" ? patch.origin.entity_id : null;
+  const versionsBefore = collectVersionSnapshot(subgraph, { preferredPlanId });
 
   const fpPayload = buildFingerprintPayload({
     patch,
@@ -176,7 +178,12 @@ export async function commitUniversalPatch(input: {
 
       let studyId: string | null = subgraph.study?.id ?? null;
       let quoteId: string | null = subgraph.quotes[0]?.id ?? null;
-      let planId: string | null = subgraph.plans[0]?.id ?? null;
+      let planId: string | null =
+        (patch.origin.section === "PLANNING"
+          ? subgraph.plans.find((p) => p.id === patch.origin.entity_id)?.id
+          : null) ??
+        subgraph.plans[0]?.id ??
+        null;
       let visitId: string | null = subgraph.visit?.id ?? null;
       let visitVersionAfter: number | null = null;
       let followUpId: string | null = subgraph.followUp?.id ?? null;
@@ -964,7 +971,11 @@ export function buildCommitPreviewMeta(input: {
   impact: AnalyzePatchImpactResult;
   subgraph: import("@/lib/bework-patch/impact/types").ImpactSubgraph;
 }) {
-  const versions = collectVersionSnapshot(input.subgraph);
+  const preferredPlanId =
+    input.patch.origin.section === "PLANNING"
+      ? input.patch.origin.entity_id
+      : null;
+  const versions = collectVersionSnapshot(input.subgraph, { preferredPlanId });
   const fingerprint = computePreviewFingerprint(
     buildFingerprintPayload({
       patch: input.patch,

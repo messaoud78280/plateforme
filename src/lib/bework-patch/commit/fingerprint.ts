@@ -5,6 +5,7 @@ import { createHash } from "crypto";
 import type { BeworkPatchV1 } from "@/lib/bework-patch/types";
 import type {
   AnalyzePatchImpactResult,
+  ImpactPlan,
   ImpactSubgraph,
 } from "@/lib/bework-patch/impact/types";
 
@@ -26,9 +27,35 @@ export type VersionSnapshot = {
   noticeVersion?: number | null;
 };
 
-export function collectVersionSnapshot(subgraph: ImpactSubgraph): VersionSnapshot {
+/**
+ * Sélectionne le planning fingerprinté.
+ * 1. preferredPlanId (origin.entity_id PLANNING)
+ * 2. sinon max revisionNumber (pas plans[0] / createdAt)
+ */
+export function selectPlanForVersionSnapshot(
+  plans: ImpactPlan[],
+  preferredPlanId?: string | null,
+): ImpactPlan | null {
+  if (plans.length === 0) return null;
+  if (preferredPlanId) {
+    const hit = plans.find((p) => p.id === preferredPlanId);
+    if (hit) return hit;
+  }
+  if (plans.length === 1) return plans[0]!;
+  return plans.reduce((best, p) =>
+    p.revisionNumber > best.revisionNumber ? p : best,
+  );
+}
+
+export function collectVersionSnapshot(
+  subgraph: ImpactSubgraph,
+  opts?: { preferredPlanId?: string | null },
+): VersionSnapshot {
   const quote = subgraph.quotes[0] ?? null;
-  const plan = subgraph.plans[0] ?? null;
+  const plan = selectPlanForVersionSnapshot(
+    subgraph.plans,
+    opts?.preferredPlanId,
+  );
   return {
     study: subgraph.study?.version ?? null,
     quoteVersion: quote?.versionNumber ?? null,

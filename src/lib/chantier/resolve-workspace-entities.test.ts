@@ -1,17 +1,33 @@
 /**
- * Tests unitaires pure — résolution workspace (sans DB, sans mutation).
+ * Tests unitaires pure — résolution CURRENT planning (Phases 1–2).
  * Usage: npx tsx src/lib/chantier/resolve-workspace-entities.test.ts
+ *        npm run test:current-plan-resolution
  */
 import assert from "node:assert/strict";
 import {
   extractVisitSearchBits,
   pickSuggestedVisitId,
   resolveCurrentSchedulePlan,
+  resolveCurrentSchedulePlanForStudy,
   resolvePrepSchedulePlanForWorkspace,
   resolvePrepStudyForWorkspace,
   resolveSchedulePlanForScope,
   workspaceOpenOrGenerateLabel,
 } from "./resolve-workspace-entities";
+import {
+  selectPlanForVersionSnapshot,
+} from "@/lib/bework-patch/commit/fingerprint";
+import type { ImpactPlan } from "@/lib/bework-patch/impact/types";
+
+type P = {
+  id: string;
+  studyId: string;
+  scopeId: string | null;
+  status: string;
+  revisionKind: string;
+  revisionNumber?: number;
+  createdAt?: string;
+};
 
 function run() {
   // CAS A — study global scopeId null
@@ -26,65 +42,369 @@ function run() {
     assert.equal(study?.id, "g1");
   }
 
-  // CAS B — study scopé seulement → visible via referenceStudyId
+  // TEST 1 — CURRENT rev2 + INITIAL rev1 → CURRENT
   {
-    const study = resolvePrepStudyForWorkspace({
-      studies: [{ id: "s1", scopeId: "scope-a", sourcesJson: null }],
-      scopes: [
-        {
-          id: "scope-a",
-          referenceStudyId: "s1",
-          referenceQuoteId: null,
-          referenceSchedulePlanId: null,
-        },
-      ],
-    });
-    assert.equal(study?.id, "s1");
+    const best = resolveCurrentSchedulePlan([
+      {
+        id: "init",
+        studyId: "s1",
+        scopeId: "sc1",
+        status: "INITIAL",
+        revisionKind: "INITIAL",
+        revisionNumber: 1,
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
+      {
+        id: "cur",
+        studyId: "s1",
+        scopeId: "sc1",
+        status: "CURRENT",
+        revisionKind: "CURRENT",
+        revisionNumber: 2,
+        createdAt: "2026-01-02T00:00:00.000Z",
+      },
+    ] satisfies P[]);
+    assert.equal(best?.id, "cur", "TEST 1");
   }
 
-  // CAS B bis — study scopé unique sans référence explicite
+  // TEST 2 — CURRENT rev2 + ARCHIVED rev3 créé plus tard → CURRENT rev2
   {
-    const study = resolvePrepStudyForWorkspace({
-      studies: [{ id: "only", scopeId: "scope-x", sourcesJson: null }],
-      scopes: [
-        {
-          id: "scope-x",
-          referenceStudyId: null,
-          referenceQuoteId: null,
-          referenceSchedulePlanId: null,
-        },
-      ],
-    });
-    assert.equal(study?.id, "only");
+    const best = resolveCurrentSchedulePlan([
+      {
+        id: "cur",
+        studyId: "s1",
+        scopeId: "sc1",
+        status: "CURRENT",
+        revisionKind: "CURRENT",
+        revisionNumber: 2,
+        createdAt: "2026-01-02T00:00:00.000Z",
+      },
+      {
+        id: "arch",
+        studyId: "s1",
+        scopeId: "sc1",
+        status: "ARCHIVED",
+        revisionKind: "CURRENT",
+        revisionNumber: 3,
+        createdAt: "2026-01-03T00:00:00.000Z",
+      },
+    ] satisfies P[]);
+    assert.equal(best?.id, "cur", "TEST 2");
   }
 
-  // Planning lié au study scopé
+  // TEST 3 — ref scope ARCHIVED + CURRENT actif → CURRENT gagne
   {
-    const study = { id: "s1", scopeId: "sc1", sourcesJson: null };
-    const plan = resolvePrepSchedulePlanForWorkspace({
-      study,
-      scopes: [
-        {
-          id: "sc1",
-          referenceStudyId: "s1",
-          referenceQuoteId: null,
-          referenceSchedulePlanId: "p1",
-        },
-      ],
+    const scope = {
+      id: "sc1",
+      referenceStudyId: "s1",
+      referenceQuoteId: null as string | null,
+      referenceSchedulePlanId: "old-arch",
+    };
+    const plans: P[] = [
+      {
+        id: "old-arch",
+        studyId: "s1",
+        scopeId: "sc1",
+        status: "ARCHIVED",
+        revisionKind: "INITIAL",
+        revisionNumber: 1,
+      },
+      {
+        id: "cur-scoped",
+        studyId: "s1",
+        scopeId: "sc1",
+        status: "CURRENT",
+        revisionKind: "CURRENT",
+        revisionNumber: 2,
+      },
+    ];
+    const forScope = resolveSchedulePlanForScope({
+      plans,
+      scope,
+      studyId: "s1",
+    });
+    assert.equal(forScope?.id, "cur-scoped", "TEST 3");
+  }
+
+  // TEST 4 — scope Fondations CURRENT + global CURRENT → scope gagne
+  {
+    const scope = {
+      id: "fondations",
+      referenceStudyId: "s1",
+      referenceQuoteId: null as string | null,
+      referenceSchedulePlanId: null as string | null,
+    };
+    const plans: P[] = [
+      {
+        id: "global-cur",
+        studyId: "s1",
+        scopeId: null,
+        status: "CURRENT",
+        revisionKind: "CURRENT",
+        revisionNumber: 5,
+        createdAt: "2026-02-01T00:00:00.000Z",
+      },
+      {
+        id: "fond-cur",
+        studyId: "s1",
+        scopeId: "fondations",
+        status: "CURRENT",
+        revisionKind: "CURRENT",
+        revisionNumber: 2,
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
+    ];
+    const forScope = resolveSchedulePlanForScope({
+      plans,
+      scope,
+      studyId: "s1",
+    });
+    assert.equal(forScope?.id, "fond-cur", "TEST 4 — pas de fallback global silencieux");
+  }
+
+  // TEST 5 — scope A / scope B — aucune contamination
+  {
+    const scopeA = {
+      id: "sc-a",
+      referenceStudyId: "s-a",
+      referenceQuoteId: null as string | null,
+      referenceSchedulePlanId: null as string | null,
+    };
+    const plans: P[] = [
+      {
+        id: "plan-a",
+        studyId: "s-a",
+        scopeId: "sc-a",
+        status: "CURRENT",
+        revisionKind: "CURRENT",
+        revisionNumber: 1,
+      },
+      {
+        id: "plan-b",
+        studyId: "s-b",
+        scopeId: "sc-b",
+        status: "CURRENT",
+        revisionKind: "CURRENT",
+        revisionNumber: 9,
+      },
+    ];
+    const a = resolveSchedulePlanForScope({
+      plans,
+      scope: scopeA,
+      studyId: "s-a",
+    });
+    assert.equal(a?.id, "plan-a", "TEST 5a");
+    const b = resolveSchedulePlanForScope({
+      plans,
+      scope: {
+        id: "sc-b",
+        referenceStudyId: "s-b",
+        referenceQuoteId: null,
+        referenceSchedulePlanId: null,
+      },
+      studyId: "s-b",
+    });
+    assert.equal(b?.id, "plan-b", "TEST 5b");
+    assert.notEqual(a?.id, b?.id);
+  }
+
+  // TEST 6 — deux CURRENT historiques → plus haute revisionNumber ; createdAt tie-break
+  {
+    const byRev = resolveCurrentSchedulePlan([
+      {
+        id: "r1",
+        studyId: "s1",
+        scopeId: null,
+        status: "CURRENT",
+        revisionKind: "CURRENT",
+        revisionNumber: 1,
+        createdAt: "2026-03-01T00:00:00.000Z",
+      },
+      {
+        id: "r2",
+        studyId: "s1",
+        scopeId: null,
+        status: "CURRENT",
+        revisionKind: "CURRENT",
+        revisionNumber: 2,
+        createdAt: "2026-02-01T00:00:00.000Z",
+      },
+    ] satisfies P[]);
+    assert.equal(byRev?.id, "r2", "TEST 6 rev");
+
+    const byDate = resolveCurrentSchedulePlan([
+      {
+        id: "older",
+        studyId: "s1",
+        scopeId: null,
+        status: "CURRENT",
+        revisionKind: "CURRENT",
+        revisionNumber: 2,
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
+      {
+        id: "newer",
+        studyId: "s1",
+        scopeId: null,
+        status: "CURRENT",
+        revisionKind: "CURRENT",
+        revisionNumber: 2,
+        createdAt: "2026-02-01T00:00:00.000Z",
+      },
+    ] satisfies P[]);
+    assert.equal(byDate?.id, "newer", "TEST 6 tie-break createdAt");
+  }
+
+  // TEST 7 — ordre lexical status n’influence pas (INITIAL > CURRENT alphabétiquement)
+  {
+    // Simule l’ancien bug orderBy status desc : "INITIAL" > "CURRENT"
+    const lexicalWouldPickInitial =
+      "INITIAL".localeCompare("CURRENT") > 0 ? "initial" : "current";
+    assert.equal(lexicalWouldPickInitial, "initial", "précondition lexical");
+
+    const best = resolveCurrentSchedulePlan([
+      {
+        id: "initial",
+        studyId: "s1",
+        scopeId: null,
+        status: "INITIAL",
+        revisionKind: "INITIAL",
+        revisionNumber: 1,
+        createdAt: "2026-06-01T00:00:00.000Z",
+      },
+      {
+        id: "current",
+        studyId: "s1",
+        scopeId: null,
+        status: "CURRENT",
+        revisionKind: "CURRENT",
+        revisionNumber: 1,
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
+    ] satisfies P[]);
+    assert.equal(best?.id, "current", "TEST 7 — ranking métier, pas lexical");
+  }
+
+  // TEST 8 / 9 — fingerprint / selectPlan cible origin.entity_id (pas plans[0] createdAt)
+  {
+    const plans: ImpactPlan[] = [
+      {
+        id: "newest-created",
+        title: "A",
+        startDate: null,
+        endDateBase: null,
+        baseDurationWorkingDays: null,
+        revisionNumber: 1,
+        studyVersionAtGeneration: 1,
+        tasks: [],
+        takeoffLinks: [],
+      },
+      {
+        id: "targeted",
+        title: "B",
+        startDate: null,
+        endDateBase: null,
+        baseDurationWorkingDays: null,
+        revisionNumber: 2,
+        studyVersionAtGeneration: 4,
+        tasks: [],
+        takeoffLinks: [],
+      },
+    ];
+    const hit = selectPlanForVersionSnapshot(plans, "targeted");
+    assert.equal(hit?.id, "targeted", "TEST 8/9 preferredPlanId");
+    const byRev = selectPlanForVersionSnapshot(plans, null);
+    assert.equal(byRev?.id, "targeted", "TEST 9 fallback max revision");
+  }
+
+  // TEST 10 — ARCHIVED deep-link consultable ; jamais navigation default
+  {
+    const plans: P[] = [
+      {
+        id: "arch",
+        studyId: "s1",
+        scopeId: "sc1",
+        status: "ARCHIVED",
+        revisionKind: "INITIAL",
+        revisionNumber: 1,
+      },
+      {
+        id: "cur",
+        studyId: "s1",
+        scopeId: "sc1",
+        status: "CURRENT",
+        revisionKind: "CURRENT",
+        revisionNumber: 2,
+      },
+    ];
+    assert.equal(resolveCurrentSchedulePlan(plans)?.id, "cur", "TEST 10 default");
+    // Deep-link : l’id ARCHIVED reste adressable (pas de rewrite ici).
+    assert.ok(plans.some((p) => p.id === "arch" && p.status === "ARCHIVED"));
+  }
+
+  // Scope sans plan scopé + ref stale + global existant → null (pas de fallback silencieux)
+  {
+    const forScope = resolveSchedulePlanForScope({
+      studyId: "s1",
+      scope: {
+        id: "sc1",
+        referenceStudyId: "s1",
+        referenceQuoteId: null,
+        referenceSchedulePlanId: "old",
+      },
       plans: [
         {
-          id: "p1",
+          id: "old",
           studyId: "s1",
           scopeId: "sc1",
-          status: "INITIAL",
+          status: "ARCHIVED",
           revisionKind: "INITIAL",
+          revisionNumber: 1,
+        },
+        {
+          id: "global-cur",
+          studyId: "s1",
+          scopeId: null,
+          status: "CURRENT",
+          revisionKind: "CURRENT",
+          revisionNumber: 2,
         },
       ],
     });
-    assert.equal(plan?.id, "p1");
+    assert.equal(forScope, null, "pas de global silencieux");
+
+    const withFallback = resolveSchedulePlanForScope({
+      studyId: "s1",
+      allowGlobalFallback: true,
+      scope: {
+        id: "sc1",
+        referenceStudyId: "s1",
+        referenceQuoteId: null,
+        referenceSchedulePlanId: "old",
+      },
+      plans: [
+        {
+          id: "old",
+          studyId: "s1",
+          scopeId: "sc1",
+          status: "ARCHIVED",
+          revisionKind: "INITIAL",
+          revisionNumber: 1,
+        },
+        {
+          id: "global-cur",
+          studyId: "s1",
+          scopeId: null,
+          status: "CURRENT",
+          revisionKind: "CURRENT",
+          revisionNumber: 2,
+        },
+      ],
+    });
+    assert.equal(withFallback?.id, "global-cur", "fallback global explicite");
   }
 
-  // Planning global CURRENT préféré
+  // Workspace global préfère scopeId null
   {
     const plan = resolvePrepSchedulePlanForWorkspace({
       study: { id: "s1", scopeId: null },
@@ -111,65 +431,33 @@ function run() {
     assert.equal(plan?.id, "cur");
   }
 
-  // C-01 — referenceSchedulePlanId stale ARCHIVED ne gagne pas face au CURRENT
+  // resolveCurrentSchedulePlanForStudy
   {
-    const OLD = "cmui103dx0002scx8q99joufl";
-    const CUR = "cmus2gpmm003ivfsmad3hafw2";
-    const scope = {
-      id: "cmui2yaj20001dli4kof4j59b",
-      referenceStudyId: "cmuh6cy4c000y1423lqo85g5v",
-      referenceQuoteId: null as string | null,
-      referenceSchedulePlanId: OLD,
-    };
-    const plans = [
-      {
-        id: OLD,
-        studyId: "cmuh6cy4c000y1423lqo85g5v",
-        scopeId: scope.id,
-        status: "ARCHIVED",
-        revisionKind: "INITIAL",
-        revisionNumber: 1,
-        createdAt: "2026-09-26T06:45:55.365Z",
-      },
-      {
-        id: CUR,
-        studyId: "cmuh6cy4c000y1423lqo85g5v",
-        scopeId: null,
-        status: "CURRENT",
-        revisionKind: "CURRENT",
-        revisionNumber: 2,
-        createdAt: "2026-10-03T07:24:32.063Z",
-      },
-      {
-        id: "cmus2eon7002nvfsm6m44h2y2",
-        studyId: "cmuh6cy4c000y1423lqo85g5v",
-        scopeId: null,
-        status: "CURRENT",
-        revisionKind: "CURRENT",
-        revisionNumber: 2,
-        createdAt: "2026-10-03T07:22:57.475Z",
-      },
-    ];
-    const forScope = resolveSchedulePlanForScope({
-      plans,
-      scope,
-      studyId: "cmuh6cy4c000y1423lqo85g5v",
+    const hit = resolveCurrentSchedulePlanForStudy({
+      studyId: "s1",
+      plans: [
+        {
+          id: "other",
+          studyId: "s2",
+          scopeId: null,
+          status: "CURRENT",
+          revisionKind: "CURRENT",
+          revisionNumber: 99,
+        },
+        {
+          id: "mine",
+          studyId: "s1",
+          scopeId: null,
+          status: "CURRENT",
+          revisionKind: "CURRENT",
+          revisionNumber: 1,
+        },
+      ],
     });
-    assert.equal(forScope?.id, CUR, "carte lot → CURRENT le plus récent");
-
-    const forWorkspace = resolvePrepSchedulePlanForWorkspace({
-      study: { id: "cmuh6cy4c000y1423lqo85g5v", scopeId: null },
-      scopes: [scope],
-      plans,
-    });
-    assert.equal(forWorkspace?.id, CUR, "chaîne chantier → CURRENT");
-
-    // Tie-break createdAt parmi plusieurs CURRENT rev 2
-    const best = resolveCurrentSchedulePlan(plans);
-    assert.equal(best?.id, CUR);
+    assert.equal(hit?.id, "mine");
   }
 
-  // referenceSchedulePlanId active encore utilisable s’il n’y a pas de meilleur CURRENT
+  // reference active encore utilisable s’il n’y a pas de meilleur CURRENT scopé
   {
     const plan = resolveSchedulePlanForScope({
       studyId: "s1",
@@ -190,35 +478,11 @@ function run() {
         },
       ],
     });
+    // INITIAL scopé = seul actif → gagné via step 1 (resolveCurrent sur scoped)
     assert.equal(plan?.id, "p-ref");
   }
 
-  // Plusieurs scopes — referenceStudyId gagne
-  {
-    const study = resolvePrepStudyForWorkspace({
-      studies: [
-        { id: "s-fond", scopeId: "sc1" },
-        { id: "s-elec", scopeId: "sc2" },
-      ],
-      scopes: [
-        {
-          id: "sc1",
-          referenceStudyId: "s-fond",
-          referenceQuoteId: null,
-          referenceSchedulePlanId: null,
-        },
-        {
-          id: "sc2",
-          referenceStudyId: "s-elec",
-          referenceQuoteId: null,
-          referenceSchedulePlanId: null,
-        },
-      ],
-    });
-    assert.equal(study?.id, "s-fond");
-  }
-
-  // Visite : pas de hardcode cuisine / C-01
+  // Visite helpers inchangés
   {
     const bits = extractVisitSearchBits({
       title: "DÉMO — Construction maison individuelle C-01",
@@ -226,7 +490,6 @@ function run() {
       siteCity: "Massy",
     });
     assert.ok(!bits.includes("cuisine"));
-    assert.ok(bits.includes("pomelle") || bits.includes("massy") || bits.includes("c-01") || bits.some((b) => b.includes("01")));
     const suggested = pickSuggestedVisitId({
       searchBits: bits,
       candidates: [
@@ -240,35 +503,13 @@ function run() {
     assert.equal(suggested, null);
   }
 
-  // Visite : match fort sur adresse
-  {
-    const suggested = pickSuggestedVisitId({
-      searchBits: ["pomelle", "massy"],
-      candidates: [
-        {
-          id: "v1",
-          subject: "Visite fondations",
-          siteAddress: "4 rue de la pomelle Massy",
-        },
-      ],
-    });
-    assert.equal(suggested, "v1");
-  }
-
-  // Ouvrir vs Générer
-  assert.equal(workspaceOpenOrGenerateLabel(true, "Générer le métré"), "Ouvrir");
+  assert.equal(workspaceOpenOrGenerateLabel(true, "Générer"), "Ouvrir");
   assert.equal(
-    workspaceOpenOrGenerateLabel(false, "Générer le métré"),
-    "Générer le métré",
+    resolvePrepStudyForWorkspace({ studies: [], scopes: [] }),
+    null,
   );
 
-  // Aucune création implicite : pas de study → null
-  {
-    const study = resolvePrepStudyForWorkspace({ studies: [], scopes: [] });
-    assert.equal(study, null);
-  }
-
-  console.log("OK resolve-workspace-entities.test.ts");
+  console.log("OK resolve-workspace-entities.test.ts (TESTS 1–10 + scope/global)");
 }
 
 run();

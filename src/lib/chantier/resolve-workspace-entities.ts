@@ -2,6 +2,23 @@
  * Résolution lecture chantier — pure, sans I/O.
  * Une seule logique pour page globale, scopes, timeline et cartes.
  * Ne crée / ne met à jour aucune donnée.
+ *
+ * ## Politique CURRENT planning (canonique)
+ *
+ * Ranking (`resolveCurrentSchedulePlan`) :
+ * 1. exclure ARCHIVED
+ * 2. CURRENT (status) > revisionKind CURRENT > INITIAL > DRAFT
+ * 3. revisionNumber DESC
+ * 4. createdAt tie-break uniquement
+ * 5. jamais d’ordre lexical sur status (INITIAL ne bat jamais CURRENT)
+ *
+ * ## Scope vs global
+ *
+ * - `resolveSchedulePlanForScope` : CURRENT **scopé** d’abord ; reference*
+ *   seulement si active/cohérente ; **pas** de fallback global silencieux.
+ * - Fallback global = explicite au call-site (ex. project-workspace).
+ * - `resolvePrepSchedulePlanForWorkspace` : carte / chaîne **globale**
+ *   (scopeId null d’abord) — ne pas l’utiliser pour une page de lot.
  */
 
 export type StudyLike = {
@@ -80,11 +97,12 @@ function planCreatedAtMs(plan: PlanLike): number {
  * Règle déterministe :
  * 1. statut CURRENT (non ARCHIVED)
  * 2. sinon revisionKind CURRENT non archivé
- * 3. sinon tout plan non archivé
+ * 3. sinon INITIAL / DRAFT non archivé
  * 4. revisionNumber la plus élevée
  * 5. createdAt le plus récent (tie-break)
  *
  * Ne jamais préférer un plan ARCHIVED, même s’il est référencé.
+ * Ne jamais utiliser l’ordre alphabétique de status.
  */
 export function resolveCurrentSchedulePlan<T extends PlanLike>(
   list: T[],
@@ -122,13 +140,29 @@ export function pickBestPlan<T extends PlanLike>(list: T[]): T | null {
 }
 
 /**
- * Ordre :
- * 1. planning CURRENT du study (scope null ou scopé)
- * 2. referenceSchedulePlanId des scopes — uniquement si non archivé
- * 3. unique planning non archivé du projet
+ * CURRENT d’une étude (tous scopes confondus dans la liste fournie).
+ * Filtrer la liste en amont si un scope précis est requis.
+ */
+export function resolveCurrentSchedulePlanForStudy<T extends PlanLike>(input: {
+  plans: T[];
+  studyId: string;
+}): T | null {
+  return resolveCurrentSchedulePlan(
+    input.plans.filter((p) => p.studyId === input.studyId),
+  );
+}
+
+/**
+ * Ordre (chaîne / carte **globale** uniquement) :
+ * 1. planning CURRENT du study avec scopeId null
+ * 2. planning CURRENT du study (tous scopes)
+ * 3. referenceSchedulePlanId des scopes — uniquement si non archivé
+ * 4. unique planning non archivé du projet
  *
  * Un referenceSchedulePlanId obsolète (ARCHIVED) ne gagne jamais
  * face à un CURRENT plus récent du même study.
+ *
+ * Ne pas utiliser pour une page de lot → `resolveSchedulePlanForScope`.
  */
 export function resolvePrepSchedulePlanForWorkspace<T extends PlanLike>(input: {
   plans: T[];
@@ -170,29 +204,53 @@ export function resolvePrepSchedulePlanForWorkspace<T extends PlanLike>(input: {
 }
 
 /**
- * Résolution du planning pour une carte de lot.
- * Ne jamais ouvrir un plan ARCHIVED via referenceSchedulePlanId stale.
+ * Résolution du planning pour une carte / page de lot.
+ *
+ * Ordre :
+ * 1. CURRENT exact scopé (scopeId === scope.id)
+ * 2. preferred/reference active du **même** scope (non ARCHIVED)
+ * 3. si `allowGlobalFallback` : CURRENT global (scopeId null) du même study
+ *
+ * ProjectScope.reference* = baseline/préférence secondaire uniquement.
+ * Pas de contamination scope A → scope B.
+ * Pas de fallback global silencieux (défaut allowGlobalFallback = false).
  */
 export function resolveSchedulePlanForScope<T extends PlanLike>(input: {
   plans: T[];
   scope: ScopeLike;
   studyId: string | null;
+  /** Explicitement true seulement si le produit demande un fallback global. */
+  allowGlobalFallback?: boolean;
 }): T | null {
-  const { plans, scope, studyId } = input;
-  const candidates = plans.filter(
-    (p) =>
-      p.scopeId === scope.id ||
-      p.id === scope.referenceSchedulePlanId ||
-      (studyId != null && p.studyId === studyId),
-  );
-  const current = resolveCurrentSchedulePlan(candidates);
-  if (current) return current;
+  const { plans, scope, studyId, allowGlobalFallback = false } = input;
 
-  // Dernier recours : référence explicite si encore active.
+  // 1. Exact scoped CURRENT / actif
+  const scopedCurrent = resolveCurrentSchedulePlan(
+    plans.filter((p) => p.scopeId === scope.id),
+  );
+  if (scopedCurrent) return scopedCurrent;
+
+  // 2. Preferred reference — même scope, active, cohérente
   if (scope.referenceSchedulePlanId) {
     const ref = plans.find((p) => p.id === scope.referenceSchedulePlanId);
-    if (ref && (ref.status ?? "").toUpperCase() !== "ARCHIVED") return ref;
+    if (
+      ref &&
+      (ref.status ?? "").toUpperCase() !== "ARCHIVED" &&
+      ref.scopeId === scope.id &&
+      (studyId == null || ref.studyId === studyId)
+    ) {
+      return ref;
+    }
   }
+
+  // 3. Global du même study — uniquement si demandé explicitement
+  if (allowGlobalFallback && studyId) {
+    const globalCurrent = resolveCurrentSchedulePlan(
+      plans.filter((p) => p.studyId === studyId && p.scopeId == null),
+    );
+    if (globalCurrent) return globalCurrent;
+  }
+
   return null;
 }
 

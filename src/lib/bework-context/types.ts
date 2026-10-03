@@ -263,6 +263,11 @@ export type ProjectContextVersions = {
     revisionNumber: number;
     studyVersionAtGeneration: number | null;
   }>;
+  /**
+   * Planning CURRENT canonique par étude (pas ProjectScope.reference*).
+   * ChatGPT ne doit pas déduire CURRENT parmi schedules[].
+   */
+  currentSchedulePlanIds: Array<{ studyId: string; planId: string }>;
 };
 
 export type ProjectContextSnapshot = {

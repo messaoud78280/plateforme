@@ -11,6 +11,7 @@ import {
   EXECUTION_STATUSES,
   type ExecutionStatus,
 } from "@/lib/chantier/planning-suivi";
+import { resolveCurrentSchedulePlan } from "@/lib/chantier/resolve-workspace-entities";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -43,7 +44,16 @@ export async function GET(req: Request, ctx: Ctx) {
           organizationId: project.organizationId,
           projectId,
         },
-        select: { id: true, studyId: true, title: true },
+        select: {
+          id: true,
+          studyId: true,
+          title: true,
+          status: true,
+          scopeId: true,
+          revisionKind: true,
+          revisionNumber: true,
+          createdAt: true,
+        },
       })
     : await resolveGlobalPlanForProject(project.organizationId, projectId);
 
@@ -52,6 +62,30 @@ export async function GET(req: Request, ctx: Ctx) {
       { error: "Aucun planning global — générez-le d’abord." },
       { status: 404 },
     );
+  }
+
+  // Suivi lié à un plan ARCHIVED : signaler l’historique + CURRENT (sans muter la fiche).
+  let siblingCurrentPlanId: string | null = null;
+  if ((plan.status ?? "").toUpperCase() === "ARCHIVED") {
+    const siblings = await prisma.prepSchedulePlan.findMany({
+      where: {
+        organizationId: project.organizationId,
+        projectId,
+        studyId: plan.studyId,
+        status: { not: "ARCHIVED" },
+      },
+      select: {
+        id: true,
+        studyId: true,
+        scopeId: true,
+        status: true,
+        revisionKind: true,
+        revisionNumber: true,
+        createdAt: true,
+      },
+    });
+    const current = resolveCurrentSchedulePlan(siblings);
+    if (current && current.id !== plan.id) siblingCurrentPlanId = current.id;
   }
 
   const tasks = await listPlanningSuiviTasks(project.organizationId, plan.id);
@@ -65,7 +99,13 @@ export async function GET(req: Request, ctx: Ctx) {
   });
 
   return NextResponse.json({
-    plan: { id: plan.id, studyId: plan.studyId, title: plan.title },
+    plan: {
+      id: plan.id,
+      studyId: plan.studyId,
+      title: plan.title,
+      status: plan.status,
+      siblingCurrentPlanId,
+    },
     sheet,
     tasks,
   });

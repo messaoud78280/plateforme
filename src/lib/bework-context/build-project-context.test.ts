@@ -293,6 +293,7 @@ function fixtureSnapshot(overrides?: Partial<ProjectContextSnapshot>): ProjectCo
           studyVersionAtGeneration: 2,
         },
       ],
+      currentSchedulePlanIds: [{ studyId: "study-a", planId: "plan-a" }],
     },
   };
   return { ...base, ...overrides };
@@ -343,6 +344,7 @@ console.log("  provenance: ok");
       takeoffVersions: [{ studyId: "study-a", version: 3 }],
       quoteVersions: [],
       planRevisions: [],
+      currentSchedulePlanIds: [],
     },
   });
   assert.equal(snap.quotes.length, 0);

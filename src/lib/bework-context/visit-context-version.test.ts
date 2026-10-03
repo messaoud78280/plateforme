@@ -127,6 +127,7 @@ function fixtureSnapshot(
       takeoffVersions: [],
       quoteVersions: [],
       planRevisions: [],
+      currentSchedulePlanIds: [],
     },
   };
 }

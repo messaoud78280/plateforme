@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
 import { commitPrepSchedule } from "@/lib/preparation/schedule/transfer";
 import type { StoredProvenance } from "@/lib/preparation/types";
+import { resolveCurrentSchedulePlan } from "@/lib/chantier/resolve-workspace-entities";
 
 const GLOBAL_STUDY_MARKER = "bework_global_metre_v1";
 
@@ -588,27 +589,42 @@ async function loadProjectQuoteContext(orgId: string, projectId: string, quoteId
     studyCandidates.find((s) => /métré chantier|metre chantier/i.test(s.title)) ??
     null;
 
-  const existingPlan = existingStudy
-    ? await prisma.prepSchedulePlan.findFirst({
+  const planCandidates = existingStudy
+    ? await prisma.prepSchedulePlan.findMany({
         where: {
           organizationId: orgId,
           projectId,
           studyId: existingStudy.id,
           status: { not: "ARCHIVED" },
         },
-        orderBy: { createdAt: "desc" },
-        select: { id: true },
+        select: {
+          id: true,
+          studyId: true,
+          scopeId: true,
+          status: true,
+          revisionKind: true,
+          revisionNumber: true,
+          createdAt: true,
+        },
       })
-    : await prisma.prepSchedulePlan.findFirst({
+    : await prisma.prepSchedulePlan.findMany({
         where: {
           organizationId: orgId,
           projectId,
           scopeId: null,
           status: { not: "ARCHIVED" },
         },
-        orderBy: { createdAt: "desc" },
-        select: { id: true },
+        select: {
+          id: true,
+          studyId: true,
+          scopeId: true,
+          status: true,
+          revisionKind: true,
+          revisionNumber: true,
+          createdAt: true,
+        },
       });
+  const existingPlan = resolveCurrentSchedulePlan(planCandidates);
 
   return { project, quote, sections, visit, visitNotes, existingStudy, existingPlan };
 }

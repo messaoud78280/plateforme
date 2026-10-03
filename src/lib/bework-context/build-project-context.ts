@@ -8,6 +8,7 @@ import {
   normalizePrepSources,
   planSourceDisplayTitle,
 } from "@/lib/preparation/plan-source";
+import { resolveCurrentSchedulePlan } from "@/lib/chantier/resolve-workspace-entities";
 import { mapProvenanceKind } from "./provenance";
 import { computeVisitContextVersion } from "./visit-context-version";
 import {
@@ -758,6 +759,20 @@ export async function buildProjectContext(
         revisionNumber: p.revisionNumber,
         studyVersionAtGeneration: p.studyVersionAtGeneration,
       })),
+      currentSchedulePlanIds: (() => {
+        const byStudy = new Map<string, typeof schedules>();
+        for (const p of schedules) {
+          const list = byStudy.get(p.studyId) ?? [];
+          list.push(p);
+          byStudy.set(p.studyId, list);
+        }
+        const out: Array<{ studyId: string; planId: string }> = [];
+        for (const [studyId, list] of byStudy) {
+          const current = resolveCurrentSchedulePlan(list);
+          if (current) out.push({ studyId, planId: current.id });
+        }
+        return out;
+      })(),
     },
   };
 }

@@ -363,6 +363,30 @@ export function PrepSchedulePlanView({
         </div>
       ) : null}
 
+      {/* Deep-link historique — pas de redirect auto vers CURRENT */}
+      {(plan.status ?? "").toUpperCase() === "ARCHIVED" ? (
+        <div
+          className="rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-[13px] text-slate-800"
+          role="status"
+        >
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+            Version historique
+          </p>
+          <p className="mt-0.5">
+            Ce planning est archivé. Un planning plus récent peut exister pour
+            ce métré.
+          </p>
+          {plan.siblingCurrentPlanId ? (
+            <Link
+              href={`/dashboard/visites-metres/etudes/${studyId}/planning/${plan.siblingCurrentPlanId}`}
+              className="mt-2 inline-flex rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-[12px] font-medium text-white"
+            >
+              Ouvrir la version actuelle
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
+
       {/* Source integrity — distinct de CTX-04 */}
       {vm.sourceWarning ? (
         <div

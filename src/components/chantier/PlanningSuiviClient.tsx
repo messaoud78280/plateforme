@@ -24,9 +24,13 @@ export function PlanningSuiviClient({
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [plan, setPlan] = useState<{ id: string; studyId: string; title: string } | null>(
-    null,
-  );
+  const [plan, setPlan] = useState<{
+    id: string;
+    studyId: string;
+    title: string;
+    status?: string;
+    siblingCurrentPlanId?: string | null;
+  } | null>(null);
   const [tasks, setTasks] = useState<SuiviTaskRow[]>([]);
   const [chantierPhotos, setChantierPhotos] = useState<
     Array<{
@@ -140,6 +144,29 @@ export function PlanningSuiviClient({
           </Link>
         </div>
       </div>
+
+      {(plan?.status ?? "").toUpperCase() === "ARCHIVED" ? (
+        <div
+          className="rounded-lg border border-slate-300 bg-slate-50 px-3 py-2.5 text-[13px] text-slate-800"
+          role="status"
+        >
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+            Planning historique
+          </p>
+          <p className="mt-0.5">
+            Cette fiche de suivi pointe vers un planning archivé. La référence
+            métier n’est pas modifiée automatiquement.
+          </p>
+          {plan?.siblingCurrentPlanId ? (
+            <Link
+              href={`/dashboard/visites-metres/etudes/${plan.studyId}/planning/${plan.siblingCurrentPlanId}`}
+              className="mt-2 inline-flex rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-[12px] font-medium text-white"
+            >
+              Ouvrir le planning actuel
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
 
       {error ? (
         <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700">

@@ -321,6 +321,9 @@ function fixtureC01(overrides?: Partial<ProjectContextSnapshot>): ProjectContext
           studyVersionAtGeneration: 3,
         },
       ],
+      currentSchedulePlanIds: [
+        { studyId: "study-fondations", planId: "plan-fond" },
+      ],
     },
   };
   return { ...base, ...overrides };

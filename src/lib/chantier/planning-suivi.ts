@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { ensureOrganizationForOwner } from "@/lib/organization/access";
 import { ensureDefaultWorkflow } from "@/lib/workflow/service";
 import { colorKeyForStatus } from "@/lib/follow-up/types";
+import { resolveCurrentSchedulePlan } from "@/lib/chantier/resolve-workspace-entities";
 
 export const EXECUTION_STATUSES = [
   "NOT_STARTED",
@@ -51,23 +52,31 @@ function parseJsonArr(raw: unknown): Array<Record<string, string>> {
   return raw.filter((x) => x && typeof x === "object") as Array<Record<string, string>>;
 }
 
+/**
+ * Planning global courant (scopeId null) — ranking canonique.
+ * Jamais orderBy status lexical (INITIAL ne bat pas CURRENT).
+ */
 export async function resolveGlobalPlanForProject(orgId: string, projectId: string) {
-  return prisma.prepSchedulePlan.findFirst({
+  const candidates = await prisma.prepSchedulePlan.findMany({
     where: {
       organizationId: orgId,
       projectId,
       scopeId: null,
       status: { not: "ARCHIVED" },
     },
-    orderBy: [{ status: "desc" }, { createdAt: "desc" }],
     select: {
       id: true,
       studyId: true,
+      scopeId: true,
       title: true,
       status: true,
+      revisionKind: true,
+      revisionNumber: true,
+      createdAt: true,
       _count: { select: { tasks: true } },
     },
   });
+  return resolveCurrentSchedulePlan(candidates);
 }
 
 export async function listPlanningSuiviTasks(

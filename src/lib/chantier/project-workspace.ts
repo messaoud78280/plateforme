@@ -13,6 +13,7 @@ import {
 import {
   extractVisitSearchBits,
   isGlobalStudySources,
+  resolveCurrentSchedulePlan,
   resolvePrepSchedulePlanForWorkspace,
   resolvePrepStudyForWorkspace,
   resolveSchedulePlanForScope,
@@ -1879,16 +1880,35 @@ export async function attachStudyToScope(input: {
         orderBy: { createdAt: "desc" },
         select: { id: true },
       });
-      const plan = await tx.prepSchedulePlan.findFirst({
-        where: { studyId: study.id, organizationId: input.orgId },
-        orderBy: { createdAt: "desc" },
-        select: { id: true },
+      // CURRENT canonique du study — jamais ARCHIVED / jamais « dernier créé ».
+      const planCandidates = await tx.prepSchedulePlan.findMany({
+        where: {
+          studyId: study.id,
+          organizationId: input.orgId,
+          status: { not: "ARCHIVED" },
+        },
+        select: {
+          id: true,
+          studyId: true,
+          scopeId: true,
+          status: true,
+          revisionKind: true,
+          revisionNumber: true,
+          createdAt: true,
+        },
       });
+      const plan =
+        resolveCurrentSchedulePlan(
+          planCandidates.filter(
+            (p) => p.scopeId === scope.id || p.scopeId == null,
+          ),
+        ) ?? resolveCurrentSchedulePlan(planCandidates);
       await tx.projectScope.update({
         where: { id: scope.id },
         data: {
           referenceStudyId: study.id,
           referenceQuoteId: quote?.id ?? scope.referenceQuoteId,
+          // Baseline uniquement si plan actif cohérent.
           referenceSchedulePlanId: plan?.id ?? scope.referenceSchedulePlanId,
         },
       });
@@ -2307,7 +2327,7 @@ export async function attachSchedulePlanToScope(input: {
       organizationId: input.orgId,
       projectId: scope.projectId,
     },
-    select: { id: true, studyId: true },
+    select: { id: true, studyId: true, status: true },
   });
   if (!plan) throw new Error("Planning introuvable");
 
@@ -2320,7 +2340,11 @@ export async function attachSchedulePlanToScope(input: {
       where: { id: plan.studyId },
       data: { scopeId: scope.id },
     });
-    if (!scope.referenceSchedulePlanId) {
+    // Baseline : jamais pointer une référence vers ARCHIVED.
+    if (
+      !scope.referenceSchedulePlanId &&
+      (plan.status ?? "").toUpperCase() !== "ARCHIVED"
+    ) {
       await tx.projectScope.update({
         where: { id: scope.id },
         data: {

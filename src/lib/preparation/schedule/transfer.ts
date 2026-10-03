@@ -25,6 +25,7 @@ import {
   holdPointBlocksSuccessor,
   normalizeHoldPointStatus,
 } from "@/lib/preparation/schedule/gantt-layout";
+import { resolveCurrentSchedulePlan } from "@/lib/chantier/resolve-workspace-entities";
 import {
   parseCrewJson,
   parseCrewMembers,
@@ -1187,6 +1188,11 @@ export type SchedulePlanViewPayload = {
   status: string;
   revisionKind: string;
   revisionNumber: number;
+  /**
+   * Si ce plan est ARCHIVED : id du CURRENT canonique du même study (lecture seule).
+   * Null si déjà CURRENT ou aucun CURRENT.
+   */
+  siblingCurrentPlanId: string | null;
   /** Version métré au moment de la génération — CTX-04. */
   studyVersionAtGeneration: number;
   startDate: string | null;
@@ -1452,6 +1458,29 @@ export async function buildPrepSchedulePlanPayload(
     };
   });
 
+  let siblingCurrentPlanId: string | null = null;
+  if ((plan.status ?? "").toUpperCase() === "ARCHIVED") {
+    const siblings = await prisma.prepSchedulePlan.findMany({
+      where: {
+        organizationId: orgId,
+        studyId: plan.studyId,
+        projectId: plan.projectId,
+        status: { not: "ARCHIVED" },
+      },
+      select: {
+        id: true,
+        studyId: true,
+        scopeId: true,
+        status: true,
+        revisionKind: true,
+        revisionNumber: true,
+        createdAt: true,
+      },
+    });
+    const current = resolveCurrentSchedulePlan(siblings);
+    if (current && current.id !== plan.id) siblingCurrentPlanId = current.id;
+  }
+
   return {
     id: plan.id,
     title: plan.title,
@@ -1460,6 +1489,7 @@ export async function buildPrepSchedulePlanPayload(
     status: plan.status,
     revisionKind: plan.revisionKind,
     revisionNumber: plan.revisionNumber,
+    siblingCurrentPlanId,
     studyVersionAtGeneration: plan.studyVersionAtGeneration,
     startDate,
     endDateBase,

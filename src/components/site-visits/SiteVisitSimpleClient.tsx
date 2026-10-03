@@ -25,6 +25,7 @@ import {
   unsupportedPhotoReason,
 } from "@/lib/site-visits/photo-import";
 import { assessVisitQuoteReadiness } from "@/lib/site-visits/quote-readiness";
+import { ChantierDossierNavHost } from "@/components/chantier/ChantierDossierNavHost";
 
 type ClientOpt = {
   id: string;
@@ -62,6 +63,7 @@ type Visit = {
   prep?: SiteVisitPrep;
   status: string;
   statusLabel: string;
+  projectId?: string | null;
   commercialQuoteHref: string | null;
   commercialQuoteNumber: string | null;
   commercial?: SiteVisitCommercialInfo;
@@ -788,6 +790,17 @@ export function SiteVisitSimpleClient({
           </Link>
         </div>
       </div>
+
+      {visit.projectId ? (
+        <div className="mb-4">
+          <ChantierDossierNavHost
+            projectId={visit.projectId}
+            activeStep="visite"
+            variant="compact"
+            sticky
+          />
+        </div>
+      ) : null}
 
       <header className="mb-4 rounded-2xl border border-[#1e3a5f]/10 bg-[#1e3a5f]/5 px-4 py-4">
         <h1 className="text-[20px] font-semibold leading-tight text-[#1e3a5f]">

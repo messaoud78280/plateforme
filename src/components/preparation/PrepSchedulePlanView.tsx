@@ -7,6 +7,7 @@ import {
   ChantierHierarchyNav,
   moduleChantierNav,
 } from "@/components/chantier/ChantierHierarchyNav";
+import { ChantierDossierNavHost } from "@/components/chantier/ChantierDossierNavHost";
 import type { SchedulePlanViewPayload } from "@/lib/preparation/schedule/transfer";
 import {
   buildPlanningViewModel,
@@ -269,6 +270,15 @@ export function PrepSchedulePlanView({
         backLabel={nav.backLabel}
         crumbs={nav.crumbs}
       />
+      {!expanded ? (
+        <ChantierDossierNavHost
+          projectId={plan.project.id}
+          scopeId={plan.scope?.id ?? null}
+          activeStep="planning"
+          variant="compact"
+          sticky
+        />
+      ) : null}
 
       {/* En-tête */}
       <header className="flex flex-wrap items-start justify-between gap-3">

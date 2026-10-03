@@ -17,12 +17,13 @@ import {
 import {
   buildPilotageTodos,
   computePilotageNextAction,
-  timelineStepCaption,
 } from "@/lib/chantier/pilotage-display";
 import { computeProjectNextAction } from "@/lib/chantier/project-preparation-state";
 import { TakeoffCreateFromChatgptModal } from "@/components/chantier/TakeoffCreateFromChatgptModal";
 import { QuoteCreateFromChatgptModal } from "@/components/chantier/QuoteCreateFromChatgptModal";
 import { PlanningCreateFromChatgptModal } from "@/components/chantier/PlanningCreateFromChatgptModal";
+import { ChantierDossierNav } from "@/components/chantier/ChantierDossierNav";
+import { buildDossierNavFromWorkspace } from "@/lib/chantier/dossier-nav";
 
 type QuoteSectionPreview = {
   sectionId: string;
@@ -66,6 +67,14 @@ export function ProjectPreparationOverview({
   const [globalBusyLabel, setGlobalBusyLabel] = useState<string | null>(null);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const workflow = workspace.global.workflow ?? [];
+  const dossierNav = useMemo(
+    () =>
+      buildDossierNavFromWorkspace(workspace, {
+        activeStep: null,
+        scopeId: null,
+      }),
+    [workspace],
+  );
   const prepState = workspace.global.preparationState;
   const workflowReady =
     prepState?.completedCount ?? workflow.filter((s) => s.ready).length;
@@ -624,127 +633,35 @@ export function ProjectPreparationOverview({
         </div>
       </div>
 
-      {/* Timeline compacte — chaque étape navigable ou générable */}
-      <div className="rounded-2xl border border-slate-200/90 bg-white px-3 py-3 sm:px-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <ol className="flex gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {workflow.map((step, idx) => {
-            const card = workflowCardMode(step);
-            const caption =
-              card.mode === "blocked" && card.reason
-                ? card.reason
-                : timelineStepCaption(step);
-            const ctaLabel =
-              card.mode === "open"
-                ? "Ouvrir →"
-                : card.mode === "generate"
-                  ? step.actionLabel && step.actionLabel !== "—"
-                    ? `${step.actionLabel} →`
-                    : "Générer →"
-                  : "Bloqué";
-            const cardClass = cn(
-              "flex w-full flex-col rounded-xl border px-2.5 py-2 text-left transition",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f]/40 focus-visible:ring-offset-1",
-              card.mode === "blocked"
-                ? "cursor-not-allowed border-dashed border-slate-200 bg-slate-50/80 opacity-90"
-                : cn(
-                    "cursor-pointer hover:-translate-y-0.5 hover:shadow-md",
-                    step.ready
-                      ? "border-slate-200/90 bg-white hover:border-[#1e3a5f]/35 hover:bg-slate-50/90"
-                      : "border-dashed border-slate-200 bg-slate-50/60 hover:border-[#1e3a5f]/30 hover:bg-white",
-                  ),
-            );
-            const Inner = (
-              <>
-                <span
-                  className={cn(
-                    "flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold",
-                    step.ready
-                      ? "bg-emerald-100 text-emerald-800"
-                      : card.mode === "blocked"
-                        ? "bg-amber-100 text-amber-800"
-                        : "bg-slate-100 text-slate-500",
-                  )}
-                >
-                  {step.ready ? "✓" : idx + 1}
-                </span>
-                <span className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                  {step.label.replace(" & quantitatif", "").replace(" chantier", "")}
-                </span>
-                <span className="mt-0.5 line-clamp-2 text-[12px] font-semibold leading-snug text-slate-800">
-                  {caption}
-                </span>
-                <span
-                  className={cn(
-                    "mt-1.5 text-[10.5px] font-semibold",
-                    card.mode === "open"
-                      ? "text-[#1e3a5f]"
-                      : card.mode === "generate"
-                        ? "text-[#1e3a5f]"
-                        : "text-amber-800",
-                  )}
-                >
-                  {globalBusy && card.mode === "generate" && globalBusyLabel
-                    ? globalBusyLabel
-                    : ctaLabel}
-                </span>
-              </>
-            );
-            return (
-              <li key={step.id} className="flex min-w-[7.5rem] flex-1 items-stretch">
-                {idx > 0 ? (
-                  <span
-                    className="mt-3 hidden w-2 shrink-0 self-start border-t border-slate-200 sm:block"
-                    aria-hidden
-                  />
-                ) : null}
-                {card.mode === "generate" ? (
-                  <button
-                    type="button"
-                    disabled={globalBusy}
-                    onClick={() => void runWorkflowAction(step)}
-                    className={cn(cardClass, "disabled:cursor-wait disabled:opacity-60")}
-                    aria-label={`${step.label} — ${step.actionLabel}`}
-                  >
-                    {Inner}
-                  </button>
-                ) : card.mode === "open" && step.href ? (
-                  <Link
-                    href={step.href}
-                    className={cardClass}
-                    aria-label={`${step.label} — ${step.actionLabel}`}
-                  >
-                    {Inner}
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    disabled
-                    title={card.reason ?? undefined}
-                    className={cardClass}
-                    aria-label={`${step.label} — ${card.reason ?? "Bloqué"}`}
-                  >
-                    {Inner}
-                  </button>
-                )}
-              </li>
-            );
-          })}
-        </ol>
-
-        {globalBusyLabel ? (
-          <p className="mt-2 text-[12.5px] font-medium text-[#1e3a5f]">
-            {globalBusyLabel}
-          </p>
-        ) : null}
-        {globalError ? (
-          <p
-            role="alert"
-            className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[12.5px] font-medium text-red-800"
-          >
-            {globalError}
-          </p>
-        ) : null}
-      </div>
+      {/* Navigation transversale dossier — variante FULL */}
+      <ChantierDossierNav
+        snapshot={dossierNav}
+        variant="full"
+        busy={globalBusy}
+        onStepAction={async (navStep) => {
+          const step = workflow.find((s) => s.id === navStep.id);
+          if (!step) return;
+          const card = workflowCardMode(step);
+          if (card.mode === "blocked") {
+            setGlobalError(card.reason ?? "Action indisponible");
+            return;
+          }
+          await runWorkflowAction(step);
+        }}
+      />
+      {globalBusyLabel ? (
+        <p className="text-[12.5px] font-medium text-[#1e3a5f]">
+          {globalBusyLabel}
+        </p>
+      ) : null}
+      {globalError ? (
+        <p
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[12.5px] font-medium text-red-800"
+        >
+          {globalError}
+        </p>
+      ) : null}
 
       {/* 3 colonnes pilotage */}
       <div className="grid gap-3 lg:grid-cols-3">

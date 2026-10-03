@@ -8,6 +8,7 @@ import {
   ChantierHierarchyNav,
   moduleChantierNav,
 } from "@/components/chantier/ChantierHierarchyNav";
+import { ChantierDossierNavHost } from "@/components/chantier/ChantierDossierNavHost";
 import { PrepPlanSourceActions } from "@/components/preparation/PrepPlanSourceActions";
 import type { PrepStudyView } from "@/lib/preparation/service";
 import {
@@ -501,6 +502,13 @@ export function PrepStudyWorkspace({
         backHref={nav.backHref}
         backLabel={nav.backLabel}
         crumbs={nav.crumbs}
+      />
+      <ChantierDossierNavHost
+        projectId={study.project.id}
+        scopeId={study.scope?.id ?? null}
+        activeStep="metre"
+        variant="compact"
+        sticky
       />
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">

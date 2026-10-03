@@ -9,6 +9,7 @@ import {
   chantierProjectsHref,
   workspaceHomeCrumb,
 } from "@/components/chantier/ChantierHierarchyNav";
+import { ChantierDossierNavHost } from "@/components/chantier/ChantierDossierNavHost";
 import { PlanningSuiviClient } from "@/components/chantier/PlanningSuiviClient";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +42,12 @@ export default async function ProjectPlanningSuiviPage({ params, searchParams }:
           { label: project.title, href: chantierProjectHref(projectId) },
           { label: "Suivi planning" },
         ]}
+      />
+      <ChantierDossierNavHost
+        projectId={projectId}
+        activeStep="suivi"
+        variant="compact"
+        sticky
       />
       <PlanningSuiviClient
         projectId={projectId}

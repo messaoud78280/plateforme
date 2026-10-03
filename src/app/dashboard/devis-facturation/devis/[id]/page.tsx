@@ -16,6 +16,7 @@ import { ensureCommercialOrgSettings } from "@/lib/commercial/settings";
 import { d } from "@/lib/commercial/decimal";
 import { VisitQuoteMeasurementsPanel } from "@/components/site-visits/VisitQuoteMeasurementsPanel";
 import { ChantierHierarchyNav } from "@/components/chantier/ChantierHierarchyNav";
+import { ChantierDossierNavHost } from "@/components/chantier/ChantierDossierNavHost";
 import { resolveQuoteChantierNav } from "@/lib/chantier/quote-chantier-nav";
 import { loadQuoteDetailState } from "@/lib/chantier/load-quote-detail-sync";
 import { loadQuoteRevalidationEligibility } from "@/lib/preparation/quote-bridge/revalidate-quote-service";
@@ -124,6 +125,15 @@ export default async function DevisDetailPage({
           Retour aux devis
         </BackLink>
       )}
+      {quote.projectId ? (
+        <ChantierDossierNavHost
+          projectId={quote.projectId}
+          scopeId={quote.scopeId ?? null}
+          activeStep="devis"
+          variant="compact"
+          sticky
+        />
+      ) : null}
       <QuoteCommercialFlow
         status={quote.status}
         hasProject={Boolean(quote.projectId)}

@@ -12,6 +12,8 @@ import {
   chantierProjectsHref,
   workspaceHomeCrumb,
 } from "@/components/chantier/ChantierHierarchyNav";
+import { ChantierDossierNavHost } from "@/components/chantier/ChantierDossierNavHost";
+import type { DossierNavStepId } from "@/lib/chantier/dossier-nav";
 
 type Props = {
   params: Promise<{ id: string; docId: string }>;
@@ -79,6 +81,13 @@ export default async function SiteDocumentPage({ params, searchParams }: Props) 
         ],
       };
 
+  const activeStep: DossierNavStepId | null =
+    document.kind === "COMPTE_RENDU"
+      ? "compte_rendu"
+      : document.kind === "NOTICE"
+        ? "notice"
+        : null;
+
   return (
     <div className="mx-auto max-w-4xl space-y-4 px-4 py-6 sm:px-6">
       <ChantierHierarchyNav
@@ -86,6 +95,15 @@ export default async function SiteDocumentPage({ params, searchParams }: Props) 
         backLabel={nav.backLabel}
         crumbs={nav.crumbs}
       />
+      {activeStep ? (
+        <ChantierDossierNavHost
+          projectId={id}
+          scopeId={scope?.id ?? null}
+          activeStep={activeStep}
+          variant="compact"
+          sticky
+        />
+      ) : null}
       <SiteDocumentEditor
         projectId={id}
         projectTitle={project.title}

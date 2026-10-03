@@ -13,6 +13,7 @@ import {
   workspaceHomeCrumb,
   moduleChantierNav,
 } from "@/components/chantier/ChantierHierarchyNav";
+import { ChantierDossierNavHost } from "@/components/chantier/ChantierDossierNavHost";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -71,6 +72,13 @@ export default async function DocumentsChantierPage({ params, searchParams }: Pr
         backHref={nav.backHref}
         backLabel={nav.backLabel}
         crumbs={nav.crumbs}
+      />
+      <ChantierDossierNavHost
+        projectId={id}
+        scopeId={scope?.id ?? null}
+        activeStep={null}
+        variant="compact"
+        sticky
       />
       <SiteDocumentsHub
         projectId={id}

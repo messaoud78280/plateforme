@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/cn";
 import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
 import { getSectionCapability } from "@/lib/bework-patch/capability";
+import { ChantierDossierNavHost } from "@/components/chantier/ChantierDossierNavHost";
 import {
   VisitSectionCard,
   visitFieldClass,
@@ -541,6 +542,15 @@ export function SiteVisitDetailClient({
           </span>
         </div>
       </div>
+
+      {visit.projectId ? (
+        <ChantierDossierNavHost
+          projectId={visit.projectId}
+          activeStep="visite"
+          variant="compact"
+          sticky
+        />
+      ) : null}
 
       <header className="rounded-2xl border border-bework-navy/10 bg-bework-soft-navy/50 p-4">
         <h1 className="text-[18px] font-semibold tracking-tight text-[#1e3a5f] sm:text-[20px]">

@@ -19,7 +19,7 @@ assert.ok(dayWidthForZoom("day") >= 90 && dayWidthForZoom("day") <= 110);
 assert.ok(dayWidthForZoom("week") >= 70 && dayWidthForZoom("week") <= 85);
 assert.ok(dayWidthForZoom("3weeks") >= 55 && dayWidthForZoom("3weeks") <= 70);
 assert.ok(dayWidthForZoom("month") >= 35 && dayWidthForZoom("month") <= 45);
-assert.ok(GANTT_LABEL_PANEL_WIDTH >= 570 && GANTT_LABEL_PANEL_WIDTH <= 630);
+assert.ok(GANTT_LABEL_PANEL_WIDTH >= 570 && GANTT_LABEL_PANEL_WIDTH <= 640);
 
 const w = dayWidthForZoom("3weeks");
 assert.equal(w, 64);

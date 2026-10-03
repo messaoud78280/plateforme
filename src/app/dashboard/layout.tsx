@@ -246,7 +246,7 @@ export default async function DashboardLayout({
         ) : saasBanner.kind === "trial_expired" ? (
           <SaasTrialExpiredBanner />
         ) : null}
-        <header className="cc-header sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 px-3 sm:px-5">
+        <header className="cc-header sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between gap-3 px-3 sm:px-5">
           <Link
             href="/dashboard"
             title="Retour à l’espace de travail"

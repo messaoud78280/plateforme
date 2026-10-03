@@ -63,10 +63,10 @@ const DAY_WIDTH: Record<GanttZoom, number> = {
 };
 
 /** Panneau gauche sticky (Réf. · Intervention · Équipe · Durée). */
-export const GANTT_LABEL_PANEL_WIDTH = 600;
+export const GANTT_LABEL_PANEL_WIDTH = 620;
 
-/** Grille CSS du panneau gauche. */
-export const GANTT_LABEL_GRID = "76px minmax(0,1fr) 120px 80px";
+/** Grille CSS du panneau gauche — Intervention prioritaire. */
+export const GANTT_LABEL_GRID = "72px minmax(0,1fr) 118px 78px";
 
 /** Semaine ISO (lundi → dimanche) — affichage axe uniquement. */
 export function isoWeekNumber(iso: string): number {

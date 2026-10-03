@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/cn";
 import {
   ChantierHierarchyNav,
@@ -17,7 +17,11 @@ import {
   type PlanningViewTab,
   type QualityGroup,
 } from "@/lib/preparation/schedule/planning-view-model";
-import { PrepScheduleGantt } from "./PrepScheduleGantt";
+import type { GanttZoom } from "@/lib/preparation/schedule/gantt-layout";
+import {
+  PrepScheduleGantt,
+  type PrepScheduleGanttHandle,
+} from "./PrepScheduleGantt";
 import { PrepScheduleTaskPanel } from "./PrepScheduleTaskPanel";
 import { PrepScheduleTransferModal } from "./PrepScheduleTransferModal";
 import { TruncatedTextWithPopover } from "./TruncatedTextWithPopover";
@@ -52,14 +56,20 @@ function euro(n: number | null): string {
   return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 }
 
-const FILTERS: Array<{ id: PlanningFilterId; label: string }> = [
-  { id: "all", label: "Toutes les phases" },
+const SECONDARY_FILTERS: Array<{ id: PlanningFilterId; label: string }> = [
   { id: "incomplete", label: "À compléter" },
   { id: "no_crew", label: "Sans équipe" },
   { id: "no_rate", label: "Sans rendement" },
   { id: "with_alert", label: "Avec alerte" },
   { id: "controls", label: "Contrôles" },
   { id: "handover", label: "Remise" },
+];
+
+const ZOOM_OPTIONS: Array<[GanttZoom, string]> = [
+  ["day", "Jour"],
+  ["week", "Semaine"],
+  ["3weeks", "3 semaines"],
+  ["month", "Mois"],
 ];
 
 export function PrepSchedulePlanView({
@@ -89,6 +99,9 @@ export function PrepSchedulePlanView({
     "comfortable",
   );
   const [moreOpen, setMoreOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [zoom, setZoom] = useState<GanttZoom>("3weeks");
+  const ganttRef = useRef<PrepScheduleGanttHandle | null>(null);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/prep-studies/${studyId}/schedule/${planId}`);
@@ -254,11 +267,12 @@ export function PrepSchedulePlanView({
 
   const hideCommercial = conductMode || expanded;
   const shell = cn(
-    "relative space-y-4",
+    "relative space-y-3",
     expanded
-      ? "h-dvh overflow-hidden px-3 py-3"
+      ? "h-dvh overflow-hidden px-2 py-2 sm:px-3"
       : "mx-auto max-w-none px-3 pb-16 pt-3 sm:px-4 lg:px-5",
   );
+  const activeFilterCount = filter === "all" ? 0 : 1;
 
   return (
     <div className={shell}>
@@ -338,7 +352,7 @@ export function PrepSchedulePlanView({
             aria-pressed={expanded}
             className="h-9 rounded-[10px] border border-slate-200 bg-white px-3 text-[13px] font-medium text-[#1e3a5f] hover:bg-slate-50"
           >
-            {expanded ? "Réduire" : "Agrandir"}
+            {expanded ? "Quitter le mode agrandi" : "Agrandir"}
           </button>
           {!hideCommercial ? (
             <div className="relative">
@@ -588,9 +602,9 @@ export function PrepSchedulePlanView({
       </>
       ) : null}
 
-      {/* Tabs */}
+      {/* Tabs — flux normal, fond opaque (pas de sticky → pas de fantôme sous header) */}
       <div
-        className="flex flex-wrap items-center gap-1 border-b border-slate-200"
+        className="relative z-0 flex flex-wrap items-center gap-1 border-b border-slate-200 bg-[color:var(--cc-surface-muted)]"
         role="tablist"
         aria-label="Vues planning"
       >
@@ -608,7 +622,7 @@ export function PrepSchedulePlanView({
             aria-selected={tab === id}
             onClick={() => setTab(id)}
             className={cn(
-              "border-b-2 px-3 py-2 text-[13px] font-medium transition",
+              "border-b-2 px-3 py-1.5 text-[13px] font-medium transition-colors duration-150",
               tab === id
                 ? "border-[#1e3a5f] text-[#1e3a5f]"
                 : "border-transparent text-slate-500 hover:text-slate-800",
@@ -621,7 +635,7 @@ export function PrepSchedulePlanView({
 
       {tab === "planning" ? (
         <>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <label className="sr-only" htmlFor="planning-search">
               Rechercher une tâche
             </label>
@@ -631,82 +645,174 @@ export function PrepSchedulePlanView({
               placeholder="Rechercher…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-[12px] outline-none focus:border-[#1e3a5f]/40"
+              className="h-8 min-w-[140px] flex-1 rounded-[10px] border border-slate-200 bg-white px-2.5 text-[12px] outline-none focus:border-[#1e3a5f]/40 sm:max-w-[200px]"
             />
-            <label className="flex items-center gap-1 text-[11px] text-slate-600">
-              Équipe
-              <select
-                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[12px]"
-                value={crewFilter}
-                onChange={(e) => setCrewFilter(e.target.value)}
-              >
-                <option value="all">Toutes les équipes</option>
-                {crewOptions.map((id) => (
-                  <option key={id} value={id}>
-                    {id}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex items-center gap-1 text-[11px] text-slate-600">
-              Phase
-              <select
-                className="max-w-[180px] rounded-md border border-slate-200 bg-white px-2 py-1 text-[12px]"
-                value={phaseFilter}
-                onChange={(e) => setPhaseFilter(e.target.value)}
-              >
-                <option value="all">Toutes les phases</option>
-                {vm.phases.map((p) => (
-                  <option key={p.key} value={p.label}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div
-              className="flex rounded-md border border-slate-200 p-0.5"
-              role="group"
-              aria-label="Densité"
+            <select
+              aria-label="Équipe"
+              className="h-8 rounded-[10px] border border-slate-200 bg-white px-2 text-[12px] text-slate-700"
+              value={crewFilter}
+              onChange={(e) => setCrewFilter(e.target.value)}
             >
+              <option value="all">Équipe</option>
+              {crewOptions.map((id) => (
+                <option key={id} value={id}>
+                  {id}
+                </option>
+              ))}
+            </select>
+            <select
+              aria-label="Phase"
+              className="h-8 max-w-[160px] rounded-[10px] border border-slate-200 bg-white px-2 text-[12px] text-slate-700"
+              value={phaseFilter}
+              onChange={(e) => setPhaseFilter(e.target.value)}
+            >
+              <option value="all">Phase</option>
+              {vm.phases.map((p) => (
+                <option key={p.key} value={p.label}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+
+            <div className="relative">
               <button
                 type="button"
-                onClick={() => setDensity("comfortable")}
+                aria-expanded={filtersOpen}
+                aria-haspopup="menu"
+                onClick={() => setFiltersOpen((v) => !v)}
                 className={cn(
-                  "rounded px-2 py-1 text-[11px] font-medium",
-                  density === "comfortable"
-                    ? "bg-[#1e3a5f] text-white"
-                    : "text-slate-600",
+                  "inline-flex h-8 items-center gap-1 rounded-[10px] border px-2.5 text-[12px] font-medium transition-colors duration-150",
+                  activeFilterCount > 0
+                    ? "border-[#1e3a5f]/30 bg-[#1e3a5f]/5 text-[#1e3a5f]"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
                 )}
               >
-                Confortable
+                Filtres
+                {activeFilterCount > 0 ? (
+                  <span className="rounded-md bg-[#1e3a5f] px-1.5 text-[10px] font-semibold text-white">
+                    {activeFilterCount}
+                  </span>
+                ) : null}
+                <ChevronDown className="h-3.5 w-3.5 opacity-60" />
               </button>
-              <button
-                type="button"
-                onClick={() => setDensity("compact")}
-                className={cn(
-                  "rounded px-2 py-1 text-[11px] font-medium",
-                  density === "compact"
-                    ? "bg-[#1e3a5f] text-white"
-                    : "text-slate-600",
-                )}
-              >
-                Compact
-              </button>
+              {filtersOpen ? (
+                <div
+                  role="menu"
+                  className="absolute left-0 z-40 mt-1 w-56 overflow-hidden rounded-[12px] border border-slate-200 bg-white py-1 shadow-[0_12px_32px_-16px_rgba(15,23,42,0.35)]"
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={cn(
+                      "block w-full px-3 py-2 text-left text-[13px] hover:bg-slate-50",
+                      filter === "all"
+                        ? "font-semibold text-[#1e3a5f]"
+                        : "text-slate-700",
+                    )}
+                    onClick={() => {
+                      setFilter("all");
+                      setFiltersOpen(false);
+                    }}
+                  >
+                    Tous
+                  </button>
+                  {SECONDARY_FILTERS.map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      role="menuitem"
+                      className={cn(
+                        "block w-full px-3 py-2 text-left text-[13px] hover:bg-slate-50",
+                        filter === f.id
+                          ? "font-semibold text-[#1e3a5f]"
+                          : "text-slate-700",
+                      )}
+                      onClick={() => {
+                        setFilter(f.id);
+                        setFiltersOpen(false);
+                      }}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                  <div className="my-1 border-t border-slate-100" />
+                  <p className="px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                    Densité
+                  </p>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={cn(
+                      "block w-full px-3 py-2 text-left text-[13px] hover:bg-slate-50",
+                      density === "comfortable"
+                        ? "font-semibold text-[#1e3a5f]"
+                        : "text-slate-700",
+                    )}
+                    onClick={() => {
+                      setDensity("comfortable");
+                      setFiltersOpen(false);
+                    }}
+                  >
+                    Confortable
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={cn(
+                      "block w-full px-3 py-2 text-left text-[13px] hover:bg-slate-50",
+                      density === "compact"
+                        ? "font-semibold text-[#1e3a5f]"
+                        : "text-slate-700",
+                    )}
+                    onClick={() => {
+                      setDensity("compact");
+                      setFiltersOpen(false);
+                    }}
+                  >
+                    Compact
+                  </button>
+                </div>
+              ) : null}
             </div>
-            <div className="flex flex-wrap gap-1">
-              {FILTERS.map((f) => (
+
+            <span className="mx-0.5 hidden h-5 w-px bg-slate-200 sm:block" aria-hidden />
+
+            <button
+              type="button"
+              onClick={() => ganttRef.current?.scrollToday()}
+              className="h-8 rounded-[10px] border border-[#1e3a5f]/25 bg-white px-2.5 text-[12px] font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
+            >
+              Aujourd&apos;hui
+            </button>
+            <button
+              type="button"
+              onClick={() => ganttRef.current?.scrollThisWeek()}
+              className="h-8 rounded-[10px] border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Cette semaine
+            </button>
+
+            <span className="mx-0.5 hidden h-5 w-px bg-slate-200 sm:block" aria-hidden />
+
+            <div
+              className="flex h-8 items-center gap-0.5 rounded-[10px] border border-slate-200 bg-white p-0.5"
+              role="group"
+              aria-label="Échelle du Gantt"
+            >
+              {ZOOM_OPTIONS.map(([z, label]) => (
                 <button
-                  key={f.id}
+                  key={z}
                   type="button"
-                  onClick={() => setFilter(f.id)}
+                  onClick={() => setZoom(z)}
+                  aria-pressed={zoom === z}
                   className={cn(
-                    "rounded-md px-2 py-1 text-[11px] font-medium",
-                    filter === f.id
+                    "rounded-md px-2 py-1 text-[11px] font-medium transition-colors duration-150",
+                    zoom === z
                       ? "bg-[#1e3a5f] text-white"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                      : "text-slate-600 hover:bg-slate-50",
                   )}
                 >
-                  {f.label}
+                  {label}
                 </button>
               ))}
             </div>
@@ -715,6 +821,7 @@ export function PrepSchedulePlanView({
           <div className={cn("flex min-w-0 gap-0", selected && "lg:pr-0")}>
             <div className="min-w-0 flex-1">
           <PrepScheduleGantt
+            ref={ganttRef}
             phases={filteredPhases}
             tasks={filteredTasks}
             dependencies={plan.dependencies}
@@ -723,6 +830,9 @@ export function PrepSchedulePlanView({
             density={density}
             expanded={expanded}
             conductMode={conductMode}
+            showChrome={false}
+            zoom={zoom}
+            onZoomChange={setZoom}
           />
             </div>
             {selected ? (

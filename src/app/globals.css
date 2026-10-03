@@ -285,15 +285,10 @@ body {
 
 .cc-header {
   border-bottom: 1px solid var(--cc-chrome-border);
-  background: color-mix(in srgb, var(--bw-soft-navy) 28%, rgba(255, 255, 255, 0.88));
-  backdrop-filter: saturate(170%) blur(14px);
-  -webkit-backdrop-filter: saturate(170%) blur(14px);
-}
-
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .cc-header {
-    background: color-mix(in srgb, var(--bw-soft-navy) 35%, white);
-  }
+  /* Fond opaque — évite le « fantôme » du contenu qui défile dessous */
+  background: color-mix(in srgb, var(--bw-soft-navy) 18%, #ffffff);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .cc-card {
@@ -3004,10 +2999,21 @@ html::before {
 /* Planning — mode agrandi / conduite : maximiser le Gantt */
 body.bework-planning-expanded aside.bw-sidebar-shell {
   display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  border: none !important;
 }
 body.bework-planning-expanded .cc-header {
   display: none !important;
 }
+body.bework-planning-expanded [data-bework-mobile-nav] {
+  display: none !important;
+}
 body.bework-planning-expanded {
   overflow: hidden;
+}
+body.bework-planning-expanded #contenu-principal {
+  max-width: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }

@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { cn } from "@/lib/cn";
 import {
   buildGanttBars,
@@ -26,6 +33,12 @@ export type GanttDependency = {
 
 export type GanttDensity = "comfortable" | "compact";
 
+export type PrepScheduleGanttHandle = {
+  scrollToday: () => void;
+  scrollThisWeek: () => void;
+  scrollStart: () => void;
+};
+
 type Props = {
   phases: PlanningPhaseVM[];
   tasks: PlanningTaskVM[];
@@ -35,6 +48,10 @@ type Props = {
   density?: GanttDensity;
   expanded?: boolean;
   conductMode?: boolean;
+  /** Masque la barre interne (toolbar fournie par le parent). */
+  showChrome?: boolean;
+  zoom?: GanttZoom;
+  onZoomChange?: (zoom: GanttZoom) => void;
 };
 
 const TRANS = "duration-150 ease-out";
@@ -140,20 +157,29 @@ function taskAlert(t: PlanningTaskVM): string | null {
   return null;
 }
 
-export function PrepScheduleGantt({
-  phases,
-  tasks,
-  dependencies,
-  selectedTaskId,
-  onSelectTask,
-  density = "comfortable",
-  expanded = false,
-  conductMode = false,
-}: Props) {
+export const PrepScheduleGantt = forwardRef<PrepScheduleGanttHandle, Props>(
+  function PrepScheduleGantt(
+    {
+      phases,
+      tasks,
+      dependencies,
+      selectedTaskId,
+      onSelectTask,
+      density = "comfortable",
+      expanded = false,
+      conductMode = false,
+      showChrome = true,
+      zoom: zoomProp,
+      onZoomChange,
+    },
+    ref,
+  ) {
   const sizes = densitySizes(density);
   const scrollRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState<GanttZoom>("3weeks");
+  const [zoomInternal, setZoomInternal] = useState<GanttZoom>("3weeks");
+  const zoom = zoomProp ?? zoomInternal;
+  const setZoom = onZoomChange ?? setZoomInternal;
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
   const [hoveredPhaseKey, setHoveredPhaseKey] = useState<string | null>(null);
@@ -162,7 +188,7 @@ export function PrepScheduleGantt({
 
   /** Panneau gauche fixe — jamais compressé pour « remplir » l’écran. */
   const labelCol = expanded
-    ? Math.min(630, GANTT_LABEL_PANEL_WIDTH + 20)
+    ? Math.min(640, GANTT_LABEL_PANEL_WIDTH + 20)
     : GANTT_LABEL_PANEL_WIDTH;
   const labelGrid = { gridTemplateColumns: GANTT_LABEL_GRID };
 
@@ -283,9 +309,10 @@ export function PrepScheduleGantt({
       highlight: boolean;
       muted: boolean;
     }> = [];
-    const hasFocus = !!focusTask;
+    const selectedCode = selected?.stepCode ?? null;
+    const hasSelection = !!selectedCode;
     for (const dep of dependencies) {
-      if (!hasFocus && dep.type !== "FS") continue;
+      if (!hasSelection && dep.type !== "FS") continue;
       const from = barByCode.get(dep.predecessorStepCode);
       const to = barByCode.get(dep.successorStepCode);
       if (!from || !to) continue;
@@ -298,13 +325,10 @@ export function PrepScheduleGantt({
       );
       if (fromIdx < 0 || toIdx < 0) continue;
       const highlight =
-        hasFocus &&
-        (focusTask!.stepCode === dep.predecessorStepCode ||
-          focusTask!.stepCode === dep.successorStepCode);
-      const muted = hasFocus && !highlight;
-      if (!hasFocus && !highlight) {
-        // au repos : seulement FS, très discret
-      }
+        hasSelection &&
+        (selectedCode === dep.predecessorStepCode ||
+          selectedCode === dep.successorStepCode);
+      const muted = hasSelection && !highlight;
       const rowY = (idx: number) => {
         let y = 0;
         for (let i = 0; i < idx; i++) {
@@ -332,7 +356,7 @@ export function PrepScheduleGantt({
       lines.push({ key: dep.id, d, type: dep.type, highlight, muted });
     }
     return lines;
-  }, [dependencies, barByCode, displayRows, focusTask, sizes.phaseH, sizes.rowH]);
+  }, [dependencies, barByCode, displayRows, selected, sizes.phaseH, sizes.rowH]);
 
   const todayIdx = days.findIndex((d) => d.iso === today);
 
@@ -382,6 +406,23 @@ export function PrepScheduleGantt({
     else if (days[0]) scrollToIso(days[0].iso);
   }
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      scrollToday: () => {
+        if (todayIdx >= 0) scrollToIso(today);
+        else scrollThisWeek();
+      },
+      scrollThisWeek,
+      scrollStart: () => {
+        if (days[0]) scrollToIso(days[0].iso);
+      },
+    }),
+    // days / dayWidth / labelCol suffisent pour resynchroniser le scroll
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [days, dayWidth, labelCol, today, todayIdx],
+  );
+
   useEffect(() => {
     if (!days.length) return undefined;
     const target =
@@ -425,7 +466,7 @@ export function PrepScheduleGantt({
   }
 
   const ganttMaxH = expanded
-    ? "max-h-[calc(100dvh-9rem)]"
+    ? "max-h-[calc(100dvh-5.5rem)]"
     : conductMode
       ? "max-h-[min(82vh,920px)]"
       : "max-h-[min(78vh,860px)]";
@@ -433,71 +474,64 @@ export function PrepScheduleGantt({
   return (
     <div
       ref={wrapRef}
-      className="overflow-hidden rounded-[16px] border border-slate-200/80 bg-white"
+      className="isolate overflow-hidden rounded-[16px] border border-slate-200/80 bg-white"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-slate-50/70 px-3 py-2">
-        <h2 className="text-[14px] font-semibold tracking-tight text-[#1e3a5f]">
-          Planning
-        </h2>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              if (todayIdx >= 0) scrollToIso(today);
-              else scrollThisWeek();
-            }}
-            className="rounded-md border border-[#1e3a5f]/25 bg-white px-2.5 py-1 text-[11px] font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
-          >
-            Aujourd&apos;hui
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (days[0]) scrollToIso(days[0].iso);
-            }}
-            className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Début chantier
-          </button>
-          <button
-            type="button"
-            onClick={scrollThisWeek}
-            className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Cette semaine
-          </button>
-          <div
-            className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-white p-0.5"
-            role="group"
-            aria-label="Échelle du Gantt"
-          >
-            {ZOOM_BTNS.map(([z, label]) => (
-              <button
-                key={z}
-                type="button"
-                onClick={() => setZoom(z)}
-                aria-pressed={zoom === z}
-                className={cn(
-                  "rounded-md px-2 py-1 text-[11px] font-medium transition",
-                  TRANS,
-                  zoom === z
-                    ? "bg-[#1e3a5f] text-white"
-                    : "text-slate-600 hover:bg-slate-50",
-                )}
-              >
-                {label}
-              </button>
-            ))}
+      {showChrome ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-slate-50/70 px-3 py-1.5">
+          <h2 className="text-[13px] font-semibold tracking-tight text-[#1e3a5f]">
+            Planning
+          </h2>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                if (todayIdx >= 0) scrollToIso(today);
+                else scrollThisWeek();
+              }}
+              className="rounded-md border border-[#1e3a5f]/25 bg-white px-2.5 py-1 text-[11px] font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
+            >
+              Aujourd&apos;hui
+            </button>
+            <button
+              type="button"
+              onClick={scrollThisWeek}
+              className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Cette semaine
+            </button>
+            <div
+              className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-white p-0.5"
+              role="group"
+              aria-label="Échelle du Gantt"
+            >
+              {ZOOM_BTNS.map(([z, label]) => (
+                <button
+                  key={z}
+                  type="button"
+                  onClick={() => setZoom(z)}
+                  aria-pressed={zoom === z}
+                  className={cn(
+                    "rounded-md px-2 py-1 text-[11px] font-medium transition",
+                    TRANS,
+                    zoom === z
+                      ? "bg-[#1e3a5f] text-white"
+                      : "text-slate-600 hover:bg-slate-50",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      ) : null}
 
       {/* Desktop Gantt */}
       <div className="hidden md:block">
         <div
           ref={scrollRef}
           className={cn(
-            "overflow-x-scroll overflow-y-auto overscroll-x-contain",
+            "relative z-0 overflow-x-scroll overflow-y-auto overscroll-x-contain",
             ganttMaxH,
           )}
           onClick={(e) => {
@@ -510,17 +544,17 @@ export function PrepScheduleGantt({
             style={{ minWidth: labelCol + chartWidth }}
             className="relative"
           >
-            <div className="sticky top-0 z-30 border-b border-slate-200/90 bg-[#f7f8fa]">
+            <div className="sticky top-0 z-20 border-b border-slate-200/90 bg-[#f7f8fa]">
               <div className="flex">
                 <div
-                  className="sticky left-0 z-40 shrink-0 border-r border-slate-200/80 bg-[#f7f8fa]"
+                  className="sticky left-0 z-30 shrink-0 border-r border-slate-200/80 bg-[#f7f8fa]"
                   style={{ width: labelCol }}
                 />
                 <div className="relative flex" style={{ width: chartWidth }}>
                   {weekBands.map((band) => (
                     <div
                       key={`${band.year}-w${band.week}-${band.startIso}`}
-                      className="flex items-center justify-center border-r border-[#1e3a5f]/20 px-1 py-1.5 text-[11px] font-semibold tracking-[0.04em] text-[#1e3a5f]"
+                      className="flex items-center justify-center border-r border-[#1e3a5f]/25 px-1 py-1.5 text-[11px] font-semibold tracking-[0.04em] text-[#1e3a5f]"
                       style={{ width: band.dayCount * dayWidth }}
                     >
                       Semaine {band.week}
@@ -530,7 +564,7 @@ export function PrepScheduleGantt({
               </div>
               <div className="flex border-t border-slate-200/70">
                 <div
-                  className="sticky left-0 z-40 grid shrink-0 gap-2 border-r border-slate-200/80 bg-[#f7f8fa] px-3 py-2 text-[11px] font-medium text-slate-500"
+                  className="sticky left-0 z-30 grid shrink-0 gap-2 border-r border-slate-200/80 bg-[#f7f8fa] px-3 py-2 text-[11px] font-medium text-slate-500"
                   style={{ width: labelCol, ...labelGrid }}
                 >
                   <span>Réf.</span>
@@ -551,7 +585,7 @@ export function PrepScheduleGantt({
                           "shrink-0 border-r border-slate-200/60 px-1 py-1.5 text-center",
                           (day.isWeekend || day.isHoliday) &&
                             "bg-slate-100/80",
-                          monday && "border-l border-l-[#1e3a5f]/35",
+                          monday && "border-l border-l-[#1e3a5f]/50",
                           isToday && "bg-[#1e3a5f]/[0.06]",
                         )}
                         style={{ width: dayWidth, minWidth: dayWidth }}
@@ -635,9 +669,9 @@ export function PrepScheduleGantt({
                     d={c.d}
                     fill="none"
                     stroke={c.highlight ? "#1e3a5f" : "#94a3b8"}
-                    strokeWidth={c.highlight ? 2.5 : 1}
+                    strokeWidth={c.highlight ? 2 : 1}
                     strokeOpacity={
-                      c.highlight ? 1 : c.muted ? 0.14 : 0.22
+                      c.highlight ? 0.92 : c.muted ? 0.05 : 0.09
                     }
                     className={cn("transition-opacity", TRANS)}
                     markerEnd={
@@ -702,7 +736,7 @@ export function PrepScheduleGantt({
                             [p.key]: !c[p.key],
                           }))
                         }
-                        className="sticky left-0 z-20 flex shrink-0 items-center gap-2.5 border-r border-slate-200/80 bg-inherit px-3 text-left"
+                        className="sticky left-0 z-[11] flex shrink-0 items-center gap-2.5 border-r border-slate-200/80 bg-inherit px-3 text-left"
                         style={{ width: labelCol }}
                         aria-expanded={!isCollapsed}
                         aria-label={`${isCollapsed ? "Déplier" : "Replier"} phase ${title}`}
@@ -811,7 +845,7 @@ export function PrepScheduleGantt({
                         }
                       }}
                       className={cn(
-                        "sticky left-0 z-20 grid shrink-0 cursor-pointer items-center gap-2 border-r border-slate-200/80 px-3 text-left",
+                        "sticky left-0 z-[11] grid shrink-0 cursor-pointer items-center gap-2 border-r border-slate-200/80 px-3 text-left",
                         TRANS,
                         isSelected || isHovered ? "bg-[#f4f6f8]" : "bg-white",
                       )}
@@ -821,12 +855,19 @@ export function PrepScheduleGantt({
                     >
                       <span
                         className={cn(
-                          "font-mono text-[11px] tabular-nums",
+                          "inline-flex items-center gap-1 font-mono text-[11px] tabular-nums",
                           isSelected
                             ? "font-semibold text-[#1e3a5f]"
                             : "text-slate-500",
                         )}
                       >
+                        {t.visualKind === "incomplete" || alert ? (
+                          <span
+                            className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500"
+                            title={alert ?? "À compléter"}
+                            aria-hidden
+                          />
+                        ) : null}
                         {t.stepCode}
                       </span>
                       <span className="min-w-0">
@@ -930,7 +971,12 @@ export function PrepScheduleGantt({
                           )}
                           style={{
                             left: bar.leftPx,
-                            width: Math.max(bar.widthPx, dayWidth * 0.45),
+                            width: Math.max(
+                              bar.widthPx,
+                              t.durationDays <= 0.5
+                                ? dayWidth * 0.5
+                                : dayWidth * 0.45,
+                            ),
                             top: (sizes.rowH - sizes.barH) / 2,
                             height: sizes.barH,
                           }}
@@ -1045,14 +1091,16 @@ export function PrepScheduleGantt({
 
     </div>
   );
-}
+  },
+);
 
 function barToneClass(kind: PlanningTaskVM["visualKind"]): string {
   switch (kind) {
     case "blocked":
       return "bg-red-700 text-white";
     case "incomplete":
-      return "bg-amber-400/90 text-amber-950";
+      // Tâche normale BeWork — l’alerte est sur la ligne (point ambre), pas la barre
+      return "bg-[#1e3a5f] text-white";
     case "control":
       return "border-2 border-[#3d5a80] bg-white text-[#1e3a5f]";
     case "wait":

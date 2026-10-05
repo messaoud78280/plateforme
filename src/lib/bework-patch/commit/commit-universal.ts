@@ -213,7 +213,7 @@ export async function commitUniversalPatch(input: {
         }
         const applied = await applyNoticeDirectInTx(tx, {
           orgId: input.orgId,
-          projectId: input.projectId,
+          projectId: resolvedProjectId,
           patch,
           expectedVersion: subgraph.notice.contextVersion,
         });
@@ -229,7 +229,7 @@ export async function commitUniversalPatch(input: {
         }
         const applied = await applyReportDirectInTx(tx, {
           orgId: input.orgId,
-          projectId: input.projectId,
+          projectId: resolvedProjectId,
           patch,
           expectedVersion: subgraph.report.contextVersion,
         });
@@ -245,7 +245,7 @@ export async function commitUniversalPatch(input: {
         }
         const applied = await applyFollowUpDirectInTx(tx, {
           orgId: input.orgId,
-          projectId: input.projectId,
+          projectId: resolvedProjectId,
           patch,
           expectedVersion: subgraph.followUp.contextVersion,
         });
@@ -276,7 +276,7 @@ export async function commitUniversalPatch(input: {
         }
         const applied = await applyPlanningDirectInTx(tx, {
           orgId: input.orgId,
-          projectId: input.projectId,
+          projectId: resolvedProjectId,
           patch,
           impact,
           plans: subgraph.plans,

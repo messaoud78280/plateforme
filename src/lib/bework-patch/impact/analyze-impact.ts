@@ -226,6 +226,61 @@ function describeDirectOp(
       unit: line?.unit ?? null,
     };
   }
+  if (op.op === "add_line") {
+    const existing = subgraph.study?.lines.find((l) => l.code === op.line.code);
+    return {
+      op: op.op,
+      section,
+      entityType: "PREP_LINE",
+      entityId: existing?.id ?? op.line.code,
+      label: `${op.line.code} · ${op.line.designation}`.trim(),
+      field: "line",
+      before: null,
+      after: {
+        code: op.line.code,
+        lot: op.line.lot,
+        designation: op.line.designation,
+        description: op.line.description ?? null,
+        unit: op.line.unit,
+        declared_quantity: op.line.declared_quantity ?? null,
+        formula: op.line.formula ?? null,
+        provenance: op.line.provenance ?? null,
+        role: op.line.role ?? "quote",
+        nature: op.line.nature ?? null,
+        notes: op.line.notes ?? null,
+        insert_after_code: op.insert_after_code ?? null,
+      },
+      unit: op.line.unit,
+      proposalProvenanceKind: op.line.provenance ?? null,
+      proposalProvenanceLabel: op.line.provenance ?? null,
+    };
+  }
+  if (op.op === "delete_line") {
+    const code = op.target.line_code ?? op.target.code ?? null;
+    const line = subgraph.study?.lines.find(
+      (l) => l.code === code || l.id === op.target.id,
+    );
+    return {
+      op: op.op,
+      section,
+      entityType: "PREP_LINE",
+      entityId: line?.id ?? code,
+      label: line
+        ? `${line.code} · ${line.designation}`
+        : code ?? "ligne",
+      field: "line",
+      before: line
+        ? {
+            code: line.code,
+            designation: line.designation,
+            unit: line.unit,
+            declared_quantity: line.declaredQuantity,
+          }
+        : { code },
+      after: null,
+      unit: line?.unit ?? null,
+    };
+  }
   if (op.op === "update_quote_item") {
     const quote = subgraph.quotes.find((q) => q.id === op.target.quote_id);
     const line = quote?.lines.find(
@@ -1611,6 +1666,15 @@ function analyzeTakeoffTechnical(
         lineDeclared[code] = op.changes.declared_quantity;
         resolvedLineCode = code;
       }
+    }
+    if (op.op === "add_line") {
+      pushAffected(affected, {
+        section: "TAKEOFF",
+        entityType: "PREP_LINE",
+        id: op.line.code,
+        label: `${op.line.code} · ${op.line.designation}`,
+        certainty: "CERTAIN",
+      });
     }
   }
 

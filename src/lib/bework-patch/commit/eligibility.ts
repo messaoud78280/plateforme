@@ -208,6 +208,31 @@ export function evaluateCommitEligibility(input: {
 
   // TAKEOFF technique ou QUOTE technical
   if (patch.origin.section === "TAKEOFF") {
+    // add_line / delete_line / update_hypothesis : pas de résolution paramètre EXACT requise
+    const structuralOnly =
+      patch.operations.length > 0 &&
+      patch.operations.every(
+        (op) =>
+          op.op === "add_line" ||
+          op.op === "delete_line" ||
+          op.op === "update_hypothesis",
+      );
+    if (structuralOnly) {
+      if (!impact.directChanges.length) {
+        return {
+          ok: false,
+          reason: "Aucune ligne à ajouter ou modifier.",
+          code: "EMPTY_OPERATIONS",
+        };
+      }
+      return {
+        ok: true,
+        mode: "FULL_SYNC",
+        buttonLabel: "Appliquer le métré",
+        warnings: impact.warnings.map((w) => w.message).slice(0, 5),
+      };
+    }
+
     if (impact.canonicalResolution.status !== "EXACT") {
       return {
         ok: false,

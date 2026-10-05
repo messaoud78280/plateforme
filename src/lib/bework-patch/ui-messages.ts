@@ -200,6 +200,8 @@ export function fieldMetierLabel(field: string): string {
     value: "Valeur",
     designation: "Désignation",
     meta: "Informations",
+    line: "Ajout de ligne",
+    declared_quantity: "Quantité",
   };
   return map[field] ?? field.replace(/_/g, " ");
 }

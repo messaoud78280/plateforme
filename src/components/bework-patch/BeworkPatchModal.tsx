@@ -27,6 +27,15 @@ import {
   syncModeUserHint,
   type UserFacingError,
 } from "@/lib/bework-patch/ui-messages";
+import {
+  countAddLines,
+  isAddLineDirectChange,
+  parseAddLineAfter,
+  provenanceBadgeLabel,
+  roleBadgeLabel,
+  summarizeAddLineLots,
+  type AddLinePreviewPayload,
+} from "@/lib/bework-patch/add-line-preview";
 
 type Props = {
   open: boolean;
@@ -236,6 +245,7 @@ export function BeworkPatchModal({
   }, [step]);
 
   const directCount = impact?.directChanges.length ?? analysis?.directChanges.length ?? 0;
+  const addLineCount = impact ? countAddLines(impact.directChanges) : 0;
   const consequenceGroups = impact ? groupDerivedBySection(impact.derivedChanges) : [];
   const consequenceCount =
     (impact?.derivedChanges.length ?? 0) + (impact?.protectedEntities.length ?? 0);
@@ -605,7 +615,18 @@ export function BeworkPatchModal({
                 <p className="mt-0.5 text-sm text-slate-500">
                   Aucune modification n’est appliquée à cette étape.
                 </p>
+                {addLineCount > 0 ? (
+                  <p className="mt-1 text-sm font-medium text-[#1e3a5f]">
+                    {addLineCount} ligne
+                    {addLineCount > 1 ? "s" : ""} seront ajoutées si vous
+                    confirmez.
+                  </p>
+                ) : null}
               </div>
+
+              {impact && addLineCount > 0 ? (
+                <AddLinesLotSummary changes={impact.directChanges} />
+              ) : null}
 
               <DirectChangesBlock
                 impact={impact}
@@ -1051,6 +1072,191 @@ function PlanningPreviewSummary({
   );
 }
 
+function AddLinesLotSummary({ changes }: { changes: DirectChange[] }) {
+  const total = countAddLines(changes);
+  const lots = summarizeAddLineLots(changes);
+  if (total === 0) return null;
+  return (
+    <section className="rounded-xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.03] p-3">
+      <h4 className="text-sm font-semibold text-[#1e3a5f]">
+        {total} ligne{total > 1 ? "s" : ""} à ajouter
+      </h4>
+      {lots.length > 0 ? (
+        <div className="mt-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            Répartition par lots
+          </p>
+          <ul className="mt-1.5 space-y-1 text-sm text-slate-700">
+            {lots.map((l) => (
+              <li
+                key={l.lot}
+                className="flex items-center justify-between gap-3 rounded-md bg-white/70 px-2 py-1"
+              >
+                <span className="min-w-0 truncate font-medium text-slate-800">
+                  {l.lot}
+                </span>
+                <span className="shrink-0 tabular-nums text-[#1e3a5f]">
+                  {l.count}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function AddLinePreviewCard({ change }: { change: DirectChange }) {
+  const [open, setOpen] = useState(false);
+  const line = parseAddLineAfter(change.after);
+  if (!line) {
+    return (
+      <li className="rounded-lg border border-red-100 bg-red-50/60 p-2.5 text-sm text-red-800">
+        Ajout de ligne illisible — payload line manquant.
+      </li>
+    );
+  }
+  return (
+    <li className="rounded-lg border border-emerald-100 bg-emerald-50/40 p-3">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-800">
+            Ajout de ligne
+          </p>
+          <p className="mt-0.5 text-sm font-semibold text-[#1e3a5f]">
+            {line.code}
+            <span className="font-normal text-slate-400"> · </span>
+            {line.lot}
+          </p>
+        </div>
+        <AddLineBadges line={line} />
+      </div>
+      <p className="mt-2 text-[15px] font-medium leading-snug text-slate-900">
+        {line.designation}
+      </p>
+      {line.description ? (
+        <p className="mt-1 line-clamp-2 text-[13px] text-slate-600">
+          {line.description}
+        </p>
+      ) : null}
+      <dl className="mt-2 grid gap-1.5 text-[13px] sm:grid-cols-2">
+        <div>
+          <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+            Quantité
+          </dt>
+          <dd className="font-semibold tabular-nums text-slate-800">
+            {line.declared_quantity != null
+              ? `${formatQtyFr(line.declared_quantity)} ${line.unit}`
+              : line.formula
+                ? `Formule · ${line.unit}`
+                : `— ${line.unit}`}
+          </dd>
+        </div>
+        {line.formula ? (
+          <div>
+            <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              Formule
+            </dt>
+            <dd className="font-mono text-[12px] text-slate-700">{line.formula}</dd>
+          </div>
+        ) : null}
+        {line.provenance ? (
+          <div>
+            <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              Provenance
+            </dt>
+            <dd>{provenanceBadgeLabel(line.provenance)}</dd>
+          </div>
+        ) : null}
+        {line.role ? (
+          <div>
+            <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              Rôle
+            </dt>
+            <dd>{roleBadgeLabel(line.role)}</dd>
+          </div>
+        ) : null}
+        {line.nature ? (
+          <div>
+            <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              Nature
+            </dt>
+            <dd>{line.nature}</dd>
+          </div>
+        ) : null}
+      </dl>
+      {(line.notes || (line.description && line.description.length > 160)) && (
+        <div className="mt-2 border-t border-emerald-100 pt-2">
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#1e3a5f]"
+          >
+            {open ? (
+              <ChevronDown className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronRight className="h-3.5 w-3.5" />
+            )}
+            Voir le détail technique
+          </button>
+          {open ? (
+            <div className="mt-2 space-y-2 rounded-md bg-white/80 px-2.5 py-2 text-[12.5px] leading-relaxed text-slate-700">
+              {line.description ? (
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    Description
+                  </p>
+                  <p className="mt-0.5 whitespace-pre-wrap">{line.description}</p>
+                </div>
+              ) : null}
+              {line.notes ? (
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    Notes techniques / CCTP
+                  </p>
+                  <p className="mt-0.5 whitespace-pre-wrap">{line.notes}</p>
+                </div>
+              ) : null}
+              <p className="text-[11px] text-slate-500">
+                Avant : ligne absente · Après : création de {line.code}
+              </p>
+            </div>
+          ) : null}
+        </div>
+      )}
+    </li>
+  );
+}
+
+function AddLineBadges({ line }: { line: AddLinePreviewPayload }) {
+  const badges: string[] = [];
+  const prov = provenanceBadgeLabel(line.provenance);
+  if (prov) badges.push(prov);
+  const role = roleBadgeLabel(line.role);
+  if (role) badges.push(role);
+  if (line.formula) badges.push("CALCULÉ");
+  if (!badges.length) return null;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {badges.map((b) => (
+        <span
+          key={b}
+          className="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-700 ring-1 ring-slate-200"
+        >
+          {b}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function formatQtyFr(n: number): string {
+  return Number.isInteger(n)
+    ? String(n)
+    : n.toLocaleString("fr-FR", { maximumFractionDigits: 4 });
+}
+
 function DirectChangesBlock({
   impact,
   fallback,
@@ -1071,7 +1277,13 @@ function DirectChangesBlock({
         </p>
       ) : changes.length > 0 ? (
         <ul className="mt-3 space-y-3">
-          {changes.map((c, i) => (
+          {changes.map((c, i) =>
+            isAddLineDirectChange(c) ? (
+              <AddLinePreviewCard
+                key={`${c.entityType}-${c.entityId}-${c.field}-${i}`}
+                change={c}
+              />
+            ) : (
             <li
               key={`${c.entityType}-${c.entityId}-${c.field}-${i}`}
               className="rounded-lg border border-slate-100 bg-slate-50/60 p-2.5"
@@ -1129,7 +1341,8 @@ function DirectChangesBlock({
                 </p>
               ) : null}
             </li>
-          ))}
+            ),
+          )}
         </ul>
       ) : (
         <ul className="mt-3 space-y-2">

@@ -140,6 +140,7 @@ export type OpAddLine = {
     entity_type: "PREP_STUDY";
     study_id: string;
   };
+  /** Payload dédié — pas `changes`. Contrat : ADD_LINE_CONTRACT. */
   line: {
     code: string;
     lot: string;
@@ -148,6 +149,10 @@ export type OpAddLine = {
     formula?: string | null;
     declared_quantity?: number | null;
     description?: string | null;
+    provenance?: "RELEVE" | "RELEVE_A_VERIFIER" | "HYPOTHESE" | "SAISIE_MANUELLE" | null;
+    role?: "quote" | "indicator" | "logistics";
+    nature?: "en_place" | "foisonne" | "compacte" | "theorique" | null;
+    notes?: string | null;
   };
   insert_after_code?: string | null;
 };
@@ -563,7 +568,7 @@ export type BeworkSupportedOperationSpec = {
   entity_types: BeworkEntityType[];
   allowed_change_fields?: string[];
   compatible_intents: BeworkChangeIntent[];
-  /** Contrats JSON détaillés (ex. structure de depends_on) — source parser. */
+  /** Contrats JSON détaillés (ex. structure de depends_on / add_line.line) — source parser. */
   field_contracts?: Array<{
     field: string;
     required?: boolean;
@@ -572,7 +577,11 @@ export type BeworkSupportedOperationSpec = {
     example?: unknown;
     target?: Record<string, unknown>;
     minimal_operation_example?: unknown;
+    minimal_valid_example?: unknown;
     meaning?: string;
+    payload_key?: string;
+    line?: Record<string, unknown>;
+    insert_after_code?: Record<string, unknown>;
   }>;
 };
 

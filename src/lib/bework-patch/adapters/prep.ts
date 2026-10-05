@@ -97,6 +97,10 @@ export function toLegacyPrepPatch(patch: BeworkPatchV1): PrepDelegateResult {
           formula: op.line.formula,
           declaredQuantity: op.line.declared_quantity,
           description: op.line.description,
+          provenance: op.line.provenance ?? undefined,
+          role: op.line.role,
+          nature: op.line.nature,
+          notes: op.line.notes,
         },
         insertAfterCode: op.insert_after_code,
       });

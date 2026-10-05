@@ -11,7 +11,7 @@ import {
   isIntentCompatibleWithOp,
   OPERATION_CATALOG,
 } from "@/lib/bework-patch/operations-catalog";
-import { normalizeDependsOnJson } from "@/lib/bework-patch/operation-contracts";
+import { normalizeDependsOnJson, parseAddLinePayload } from "@/lib/bework-patch/operation-contracts";
 import {
   BEWORK_CHANGE_INTENTS,
   BEWORK_ENTITY_TYPES,
@@ -426,31 +426,17 @@ function parseOperation(
     }
     case "add_line": {
       if (!requireTargetIds(target, `${path}.target`, ["study_id"], issues)) return null;
-      if (!isObj(raw.line)) {
-        issues.push(err("INVALID_FIELD", `${path}.line`, "line obligatoire"));
-        return null;
-      }
-      const code = str(raw.line.code, 40);
-      const lot = str(raw.line.lot, 120);
-      const designation = str(raw.line.designation, 300);
-      const unit = str(raw.line.unit, 40);
-      if (!code || !lot || !designation || !unit) {
-        issues.push(err("INVALID_FIELD", `${path}.line`, "code, lot, designation, unit requis"));
-        return null;
-      }
+      const parsedLine = parseAddLinePayload(
+        raw as Record<string, unknown>,
+        path,
+        issues,
+      );
+      if (!parsedLine) return null;
       return {
         op,
         target: { ...target, entity_type: "PREP_STUDY", study_id: target.study_id! },
-        line: {
-          code,
-          lot,
-          designation,
-          unit,
-          formula: str(raw.line.formula, 500),
-          declared_quantity: num(raw.line.declared_quantity ?? raw.line.declaredQuantity),
-          description: str(raw.line.description, 5000),
-        },
-        insert_after_code: str(raw.insert_after_code ?? raw.insertAfterCode, 40),
+        line: parsedLine.line,
+        insert_after_code: parsedLine.insert_after_code,
       };
     }
     case "delete_line": {

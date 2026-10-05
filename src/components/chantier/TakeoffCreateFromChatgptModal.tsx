@@ -20,9 +20,12 @@ type ProvenanceSummary = {
   params: number;
 };
 
+type InteractionMode = "CREATE" | "MODIFY";
+
 /**
- * CREATE métré — BeWork ↔ ChatGPT ↔ BeWork.
- * Preview obligatoire avant « Créer le métré ».
+ * CREATE / MODIFY métré — BeWork ↔ ChatGPT ↔ BeWork.
+ * Si un métré CURRENT existe, le contexte est MODIFY (version réelle).
+ * Preview CREATE obligatoire avant « Créer le métré ».
  */
 export function TakeoffCreateFromChatgptModal({
   projectId,
@@ -48,6 +51,12 @@ export function TakeoffCreateFromChatgptModal({
   const [preview, setPreview] = useState<PrepImportPreview | null>(null);
   const [summary, setSummary] = useState<ProvenanceSummary | null>(null);
   const [allowDuplicate, setAllowDuplicate] = useState(false);
+  const [mode, setMode] = useState<InteractionMode>("CREATE");
+  const [modifyMeta, setModifyMeta] = useState<{
+    studyId: string;
+    version: number;
+    status: string;
+  } | null>(null);
 
   const copyContext = useCallback(async () => {
     setBusy(true);
@@ -60,19 +69,35 @@ export function TakeoffCreateFromChatgptModal({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        if (data?.code === "STUDY_ALREADY_EXISTS" && data?.studyId) {
-          throw new Error(
-            "Un métré existe déjà — utilisez « Modifier avec ChatGPT » depuis l’étude.",
-          );
-        }
         throw new Error(data?.error ?? "Contexte indisponible");
       }
       await navigator.clipboard.writeText(data.text);
-      setSourcesFingerprint(data.sourcesFingerprint ?? null);
-      setResolvedVisitId(data.context?.visit?.id ?? visitId ?? null);
-      setToast("Contexte CREATE copié — discutez avec ChatGPT, puis collez le JSON");
-      window.setTimeout(() => setToast(null), 4000);
-      setStep("json");
+      const interactionMode =
+        data.interactionMode === "MODIFY" || data.context?.interaction_mode === "MODIFY"
+          ? "MODIFY"
+          : "CREATE";
+      setMode(interactionMode);
+      if (interactionMode === "MODIFY") {
+        const studyId = String(data.studyId ?? data.context?.target?.id ?? "");
+        const version = Number(data.version ?? data.context?.target?.version ?? 0);
+        const status = String(
+          data.context?.data?.takeoff?.status ??
+            data.context?.versions?.current_takeoff?.status ??
+            "CURRENT",
+        );
+        setModifyMeta({ studyId, version, status });
+        setToast(
+          `Contexte MODIFY copié — Métré v${version} ${status}. Collez-le dans ChatGPT.`,
+        );
+        setStep("context");
+      } else {
+        setModifyMeta(null);
+        setSourcesFingerprint(data.sourcesFingerprint ?? null);
+        setResolvedVisitId(data.context?.visit?.id ?? visitId ?? null);
+        setToast("Contexte CREATE copié — discutez avec ChatGPT, puis collez le JSON");
+        setStep("json");
+      }
+      window.setTimeout(() => setToast(null), 4500);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Copie impossible");
     } finally {
@@ -102,6 +127,11 @@ export function TakeoffCreateFromChatgptModal({
         const ctx = await resCtx.json().catch(() => null);
         if (!resCtx.ok) {
           throw new Error(ctx?.error ?? "Contexte indisponible");
+        }
+        if (ctx.interactionMode === "MODIFY") {
+          throw new Error(
+            "Un métré existe déjà — utilisez « Modifier avec ChatGPT » depuis l’étude.",
+          );
         }
         fp = ctx.sourcesFingerprint ?? null;
         setSourcesFingerprint(fp);
@@ -185,6 +215,8 @@ export function TakeoffCreateFromChatgptModal({
     }
   }
 
+  const isModify = mode === "MODIFY";
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-3 sm:items-center">
       <div
@@ -195,16 +227,21 @@ export function TakeoffCreateFromChatgptModal({
         <header className="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
-              Métré · CREATE
+              Métré · {isModify ? "MODIFY" : "CREATE"}
+              {modifyMeta ? ` · v${modifyMeta.version} ${modifyMeta.status}` : ""}
             </p>
             <h2
               id="takeoff-create-title"
               className="text-[1.05rem] font-semibold text-[#1e3a5f]"
             >
-              Préparer le métré avec ChatGPT
+              {isModify
+                ? "Contexte métré courant pour ChatGPT"
+                : "Préparer le métré avec ChatGPT"}
             </h2>
             <p className="mt-0.5 text-[12.5px] text-slate-600">
-              ChatGPT propose · BeWork contrôle · vous validez. Aucune mesure inventée.
+              {isModify
+                ? "Le métré CURRENT est exposé avec son id et sa version — ChatGPT produit un bework_patch_v1."
+                : "ChatGPT propose · BeWork contrôle · vous validez. Aucune mesure inventée."}
             </p>
           </div>
           <button
@@ -216,17 +253,19 @@ export function TakeoffCreateFromChatgptModal({
           </button>
         </header>
 
-        <div className="flex gap-2 border-b border-slate-100 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-          <span className={step === "context" || step === "json" || step === "preview" ? "text-[#1e3a5f]" : ""}>
-            1. Contexte
-          </span>
-          <span>·</span>
-          <span className={step === "json" || step === "preview" ? "text-[#1e3a5f]" : ""}>
-            2. JSON
-          </span>
-          <span>·</span>
-          <span className={step === "preview" ? "text-[#1e3a5f]" : ""}>3. Preview</span>
-        </div>
+        {!isModify ? (
+          <div className="flex gap-2 border-b border-slate-100 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            <span className={step === "context" || step === "json" || step === "preview" ? "text-[#1e3a5f]" : ""}>
+              1. Contexte
+            </span>
+            <span>·</span>
+            <span className={step === "json" || step === "preview" ? "text-[#1e3a5f]" : ""}>
+              2. JSON
+            </span>
+            <span>·</span>
+            <span className={step === "preview" ? "text-[#1e3a5f]" : ""}>3. Preview</span>
+          </div>
+        ) : null}
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
           {toast ? (
@@ -268,7 +307,52 @@ export function TakeoffCreateFromChatgptModal({
             </div>
           ) : null}
 
-          {step !== "preview" ? (
+          {isModify && modifyMeta ? (
+            <div className="space-y-3">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-[13px] text-slate-700">
+                <p className="font-semibold text-slate-900">
+                  Métré v{modifyMeta.version} · {modifyMeta.status}
+                </p>
+                <p className="mt-1 text-[12.5px]">
+                  Le contexte ChatGPT contient l’id réel (
+                  <code className="text-[11px]">{modifyMeta.studyId}</code>
+                  ), la version courante, et le bloc <code className="text-[11px]">versions</code>{" "}
+                  (écart devis / planning si présent).
+                </p>
+                <ol className="mt-2 list-decimal space-y-0.5 pl-4 text-[12.5px]">
+                  <li>Contexte MODIFY déjà copié dans le presse-papiers.</li>
+                  <li>Discutez avec ChatGPT — il produit un <code>bework_patch_v1</code>.</li>
+                  <li>
+                    Appliquez le patch depuis la page métré (« Modifier avec ChatGPT »).
+                  </li>
+                </ol>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void copyContext()}
+                  className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-[12.5px] font-semibold text-white disabled:opacity-50"
+                >
+                  {busy ? "…" : "Recopier le contexte"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    router.push(
+                      `/dashboard/visites-metres/etudes/${modifyMeta.studyId}`,
+                    );
+                  }}
+                  className="rounded-lg border border-[#1e3a5f]/30 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-[#1e3a5f]"
+                >
+                  Ouvrir le métré
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {!isModify && step !== "preview" ? (
             <div className="space-y-3">
               <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-[13px] text-slate-700">
                 <p className="font-semibold text-slate-900">Discussion métier</p>
@@ -301,7 +385,9 @@ export function TakeoffCreateFromChatgptModal({
                 />
               </label>
             </div>
-          ) : preview && summary ? (
+          ) : null}
+
+          {!isModify && step === "preview" && preview && summary ? (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {[
@@ -362,7 +448,15 @@ export function TakeoffCreateFromChatgptModal({
         </div>
 
         <footer className="flex flex-wrap items-center justify-end gap-2 border-t border-slate-100 px-4 py-3">
-          {step === "preview" ? (
+          {isModify ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-slate-200 px-3 py-1.5 text-[12.5px] text-slate-700"
+            >
+              Fermer
+            </button>
+          ) : step === "preview" ? (
             <>
               <button
                 type="button"

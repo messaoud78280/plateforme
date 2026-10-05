@@ -45,8 +45,16 @@ export async function POST(_req: Request, ctx: Ctx) {
       ok: true,
       text: JSON.stringify(context, null, 2),
       context,
-      sourcesFingerprint: context.sources_fingerprint,
+      interactionMode: context.interaction_mode,
+      sourcesFingerprint:
+        context.interaction_mode === "CREATE"
+          ? context.sources_fingerprint
+          : null,
       projectId: context.project?.id ?? null,
+      studyId:
+        context.interaction_mode === "MODIFY" ? context.target.id : null,
+      version:
+        context.interaction_mode === "MODIFY" ? context.target.version : 0,
     });
   } catch (e) {
     const err = e as { message?: string; code?: string; status?: number; studyId?: string };

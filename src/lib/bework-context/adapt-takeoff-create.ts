@@ -1,14 +1,28 @@
 /**
  * Contexte ChatGPT CREATE métré — visite (+ plan facultatif) → bework_prep_bundle_v1.
  * Lecture seule. Aucune invention de dimension / métier hardcodé.
+ *
+ * Si un PrepStudy CURRENT existe déjà → retourne MODIFY (pas un faux CREATE).
  */
 import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
-import { BEWORK_CONTEXT_FORMAT, BEWORK_CONTEXT_SCHEMA_VERSION } from "@/lib/bework-patch/types";
+import {
+  BEWORK_CONTEXT_FORMAT,
+  BEWORK_CONTEXT_SCHEMA_VERSION,
+  BEWORK_PATCH_FORMAT,
+  type BeworkChatgptContextV1,
+} from "@/lib/bework-patch/types";
 import { PREP_BUNDLE_FORMAT } from "@/lib/preparation/types";
 import { computeVisitContextVersion } from "@/lib/bework-context/visit-context-version";
 import { listProjectPlanCandidateFiles } from "@/lib/preparation/plan-source";
+import { buildProjectContext } from "@/lib/bework-context/build-project-context";
+import { adaptTakeoffForChatgptContext } from "@/lib/bework-context/adapters";
+import {
+  resolveCurrentPrepStudy,
+  resolveCurrentSchedulePlan,
+} from "@/lib/chantier/resolve-workspace-entities";
+import type { ProjectContextSnapshot } from "@/lib/bework-context/types";
 
 export const TAKEOFF_CREATE_INSTRUCTIONS = [
   "Tu es un copilote chantier BTP. Tu proposes ; le professionnel décide.",
@@ -81,7 +95,295 @@ export type BeworkTakeoffCreateContextV1 = {
     /** Null tant qu’aucun Project n’est lié — le commit crée / rattache d’abord un chantier. */
     create_on_project_id: string | null;
   };
+  versions?: TakeoffContextVersionsBlock;
 };
+
+/** Contexte MODIFY — métré CURRENT (ou ARCHIVED deep-link) exposé avec version réelle. */
+export type BeworkTakeoffModifyContextV1 = Omit<BeworkChatgptContextV1, "target" | "data"> & {
+  interaction_mode: "MODIFY";
+  expected_output: typeof BEWORK_PATCH_FORMAT;
+  target: BeworkChatgptContextV1["target"] & {
+    base_version: number;
+    create_on_project_id: string;
+  };
+  versions: TakeoffContextVersionsBlock;
+  data: Record<string, unknown> & {
+    interaction_mode: "MODIFY";
+    takeoff: {
+      exists: true;
+      study_id: string;
+      version: number;
+      status: "CURRENT" | "ARCHIVED";
+      is_current: boolean;
+      scope_id: string | null;
+      updated_at: string | null;
+    };
+  };
+};
+
+export type TakeoffContextVersionsBlock = {
+  current_takeoff?: {
+    id: string;
+    version: number;
+    status: "CURRENT" | "ARCHIVED";
+    is_current: boolean;
+    scope_id: string | null;
+    updated_at: string | null;
+  };
+  quote?: {
+    id: string;
+    version: number;
+    study_version_at_generation: number | null;
+  };
+  planning?: {
+    id: string;
+    revision: number;
+    study_version_at_generation: number | null;
+  };
+};
+
+export type BeworkTakeoffChatgptContextV1 =
+  | BeworkTakeoffCreateContextV1
+  | BeworkTakeoffModifyContextV1;
+
+/** Bloc versions (métré / devis / planning) — pur, testable. */
+export function buildTakeoffVersionsBlock(
+  snap: ProjectContextSnapshot,
+  studyId: string,
+  meta: { status: "CURRENT" | "ARCHIVED"; isCurrent: boolean },
+): TakeoffContextVersionsBlock {
+  const study = snap.takeoffs.find((t) => t.id === studyId);
+  const block: TakeoffContextVersionsBlock = {};
+  if (study) {
+    block.current_takeoff = {
+      id: study.id,
+      version: study.version,
+      status: meta.status,
+      is_current: meta.isCurrent,
+      scope_id: study.scopeId,
+      updated_at: study.updatedAt,
+    };
+  }
+
+  const quote =
+    snap.quotes.find((q) => q.sourcePrepStudyId === studyId) ??
+    snap.quotes.find((q) => q.transfer?.studyId === studyId) ??
+    null;
+  if (quote) {
+    block.quote = {
+      id: quote.id,
+      version: quote.versionNumber ?? 0,
+      study_version_at_generation: quote.transfer?.studyVersion ?? null,
+    };
+  }
+
+  const plansForStudy = snap.schedules.filter(
+    (p): p is typeof p & { studyId: string } => p.studyId === studyId,
+  );
+  const plan = resolveCurrentSchedulePlan(plansForStudy);
+  if (plan) {
+    block.planning = {
+      id: plan.id,
+      revision: plan.revisionNumber,
+      study_version_at_generation: plan.studyVersionAtGeneration,
+    };
+  }
+
+  return block;
+}
+
+/**
+ * MODIFY — snapshot canonique + resolver CURRENT.
+ * Lecture seule. Deep-link `studyId` peut exposer ARCHIVED (is_current false).
+ */
+export async function buildTakeoffModifyContext(input: {
+  orgId: string;
+  projectId: string;
+  /** Deep-link étude (peut être ARCHIVED). Absent = CURRENT canonique. */
+  studyId?: string | null;
+}): Promise<BeworkTakeoffModifyContextV1> {
+  const [snap, studies, scopes] = await Promise.all([
+    buildProjectContext(input.projectId, input.orgId),
+    prisma.prepStudy.findMany({
+      where: {
+        projectId: input.projectId,
+        organizationId: input.orgId,
+      },
+      select: {
+        id: true,
+        title: true,
+        scopeId: true,
+        sourcesJson: true,
+        archivedAt: true,
+        version: true,
+        updatedAt: true,
+      },
+    }),
+    prisma.projectScope.findMany({
+      where: {
+        projectId: input.projectId,
+        organizationId: input.orgId,
+      },
+      select: {
+        id: true,
+        referenceStudyId: true,
+        referenceQuoteId: true,
+        referenceSchedulePlanId: true,
+      },
+    }),
+  ]);
+  if (!snap) {
+    throw Object.assign(new Error("Chantier introuvable"), {
+      code: "PROJECT_NOT_FOUND",
+      status: 404,
+    });
+  }
+
+  const resolved = resolveCurrentPrepStudy({
+    studies,
+    scopes,
+    explicitStudyId: input.studyId ?? null,
+  });
+
+  if (!resolved) {
+    throw Object.assign(new Error("Aucun métré pour ce chantier"), {
+      code: "STUDY_NOT_FOUND",
+      status: 404,
+    });
+  }
+
+  const studyRow = resolved.study;
+  const version = studyRow.version ?? 0;
+  const updatedAtIso = studyRow.updatedAt.toISOString();
+
+  // Snapshot n’embarque que les non-archivées — fallback minimal si ARCHIVED.
+  let ctx = adaptTakeoffForChatgptContext(snap, studyRow.id);
+  if (!ctx) {
+    ctx = {
+      type: BEWORK_CONTEXT_FORMAT,
+      schema_version: BEWORK_CONTEXT_SCHEMA_VERSION,
+      section: "TAKEOFF",
+      project: {
+        id: snap.project.id,
+        title: snap.project.title,
+      },
+      organization: {
+        id: snap.organization.id,
+        name: snap.organization.name,
+      },
+      target: {
+        entity_type: "PREP_STUDY",
+        id: studyRow.id,
+        version,
+        base_version: version,
+        code: studyRow.title,
+      },
+      data: {},
+      relationships: { quote_items: [] },
+      supported_change_intents: [],
+      supported_operations: [],
+      expected_output: BEWORK_PATCH_FORMAT,
+    };
+  }
+
+  const versions = buildTakeoffVersionsBlock(snap, studyRow.id, {
+    status: resolved.status,
+    isCurrent: resolved.isCurrent,
+  });
+  if (!versions.current_takeoff) {
+    versions.current_takeoff = {
+      id: studyRow.id,
+      version,
+      status: resolved.status,
+      is_current: resolved.isCurrent,
+      scope_id: studyRow.scopeId,
+      updated_at: updatedAtIso,
+    };
+  } else {
+    versions.current_takeoff.status = resolved.status;
+    versions.current_takeoff.is_current = resolved.isCurrent;
+  }
+
+  return {
+    ...ctx,
+    interaction_mode: "MODIFY",
+    expected_output: BEWORK_PATCH_FORMAT,
+    target: {
+      ...ctx.target,
+      id: studyRow.id,
+      version,
+      base_version: version,
+      create_on_project_id: input.projectId,
+    },
+    versions,
+    data: {
+      ...ctx.data,
+      interaction_mode: "MODIFY",
+      takeoff: {
+        exists: true,
+        study_id: studyRow.id,
+        version,
+        status: resolved.status,
+        is_current: resolved.isCurrent,
+        scope_id: studyRow.scopeId,
+        updated_at: updatedAtIso,
+      },
+    },
+  };
+}
+
+/**
+ * Résout le métré CURRENT du chantier (resolver canonique).
+ * Lecture seule.
+ */
+export async function resolveProjectCurrentTakeoff(input: {
+  orgId: string;
+  projectId: string;
+}): Promise<{
+  studyId: string;
+  version: number;
+  status: "CURRENT";
+  scopeId: string | null;
+  updatedAt: string;
+} | null> {
+  const [studies, scopes] = await Promise.all([
+    prisma.prepStudy.findMany({
+      where: {
+        projectId: input.projectId,
+        organizationId: input.orgId,
+      },
+      select: {
+        id: true,
+        scopeId: true,
+        sourcesJson: true,
+        archivedAt: true,
+        version: true,
+        updatedAt: true,
+      },
+    }),
+    prisma.projectScope.findMany({
+      where: {
+        projectId: input.projectId,
+        organizationId: input.orgId,
+      },
+      select: {
+        id: true,
+        referenceStudyId: true,
+        referenceQuoteId: true,
+        referenceSchedulePlanId: true,
+      },
+    }),
+  ]);
+  const resolved = resolveCurrentPrepStudy({ studies, scopes });
+  if (!resolved || !resolved.isCurrent) return null;
+  return {
+    studyId: resolved.study.id,
+    version: resolved.study.version ?? 0,
+    status: "CURRENT",
+    scopeId: resolved.study.scopeId,
+    updatedAt: resolved.study.updatedAt.toISOString(),
+  };
+}
 
 function numOrNull(v: unknown): number | null {
   if (v == null) return null;
@@ -130,14 +432,16 @@ export function computeTakeoffCreateSourcesFingerprint(input: {
 }
 
 /**
- * Construit le contexte CREATE — multi-tenant strict.
+ * Construit le contexte TAKEOFF pour ChatGPT — multi-tenant strict.
+ * Si un métré CURRENT existe → MODIFY (id + version réels).
+ * Sinon → CREATE (id null, version 0).
  * Ne crée aucune donnée. Plan facultatif.
  */
 export async function buildTakeoffCreateContext(input: {
   orgId: string;
   projectId: string;
   visitId?: string | null;
-}): Promise<BeworkTakeoffCreateContextV1> {
+}): Promise<BeworkTakeoffChatgptContextV1> {
   const project = await prisma.project.findFirst({
     where: { id: input.projectId, organizationId: input.orgId },
     select: {
@@ -159,22 +463,16 @@ export async function buildTakeoffCreateContext(input: {
     });
   }
 
-  const existingStudy = await prisma.prepStudy.findFirst({
-    where: {
-      organizationId: input.orgId,
-      projectId: input.projectId,
-      archivedAt: null,
-    },
-    select: { id: true, version: true, title: true },
-    orderBy: { updatedAt: "desc" },
+  // Resolver canonique — jamais findFirst createdAt / ProjectScope seul.
+  const current = await resolveProjectCurrentTakeoff({
+    orgId: input.orgId,
+    projectId: input.projectId,
   });
-  if (existingStudy) {
-    throw Object.assign(
-      new Error(
-        `Un métré existe déjà (« ${existingStudy.title} » v${existingStudy.version}). Utilisez « Modifier avec ChatGPT ».`,
-      ),
-      { code: "STUDY_ALREADY_EXISTS", status: 409, studyId: existingStudy.id },
-    );
+  if (current) {
+    return buildTakeoffModifyContext({
+      orgId: input.orgId,
+      projectId: input.projectId,
+    });
   }
 
   const visitWhere = input.visitId
@@ -425,7 +723,7 @@ export async function buildTakeoffCreateContext(input: {
 export async function buildTakeoffCreateContextFromVisit(input: {
   orgId: string;
   visitId: string;
-}): Promise<BeworkTakeoffCreateContextV1> {
+}): Promise<BeworkTakeoffChatgptContextV1> {
   const visit = await prisma.siteVisit.findFirst({
     where: { id: input.visitId, organizationId: input.orgId },
     select: {

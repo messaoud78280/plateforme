@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import {
   extractVisitSearchBits,
   pickSuggestedVisitId,
+  resolveCurrentPrepStudy,
   resolveCurrentSchedulePlan,
   resolveCurrentSchedulePlanForStudy,
   resolvePrepSchedulePlanForWorkspace,
@@ -509,7 +510,114 @@ function run() {
     null,
   );
 
-  console.log("OK resolve-workspace-entities.test.ts (TESTS 1–10 + scope/global)");
+  // --- resolveCurrentPrepStudy — CURRENT vs ARCHIVED / scope stale ---
+  {
+    // A — aucun métré
+    assert.equal(
+      resolveCurrentPrepStudy({ studies: [], scopes: [] }),
+      null,
+      "A aucun métré",
+    );
+
+    // B — 1 métré CURRENT v1
+    const b = resolveCurrentPrepStudy({
+      studies: [
+        {
+          id: "s1",
+          scopeId: null,
+          version: 1,
+          archivedAt: null,
+          updatedAt: "2026-01-01T00:00:00.000Z",
+        },
+      ],
+      scopes: [],
+    });
+    assert.equal(b?.study.id, "s1");
+    assert.equal(b?.status, "CURRENT");
+    assert.equal(b?.isCurrent, true);
+
+    // C — CURRENT v3 + ancien v2 ARCHIVED → v3
+    const c = resolveCurrentPrepStudy({
+      studies: [
+        {
+          id: "s-old",
+          scopeId: null,
+          version: 2,
+          archivedAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+        },
+        {
+          id: "s-cur",
+          scopeId: null,
+          version: 3,
+          archivedAt: null,
+          updatedAt: "2026-02-01T00:00:00.000Z",
+        },
+      ],
+      scopes: [],
+    });
+    assert.equal(c?.study.id, "s-cur");
+    assert.equal(c?.study.version, 3);
+    assert.equal(c?.status, "CURRENT");
+
+    // D — ProjectScope référence ancien métré → CURRENT gagne
+    const d = resolveCurrentPrepStudy({
+      studies: [
+        {
+          id: "s-stale-ref",
+          scopeId: "sc1",
+          version: 1,
+          archivedAt: null,
+          updatedAt: "2026-01-01T00:00:00.000Z",
+        },
+        {
+          id: "s-global",
+          scopeId: null,
+          version: 5,
+          archivedAt: null,
+          updatedAt: "2026-03-01T00:00:00.000Z",
+          sourcesJson: { kind: "bework_global_metre_v1" },
+        },
+      ],
+      scopes: [
+        {
+          id: "sc1",
+          referenceStudyId: "s-stale-ref",
+          referenceQuoteId: null,
+          referenceSchedulePlanId: null,
+        },
+      ],
+    });
+    assert.equal(d?.study.id, "s-global", "D global CURRENT bat référence scope");
+    assert.equal(d?.study.version, 5);
+
+    // G — deep-link ARCHIVED
+    const g = resolveCurrentPrepStudy({
+      studies: [
+        {
+          id: "s-arch",
+          scopeId: null,
+          version: 2,
+          archivedAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+        },
+        {
+          id: "s-cur2",
+          scopeId: null,
+          version: 4,
+          archivedAt: null,
+          updatedAt: "2026-04-01T00:00:00.000Z",
+        },
+      ],
+      scopes: [],
+      explicitStudyId: "s-arch",
+    });
+    assert.equal(g?.study.id, "s-arch");
+    assert.equal(g?.status, "ARCHIVED");
+    assert.equal(g?.isCurrent, false);
+  }
+
+  console.log("OK resolve-workspace-entities.test.ts (TESTS 1–10 + scope/global + CURRENT takeoff)");
 }
 
 run();

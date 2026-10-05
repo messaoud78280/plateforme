@@ -25,6 +25,16 @@ export type StudyLike = {
   id: string;
   scopeId: string | null;
   sourcesJson?: unknown;
+  archivedAt?: Date | string | null;
+  version?: number | null;
+  updatedAt?: Date | string | null;
+};
+
+export type ScopeLike = {
+  id: string;
+  referenceStudyId: string | null;
+  referenceQuoteId: string | null;
+  referenceSchedulePlanId: string | null;
 };
 
 export type PlanLike = {
@@ -38,18 +48,24 @@ export type PlanLike = {
   createdAt?: Date | string | null;
 };
 
-export type ScopeLike = {
-  id: string;
-  referenceStudyId: string | null;
-  referenceQuoteId: string | null;
-  referenceSchedulePlanId: string | null;
-};
-
 const GLOBAL_STUDY_KIND = "bework_global_metre_v1";
 
 export function isGlobalStudySources(sourcesJson: unknown): boolean {
   if (!sourcesJson || typeof sourcesJson !== "object") return false;
   return (sourcesJson as { kind?: string }).kind === GLOBAL_STUDY_KIND;
+}
+
+function isArchivedStudy(s: { archivedAt?: Date | string | null }): boolean {
+  return s.archivedAt != null && String(s.archivedAt).length > 0;
+}
+
+function studyUpdatedAtMs(s: { updatedAt?: Date | string | null }): number {
+  if (!s.updatedAt) return 0;
+  const t =
+    s.updatedAt instanceof Date
+      ? s.updatedAt.getTime()
+      : new Date(s.updatedAt).getTime();
+  return Number.isFinite(t) ? t : 0;
 }
 
 /**
@@ -59,18 +75,23 @@ export function isGlobalStudySources(sourcesJson: unknown): boolean {
  * 3. referenceStudyId des scopes (premier trouvé)
  * 4. unique PrepStudy du projet
  * 5. null (ne jamais inventer)
+ *
+ * Les études archivées sont exclues sauf si la liste n’en contient que des archivées
+ * (cas deep-link géré par resolveCurrentPrepStudy).
  */
 export function resolvePrepStudyForWorkspace<T extends StudyLike>(input: {
   studies: T[];
   scopes: ScopeLike[];
 }): T | null {
-  const { studies, scopes } = input;
+  const { scopes } = input;
+  const pool = input.studies.filter((s) => !isArchivedStudy(s));
+  if (pool.length === 0) return null;
   const byId = (id: string | null | undefined) =>
-    id ? studies.find((s) => s.id === id) ?? null : null;
+    id ? pool.find((s) => s.id === id) ?? null : null;
 
   return (
-    studies.find((s) => isGlobalStudySources(s.sourcesJson) && !s.scopeId) ??
-    studies.find((s) => !s.scopeId) ??
+    pool.find((s) => isGlobalStudySources(s.sourcesJson) && !s.scopeId) ??
+    pool.find((s) => !s.scopeId) ??
     (() => {
       for (const sc of scopes) {
         const hit = byId(sc.referenceStudyId);
@@ -78,8 +99,79 @@ export function resolvePrepStudyForWorkspace<T extends StudyLike>(input: {
       }
       return null;
     })() ??
-    (studies.length === 1 ? studies[0]! : null)
+    (pool.length === 1 ? pool[0]! : null)
   );
+}
+
+/**
+ * Resolver canonique métré CURRENT pour un chantier.
+ * - CURRENT = non archivé + gagnant resolvePrepStudyForWorkspace
+ * - Si plusieurs candidats au même rang : version DESC puis updatedAt DESC
+ * - deep-link `explicitStudyId` : retourne cette étude même ARCHIVED (isCurrent false)
+ * - referenceStudyId d’un scope ne bat jamais un CURRENT non archivé plus récent
+ */
+export function resolveCurrentPrepStudy<T extends StudyLike>(input: {
+  studies: T[];
+  scopes: ScopeLike[];
+  explicitStudyId?: string | null;
+}): {
+  study: T;
+  isCurrent: boolean;
+  status: "CURRENT" | "ARCHIVED";
+} | null {
+  const { studies, scopes, explicitStudyId } = input;
+
+  if (explicitStudyId) {
+    const hit = studies.find((s) => s.id === explicitStudyId);
+    if (!hit) return null;
+    const archived = isArchivedStudy(hit);
+    const current = resolvePrepStudyForWorkspace({
+      studies: studies.filter((s) => !isArchivedStudy(s)),
+      scopes,
+    });
+    const isCurrent = !archived && current?.id === hit.id;
+    return {
+      study: hit,
+      isCurrent,
+      status: archived ? "ARCHIVED" : isCurrent ? "CURRENT" : "ARCHIVED",
+    };
+  }
+
+  const active = studies.filter((s) => !isArchivedStudy(s));
+  if (active.length === 0) return null;
+
+  // Si reference scope pointe un ancien, le CURRENT actif gagne quand même
+  // via resolvePrepStudyForWorkspace (global / scopeId null d’abord).
+  let picked = resolvePrepStudyForWorkspace({ studies: active, scopes });
+
+  // Plusieurs études actives sans gagnant clair → meilleure version
+  if (!picked && active.length > 1) {
+    picked = [...active].sort((a, b) => {
+      const dv = (b.version ?? 0) - (a.version ?? 0);
+      if (dv !== 0) return dv;
+      return studyUpdatedAtMs(b) - studyUpdatedAtMs(a);
+    })[0]!;
+  }
+
+  // Tie-break version si le resolver a choisi un global mais une autre étude
+  // active a une version supérieure au même scope null
+  if (picked && active.length > 1) {
+    const peers = active.filter(
+      (s) =>
+        (s.scopeId ?? null) === (picked!.scopeId ?? null) ||
+        (!s.scopeId && !picked!.scopeId),
+    );
+    if (peers.length > 1) {
+      picked = [...peers].sort((a, b) => {
+        const dv = (b.version ?? 0) - (a.version ?? 0);
+        if (dv !== 0) return dv;
+        return studyUpdatedAtMs(b) - studyUpdatedAtMs(a);
+      })[0]!;
+    }
+  }
+
+  if (!picked) return null;
+  return { study: picked, isCurrent: true, status: "CURRENT" };
 }
 
 function planCreatedAtMs(plan: PlanLike): number {

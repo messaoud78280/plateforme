@@ -524,7 +524,12 @@ export function PrepStudyWorkspace({
               {DOSSIER_STATUS_LABELS[study.dossierStatus]}
             </Chip>
             {study.trade ? <span>{study.trade}</span> : null}
-            <span>Version {study.version}</span>
+            <span className="font-semibold tabular-nums text-[#1e3a5f]">
+              Métré v{study.version}
+            </span>
+            <Chip className="bg-emerald-50 text-emerald-800 ring-emerald-200">
+              CURRENT
+            </Chip>
             {sourceFormatLabel ? <span>{sourceFormatLabel}</span> : null}
           </div>
           <div className="mt-3">

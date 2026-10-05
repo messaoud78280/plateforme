@@ -1,6 +1,6 @@
 /**
- * Contexte CREATE métré — lecture seule.
- * POST { visitId? } → { text, context, sourcesFingerprint }
+ * Contexte TAKEOFF ChatGPT — CREATE si aucun métré, MODIFY si CURRENT existe.
+ * Lecture seule. POST { visitId? } → { text, context, sourcesFingerprint?, interactionMode }
  */
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
@@ -39,11 +39,21 @@ export async function POST(req: Request, ctx: Ctx) {
       visitId: typeof body.visitId === "string" ? body.visitId : null,
     });
     const text = JSON.stringify(context, null, 2);
+    const isCreate = context.interaction_mode === "CREATE";
     return NextResponse.json({
       ok: true,
       text,
       context,
-      sourcesFingerprint: context.sources_fingerprint,
+      interactionMode: context.interaction_mode,
+      sourcesFingerprint: isCreate ? context.sources_fingerprint : null,
+      studyId:
+        context.interaction_mode === "MODIFY"
+          ? context.target.id
+          : null,
+      version:
+        context.interaction_mode === "MODIFY"
+          ? context.target.version
+          : 0,
     });
   } catch (e) {
     const err = e as { message?: string; code?: string; status?: number; studyId?: string };

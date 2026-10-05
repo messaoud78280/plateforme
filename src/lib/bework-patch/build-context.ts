@@ -6,9 +6,9 @@
 import { prisma } from "@/lib/prisma";
 import { d } from "@/lib/commercial/decimal";
 import {
-  adaptTakeoffForChatgptContext,
   adaptVisitForChatgptContext,
   buildProjectContext,
+  buildTakeoffModifyContext,
 } from "@/lib/bework-context";
 import { VISIT_MODIFY_INSTRUCTIONS } from "@/lib/bework-context/adapters";
 import { computeVisitContextVersion } from "@/lib/bework-context/visit-context-version";
@@ -174,25 +174,25 @@ async function buildQuoteContext(
 }
 
 /**
- * CTX-08 — TAKEOFF via snapshot canonique.
- * Legacy `buildMetreChatgptContext` reste intact pour rétrocompatibilité.
+ * CTX-08 — TAKEOFF via resolver CURRENT + versions.
+ * Deep-link `studyId` : peut exposer ARCHIVED (is_current false).
  */
 async function buildTakeoffContext(
   orgId: string,
   project: { id: string; title: string },
   studyId: string,
 ): Promise<BeworkChatgptContextV1 | null> {
-  const snapshot = await buildProjectContext(project.id, orgId, {
-    includeLines: true,
-  });
-  if (!snapshot) return null;
-
-  const adapted = adaptTakeoffForChatgptContext(snapshot, studyId);
-  if (!adapted) return null;
-
-  // Garde-fou : l’étude doit appartenir au projet déjà scopé org.
-  if (adapted.project?.id !== project.id) return null;
-  return adapted;
+  try {
+    const ctx = await buildTakeoffModifyContext({
+      orgId,
+      projectId: project.id,
+      studyId,
+    });
+    if (ctx.project?.id !== project.id) return null;
+    return ctx;
+  } catch {
+    return null;
+  }
 }
 
 async function buildPlanningContext(

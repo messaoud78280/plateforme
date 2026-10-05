@@ -52,14 +52,19 @@ export function VisitPrepareTakeoffModal({
         );
         const data = await res.json().catch(() => null);
         if (!res.ok) {
-          if (data?.code === "STUDY_ALREADY_EXISTS" && data?.studyId) {
-            throw new Error(
-              "Un métré existe déjà — ouvrez-le depuis le dossier chantier.",
-            );
-          }
           throw new Error(data?.error ?? "Contexte indisponible");
         }
         await navigator.clipboard.writeText(data.text);
+        const isModify =
+          data.interactionMode === "MODIFY" ||
+          data.context?.interaction_mode === "MODIFY";
+        const version = data.version ?? data.context?.target?.version ?? 0;
+        setCopied(true);
+        setToast(
+          isModify
+            ? `Contexte MÉTRÉ MODIFY copié — Métré v${version} CURRENT (bework_patch_v1)`
+            : "Contexte MÉTRÉ (TAKEOFF CREATE) copié — expected_output : bework_prep_bundle_v1",
+        );
       } else {
         const res = await fetch(
           `/api/site-visits/${visitId}/takeoff-create/context`,
@@ -68,11 +73,17 @@ export function VisitPrepareTakeoffModal({
         const data = await res.json().catch(() => null);
         if (!res.ok) throw new Error(data?.error ?? "Contexte indisponible");
         await navigator.clipboard.writeText(data.text);
+        const isModify =
+          data.interactionMode === "MODIFY" ||
+          data.context?.interaction_mode === "MODIFY";
+        const version = data.version ?? data.context?.target?.version ?? 0;
+        setCopied(true);
+        setToast(
+          isModify
+            ? `Contexte MÉTRÉ MODIFY copié — Métré v${version} CURRENT (bework_patch_v1)`
+            : "Contexte MÉTRÉ (TAKEOFF CREATE) copié — expected_output : bework_prep_bundle_v1",
+        );
       }
-      setCopied(true);
-      setToast(
-        "Contexte MÉTRÉ (TAKEOFF CREATE) copié — expected_output : bework_prep_bundle_v1",
-      );
       window.setTimeout(() => setToast(null), 4500);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Copie impossible");

@@ -57,10 +57,16 @@ export {
 export {
   buildTakeoffCreateContext,
   buildTakeoffCreateContextFromVisit,
+  buildTakeoffModifyContext,
+  buildTakeoffVersionsBlock,
+  resolveProjectCurrentTakeoff,
   computeTakeoffCreateSourcesFingerprint,
   loadCurrentTakeoffCreateSourcesFingerprint,
   TAKEOFF_CREATE_INSTRUCTIONS,
   type BeworkTakeoffCreateContextV1,
+  type BeworkTakeoffModifyContextV1,
+  type BeworkTakeoffChatgptContextV1,
+  type TakeoffContextVersionsBlock,
 } from "./adapt-takeoff-create";
 
 export {

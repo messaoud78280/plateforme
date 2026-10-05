@@ -121,6 +121,8 @@ export type ProjectContextTakeoffLine = {
   code: string;
   lot: string;
   designation: string;
+  /** Description technique / CCTP (si renseignée). */
+  description: string | null;
   unit: string;
   formula: string | null;
   declaredQuantity: number | null;
@@ -129,6 +131,10 @@ export type ProjectContextTakeoffLine = {
   provenance: string | null;
   provenanceKind: ProjectContextProvenanceKind;
   role: string;
+  /** en_place | foisonne | compacte | theorique */
+  nature: string | null;
+  /** Notes métier (références NF/DTU, contrôles, réserves…). */
+  notes: string | null;
 };
 
 export type ProjectContextTakeoff = {

@@ -127,6 +127,9 @@ function baseTakeoff(overrides?: Partial<ProjectContextTakeoff>): ProjectContext
       provenanceKind:
         i % 3 === 0 ? "CALCULATION" : i % 5 === 0 ? "HYPOTHESIS" : "MEASURE",
       role: "quote",
+      nature: null,
+      notes: null,
+      description: null,
     })),
     updatedAt: "2026-10-01T10:00:00.000Z",
     ...overrides,
@@ -189,6 +192,9 @@ function fixtureC01(overrides?: Partial<ProjectContextSnapshot>): ProjectContext
         provenance: "RELEVE",
         provenanceKind: "MEASURE",
         role: "quote",
+        description: "Description technique test",
+        nature: "en_place",
+        notes: "RÉFÉRENCE : NF DTU TEST",
       },
     ],
     updatedAt: "2026-10-01T11:00:00.000Z",
@@ -489,6 +495,28 @@ function fixtureC01(overrides?: Partial<ProjectContextSnapshot>): ProjectContext
   // Garde-fou soft : < 500 Ko pour un métré démo 28/32
   assert.ok(bytes < 500_000, `payload trop volumineux: ${bytes}`);
   assert.ok(bytes > 1_000, "payload trop pauvre");
+}
+
+// --- TEST K — description / notes / nature exposés (CCTP) ---
+{
+  const ctx = adaptTakeoffForChatgptContext(fixtureC01(), "study-elec")!;
+  const lines = (
+    ctx.data as {
+      lines: Array<{
+        code: string;
+        description: string | null;
+        notes: string | null;
+        nature: string | null;
+      }>;
+    }
+  ).lines;
+  const el = lines.find((l) => l.code === "EL.01");
+  assert.ok(el);
+  assert.equal(el!.description, "Description technique test");
+  assert.equal(el!.notes, "RÉFÉRENCE : NF DTU TEST");
+  assert.equal(el!.nature, "en_place");
+  assert.ok(el!.notes?.includes("NF DTU"));
+  console.log("  K description/notes/nature CCTP: ok");
 }
 
 console.log("adapt-takeoff-chatgpt.test.ts: ok");

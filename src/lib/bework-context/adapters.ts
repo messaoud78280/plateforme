@@ -248,6 +248,7 @@ export function adaptTakeoffForChatgptContext(
         code: l.code,
         lot: l.lot,
         designation: l.designation,
+        description: l.description ?? null,
         unit: l.unit,
         formula: l.formula,
         declared_quantity: l.declaredQuantity,
@@ -256,6 +257,8 @@ export function adaptTakeoffForChatgptContext(
         provenance: l.provenance,
         provenance_kind: l.provenanceKind,
         role: l.role,
+        nature: l.nature ?? null,
+        notes: l.notes ?? null,
         source_ref: null as string | null,
         protected:
           l.validatedQuantity != null ||

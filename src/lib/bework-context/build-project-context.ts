@@ -166,6 +166,7 @@ export async function buildProjectContext(
                   code: true,
                   lot: true,
                   designation: true,
+                  description: true,
                   unit: true,
                   formula: true,
                   declaredQuantity: true,
@@ -173,6 +174,8 @@ export async function buildProjectContext(
                   validatedQuantity: true,
                   provenance: true,
                   role: true,
+                  nature: true,
+                  notes: true,
                 },
               },
             }
@@ -482,23 +485,44 @@ export async function buildProjectContext(
         hypothesisId:
           "hypothesisId" in p ? (p.hypothesisId as string | null) : null,
       })),
-      lines: lines.map((l) => ({
-        id: l.id,
-        code: l.code,
-        lot: l.lot,
-        designation: l.designation,
-        unit: l.unit,
-        formula: l.formula,
-        declaredQuantity: numOrNull(l.declaredQuantity),
-        computedQuantity: numOrNull(l.computedQuantity),
-        validatedQuantity: numOrNull(l.validatedQuantity),
-        provenance: l.provenance,
-        provenanceKind: mapProvenanceKind({
-          provenance: l.provenance,
-          formula: l.formula,
-        }),
-        role: l.role,
-      })),
+      lines: lines.map((l) => {
+        const row = l as {
+          id: string;
+          code: string;
+          lot: string;
+          designation: string;
+          description?: string | null;
+          unit: string;
+          formula: string | null;
+          declaredQuantity: unknown;
+          computedQuantity: unknown;
+          validatedQuantity: unknown;
+          provenance: string | null;
+          role: string;
+          nature?: string | null;
+          notes?: string | null;
+        };
+        return {
+          id: row.id,
+          code: row.code,
+          lot: row.lot,
+          designation: row.designation,
+          description: row.description ?? null,
+          unit: row.unit,
+          formula: row.formula,
+          declaredQuantity: numOrNull(row.declaredQuantity),
+          computedQuantity: numOrNull(row.computedQuantity),
+          validatedQuantity: numOrNull(row.validatedQuantity),
+          provenance: row.provenance,
+          provenanceKind: mapProvenanceKind({
+            provenance: row.provenance,
+            formula: row.formula,
+          }),
+          role: row.role,
+          nature: row.nature ?? null,
+          notes: row.notes ?? null,
+        };
+      }),
       updatedAt: study.updatedAt.toISOString(),
     };
   });

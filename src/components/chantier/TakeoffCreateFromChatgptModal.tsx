@@ -52,6 +52,7 @@ export function TakeoffCreateFromChatgptModal({
   const [summary, setSummary] = useState<ProvenanceSummary | null>(null);
   const [allowDuplicate, setAllowDuplicate] = useState(false);
   const [mode, setMode] = useState<InteractionMode>("CREATE");
+  const [errorPhase, setErrorPhase] = useState<"preview" | "commit" | null>(null);
   const [modifyMeta, setModifyMeta] = useState<{
     studyId: string;
     version: number;
@@ -112,6 +113,7 @@ export function TakeoffCreateFromChatgptModal({
   async function runPreview() {
     setBusy(true);
     setError(null);
+    setErrorPhase(null);
     setErrorIssues([]);
     setShowIssueDetails(false);
     setPreview(null);
@@ -166,6 +168,7 @@ export function TakeoffCreateFromChatgptModal({
       setSourcesFingerprint(data.sourcesFingerprint ?? fp);
       setStep("preview");
     } catch (e) {
+      setErrorPhase("preview");
       setError(e instanceof Error ? e.message : "Erreur");
     } finally {
       setBusy(false);
@@ -176,6 +179,7 @@ export function TakeoffCreateFromChatgptModal({
     if (!preview || !sourcesFingerprint) return;
     setBusy(true);
     setError(null);
+    setErrorPhase(null);
     try {
       const res = await fetch(`/api/projets/${projectId}/takeoff-create/commit`, {
         method: "POST",
@@ -191,16 +195,26 @@ export function TakeoffCreateFromChatgptModal({
       if (data?.code === "PREVIEW_STALE") {
         setSourcesFingerprint(data.sourcesFingerprint ?? null);
         setStep("json");
+        setErrorPhase("commit");
         throw new Error(data.error);
+      }
+      if (data?.code === "STUDY_ALREADY_EXISTS" && data?.studyId) {
+        setErrorPhase("commit");
+        throw new Error(
+          data.error ??
+            "Un métré existe déjà — ouvrez-le pour « Modifier avec ChatGPT ».",
+        );
       }
       if (!res.ok || !data?.ok) {
         if (res.status === 409 && !allowDuplicate) {
           setAllowDuplicate(true);
+          setErrorPhase("commit");
           throw new Error(
             data?.error ??
               "Ce JSON a déjà été importé. Cochez pour forcer une copie, ou annulez.",
           );
         }
+        setErrorPhase("commit");
         throw new Error(data?.error ?? "Création impossible");
       }
       const studyId = data.studyId as string;
@@ -209,6 +223,7 @@ export function TakeoffCreateFromChatgptModal({
       router.push(`/dashboard/visites-metres/etudes/${studyId}`);
       router.refresh();
     } catch (e) {
+      setErrorPhase((prev) => prev ?? "commit");
       setError(e instanceof Error ? e.message : "Erreur");
     } finally {
       setBusy(false);
@@ -275,7 +290,11 @@ export function TakeoffCreateFromChatgptModal({
           ) : null}
           {error ? (
             <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800">
-              <p className="font-semibold">Prévisualisation impossible</p>
+              <p className="font-semibold">
+                {errorPhase === "commit"
+                  ? "Création du métré impossible"
+                  : "Prévisualisation impossible"}
+              </p>
               {errorIssues.length > 0 ? (
                 <>
                   <ul className="mt-2 list-none space-y-2">

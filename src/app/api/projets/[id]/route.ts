@@ -3,9 +3,6 @@ import { getServerSession } from "next-auth";
 import type { ChantierStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { canDeleteChantierProject } from "@/lib/chantier-dossier/access";
-import { deleteChantierProjectStorage } from "@/lib/chantier-dossier/delete-project-storage";
-import { createServiceRoleClient } from "@/lib/supabase";
 import { isAgencyOrManager, isBeworkStaff } from "@/lib/authz";
 import { projectLifecycleWrite } from "@/lib/chantier-lifecycle";
 
@@ -117,9 +114,12 @@ export async function PATCH(
   }
 }
 
-/** DELETE — Supprimer un chantier et son classeur (confirmation côté client). */
+/**
+ * DELETE — suppression définitive uniquement (chantier déjà archivé, sans lock commercial).
+ * Préférer POST /api/projets/[id]/archive { action: "archive" } pour le soft-delete.
+ */
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
@@ -128,38 +128,32 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  const project = await prisma.project.findUnique({
-    where: { id },
-    select: { id: true, title: true, clientId: true },
+  const body = (await request.json().catch(() => ({}))) as {
+    confirmation?: string;
+  };
+
+  const { hardDeleteProject } = await import("@/lib/chantier/project-archive");
+  const result = await hardDeleteProject({
+    projectId: id,
+    user: { id: session.user.id, role: session.user.role },
+    confirmation: body.confirmation ?? "SUPPRIMER",
   });
-  if (!project) {
-    return NextResponse.json({ error: "Chantier introuvable" }, { status: 404 });
+
+  if (!result.ok) {
+    const status =
+      result.code === "NOT_FOUND"
+        ? 404
+        : result.code === "FORBIDDEN"
+          ? 403
+          : result.code === "COMMERCIAL_LOCK"
+            ? 409
+            : 400;
+    return NextResponse.json({ error: result.error, code: result.code }, { status });
   }
 
-  if (!canDeleteChantierProject(session.user, project)) {
-    return NextResponse.json(
-      { error: "Vous n’avez pas l’autorisation de supprimer ce chantier." },
-      { status: 403 },
-    );
-  }
-
-  const supabase = createServiceRoleClient();
-  if (supabase) {
-    try {
-      await deleteChantierProjectStorage(supabase, id);
-    } catch (e) {
-      console.error("deleteChantierProjectStorage:", e);
-    }
-  }
-
-  try {
-    await prisma.project.delete({ where: { id } });
-    return NextResponse.json({ ok: true });
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json(
-      { error: "Erreur lors de la suppression du chantier." },
-      { status: 500 },
-    );
-  }
+  return NextResponse.json({
+    ok: true,
+    projectId: result.projectId,
+    title: result.title,
+  });
 }

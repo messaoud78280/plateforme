@@ -41,8 +41,11 @@ export default async function ProjetsPage({
   const params = await searchParams;
   const search = (params.recherche ?? "").trim();
   const statusFilter = params.statut;
+  const showArchives = statusFilter === "ARCHIVES";
   const validChantierStatus: ChantierStatus | undefined =
-    statusFilter && CHANTIER_STATUSES.includes(statusFilter as ChantierStatus)
+    !showArchives &&
+    statusFilter &&
+    CHANTIER_STATUSES.includes(statusFilter as ChantierStatus)
       ? (statusFilter as ChantierStatus)
       : undefined;
 
@@ -63,6 +66,7 @@ export default async function ProjetsPage({
       whereProject,
       search: search || undefined,
       statusFilter: validChantierStatus,
+      archiveFilter: showArchives ? "archived" : "active",
     }),
     staff
       ? prisma.user.findMany({
@@ -136,7 +140,7 @@ export default async function ProjetsPage({
       <ChantiersPortfolioList
         rows={rows}
         initialSearch={search}
-        initialStatus={validChantierStatus ?? ""}
+        initialStatus={showArchives ? "ARCHIVES" : validChantierStatus ?? ""}
         canCreate={staff || session.user.role === "CLIENT"}
       />
     </div>

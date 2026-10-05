@@ -106,7 +106,7 @@ export default async function PlanningPage() {
   const projectWhere = staff ? {} : await projectWhereForClientUser(session.user.id);
 
   const projectRows = await prisma.project.findMany({
-    where: projectWhere,
+    where: { ...projectWhere, archivedAt: null },
     select: {
       id: true,
       title: true,

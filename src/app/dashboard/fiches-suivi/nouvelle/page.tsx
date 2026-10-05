@@ -23,9 +23,12 @@ export default async function NouvelleFichePage({
 
   const ownerUserId = await resolveFollowUpOwnerUserId(session.user.id);
   const projects = await prisma.project.findMany({
-    where: isBeworkStaff(session.user)
-      ? {}
-      : await projectWhereForClientUser(session.user.id),
+    where: {
+      archivedAt: null,
+      ...(isBeworkStaff(session.user)
+        ? {}
+        : await projectWhereForClientUser(session.user.id)),
+    },
     select: {
       id: true,
       title: true,

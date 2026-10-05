@@ -921,6 +921,9 @@ model Project {
   plannedStartDate  DateTime?  @db.Date
   plannedEndDate    DateTime?  @db.Date
   chantierStatus    ChantierStatus @default(ETUDE)
+  /// Soft-archive — retiré des listes actives, dossier conservé.
+  archivedAt    DateTime?
+  archivedById  String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -961,6 +964,8 @@ model Project {
   beworkUniversalPatches BeworkUniversalPatch[]
 
   @@index([organizationId])
+  @@index([archivedAt])
+  @@index([organizationId, archivedAt])
 }
 
 // Statut métier du chantier (pilotage conducteur de travaux)

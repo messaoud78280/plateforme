@@ -42,7 +42,7 @@ export default async function NouveauPilotagePage({
 
   const [projects, staffUsers] = await Promise.all([
     prisma.project.findMany({
-      where: projectWhere,
+      where: { ...projectWhere, archivedAt: null },
       include: { client: { select: { name: true, company: true } } },
       orderBy: { title: "asc" },
       take: 300,

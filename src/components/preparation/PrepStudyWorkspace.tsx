@@ -10,6 +10,7 @@ import {
 } from "@/components/chantier/ChantierHierarchyNav";
 import { ChantierDossierNavHost } from "@/components/chantier/ChantierDossierNavHost";
 import { PrepPlanSourceActions } from "@/components/preparation/PrepPlanSourceActions";
+import { DownloadProjectPdfButton } from "@/components/chantier/pdf/DownloadProjectPdfButton";
 import type { PrepStudyView } from "@/lib/preparation/service";
 import {
   computeStudy,
@@ -582,6 +583,13 @@ export function PrepStudyWorkspace({
             onApplied={() => {
               window.location.reload();
             }}
+          />
+          <DownloadProjectPdfButton
+            projectId={study.project.id}
+            section="TAKEOFF"
+            entityId={study.id}
+            label="Télécharger PDF"
+            className="!rounded-full !px-4 !py-2 !text-[13px] !font-medium !shadow-none"
           />
           <button
             type="button"

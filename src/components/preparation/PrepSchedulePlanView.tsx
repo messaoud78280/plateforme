@@ -28,6 +28,7 @@ import { TruncatedTextWithPopover } from "./TruncatedTextWithPopover";
 import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
 import { getSectionCapability } from "@/lib/bework-patch/capability";
 import { buildPlanningDetailState } from "@/lib/chantier/planning-detail-state";
+import { DownloadProjectPdfButton } from "@/components/chantier/pdf/DownloadProjectPdfButton";
 
 function asIso(d: string | null): string {
   if (!d) return "—";
@@ -420,6 +421,14 @@ export function PrepSchedulePlanView({
                       Lier un devis
                     </button>
                   )}
+                  <DownloadProjectPdfButton
+                    projectId={plan.project.id}
+                    section="PLANNING"
+                    entityId={plan.id}
+                    label="Télécharger PDF"
+                    variant="menu"
+                    className="!px-3 !py-2 !text-[13px] !text-slate-700"
+                  />
                   <Link
                     role="menuitem"
                     href={`/dashboard/visites-metres/etudes/${studyId}`}

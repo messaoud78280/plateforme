@@ -105,7 +105,7 @@ export default async function DevisListPage({
       take: 100,
     }),
     prisma.project.findMany({
-      where: { organizationId: orgId },
+      where: { organizationId: orgId, archivedAt: null },
       select: { id: true, title: true },
       orderBy: { updatedAt: "desc" },
       take: 60,

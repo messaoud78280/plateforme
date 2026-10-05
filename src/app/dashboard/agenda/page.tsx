@@ -31,7 +31,7 @@ export default async function AgendaPage() {
 
   const [projects, teamUsers] = await Promise.all([
     prisma.project.findMany({
-      where: projectWhere,
+      where: { ...projectWhere, archivedAt: null },
       select: { id: true, title: true },
       orderBy: { title: "asc" },
       take: 200,

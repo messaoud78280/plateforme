@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { ChantierStatus } from "@prisma/client";
 import { DeleteChantierButton } from "@/components/chantier/DeleteChantierButton";
 import { ProjectSignatureCompact } from "@/components/chantier/project-signature/ProjectSignatureCompact";
+import { HeaderDropdown } from "@/components/ui/HeaderDropdown";
 import type {
   PortfolioModuleSnapshot,
   PortfolioProjectRow,
@@ -104,64 +105,101 @@ function moduleDot(state: PortfolioModuleSnapshot["state"]) {
 }
 
 function RowMenu({ row }: { row: PortfolioProjectRow }) {
-  const [open, setOpen] = useState(false);
+  const itemClass =
+    "block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50";
   return (
-    <div className="relative" onClick={(e) => e.stopPropagation()}>
-      <button
-        type="button"
-        className="rounded-lg px-2 py-1 text-sm text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-        aria-label={`Actions ${row.title}`}
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        •••
-      </button>
-      {open ? (
-        <>
+    <div onClick={(e) => e.stopPropagation()}>
+      <HeaderDropdown
+        align="right"
+        width={220}
+        zIndex={80}
+        panelClassName="overflow-hidden rounded-xl border border-slate-200/80 bg-white py-1 shadow-[0_10px_28px_rgba(15,23,42,0.12)]"
+        panelId={`portfolio-row-menu-${row.id}`}
+        trigger={({ onClick, expanded, triggerRef }) => (
           <button
+            ref={triggerRef}
             type="button"
-            className="fixed inset-0 z-10 cursor-default"
-            aria-label="Fermer"
-            onClick={() => setOpen(false)}
-          />
-          <div className="absolute right-0 z-20 mt-1 w-52 overflow-hidden rounded-xl border border-slate-200/80 bg-white py-1 shadow-[0_10px_28px_rgba(15,23,42,0.12)]">
-            <Link href={row.href} className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50">
-              Ouvrir
-            </Link>
+            className="rounded-lg px-2 py-1 text-sm text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            aria-label={`Actions ${row.title}`}
+            aria-haspopup="menu"
+            aria-expanded={expanded}
+            aria-controls={`portfolio-row-menu-${row.id}`}
+            onClick={onClick}
+          >
+            •••
+          </button>
+        )}
+      >
+        <Link href={row.href} role="menuitem" className={itemClass}>
+          Ouvrir
+        </Link>
+        {row.isArchived ? (
+          <>
+            {row.canDelete ? (
+              <>
+                <div className="px-1 py-0.5">
+                  <DeleteChantierButton
+                    projectId={row.id}
+                    projectTitle={row.title}
+                    mode="restore"
+                    label="Restaurer"
+                    className="!block !w-full !rounded-md !px-3 !py-2 !text-left !text-sm !font-normal !text-slate-800 hover:!bg-slate-50"
+                  />
+                </div>
+                <div className="my-1 border-t border-slate-100" />
+                <div className="px-1 py-0.5">
+                  <DeleteChantierButton
+                    projectId={row.id}
+                    projectTitle={row.title}
+                    mode="hard-delete"
+                    label="Supprimer définitivement"
+                    redirectTo="/dashboard/projets?statut=ARCHIVES"
+                    className="!block !w-full !rounded-md !px-3 !py-2 !text-left !text-sm !font-normal !text-rose-700/90 hover:!bg-rose-50"
+                  />
+                </div>
+              </>
+            ) : null}
+          </>
+        ) : (
+          <>
             <Link
               href={`/dashboard/messagerie?view=chantiers&project=${row.id}`}
-              className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
+              role="menuitem"
+              className={itemClass}
             >
               Message équipe
             </Link>
             <Link
               href={`/dashboard/agenda?project=${row.id}`}
-              className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
+              role="menuitem"
+              className={itemClass}
             >
               Agenda
             </Link>
             <Link
               href={`/dashboard/projets/${row.id}?tab=documents`}
-              className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
+              role="menuitem"
+              className={itemClass}
             >
               Documents
             </Link>
             {row.canDelete ? (
               <>
                 <div className="my-1 border-t border-slate-100" />
-                <div className="px-2 py-1">
+                <div className="px-1 py-0.5">
                   <DeleteChantierButton
                     projectId={row.id}
                     projectTitle={row.title}
-                    label="Supprimer définitivement"
-                    className="!w-full !justify-start !rounded-md !border-0 !bg-transparent !px-2 !py-2 !text-left !text-sm !font-normal !text-red-600 hover:!bg-red-50"
+                    mode="archive"
+                    label="Supprimer le chantier"
+                    className="!block !w-full !rounded-md !px-3 !py-2 !text-left !text-sm !font-normal !text-rose-700/85 hover:!bg-rose-50"
                   />
                 </div>
               </>
             ) : null}
-          </div>
-        </>
-      ) : null}
+          </>
+        )}
+      </HeaderDropdown>
     </div>
   );
 }
@@ -405,7 +443,9 @@ export function ChantiersPortfolioList({
 
   const filtered = useMemo(() => {
     let list = [...rows];
-    if (status) list = list.filter((r) => r.chantierStatus === status);
+    if (status && status !== "ARCHIVES") {
+      list = list.filter((r) => r.chantierStatus === status);
+    }
     if (attentionOnly) {
       list = list.filter(
         (r) =>
@@ -482,16 +522,25 @@ export function ChantiersPortfolioList({
 
           <select
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onChange={(e) => {
+              const next = e.target.value;
+              setStatus(next);
+              const params = new URLSearchParams();
+              if (debouncedQ) params.set("recherche", debouncedQ);
+              if (next) params.set("statut", next);
+              const qs = params.toString();
+              router.replace(qs ? `/dashboard/projets?${qs}` : "/dashboard/projets");
+            }}
             className={selectClass}
             aria-label="Filtrer par statut"
           >
             <option value="">Statut : Tous</option>
+            <option value="EN_ATTENTE">En préparation</option>
             <option value="EN_COURS">En réalisation</option>
             <option value="ETUDE">Étude</option>
-            <option value="EN_ATTENTE">En préparation</option>
             <option value="RECEPTION">Réception</option>
-            <option value="TERMINE">Terminé</option>
+            <option value="TERMINE">Terminés</option>
+            <option value="ARCHIVES">Archivés</option>
           </select>
 
           <select

@@ -25,7 +25,6 @@ import { projectMessageVisibilityWhere } from "@/lib/messaging/access";
 import { isSharedVisibility, userHasProjectScope } from "@/lib/equipe-acces/project-access";
 import { canManageEquipe, isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import { ProjectMissionsSection, type ChantierMissionRow } from "@/components/projects/ProjectMissionsSection";
-import { DeleteChantierButton } from "@/components/chantier/DeleteChantierButton";
 import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
 import {
   syncProjectMissionDocuments,
@@ -34,10 +33,10 @@ import {
 import { ChantierOrphanMissionBanner } from "@/components/chantier/ChantierOrphanMissionBanner";
 import { ChantierStatusSelect } from "@/components/chantier/ChantierStatusSelect";
 import { TaskStatus } from "@prisma/client";
-import { ProjectMessagerieLinks } from "@/components/messagerie/MessagerieContextLinks";
 import {
   chantierStatusDisplayLabel,
 } from "@/lib/chantier/cockpit-ops";
+import { ProjectSignatureOverflowMenu } from "@/components/chantier/project-signature/ProjectSignatureOverflowMenu";
 import {
   ChantierOpsOverviewDeferred,
   ChantierOpsOverviewSkeleton,
@@ -817,44 +816,20 @@ export default async function ProjetDetailPage({
         }
         agendaHref={`/dashboard/agenda?projectId=${encodeURIComponent(id)}`}
         overflowSlot={
-          <details className="relative">
-            <summary>•••</summary>
-            <div className="absolute right-0 z-20 mt-1 min-w-[200px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
-              {!isExternalViewer && isStaff ? (
-                <Link
-                  href="/dashboard/a-traiter"
-                  className="block px-3.5 py-2 text-sm text-slate-800 hover:bg-slate-50"
-                >
-                  À traiter
-                </Link>
-              ) : null}
-              {!isExternalViewer ? (
-                <div className="border-b border-slate-100 px-2 py-2">
-                  <ProjectMessagerieLinks projectId={project.id} />
-                </div>
-              ) : null}
-              {missingCount > 0 ? (
-                <Link
-                  href={`/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`}
-                  className="block px-3.5 py-2 text-sm text-red-700 hover:bg-red-50"
-                >
-                  {missingCount} pièce{missingCount > 1 ? "s" : ""} manquante
-                  {missingCount > 1 ? "s" : ""}
-                </Link>
-              ) : null}
-              {canDeleteChantier ? (
-                <div className="px-2 py-1">
-                  <DeleteChantierButton
-                    projectId={id}
-                    projectTitle={project.title}
-                    redirectTo="/dashboard/projets"
-                    label="Supprimer le chantier"
-                    className="w-full px-2 py-2 text-left text-sm"
-                  />
-                </div>
-              ) : null}
-            </div>
-          </details>
+          <ProjectSignatureOverflowMenu
+            projectId={id}
+            projectTitle={project.title}
+            showATraiter={!isExternalViewer && isStaff}
+            showMessagerie={!isExternalViewer}
+            missingCount={missingCount}
+            canDelete={canDeleteChantier}
+            isArchived={Boolean(project.archivedAt)}
+            pdfExportHref={
+              !isExternalViewer
+                ? `/api/projets/${id}/export-pdf?section=DOSSIER`
+                : null
+            }
+          />
         }
       />
 

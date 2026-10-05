@@ -9,6 +9,10 @@ import { loadPurchaseOrderAttention } from "@/lib/purchase-orders/attention/batc
 import { displayUserRoleLabel } from "@/lib/equipe-acces/display-role";
 import { CHANTIER_STATUS_LABELS } from "@/lib/chantier-dossier/constants";
 import { canDeleteChantierProject } from "@/lib/chantier-dossier/access";
+import {
+  activeProjectWhere,
+  archivedProjectWhere,
+} from "@/lib/chantier/project-archive";
 import { withPerfLog } from "@/lib/perf/server-timing";
 import {
   isSameDeliveryAsAgendaEvent,
@@ -96,7 +100,13 @@ export type PortfolioProjectRow = {
    */
   lastActivityAt: string;
   updatedAt: string;
+  /** Soft-archive (archivedAt). */
+  isArchived: boolean;
+  archivedAt: string | null;
   canDelete: boolean;
+  /** Suppression définitive possible (archivé + pas de lock commercial). */
+  canHardDelete: boolean;
+  commercialLock: boolean;
   href: string;
   /** Score tri Attention */
   attentionScore: number;
@@ -205,6 +215,8 @@ export async function loadProjectsPortfolio(opts: {
   whereProject: Record<string, unknown>;
   search?: string;
   statusFilter?: ChantierStatus;
+  /** active (défaut) | archived | all */
+  archiveFilter?: "active" | "archived" | "all";
   take?: number;
 }): Promise<ProjectsPortfolioResult> {
   return withPerfLog("loadProjectsPortfolio", async () => {
@@ -212,9 +224,16 @@ export async function loadProjectsPortfolio(opts: {
     const search = (opts.search ?? "").trim();
     const day0 = startOfDay(new Date());
     const soon = addDays(day0, 21);
+    const archiveClause =
+      opts.archiveFilter === "archived"
+        ? archivedProjectWhere()
+        : opts.archiveFilter === "all"
+          ? {}
+          : activeProjectWhere();
 
     const where = {
       ...opts.whereProject,
+      ...archiveClause,
       ...(opts.statusFilter ? { chantierStatus: opts.statusFilter } : {}),
       ...(search
         ? {
@@ -265,13 +284,13 @@ export async function loadProjectsPortfolio(opts: {
       prisma.project.groupBy({
         by: ["chantierStatus"],
         _count: true,
-        where: opts.whereProject,
+        where: { ...opts.whereProject, ...activeProjectWhere() },
       }),
       prisma.chantierFile.count({
         where: {
           status: { in: ["MANQUANT", "A_RELANCER"] },
           deletedAt: null,
-          project: opts.whereProject,
+          project: { ...opts.whereProject, ...activeProjectWhere() },
         },
       }),
     ]);
@@ -935,7 +954,12 @@ export async function loadProjectsPortfolio(opts: {
         nextAction: preparation.nextAction,
         lastActivityAt: lastAct.toISOString(),
         updatedAt: p.updatedAt.toISOString(),
+        isArchived: Boolean(p.archivedAt),
+        archivedAt: p.archivedAt ? p.archivedAt.toISOString() : null,
         canDelete: canDeleteChantierProject(opts.user, p),
+        /** Bouton visible si archivé ; le lock commercial est vérifié à l’API. */
+        canHardDelete: Boolean(p.archivedAt) && canDeleteChantierProject(opts.user, p),
+        commercialLock: false,
         href: `/dashboard/projets/${p.id}`,
         attentionScore,
       };

@@ -1,7 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ArchiveChantierModal } from "@/components/chantier/ArchiveChantierModal";
+import { cn } from "@/lib/cn";
+
+type Mode = "archive" | "restore" | "hard-delete";
 
 type Props = {
   projectId: string;
@@ -9,62 +12,62 @@ type Props = {
   redirectTo?: string;
   label?: string;
   className?: string;
+  /** archive (défaut) | restore | hard-delete */
+  mode?: Mode;
+  commercialLock?: boolean;
+  commercialReasons?: string[];
 };
 
+/**
+ * Action chantier — soft-archive par défaut (plus de DELETE brut via window.confirm).
+ */
 export function DeleteChantierButton({
   projectId,
   projectTitle,
   redirectTo,
-  label = "Supprimer",
+  label,
   className = "",
+  mode = "archive",
+  commercialLock = false,
+  commercialReasons = [],
 }: Props) {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [open, setOpen] = useState(false);
 
-  async function handleDelete(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (loading) return;
-
-    const ok = window.confirm(
-      `Supprimer le chantier « ${projectTitle} » ?\n\nTout le classeur (documents, rubriques, pièces) sera effacé définitivement. Les missions liées au chantier resteront mais ne seront plus rattachées à ce dossier.`
-    );
-    if (!ok) return;
-
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/projets/${projectId}`, { method: "DELETE" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError((data as { error?: string }).error ?? "Impossible de supprimer ce chantier.");
-        return;
-      }
-      if (redirectTo) {
-        router.push(redirectTo);
-        router.refresh();
-      } else {
-        router.refresh();
-      }
-    } catch {
-      setError("Erreur réseau.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const defaultLabel =
+    mode === "archive"
+      ? "Supprimer le chantier"
+      : mode === "restore"
+        ? "Restaurer"
+        : "Supprimer définitivement";
 
   return (
-    <span className="inline-flex flex-col items-end gap-1">
+    <>
       <button
         type="button"
-        onClick={handleDelete}
-        disabled={loading}
-        className={`rounded-md border border-red-200 bg-white px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50 ${className}`}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen(true);
+        }}
+        className={cn(
+          mode === "restore"
+            ? "text-sm text-slate-800 hover:bg-slate-50"
+            : "text-sm text-rose-700/90 hover:bg-rose-50",
+          className,
+        )}
       >
-        {loading ? "Suppression…" : label}
+        {label ?? defaultLabel}
       </button>
-      {error ? <span className="max-w-[14rem] text-right text-[11px] text-red-600">{error}</span> : null}
-    </span>
+      <ArchiveChantierModal
+        projectId={projectId}
+        projectTitle={projectTitle}
+        mode={mode}
+        open={open}
+        onClose={() => setOpen(false)}
+        redirectTo={redirectTo}
+        commercialLock={commercialLock}
+        commercialReasons={commercialReasons}
+      />
+    </>
   );
 }

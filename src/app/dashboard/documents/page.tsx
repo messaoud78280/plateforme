@@ -284,7 +284,7 @@ export default async function DocumentsPage({
         since: since || undefined,
       }),
       prisma.project.findMany({
-        where: projectWhere,
+        where: { ...projectWhere, archivedAt: null },
         select: { id: true, title: true },
         orderBy: { updatedAt: "desc" },
         take: 80,

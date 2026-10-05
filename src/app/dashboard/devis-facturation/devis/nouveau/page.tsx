@@ -51,7 +51,7 @@ export default async function NouveauDevisPage() {
       take: 200,
     }),
     prisma.project.findMany({
-      where: { organizationId: orgId },
+      where: { organizationId: orgId, archivedAt: null },
       select: { id: true, title: true, siteAddress: true, siteCity: true },
       orderBy: { updatedAt: "desc" },
       take: 80,

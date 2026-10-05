@@ -24,8 +24,12 @@ export function generateFollowUpPdf(input: {
   nextActions?: string[];
 }): Uint8Array {
   const doc = createDoc("portrait", "a4");
-  drawDocHeader(doc, "SUIVI CHANTIER", metaSubtitle(input.meta));
-  let y = 30;
+  const headerBottom = drawDocHeader(
+    doc,
+    "SUIVI CHANTIER",
+    metaSubtitle(input.meta),
+  );
+  let y = headerBottom + 8;
   y = kv(doc, y, "Chantier", input.meta.projectTitle);
   y = kv(doc, y, "Fiche", input.sheetTitle);
   y = kv(doc, y, "Client", input.meta.clientLabel);

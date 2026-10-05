@@ -25,18 +25,25 @@ export function ensureSpace(doc: jsPDF, y: number, need: number, margin = 16): n
   return y;
 }
 
-export function drawDocHeader(doc: jsPDF, title: string, subtitle: string) {
+export function drawDocHeader(doc: jsPDF, title: string, subtitle: string): number {
   const w = doc.internal.pageSize.getWidth();
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  const subLines = (
+    doc.splitTextToSize(pdfSafe(subtitle), w - 28) as string[]
+  ).slice(0, 2);
+  const headerH = subLines.length > 1 ? 26 : 22;
   doc.setFillColor(...DEFAULT_BRAND);
-  doc.rect(0, 0, w, 22, "F");
+  doc.rect(0, 0, w, headerH, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
   doc.text(pdfSafe(title), 14, 10);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text(pdfSafe(subtitle), 14, 17);
+  doc.text(subLines, 14, 17);
   doc.setTextColor(...INK);
+  return headerH;
 }
 
 export function drawDocFooter(doc: jsPDF, ref: string) {
@@ -49,8 +56,11 @@ export function drawDocFooter(doc: jsPDF, ref: string) {
     doc.line(14, h - 10, w - 14, h - 10);
     doc.setFontSize(8);
     doc.setTextColor(...MUTED);
-    doc.text(pdfSafe(ref), 14, h - 6);
-    doc.text(`${i} / ${pageCount}`, w - 14, h - 6, { align: "right" });
+    const pageLabel = `${i} / ${pageCount}`;
+    const maxRefW = w - 40;
+    const refLines = doc.splitTextToSize(pdfSafe(ref), maxRefW) as string[];
+    doc.text(refLines[0] ?? "", 14, h - 6);
+    doc.text(pageLabel, w - 14, h - 6, { align: "right" });
   }
 }
 

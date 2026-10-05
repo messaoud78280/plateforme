@@ -40,8 +40,12 @@ export function generatePlanningPdf(input: {
   alerts?: string[];
 }): Uint8Array {
   const doc = createDoc("landscape", "a3");
-  drawDocHeader(doc, "PLANNING CHANTIER", metaSubtitle(input.meta));
-  let y = 28;
+  const headerBottom = drawDocHeader(
+    doc,
+    "PLANNING CHANTIER",
+    metaSubtitle(input.meta),
+  );
+  let y = headerBottom + 6;
   y = kv(doc, y, "Chantier", input.meta.projectTitle);
   y = kv(doc, y, "Client", input.meta.clientLabel);
   y = kv(
@@ -117,13 +121,12 @@ export function generatePlanningPdf(input: {
   for (let period = 0; period < pagePeriods; period++) {
     if (period > 0 || y > 60) {
       doc.addPage();
-      y = 16;
-      drawDocHeader(
+      const hb = drawDocHeader(
         doc,
         "PLANNING CHANTIER",
         `${metaSubtitle(input.meta)} · période ${period + 1}/${pagePeriods}`,
       );
-      y = 28;
+      y = hb + 6;
     }
 
     const periodStart = addDays(rangeStart, period * daysPerPage);
@@ -201,8 +204,12 @@ export function generatePlanningPdf(input: {
 
   // Tableau récapitulatif lisible
   doc.addPage();
-  drawDocHeader(doc, "PLANNING — DETAIL DES TACHES", metaSubtitle(input.meta));
-  y = 28;
+  const detailHeader = drawDocHeader(
+    doc,
+    "PLANNING — DETAIL DES TACHES",
+    metaSubtitle(input.meta),
+  );
+  y = detailHeader + 6;
   doc.setFillColor(...WASH_GRAY);
   doc.rect(12, y - 3.5, pageW - 24, 7, "F");
   doc.setFont("helvetica", "bold");

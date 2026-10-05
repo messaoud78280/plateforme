@@ -464,6 +464,17 @@ export async function commitUniversalPatch(input: {
         impact,
       };
     }
+    if (code === "STRUCTURAL_OPERATION_NOT_APPLIED") {
+      return {
+        ok: false,
+        error:
+          e instanceof Error
+            ? e.message
+            : "Les ajouts de lignes n’ont pas été enregistrés. Aucune donnée n’a été modifiée.",
+        code: "STRUCTURAL_OPERATION_NOT_APPLIED",
+        impact,
+      };
+    }
     if (code === "PREVIEW_STALE" || code === "VERSION_CONFLICT") {
       return {
         ok: false,
@@ -625,6 +636,15 @@ async function applyTakeoffDirectInTx(
     );
   }
 
+  const addLineOps = input.patch.operations.filter((op) => op.op === "add_line");
+  const updateLineOps = input.patch.operations.filter((op) => op.op === "update_line");
+  const deleteLineOps = input.patch.operations.filter((op) => op.op === "delete_line");
+  const hypothesisOps = input.patch.operations.filter(
+    (op) => op.op === "update_hypothesis",
+  );
+  const structuralRequested =
+    addLineOps.length + updateLineOps.length + deleteLineOps.length;
+
   const paramUpdates = new Map<string, number | null>();
   const isOverride =
     input.patch.change_intent === "TECHNICAL_OVERRIDE" &&
@@ -659,6 +679,245 @@ async function applyTakeoffDirectInTx(
     });
   }
 
+  // --- Lignes : état mutable en mémoire (existantes + créations) ---
+  type MutableLine = {
+    code: string;
+    lot: string;
+    designation: string;
+    description: string | null;
+    unit: string;
+    formula: string | null;
+    declaredQuantity: number | null;
+    provenance: string | null;
+    role: string;
+    nature: string | null;
+    notes: string | null;
+    sortOrder: number;
+    isNew: boolean;
+    deleted: boolean;
+  };
+
+  const lineMap = new Map<string, MutableLine>();
+  for (const l of study.lines) {
+    lineMap.set(l.code, {
+      code: l.code,
+      lot: l.lot,
+      designation: l.designation,
+      description: l.description,
+      unit: l.unit,
+      formula: l.formula,
+      declaredQuantity: l.declaredQuantity != null ? d(l.declaredQuantity) : null,
+      provenance: l.provenance,
+      role: l.role,
+      nature: l.nature,
+      notes: l.notes,
+      sortOrder: l.sortOrder,
+      isNew: false,
+      deleted: false,
+    });
+  }
+
+  let maxSort = study.lines.reduce((m, l) => Math.max(m, l.sortOrder), -1);
+  let addedCount = 0;
+  let updatedCount = 0;
+  let deletedCount = 0;
+
+  for (const op of deleteLineOps) {
+    const code = op.target.line_code ?? op.target.code ?? op.target.id;
+    if (!code) {
+      throw Object.assign(new Error("delete_line sans line_code"), {
+        code: "STRUCTURAL_OPERATION_NOT_APPLIED",
+      });
+    }
+    const existing = lineMap.get(code);
+    if (!existing || existing.deleted) {
+      throw Object.assign(new Error(`Ligne introuvable pour suppression : ${code}`), {
+        code: "STRUCTURAL_OPERATION_NOT_APPLIED",
+      });
+    }
+    existing.deleted = true;
+    deletedCount += 1;
+  }
+
+  for (const op of updateLineOps) {
+    const code = op.target.line_code ?? op.target.code ?? op.target.id;
+    if (!code) {
+      throw Object.assign(new Error("update_line sans line_code"), {
+        code: "STRUCTURAL_OPERATION_NOT_APPLIED",
+      });
+    }
+    const existing = lineMap.get(code);
+    if (!existing || existing.deleted) {
+      throw Object.assign(new Error(`Ligne introuvable pour mise à jour : ${code}`), {
+        code: "STRUCTURAL_OPERATION_NOT_APPLIED",
+      });
+    }
+    if (op.changes.designation !== undefined) existing.designation = op.changes.designation;
+    if (op.changes.description !== undefined) existing.description = op.changes.description;
+    if (op.changes.declared_quantity !== undefined) {
+      existing.declaredQuantity = op.changes.declared_quantity;
+    }
+    if (op.changes.unit !== undefined) existing.unit = op.changes.unit;
+    if (op.changes.lot !== undefined) existing.lot = op.changes.lot;
+    if (op.changes.notes !== undefined) existing.notes = op.changes.notes;
+    updatedCount += 1;
+  }
+
+  for (const op of addLineOps) {
+    const code = op.line.code.trim();
+    const existing = lineMap.get(code);
+    if (existing && !existing.deleted) {
+      throw Object.assign(new Error(`Ligne déjà présente : ${code}`), {
+        code: "STRUCTURAL_OPERATION_NOT_APPLIED",
+      });
+    }
+    let sortOrder = maxSort + 1;
+    if (op.insert_after_code) {
+      const after = lineMap.get(op.insert_after_code);
+      if (after && !after.deleted) {
+        sortOrder = after.sortOrder + 1;
+        for (const l of lineMap.values()) {
+          if (!l.deleted && l.sortOrder >= sortOrder) l.sortOrder += 1;
+        }
+      }
+    }
+    maxSort = Math.max(maxSort, sortOrder);
+    lineMap.set(code, {
+      code,
+      lot: op.line.lot,
+      designation: op.line.designation,
+      description: op.line.description ?? null,
+      unit: op.line.unit,
+      formula: op.line.formula ?? null,
+      declaredQuantity:
+        op.line.declared_quantity != null && Number.isFinite(op.line.declared_quantity)
+          ? op.line.declared_quantity
+          : null,
+      provenance: op.line.provenance ?? null,
+      role: op.line.role ?? "quote",
+      nature: op.line.nature ?? null,
+      notes: op.line.notes ?? null,
+      sortOrder,
+      isNew: true,
+      deleted: false,
+    });
+    addedCount += 1;
+  }
+
+  // Anti-faux succès : opérations structurantes demandées ≠ appliquées → rollback TX
+  if (addLineOps.length > 0 && addedCount !== addLineOps.length) {
+    throw Object.assign(
+      new Error(
+        `STRUCTURAL_OPERATION_NOT_APPLIED: ${addedCount}/${addLineOps.length} add_line persistées`,
+      ),
+      { code: "STRUCTURAL_OPERATION_NOT_APPLIED" },
+    );
+  }
+  if (updateLineOps.length > 0 && updatedCount !== updateLineOps.length) {
+    throw Object.assign(
+      new Error(
+        `STRUCTURAL_OPERATION_NOT_APPLIED: ${updatedCount}/${updateLineOps.length} update_line`,
+      ),
+      { code: "STRUCTURAL_OPERATION_NOT_APPLIED" },
+    );
+  }
+  if (deleteLineOps.length > 0 && deletedCount !== deleteLineOps.length) {
+    throw Object.assign(
+      new Error(
+        `STRUCTURAL_OPERATION_NOT_APPLIED: ${deletedCount}/${deleteLineOps.length} delete_line`,
+      ),
+      { code: "STRUCTURAL_OPERATION_NOT_APPLIED" },
+    );
+  }
+  if (structuralRequested > 0 && addedCount + updatedCount + deletedCount === 0) {
+    throw Object.assign(
+      new Error(
+        "STRUCTURAL_OPERATION_NOT_APPLIED: aucune opération structurante n’a été persistée",
+      ),
+      { code: "STRUCTURAL_OPERATION_NOT_APPLIED" },
+    );
+  }
+
+  // Persist deletes / updates / creates
+  for (const l of lineMap.values()) {
+    if (l.deleted && !l.isNew) {
+      await tx.prepTakeoffLine.delete({
+        where: { studyId_code: { studyId: study.id, code: l.code } },
+      });
+    }
+  }
+  for (const l of lineMap.values()) {
+    if (l.deleted) continue;
+    if (l.isNew) {
+      await tx.prepTakeoffLine.create({
+        data: {
+          studyId: study.id,
+          organizationId: input.orgId,
+          code: l.code,
+          lot: l.lot,
+          designation: l.designation,
+          description: l.description,
+          unit: l.unit,
+          formula: l.formula,
+          declaredQuantity: l.declaredQuantity,
+          provenance: l.provenance,
+          role: l.role,
+          nature: l.nature,
+          notes: l.notes,
+          sortOrder: l.sortOrder,
+          originalDesignation: l.designation,
+          originalDeclared: l.declaredQuantity,
+          originalProvenance: l.provenance,
+        },
+      });
+    } else if (
+      updateLineOps.some(
+        (op) => (op.target.line_code ?? op.target.code ?? op.target.id) === l.code,
+      )
+    ) {
+      await tx.prepTakeoffLine.update({
+        where: { studyId_code: { studyId: study.id, code: l.code } },
+        data: {
+          lot: l.lot,
+          designation: l.designation,
+          description: l.description,
+          unit: l.unit,
+          declaredQuantity: l.declaredQuantity,
+          notes: l.notes,
+          sortOrder: l.sortOrder,
+        },
+      });
+    } else if (addLineOps.length > 0 || deleteLineOps.length > 0) {
+      // Réordonner si insertions ont décalé sortOrder
+      await tx.prepTakeoffLine.update({
+        where: { studyId_code: { studyId: study.id, code: l.code } },
+        data: { sortOrder: l.sortOrder },
+      });
+    }
+  }
+
+  // Hypothèses (JSON étude)
+  let hypothesesJson: Prisma.InputJsonValue | typeof PrismaNS.DbNull | undefined;
+  if (hypothesisOps.length > 0) {
+    const raw = study.hypothesesJson;
+    const list = Array.isArray(raw) ? [...(raw as Array<Record<string, unknown>>)] : [];
+    for (const op of hypothesisOps) {
+      const id = op.target.id;
+      const idx = list.findIndex((h) => h && typeof h === "object" && h.id === id);
+      if (idx < 0) {
+        throw Object.assign(new Error(`Hypothèse introuvable : ${id}`), {
+          code: "STRUCTURAL_OPERATION_NOT_APPLIED",
+        });
+      }
+      const cur = { ...list[idx]! };
+      if (op.changes.statement !== undefined) cur.statement = op.changes.statement;
+      if (op.changes.reason !== undefined) cur.reason = op.changes.reason;
+      list[idx] = cur;
+    }
+    hypothesesJson = list as unknown as Prisma.InputJsonValue;
+  }
+
+  const activeLines = [...lineMap.values()].filter((l) => !l.deleted);
   const params = study.parameters.map((p) => ({
     key: p.key,
     value: paramUpdates.has(p.key)
@@ -669,16 +928,16 @@ async function applyTakeoffDirectInTx(
     formula: p.formula,
     provenance: null as null,
   }));
-  const lines = study.lines.map((l) => ({
+  const engineLines = activeLines.map((l) => ({
     code: l.code,
     formula: l.formula,
-    declaredQuantity: l.declaredQuantity != null ? d(l.declaredQuantity) : null,
+    declaredQuantity: l.declaredQuantity,
     provenance: null as null,
     literalProvenance: null as null,
   }));
-  const engine = computeStudy({ params, lines });
+  const engine = computeStudy({ params, lines: engineLines });
 
-  for (const l of study.lines) {
+  for (const l of activeLines) {
     const node = engine.nodes.get(l.code);
     await tx.prepTakeoffLine.update({
       where: { studyId_code: { studyId: study.id, code: l.code } },
@@ -689,26 +948,56 @@ async function applyTakeoffDirectInTx(
     });
   }
 
+  // Garde finale lecture DB : version +1 sans les add_line créés = invalide
+  if (addLineOps.length > 0) {
+    const dbCount = await tx.prepTakeoffLine.count({ where: { studyId: study.id } });
+    const expectedCount = study.lines.length - deletedCount + addedCount;
+    if (dbCount !== expectedCount) {
+      throw Object.assign(
+        new Error(
+          `STRUCTURAL_OPERATION_NOT_APPLIED: count DB=${dbCount}, attendu=${expectedCount}`,
+        ),
+        { code: "STRUCTURAL_OPERATION_NOT_APPLIED" },
+      );
+    }
+    for (const op of addLineOps) {
+      const row = await tx.prepTakeoffLine.findUnique({
+        where: { studyId_code: { studyId: study.id, code: op.line.code } },
+        select: { code: true },
+      });
+      if (!row) {
+        throw Object.assign(
+          new Error(`STRUCTURAL_OPERATION_NOT_APPLIED: ${op.line.code} absente après create`),
+          { code: "STRUCTURAL_OPERATION_NOT_APPLIED" },
+        );
+      }
+    }
+  }
+
   const nextVersion = study.version + 1;
   await tx.prepStudy.update({
     where: { id: study.id },
     data: {
       version: nextVersion,
       updatedById: input.userId,
+      ...(hypothesesJson !== undefined ? { hypothesesJson } : {}),
     },
   });
   await invalidateFinalValidationIfNeeded(tx, {
     studyId: study.id,
     organizationId: input.orgId,
     currentStatus: study.dossierStatus,
-    change: "patch_takeoff",
+    change:
+      structuralRequested > 0 || paramUpdates.size > 0
+        ? "patch_takeoff"
+        : "text_only",
     actorUserId: input.userId,
     versionBefore: study.version,
     versionAfter: nextVersion,
   });
 
   const qtyByCode = new Map<string, number | null>();
-  for (const l of study.lines) {
+  for (const l of activeLines) {
     qtyByCode.set(l.code, engine.nodes.get(l.code)?.value ?? null);
   }
   return { studyId: study.id, studyVersion: nextVersion, qtyByCode };

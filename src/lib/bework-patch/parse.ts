@@ -448,8 +448,8 @@ function parseOperation(
     }
     case "delete_line": {
       if (!requireTargetIds(target, `${path}.target`, ["study_id"], issues)) return null;
-      if (!target.line_code && !target.code && !target.id) {
-        issues.push(err("INVALID_TARGET", `${path}.target`, "line_code requis"));
+      if (!target.line_code && !target.code && !target.line_id && !target.id) {
+        issues.push(err("INVALID_TARGET", `${path}.target`, "line_code ou line_id requis"));
         return null;
       }
       return {

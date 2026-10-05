@@ -67,7 +67,7 @@ export const OPERATION_CATALOG: Record<
   delete_line: {
     entity_types: ["PREP_LINE"],
     sections: ["TAKEOFF"],
-    compatible_intents: ["TECHNICAL_CORRECTION", "ADMINISTRATIVE_UPDATE"],
+    compatible_intents: ["TECHNICAL_CORRECTION", "FIELD_UPDATE", "ADMINISTRATIVE_UPDATE"],
     allowed_change_fields: [],
   },
   update_hypothesis: {

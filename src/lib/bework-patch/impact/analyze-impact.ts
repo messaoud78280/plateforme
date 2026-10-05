@@ -289,8 +289,11 @@ function describeDirectOp(
   }
   if (op.op === "delete_line") {
     const code = op.target.line_code ?? op.target.code ?? null;
+    const lineId = op.target.line_id ?? op.target.id ?? null;
     const line = subgraph.study?.lines.find(
-      (l) => l.code === code || l.id === op.target.id,
+      (l) =>
+        (code != null && l.code === code) ||
+        (lineId != null && l.id === lineId),
     );
     return {
       op: op.op,

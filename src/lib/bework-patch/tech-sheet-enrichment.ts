@@ -115,9 +115,20 @@ export function isTechSheetIncomplete(line: {
  * - role quote (priorité) ou logistics
  * - indicator exclu par défaut
  */
-export function selectLinesForTechSheetEnrichment<T extends { role: string }>(
-  lines: T[],
-): T[] {
+export function selectLinesForTechSheetEnrichment<
+  T extends {
+    role: string;
+    includedServices?: unknown;
+    includedServicesJson?: unknown;
+    technicalReferences?: unknown;
+    technicalReferencesJson?: unknown;
+    executionNotes?: unknown;
+    qualityControls?: unknown;
+    qualityControlsJson?: unknown;
+    technicalReservations?: unknown;
+    technicalReservationsJson?: unknown;
+  },
+>(lines: T[]): T[] {
   return lines.filter((l) => {
     if (l.role === "indicator") return false;
     if (l.role !== "quote" && l.role !== "logistics") return false;

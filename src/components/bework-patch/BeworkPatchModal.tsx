@@ -29,11 +29,17 @@ import {
 } from "@/lib/bework-patch/ui-messages";
 import {
   countAddLines,
+  formatDisplayUnit,
+  formatFormulaDisplay,
+  formatQuantityWithUnit,
   isAddLineDirectChange,
+  natureLabel,
   parseAddLineAfter,
+  parseTechnicalNotes,
   provenanceBadgeLabel,
   roleBadgeLabel,
   summarizeAddLineLots,
+  summarizeAddLineStats,
   type AddLinePreviewPayload,
 } from "@/lib/bework-patch/add-line-preview";
 
@@ -111,11 +117,10 @@ function formatValue(v: unknown): string {
   }
   if (typeof v === "boolean") return v ? "Oui" : "Non";
   if (typeof v === "string") return v.trim() || "—";
-  try {
-    return JSON.stringify(v);
-  } catch {
-    return String(v);
-  }
+  // Jamais de JSON brut dans la preview métier
+  const line = parseAddLineAfter(v);
+  if (line) return `${line.code} · ${line.designation}`;
+  return "Détail structuré";
 }
 
 function consequenceLabel(d: DerivedChange): string {
@@ -178,6 +183,7 @@ export function BeworkPatchModal({
   const [showRawJson, setShowRawJson] = useState(false);
   const analyzingRef = useRef(false);
   const committingRef = useRef(false);
+  const [existingLineCount, setExistingLineCount] = useState<number | null>(null);
 
   const sectionLabel = sectionMetierLabel(section);
 
@@ -192,6 +198,7 @@ export function BeworkPatchModal({
     setTechDetail(null);
     setShowTech(false);
     setShowRawJson(false);
+    setExistingLineCount(null);
     analyzingRef.current = false;
     committingRef.current = false;
   }, []);
@@ -308,6 +315,11 @@ export function BeworkPatchModal({
       }
       setAnalysis(data.analysis as BeworkPatchAnalyzeResult);
       setCommitMeta((data.commit as CommitMeta) ?? null);
+      const existing =
+        typeof data?.meta?.existingLineCount === "number"
+          ? data.meta.existingLineCount
+          : null;
+      setExistingLineCount(existing);
       setStep("preview");
     } catch (e) {
       setUserError(
@@ -620,12 +632,22 @@ export function BeworkPatchModal({
                     {addLineCount} ligne
                     {addLineCount > 1 ? "s" : ""} seront ajoutées si vous
                     confirmez.
+                    {existingLineCount != null
+                      ? ` · ${existingLineCount} ligne${
+                          existingLineCount > 1 ? "s" : ""
+                        } existante${
+                          existingLineCount > 1 ? "s" : ""
+                        } conservée${existingLineCount > 1 ? "s" : ""}.`
+                      : ""}
                   </p>
                 ) : null}
               </div>
 
               {impact && addLineCount > 0 ? (
-                <AddLinesLotSummary changes={impact.directChanges} />
+                <AddLinesLotSummary
+                  changes={impact.directChanges}
+                  existingLineCount={existingLineCount}
+                />
               ) : null}
 
               <DirectChangesBlock
@@ -1072,17 +1094,35 @@ function PlanningPreviewSummary({
   );
 }
 
-function AddLinesLotSummary({ changes }: { changes: DirectChange[] }) {
+function AddLinesLotSummary({
+  changes,
+  existingLineCount,
+}: {
+  changes: DirectChange[];
+  existingLineCount: number | null;
+}) {
   const total = countAddLines(changes);
   const lots = summarizeAddLineLots(changes);
+  const stats = summarizeAddLineStats(changes);
   if (total === 0) return null;
   return (
     <section className="rounded-xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.03] p-3">
       <h4 className="text-sm font-semibold text-[#1e3a5f]">
         {total} ligne{total > 1 ? "s" : ""} à ajouter
+        {existingLineCount != null
+          ? ` · ${existingLineCount} existante${
+              existingLineCount > 1 ? "s" : ""
+            } conservée${existingLineCount > 1 ? "s" : ""}`
+          : ""}
       </h4>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        <SummaryChip label="Devis" value={stats.quote} />
+        <SummaryChip label="Indicateurs" value={stats.indicator} />
+        <SummaryChip label="Hypothèses" value={stats.hypothesis} />
+        <SummaryChip label="Calculées" value={stats.calculated} />
+      </div>
       {lots.length > 0 ? (
-        <div className="mt-2">
+        <div className="mt-3">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
             Répartition par lots
           </p>
@@ -1107,6 +1147,15 @@ function AddLinesLotSummary({ changes }: { changes: DirectChange[] }) {
   );
 }
 
+function SummaryChip({ label, value }: { label: string; value: number }) {
+  if (!value) return null;
+  return (
+    <span className="rounded-md bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
+      {label} : {value}
+    </span>
+  );
+}
+
 function AddLinePreviewCard({ change }: { change: DirectChange }) {
   const [open, setOpen] = useState(false);
   const line = parseAddLineAfter(change.after);
@@ -1117,77 +1166,82 @@ function AddLinePreviewCard({ change }: { change: DirectChange }) {
       </li>
     );
   }
+
+  const qty = formatQuantityWithUnit(line.declared_quantity, line.unit);
+  const formula = formatFormulaDisplay(line.formula);
+  const notes = parseTechnicalNotes(line.notes, {
+    formula: line.formula,
+    quantity: line.declared_quantity,
+    unit: line.unit,
+  });
+  const hasDetail =
+    Boolean(notes?.controls.length) ||
+    Boolean(notes?.reserves.length) ||
+    Boolean(notes?.other) ||
+    (!notes && Boolean(line.notes)) ||
+    Boolean(line.description && line.description.length > 180);
+
   return (
-    <li className="rounded-lg border border-emerald-100 bg-emerald-50/40 p-3">
+    <li className="rounded-xl border border-emerald-100 bg-white p-3 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-800">
             Ajout de ligne
           </p>
-          <p className="mt-0.5 text-sm font-semibold text-[#1e3a5f]">
-            {line.code}
-            <span className="font-normal text-slate-400"> · </span>
-            {line.lot}
+          <p className="mt-1 text-[11px] text-slate-500">
+            Avant : <span className="font-medium text-slate-700">Ligne inexistante</span>
           </p>
         </div>
         <AddLineBadges line={line} />
       </div>
-      <p className="mt-2 text-[15px] font-medium leading-snug text-slate-900">
-        {line.designation}
-      </p>
-      {line.description ? (
-        <p className="mt-1 line-clamp-2 text-[13px] text-slate-600">
-          {line.description}
-        </p>
-      ) : null}
-      <dl className="mt-2 grid gap-1.5 text-[13px] sm:grid-cols-2">
-        <div>
-          <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-            Quantité
-          </dt>
-          <dd className="font-semibold tabular-nums text-slate-800">
-            {line.declared_quantity != null
-              ? `${formatQtyFr(line.declared_quantity)} ${line.unit}`
-              : line.formula
-                ? `Formule · ${line.unit}`
-                : `— ${line.unit}`}
-          </dd>
+
+      <dl className="mt-3 grid gap-2.5 sm:grid-cols-2">
+        <Field label="Code" value={line.code} strong />
+        <Field label="Lot" value={line.lot} strong />
+        <div className="sm:col-span-2">
+          <Field label="Désignation" value={line.designation} strong />
         </div>
-        {line.formula ? (
-          <div>
-            <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-              Formule
-            </dt>
-            <dd className="font-mono text-[12px] text-slate-700">{line.formula}</dd>
+        {line.description ? (
+          <div className="sm:col-span-2">
+            <Field
+              label="Description"
+              value={
+                open
+                  ? line.description
+                  : line.description.length > 180
+                    ? `${line.description.slice(0, 180)}…`
+                    : line.description
+              }
+            />
           </div>
         ) : null}
+        <Field label="Quantité" value={qty ?? `— ${formatDisplayUnit(line.unit)}`} strong />
+        {formula ? <Field label="Formule" value={formula} mono /> : null}
         {line.provenance ? (
-          <div>
-            <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-              Provenance
-            </dt>
-            <dd>{provenanceBadgeLabel(line.provenance)}</dd>
-          </div>
+          <Field
+            label="Provenance"
+            value={provenanceBadgeLabel(line.provenance) ?? line.provenance}
+          />
         ) : null}
         {line.role ? (
-          <div>
-            <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-              Rôle
-            </dt>
-            <dd>{roleBadgeLabel(line.role)}</dd>
-          </div>
+          <Field label="Rôle" value={roleBadgeLabel(line.role) ?? line.role} />
         ) : null}
         {line.nature ? (
-          <div>
-            <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-              Nature
-            </dt>
-            <dd>{line.nature}</dd>
-          </div>
+          <Field label="Nature" value={natureLabel(line.nature) ?? line.nature} />
         ) : null}
       </dl>
-      {(line.notes || (line.description && line.description.length > 160)) && (
-        <div className="mt-2 border-t border-emerald-100 pt-2">
+
+      {(notes?.metre || notes?.references.length) ? (
+        <div className="mt-3 space-y-2 rounded-lg border border-slate-100 bg-slate-50/80 px-2.5 py-2 text-[12.5px] leading-relaxed text-slate-700">
+          {notes?.metre ? <NotesBlock title="Métré" body={notes.metre} /> : null}
+          {notes?.references.length ? (
+            <NotesBlock title="Références" items={notes.references} />
+          ) : null}
+        </div>
+      ) : null}
+
+      {hasDetail ? (
+        <div className="mt-3 border-t border-slate-100 pt-2">
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -1198,63 +1252,125 @@ function AddLinePreviewCard({ change }: { change: DirectChange }) {
             ) : (
               <ChevronRight className="h-3.5 w-3.5" />
             )}
-            Voir le détail technique
+            Voir contrôles / réserves
           </button>
           {open ? (
-            <div className="mt-2 space-y-2 rounded-md bg-white/80 px-2.5 py-2 text-[12.5px] leading-relaxed text-slate-700">
-              {line.description ? (
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                    Description
-                  </p>
-                  <p className="mt-0.5 whitespace-pre-wrap">{line.description}</p>
-                </div>
+            <div className="mt-2 space-y-2.5 rounded-lg bg-slate-50 px-2.5 py-2 text-[12.5px] leading-relaxed text-slate-700">
+              {notes?.controls.length ? (
+                <NotesBlock title="Contrôles" items={notes.controls} />
               ) : null}
-              {line.notes ? (
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                    Notes techniques / CCTP
-                  </p>
-                  <p className="mt-0.5 whitespace-pre-wrap">{line.notes}</p>
-                </div>
+              {notes?.reserves.length ? (
+                <NotesBlock title="Réserves" items={notes.reserves} />
               ) : null}
-              <p className="text-[11px] text-slate-500">
-                Avant : ligne absente · Après : création de {line.code}
-              </p>
+              {notes?.other ? (
+                <NotesBlock title="Notes" body={notes.other} />
+              ) : null}
+              {!notes && line.notes ? (
+                <NotesBlock title="Notes techniques / CCTP" body={line.notes} />
+              ) : null}
+              {line.description && line.description.length > 180 ? (
+                <NotesBlock title="Description complète" body={line.description} />
+              ) : null}
             </div>
           ) : null}
         </div>
-      )}
+      ) : null}
     </li>
   );
 }
 
-function AddLineBadges({ line }: { line: AddLinePreviewPayload }) {
-  const badges: string[] = [];
-  const prov = provenanceBadgeLabel(line.provenance);
-  if (prov) badges.push(prov);
-  const role = roleBadgeLabel(line.role);
-  if (role) badges.push(role);
-  if (line.formula) badges.push("CALCULÉ");
-  if (!badges.length) return null;
+function Field({
+  label,
+  value,
+  strong,
+  mono,
+}: {
+  label: string;
+  value: string;
+  strong?: boolean;
+  mono?: boolean;
+}) {
   return (
-    <div className="flex flex-wrap gap-1">
-      {badges.map((b) => (
-        <span
-          key={b}
-          className="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-700 ring-1 ring-slate-200"
-        >
-          {b}
-        </span>
-      ))}
+    <div>
+      <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+        {label}
+      </dt>
+      <dd
+        className={`mt-0.5 whitespace-pre-wrap text-[13.5px] text-slate-800 ${
+          strong ? "font-semibold" : ""
+        } ${mono ? "font-mono text-[12.5px]" : ""}`}
+      >
+        {value}
+      </dd>
     </div>
   );
 }
 
-function formatQtyFr(n: number): string {
-  return Number.isInteger(n)
-    ? String(n)
-    : n.toLocaleString("fr-FR", { maximumFractionDigits: 4 });
+function NotesBlock({
+  title,
+  body,
+  items,
+}: {
+  title: string;
+  body?: string;
+  items?: string[];
+}) {
+  return (
+    <div>
+      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+        {title}
+      </p>
+      {body ? <p className="mt-0.5 whitespace-pre-wrap">{body}</p> : null}
+      {items?.length ? (
+        <ul className="mt-0.5 list-disc space-y-0.5 pl-4">
+          {items.map((it) => (
+            <li key={it}>{it}</li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
+function AddLineBadges({ line }: { line: AddLinePreviewPayload }) {
+  const badges: Array<{ text: string; tone: string }> = [
+    { text: "AJOUT", tone: "bg-emerald-50 text-emerald-900 ring-emerald-200" },
+  ];
+  const prov = provenanceBadgeLabel(line.provenance);
+  if (prov) {
+    badges.push({
+      text: prov,
+      tone: "bg-violet-50 text-violet-900 ring-violet-200",
+    });
+  }
+  const role = roleBadgeLabel(line.role);
+  if (role) {
+    badges.push({
+      text: role,
+      tone:
+        line.role === "indicator"
+          ? "bg-sky-50 text-sky-900 ring-sky-200"
+          : "bg-slate-50 text-slate-800 ring-slate-200",
+    });
+  }
+  if (line.formula) {
+    badges.push({
+      text: "CALCULÉ",
+      tone: "bg-amber-50 text-amber-950 ring-amber-200",
+    });
+  }
+  return (
+    <div className="flex flex-wrap justify-end gap-1">
+      {badges.map((b) => (
+        <span
+          key={b.text}
+          className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1 ${b.tone}`}
+        >
+          {b.text}
+        </span>
+      ))}
+    </div>
+  );
 }
 
 function DirectChangesBlock({
@@ -1284,63 +1400,68 @@ function DirectChangesBlock({
                 change={c}
               />
             ) : (
-            <li
-              key={`${c.entityType}-${c.entityId}-${c.field}-${i}`}
-              className="rounded-lg border border-slate-100 bg-slate-50/60 p-2.5"
-            >
-              <p className="text-xs font-medium text-slate-500">
-                {c.label}
-                <span className="text-slate-300"> · </span>
-                {fieldMetierLabel(c.field)}
-              </p>
-              <div className="mt-1.5 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-                <span className="rounded bg-white px-2 py-1 text-sm text-slate-600 line-through decoration-slate-300 sm:max-w-[45%] sm:truncate">
-                  {formatValue(c.before)}
-                  {c.unit ? ` ${c.unit}` : ""}
-                </span>
-                <span className="hidden text-slate-400 sm:inline" aria-hidden>
-                  →
-                </span>
-                <span className="text-xs font-medium text-slate-400 sm:hidden">
-                  Après
-                </span>
-                <span
-                  className={`rounded px-2 py-1 text-sm font-medium sm:max-w-[45%] sm:truncate ${
-                    c.protectionStatus === "BLOCKED"
-                      ? "bg-red-50 text-red-900"
-                      : c.protectionStatus === "OVERRIDE_OK"
-                        ? "bg-amber-50 text-amber-950"
-                        : "bg-emerald-50 text-emerald-900"
-                  }`}
-                >
-                  {formatValue(c.after)}
-                  {c.unit ? ` ${c.unit}` : ""}
-                </span>
-              </div>
-              {(c.currentProvenanceLabel || c.proposalProvenanceLabel) && (
-                <p className="mt-1.5 text-xs text-slate-500">
-                  {c.currentProvenanceLabel
-                    ? `Source actuelle : ${c.currentProvenanceLabel}`
-                    : null}
-                  {c.currentProvenanceLabel && c.proposalProvenanceLabel
-                    ? " · "
-                    : null}
-                  {c.proposalProvenanceLabel
-                    ? `Proposition : ${c.proposalProvenanceLabel}`
-                    : null}
+              <li
+                key={`${c.entityType}-${c.entityId}-${c.field}-${i}`}
+                className="rounded-lg border border-slate-100 bg-slate-50/60 p-2.5"
+              >
+                <p className="text-xs font-medium text-slate-500">
+                  {c.label}
+                  <span className="text-slate-300"> · </span>
+                  {fieldMetierLabel(c.field)}
                 </p>
-              )}
-              {c.protectionStatus === "BLOCKED" && c.protectionMessage ? (
-                <p className="mt-1.5 text-xs font-medium text-red-700">
-                  ⛔ Modification bloquée — {c.protectionMessage}
-                </p>
-              ) : null}
-              {c.protectionStatus === "OVERRIDE_OK" && c.protectionMessage ? (
-                <p className="mt-1.5 text-xs font-medium text-amber-800">
-                  {c.protectionMessage}
-                </p>
-              ) : null}
-            </li>
+                <div className="mt-1.5 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+                  <span className="rounded bg-white px-2 py-1 text-sm text-slate-600 line-through decoration-slate-300 sm:max-w-[45%] sm:truncate">
+                    {formatValue(c.before)}
+                    {c.unit && typeof c.after !== "object"
+                      ? ` ${formatDisplayUnit(c.unit)}`
+                      : ""}
+                  </span>
+                  <span className="hidden text-slate-400 sm:inline" aria-hidden>
+                    →
+                  </span>
+                  <span className="text-xs font-medium text-slate-400 sm:hidden">
+                    Après
+                  </span>
+                  <span
+                    className={`rounded px-2 py-1 text-sm font-medium sm:max-w-[45%] sm:truncate ${
+                      c.protectionStatus === "BLOCKED"
+                        ? "bg-red-50 text-red-900"
+                        : c.protectionStatus === "OVERRIDE_OK"
+                          ? "bg-amber-50 text-amber-950"
+                          : "bg-emerald-50 text-emerald-900"
+                    }`}
+                  >
+                    {typeof c.after === "object" && c.after !== null
+                      ? formatValue(c.after)
+                      : `${formatValue(c.after)}${
+                          c.unit ? ` ${formatDisplayUnit(c.unit)}` : ""
+                        }`}
+                  </span>
+                </div>
+                {(c.currentProvenanceLabel || c.proposalProvenanceLabel) && (
+                  <p className="mt-1.5 text-xs text-slate-500">
+                    {c.currentProvenanceLabel
+                      ? `Source actuelle : ${c.currentProvenanceLabel}`
+                      : null}
+                    {c.currentProvenanceLabel && c.proposalProvenanceLabel
+                      ? " · "
+                      : null}
+                    {c.proposalProvenanceLabel
+                      ? `Proposition : ${c.proposalProvenanceLabel}`
+                      : null}
+                  </p>
+                )}
+                {c.protectionStatus === "BLOCKED" && c.protectionMessage ? (
+                  <p className="mt-1.5 text-xs font-medium text-red-700">
+                    ⛔ Modification bloquée — {c.protectionMessage}
+                  </p>
+                ) : null}
+                {c.protectionStatus === "OVERRIDE_OK" && c.protectionMessage ? (
+                  <p className="mt-1.5 text-xs font-medium text-amber-800">
+                    {c.protectionMessage}
+                  </p>
+                ) : null}
+              </li>
             ),
           )}
         </ul>

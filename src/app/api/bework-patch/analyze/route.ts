@@ -100,6 +100,7 @@ export async function POST(req: Request) {
         simulationOnly: true,
         canPropagate: false,
         phase: "E",
+        existingLineCount: subgraph?.study?.lines?.length ?? null,
       },
     });
   } catch (e) {

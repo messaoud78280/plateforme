@@ -28,7 +28,6 @@ import { assessVisitQuoteReadiness } from "@/lib/site-visits/quote-readiness";
 import { ChantierDossierNavHost } from "@/components/chantier/ChantierDossierNavHost";
 import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
 import { getSectionCapability } from "@/lib/bework-patch/capability";
-import { VisitFillFromChatgptModal } from "@/components/site-visits/VisitFillFromChatgptModal";
 import { LinkVisitToProjectModal } from "@/components/site-visits/LinkVisitToProjectModal";
 import { CreateProjectFromVisitModal } from "@/components/site-visits/CreateProjectFromVisitModal";
 
@@ -219,7 +218,6 @@ export function SiteVisitSimpleClient({
   const [importingPhotos, setImportingPhotos] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [chatgptPreview, setChatgptPreview] = useState<string | null>(null);
-  const [fillChatgptOpen, setFillChatgptOpen] = useState(false);
   const [linkProjectOpen, setLinkProjectOpen] = useState(false);
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
   const [linkToast, setLinkToast] = useState<string | null>(null);
@@ -868,33 +866,19 @@ export function SiteVisitSimpleClient({
           Compte rendu de visite
         </h1>
         <p className="mt-1 text-[13px] text-slate-600">
-          Saisie manuelle · ou préparer / modifier avec ChatGPT
+          Saisie manuelle · ou modifier avec ChatGPT
         </p>
-        {visit.projectId ? (
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setFillChatgptOpen(true)}
-              className="inline-flex h-10 items-center rounded-xl bg-[#1e3a5f] px-3.5 text-[13px] font-semibold text-white"
-            >
-              ✨ Préparer avec ChatGPT
-            </button>
-            <BeworkPatchToolbar
-              section="VISIT"
-              projectId={visit.projectId}
-              entityId={visit.id}
-              version={visit.patchContextVersion ?? 1}
-              capability={getSectionCapability("VISIT")}
-              entityLabel={visit.siteName || visit.clientName}
-              primaryActionLabel="✨ Modifier avec ChatGPT"
-              compact
-            />
-          </div>
-        ) : (
-          <p className="mt-2 text-[12px] text-amber-800">
-            Créez ou liez un chantier pour activer ChatGPT (préparer / modifier).
-          </p>
-        )}
+        <div className="mt-3">
+          <BeworkPatchToolbar
+            section="VISIT"
+            projectId={visit.projectId ?? null}
+            entityId={visit.id}
+            version={visit.patchContextVersion ?? 1}
+            capability={getSectionCapability("VISIT")}
+            entityLabel={visit.siteName || visit.clientName}
+            primaryActionLabel="✨ Modifier avec ChatGPT"
+          />
+        </div>
       </header>
 
       {/* Résumé compact mobile */}
@@ -1835,24 +1819,10 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
               >
                 Télécharger le compte rendu PDF
               </button>
-              {visit.projectId ? (
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => setFillChatgptOpen(true)}
-                  className="flex h-12 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[14px] font-semibold text-white"
-                >
-                  ✨ Préparer / remplir avec ChatGPT
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setCreateProjectOpen(true)}
-                  className="flex h-12 w-full items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-[14px] font-semibold text-amber-900"
-                >
-                  + Créer le chantier pour ChatGPT
-                </button>
-              )}
+              <p className="text-[12px] text-slate-500">
+                Pour modifier avec ChatGPT, utilisez la barre d’actions en haut
+                de la visite (aucun chantier requis).
+              </p>
               <button
                 type="button"
                 disabled={busy}
@@ -1887,13 +1857,6 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
         </div>
       ) : null}
 
-      {fillChatgptOpen ? (
-        <VisitFillFromChatgptModal
-          visitId={visit.id}
-          onClose={() => setFillChatgptOpen(false)}
-        />
-      ) : null}
-
       {linkProjectOpen ? (
         <LinkVisitToProjectModal
           visit={{
@@ -1920,7 +1883,7 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
                   ? linked.projectHref
                   : prev.projectHref,
             }));
-            setLinkToast("✓ Chantier lié — ChatGPT est disponible");
+            setLinkToast("✓ Chantier lié");
             window.setTimeout(() => setLinkToast(null), 4000);
           }}
         />
@@ -1947,7 +1910,7 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
                   ? created.projectHref
                   : prev.projectHref,
             }));
-            setLinkToast("✓ Chantier créé — visite liée — ChatGPT disponible");
+            setLinkToast("✓ Chantier créé — visite liée");
             window.setTimeout(() => setLinkToast(null), 5000);
           }}
         />

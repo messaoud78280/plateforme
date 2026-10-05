@@ -32,7 +32,7 @@ type Props = {
   open: boolean;
   mode: "chatgpt" | "json";
   section: BeworkPatchSection;
-  projectId: string;
+  projectId?: string | null;
   entityId: string;
   version: number;
   capability: SectionPatchCapability;

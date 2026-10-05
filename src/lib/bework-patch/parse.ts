@@ -1139,10 +1139,26 @@ export function parseBeworkPatch(rawInput: unknown): ParseBeworkPatchResult {
 
   const section = parseSection(obj.origin.section, "origin.section", errors);
   const projectId = str(obj.origin.project_id ?? obj.origin.projectId, 80);
-  const entityId = str(obj.origin.entity_id ?? obj.origin.entityId, 80);
+  const entityId = str(
+    obj.origin.entity_id ?? obj.origin.entityId ?? obj.origin.visit_id ?? obj.origin.visitId,
+    80,
+  );
   const baseVersion = num(obj.origin.base_version ?? obj.origin.baseVersion);
-  if (!projectId) errors.push(err("INVALID_TARGET", "origin.project_id", "project_id requis"));
-  if (!entityId) errors.push(err("INVALID_TARGET", "origin.entity_id", "entity_id requis"));
+  const visitStandalone = section === "VISIT";
+  if (!projectId && !visitStandalone) {
+    errors.push(err("INVALID_TARGET", "origin.project_id", "project_id requis"));
+  }
+  if (!entityId) {
+    errors.push(
+      err(
+        "INVALID_TARGET",
+        visitStandalone ? "origin.entity_id" : "origin.entity_id",
+        visitStandalone
+          ? "entity_id / visit_id requis pour VISIT"
+          : "entity_id requis",
+      ),
+    );
+  }
   if (baseVersion == null || !Number.isInteger(baseVersion) || baseVersion < 1) {
     errors.push(
       err("VERSION_CONFLICT", "origin.base_version", "base_version entier ≥ 1 requis"),
@@ -1161,13 +1177,21 @@ export function parseBeworkPatch(rawInput: unknown): ParseBeworkPatchResult {
     errors.push(err("EMPTY_OPERATIONS", "operations", "Au moins une opération requise"));
   }
 
-  if (errors.length || !section || !intent || !patchId || !projectId || !entityId || baseVersion == null) {
+  if (
+    errors.length ||
+    !section ||
+    !intent ||
+    !patchId ||
+    !entityId ||
+    baseVersion == null ||
+    (!visitStandalone && !projectId)
+  ) {
     return { ok: false, errors, warnings };
   }
 
   const origin: BeworkPatchOrigin = {
     section,
-    project_id: projectId,
+    project_id: projectId || null,
     entity_id: entityId,
     base_version: baseVersion,
   };

@@ -10,6 +10,9 @@ import {
   adaptVisitForChatgptContext,
   buildProjectContext,
 } from "@/lib/bework-context";
+import { VISIT_MODIFY_INSTRUCTIONS } from "@/lib/bework-context/adapters";
+import { computeVisitContextVersion } from "@/lib/bework-context/visit-context-version";
+import { parseVisitPrep } from "@/lib/site-visits/types";
 import { computeFollowUpContextVersion } from "@/lib/bework-context/follow-up-context-version";
 import { sheetToVersionInput } from "@/lib/bework-patch/commit/follow-up-ops";
 import { computeReportContextVersion } from "@/lib/bework-context/report-context-version";
@@ -46,11 +49,18 @@ function isObj(v: unknown): v is Record<string, unknown> {
 export async function buildUniversalPatchContext(input: {
   orgId: string;
   section: BeworkPatchSection;
-  projectId: string;
+  projectId?: string | null;
   entityId: string;
 }): Promise<BeworkChatgptContextV1 | null> {
+  const projectId = input.projectId?.trim() || null;
+
+  if (input.section === "VISIT") {
+    return buildVisitContextFlexible(input.orgId, projectId, input.entityId);
+  }
+
+  if (!projectId) return null;
   const project = await prisma.project.findFirst({
-    where: { id: input.projectId, organizationId: input.orgId },
+    where: { id: projectId, organizationId: input.orgId },
     select: { id: true, title: true },
   });
   if (!project) return null;
@@ -62,8 +72,6 @@ export async function buildUniversalPatchContext(input: {
       return buildTakeoffContext(input.orgId, project, input.entityId);
     case "PLANNING":
       return buildPlanningContext(input.orgId, project, input.entityId);
-    case "VISIT":
-      return buildVisitContext(input.orgId, project, input.entityId);
     case "FOLLOW_UP":
       return buildFollowUpContext(input.orgId, project, input.entityId);
     case "REPORT":
@@ -183,7 +191,7 @@ async function buildTakeoffContext(
   if (!adapted) return null;
 
   // Garde-fou : l’étude doit appartenir au projet déjà scopé org.
-  if (adapted.project.id !== project.id) return null;
+  if (adapted.project?.id !== project.id) return null;
   return adapted;
 }
 
@@ -333,23 +341,216 @@ async function buildPlanningContext(
 }
 
 /**
- * CTX-07 — VISIT via snapshot canonique + version dérivée.
- * Legacy bework_site_survey_v1 inchangé.
+ * VISIT autonome (project facultatif) + enrichissement chantier si lié.
  */
-async function buildVisitContext(
+async function buildVisitContextFlexible(
   orgId: string,
-  project: { id: string; title: string },
+  projectId: string | null,
   visitId: string,
 ): Promise<BeworkChatgptContextV1 | null> {
-  const snapshot = await buildProjectContext(project.id, orgId, {
-    includeLines: true,
+  const visit = await prisma.siteVisit.findFirst({
+    where: { id: visitId, organizationId: orgId },
+    select: { id: true, projectId: true },
   });
-  if (!snapshot) return null;
+  if (!visit) return null;
+  if (projectId && visit.projectId && visit.projectId !== projectId) return null;
 
-  const adapted = adaptVisitForChatgptContext(snapshot, visitId);
-  if (!adapted) return null;
-  if (adapted.project.id !== project.id) return null;
-  return adapted;
+  const effectiveProjectId = visit.projectId || projectId;
+  if (effectiveProjectId) {
+    const snapshot = await buildProjectContext(effectiveProjectId, orgId, {
+      includeLines: true,
+    });
+    if (snapshot) {
+      const adapted = adaptVisitForChatgptContext(snapshot, visitId);
+      if (adapted) return adapted;
+    }
+  }
+
+  return buildStandaloneVisitContext(orgId, visitId);
+}
+
+async function buildStandaloneVisitContext(
+  orgId: string,
+  visitId: string,
+): Promise<BeworkChatgptContextV1 | null> {
+  const visit = await prisma.siteVisit.findFirst({
+    where: { id: visitId, organizationId: orgId },
+    select: {
+      id: true,
+      subject: true,
+      status: true,
+      clientName: true,
+      siteName: true,
+      siteAddress: true,
+      clientNeed: true,
+      comments: true,
+      contactName: true,
+      contactPhone: true,
+      scheduledAt: true,
+      lotsJson: true,
+      zonesJson: true,
+      constraintsJson: true,
+      findingsJson: true,
+      proposedWorksJson: true,
+      commercialJson: true,
+      prepJson: true,
+      organization: { select: { id: true, name: true } },
+      responsible: { select: { id: true, name: true } },
+      measurements: {
+        orderBy: { sortOrder: "asc" },
+        select: {
+          id: true,
+          zone: true,
+          label: true,
+          measureType: true,
+          unit: true,
+          lengthM: true,
+          widthM: true,
+          heightM: true,
+          quantityValue: true,
+          computedQuantity: true,
+          lot: true,
+          observation: true,
+        },
+      },
+      medias: {
+        orderBy: { createdAt: "desc" },
+        take: 40,
+        select: {
+          id: true,
+          name: true,
+          kind: true,
+          category: true,
+          caption: true,
+          observation: true,
+          hypothesis: true,
+          origin: true,
+          fileUrl: true,
+          storagePath: true,
+        },
+      },
+    },
+  });
+  if (!visit) return null;
+
+  const prep = parseVisitPrep(visit.prepJson);
+  const version = computeVisitContextVersion({
+    id: visit.id,
+    subject: visit.subject,
+    status: visit.status,
+    clientName: visit.clientName,
+    siteAddress: visit.siteAddress,
+    clientNeed: visit.clientNeed,
+    comments: visit.comments,
+    measurements: visit.measurements.map((m) => ({
+      id: m.id,
+      zone: m.zone,
+      label: m.label,
+      measureType: m.measureType,
+      unit: m.unit,
+      lengthM: m.lengthM != null ? d(m.lengthM) : null,
+      widthM: m.widthM != null ? d(m.widthM) : null,
+      heightM: m.heightM != null ? d(m.heightM) : null,
+      quantityValue: m.quantityValue != null ? d(m.quantityValue) : null,
+      computedQuantity: d(m.computedQuantity),
+      lot: m.lot,
+      observation: m.observation,
+    })),
+    mediaRefs: visit.medias.map((m) => ({
+      id: m.id,
+      name: m.name,
+      kind: m.kind,
+      category: m.category,
+      observation: m.observation ?? m.caption,
+      hasUrl: Boolean(m.fileUrl || m.storagePath),
+    })),
+  });
+
+  const skeleton = buildChatgptContextSkeleton({
+    section: "VISIT",
+    project: null,
+    target: {
+      entity_type: "SITE_VISIT",
+      id: visit.id,
+      version,
+      code: visit.subject,
+      base_version: version,
+    },
+    data: {
+      interaction_mode: "MODIFY",
+      project: null,
+      client: {
+        name: visit.clientName,
+        phone: visit.contactPhone,
+        email: prep.contactEmail ?? null,
+        contact_name: visit.contactName,
+      },
+      site: {
+        name: visit.siteName,
+        address: visit.siteAddress,
+        zip_code: prep.zipCode ?? null,
+        city: prep.city ?? null,
+      },
+      visit: {
+        subject: visit.subject,
+        status: visit.status,
+        scheduled_at: visit.scheduledAt?.toISOString() ?? null,
+        responsible: visit.responsible?.name ?? null,
+        client_need: visit.clientNeed,
+        lots: visit.lotsJson,
+        zones: visit.zonesJson,
+        comments: visit.comments,
+        field_notes: prep.fieldNotes ?? null,
+        constraints: visit.constraintsJson,
+        findings: visit.findingsJson,
+        proposed_works: visit.proposedWorksJson,
+        commercial: visit.commercialJson,
+      },
+      measurements: visit.measurements.map((m) => ({
+        measurement_id: m.id,
+        zone: m.zone,
+        label: m.label,
+        measure_type: m.measureType,
+        unit: m.unit,
+        length_m: m.lengthM != null ? d(m.lengthM) : null,
+        width_m: m.widthM != null ? d(m.widthM) : null,
+        height_m: m.heightM != null ? d(m.heightM) : null,
+        quantity_value: m.quantityValue != null ? d(m.quantityValue) : null,
+        quantity: d(m.computedQuantity),
+        lot: m.lot,
+        observation: m.observation,
+        provenance_kind: "MEASURE",
+      })),
+      media_refs: visit.medias.map((m) => ({
+        id: m.id,
+        name: m.name,
+        kind: m.kind,
+        category: m.category,
+        caption: m.caption,
+        observation: m.observation,
+        hypothesis: m.hypothesis,
+        origin: m.origin,
+        has_url: Boolean(m.fileUrl || m.storagePath),
+        provenance_kind: m.kind === "DOCUMENT" ? "PLAN" : "UNKNOWN",
+      })),
+      plan_sources: [],
+      counts: {
+        measurements: visit.measurements.length,
+        media_refs: visit.medias.length,
+        plan_sources: 0,
+      },
+      instructions: [...VISIT_MODIFY_INSTRUCTIONS],
+      note: "Visite autonome — aucun chantier lié. Project = null. Métré = étape suivante.",
+    },
+  });
+
+  return {
+    ...skeleton,
+    organization: visit.organization
+      ? { id: visit.organization.id, name: visit.organization.name }
+      : { id: orgId, name: "" },
+    project: null,
+  };
 }
 
 async function buildFollowUpContext(

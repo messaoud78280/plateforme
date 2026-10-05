@@ -181,7 +181,7 @@ export async function applyVisitDirectInTx(
   tx: Prisma.TransactionClient,
   input: {
     orgId: string;
-    projectId: string;
+    projectId?: string | null;
     patch: BeworkPatchV1;
     expectedVersion: number;
   },
@@ -204,15 +204,10 @@ export async function applyVisitDirectInTx(
       code: "TARGET_NOT_FOUND",
     });
   }
-  if (visit.projectId && visit.projectId !== input.projectId) {
+  const targetProject = input.projectId?.trim() || null;
+  if (targetProject && visit.projectId && visit.projectId !== targetProject) {
     throw Object.assign(
       new Error("Visite hors projet ciblé — commit refusé."),
-      { code: "PROJECT_MISMATCH" },
-    );
-  }
-  if (!visit.projectId) {
-    throw Object.assign(
-      new Error("Visite sans projet rattaché — commit patch refusé."),
       { code: "PROJECT_MISMATCH" },
     );
   }

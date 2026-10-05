@@ -8,7 +8,8 @@ import { sectionMetierLabel } from "@/lib/bework-patch/ui-messages";
 
 type Props = {
   section: BeworkPatchSection;
-  projectId: string;
+  /** Facultatif pour VISIT autonome. */
+  projectId?: string | null;
   entityId: string;
   version: number;
   capability: SectionPatchCapability;

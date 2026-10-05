@@ -618,20 +618,14 @@ export function SiteVisitDetailClient({
           {visit.responsibleName ? ` · ${visit.responsibleName}` : ""}
         </p>
         <div className="mt-3">
-          {visit.projectId ? (
-            <BeworkPatchToolbar
-              section="VISIT"
-              projectId={visit.projectId}
-              entityId={visit.id}
-              version={visit.patchContextVersion ?? 1}
-              capability={getSectionCapability("VISIT")}
-              entityLabel={visit.siteName || visit.clientName}
-            />
-          ) : (
-            <p className="text-[11px] text-slate-500">
-              Créez ou liez un chantier pour activer la modification ChatGPT / JSON.
-            </p>
-          )}
+          <BeworkPatchToolbar
+            section="VISIT"
+            projectId={visit.projectId ?? null}
+            entityId={visit.id}
+            version={visit.patchContextVersion ?? 1}
+            capability={getSectionCapability("VISIT")}
+            entityLabel={visit.siteName || visit.clientName}
+          />
         </div>
         {visit.completeness ? (
           <div className="mt-3">
@@ -2063,7 +2057,7 @@ export function SiteVisitDetailClient({
                   ? linked.projectHref
                   : prev.projectHref,
             }));
-            setMessage("✓ Chantier lié — ChatGPT est disponible");
+            setMessage("✓ Chantier lié");
           }}
         />
       ) : null}
@@ -2089,7 +2083,7 @@ export function SiteVisitDetailClient({
                   ? created.projectHref
                   : prev.projectHref,
             }));
-            setMessage("✓ Chantier créé — visite liée — ChatGPT disponible");
+            setMessage("✓ Chantier créé — visite liée");
           }}
         />
       ) : null}

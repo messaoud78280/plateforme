@@ -23,17 +23,22 @@ export async function POST(req: Request) {
     } | null;
 
     const section = body?.section?.trim() as BeworkPatchSection | undefined;
-    const projectId = body?.projectId?.trim();
+    const projectId = body?.projectId?.trim() || null;
     const entityId = body?.entityId?.trim();
+    const visitStandalone = section === "VISIT";
 
     if (
       !section ||
       !(BEWORK_PATCH_SECTIONS as readonly string[]).includes(section) ||
-      !projectId ||
-      !entityId
+      !entityId ||
+      (!visitStandalone && !projectId)
     ) {
       return NextResponse.json(
-        { error: "section, projectId et entityId requis" },
+        {
+          error: visitStandalone
+            ? "section et entityId (visite) requis"
+            : "section, projectId et entityId requis",
+        },
         { status: 422 },
       );
     }

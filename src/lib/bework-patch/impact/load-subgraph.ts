@@ -28,28 +28,14 @@ function asIso(dte: Date | null | undefined): string | null {
 
 export async function loadImpactSubgraph(input: {
   orgId: string;
-  projectId: string;
+  projectId?: string | null;
   patch: BeworkPatchV1;
 }): Promise<ImpactSubgraph> {
-  const graph = emptySubgraph(input.projectId);
-  const project = await prisma.project.findFirst({
-    where: { id: input.projectId, organizationId: input.orgId },
-    select: { id: true },
-  });
-  if (!project) return graph;
-
+  const projectId = input.projectId?.trim() || "";
+  const graph = emptySubgraph(projectId);
   const section = input.patch.origin.section;
-  let studyId: string | null = null;
-  let quoteId: string | null = null;
-  let planId: string | null = null;
 
-  if (section === "TAKEOFF") {
-    studyId = input.patch.origin.entity_id;
-  } else if (section === "QUOTE") {
-    quoteId = input.patch.origin.entity_id;
-  } else if (section === "PLANNING") {
-    planId = input.patch.origin.entity_id;
-  } else if (section === "VISIT") {
+  if (section === "VISIT") {
     const visitId = input.patch.origin.entity_id;
     const visit = await prisma.siteVisit.findFirst({
       where: {
@@ -96,7 +82,7 @@ export async function loadImpactSubgraph(input: {
     });
     if (
       visit &&
-      (!visit.projectId || visit.projectId === input.projectId)
+      (!projectId || !visit.projectId || visit.projectId === projectId)
     ) {
       const contextVersion = computeVisitContextVersion(
         visitRowToVersionInput(visit),
@@ -114,13 +100,33 @@ export async function loadImpactSubgraph(input: {
       };
     }
     return graph;
+  }
+
+  const project = projectId
+    ? await prisma.project.findFirst({
+        where: { id: projectId, organizationId: input.orgId },
+        select: { id: true },
+      })
+    : null;
+  if (!project) return graph;
+
+  let studyId: string | null = null;
+  let quoteId: string | null = null;
+  let planId: string | null = null;
+
+  if (section === "TAKEOFF") {
+    studyId = input.patch.origin.entity_id;
+  } else if (section === "QUOTE") {
+    quoteId = input.patch.origin.entity_id;
+  } else if (section === "PLANNING") {
+    planId = input.patch.origin.entity_id;
   } else if (section === "FOLLOW_UP") {
     const sheetId = input.patch.origin.entity_id;
     const sheet = await prisma.followUpSheet.findFirst({
       where: {
         id: sheetId,
         organizationId: input.orgId,
-        projectId: input.projectId,
+        projectId,
       },
       select: {
         id: true,
@@ -151,7 +157,7 @@ export async function loadImpactSubgraph(input: {
       where: {
         id: documentId,
         organizationId: input.orgId,
-        projectId: input.projectId,
+        projectId,
         kind: "COMPTE_RENDU",
       },
       select: {
@@ -183,7 +189,7 @@ export async function loadImpactSubgraph(input: {
       where: {
         id: documentId,
         organizationId: input.orgId,
-        projectId: input.projectId,
+        projectId,
         kind: "NOTICE",
       },
       select: {
@@ -235,7 +241,7 @@ export async function loadImpactSubgraph(input: {
       where: {
         id: planId,
         organizationId: input.orgId,
-        projectId: input.projectId,
+        projectId,
       },
       select: { studyId: true },
     });
@@ -247,7 +253,7 @@ export async function loadImpactSubgraph(input: {
       where: {
         id: studyId,
         organizationId: input.orgId,
-        projectId: input.projectId,
+        projectId,
         archivedAt: null,
       },
       select: {
@@ -349,7 +355,7 @@ export async function loadImpactSubgraph(input: {
         where: {
           organizationId: input.orgId,
           id: { in: quoteIds },
-          OR: [{ projectId: input.projectId }, { projectId: null }],
+          OR: [{ projectId }, { projectId: null }],
         },
         select: {
           id: true,
@@ -474,7 +480,7 @@ export async function loadImpactSubgraph(input: {
         where: {
           id: planId,
           organizationId: input.orgId,
-          projectId: input.projectId,
+          projectId,
           studyId,
         },
         select: planSelect,
@@ -484,7 +490,7 @@ export async function loadImpactSubgraph(input: {
       const candidates = await prisma.prepSchedulePlan.findMany({
         where: {
           organizationId: input.orgId,
-          projectId: input.projectId,
+          projectId,
           studyId,
         },
         select: planSelect,
@@ -587,7 +593,7 @@ export async function loadImpactSubgraph(input: {
       where: {
         id: planId,
         organizationId: input.orgId,
-        projectId: input.projectId,
+        projectId,
       },
       select: {
         id: true,

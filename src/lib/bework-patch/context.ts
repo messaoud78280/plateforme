@@ -55,7 +55,7 @@ export function buildCanonicalResolution(input: {
 
 export function buildChatgptContextSkeleton(input: {
   section: BeworkPatchSection;
-  project: { id: string; title: string };
+  project: { id: string; title: string } | null;
   target: {
     entity_type: BeworkEntityType;
     id: string;

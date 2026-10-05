@@ -33,26 +33,28 @@ export async function POST(req: Request) {
 
     let context = null;
     const section = body.section?.trim() as BeworkPatchSection | undefined;
+    const projectId = body.projectId?.trim() || null;
+    const entityId = body.entityId?.trim() || null;
     if (
       section &&
       (BEWORK_PATCH_SECTIONS as readonly string[]).includes(section) &&
-      body.projectId &&
-      body.entityId
+      entityId &&
+      (projectId || section === "VISIT")
     ) {
       context = await buildUniversalPatchContext({
         orgId: guard.ctx.orgId,
         section,
-        projectId: body.projectId,
-        entityId: body.entityId,
+        projectId,
+        entityId,
       });
     }
 
     const snapshot =
-      body.projectId &&
-      (context?.target.version != null || body.currentVersion != null)
+      (context?.target.version != null || body.currentVersion != null) &&
+      (projectId || section === "VISIT")
         ? {
             organizationId: guard.ctx.orgId,
-            projectId: body.projectId,
+            projectId,
             /**
              * CTX-07 : préférer la version live du contexte (DB) plutôt que
              * la version UI potentiellement stale / hardcodée.
@@ -64,16 +66,15 @@ export async function POST(req: Request) {
     let subgraph = null;
     const parsed = parseBeworkPatch(body.raw);
     // CTX-09A : charger le subgraph pour toute section AVAILABLE (NOTICE inclus).
-    if (
-      parsed.ok &&
-      body.projectId &&
-      isUniversalPipelineSection(parsed.patch.origin.section)
-    ) {
-      subgraph = await loadImpactSubgraph({
-        orgId: guard.ctx.orgId,
-        projectId: body.projectId,
-        patch: parsed.patch,
-      });
+    if (parsed.ok && isUniversalPipelineSection(parsed.patch.origin.section)) {
+      if (parsed.patch.origin.section === "VISIT" || projectId) {
+        subgraph = await loadImpactSubgraph({
+          orgId: guard.ctx.orgId,
+          projectId:
+            projectId || parsed.patch.origin.project_id || null,
+          patch: parsed.patch,
+        });
+      }
     }
 
     const result = analyzeBeworkPatchInput({

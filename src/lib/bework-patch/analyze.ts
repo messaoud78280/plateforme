@@ -217,7 +217,7 @@ export function analyzeBeworkPatchInput(input: {
   if (isUniversalPipelineSection(section)) {
     const subgraph =
       input.subgraph ??
-      emptySubgraph(patch.origin.project_id);
+      emptySubgraph(patch.origin.project_id ?? "");
     impact = analyzePatchImpact({ patch, subgraph });
     warnings = [...warnings, ...impact.warnings];
     errors = [...errors, ...impact.errors];

@@ -60,7 +60,7 @@ export type CommitUniversalResult =
 
 export async function commitUniversalPatch(input: {
   orgId: string;
-  projectId: string;
+  projectId?: string | null;
   userId: string | null;
   raw: unknown;
   /** Fingerprint du preview client — doit matcher le recalcul serveur. */
@@ -75,14 +75,25 @@ export async function commitUniversalPatch(input: {
     };
   }
   const patch = parsed.patch;
-
-  if (patch.origin.project_id !== input.projectId) {
+  const inputProject = input.projectId?.trim() || null;
+  const patchProject = patch.origin.project_id?.trim() || null;
+  const visitStandalone = patch.origin.section === "VISIT";
+  if (visitStandalone) {
+    if (patchProject && inputProject && patchProject !== inputProject) {
+      return {
+        ok: false,
+        error: "Le projet du patch ne correspond pas.",
+        code: "PROJECT_MISMATCH",
+      };
+    }
+  } else if (patchProject !== inputProject) {
     return {
       ok: false,
       error: "Le projet du patch ne correspond pas.",
       code: "PROJECT_MISMATCH",
     };
   }
+  const resolvedProjectId = inputProject || patchProject || "";
 
   // Pré-check duplicate (UX)
   const existing = await prisma.beworkUniversalPatch.findUnique({
@@ -105,7 +116,7 @@ export async function commitUniversalPatch(input: {
   // Reload + re-analyze
   const subgraph = await loadImpactSubgraph({
     orgId: input.orgId,
-    projectId: input.projectId,
+    projectId: resolvedProjectId || null,
     patch,
   });
   const impact = analyzePatchImpact({ patch, subgraph });
@@ -249,7 +260,7 @@ export async function commitUniversalPatch(input: {
         }
         const applied = await applyVisitDirectInTx(tx, {
           orgId: input.orgId,
-          projectId: input.projectId,
+          projectId: resolvedProjectId || null,
           patch,
           expectedVersion: subgraph.visit.contextVersion,
         });
@@ -349,10 +360,26 @@ export async function commitUniversalPatch(input: {
       });
 
       try {
+        if (!resolvedProjectId) {
+          return {
+            patchRecordId: `visit:${visitId ?? patch.origin.entity_id}`,
+            versionsAfter,
+            summary: {
+              takeoffUpdated,
+              quoteUpdated,
+              planningUpdated,
+              visitUpdated,
+              followUpUpdated,
+              reportUpdated,
+              noticeUpdated,
+              quoteProtected,
+            },
+          };
+        }
         const row = await tx.beworkUniversalPatch.create({
           data: {
             organizationId: input.orgId,
-            projectId: input.projectId,
+            projectId: resolvedProjectId,
             patchId: patch.patch_id,
             originSection: patch.origin.section,
             originEntityId: patch.origin.entity_id,

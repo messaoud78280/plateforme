@@ -19,11 +19,11 @@ export async function POST(req: Request) {
       previewFingerprint?: string;
     } | null;
 
-    const projectId = body?.projectId?.trim();
+    const projectId = body?.projectId?.trim() || null;
     const previewFingerprint = body?.previewFingerprint?.trim();
-    if (body?.raw == null || !projectId || !previewFingerprint) {
+    if (body?.raw == null || !previewFingerprint) {
       return NextResponse.json(
-        { error: "raw, projectId et previewFingerprint requis" },
+        { error: "raw et previewFingerprint requis" },
         { status: 422 },
       );
     }

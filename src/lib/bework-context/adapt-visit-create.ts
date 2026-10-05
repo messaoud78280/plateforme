@@ -49,7 +49,7 @@ export type BeworkVisitCreateContextV1 = {
     status: string | null;
     chantier_status: string | null;
     client: { name: string | null; company: string | null } | null;
-  };
+  } | null;
   scope: null;
   visit: Record<string, unknown>;
   plan_candidates: Array<{
@@ -117,6 +117,7 @@ export async function buildVisitCreateContext(input: {
       clientNeed: true,
       comments: true,
       projectId: true,
+      organization: { select: { id: true, name: true } },
       constraintsJson: true,
       findingsJson: true,
       proposedWorksJson: true,
@@ -192,19 +193,21 @@ export async function buildVisitCreateContext(input: {
       status: 404,
     });
   }
-  if (!visit.projectId || !visit.project?.organization) {
-    throw Object.assign(
-      new Error("Liez la visite à un chantier pour utiliser ChatGPT."),
-      { code: "PROJECT_REQUIRED", status: 400 },
-    );
+  const organization = visit.organization;
+  if (!organization) {
+    throw Object.assign(new Error("Organisation introuvable"), {
+      code: "ORG_REQUIRED",
+      status: 404,
+    });
   }
 
-  const project = visit.project;
-  const organization = project.organization!;
-  const planFiles = await listProjectPlanCandidateFiles({
-    projectId: project.id,
-    take: 30,
-  });
+  const project = visit.project ?? null;
+  const planFiles = project
+    ? await listProjectPlanCandidateFiles({
+        projectId: project.id,
+        take: 30,
+      })
+    : [];
   const prep = parseVisitPrep(visit.prepJson);
 
   const contextVersion = computeVisitContextVersion({
@@ -258,18 +261,20 @@ export async function buildVisitCreateContext(input: {
       id: organization.id,
       name: organization.name,
     },
-    project: {
-      id: project.id,
-      title: project.title,
-      description: project.description,
-      site_address: project.siteAddress,
-      site_city: project.siteCity,
-      status: project.status,
-      chantier_status: project.chantierStatus,
-      client: project.client
-        ? { name: project.client.name, company: project.client.company }
-        : null,
-    },
+    project: project
+      ? {
+          id: project.id,
+          title: project.title,
+          description: project.description,
+          site_address: project.siteAddress,
+          site_city: project.siteCity,
+          status: project.status,
+          chantier_status: project.chantierStatus,
+          client: project.client
+            ? { name: project.client.name, company: project.client.company }
+            : null,
+        }
+      : null,
     scope: null,
     visit: {
       id: visit.id,
@@ -362,11 +367,11 @@ export async function buildVisitCreateContext(input: {
 export async function loadCurrentVisitCreateSourcesFingerprint(input: {
   orgId: string;
   visitId: string;
-}): Promise<{ fingerprint: string; contextVersion: number; projectId: string }> {
+}): Promise<{ fingerprint: string; contextVersion: number; projectId: string | null }> {
   const ctx = await buildVisitCreateContext(input);
   return {
     fingerprint: ctx.sources_fingerprint,
     contextVersion: ctx.target.version,
-    projectId: ctx.project.id,
+    projectId: ctx.project?.id ?? null,
   };
 }

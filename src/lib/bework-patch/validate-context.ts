@@ -10,7 +10,8 @@ import type {
 
 export type PatchContextSnapshot = {
   organizationId: string;
-  projectId: string;
+  /** Null / vide autorisé pour VISIT autonome. */
+  projectId: string | null;
   /** Version actuelle de l’entité d’origine. */
   currentVersion: number;
   /** IDs déjà appliqués (idempotence). */
@@ -39,7 +40,21 @@ export function validatePatchContext(
   const errors: BeworkPatchIssue[] = [];
   const warnings: BeworkPatchIssue[] = [];
 
-  if (patch.origin.project_id !== snapshot.projectId) {
+  const patchProject = patch.origin.project_id?.trim() || null;
+  const snapProject = snapshot.projectId?.trim() || null;
+  const visitStandalone = patch.origin.section === "VISIT";
+  if (visitStandalone) {
+    if (patchProject && snapProject && patchProject !== snapProject) {
+      errors.push(
+        err(
+          "PROJECT_MISMATCH",
+          "origin.project_id",
+          `project_id du patch (${patchProject}) ≠ projet ouvert (${snapProject})`,
+        ),
+      );
+      return { ok: false, errors, warnings, code: "PROJECT_MISMATCH" };
+    }
+  } else if (patchProject !== snapProject) {
     errors.push(
       err(
         "PROJECT_MISMATCH",
@@ -129,7 +144,7 @@ export function validatePatchAgainstChatgptContext(
 ): ValidatePatchContextResult {
   const snapshot: PatchContextSnapshot = {
     organizationId: "",
-    projectId: context.project.id,
+    projectId: context.project?.id ?? null,
     currentVersion: context.target.version,
   };
   const base = validatePatchContext(patch, snapshot);

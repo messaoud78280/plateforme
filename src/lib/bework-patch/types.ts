@@ -73,7 +73,8 @@ export type CanonicalResolution = {
 
 export type BeworkPatchOrigin = {
   section: BeworkPatchSection;
-  project_id: string;
+  /** Facultatif pour VISIT (visite autonome). Obligatoire pour les autres sections. */
+  project_id: string | null;
   entity_id: string;
   base_version: number;
 };
@@ -579,6 +580,7 @@ export type BeworkChatgptContextV1 = {
   type: typeof BEWORK_CONTEXT_FORMAT;
   schema_version: typeof BEWORK_CONTEXT_SCHEMA_VERSION;
   section: BeworkPatchSection;
+  /** Null si VISIT autonome (aucun chantier lié). */
   project: {
     id: string;
     title: string;
@@ -588,7 +590,7 @@ export type BeworkChatgptContextV1 = {
     site_city?: string | null;
     status?: string | null;
     chantier_status?: string | null;
-  };
+  } | null;
   /** Organisation du chantier — additif CTX-08. */
   organization?: {
     id: string;

@@ -557,3 +557,69 @@ import {
 }
 
 console.log("ok — bework_patch Phase C");
+
+// --- VISIT autonome : project_id facultatif ---
+{
+  const r = parseBeworkPatch({
+    type: "bework_patch_v1",
+    schema_version: 1,
+    patch_id: "patch_visit_standalone",
+    origin: {
+      section: "VISIT",
+      entity_id: "visit_rockman",
+      base_version: 4,
+    },
+    change_intent: "FIELD_UPDATE",
+    reason: "Compléter observations",
+    operations: [
+      {
+        op: "update_visit",
+        target: { entity_type: "SITE_VISIT", id: "visit_rockman" },
+        changes: { comments: "Observation terrain" },
+      },
+    ],
+  });
+  assert.equal(r.ok, true, "VISIT sans project_id doit parser");
+  if (r.ok) {
+    assert.equal(r.patch.origin.project_id, null);
+    assert.equal(r.patch.origin.entity_id, "visit_rockman");
+    const v = validatePatchContext(r.patch, {
+      organizationId: "org",
+      projectId: null,
+      currentVersion: 4,
+    });
+    assert.equal(v.ok, true, "preview VISIT sans project OK");
+  }
+  console.log("ok — VISIT autonome sans project_id");
+}
+
+{
+  const r = parseBeworkPatch({
+    type: "bework_patch_v1",
+    schema_version: 1,
+    patch_id: "patch_takeoff_no_project",
+    origin: {
+      section: "TAKEOFF",
+      entity_id: "study_1",
+      base_version: 4,
+    },
+    change_intent: "TECHNICAL_CORRECTION",
+    reason: "x",
+    operations: [
+      {
+        op: "update_parameter",
+        target: {
+          entity_type: "PREP_PARAMETER",
+          study_id: "study_1",
+          parameter_key: "trenche.length",
+        },
+        changes: { value: 65 },
+      },
+    ],
+  });
+  assert.equal(r.ok, false);
+  if (!r.ok) {
+    assert.ok(r.errors.some((e) => e.path === "origin.project_id"));
+  }
+  console.log("ok — TAKEOFF sans project_id toujours refusé");
+}

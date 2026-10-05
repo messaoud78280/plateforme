@@ -83,6 +83,11 @@ export function toLegacyPrepPatch(patch: BeworkPatchV1): PrepDelegateResult {
           declaredQuantity: op.changes.declared_quantity,
           lot: op.changes.lot,
           notes: op.changes.notes,
+          includedServices: op.changes.included_services,
+          technicalReferences: op.changes.technical_references,
+          executionNotes: op.changes.execution_notes,
+          qualityControls: op.changes.quality_controls,
+          technicalReservations: op.changes.technical_reservations,
         },
       });
     } else if (op.op === "add_line") {
@@ -101,6 +106,11 @@ export function toLegacyPrepPatch(patch: BeworkPatchV1): PrepDelegateResult {
           role: op.line.role,
           nature: op.line.nature,
           notes: op.line.notes,
+          includedServices: op.line.included_services,
+          technicalReferences: op.line.technical_references,
+          executionNotes: op.line.execution_notes,
+          qualityControls: op.line.quality_controls,
+          technicalReservations: op.line.technical_reservations,
         },
         insertAfterCode: op.insert_after_code,
       });

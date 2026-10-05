@@ -280,7 +280,9 @@ export async function loadImpactSubgraph(input: {
           select: {
             id: true,
             code: true,
+            lot: true,
             designation: true,
+            description: true,
             unit: true,
             formula: true,
             declaredQuantity: true,
@@ -288,6 +290,14 @@ export async function loadImpactSubgraph(input: {
             validatedQuantity: true,
             provenance: true,
             role: true,
+            nature: true,
+            notes: true,
+            includedServicesJson: true,
+            technicalReferencesJson: true,
+            executionNotes: true,
+            qualityControlsJson: true,
+            technicalReservationsJson: true,
+            textsUserEdited: true,
           },
         },
       },
@@ -309,18 +319,54 @@ export async function loadImpactSubgraph(input: {
           sourceRef: p.sourceRef,
           hypothesisId: p.hypothesisId,
         })),
-        lines: study.lines.map((l) => ({
-          id: l.id,
-          code: l.code,
-          designation: l.designation,
-          unit: l.unit,
-          formula: l.formula,
-          declaredQuantity: l.declaredQuantity != null ? d(l.declaredQuantity) : null,
-          computedQuantity: l.computedQuantity != null ? d(l.computedQuantity) : null,
-          validatedQuantity: l.validatedQuantity != null ? d(l.validatedQuantity) : null,
-          provenance: l.provenance,
-          role: l.role,
-        })),
+        lines: study.lines.map((l) => {
+          const asList = (v: unknown): string[] =>
+            Array.isArray(v)
+              ? v.map((x) => (typeof x === "string" ? x.trim() : "")).filter(Boolean)
+              : [];
+          const asRefs = (v: unknown) => {
+            if (!Array.isArray(v)) return [] as Array<{
+              label: string;
+              kind: string;
+              note: string | null;
+            }>;
+            const out: Array<{ label: string; kind: string; note: string | null }> = [];
+            for (const item of v) {
+              if (!item || typeof item !== "object") continue;
+              const o = item as Record<string, unknown>;
+              const label = typeof o.label === "string" ? o.label.trim() : "";
+              if (!label) continue;
+              out.push({
+                label,
+                kind: typeof o.kind === "string" ? o.kind : "INDICATIVE",
+                note: typeof o.note === "string" ? o.note : null,
+              });
+            }
+            return out;
+          };
+          return {
+            id: l.id,
+            code: l.code,
+            lot: l.lot,
+            designation: l.designation,
+            description: l.description,
+            unit: l.unit,
+            formula: l.formula,
+            declaredQuantity: l.declaredQuantity != null ? d(l.declaredQuantity) : null,
+            computedQuantity: l.computedQuantity != null ? d(l.computedQuantity) : null,
+            validatedQuantity: l.validatedQuantity != null ? d(l.validatedQuantity) : null,
+            provenance: l.provenance,
+            role: l.role,
+            nature: l.nature,
+            notes: l.notes,
+            includedServices: asList(l.includedServicesJson),
+            technicalReferences: asRefs(l.technicalReferencesJson),
+            executionNotes: l.executionNotes,
+            qualityControls: asList(l.qualityControlsJson),
+            technicalReservations: asList(l.technicalReservationsJson),
+            textsUserEdited: l.textsUserEdited,
+          };
+        }),
       };
     }
   }

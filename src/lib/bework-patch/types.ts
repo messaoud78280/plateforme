@@ -131,6 +131,15 @@ export type OpUpdateLine = {
     unit?: string;
     lot?: string;
     notes?: string | null;
+    included_services?: string[];
+    technical_references?: Array<{
+      label: string;
+      kind: "INDICATIVE" | "DOSSIER" | "TO_VERIFY" | "PHOTO";
+      note: string | null;
+    }>;
+    execution_notes?: string | null;
+    quality_controls?: string[];
+    technical_reservations?: string[];
   };
 };
 
@@ -153,6 +162,15 @@ export type OpAddLine = {
     role?: "quote" | "indicator" | "logistics";
     nature?: "en_place" | "foisonne" | "compacte" | "theorique" | null;
     notes?: string | null;
+    included_services?: string[];
+    technical_references?: Array<{
+      label: string;
+      kind: "INDICATIVE" | "DOSSIER" | "TO_VERIFY" | "PHOTO";
+      note: string | null;
+    }>;
+    execution_notes?: string | null;
+    quality_controls?: string[];
+    technical_reservations?: string[];
   };
   insert_after_code?: string | null;
 };

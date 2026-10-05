@@ -17,6 +17,15 @@ export type AddLinePreviewPayload = {
   nature?: string | null;
   notes?: string | null;
   insert_after_code?: string | null;
+  included_services?: string[];
+  technical_references?: Array<{
+    label: string;
+    kind: string;
+    note: string | null;
+  }>;
+  execution_notes?: string | null;
+  quality_controls?: string[];
+  technical_reservations?: string[];
 };
 
 export type TechnicalNotesSections = {
@@ -51,6 +60,26 @@ export function parseAddLineAfter(after: unknown): AddLinePreviewPayload | null 
   if (!code || !designation) return null;
   const unit = unitRaw || "u";
   const qtyRaw = o.declared_quantity ?? o.declaredQuantity ?? o.quantity;
+  const strList = (v: unknown): string[] =>
+    Array.isArray(v)
+      ? v.map((x) => (typeof x === "string" ? x.trim() : "")).filter(Boolean)
+      : [];
+  const refs = (v: unknown) => {
+    if (!Array.isArray(v)) return [] as AddLinePreviewPayload["technical_references"];
+    const out: NonNullable<AddLinePreviewPayload["technical_references"]> = [];
+    for (const item of v) {
+      if (!item || typeof item !== "object") continue;
+      const r = item as Record<string, unknown>;
+      const label = typeof r.label === "string" ? r.label.trim() : "";
+      if (!label) continue;
+      out.push({
+        label,
+        kind: typeof r.kind === "string" ? r.kind : "INDICATIVE",
+        note: typeof r.note === "string" ? r.note : null,
+      });
+    }
+    return out;
+  };
   return {
     code,
     lot: lot || "Sans lot",
@@ -80,7 +109,25 @@ export function parseAddLineAfter(after: unknown): AddLinePreviewPayload | null 
         : typeof o.insertAfterCode === "string"
           ? o.insertAfterCode
           : null,
+    included_services: strList(o.included_services ?? o.includedServices),
+    technical_references: refs(o.technical_references ?? o.technicalReferences),
+    execution_notes:
+      typeof o.execution_notes === "string"
+        ? o.execution_notes
+        : typeof o.executionNotes === "string"
+          ? o.executionNotes
+          : o.execution_notes === null || o.executionNotes === null
+            ? null
+            : null,
+    quality_controls: strList(o.quality_controls ?? o.qualityControls),
+    technical_reservations: strList(
+      o.technical_reservations ?? o.technicalReservations,
+    ),
   };
+}
+
+export function isUpdateLineMetaChange(c: DirectChange): boolean {
+  return c.op === "update_line" && c.field === "meta";
 }
 
 export function summarizeAddLineLots(

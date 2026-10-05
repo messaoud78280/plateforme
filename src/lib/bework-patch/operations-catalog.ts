@@ -51,6 +51,11 @@ export const OPERATION_CATALOG: Record<
       "unit",
       "lot",
       "notes",
+      "included_services",
+      "technical_references",
+      "execution_notes",
+      "quality_controls",
+      "technical_reservations",
     ],
   },
   add_line: {

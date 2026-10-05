@@ -130,6 +130,11 @@ function baseTakeoff(overrides?: Partial<ProjectContextTakeoff>): ProjectContext
       nature: null,
       notes: null,
       description: null,
+      includedServices: [],
+      technicalReferences: [],
+      executionNotes: null,
+      qualityControls: [],
+      technicalReservations: [],
     })),
     updatedAt: "2026-10-01T10:00:00.000Z",
     ...overrides,
@@ -195,6 +200,13 @@ function fixtureC01(overrides?: Partial<ProjectContextSnapshot>): ProjectContext
         description: "Description technique test",
         nature: "en_place",
         notes: "RÉFÉRENCE : NF DTU TEST",
+        includedServices: ["Pose"],
+        technicalReferences: [
+          { label: "NF DTU TEST", kind: "INDICATIVE", note: null },
+        ],
+        executionNotes: "Note exécution",
+        qualityControls: ["Contrôle"],
+        technicalReservations: ["Réserve"],
       },
     ],
     updatedAt: "2026-10-01T11:00:00.000Z",
@@ -507,6 +519,11 @@ function fixtureC01(overrides?: Partial<ProjectContextSnapshot>): ProjectContext
         description: string | null;
         notes: string | null;
         nature: string | null;
+        included_services: string[];
+        technical_references: Array<{ label: string; kind: string }>;
+        execution_notes: string | null;
+        quality_controls: string[];
+        technical_reservations: string[];
       }>;
     }
   ).lines;
@@ -516,6 +533,11 @@ function fixtureC01(overrides?: Partial<ProjectContextSnapshot>): ProjectContext
   assert.equal(el!.notes, "RÉFÉRENCE : NF DTU TEST");
   assert.equal(el!.nature, "en_place");
   assert.ok(el!.notes?.includes("NF DTU"));
+  assert.deepEqual(el!.included_services, ["Pose"]);
+  assert.equal(el!.technical_references?.[0]?.label, "NF DTU TEST");
+  assert.equal(el!.execution_notes, "Note exécution");
+  assert.deepEqual(el!.quality_controls, ["Contrôle"]);
+  assert.deepEqual(el!.technical_reservations, ["Réserve"]);
   console.log("  K description/notes/nature CCTP: ok");
 }
 

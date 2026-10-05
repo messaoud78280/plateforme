@@ -692,9 +692,48 @@ async function applyTakeoffDirectInTx(
     role: string;
     nature: string | null;
     notes: string | null;
+    includedServices: string[] | null;
+    technicalReferences: Array<{
+      label: string;
+      kind: string;
+      note: string | null;
+    }> | null;
+    executionNotes: string | null;
+    qualityControls: string[] | null;
+    technicalReservations: string[] | null;
+    textsUserEdited: boolean;
+    sheetTouched: boolean;
     sortOrder: number;
     isNew: boolean;
     deleted: boolean;
+  };
+
+  const asStringList = (v: unknown): string[] | null => {
+    if (v == null) return null;
+    if (!Array.isArray(v)) return null;
+    const out = v
+      .map((x) => (typeof x === "string" ? x.trim() : ""))
+      .filter(Boolean);
+    return out;
+  };
+  const asTechRefs = (
+    v: unknown,
+  ): MutableLine["technicalReferences"] => {
+    if (v == null) return null;
+    if (!Array.isArray(v)) return null;
+    const out: NonNullable<MutableLine["technicalReferences"]> = [];
+    for (const item of v) {
+      if (!item || typeof item !== "object") continue;
+      const o = item as Record<string, unknown>;
+      const label = typeof o.label === "string" ? o.label.trim() : "";
+      if (!label) continue;
+      out.push({
+        label,
+        kind: typeof o.kind === "string" ? o.kind : "INDICATIVE",
+        note: typeof o.note === "string" ? o.note : null,
+      });
+    }
+    return out;
   };
 
   const lineMap = new Map<string, MutableLine>();
@@ -711,6 +750,13 @@ async function applyTakeoffDirectInTx(
       role: l.role,
       nature: l.nature,
       notes: l.notes,
+      includedServices: asStringList(l.includedServicesJson),
+      technicalReferences: asTechRefs(l.technicalReferencesJson),
+      executionNotes: l.executionNotes,
+      qualityControls: asStringList(l.qualityControlsJson),
+      technicalReservations: asStringList(l.technicalReservationsJson),
+      textsUserEdited: l.textsUserEdited,
+      sheetTouched: false,
       sortOrder: l.sortOrder,
       isNew: false,
       deleted: false,
@@ -760,6 +806,36 @@ async function applyTakeoffDirectInTx(
     if (op.changes.unit !== undefined) existing.unit = op.changes.unit;
     if (op.changes.lot !== undefined) existing.lot = op.changes.lot;
     if (op.changes.notes !== undefined) existing.notes = op.changes.notes;
+    let sheetChange = false;
+    if (op.changes.included_services !== undefined) {
+      existing.includedServices = op.changes.included_services;
+      sheetChange = true;
+    }
+    if (op.changes.technical_references !== undefined) {
+      existing.technicalReferences = op.changes.technical_references;
+      sheetChange = true;
+    }
+    if (op.changes.execution_notes !== undefined) {
+      existing.executionNotes = op.changes.execution_notes;
+      sheetChange = true;
+    }
+    if (op.changes.quality_controls !== undefined) {
+      existing.qualityControls = op.changes.quality_controls;
+      sheetChange = true;
+    }
+    if (op.changes.technical_reservations !== undefined) {
+      existing.technicalReservations = op.changes.technical_reservations;
+      sheetChange = true;
+    }
+    if (
+      sheetChange ||
+      op.changes.designation !== undefined ||
+      op.changes.description !== undefined
+    ) {
+      existing.sheetTouched = true;
+      // Patch ChatGPT explicite (preview + confirmation) : autorisé même si textsUserEdited.
+      existing.textsUserEdited = true;
+    }
     updatedCount += 1;
   }
 
@@ -782,6 +858,12 @@ async function applyTakeoffDirectInTx(
       }
     }
     maxSort = Math.max(maxSort, sortOrder);
+    const hasSheet =
+      (op.line.included_services?.length ?? 0) > 0 ||
+      (op.line.technical_references?.length ?? 0) > 0 ||
+      !!op.line.execution_notes ||
+      (op.line.quality_controls?.length ?? 0) > 0 ||
+      (op.line.technical_reservations?.length ?? 0) > 0;
     lineMap.set(code, {
       code,
       lot: op.line.lot,
@@ -797,6 +879,14 @@ async function applyTakeoffDirectInTx(
       role: op.line.role ?? "quote",
       nature: op.line.nature ?? null,
       notes: op.line.notes ?? null,
+      includedServices: op.line.included_services ?? null,
+      technicalReferences: op.line.technical_references ?? null,
+      executionNotes: op.line.execution_notes ?? null,
+      qualityControls: op.line.quality_controls ?? null,
+      technicalReservations: op.line.technical_reservations ?? null,
+      // Création ChatGPT : fiche générée, pas encore retouchée manuellement.
+      textsUserEdited: false,
+      sheetTouched: hasSheet,
       sortOrder,
       isNew: true,
       deleted: false,
@@ -864,6 +954,24 @@ async function applyTakeoffDirectInTx(
           role: l.role,
           nature: l.nature,
           notes: l.notes,
+          includedServicesJson:
+            l.includedServices != null
+              ? (l.includedServices as unknown as Prisma.InputJsonValue)
+              : PrismaNS.DbNull,
+          technicalReferencesJson:
+            l.technicalReferences != null
+              ? (l.technicalReferences as unknown as Prisma.InputJsonValue)
+              : PrismaNS.DbNull,
+          executionNotes: l.executionNotes,
+          qualityControlsJson:
+            l.qualityControls != null
+              ? (l.qualityControls as unknown as Prisma.InputJsonValue)
+              : PrismaNS.DbNull,
+          technicalReservationsJson:
+            l.technicalReservations != null
+              ? (l.technicalReservations as unknown as Prisma.InputJsonValue)
+              : PrismaNS.DbNull,
+          textsUserEdited: l.textsUserEdited,
           sortOrder: l.sortOrder,
           originalDesignation: l.designation,
           originalDeclared: l.declaredQuantity,
@@ -884,6 +992,28 @@ async function applyTakeoffDirectInTx(
           unit: l.unit,
           declaredQuantity: l.declaredQuantity,
           notes: l.notes,
+          ...(l.sheetTouched
+            ? {
+                includedServicesJson:
+                  l.includedServices != null
+                    ? (l.includedServices as unknown as Prisma.InputJsonValue)
+                    : PrismaNS.DbNull,
+                technicalReferencesJson:
+                  l.technicalReferences != null
+                    ? (l.technicalReferences as unknown as Prisma.InputJsonValue)
+                    : PrismaNS.DbNull,
+                executionNotes: l.executionNotes,
+                qualityControlsJson:
+                  l.qualityControls != null
+                    ? (l.qualityControls as unknown as Prisma.InputJsonValue)
+                    : PrismaNS.DbNull,
+                technicalReservationsJson:
+                  l.technicalReservations != null
+                    ? (l.technicalReservations as unknown as Prisma.InputJsonValue)
+                    : PrismaNS.DbNull,
+                textsUserEdited: l.textsUserEdited,
+              }
+            : {}),
           sortOrder: l.sortOrder,
         },
       });

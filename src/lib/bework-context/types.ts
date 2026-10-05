@@ -133,8 +133,17 @@ export type ProjectContextTakeoffLine = {
   role: string;
   /** en_place | foisonne | compacte | theorique */
   nature: string | null;
-  /** Notes métier (références NF/DTU, contrôles, réserves…). */
+  /** Notes métier libres (ne remplace pas la fiche structurée). */
   notes: string | null;
+  includedServices: string[];
+  technicalReferences: Array<{
+    label: string;
+    kind: string;
+    note: string | null;
+  }>;
+  executionNotes: string | null;
+  qualityControls: string[];
+  technicalReservations: string[];
 };
 
 export type ProjectContextTakeoff = {

@@ -28,6 +28,8 @@ export type DirectChange = {
   currentProvenanceLabel?: string | null;
   proposalProvenanceLabel?: string | null;
   protectionStatus?: "ALLOW" | "BLOCKED" | "OVERRIDE_OK" | null;
+  /** update_line : la fiche a été retouchée manuellement — le patch la remplacera. */
+  manualTextsOverride?: boolean;
   protectionMessage?: string | null;
 };
 
@@ -140,6 +142,20 @@ export type ImpactLine = {
   validatedQuantity?: number | null;
   provenance?: string | null;
   role: string;
+  description?: string | null;
+  notes?: string | null;
+  nature?: string | null;
+  lot?: string | null;
+  includedServices?: string[];
+  technicalReferences?: Array<{
+    label: string;
+    kind: string;
+    note: string | null;
+  }>;
+  executionNotes?: string | null;
+  qualityControls?: string[];
+  technicalReservations?: string[];
+  textsUserEdited?: boolean;
 };
 
 export type ImpactQuoteLine = {

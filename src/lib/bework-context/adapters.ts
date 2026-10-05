@@ -259,6 +259,11 @@ export function adaptTakeoffForChatgptContext(
         role: l.role,
         nature: l.nature ?? null,
         notes: l.notes ?? null,
+        included_services: l.includedServices ?? [],
+        technical_references: l.technicalReferences ?? [],
+        execution_notes: l.executionNotes ?? null,
+        quality_controls: l.qualityControls ?? [],
+        technical_reservations: l.technicalReservations ?? [],
         source_ref: null as string | null,
         protected:
           l.validatedQuantity != null ||

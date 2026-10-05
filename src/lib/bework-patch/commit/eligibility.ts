@@ -208,14 +208,17 @@ export function evaluateCommitEligibility(input: {
 
   // TAKEOFF technique ou QUOTE technical
   if (patch.origin.section === "TAKEOFF") {
-    // add_line / delete_line / update_hypothesis : pas de résolution paramètre EXACT requise
+    // add_line / delete_line / update_hypothesis / update_line (hors quantité)
+    // : pas de résolution paramètre EXACT requise
     const structuralOnly =
       patch.operations.length > 0 &&
       patch.operations.every(
         (op) =>
           op.op === "add_line" ||
           op.op === "delete_line" ||
-          op.op === "update_hypothesis",
+          op.op === "update_hypothesis" ||
+          (op.op === "update_line" &&
+            op.changes.declared_quantity === undefined),
       );
     if (structuralOnly) {
       if (!impact.directChanges.length) {

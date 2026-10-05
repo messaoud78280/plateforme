@@ -11,7 +11,7 @@ import {
   isIntentCompatibleWithOp,
   OPERATION_CATALOG,
 } from "@/lib/bework-patch/operations-catalog";
-import { normalizeDependsOnJson, parseAddLinePayload } from "@/lib/bework-patch/operation-contracts";
+import { normalizeDependsOnJson, parseAddLinePayload, parseUpdateLineTechChanges } from "@/lib/bework-patch/operation-contracts";
 import {
   BEWORK_CHANGE_INTENTS,
   BEWORK_ENTITY_TYPES,
@@ -406,6 +406,12 @@ function parseOperation(
         issues.push(err("INVALID_TARGET", `${path}.target`, "line_code ou line_id requis"));
         return null;
       }
+      const sheet = parseUpdateLineTechChanges(
+        changes as Record<string, unknown>,
+        `${path}.changes`,
+        issues,
+      );
+      if (sheet === null) return null;
       return {
         op,
         target: { ...target, entity_type: "PREP_LINE", study_id: target.study_id! },
@@ -421,6 +427,7 @@ function parseOperation(
           unit: str(changes!.unit, 40) ?? undefined,
           lot: str(changes!.lot, 120) ?? undefined,
           notes: str(changes!.notes, 2000) ?? (changes!.notes === null ? null : undefined),
+          ...sheet,
         },
       };
     }

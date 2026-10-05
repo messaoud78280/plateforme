@@ -10,8 +10,13 @@ import {
   LINE_ROLES,
   type LineNature,
   type LineRole,
+  type PrepTechnicalReference,
   type StoredProvenance,
 } from "@/lib/preparation/types";
+import {
+  parseTechSheetFieldsFromObject,
+  type TechSheetFields,
+} from "@/lib/bework-patch/tech-sheet-fields";
 
 /** Contrat réel du champ changes.depends_on (update_dependency). */
 export const UPDATE_DEPENDENCY_DEPENDS_ON_CONTRACT = {
@@ -140,7 +145,55 @@ export const ADD_LINE_CONTRACT = {
       required: false,
       type: "string|null",
       max: 2000,
-      meaning: "Note métier libre",
+      meaning:
+        "Note métier libre — ne pas y mettre la fiche structurée (utiliser included_services / technical_references / …)",
+    },
+    included_services: {
+      required: false,
+      type: "string[]",
+      aliases: ["includedServices"],
+      meaning: "Prestations comprises → includedServicesJson",
+      example: ["Réglage du fond de fouille", "Mise en œuvre du béton"],
+    },
+    technical_references: {
+      required: false,
+      type: "array",
+      aliases: ["technicalReferences"],
+      meaning:
+        "Références techniques → technicalReferencesJson (kind: INDICATIVE|DOSSIER|TO_VERIFY|PHOTO)",
+      item: {
+        label: { required: true, type: "string", max: 200 },
+        kind: {
+          required: true,
+          type: "enum",
+          enum: ["INDICATIVE", "DOSSIER", "TO_VERIFY", "PHOTO"],
+        },
+        note: { required: false, type: "string|null", max: 2000 },
+      },
+      example: [
+        { label: "NF DTU 13.1", kind: "INDICATIVE", note: null },
+      ],
+    },
+    execution_notes: {
+      required: false,
+      type: "string|null",
+      aliases: ["executionNotes"],
+      max: 8000,
+      meaning: "Notes d’exécution → executionNotes",
+    },
+    quality_controls: {
+      required: false,
+      type: "string[]",
+      aliases: ["qualityControls"],
+      meaning: "Contrôles qualité → qualityControlsJson",
+      example: ["Contrôle niveau", "Contrôle géométrie"],
+    },
+    technical_reservations: {
+      required: false,
+      type: "string[]",
+      aliases: ["technicalReservations"],
+      meaning: "Réserves / points à confirmer → technicalReservationsJson",
+      example: ["Dimension à confirmer"],
     },
     provenance_kind: {
       accepted: false,
@@ -190,6 +243,11 @@ export type AddLineParsed = {
     role?: LineRole;
     nature?: LineNature | null;
     notes?: string | null;
+    included_services?: string[];
+    technical_references?: PrepTechnicalReference[];
+    execution_notes?: string | null;
+    quality_controls?: string[];
+    technical_reservations?: string[];
   };
   insert_after_code?: string | null;
 };
@@ -289,6 +347,13 @@ export function parseAddLinePayload(
     }
   }
 
+  const sheet = parseTechSheetFieldsFromObject(
+    lineRaw,
+    `${path}.line`,
+    issues,
+  );
+  if (sheet === null) return null;
+
   return {
     line: {
       code,
@@ -304,12 +369,25 @@ export function parseAddLinePayload(
       role,
       nature,
       notes: str(lineRaw.notes, ADD_LINE_CONTRACT.line.notes.max),
+      ...(sheet as TechSheetFields),
     },
     insert_after_code: str(
       rawOp.insert_after_code ?? rawOp.insertAfterCode,
       ADD_LINE_CONTRACT.insert_after_code.max,
     ),
   };
+}
+
+/**
+ * Parse changes update_line incluant fiche technique.
+ * Retourne null si champ structuré invalide.
+ */
+export function parseUpdateLineTechChanges(
+  changes: Record<string, unknown>,
+  path: string,
+  issues: BeworkPatchIssue[],
+): TechSheetFields | null {
+  return parseTechSheetFieldsFromObject(changes, path, issues);
 }
 
 export type OperationFieldContract = {
@@ -369,6 +447,28 @@ export function fieldContractsForOp(
         minimal_operation_example: ADD_LINE_CONTRACT.minimal_valid_example,
         minimal_valid_example: ADD_LINE_CONTRACT.minimal_valid_example,
         example: ADD_LINE_CONTRACT.minimal_valid_example,
+      },
+    ];
+  }
+  if (op === "update_line") {
+    return [
+      {
+        field: "changes",
+        required: true,
+        type: "object",
+        meaning:
+          "Champs à modifier sur une PrepTakeoffLine existante (quantitatif et/ou fiche technique)",
+        example: {
+          designation: "…",
+          description: "…",
+          included_services: ["…"],
+          technical_references: [
+            { label: "NF DTU 13.1", kind: "INDICATIVE", note: null },
+          ],
+          execution_notes: "…",
+          quality_controls: ["…"],
+          technical_reservations: ["…"],
+        },
       },
     ];
   }

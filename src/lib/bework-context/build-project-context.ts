@@ -176,6 +176,11 @@ export async function buildProjectContext(
                   role: true,
                   nature: true,
                   notes: true,
+                  includedServicesJson: true,
+                  technicalReferencesJson: true,
+                  executionNotes: true,
+                  qualityControlsJson: true,
+                  technicalReservationsJson: true,
                 },
               },
             }
@@ -501,6 +506,32 @@ export async function buildProjectContext(
           role: string;
           nature?: string | null;
           notes?: string | null;
+          includedServicesJson?: unknown;
+          technicalReferencesJson?: unknown;
+          executionNotes?: string | null;
+          qualityControlsJson?: unknown;
+          technicalReservationsJson?: unknown;
+        };
+        const asList = (v: unknown): string[] =>
+          Array.isArray(v)
+            ? v.map((x) => (typeof x === "string" ? x.trim() : "")).filter(Boolean)
+            : [];
+        const asRefs = (v: unknown) => {
+          if (!Array.isArray(v)) return [];
+          const out: Array<{ label: string; kind: string; note: string | null }> =
+            [];
+          for (const item of v) {
+            if (!item || typeof item !== "object") continue;
+            const o = item as Record<string, unknown>;
+            const label = typeof o.label === "string" ? o.label.trim() : "";
+            if (!label) continue;
+            out.push({
+              label,
+              kind: typeof o.kind === "string" ? o.kind : "INDICATIVE",
+              note: typeof o.note === "string" ? o.note : null,
+            });
+          }
+          return out;
         };
         return {
           id: row.id,
@@ -521,6 +552,11 @@ export async function buildProjectContext(
           role: row.role,
           nature: row.nature ?? null,
           notes: row.notes ?? null,
+          includedServices: asList(row.includedServicesJson),
+          technicalReferences: asRefs(row.technicalReferencesJson),
+          executionNotes: row.executionNotes ?? null,
+          qualityControls: asList(row.qualityControlsJson),
+          technicalReservations: asList(row.technicalReservationsJson),
         };
       }),
       updatedAt: study.updatedAt.toISOString(),

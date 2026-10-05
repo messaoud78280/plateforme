@@ -33,6 +33,7 @@ import {
   formatFormulaDisplay,
   formatQuantityWithUnit,
   isAddLineDirectChange,
+  isUpdateLineMetaChange,
   natureLabel,
   parseAddLineAfter,
   parseTechnicalNotes,
@@ -42,6 +43,7 @@ import {
   summarizeAddLineStats,
   type AddLinePreviewPayload,
 } from "@/lib/bework-patch/add-line-preview";
+import { TECH_REF_KIND_LABELS } from "@/lib/preparation/types";
 
 type Props = {
   open: boolean;
@@ -1231,11 +1233,19 @@ function AddLinePreviewCard({ change }: { change: DirectChange }) {
         ) : null}
       </dl>
 
-      {(notes?.metre || notes?.references.length) ? (
+      <TechSheetSections
+        included={line.included_services}
+        references={line.technical_references}
+        execution={line.execution_notes}
+        controls={line.quality_controls}
+        reservations={line.technical_reservations}
+      />
+
+      {(notes?.metre || (notes?.references.length && !(line.technical_references?.length))) ? (
         <div className="mt-3 space-y-2 rounded-lg border border-slate-100 bg-slate-50/80 px-2.5 py-2 text-[12.5px] leading-relaxed text-slate-700">
-          {notes?.metre ? <NotesBlock title="Métré" body={notes.metre} /> : null}
-          {notes?.references.length ? (
-            <NotesBlock title="Références" items={notes.references} />
+          {notes?.metre ? <NotesBlock title="Métré (notes)" body={notes.metre} /> : null}
+          {notes?.references.length && !(line.technical_references?.length) ? (
+            <NotesBlock title="Références (notes libres)" items={notes.references} />
           ) : null}
         </div>
       ) : null}
@@ -1332,6 +1342,225 @@ function NotesBlock({
   );
 }
 
+function TechSheetSections({
+  included,
+  references,
+  execution,
+  controls,
+  reservations,
+}: {
+  included?: string[];
+  references?: Array<{ label: string; kind: string; note: string | null }>;
+  execution?: string | null;
+  controls?: string[];
+  reservations?: string[];
+}) {
+  const has =
+    (included?.length ?? 0) > 0 ||
+    (references?.length ?? 0) > 0 ||
+    !!execution?.trim() ||
+    (controls?.length ?? 0) > 0 ||
+    (reservations?.length ?? 0) > 0;
+  if (!has) return null;
+  return (
+    <div className="mt-3 space-y-2.5 rounded-lg border border-[#1e3a5f]/10 bg-[#1e3a5f]/[0.02] px-2.5 py-2 text-[12.5px] leading-relaxed text-slate-700">
+      {included?.length ? (
+        <NotesBlock title="Prestations comprises" items={included} />
+      ) : null}
+      {references?.length ? (
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+            Références techniques
+          </p>
+          <ul className="mt-1 space-y-1.5">
+            {references.map((r, i) => (
+              <li
+                key={`${r.label}-${i}`}
+                className="rounded-md bg-white px-2 py-1.5 ring-1 ring-slate-100"
+              >
+                <p className="font-semibold text-slate-800">{r.label}</p>
+                <p className="text-[11px] text-slate-500">
+                  {(TECH_REF_KIND_LABELS as Record<string, string>)[r.kind] ??
+                    r.kind}
+                  {r.note ? ` · ${r.note}` : ""}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      {execution?.trim() ? (
+        <NotesBlock title="Notes d’exécution" body={execution} />
+      ) : null}
+      {controls?.length ? (
+        <NotesBlock title="Contrôles qualité" items={controls} />
+      ) : null}
+      {reservations?.length ? (
+        <NotesBlock title="Réserves / points à confirmer" items={reservations} />
+      ) : null}
+    </div>
+  );
+}
+
+function BeforeAfterList({
+  label,
+  before,
+  after,
+}: {
+  label: string;
+  before: string[];
+  after: string[];
+}) {
+  if (!before.length && !after.length) return null;
+  const same =
+    JSON.stringify(before) === JSON.stringify(after);
+  if (same) return null;
+  return (
+    <div className="rounded-lg border border-slate-100 bg-slate-50/80 px-2.5 py-2 text-[12.5px]">
+      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+        {label}
+      </p>
+      <div className="mt-1.5 grid gap-2 sm:grid-cols-2">
+        <div>
+          <p className="text-[10px] font-semibold text-slate-400">Avant</p>
+          {before.length ? (
+            <ul className="mt-0.5 list-disc space-y-0.5 pl-4 text-slate-600">
+              {before.map((x) => (
+                <li key={x}>{x}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-slate-400">—</p>
+          )}
+        </div>
+        <div>
+          <p className="text-[10px] font-semibold text-emerald-700">Après</p>
+          {after.length ? (
+            <ul className="mt-0.5 list-disc space-y-0.5 pl-4 font-medium text-slate-800">
+              {after.map((x) => (
+                <li key={x}>{x}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-slate-400">—</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UpdateLineMetaPreviewCard({ change }: { change: DirectChange }) {
+  const before = (change.before ?? {}) as Record<string, unknown>;
+  const after = (change.after ?? {}) as Record<string, unknown>;
+  const list = (v: unknown): string[] =>
+    Array.isArray(v)
+      ? v.map((x) => (typeof x === "string" ? x.trim() : "")).filter(Boolean)
+      : [];
+  const refsLabel = (v: unknown): string[] => {
+    if (!Array.isArray(v)) return [];
+    return v
+      .map((item) => {
+        if (!item || typeof item !== "object") return "";
+        const o = item as Record<string, unknown>;
+        const label = typeof o.label === "string" ? o.label : "";
+        const kind = typeof o.kind === "string" ? o.kind : "";
+        const note = typeof o.note === "string" ? o.note : "";
+        const kindLabel =
+          (TECH_REF_KIND_LABELS as Record<string, string>)[kind] ?? kind;
+        return [label, kindLabel, note].filter(Boolean).join(" · ");
+      })
+      .filter(Boolean);
+  };
+
+  return (
+    <li className="rounded-xl border border-amber-100 bg-white p-3 shadow-sm">
+      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-900">
+        Modification de ligne
+      </p>
+      <p className="mt-1 text-sm font-semibold text-slate-900">{change.label}</p>
+      {change.manualTextsOverride ? (
+        <p className="mt-2 rounded-md bg-amber-50 px-2 py-1.5 text-[12px] text-amber-950 ring-1 ring-amber-200">
+          Cette fiche a été retouchée manuellement. La confirmation remplacera
+          les textes existants par la proposition ChatGPT.
+        </p>
+      ) : null}
+      <div className="mt-3 space-y-2">
+        {after.designation !== undefined ? (
+          <BeforeAfterList
+            label="Désignation"
+            before={
+              typeof before.designation === "string" ? [before.designation] : []
+            }
+            after={
+              typeof after.designation === "string" ? [after.designation] : []
+            }
+          />
+        ) : null}
+        {after.description !== undefined ? (
+          <BeforeAfterList
+            label="Description"
+            before={
+              typeof before.description === "string" && before.description
+                ? [before.description]
+                : []
+            }
+            after={
+              typeof after.description === "string" && after.description
+                ? [after.description]
+                : after.description === null
+                  ? []
+                  : []
+            }
+          />
+        ) : null}
+        {after.included_services !== undefined ? (
+          <BeforeAfterList
+            label="Prestations comprises"
+            before={list(before.included_services)}
+            after={list(after.included_services)}
+          />
+        ) : null}
+        {after.technical_references !== undefined ? (
+          <BeforeAfterList
+            label="Références techniques"
+            before={refsLabel(before.technical_references)}
+            after={refsLabel(after.technical_references)}
+          />
+        ) : null}
+        {after.execution_notes !== undefined ? (
+          <BeforeAfterList
+            label="Notes d’exécution"
+            before={
+              typeof before.execution_notes === "string" && before.execution_notes
+                ? [before.execution_notes]
+                : []
+            }
+            after={
+              typeof after.execution_notes === "string" && after.execution_notes
+                ? [after.execution_notes]
+                : []
+            }
+          />
+        ) : null}
+        {after.quality_controls !== undefined ? (
+          <BeforeAfterList
+            label="Contrôles qualité"
+            before={list(before.quality_controls)}
+            after={list(after.quality_controls)}
+          />
+        ) : null}
+        {after.technical_reservations !== undefined ? (
+          <BeforeAfterList
+            label="Réserves / points à confirmer"
+            before={list(before.technical_reservations)}
+            after={list(after.technical_reservations)}
+          />
+        ) : null}
+      </div>
+    </li>
+  );
+}
 function AddLineBadges({ line }: { line: AddLinePreviewPayload }) {
   const badges: Array<{ text: string; tone: string }> = [
     { text: "AJOUT", tone: "bg-emerald-50 text-emerald-900 ring-emerald-200" },
@@ -1396,6 +1625,11 @@ function DirectChangesBlock({
           {changes.map((c, i) =>
             isAddLineDirectChange(c) ? (
               <AddLinePreviewCard
+                key={`${c.entityType}-${c.entityId}-${c.field}-${i}`}
+                change={c}
+              />
+            ) : isUpdateLineMetaChange(c) ? (
+              <UpdateLineMetaPreviewCard
                 key={`${c.entityType}-${c.entityId}-${c.field}-${i}`}
                 change={c}
               />

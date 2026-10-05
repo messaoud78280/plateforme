@@ -201,6 +201,17 @@ function describeDirectOp(
     const line = subgraph.study?.lines.find(
       (l) => l.code === code || l.id === op.target.id,
     );
+    const sheetKeysTouched =
+      op.changes.included_services !== undefined ||
+      op.changes.technical_references !== undefined ||
+      op.changes.execution_notes !== undefined ||
+      op.changes.quality_controls !== undefined ||
+      op.changes.technical_reservations !== undefined ||
+      op.changes.designation !== undefined ||
+      op.changes.description !== undefined;
+    const manualTextsOverride = Boolean(
+      line?.textsUserEdited && sheetKeysTouched,
+    );
     if (op.changes.declared_quantity === undefined) {
       return {
         op: op.op,
@@ -209,9 +220,21 @@ function describeDirectOp(
         entityId: line?.id ?? op.target.id ?? null,
         label: line?.designation ?? code ?? "ligne",
         field: "meta",
-        before: null,
+        before: {
+          designation: line?.designation ?? null,
+          description: line?.description ?? null,
+          lot: line?.lot ?? null,
+          notes: line?.notes ?? null,
+          included_services: line?.includedServices ?? [],
+          technical_references: line?.technicalReferences ?? [],
+          execution_notes: line?.executionNotes ?? null,
+          quality_controls: line?.qualityControls ?? [],
+          technical_reservations: line?.technicalReservations ?? [],
+          texts_user_edited: line?.textsUserEdited ?? false,
+        },
         after: op.changes,
         unit: line?.unit ?? null,
+        manualTextsOverride,
       };
     }
     return {
@@ -224,6 +247,7 @@ function describeDirectOp(
       before: line?.declaredQuantity ?? null,
       after: op.changes.declared_quantity,
       unit: line?.unit ?? null,
+      manualTextsOverride,
     };
   }
   if (op.op === "add_line") {
@@ -248,6 +272,11 @@ function describeDirectOp(
         role: op.line.role ?? "quote",
         nature: op.line.nature ?? null,
         notes: op.line.notes ?? null,
+        included_services: op.line.included_services ?? [],
+        technical_references: op.line.technical_references ?? [],
+        execution_notes: op.line.execution_notes ?? null,
+        quality_controls: op.line.quality_controls ?? [],
+        technical_reservations: op.line.technical_reservations ?? [],
         insert_after_code: op.insert_after_code ?? null,
       },
       unit: op.line.unit,

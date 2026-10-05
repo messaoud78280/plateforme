@@ -91,13 +91,14 @@ export function evaluateCommitEligibility(input: {
     };
   }
 
-  // CTX-02B — VISIT local (champs texte uniquement)
+  // VISIT local — update_visit + mesures
   if (patch.origin.section === "VISIT") {
-    const unsupported = patch.operations.filter((op) => op.op !== "update_visit");
+    const allowed = new Set(["update_visit", "update_measurement", "add_measurement"]);
+    const unsupported = patch.operations.filter((op) => !allowed.has(op.op));
     if (unsupported.length) {
       return {
         ok: false,
-        reason: `Opération ${unsupported[0]!.op} non supportée pour le commit VISIT (CTX-02B).`,
+        reason: `Opération ${unsupported[0]!.op} non supportée pour le commit VISIT.`,
         code: "OPERATION_NOT_ALLOWED_FOR_SECTION",
       };
     }

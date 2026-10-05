@@ -26,6 +26,9 @@ import {
 } from "@/lib/site-visits/photo-import";
 import { assessVisitQuoteReadiness } from "@/lib/site-visits/quote-readiness";
 import { ChantierDossierNavHost } from "@/components/chantier/ChantierDossierNavHost";
+import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
+import { getSectionCapability } from "@/lib/bework-patch/capability";
+import { VisitFillFromChatgptModal } from "@/components/site-visits/VisitFillFromChatgptModal";
 
 type ClientOpt = {
   id: string;
@@ -64,6 +67,7 @@ type Visit = {
   status: string;
   statusLabel: string;
   projectId?: string | null;
+  patchContextVersion?: number | null;
   commercialQuoteHref: string | null;
   commercialQuoteNumber: string | null;
   commercial?: SiteVisitCommercialInfo;
@@ -210,6 +214,7 @@ export function SiteVisitSimpleClient({
   const [importingPhotos, setImportingPhotos] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [chatgptPreview, setChatgptPreview] = useState<string | null>(null);
+  const [fillChatgptOpen, setFillChatgptOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ url: string; caption: string } | null>(null);
   const [measureOpen, setMeasureOpen] = useState(false);
   const [clientQuery, setClientQuery] = useState("");
@@ -806,8 +811,33 @@ export function SiteVisitSimpleClient({
           Compte rendu de visite
         </h1>
         <p className="mt-1 text-[13px] text-slate-600">
-          5 étapes · puis générez le document pour ChatGPT / devis estimatif
+          Saisie manuelle · ou préparer / modifier avec ChatGPT
         </p>
+        {visit.projectId ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setFillChatgptOpen(true)}
+              className="inline-flex h-10 items-center rounded-xl bg-[#1e3a5f] px-3.5 text-[13px] font-semibold text-white"
+            >
+              ✨ Préparer avec ChatGPT
+            </button>
+            <BeworkPatchToolbar
+              section="VISIT"
+              projectId={visit.projectId}
+              entityId={visit.id}
+              version={visit.patchContextVersion ?? 1}
+              capability={getSectionCapability("VISIT")}
+              entityLabel={visit.siteName || visit.clientName}
+              primaryActionLabel="✨ Modifier avec ChatGPT"
+              compact
+            />
+          </div>
+        ) : (
+          <p className="mt-2 text-[12px] text-amber-800">
+            Liez un chantier pour activer ChatGPT (préparer / modifier).
+          </p>
+        )}
       </header>
 
       {/* Résumé compact mobile */}
@@ -1751,10 +1781,18 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => void copyChatgpt()}
+                onClick={() => setFillChatgptOpen(true)}
                 className="flex h-12 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[14px] font-semibold text-white"
               >
-                ✨ Préparer pour ChatGPT (copier)
+                ✨ Préparer / remplir avec ChatGPT
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void copyChatgpt()}
+                className="flex h-11 w-full items-center justify-center rounded-xl border border-slate-200 text-[13px] font-semibold text-slate-800"
+              >
+                Copier le contexte devis (export survey)
               </button>
               <button
                 type="button"
@@ -1780,6 +1818,13 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
             </p>
           </div>
         </div>
+      ) : null}
+
+      {fillChatgptOpen ? (
+        <VisitFillFromChatgptModal
+          visitId={visit.id}
+          onClose={() => setFillChatgptOpen(false)}
+        />
       ) : null}
 
       {lightbox ? (

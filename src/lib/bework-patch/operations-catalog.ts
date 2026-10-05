@@ -186,7 +186,16 @@ export const OPERATION_CATALOG: Record<
     entity_types: ["SITE_VISIT"],
     sections: ["VISIT"],
     compatible_intents: FIELD,
-    allowed_change_fields: ["subject", "client_need", "comments"],
+    allowed_change_fields: [
+      "subject",
+      "client_need",
+      "comments",
+      "findings",
+      "proposed_works",
+      "commercial",
+      "constraints",
+      "field_notes",
+    ],
   },
   update_measurement: {
     entity_types: ["SITE_VISIT_MEASUREMENT"],

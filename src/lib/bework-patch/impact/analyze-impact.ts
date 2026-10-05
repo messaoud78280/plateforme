@@ -1105,7 +1105,7 @@ function analyzeFollowUpLocal(
   };
 }
 
-/* ─── VISIT local (champs texte, pas de mesures/médias) ─── */
+/* ─── VISIT local (texte + mesures ; médias/statut hors scope) ─── */
 
 function analyzeVisitLocal(
   patch: BeworkPatchV1,
@@ -1115,23 +1115,45 @@ function analyzeVisitLocal(
   const warnings: BeworkPatchIssue[] = [
     issue(
       "VISIT_SCOPE",
-      "VISIT CTX-02B : mesures, médias et statut non modifiables via patch.",
+      "VISIT : médias et statut non modifiables via patch. PLAN ≠ PHOTO ≠ MEASURE.",
       "warn",
     ),
   ];
 
-  const supported = new Set(["update_visit"]);
-  const allowedFields = new Set(["subject", "client_need", "comments"]);
+  const supported = new Set([
+    "update_visit",
+    "update_measurement",
+    "add_measurement",
+  ]);
+  const allowedFields = new Set([
+    "subject",
+    "client_need",
+    "comments",
+    "findings",
+    "proposed_works",
+    "commercial",
+    "constraints",
+    "field_notes",
+  ]);
 
   for (const op of patch.operations) {
     if (!supported.has(op.op)) {
       errors.push(
         issue(
           "OPERATION_NOT_ALLOWED_FOR_SECTION",
-          `Opération ${op.op} non supportée pour le commit VISIT (CTX-02B).`,
+          `Opération ${op.op} non supportée pour le commit VISIT.`,
           "error",
         ),
       );
+      continue;
+    }
+    if (op.op === "update_measurement" || op.op === "add_measurement") {
+      const targetId = op.target.visit_id ?? op.target.id;
+      if (targetId && targetId !== patch.origin.entity_id) {
+        errors.push(
+          issue("PROJECT_MISMATCH", "Cible hors visite.", "error"),
+        );
+      }
       continue;
     }
     if (op.op === "update_visit") {
@@ -1159,7 +1181,7 @@ function analyzeVisitLocal(
           errors.push(
             issue(
               "INVALID_FIELD",
-              `Champ « ${key} » non autorisé (whitelist: subject, client_need, comments).`,
+              `Champ « ${key} » non autorisé pour update_visit.`,
               "error",
             ),
           );

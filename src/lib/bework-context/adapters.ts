@@ -368,8 +368,18 @@ export function adaptQuoteForChatgptContext(
   };
 }
 
+/** Instructions MODIFY VISIT — discussion avant patch. */
+export const VISIT_MODIFY_INSTRUCTIONS = [
+  "Mode MODIFY : visite existante. Analyse d’abord, pose des questions, puis JSON bework_patch_v1 seulement sur demande.",
+  "Ne jamais inventer une dimension absente. PLAN ≠ PHOTO ≠ MEASURE.",
+  "Ordre : MEASURE > MANUAL > PLAN > CALCULATION > HYPOTHESIS > UNKNOWN.",
+  "Données manuelles / MEASURE déjà saisies : ne pas les remplacer silencieusement (TECHNICAL_OVERRIDE + motif si besoin).",
+  "Visite = faits terrain ; ne pas produire un métré complet ici.",
+  "base_version du patch = target.version.",
+] as const;
+
 /**
- * Adapter VISIT → bework_chatgpt_context_v1 (CTX-07).
+ * Adapter VISIT → bework_chatgpt_context_v1 (CTX-07) — MODIFY.
  * Version = empreinte déterministe de l’état exposé (pas hardcodé à 1).
  */
 export function adaptVisitForChatgptContext(
@@ -393,6 +403,12 @@ export function adaptVisitForChatgptContext(
       mediaRefs: visit.mediaRefs,
     });
 
+  const planSources = snapshot.sources.filter((s) =>
+    /plan/i.test(
+      [s.displayTitle, s.filename, s.title, s.planNumber].filter(Boolean).join(" "),
+    ),
+  );
+
   const skeleton = buildChatgptContextSkeleton({
     section: "VISIT",
     project: {
@@ -406,6 +422,7 @@ export function adaptVisitForChatgptContext(
       code: visit.subject,
     },
     data: {
+      interaction_mode: "MODIFY",
       subject: visit.subject,
       status: visit.status,
       client_name: visit.clientName,
@@ -425,6 +442,7 @@ export function adaptVisitForChatgptContext(
         quantity: m.computedQuantity,
         lot: m.lot,
         observation: m.observation,
+        provenance_kind: "MEASURE",
       })),
       media_refs: visit.mediaRefs.map((m) => ({
         id: m.id,
@@ -433,13 +451,23 @@ export function adaptVisitForChatgptContext(
         category: m.category,
         observation: m.observation,
         has_url: m.hasUrl,
+        provenance_kind: m.kind === "DOCUMENT" ? "PLAN" : "UNKNOWN",
+      })),
+      plan_sources: planSources.slice(0, 30).map((s) => ({
+        id: s.id,
+        label: s.displayTitle || s.filename || s.title,
+        document_id: s.chantierFileId,
+        source_ref: s.chantierFileId || s.id,
+        provenance_kind: "PLAN",
       })),
       counts: {
         measurements: visit.measurements.length,
         media_refs: visit.mediaRefs.length,
+        plan_sources: planSources.length,
       },
+      instructions: [...VISIT_MODIFY_INSTRUCTIONS],
       canonical_source: "bework_project_context_v1",
-      note: "Aucune FK mesure → paramètre métré : canonical_resolution = NONE sauf lien explicite futur.",
+      note: "Visite = faits / sources. Métré = ouvrages (étape suivante).",
       version_note:
         "target.version = empreinte déterministe (SHA-256→uint48) de l’état ChatGPT VISIT.",
     },

@@ -826,6 +826,24 @@ function parseOperation(
             changes!.comments === null
               ? null
               : str(changes!.comments, 8000) ?? undefined,
+          findings: Array.isArray(changes!.findings)
+            ? changes!.findings
+            : undefined,
+          proposed_works: Array.isArray(changes!.proposed_works)
+            ? changes!.proposed_works
+            : undefined,
+          commercial:
+            changes!.commercial && typeof changes!.commercial === "object"
+              ? changes!.commercial
+              : undefined,
+          constraints:
+            changes!.constraints && typeof changes!.constraints === "object"
+              ? changes!.constraints
+              : undefined,
+          field_notes:
+            changes!.field_notes === null
+              ? null
+              : str(changes!.field_notes, 8000) ?? undefined,
         },
       };
     }

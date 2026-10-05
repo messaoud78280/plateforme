@@ -10,7 +10,11 @@ import {
   type VisitContextVersionInput,
 } from "@/lib/bework-context/visit-context-version";
 
-export const VISIT_COMMIT_SUPPORTED_OPS = ["update_visit"] as const;
+export const VISIT_COMMIT_SUPPORTED_OPS = [
+  "update_visit",
+  "update_measurement",
+  "add_measurement",
+] as const;
 
 export type VisitCommitSupportedOp =
   (typeof VISIT_COMMIT_SUPPORTED_OPS)[number];
@@ -21,10 +25,8 @@ export function isVisitCommitSupportedOp(
   return (VISIT_COMMIT_SUPPORTED_OPS as readonly string[]).includes(op);
 }
 
-/** Ops catalogue VISIT non commitables CTX-02B. */
+/** Ops catalogue VISIT non commitables. */
 export const VISIT_COMMIT_UNSUPPORTED_OPS = [
-  "update_measurement",
-  "add_measurement",
   "update_parameter",
   "update_progress",
 ] as const;
@@ -34,6 +36,11 @@ export const VISIT_UPDATE_ALLOWED_FIELDS = [
   "subject",
   "client_need",
   "comments",
+  "findings",
+  "proposed_works",
+  "commercial",
+  "constraints",
+  "field_notes",
 ] as const;
 
 export type VisitUpdateAllowedField =
@@ -231,6 +238,21 @@ export async function applyVisitDirectInTx(
 
   const data: Prisma.SiteVisitUpdateInput = {};
   let touched = false;
+  const measurementOps: Array<
+    | { kind: "update"; measurementId: string; changes: Record<string, unknown> }
+    | {
+        kind: "add";
+        measurement: {
+          label: string;
+          unit: string;
+          length_m?: number | null;
+          width_m?: number | null;
+          height_m?: number | null;
+          quantity_value?: number | null;
+          observation?: string | null;
+        };
+      }
+  > = [];
 
   for (const op of input.patch.operations) {
     if (!isVisitCommitSupportedOp(op.op)) {
@@ -239,6 +261,46 @@ export async function applyVisitDirectInTx(
         { code: "OPERATION_NOT_ALLOWED_FOR_SECTION" },
       );
     }
+
+    if (op.op === "update_measurement") {
+      const mid = op.target.measurement_id ?? op.target.id;
+      if (!mid) {
+        throw Object.assign(new Error("measurement_id requis"), {
+          code: "INVALID_TARGET",
+        });
+      }
+      // Protection : ne pas inventer de cote absente si toutes null
+      const ch = op.changes;
+      const hasDim =
+        ch.length_m != null ||
+        ch.width_m != null ||
+        ch.height_m != null ||
+        ch.quantity_value != null ||
+        ch.label != null ||
+        ch.observation != null ||
+        ch.unit != null;
+      if (!hasDim) continue;
+      measurementOps.push({ kind: "update", measurementId: mid, changes: ch });
+      touched = true;
+      continue;
+    }
+
+    if (op.op === "add_measurement") {
+      const m = op.measurement;
+      if (
+        m.quantity_value == null &&
+        m.length_m == null &&
+        m.width_m == null &&
+        m.height_m == null
+      ) {
+        // Pas d'invention : mesure sans cote → ignorée (à confirmer côté preview)
+        continue;
+      }
+      measurementOps.push({ kind: "add", measurement: m });
+      touched = true;
+      continue;
+    }
+
     if (op.op !== "update_visit") continue;
 
     const targetVisitId = op.target.visit_id ?? op.target.id;
@@ -288,6 +350,36 @@ export async function applyVisitDirectInTx(
       data.comments = changes.comments;
       touched = true;
     }
+    if (changes.findings !== undefined) {
+      data.findingsJson = changes.findings as Prisma.InputJsonValue;
+      touched = true;
+    }
+    if (changes.proposed_works !== undefined) {
+      data.proposedWorksJson = changes.proposed_works as Prisma.InputJsonValue;
+      touched = true;
+    }
+    if (changes.commercial !== undefined) {
+      data.commercialJson = changes.commercial as Prisma.InputJsonValue;
+      touched = true;
+    }
+    if (changes.constraints !== undefined) {
+      data.constraintsJson = changes.constraints as Prisma.InputJsonValue;
+      touched = true;
+    }
+    if (changes.field_notes !== undefined) {
+      const existingPrep =
+        (await tx.siteVisit.findFirst({
+          where: { id: visit.id },
+          select: { prepJson: true },
+        }))?.prepJson ?? {};
+      const prepObj =
+        existingPrep && typeof existingPrep === "object" && !Array.isArray(existingPrep)
+          ? { ...(existingPrep as Record<string, unknown>) }
+          : {};
+      prepObj.fieldNotes = changes.field_notes;
+      data.prepJson = prepObj as Prisma.InputJsonValue;
+      touched = true;
+    }
   }
 
   if (!touched) {
@@ -296,10 +388,86 @@ export async function applyVisitDirectInTx(
     });
   }
 
-  await tx.siteVisit.update({
-    where: { id: visit.id },
-    data,
-  });
+  if (Object.keys(data).length > 0) {
+    await tx.siteVisit.update({
+      where: { id: visit.id },
+      data,
+    });
+  }
+
+  for (const mop of measurementOps) {
+    if (mop.kind === "add") {
+      const m = mop.measurement;
+      const qty =
+        m.quantity_value ??
+        (m.length_m != null && m.width_m != null
+          ? m.length_m * m.width_m
+          : m.length_m ?? m.width_m ?? m.height_m ?? 0);
+      await tx.siteVisitMeasurement.create({
+        data: {
+          visitId: visit.id,
+          organizationId: input.orgId,
+          label: m.label,
+          unit: m.unit,
+          measureType: "FREE",
+          lengthM: m.length_m ?? null,
+          widthM: m.width_m ?? null,
+          heightM: m.height_m ?? null,
+          quantityValue: m.quantity_value ?? null,
+          computedQuantity: qty,
+          observation: m.observation ?? null,
+        },
+      });
+    } else {
+      const existing = await tx.siteVisitMeasurement.findFirst({
+        where: {
+          id: mop.measurementId,
+          visitId: visit.id,
+          organizationId: input.orgId,
+        },
+      });
+      if (!existing) {
+        throw Object.assign(new Error("Mesure introuvable"), {
+          code: "TARGET_NOT_FOUND",
+        });
+      }
+      // Ne pas écraser silencieusement une mesure terrain par des nulls
+      const ch = mop.changes;
+      const nextLen =
+        ch.length_m !== undefined ? (ch.length_m as number | null) : existing.lengthM;
+      const nextWid =
+        ch.width_m !== undefined ? (ch.width_m as number | null) : existing.widthM;
+      const nextHei =
+        ch.height_m !== undefined ? (ch.height_m as number | null) : existing.heightM;
+      const nextQty =
+        ch.quantity_value !== undefined
+          ? (ch.quantity_value as number | null)
+          : existing.quantityValue;
+      const computed =
+        nextQty != null
+          ? Number(nextQty)
+          : nextLen != null && nextWid != null
+            ? Number(nextLen) * Number(nextWid)
+            : Number(existing.computedQuantity);
+      await tx.siteVisitMeasurement.update({
+        where: { id: existing.id },
+        data: {
+          label:
+            typeof ch.label === "string" ? ch.label : existing.label,
+          unit: typeof ch.unit === "string" ? ch.unit : existing.unit,
+          lengthM: nextLen,
+          widthM: nextWid,
+          heightM: nextHei,
+          quantityValue: nextQty,
+          computedQuantity: computed,
+          observation:
+            ch.observation !== undefined
+              ? (ch.observation as string | null)
+              : existing.observation,
+        },
+      });
+    }
+  }
 
   const after = await tx.siteVisit.findFirst({
     where: { id: visit.id, organizationId: input.orgId },

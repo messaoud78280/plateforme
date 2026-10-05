@@ -114,7 +114,12 @@ function visitPatch(overrides?: {
 // --- catalog ---
 {
   assert.ok(isVisitCommitSupportedOp("update_visit"));
-  assert.deepEqual([...VISIT_COMMIT_SUPPORTED_OPS], ["update_visit"]);
+  assert.ok(isVisitCommitSupportedOp("update_measurement"));
+  assert.ok(isVisitCommitSupportedOp("add_measurement"));
+  assert.deepEqual(
+    [...VISIT_COMMIT_SUPPORTED_OPS],
+    ["update_visit", "update_measurement", "add_measurement"],
+  );
   for (const op of VISIT_COMMIT_UNSUPPORTED_OPS) {
     assert.equal(isVisitCommitSupportedOp(op), false);
   }
@@ -204,7 +209,7 @@ function visitPatch(overrides?: {
   console.log("  E stale fingerprint: ok");
 }
 
-// --- F measurement UNSUPPORTED ---
+// --- F measurement SUPPORTED (eligibility) ---
 {
   const subgraph = visitSubgraph();
   const patch = visitPatch({
@@ -222,10 +227,10 @@ function visitPatch(overrides?: {
     ],
   });
   const impact = analyzePatchImpact({ patch, subgraph });
-  assert.ok(impact.errors.length > 0);
   const elig = evaluateCommitEligibility({ patch, impact });
-  assert.equal(elig.ok, false);
-  console.log("  F update_measurement UNSUPPORTED: ok");
+  assert.equal(elig.ok, true);
+  if (elig.ok) assert.equal(elig.mode, "VISIT_ONLY");
+  console.log("  F update_measurement SUPPORTED: ok");
 }
 
 // --- G forbidden field (via impact whitelist) ---
@@ -368,7 +373,7 @@ function visitPatch(overrides?: {
   console.log("  M PLANNING AVAILABLE: ok");
 }
 
-// --- N add_measurement UNSUPPORTED ---
+// --- N add_measurement SUPPORTED (eligibility) ---
 {
   const subgraph = visitSubgraph();
   const patch = visitPatch({
@@ -377,14 +382,13 @@ function visitPatch(overrides?: {
       {
         op: "add_measurement",
         target: { entity_type: "SITE_VISIT", visit_id: FIXTURE_VISIT_ID },
-        measurement: { label: "Mur", unit: "m²" },
+        measurement: { label: "Mur", unit: "m²", length_m: 3, width_m: 2 },
       },
     ],
   });
   const impact = analyzePatchImpact({ patch, subgraph });
-  assert.ok(impact.errors.length > 0);
-  assert.equal(evaluateCommitEligibility({ patch, impact }).ok, false);
-  console.log("  N add_measurement UNSUPPORTED: ok");
+  assert.equal(evaluateCommitEligibility({ patch, impact }).ok, true);
+  console.log("  N add_measurement SUPPORTED: ok");
 }
 
 console.log("ctx02b-visit-commit.test.ts: ok");

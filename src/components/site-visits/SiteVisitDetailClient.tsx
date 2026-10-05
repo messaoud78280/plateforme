@@ -46,6 +46,7 @@ import type {
 import { emptyCommercial } from "@/lib/site-visits/survey-types";
 import { buildMeasurementCoherence } from "@/lib/site-visits/coherence";
 import { LinkVisitToProjectModal } from "@/components/site-visits/LinkVisitToProjectModal";
+import { CreateProjectFromVisitModal } from "@/components/site-visits/CreateProjectFromVisitModal";
 
 type Visit = {
   id: string;
@@ -219,6 +220,7 @@ export function SiteVisitDetailClient({
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [linkProjectOpen, setLinkProjectOpen] = useState(false);
+  const [createProjectOpen, setCreateProjectOpen] = useState(false);
   const [measureOpen, setMeasureOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [noteDraft, setNoteDraft] = useState("");
@@ -578,15 +580,24 @@ export function SiteVisitDetailClient({
             ) : null}
           </div>
         ) : (
-          <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+          <div className="mt-1.5 space-y-2.5">
             <p className="text-[14px] text-slate-600">Aucun chantier lié</p>
-            <button
-              type="button"
-              onClick={() => setLinkProjectOpen(true)}
-              className="inline-flex h-9 items-center rounded-xl bg-[#1e3a5f] px-3.5 text-[12px] font-semibold text-white"
-            >
-              Lier à un chantier
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setCreateProjectOpen(true)}
+                className="inline-flex h-9 items-center rounded-xl bg-[#1e3a5f] px-3.5 text-[12px] font-semibold text-white"
+              >
+                + Créer le chantier
+              </button>
+              <button
+                type="button"
+                onClick={() => setLinkProjectOpen(true)}
+                className="inline-flex h-9 items-center rounded-xl border border-[#1e3a5f]/20 px-3.5 text-[12px] font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
+              >
+                Lier à un chantier existant
+              </button>
+            </div>
           </div>
         )}
       </section>
@@ -618,7 +629,7 @@ export function SiteVisitDetailClient({
             />
           ) : (
             <p className="text-[11px] text-slate-500">
-              Liez un chantier pour activer la modification ChatGPT / JSON.
+              Créez ou liez un chantier pour activer la modification ChatGPT / JSON.
             </p>
           )}
         </div>
@@ -2053,6 +2064,32 @@ export function SiteVisitDetailClient({
                   : prev.projectHref,
             }));
             setMessage("✓ Chantier lié — ChatGPT est disponible");
+          }}
+        />
+      ) : null}
+
+      {createProjectOpen ? (
+        <CreateProjectFromVisitModal
+          visitId={visit.id}
+          onClose={() => setCreateProjectOpen(false)}
+          onCreated={({ visit: created }) => {
+            setVisit((prev) => ({
+              ...prev,
+              ...(created as Partial<Visit>),
+              projectId:
+                typeof created.projectId === "string"
+                  ? created.projectId
+                  : prev.projectId,
+              projectTitle:
+                typeof created.projectTitle === "string"
+                  ? created.projectTitle
+                  : prev.projectTitle,
+              projectHref:
+                typeof created.projectHref === "string"
+                  ? created.projectHref
+                  : prev.projectHref,
+            }));
+            setMessage("✓ Chantier créé — visite liée — ChatGPT disponible");
           }}
         />
       ) : null}

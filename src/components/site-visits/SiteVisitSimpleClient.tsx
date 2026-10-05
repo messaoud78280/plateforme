@@ -30,6 +30,7 @@ import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar
 import { getSectionCapability } from "@/lib/bework-patch/capability";
 import { VisitFillFromChatgptModal } from "@/components/site-visits/VisitFillFromChatgptModal";
 import { LinkVisitToProjectModal } from "@/components/site-visits/LinkVisitToProjectModal";
+import { CreateProjectFromVisitModal } from "@/components/site-visits/CreateProjectFromVisitModal";
 
 type ClientOpt = {
   id: string;
@@ -220,6 +221,7 @@ export function SiteVisitSimpleClient({
   const [chatgptPreview, setChatgptPreview] = useState<string | null>(null);
   const [fillChatgptOpen, setFillChatgptOpen] = useState(false);
   const [linkProjectOpen, setLinkProjectOpen] = useState(false);
+  const [createProjectOpen, setCreateProjectOpen] = useState(false);
   const [linkToast, setLinkToast] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{ url: string; caption: string } | null>(null);
   const [measureOpen, setMeasureOpen] = useState(false);
@@ -836,15 +838,24 @@ export function SiteVisitSimpleClient({
             ) : null}
           </div>
         ) : (
-          <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+          <div className="mt-1.5 space-y-2.5">
             <p className="text-[14px] text-slate-600">Aucun chantier lié</p>
-            <button
-              type="button"
-              onClick={() => setLinkProjectOpen(true)}
-              className="inline-flex h-9 items-center rounded-xl bg-[#1e3a5f] px-3.5 text-[12px] font-semibold text-white"
-            >
-              Lier à un chantier
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setCreateProjectOpen(true)}
+                className="inline-flex h-9 items-center rounded-xl bg-[#1e3a5f] px-3.5 text-[12px] font-semibold text-white"
+              >
+                + Créer le chantier
+              </button>
+              <button
+                type="button"
+                onClick={() => setLinkProjectOpen(true)}
+                className="inline-flex h-9 items-center rounded-xl border border-[#1e3a5f]/20 px-3.5 text-[12px] font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
+              >
+                Lier à un chantier existant
+              </button>
+            </div>
           </div>
         )}
         {linkToast ? (
@@ -881,7 +892,7 @@ export function SiteVisitSimpleClient({
           </div>
         ) : (
           <p className="mt-2 text-[12px] text-amber-800">
-            Liez un chantier pour activer ChatGPT (préparer / modifier).
+            Créez ou liez un chantier pour activer ChatGPT (préparer / modifier).
           </p>
         )}
       </header>
@@ -1836,10 +1847,10 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
               ) : (
                 <button
                   type="button"
-                  onClick={() => setLinkProjectOpen(true)}
+                  onClick={() => setCreateProjectOpen(true)}
                   className="flex h-12 w-full items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-[14px] font-semibold text-amber-900"
                 >
-                  Lier un chantier pour ChatGPT
+                  + Créer le chantier pour ChatGPT
                 </button>
               )}
               <button
@@ -1911,6 +1922,33 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
             }));
             setLinkToast("✓ Chantier lié — ChatGPT est disponible");
             window.setTimeout(() => setLinkToast(null), 4000);
+          }}
+        />
+      ) : null}
+
+      {createProjectOpen ? (
+        <CreateProjectFromVisitModal
+          visitId={visit.id}
+          onClose={() => setCreateProjectOpen(false)}
+          onCreated={({ visit: created }) => {
+            setVisit((prev) => ({
+              ...prev,
+              ...(created as Partial<Visit>),
+              projectId:
+                typeof created.projectId === "string"
+                  ? created.projectId
+                  : prev.projectId,
+              projectTitle:
+                typeof created.projectTitle === "string"
+                  ? created.projectTitle
+                  : prev.projectTitle,
+              projectHref:
+                typeof created.projectHref === "string"
+                  ? created.projectHref
+                  : prev.projectHref,
+            }));
+            setLinkToast("✓ Chantier créé — visite liée — ChatGPT disponible");
+            window.setTimeout(() => setLinkToast(null), 5000);
           }}
         />
       ) : null}

@@ -45,6 +45,7 @@ import type {
 } from "@/lib/site-visits/survey-types";
 import { emptyCommercial } from "@/lib/site-visits/survey-types";
 import { buildMeasurementCoherence } from "@/lib/site-visits/coherence";
+import { LinkVisitToProjectModal } from "@/components/site-visits/LinkVisitToProjectModal";
 
 type Visit = {
   id: string;
@@ -61,6 +62,7 @@ type Visit = {
   projectId?: string | null;
   projectTitle?: string | null;
   projectHref?: string | null;
+  visitCity?: string | null;
   agendaHref?: string | null;
   documentsHref?: string | null;
   lots?: string[];
@@ -216,6 +218,7 @@ export function SiteVisitDetailClient({
   const [busy, setBusy] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [linkProjectOpen, setLinkProjectOpen] = useState(false);
   const [measureOpen, setMeasureOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [noteDraft, setNoteDraft] = useState("");
@@ -550,6 +553,43 @@ export function SiteVisitDetailClient({
           variant="compact"
         />
       ) : null}
+
+      <section className="rounded-2xl border border-[#1e3a5f]/15 bg-white px-4 py-3">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1e3a5f]">
+          Chantier associé
+        </p>
+        {visit.projectId ? (
+          <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-[14px] font-semibold text-emerald-800">
+                ✓ Chantier lié
+              </p>
+              <p className="text-[14px] text-[#1e3a5f]">
+                {visit.projectTitle || "Chantier"}
+              </p>
+            </div>
+            {visit.projectHref ? (
+              <Link
+                href={visit.projectHref}
+                className="inline-flex h-9 items-center rounded-xl border border-[#1e3a5f]/20 px-3 text-[12px] font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
+              >
+                Voir le chantier
+              </Link>
+            ) : null}
+          </div>
+        ) : (
+          <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[14px] text-slate-600">Aucun chantier lié</p>
+            <button
+              type="button"
+              onClick={() => setLinkProjectOpen(true)}
+              className="inline-flex h-9 items-center rounded-xl bg-[#1e3a5f] px-3.5 text-[12px] font-semibold text-white"
+            >
+              Lier à un chantier
+            </button>
+          </div>
+        )}
+      </section>
 
       <header className="rounded-2xl border border-bework-navy/10 bg-bework-soft-navy/50 p-4">
         <h1 className="text-[18px] font-semibold tracking-tight text-[#1e3a5f] sm:text-[20px]">
@@ -1984,6 +2024,37 @@ export function SiteVisitDetailClient({
             </button>
           </div>
         </Modal>
+      ) : null}
+
+      {linkProjectOpen ? (
+        <LinkVisitToProjectModal
+          visit={{
+            id: visit.id,
+            clientName: visit.clientName,
+            siteAddress: visit.siteAddress,
+            visitCity: visit.visitCity ?? visit.prep?.city,
+          }}
+          onClose={() => setLinkProjectOpen(false)}
+          onLinked={({ visit: linked }) => {
+            setVisit((prev) => ({
+              ...prev,
+              ...(linked as Partial<Visit>),
+              projectId:
+                typeof linked.projectId === "string"
+                  ? linked.projectId
+                  : prev.projectId,
+              projectTitle:
+                typeof linked.projectTitle === "string"
+                  ? linked.projectTitle
+                  : prev.projectTitle,
+              projectHref:
+                typeof linked.projectHref === "string"
+                  ? linked.projectHref
+                  : prev.projectHref,
+            }));
+            setMessage("✓ Chantier lié — ChatGPT est disponible");
+          }}
+        />
       ) : null}
     </div>
   );

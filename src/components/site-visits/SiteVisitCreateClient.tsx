@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
@@ -22,6 +22,14 @@ type ClientOpt = {
   }>;
 };
 
+type ProjectOpt = {
+  id: string;
+  title: string;
+  siteAddress: string | null;
+  siteCity: string | null;
+  clientName?: string | null;
+};
+
 type UserOpt = { id: string; name: string | null; email: string };
 
 const field =
@@ -30,16 +38,20 @@ const label = "block text-[12px] font-semibold uppercase tracking-wide text-slat
 
 /**
  * Création rapide — le compte rendu se remplit ensuite sur la fiche visite (5 blocs).
+ * Si `initialProjectId` est fourni (depuis un chantier), projectId est envoyé dès le POST.
  */
 export function SiteVisitCreateClient({
   clients,
+  projects = [],
   users,
   currentUserId,
+  initialProjectId = null,
 }: {
   clients: ClientOpt[];
-  projects?: unknown;
+  projects?: ProjectOpt[];
   users: UserOpt[];
   currentUserId: string;
+  initialProjectId?: string | null;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -56,6 +68,30 @@ export function SiteVisitCreateClient({
   const [date, setDate] = useState("");
   const [time, setTime] = useState("09:00");
   const [responsibleId, setResponsibleId] = useState(currentUserId);
+  const [projectId, setProjectId] = useState(() => {
+    if (
+      initialProjectId &&
+      projects.some((p) => p.id === initialProjectId)
+    ) {
+      return initialProjectId;
+    }
+    return "";
+  });
+  const [projectQuery, setProjectQuery] = useState("");
+
+  const selectedProject = useMemo(
+    () => projects.find((p) => p.id === projectId) ?? null,
+    [projects, projectId],
+  );
+
+  const prefilledFromProject = useRef(false);
+  useEffect(() => {
+    if (prefilledFromProject.current || !selectedProject) return;
+    prefilledFromProject.current = true;
+    if (selectedProject.siteAddress) setAddress(selectedProject.siteAddress);
+    if (selectedProject.siteCity) setCity(selectedProject.siteCity);
+    if (selectedProject.clientName) setClientName(selectedProject.clientName);
+  }, [selectedProject]);
 
   const filteredClients = useMemo(() => {
     const q = clientQuery.trim().toLowerCase();
@@ -70,6 +106,20 @@ export function SiteVisitCreateClient({
       .slice(0, 12);
   }, [clients, clientQuery]);
 
+  const filteredProjects = useMemo(() => {
+    const q = projectQuery.trim().toLowerCase();
+    if (!q) return projects.slice(0, 12);
+    return projects
+      .filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          (p.siteCity ?? "").toLowerCase().includes(q) ||
+          (p.siteAddress ?? "").toLowerCase().includes(q) ||
+          (p.clientName ?? "").toLowerCase().includes(q),
+      )
+      .slice(0, 12);
+  }, [projects, projectQuery]);
+
   function applyClient(id: string) {
     setClientId(id);
     const c = clients.find((x) => x.id === id);
@@ -82,6 +132,16 @@ export function SiteVisitCreateClient({
     setZipCode(c.zipCode || "");
     setCity(c.city || "");
     setClientQuery("");
+  }
+
+  function applyProject(id: string) {
+    setProjectId(id);
+    const p = projects.find((x) => x.id === id);
+    if (!p) return;
+    if (p.siteAddress) setAddress(p.siteAddress);
+    if (p.siteCity) setCity(p.siteCity);
+    if (p.clientName && !clientName.trim()) setClientName(p.clientName);
+    setProjectQuery("");
   }
 
   const canCreate = Boolean(clientName.trim() && address.trim());
@@ -115,6 +175,7 @@ export function SiteVisitCreateClient({
           clientNeed: works.trim() || null,
           scheduledAt,
           responsibleId: responsibleId || null,
+          projectId: projectId || null,
           prep: {
             contactEmail: email.trim() || null,
             zipCode: zipCode.trim() || null,
@@ -157,6 +218,68 @@ export function SiteVisitCreateClient({
 
       <section className="mt-5 space-y-3 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
         <h2 className="text-[15px] font-semibold text-[#1e3a5f]">Client & chantier</h2>
+
+        {projects.length > 0 ? (
+          <label>
+            <span className={label}>Chantier BeWork</span>
+            {selectedProject ? (
+              <div className="mt-1 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5">
+                <div>
+                  <p className="text-[13px] font-semibold text-emerald-900">
+                    {selectedProject.title}
+                  </p>
+                  <p className="text-[12px] text-emerald-800">
+                    {[selectedProject.clientName, selectedProject.siteCity]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                </div>
+                {!initialProjectId ? (
+                  <button
+                    type="button"
+                    className="text-[12px] font-semibold text-slate-600 underline"
+                    onClick={() => setProjectId("")}
+                  >
+                    Retirer
+                  </button>
+                ) : (
+                  <span className="text-[11px] font-medium text-emerald-800">
+                    Lié depuis le dossier
+                  </span>
+                )}
+              </div>
+            ) : (
+              <>
+                <input
+                  className={field}
+                  value={projectQuery}
+                  onChange={(e) => setProjectQuery(e.target.value)}
+                  placeholder="Rechercher un chantier…"
+                />
+                {projectQuery.trim() ? (
+                  <ul className="mt-2 max-h-40 overflow-auto rounded-xl border border-slate-100 bg-slate-50">
+                    {filteredProjects.map((p) => (
+                      <li key={p.id}>
+                        <button
+                          type="button"
+                          className="w-full px-3 py-2 text-left text-[13px] hover:bg-white"
+                          onClick={() => applyProject(p.id)}
+                        >
+                          <span className="font-medium">{p.title}</span>
+                          <span className="block text-[12px] text-slate-500">
+                            {[p.clientName, p.siteAddress, p.siteCity]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </>
+            )}
+          </label>
+        ) : null}
 
         <label>
           <span className={label}>Client existant</span>
@@ -204,10 +327,9 @@ export function SiteVisitCreateClient({
             />
           </label>
           <label>
-            <span className={label}>Email</span>
+            <span className={label}>E-mail</span>
             <input
               className={field}
-              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -240,20 +362,24 @@ export function SiteVisitCreateClient({
           </label>
         </div>
         <label>
-          <span className={label}>Travaux demandés (facultatif)</span>
+          <span className={label}>Travaux envisagés</span>
           <textarea
-            className={cn(field, "min-h-[88px] resize-y")}
+            className={cn(field, "min-h-[88px]")}
             value={works}
             onChange={(e) => setWorks(e.target.value)}
-            placeholder="Ex. Réfection terrasse 40 m²…"
+            placeholder="Ex. rénovation appartement, peinture, plomberie…"
           />
         </label>
+      </section>
+
+      <section className="mt-4 space-y-3 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+        <h2 className="text-[15px] font-semibold text-[#1e3a5f]">Planification</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <label>
-            <span className={label}>Date (facultatif)</span>
+            <span className={label}>Date</span>
             <input
-              className={field}
               type="date"
+              className={field}
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
@@ -261,15 +387,15 @@ export function SiteVisitCreateClient({
           <label>
             <span className={label}>Heure</span>
             <input
-              className={field}
               type="time"
+              className={field}
               value={time}
               onChange={(e) => setTime(e.target.value)}
             />
           </label>
         </div>
         <label>
-          <span className={label}>Commercial / responsable</span>
+          <span className={label}>Responsable</span>
           <select
             className={field}
             value={responsibleId}
@@ -288,9 +414,9 @@ export function SiteVisitCreateClient({
         type="button"
         disabled={busy || !canCreate}
         onClick={() => void submit()}
-        className="mt-4 flex h-14 w-full items-center justify-center rounded-2xl bg-[#1e3a5f] text-[16px] font-semibold text-white disabled:opacity-40"
+        className="mt-5 flex h-12 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[15px] font-semibold text-white disabled:opacity-40"
       >
-        {busy ? "Création…" : "Créer et ouvrir le compte rendu"}
+        {busy ? "Création…" : "Créer la visite"}
       </button>
     </div>
   );

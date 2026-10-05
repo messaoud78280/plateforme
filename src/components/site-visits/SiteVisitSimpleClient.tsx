@@ -29,6 +29,7 @@ import { ChantierDossierNavHost } from "@/components/chantier/ChantierDossierNav
 import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
 import { getSectionCapability } from "@/lib/bework-patch/capability";
 import { VisitFillFromChatgptModal } from "@/components/site-visits/VisitFillFromChatgptModal";
+import { LinkVisitToProjectModal } from "@/components/site-visits/LinkVisitToProjectModal";
 
 type ClientOpt = {
   id: string;
@@ -67,6 +68,9 @@ type Visit = {
   status: string;
   statusLabel: string;
   projectId?: string | null;
+  projectTitle?: string | null;
+  projectHref?: string | null;
+  visitCity?: string | null;
   patchContextVersion?: number | null;
   commercialQuoteHref: string | null;
   commercialQuoteNumber: string | null;
@@ -215,6 +219,8 @@ export function SiteVisitSimpleClient({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [chatgptPreview, setChatgptPreview] = useState<string | null>(null);
   const [fillChatgptOpen, setFillChatgptOpen] = useState(false);
+  const [linkProjectOpen, setLinkProjectOpen] = useState(false);
+  const [linkToast, setLinkToast] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{ url: string; caption: string } | null>(null);
   const [measureOpen, setMeasureOpen] = useState(false);
   const [clientQuery, setClientQuery] = useState("");
@@ -805,6 +811,46 @@ export function SiteVisitSimpleClient({
           />
         </div>
       ) : null}
+
+      <section className="mb-4 rounded-2xl border border-[#1e3a5f]/15 bg-white px-4 py-3">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1e3a5f]">
+          Chantier associé
+        </p>
+        {visit.projectId ? (
+          <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-[14px] font-semibold text-emerald-800">
+                ✓ Chantier lié
+              </p>
+              <p className="text-[14px] text-[#1e3a5f]">
+                {visit.projectTitle || "Chantier"}
+              </p>
+            </div>
+            {visit.projectHref ? (
+              <Link
+                href={visit.projectHref}
+                className="inline-flex h-9 items-center rounded-xl border border-[#1e3a5f]/20 px-3 text-[12px] font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
+              >
+                Voir le chantier
+              </Link>
+            ) : null}
+          </div>
+        ) : (
+          <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[14px] text-slate-600">Aucun chantier lié</p>
+            <button
+              type="button"
+              onClick={() => setLinkProjectOpen(true)}
+              className="inline-flex h-9 items-center rounded-xl bg-[#1e3a5f] px-3.5 text-[12px] font-semibold text-white"
+            >
+              Lier à un chantier
+            </button>
+          </div>
+        )}
+        {linkToast ? (
+          <p className="mt-2 text-[12px] font-medium text-emerald-700">{linkToast}</p>
+        ) : null}
+      </section>
 
       <header className="mb-4 rounded-2xl border border-[#1e3a5f]/10 bg-[#1e3a5f]/5 px-4 py-4">
         <h1 className="text-[20px] font-semibold leading-tight text-[#1e3a5f]">
@@ -1778,14 +1824,24 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
               >
                 Télécharger le compte rendu PDF
               </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => setFillChatgptOpen(true)}
-                className="flex h-12 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[14px] font-semibold text-white"
-              >
-                ✨ Préparer / remplir avec ChatGPT
-              </button>
+              {visit.projectId ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setFillChatgptOpen(true)}
+                  className="flex h-12 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[14px] font-semibold text-white"
+                >
+                  ✨ Préparer / remplir avec ChatGPT
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setLinkProjectOpen(true)}
+                  className="flex h-12 w-full items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-[14px] font-semibold text-amber-900"
+                >
+                  Lier un chantier pour ChatGPT
+                </button>
+              )}
               <button
                 type="button"
                 disabled={busy}
@@ -1824,6 +1880,38 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
         <VisitFillFromChatgptModal
           visitId={visit.id}
           onClose={() => setFillChatgptOpen(false)}
+        />
+      ) : null}
+
+      {linkProjectOpen ? (
+        <LinkVisitToProjectModal
+          visit={{
+            id: visit.id,
+            clientName,
+            siteAddress: address,
+            visitCity: city || visit.visitCity,
+          }}
+          onClose={() => setLinkProjectOpen(false)}
+          onLinked={({ visit: linked }) => {
+            setVisit((prev) => ({
+              ...prev,
+              ...(linked as Partial<Visit>),
+              projectId:
+                typeof linked.projectId === "string"
+                  ? linked.projectId
+                  : prev.projectId,
+              projectTitle:
+                typeof linked.projectTitle === "string"
+                  ? linked.projectTitle
+                  : prev.projectTitle,
+              projectHref:
+                typeof linked.projectHref === "string"
+                  ? linked.projectHref
+                  : prev.projectHref,
+            }));
+            setLinkToast("✓ Chantier lié — ChatGPT est disponible");
+            window.setTimeout(() => setLinkToast(null), 4000);
+          }}
         />
       ) : null}
 

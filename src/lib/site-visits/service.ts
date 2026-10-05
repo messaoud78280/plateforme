@@ -877,10 +877,21 @@ export async function updateSiteVisit(opts: {
   }
   if (d0.surveyExportedAt === true) patch.surveyExportedAt = new Date();
   if (typeof d0.projectId === "string" || d0.projectId === null) {
-    patch.project =
-      typeof d0.projectId === "string" && d0.projectId
-        ? { connect: { id: d0.projectId } }
-        : { disconnect: true };
+    if (typeof d0.projectId === "string" && d0.projectId) {
+      const project = await prisma.project.findFirst({
+        where: {
+          id: d0.projectId,
+          organizationId: opts.organizationId,
+        },
+        select: { id: true },
+      });
+      if (!project) {
+        throw new Error("Chantier introuvable dans votre organisation");
+      }
+      patch.project = { connect: { id: project.id } };
+    } else {
+      patch.project = { disconnect: true };
+    }
   }
   if (typeof d0.responsibleId === "string" || d0.responsibleId === null)
     patch.responsible =

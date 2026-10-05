@@ -1484,7 +1484,7 @@ async function getProjectWorkspaceUncached(
     isReference: true,
   };
 
-  const visitsListHref = `/dashboard/visites-metres?projectId=${encodeURIComponent(projectId)}`;
+  const newVisitHref = `/dashboard/visites-metres/nouveau?projectId=${encodeURIComponent(projectId)}`;
   const documentsChantierHref = `/dashboard/projets/${projectId}/documents-chantier`;
 
   const workflow: ChantierWorkflowStep[] = [
@@ -1502,13 +1502,13 @@ async function getProjectWorkspaceUncached(
               : "Aucune visite terrain liée",
       href: resolvedVisitId
         ? `/dashboard/visites-metres/${resolvedVisitId}`
-        : visitsListHref,
+        : newVisitHref,
       ready: prepState.visit.countsAsCompleted || !prepState.visit.applicable,
       actionLabel: resolvedVisitId
         ? visit
           ? "Ouvrir"
           : "Ouvrir la visite"
-        : "Ouvrir les visites",
+        : "Créer une visite",
       primaryAction: "open",
     },
     {

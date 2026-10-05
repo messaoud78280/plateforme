@@ -10,7 +10,11 @@ import { SiteVisitCreateClient } from "@/components/site-visits/SiteVisitCreateC
 
 export const dynamic = "force-dynamic";
 
-export default async function NouvelleVisitePage() {
+export default async function NouvelleVisitePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ projectId?: string }>;
+}) {
   const session = await getCachedServerSession();
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard/visites-metres/nouveau");
@@ -25,6 +29,9 @@ export default async function NouvelleVisitePage() {
   });
   const orgId = await resolveSiteVisitsOrgId(session.user);
   if (!orgId) redirect("/dashboard");
+
+  const sp = await searchParams;
+  const requestedProjectId = sp.projectId?.trim() || null;
 
   const [clients, projects, members] = await Promise.all([
     prisma.externalOrganization.findMany({
@@ -60,7 +67,13 @@ export default async function NouvelleVisitePage() {
     }),
     prisma.project.findMany({
       where: { organizationId: orgId, archivedAt: null },
-      select: { id: true, title: true, siteAddress: true, siteCity: true },
+      select: {
+        id: true,
+        title: true,
+        siteAddress: true,
+        siteCity: true,
+        client: { select: { name: true } },
+      },
       orderBy: { updatedAt: "desc" },
       take: 80,
     }),
@@ -73,9 +86,15 @@ export default async function NouvelleVisitePage() {
     }),
   ]);
 
+  const initialProjectId =
+    requestedProjectId && projects.some((p) => p.id === requestedProjectId)
+      ? requestedProjectId
+      : null;
+
   return (
     <SiteVisitCreateClient
       currentUserId={session.user.id}
+      initialProjectId={initialProjectId}
       clients={clients.map((c) => ({
         id: c.id,
         name: c.tradeName || c.name,
@@ -92,7 +111,13 @@ export default async function NouvelleVisitePage() {
           isPrimary: ct.isPrimary,
         })),
       }))}
-      projects={projects}
+      projects={projects.map((p) => ({
+        id: p.id,
+        title: p.title,
+        siteAddress: p.siteAddress,
+        siteCity: p.siteCity,
+        clientName: p.client?.name ?? null,
+      }))}
       users={members.map((m) => ({
         id: m.user.id,
         name: m.user.name,

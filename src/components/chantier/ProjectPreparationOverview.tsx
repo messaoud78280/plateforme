@@ -580,9 +580,17 @@ export function ProjectPreparationOverview({
                         className="block px-3.5 py-2 text-[13px] text-slate-800 hover:bg-slate-50"
                         onClick={() => setAddMenuOpen(false)}
                       >
-                        Visite
+                        Visite — Ouvrir
                       </Link>
-                    ) : null}
+                    ) : (
+                      <Link
+                        href={`/dashboard/visites-metres/nouveau?projectId=${encodeURIComponent(workspace.projectId)}`}
+                        className="block px-3.5 py-2 text-[13px] text-slate-800 hover:bg-slate-50"
+                        onClick={() => setAddMenuOpen(false)}
+                      >
+                        Visite — Créer
+                      </Link>
+                    )}
                     <Link
                       href={`/dashboard/projets/${workspace.projectId}/documents-chantier`}
                       className="block px-3.5 py-2 text-[13px] text-slate-800 hover:bg-slate-50"

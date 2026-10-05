@@ -65,6 +65,8 @@ export type PrepParamDTO = {
   value: number | null;
   formula: string | null;
   provenance: StoredProvenance | null;
+  /** Sémantique métier (PLAN / CALCULATION / …) — distincte du legacy. */
+  provenanceKind?: import("@/lib/bework-context/types").ProjectContextProvenanceKind | null;
   sourceRef: string | null;
   evidence: { kind?: string; location?: string; quote?: string } | null;
   hypothesisId: string | null;
@@ -113,6 +115,8 @@ export type PrepLineDTO = {
   formula: string | null;
   declaredQuantity: number | null;
   provenance: StoredProvenance | null;
+  /** Sémantique métier (PLAN / CALCULATION / …) — distincte du legacy. */
+  provenanceKind?: import("@/lib/bework-context/types").ProjectContextProvenanceKind | null;
   literalProvenance: StoredProvenance | null;
   justification: string | null;
   role: LineRole;

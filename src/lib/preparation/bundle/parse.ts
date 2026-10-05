@@ -6,6 +6,7 @@ import { adaptLegacyFoundationsBundle, isLegacyPrepBundle } from "@/lib/preparat
 import { computeStudy, quantitiesDiffer } from "@/lib/preparation/engine/compute";
 import { LINE_CODE_RE, PARAM_KEY_RE } from "@/lib/preparation/engine/formula";
 import { normalizePrepUnit } from "@/lib/preparation/units";
+import { resolveImportProvenancePair } from "@/lib/preparation/import-provenance";
 import {
   DEMO_WATERMARK,
   IMPORT_PROVENANCES,
@@ -45,6 +46,8 @@ export type BundleParam = {
   value: number | null;
   formula: string | null;
   provenance: StoredProvenance | null;
+  /** Sémantique métier CREATE — distincte du legacy moteur. */
+  provenanceKind: import("@/lib/bework-context/types").ProjectContextProvenanceKind | null;
   sourceRef: string | null;
   evidence: { kind?: string; location?: string; quote?: string } | null;
   hypothesisId: string | null;
@@ -68,6 +71,7 @@ export type BundleLine = {
   formula: string | null;
   declaredQuantity: number | null;
   provenance: StoredProvenance | null;
+  provenanceKind: import("@/lib/bework-context/types").ProjectContextProvenanceKind | null;
   literalProvenance: StoredProvenance | null;
   justification: string | null;
   role: LineRole;
@@ -339,7 +343,11 @@ export function parsePrepBundle(input: unknown): PrepParseResult {
   const parameters: BundleParam[] = [];
   const paramKeys = new Set<string>();
   const rawParams = Array.isArray(root.parameters) ? root.parameters : [];
-  if (!Array.isArray(root.parameters)) warn("parameters", "Aucun paramètre déclaré");
+  if (!Array.isArray(root.parameters)) {
+    warn("parameters", "Bloc parameters absent — facultatif si le métré n’utilise pas de formules");
+  } else if (rawParams.length === 0) {
+    // vide = OK (CREATE surfaces pures)
+  }
   if (rawParams.length > PREP_LIMITS.parameters) {
     err("parameters", `Trop de paramètres (maximum ${PREP_LIMITS.parameters})`);
   }
@@ -371,10 +379,17 @@ export function parsePrepBundle(input: unknown): PrepParseResult {
     const unit = unitRaw ? normalizePrepUnit(unitRaw).unit : "";
 
     let provenance: StoredProvenance | null = null;
+    let provenanceKind: BundleParam["provenanceKind"] = null;
     let evidence: BundleParam["evidence"] = null;
     const sourceRef = str(p.source_ref, 60);
     if (!formula) {
-      provenance = readImportProvenance(p.provenance, `${path}.provenance`, key, warn);
+      const pair = resolveImportProvenancePair({
+        provenance: p.provenance,
+        provenanceKind: p.provenance_kind ?? p.provenanceKind,
+      });
+      provenance = pair.provenance;
+      provenanceKind = pair.provenanceKind;
+      if (pair.note) warn(`${path}.provenance`, `${key} : ${pair.note}`);
       if (isObj(p.evidence)) {
         evidence = {
           kind: str(p.evidence.kind, 40) ?? undefined,
@@ -385,18 +400,27 @@ export function parsePrepBundle(input: unknown): PrepParseResult {
       if (sourceRef && !sourceIds.has(sourceRef)) {
         warn(`${path}.source_ref`, `${key} : source inconnue ${sourceRef}`);
       }
-      if (provenance === "RELEVE") {
+      if (provenance === "RELEVE" && provenanceKind === "MEASURE") {
         const proven = !!sourceRef && sourceIds.has(sourceRef) && !!evidence?.location && !!evidence?.quote;
         if (!proven) {
           provenance = "RELEVE_A_VERIFIER";
           warn(
             path,
-            `${key} : « relevé » sans preuve de lecture complète (source, emplacement, texte lu) — classé « relevé à vérifier »`,
+            `${key} : « relevé » sans preuve de lecture complète (source, emplacement, texte lu) — classé « relevé à vérifier » (kind MEASURE conservé)`,
           );
         }
       }
-    } else if (p.provenance !== undefined) {
-      warn(`${path}.provenance`, `${key} : provenance ignorée sur un paramètre calculé`);
+    } else {
+      const pair = resolveImportProvenancePair({
+        provenance: p.provenance,
+        provenanceKind: p.provenance_kind ?? p.provenanceKind,
+        formula,
+      });
+      provenance = null;
+      provenanceKind = pair.provenanceKind ?? "CALCULATION";
+      if (p.provenance !== undefined) {
+        warn(`${path}.provenance`, `${key} : provenance legacy ignorée sur un paramètre calculé`);
+      }
     }
     const hypothesisId = str(p.hypothesis_id, 40);
     if (hypothesisId && !hypothesisIds.has(hypothesisId)) {
@@ -409,6 +433,7 @@ export function parsePrepBundle(input: unknown): PrepParseResult {
       value: formula ? null : value,
       formula,
       provenance,
+      provenanceKind,
       sourceRef,
       evidence,
       hypothesisId,
@@ -533,13 +558,28 @@ export function parsePrepBundle(input: unknown): PrepParseResult {
       err(path, `${code} : quantité déclarée non numérique`);
     }
     let provenance: StoredProvenance | null = null;
+    let provenanceKind: BundleLine["provenanceKind"] = null;
     let literalProvenance: StoredProvenance | null = null;
     if (!formula) {
       if (declaredQuantity === null) err(path, `${code} : ni formule ni quantité déclarée`);
-      provenance = readImportProvenance(it.provenance, `${path}.provenance`, code, warn);
-    } else if (it.provenance !== undefined && it.provenance !== null) {
-      const p = String(it.provenance);
-      if ((IMPORT_PROVENANCES as readonly string[]).includes(p)) literalProvenance = p as ImportProvenance;
+      const pair = resolveImportProvenancePair({
+        provenance: it.provenance,
+        provenanceKind: it.provenance_kind ?? it.provenanceKind,
+      });
+      provenance = pair.provenance;
+      provenanceKind = pair.provenanceKind;
+      if (pair.note) warn(`${path}.provenance`, `${code} : ${pair.note}`);
+    } else {
+      const pair = resolveImportProvenancePair({
+        provenance: it.provenance,
+        provenanceKind: it.provenance_kind ?? it.provenanceKind,
+        formula,
+      });
+      provenanceKind = pair.provenanceKind ?? "CALCULATION";
+      if (it.provenance !== undefined && it.provenance !== null) {
+        const p = String(it.provenance);
+        if ((IMPORT_PROVENANCES as readonly string[]).includes(p)) literalProvenance = p as ImportProvenance;
+      }
     }
 
     let role: LineRole = "quote";
@@ -580,6 +620,7 @@ export function parsePrepBundle(input: unknown): PrepParseResult {
       formula,
       declaredQuantity,
       provenance,
+      provenanceKind,
       literalProvenance,
       justification: str(it.justification),
       role,
@@ -708,23 +749,6 @@ export function parsePrepBundle(input: unknown): PrepParseResult {
       disclaimers,
     },
   };
-}
-
-function readImportProvenance(
-  v: unknown,
-  path: string,
-  id: string,
-  warn: (path: string, message: string) => void,
-): StoredProvenance {
-  if (typeof v === "string" && (IMPORT_PROVENANCES as readonly string[]).includes(v)) {
-    return v as ImportProvenance;
-  }
-  if (v === "CALCULE" || v === "SAISIE_MANUELLE") {
-    warn(path, `${id} : provenance « ${v} » réservée à BeWork — classée « hypothèse »`);
-  } else {
-    warn(path, `${id} : provenance absente ou inconnue — classée « hypothèse »`);
-  }
-  return "HYPOTHESE";
 }
 
 function round6(v: number): number {

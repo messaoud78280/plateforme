@@ -9,7 +9,8 @@ import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
 import { prisma } from "@/lib/prisma";
 import { previewPrepImport, PrepError } from "@/lib/preparation/service";
 import { loadCurrentTakeoffCreateSourcesFingerprint } from "@/lib/bework-context/adapt-takeoff-create";
-import { mapProvenanceKind } from "@/lib/bework-context/provenance";
+import { summarizePrepPreviewFailure } from "@/lib/preparation/preview-error";
+import { summarizeCreateProvenance } from "@/lib/preparation/import-provenance";
 
 export const dynamic = "force-dynamic";
 
@@ -72,28 +73,49 @@ export async function POST(req: Request, ctx: Ctx) {
       targetStudyId: null,
     });
     if (!result.ok) {
-      return NextResponse.json(result, { status: 422 });
+      const summary = summarizePrepPreviewFailure({
+        issues: result.issues,
+        code: "PREP_PARSE_FAILED",
+      });
+      return NextResponse.json(
+        {
+          ok: false,
+          code: "PREP_PARSE_FAILED",
+          error: summary.title,
+          message: summary.title,
+          issues: result.issues,
+          details: summary.details,
+        },
+        { status: 422 },
+      );
     }
 
     const params = result.preview.params;
     const lines = result.preview.lines;
+    const counts = summarizeCreateProvenance([
+      ...params.map((p) => ({
+        provenanceKind: p.provenanceKind,
+        provenance: p.provenance,
+        formula: p.formula,
+        missingValue: p.value == null && !p.formula,
+      })),
+      ...lines.map((l) => ({
+        provenanceKind: l.provenanceKind,
+        provenance: l.provenance,
+        formula: l.formula,
+        // À confirmer seulement si quantité vraiment absente — pas RELEVE_A_VERIFIER/PLAN
+        missingValue:
+          l.declaredQuantity == null && !l.formula && (l.computed == null || !Number.isFinite(l.computed)),
+      })),
+    ]);
     const provenanceSummary = {
-      measure: params.filter((p) => mapProvenanceKind({ provenance: p.provenance }) === "MEASURE")
-        .length,
-      plan: params.filter((p) => mapProvenanceKind({ provenance: p.provenance }) === "PLAN")
-        .length,
-      manual: params.filter((p) => mapProvenanceKind({ provenance: p.provenance }) === "MANUAL")
-        .length,
-      calculation: params.filter(
-        (p) => mapProvenanceKind({ provenance: p.provenance, formula: p.formula }) === "CALCULATION",
-      ).length,
-      hypothesis:
-        params.filter((p) => mapProvenanceKind({ provenance: p.provenance }) === "HYPOTHESIS")
-          .length + result.preview.hypotheses.length,
-      toConfirm: [
-        ...params.filter((p) => p.value == null),
-        ...lines.filter((l) => l.toVerifyCount > 0),
-      ].length,
+      measure: counts.measure,
+      plan: counts.plan,
+      manual: counts.manual,
+      calculation: counts.calculation,
+      hypothesis: counts.hypothesis + result.preview.hypotheses.length,
+      unknown: counts.unknown,
+      toConfirm: counts.toConfirm,
       lines: lines.length,
       params: params.length,
     };
@@ -107,14 +129,32 @@ export async function POST(req: Request, ctx: Ctx) {
     });
   } catch (e) {
     if (e instanceof PrepError) {
+      const summary = summarizePrepPreviewFailure({
+        error: e.message,
+        issues: e.issues ?? [],
+        code: "PREP_ERROR",
+      });
       return NextResponse.json(
-        { ok: false, error: e.message, issues: e.issues ?? [] },
+        {
+          ok: false,
+          code: "PREP_ERROR",
+          error: summary.title,
+          message: summary.title,
+          issues: e.issues ?? [],
+          details: summary.details,
+        },
         { status: e.status },
       );
     }
     const err = e as { message?: string; status?: number; code?: string };
     return NextResponse.json(
-      { ok: false, error: err.message ?? "Prévisualisation impossible", code: err.code },
+      {
+        ok: false,
+        error: err.message ?? "Prévisualisation impossible",
+        message: err.message ?? "Prévisualisation impossible",
+        code: err.code,
+        issues: [],
+      },
       { status: err.status ?? 500 },
     );
   }

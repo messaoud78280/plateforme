@@ -4,8 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import type { PrepImportPreview } from "@/lib/preparation/service";
+import type { PrepIssue } from "@/lib/preparation/types";
 import { displayUnit, formatQty } from "@/lib/preparation/units";
 import { ProvenanceBadge } from "@/components/preparation/prep-ui";
+import { summarizePrepPreviewFailure } from "@/lib/preparation/preview-error";
 
 type ProvenanceSummary = {
   measure: number;
@@ -37,6 +39,8 @@ export function TakeoffCreateFromChatgptModal({
   const [step, setStep] = useState<"context" | "json" | "preview">("context");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorIssues, setErrorIssues] = useState<PrepIssue[]>([]);
+  const [showIssueDetails, setShowIssueDetails] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [sourcesFingerprint, setSourcesFingerprint] = useState<string | null>(null);
   const [resolvedVisitId, setResolvedVisitId] = useState<string | null>(visitId ?? null);
@@ -83,32 +87,53 @@ export function TakeoffCreateFromChatgptModal({
   async function runPreview() {
     setBusy(true);
     setError(null);
+    setErrorIssues([]);
+    setShowIssueDetails(false);
     setPreview(null);
     setSummary(null);
     try {
-      if (!sourcesFingerprint) {
-        await copyContext();
+      let fp = sourcesFingerprint;
+      if (!fp) {
+        const resCtx = await fetch(`/api/projets/${projectId}/takeoff-create/context`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ visitId: visitId ?? null }),
+        });
+        const ctx = await resCtx.json().catch(() => null);
+        if (!resCtx.ok) {
+          throw new Error(ctx?.error ?? "Contexte indisponible");
+        }
+        fp = ctx.sourcesFingerprint ?? null;
+        setSourcesFingerprint(fp);
+        setResolvedVisitId(ctx.context?.visit?.id ?? visitId ?? null);
       }
       const res = await fetch(`/api/projets/${projectId}/takeoff-create/preview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           raw,
-          sourcesFingerprint,
+          sourcesFingerprint: fp,
           visitId: resolvedVisitId,
         }),
       });
       const data = await res.json().catch(() => null);
       if (data?.code === "PREVIEW_STALE") {
         setSourcesFingerprint(data.sourcesFingerprint ?? null);
-        throw new Error(data.error);
+        throw new Error(data.error ?? data.message ?? "Contexte obsolète");
       }
       if (!res.ok || !data?.ok) {
-        throw new Error(data?.error ?? "Prévisualisation impossible");
+        const issues = Array.isArray(data?.issues) ? (data.issues as PrepIssue[]) : [];
+        setErrorIssues(issues);
+        const summary = summarizePrepPreviewFailure({
+          error: data?.error ?? data?.message,
+          issues,
+          code: data?.code,
+        });
+        throw new Error(summary.details || summary.title || "Prévisualisation impossible");
       }
       setPreview(data.preview as PrepImportPreview);
       setSummary(data.provenanceSummary as ProvenanceSummary);
-      setSourcesFingerprint(data.sourcesFingerprint ?? sourcesFingerprint);
+      setSourcesFingerprint(data.sourcesFingerprint ?? fp);
       setStep("preview");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
@@ -210,9 +235,37 @@ export function TakeoffCreateFromChatgptModal({
             </p>
           ) : null}
           {error ? (
-            <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800">
-              {error}
-            </p>
+            <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800">
+              <p className="font-semibold">Prévisualisation impossible</p>
+              {errorIssues.length > 0 ? (
+                <>
+                  <ul className="mt-2 list-none space-y-2">
+                    {(showIssueDetails ? errorIssues : errorIssues.slice(0, 5)).map((iss, idx) => (
+                      <li key={`${iss.path}-${idx}`} className="rounded-md bg-white/60 px-2 py-1.5">
+                        <p className="font-medium text-red-900">
+                          Champ : {iss.path || "—"}
+                          {iss.severity === "warn" ? " (avertissement)" : ""}
+                        </p>
+                        <p className="whitespace-pre-wrap text-red-800">{iss.message}</p>
+                      </li>
+                    ))}
+                  </ul>
+                  {errorIssues.length > 5 ? (
+                    <button
+                      type="button"
+                      className="mt-2 text-[12px] font-semibold underline"
+                      onClick={() => setShowIssueDetails((v) => !v)}
+                    >
+                      {showIssueDetails
+                        ? "Masquer les détails"
+                        : `Voir les détails (+${errorIssues.length - 5})`}
+                    </button>
+                  ) : null}
+                </>
+              ) : (
+                <p className="mt-1 whitespace-pre-wrap">{error}</p>
+              )}
+            </div>
           ) : null}
 
           {step !== "preview" ? (

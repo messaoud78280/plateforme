@@ -30,6 +30,7 @@ import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar
 import { getSectionCapability } from "@/lib/bework-patch/capability";
 import { LinkVisitToProjectModal } from "@/components/site-visits/LinkVisitToProjectModal";
 import { CreateProjectFromVisitModal } from "@/components/site-visits/CreateProjectFromVisitModal";
+import { VisitPrepareTakeoffModal } from "@/components/site-visits/VisitPrepareTakeoffModal";
 
 type ClientOpt = {
   id: string;
@@ -220,6 +221,7 @@ export function SiteVisitSimpleClient({
   const [chatgptPreview, setChatgptPreview] = useState<string | null>(null);
   const [linkProjectOpen, setLinkProjectOpen] = useState(false);
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
+  const [prepareTakeoffOpen, setPrepareTakeoffOpen] = useState(false);
   const [linkToast, setLinkToast] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{ url: string; caption: string } | null>(null);
   const [measureOpen, setMeasureOpen] = useState(false);
@@ -760,7 +762,7 @@ export function SiteVisitSimpleClient({
       setMessage(
         missing.length
           ? `Impossible de terminer la visite : ${missing.join(", ")}`
-          : "Visite prête à chiffrer",
+          : "Visite terminée — prochaine étape : préparer le métré",
       );
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Erreur");
@@ -868,7 +870,7 @@ export function SiteVisitSimpleClient({
         <p className="mt-1 text-[13px] text-slate-600">
           Saisie manuelle · ou modifier avec ChatGPT
         </p>
-        <div className="mt-3">
+        <div className="mt-3 space-y-2">
           <BeworkPatchToolbar
             section="VISIT"
             projectId={visit.projectId ?? null}
@@ -878,6 +880,13 @@ export function SiteVisitSimpleClient({
             entityLabel={visit.siteName || visit.clientName}
             primaryActionLabel="✨ Modifier avec ChatGPT"
           />
+          <button
+            type="button"
+            onClick={() => setPrepareTakeoffOpen(true)}
+            className="inline-flex h-10 items-center rounded-xl border border-[#1e3a5f]/20 bg-white px-3.5 text-[13px] font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
+          >
+            Préparer le métré avec ChatGPT
+          </button>
         </div>
       </header>
 
@@ -1671,7 +1680,7 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
                 onClick={() => void finishVisit()}
                 className="h-14 flex-1 rounded-2xl border border-[#1e3a5f] bg-white text-[16px] font-semibold text-[#1e3a5f]"
               >
-                {readiness.ready ? "Marquer prêt à chiffrer" : "Terminer la visite"}
+                {readiness.ready ? "Marquer prête pour le métré" : "Terminer la visite"}
               </button>
             ) : (
               <p className="flex h-14 flex-1 items-center justify-center text-[15px] font-semibold text-emerald-800">
@@ -1681,7 +1690,7 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
           </div>
           {previewOpen && readiness.ready && canFinish ? (
             <p className="text-[13px] text-[#1e3a5f]">
-              Compte rendu prêt — Marquer la visite prête à chiffrer
+              Compte rendu prêt — Marquer la visite prête pour le métré
             </p>
           ) : null}
 
@@ -1729,7 +1738,7 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
                 onClick={() => void finishVisit()}
                 className="mt-3 flex h-11 w-full items-center justify-center rounded-xl border border-[#1e3a5f] text-[13px] font-semibold text-[#1e3a5f]"
               >
-                {readiness.ready ? "Marquer prêt à chiffrer" : "Terminer la visite"}
+                {readiness.ready ? "Marquer prête pour le métré" : "Terminer la visite"}
               </button>
             ) : null}
             <button
@@ -1739,6 +1748,13 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
               className="mt-4 flex h-12 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[14px] font-semibold text-white"
             >
               Générer le compte rendu
+            </button>
+            <button
+              type="button"
+              onClick={() => setPrepareTakeoffOpen(true)}
+              className="mt-2 flex h-11 w-full items-center justify-center rounded-xl border border-[#1e3a5f]/20 text-[13px] font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
+            >
+              Préparer le métré
             </button>
           </div>
         </aside>
@@ -1825,11 +1841,21 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
               </p>
               <button
                 type="button"
+                onClick={() => {
+                  setPreviewOpen(false);
+                  setPrepareTakeoffOpen(true);
+                }}
+                className="flex h-11 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[13px] font-semibold text-white"
+              >
+                Préparer le métré avec ChatGPT
+              </button>
+              <button
+                type="button"
                 disabled={busy}
                 onClick={() => void copyChatgpt()}
                 className="flex h-11 w-full items-center justify-center rounded-xl border border-slate-200 text-[13px] font-semibold text-slate-800"
               >
-                Copier le contexte devis (export survey)
+                Copier le contexte métré (export survey)
               </button>
               <button
                 type="button"
@@ -1850,8 +1876,8 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
             ) : null}
             <p className="mt-3 text-[12px] text-slate-500">
               Ensuite : collez dans ChatGPT → récupérez un JSON{" "}
-              <code>bework_quote_bundle_v1</code> → importez-le dans Devis
-              (pas ce prompt, pas le compte rendu de visite).
+              <code>bework_prep_bundle_v1</code> (métré). Le devis vient après
+              validation du métré — pas depuis ce compte rendu.
             </p>
           </div>
         </div>
@@ -1912,6 +1938,23 @@ L'accès au chantier se fait par un passage de 95 cm de large…`}
             }));
             setLinkToast("✓ Chantier créé — visite liée");
             window.setTimeout(() => setLinkToast(null), 5000);
+          }}
+        />
+      ) : null}
+
+      {prepareTakeoffOpen ? (
+        <VisitPrepareTakeoffModal
+          visitId={visit.id}
+          projectId={visit.projectId}
+          onClose={() => setPrepareTakeoffOpen(false)}
+          onProjectLinked={(payload) => {
+            setVisit((prev) => ({
+              ...prev,
+              ...(payload.visit as Partial<Visit>),
+              projectId: payload.projectId,
+              projectTitle: payload.projectTitle,
+              projectHref: payload.projectHref,
+            }));
           }}
         />
       ) : null}

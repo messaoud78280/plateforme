@@ -1,11 +1,11 @@
 /**
- * Export visite → bework_site_survey_v1 + prompt ChatGPT → bework_quote_bundle_v1
- * Aucune API IA. Distingue mesuré / calculé / déclaré / à confirmer.
+ * Export visite → bework_site_survey_v1 + prompt ChatGPT → bework_prep_bundle_v1 (métré).
+ * Le devis (bework_quote_bundle_v1) vient APRÈS le métré, pas depuis la visite.
  */
 import { jsPDF } from "jspdf";
 import { DEFAULT_BRAND, INK, MUTED, RULE, SLATE, tint } from "@/lib/commercial/pdf/colors";
 import { fmtDate, pdfSafe } from "@/lib/commercial/pdf/format";
-import { BEWORK_QUOTE_BUNDLE_FORMAT } from "@/lib/commercial/chatgpt-bundle/types";
+import { PREP_BUNDLE_FORMAT } from "@/lib/preparation/types";
 import {
   BEWORK_SITE_SURVEY_FORMAT,
   photoCategoryLabel,
@@ -357,101 +357,68 @@ export function buildSiteSurveyJson(visit: SurveyVisitInput) {
   };
 }
 
-export function buildChatgptQuoteInstructions(survey: ReturnType<typeof buildSiteSurveyJson>): string {
+/**
+ * Instructions ChatGPT après export visite → prochaine étape = MÉTRÉ (pas devis).
+ * Sortie attendue : bework_prep_bundle_v1.
+ */
+export function buildChatgptTakeoffFromSurveyInstructions(
+  survey: ReturnType<typeof buildSiteSurveyJson>,
+): string {
   return [
     "Analyse ce compte rendu de visite de chantier BeWork (format bework_site_survey_v1).",
     "",
+    "Tu prépares le MÉTRÉ / QUANTITATIF (section TAKEOFF), PAS un devis commercial.",
+    "",
     "Analyse les relevés de chantier fournis.",
-    "Identifie les ouvrages existants, les travaux demandés, les dimensions, les quantités,",
+    "Identifie les ouvrages, les travaux demandés, les dimensions, les quantités,",
     "les matériaux et les contraintes.",
     "",
     "Utilise les valeurs effectivement renseignées.",
     "Lorsque des dimensions permettent un calcul simple et non ambigu, vérifie leur cohérence.",
-    "Exemple : 8 m × 5 m = 40 m².",
+    "Exemple : 8 m × 5 m = 40 m² (CALCULATION).",
     "",
-    "Distingue les mesures réellement relevées, les quantités calculées et les hypothèses.",
-    "Si une quantité est manquante ou ambiguë, indique qu'elle doit être confirmée.",
+    "Provenance obligatoire pour chaque cote / quantité :",
+    "- MEASURE = relevé terrain réel",
+    "- PLAN = cote explicitement lisible sur un plan",
+    "- MANUAL = validation / saisie professionnelle",
+    "- CALCULATION = calcul déterministe à partir de sources fiables",
+    "- HYPOTHESIS = hypothèse clairement déclarée (jamais une mesure)",
+    "- UNKNOWN = information absente → null / « à confirmer »",
     "",
-    "Examine également les photos de chantier et leurs légendes.",
-    "",
-    "Prépare une décomposition des travaux par lots et par postes.",
-    "",
-    "N'invente aucune dimension.",
-    "Ne considère pas qu'une proposition technique est une mesure réellement effectuée.",
+    "N'invente AUCUNE dimension.",
+    "PHOTO n'est PAS une mesure : ne déduis jamais une cote depuis une photo.",
+    "Un plan fourni dans la discussion (hors BeWork) → provenance PLAN uniquement si la cote est lisible.",
     "Ne confonds pas une épaisseur existante et une épaisseur envisagée.",
     "",
-    "Puis génère UNIQUEMENT un devis estimatif structuré",
-    `au format ${BEWORK_QUOTE_BUNDLE_FORMAT}, compatible avec l'import BeWork.`,
+    "Quand les informations sont suffisantes, génère UNIQUEMENT un JSON",
+    `au format ${PREP_BUNDLE_FORMAT}, compatible avec l'import métré BeWork.`,
+    "",
+    "NE PRODUIS PAS de bework_quote_bundle_v1.",
+    "NE PRODUIS PAS de prix, marge, TVA ni conditions commerciales (étape DEVIS ultérieure).",
     "",
     "IMPORTANT — COORDONNÉES CLIENT / CHANTIER :",
     "- Reprends EXACTEMENT les champs client, chantier et contact_sur_place du survey.",
-    "- Ne laisse pas vides prenom, nom, telephone, email, adresse si présents dans le survey.",
-    "- Si adresse_identique_chantier = true, copie l'adresse chantier dans client.adresse",
-    "  et mets same_as_client_address / adresse_identique_chantier à true.",
     "- N'invente aucune coordonnée manquante : laisse null / vide et signale dans warnings.",
     "",
-    "Schéma attendu (propriétés reconnues par le parser BeWork) :",
-    JSON.stringify(
-      {
-        format: BEWORK_QUOTE_BUNDLE_FORMAT,
-        client: {
-          civilite: "",
-          prenom: "",
-          nom: "",
-          nom_complet: "",
-          raison_sociale: "",
-          telephone: "",
-          email: "",
-          adresse: { ligne1: "", code_postal: "", ville: "", pays: "France" },
-        },
-        chantier: {
-          nom: "",
-          adresse: { ligne1: "", code_postal: "", ville: "", pays: "France" },
-          same_as_client_address: false,
-        },
-        devis: {
-          objet: "",
-          observations: "",
-          duree_validite: 30,
-          tva: { taux: 20, requires_confirmation: true },
-        },
-        sections: [
-          {
-            title: "Lot",
-            items: [
-              {
-                designation: "",
-                description: "",
-                quantity: 0,
-                unit: "m²",
-                unit_price_ht: 0,
-                vat_rate: 20,
-              },
-            ],
-          },
-        ],
-        client_advice: [],
-        reservations: [],
-        internal_notes: [],
-        warnings: [],
-      },
-      null,
-      2,
-    ),
-    "",
     "Règles :",
-    "- Chaque ligne doit avoir designation, quantity ≥ 0, unit_price_ht ≥ 0.",
-    "- Les totaux du JSON ne sont PAS une source de vérité (BeWork recalcule).",
-    "- Si une quantité est ambiguë, mets-la dans warnings / reservations, ne l'invente pas.",
-    "- Le champ field_notes est le récit terrain de l'artisan : respecte-le intégralement.",
-    "- Photos : référence les photo_id dans les descriptions si utile.",
-    "- origin = TERRAIN : photo réellement prise sur le chantier.",
-    "- origin = DEMONSTRATION : illustration de formation. Écris « Illustration démonstration » et ne la présente jamais comme une preuve terrain.",
-    "- Client : ne remplace jamais une coordonnée renseignée par une chaîne vide.",
+    "- Chaque paramètre / ligne de métré doit avoir une provenance explicite.",
+    "- Si une quantité est ambiguë : null + « à confirmer », ne l'invente pas.",
+    "- Le champ field_notes est le récit terrain : respecte-le intégralement.",
+    "- Photos : références utiles, jamais comme source de dimensions.",
     "",
     "DONNÉES DE VISITE (bework_site_survey_v1) :",
     JSON.stringify(survey, null, 2),
   ].join("\n");
+}
+
+/**
+ * @deprecated Alias — le parcours standard est métré (bework_prep_bundle_v1), pas devis.
+ * Conservé pour appels historiques ; délègue vers buildChatgptTakeoffFromSurveyInstructions.
+ */
+export function buildChatgptQuoteInstructions(
+  survey: ReturnType<typeof buildSiteSurveyJson>,
+): string {
+  return buildChatgptTakeoffFromSurveyInstructions(survey);
 }
 
 function ensureSpace(doc: jsPDF, y: number, need: number): number {
@@ -713,7 +680,7 @@ export function generateSiteSurveyPdf(
   doc.setDrawColor(...RULE);
   doc.line(16, y, w - 16, y);
   doc.text(
-    "Document basé uniquement sur les données saisies. Aucune mesure ni prix inventés. À vérifier avant devis.",
+    "Document basé uniquement sur les données saisies. Aucune mesure ni prix inventés. Prochaine étape : métré / quantitatif.",
     16,
     y + 6,
   );

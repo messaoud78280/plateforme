@@ -56,6 +56,7 @@ export {
 
 export {
   buildTakeoffCreateContext,
+  buildTakeoffCreateContextFromVisit,
   computeTakeoffCreateSourcesFingerprint,
   loadCurrentTakeoffCreateSourcesFingerprint,
   TAKEOFF_CREATE_INSTRUCTIONS,

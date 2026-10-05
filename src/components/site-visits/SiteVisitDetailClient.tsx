@@ -47,6 +47,7 @@ import { emptyCommercial } from "@/lib/site-visits/survey-types";
 import { buildMeasurementCoherence } from "@/lib/site-visits/coherence";
 import { LinkVisitToProjectModal } from "@/components/site-visits/LinkVisitToProjectModal";
 import { CreateProjectFromVisitModal } from "@/components/site-visits/CreateProjectFromVisitModal";
+import { VisitPrepareTakeoffModal } from "@/components/site-visits/VisitPrepareTakeoffModal";
 
 type Visit = {
   id: string;
@@ -221,6 +222,7 @@ export function SiteVisitDetailClient({
   const [message, setMessage] = useState<string | null>(null);
   const [linkProjectOpen, setLinkProjectOpen] = useState(false);
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
+  const [prepareTakeoffOpen, setPrepareTakeoffOpen] = useState(false);
   const [measureOpen, setMeasureOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [noteDraft, setNoteDraft] = useState("");
@@ -617,7 +619,7 @@ export function SiteVisitDetailClient({
             : "Date à planifier"}
           {visit.responsibleName ? ` · ${visit.responsibleName}` : ""}
         </p>
-        <div className="mt-3">
+        <div className="mt-3 space-y-2">
           <BeworkPatchToolbar
             section="VISIT"
             projectId={visit.projectId ?? null}
@@ -626,6 +628,13 @@ export function SiteVisitDetailClient({
             capability={getSectionCapability("VISIT")}
             entityLabel={visit.siteName || visit.clientName}
           />
+          <button
+            type="button"
+            onClick={() => setPrepareTakeoffOpen(true)}
+            className="inline-flex h-10 items-center rounded-xl border border-[#1e3a5f]/20 bg-white px-3.5 text-[13px] font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
+          >
+            Préparer le métré avec ChatGPT
+          </button>
         </div>
         {visit.completeness ? (
           <div className="mt-3">
@@ -937,15 +946,22 @@ export function SiteVisitDetailClient({
               ))}
             </ul>
           ) : null}
-          {canCreateQuote && visit.status === "READY_TO_QUOTE" ? (
+          {visit.status === "READY_TO_QUOTE" ? (
             <button
               type="button"
-              disabled={busy}
-              onClick={() => void createQuote()}
+              onClick={() => setPrepareTakeoffOpen(true)}
               className="mt-4 flex h-12 w-full items-center justify-center rounded-xl bg-[#1e3a5f] text-[14px] font-semibold text-white"
             >
-              Créer le devis
+              Préparer le métré
             </button>
+          ) : null}
+          {canCreateQuote && visit.commercialQuoteHref ? (
+            <Link
+              href={visit.commercialQuoteHref}
+              className="mt-2 block text-center text-[13px] font-medium text-[#1e3a5f] hover:underline"
+            >
+              Ouvrir le devis {visit.commercialQuoteNumber}
+            </Link>
           ) : null}
         </Section>
       ) : null}
@@ -1444,6 +1460,7 @@ export function SiteVisitDetailClient({
             });
           }}
           onCreateQuote={createQuote}
+          onPrepareTakeoff={() => setPrepareTakeoffOpen(true)}
         />
       ) : null}
 
@@ -2084,6 +2101,23 @@ export function SiteVisitDetailClient({
                   : prev.projectHref,
             }));
             setMessage("✓ Chantier créé — visite liée");
+          }}
+        />
+      ) : null}
+
+      {prepareTakeoffOpen ? (
+        <VisitPrepareTakeoffModal
+          visitId={visit.id}
+          projectId={visit.projectId}
+          onClose={() => setPrepareTakeoffOpen(false)}
+          onProjectLinked={(payload) => {
+            setVisit((prev) => ({
+              ...prev,
+              ...(payload.visit as Partial<Visit>),
+              projectId: payload.projectId,
+              projectTitle: payload.projectTitle,
+              projectHref: payload.projectHref,
+            }));
           }}
         />
       ) : null}

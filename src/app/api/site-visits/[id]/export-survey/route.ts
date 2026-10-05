@@ -9,6 +9,7 @@ import { getSiteVisit } from "@/lib/site-visits/service";
 import { prisma } from "@/lib/prisma";
 import { createServiceRoleClient } from "@/lib/supabase";
 import {
+  buildChatgptTakeoffFromSurveyInstructions,
   buildChatgptQuoteInstructions,
   buildSiteSurveyJson,
   generateSiteSurveyPdf,
@@ -234,7 +235,7 @@ export async function GET(
   const format = new URL(req.url).searchParams.get("format") || "json";
   const input = await enrichFromLinkedClient(visit, toSurveyInput(visit));
   const survey = buildSiteSurveyJson(input);
-  const prompt = buildChatgptQuoteInstructions(survey);
+  const prompt = buildChatgptTakeoffFromSurveyInstructions(survey);
 
   await prisma.siteVisit.update({
     where: { id: visit.id },

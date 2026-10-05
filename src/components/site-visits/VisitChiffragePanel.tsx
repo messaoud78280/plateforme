@@ -54,6 +54,7 @@ type Props = {
   }) => void;
   onSave: () => Promise<void>;
   onCreateQuote: () => Promise<void>;
+  onPrepareTakeoff?: () => void;
   busy: boolean;
   autosaveHint?: string | null;
 };
@@ -73,7 +74,8 @@ export function VisitChiffragePanel({
   lotSheets,
   onChange,
   onSave,
-  onCreateQuote,
+  onCreateQuote: _onCreateQuote,
+  onPrepareTakeoff,
   busy,
   autosaveHint,
 }: Props) {
@@ -483,17 +485,26 @@ export function VisitChiffragePanel({
       <VisitSectionCard
         tone="ok"
         icon={Sparkles}
-        title="Compte rendu & export ChatGPT"
-        hint="Aucune API IA dans BeWork. Vous copiez le dossier, ChatGPT produit le devis JSON."
+        title="Compte rendu & métré"
+        hint="Document de visite d’abord. Le devis vient après le métré — pas depuis la visite."
       >
         <div className="flex flex-wrap gap-2">
+          {onPrepareTakeoff ? (
+            <button
+              type="button"
+              onClick={onPrepareTakeoff}
+              className="rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white"
+            >
+              Préparer le métré avec ChatGPT
+            </button>
+          ) : null}
           <button
             type="button"
             disabled={busy}
             onClick={() => void exportSurvey("prompt")}
-            className="rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+            className="rounded-xl border border-[#1e3a5f]/20 bg-white px-4 py-2.5 text-sm font-semibold text-[#1e3a5f] disabled:opacity-60"
           >
-            ✨ Préparer le dossier pour ChatGPT
+            Copier le contexte métré
           </button>
           <button
             type="button"
@@ -509,7 +520,7 @@ export function VisitChiffragePanel({
             onClick={() => void exportSurvey("pdf")}
             className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800"
           >
-            Générer le PDF
+            Générer le compte rendu PDF
           </button>
           <button
             type="button"
@@ -529,31 +540,20 @@ export function VisitChiffragePanel({
           >
             Exporter ZIP (PDF + JSON + photos)
           </button>
-          {canCreateQuote ? (
-            quoteHref ? (
-              <Link
-                href={quoteHref}
-                className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-900"
-              >
-                Ouvrir le devis {quoteNumber}
-              </Link>
-            ) : (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void onCreateQuote()}
-                className="rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-900"
-              >
-                Créer un devis depuis cette visite
-              </button>
-            )
+          {canCreateQuote && quoteHref ? (
+            <Link
+              href={quoteHref}
+              className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-900"
+            >
+              Ouvrir le devis {quoteNumber}
+            </Link>
           ) : null}
         </div>
         <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-slate-600">
-          <li>Copiez les instructions + données (bouton violet)</li>
-          <li>Collez-les dans ChatGPT</li>
-          <li>Récupérez un JSON <code>bework_quote_bundle_v1</code></li>
-          <li>Importez-le dans Devis & Facturation</li>
+          <li>Préparez le métré avec ChatGPT (contexte TAKEOFF CREATE)</li>
+          <li>Récupérez un JSON <code>bework_prep_bundle_v1</code></li>
+          <li>Validez le métré — puis seulement préparez le devis</li>
+          <li>Le compte rendu PDF est un document de visite (sans prix obligatoire)</li>
         </ol>
         {promptPreview ? (
           <textarea

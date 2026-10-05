@@ -34,6 +34,7 @@ export type BeworkTakeoffCreateContextV1 = {
   interaction_mode: "CREATE";
   expected_output: typeof PREP_BUNDLE_FORMAT;
   organization: { id: string; name: string };
+  /** Null si la visite n’est pas encore rattachée à un chantier. */
   project: {
     id: string;
     title: string;
@@ -43,7 +44,7 @@ export type BeworkTakeoffCreateContextV1 = {
     status: string | null;
     chantier_status: string | null;
     client: { name: string | null; company: string | null } | null;
-  };
+  } | null;
   scope: null;
   visit: Record<string, unknown> | null;
   plan_candidates: Array<{
@@ -66,7 +67,8 @@ export type BeworkTakeoffCreateContextV1 = {
     id: null;
     version: 0;
     base_version: 0;
-    create_on_project_id: string;
+    /** Null tant qu’aucun Project n’est lié — le commit crée / rattache d’abord un chantier. */
+    create_on_project_id: string | null;
   };
 };
 
@@ -76,9 +78,16 @@ function numOrNull(v: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+/** field_notes stockés dans prepJson.fieldNotes — exposés explicitement pour ChatGPT. */
+function fieldNotesFromPrep(prep: unknown): string | null {
+  if (!prep || typeof prep !== "object") return null;
+  const fn = (prep as { fieldNotes?: unknown }).fieldNotes;
+  return typeof fn === "string" && fn.trim() ? fn : null;
+}
+
 /** Empreinte des sources chantier pour PREVIEW_STALE (visite + plans candidats). */
 export function computeTakeoffCreateSourcesFingerprint(input: {
-  projectId: string;
+  projectId: string | null;
   visit:
     | {
         id: string;
@@ -255,6 +264,7 @@ export async function buildTakeoffCreateContext(input: {
         site_address: visit.siteAddress,
         client_need: visit.clientNeed,
         comments: visit.comments,
+        field_notes: fieldNotesFromPrep(visit.prepJson),
         constraints: visit.constraintsJson,
         findings: visit.findingsJson,
         proposed_works: visit.proposedWorksJson,
@@ -392,6 +402,225 @@ export async function buildTakeoffCreateContext(input: {
       version: 0,
       base_version: 0,
       create_on_project_id: project.id,
+    },
+  };
+}
+
+/**
+ * Contexte TAKEOFF CREATE depuis une visite autonome (projectId facultatif).
+ * Lecture seule — ChatGPT n’est jamais bloqué par l’absence de chantier.
+ * Le commit PrepStudy reste lié à un Project (création / rattachement séparés).
+ */
+export async function buildTakeoffCreateContextFromVisit(input: {
+  orgId: string;
+  visitId: string;
+}): Promise<BeworkTakeoffCreateContextV1> {
+  const visit = await prisma.siteVisit.findFirst({
+    where: { id: input.visitId, organizationId: input.orgId },
+    select: {
+      id: true,
+      projectId: true,
+      subject: true,
+      status: true,
+      clientName: true,
+      siteAddress: true,
+      clientNeed: true,
+      comments: true,
+      constraintsJson: true,
+      findingsJson: true,
+      proposedWorksJson: true,
+      lotsJson: true,
+      zonesJson: true,
+      prepJson: true,
+      updatedAt: true,
+      organization: { select: { id: true, name: true } },
+      measurements: {
+        orderBy: { sortOrder: "asc" },
+        select: {
+          id: true,
+          zone: true,
+          label: true,
+          measureType: true,
+          unit: true,
+          lengthM: true,
+          widthM: true,
+          heightM: true,
+          quantityValue: true,
+          computedQuantity: true,
+          lot: true,
+          observation: true,
+        },
+      },
+      medias: {
+        orderBy: { createdAt: "desc" },
+        take: 40,
+        select: {
+          id: true,
+          name: true,
+          kind: true,
+          category: true,
+          caption: true,
+          observation: true,
+          hypothesis: true,
+          origin: true,
+          fileUrl: true,
+          storagePath: true,
+        },
+      },
+      missingInfos: {
+        orderBy: { createdAt: "asc" },
+        select: {
+          id: true,
+          label: true,
+          category: true,
+          checkStatus: true,
+          dueAt: true,
+          resolvedAt: true,
+        },
+      },
+    },
+  });
+  if (!visit?.organization) {
+    throw Object.assign(new Error("Visite introuvable"), {
+      code: "VISIT_NOT_FOUND",
+      status: 404,
+    });
+  }
+
+  if (visit.projectId) {
+    return buildTakeoffCreateContext({
+      orgId: input.orgId,
+      projectId: visit.projectId,
+      visitId: visit.id,
+    });
+  }
+
+  const visitPayload = {
+    id: visit.id,
+    subject: visit.subject,
+    status: visit.status,
+    client_name: visit.clientName,
+    site_address: visit.siteAddress,
+    client_need: visit.clientNeed,
+    comments: visit.comments,
+    field_notes: fieldNotesFromPrep(visit.prepJson),
+    constraints: visit.constraintsJson,
+    findings: visit.findingsJson,
+    proposed_works: visit.proposedWorksJson,
+    lots: visit.lotsJson,
+    zones: visit.zonesJson,
+    prep: visit.prepJson,
+    measurements: visit.measurements.map((m) => ({
+      id: m.id,
+      zone: m.zone,
+      label: m.label,
+      measure_type: m.measureType,
+      unit: m.unit,
+      length_m: m.lengthM != null ? d(m.lengthM) : null,
+      width_m: m.widthM != null ? d(m.widthM) : null,
+      height_m: m.heightM != null ? d(m.heightM) : null,
+      quantity_value: m.quantityValue != null ? d(m.quantityValue) : null,
+      computed_quantity: d(m.computedQuantity),
+      lot: m.lot,
+      observation: m.observation,
+      suggested_provenance: "MEASURE" as const,
+    })),
+    media_refs: visit.medias.map((m) => ({
+      id: m.id,
+      name: m.name,
+      kind: m.kind,
+      category: m.category,
+      caption: m.caption,
+      observation: m.observation,
+      hypothesis: m.hypothesis,
+      origin: m.origin,
+      has_url: Boolean(m.fileUrl || m.storagePath),
+    })),
+    missing_infos: visit.missingInfos.map((mi) => ({
+      id: mi.id,
+      label: mi.label,
+      category: mi.category,
+      check_status: mi.checkStatus,
+      due_at: mi.dueAt?.toISOString() ?? null,
+      resolved_at: mi.resolvedAt?.toISOString() ?? null,
+    })),
+    context_version: computeVisitContextVersion({
+      id: visit.id,
+      subject: visit.subject,
+      status: visit.status,
+      clientName: visit.clientName,
+      siteAddress: visit.siteAddress,
+      clientNeed: visit.clientNeed,
+      comments: visit.comments,
+      measurements: visit.measurements.map((m) => ({
+        id: m.id,
+        zone: m.zone,
+        label: m.label,
+        measureType: m.measureType,
+        unit: m.unit,
+        lengthM: numOrNull(m.lengthM),
+        widthM: numOrNull(m.widthM),
+        heightM: numOrNull(m.heightM),
+        quantityValue: numOrNull(m.quantityValue),
+        computedQuantity: Number(m.computedQuantity),
+        lot: m.lot,
+        observation: m.observation,
+      })),
+      mediaRefs: visit.medias.map((m) => ({
+        id: m.id,
+        name: m.name,
+        kind: m.kind,
+        category: m.category,
+        observation: m.observation ?? m.caption,
+        hasUrl: Boolean(m.fileUrl || m.storagePath),
+      })),
+    }),
+    updated_at: visit.updatedAt.toISOString(),
+  };
+
+  const sourcesFingerprint = computeTakeoffCreateSourcesFingerprint({
+    projectId: null,
+    visit: {
+      id: visitPayload.id,
+      updatedAt: visitPayload.updated_at,
+      contextVersion: visitPayload.context_version,
+      measurementCount: visitPayload.measurements.length,
+      mediaCount: visitPayload.media_refs.length,
+    },
+    planFileIds: [],
+  });
+
+  return {
+    type: BEWORK_CONTEXT_FORMAT,
+    schema_version: BEWORK_CONTEXT_SCHEMA_VERSION,
+    section: "TAKEOFF",
+    interaction_mode: "CREATE",
+    expected_output: PREP_BUNDLE_FORMAT,
+    organization: {
+      id: visit.organization.id,
+      name: visit.organization.name,
+    },
+    project: null,
+    scope: null,
+    visit: visitPayload,
+    plan_candidates: [],
+    sources_fingerprint: sourcesFingerprint,
+    data: {
+      takeoff: null,
+      note:
+        "Visite autonome (aucun chantier lié). Discutez du métré avec ChatGPT (bework_prep_bundle_v1). Pour enregistrer l’étude dans BeWork, créez ou liez ensuite un chantier — PrepStudy reste rattaché à un Project.",
+    },
+    instructions: [
+      ...TAKEOFF_CREATE_INSTRUCTIONS,
+      "Aucun Project BeWork n’est lié : un plan fourni uniquement dans la discussion ChatGPT n’est pas une source BeWork stockée.",
+      "Si une cote est lue sur ce plan externe : provenance PLAN + « à confirmer » si doute — jamais MEASURE.",
+    ],
+    target: {
+      entity_type: "PREP_STUDY",
+      id: null,
+      version: 0,
+      base_version: 0,
+      create_on_project_id: null,
     },
   };
 }

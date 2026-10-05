@@ -87,7 +87,7 @@ function primaryActionFor(status: SiteVisitStatus, quoteHref: string | null): {
     case "INCOMPLETE":
       return { kind: "complete", label: "Compléter" };
     case "READY_TO_QUOTE":
-      return { kind: "quote", label: "Créer le devis" };
+      return { kind: "takeoff", label: "Préparer le métré" };
     case "TRANSMITTED":
       return { kind: "open-quote", label: "Voir le devis", href: quoteHref };
     default:

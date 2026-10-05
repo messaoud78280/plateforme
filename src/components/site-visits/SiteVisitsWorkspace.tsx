@@ -413,14 +413,11 @@ export function SiteVisitsWorkspace({
   }
 
   function primaryClick(v: VisitListItem) {
-    if (v.status === "READY_TO_QUOTE" && canCreateQuote) {
-      void createQuote(v.id);
-      return;
-    }
     if (v.status === "TRANSMITTED" && v.commercialQuoteHref) {
       window.open(v.commercialQuoteHref, "_blank", "noopener,noreferrer");
       return;
     }
+    // READY_TO_QUOTE → ouvrir la visite (métré), jamais créer un devis directement
     router.push(`/dashboard/visites-metres/${v.id}`);
   }
 
@@ -437,7 +434,7 @@ export function SiteVisitsWorkspace({
     <div className="mx-auto max-w-[1440px] space-y-5 px-4 py-6 sm:px-6 lg:px-8">
       <PageHeader
         title="Visites & métrés"
-        description="Du terrain au devis, sans ressaisie."
+        description="Visite → métré → devis → planning, sans ressaisie."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Link

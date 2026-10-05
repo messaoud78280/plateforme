@@ -149,6 +149,44 @@ export function countAddLines(changes: DirectChange[]): number {
   return changes.filter(isAddLineDirectChange).length;
 }
 
+/** update_line fiche technique (pas quantité). */
+export function isTechSheetUpdateChange(c: DirectChange): boolean {
+  if (!isUpdateLineMetaChange(c)) return false;
+  const after = c.after;
+  if (!after || typeof after !== "object" || Array.isArray(after)) return false;
+  const o = after as Record<string, unknown>;
+  return (
+    o.included_services !== undefined ||
+    o.technical_references !== undefined ||
+    o.execution_notes !== undefined ||
+    o.quality_controls !== undefined ||
+    o.technical_reservations !== undefined
+  );
+}
+
+export function countTechSheetUpdates(changes: DirectChange[]): number {
+  return changes.filter(isTechSheetUpdateChange).length;
+}
+
+export function summarizeTechSheetUpdateLots(
+  changes: DirectChange[],
+): Array<{ lot: string; count: number }> {
+  const map = new Map<string, number>();
+  for (const c of changes) {
+    if (!isTechSheetUpdateChange(c)) continue;
+    const before = c.before;
+    let lot = "Sans lot";
+    if (before && typeof before === "object" && !Array.isArray(before)) {
+      const l = (before as { lot?: unknown }).lot;
+      if (typeof l === "string" && l.trim()) lot = l.trim();
+    }
+    map.set(lot, (map.get(lot) ?? 0) + 1);
+  }
+  return [...map.entries()]
+    .map(([lot, count]) => ({ lot, count }))
+    .sort((a, b) => a.lot.localeCompare(b.lot, "fr"));
+}
+
 export type AddLineStats = {
   total: number;
   quote: number;

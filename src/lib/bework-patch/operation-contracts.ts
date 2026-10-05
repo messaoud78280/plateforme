@@ -406,6 +406,77 @@ export type OperationFieldContract = {
   insert_after_code?: Record<string, unknown>;
 };
 
+/**
+ * Contrat exact update_line — target PREP_LINE avec study_id + line_id obligatoires.
+ * ChatGPT ne doit jamais omettre study_id (sinon INVALID_TARGET).
+ */
+export const UPDATE_LINE_CONTRACT = {
+  field: "changes",
+  required: true,
+  type: "object",
+  payload_key: "changes",
+  meaning:
+    "Champs à modifier sur une PrepTakeoffLine existante (quantitatif et/ou fiche technique)",
+  target: {
+    entity_type: "PREP_LINE",
+    required: ["study_id", "line_id"],
+    also_accepted: ["line_code", "code"],
+    meaning:
+      "study_id = PrepStudy.id ; line_id = PrepTakeoffLine.id ; line_code recommandé pour lisibilité",
+  },
+  changes: {
+    included_services: {
+      required: false,
+      type: "string[]",
+      aliases: ["includedServices"],
+      meaning: "Prestations comprises → includedServicesJson",
+    },
+    technical_references: {
+      required: false,
+      type: "array",
+      aliases: ["technicalReferences"],
+      meaning:
+        "Références techniques → technicalReferencesJson (kind: INDICATIVE|DOSSIER|TO_VERIFY|PHOTO)",
+    },
+    execution_notes: {
+      required: false,
+      type: "string|null",
+      aliases: ["executionNotes"],
+      meaning: "Notes d’exécution → executionNotes",
+    },
+    quality_controls: {
+      required: false,
+      type: "string[]",
+      aliases: ["qualityControls"],
+      meaning: "Contrôles qualité → qualityControlsJson",
+    },
+    technical_reservations: {
+      required: false,
+      type: "string[]",
+      aliases: ["technicalReservations"],
+      meaning: "Réserves / points à confirmer → technicalReservationsJson",
+    },
+  },
+  minimal_valid_example: {
+    op: "update_line",
+    target: {
+      entity_type: "PREP_LINE",
+      study_id: "<STUDY_ID>",
+      line_id: "<LINE_ID>",
+      line_code: "GO-01",
+    },
+    changes: {
+      included_services: ["Réglage du fond de fouille", "Mise en œuvre du béton"],
+      technical_references: [
+        { label: "NF DTU 13.1", kind: "INDICATIVE", note: null },
+      ],
+      execution_notes: "Contrôler le niveau avant coulage.",
+      quality_controls: ["Contrôle niveau", "Contrôle géométrie"],
+      technical_reservations: ["Dimension à confirmer sur plan"],
+    },
+  },
+} as const;
+
 /** Contrats exportés dans supported_operations (ChatGPT). */
 export function fieldContractsForOp(
   op: BeworkPatchOpName,
@@ -453,22 +524,15 @@ export function fieldContractsForOp(
   if (op === "update_line") {
     return [
       {
-        field: "changes",
-        required: true,
-        type: "object",
-        meaning:
-          "Champs à modifier sur une PrepTakeoffLine existante (quantitatif et/ou fiche technique)",
-        example: {
-          designation: "…",
-          description: "…",
-          included_services: ["…"],
-          technical_references: [
-            { label: "NF DTU 13.1", kind: "INDICATIVE", note: null },
-          ],
-          execution_notes: "…",
-          quality_controls: ["…"],
-          technical_reservations: ["…"],
-        },
+        field: UPDATE_LINE_CONTRACT.field,
+        required: UPDATE_LINE_CONTRACT.required,
+        type: UPDATE_LINE_CONTRACT.type,
+        payload_key: UPDATE_LINE_CONTRACT.payload_key,
+        meaning: UPDATE_LINE_CONTRACT.meaning,
+        target: UPDATE_LINE_CONTRACT.target as unknown as Record<string, unknown>,
+        example: UPDATE_LINE_CONTRACT.minimal_valid_example,
+        minimal_operation_example: UPDATE_LINE_CONTRACT.minimal_valid_example,
+        minimal_valid_example: UPDATE_LINE_CONTRACT.minimal_valid_example,
       },
     ];
   }

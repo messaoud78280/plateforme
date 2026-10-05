@@ -20,11 +20,15 @@ export async function POST(req: Request) {
       section?: string;
       projectId?: string;
       entityId?: string;
+      purpose?: string;
     } | null;
 
     const section = body?.section?.trim() as BeworkPatchSection | undefined;
     const projectId = body?.projectId?.trim() || null;
     const entityId = body?.entityId?.trim();
+    const purposeRaw = body?.purpose?.trim();
+    const purpose =
+      purposeRaw === "enrich_tech_sheets" ? "enrich_tech_sheets" : "modify";
     const visitStandalone = section === "VISIT";
 
     if (
@@ -48,6 +52,7 @@ export async function POST(req: Request) {
       section,
       projectId,
       entityId,
+      purpose,
     });
     if (!context) {
       return NextResponse.json(

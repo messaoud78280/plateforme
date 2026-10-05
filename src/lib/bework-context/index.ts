@@ -58,6 +58,7 @@ export {
   buildTakeoffCreateContext,
   buildTakeoffCreateContextFromVisit,
   buildTakeoffModifyContext,
+  buildTakeoffEnrichTechSheetsContext,
   buildTakeoffVersionsBlock,
   resolveProjectCurrentTakeoff,
   computeTakeoffCreateSourcesFingerprint,

@@ -681,6 +681,7 @@ async function applyTakeoffDirectInTx(
 
   // --- Lignes : état mutable en mémoire (existantes + créations) ---
   type MutableLine = {
+    id: string | null;
     code: string;
     lot: string;
     designation: string;
@@ -737,8 +738,11 @@ async function applyTakeoffDirectInTx(
   };
 
   const lineMap = new Map<string, MutableLine>();
+  const idToCode = new Map<string, string>();
   for (const l of study.lines) {
+    idToCode.set(l.id, l.code);
     lineMap.set(l.code, {
+      id: l.id,
       code: l.code,
       lot: l.lot,
       designation: l.designation,
@@ -763,15 +767,30 @@ async function applyTakeoffDirectInTx(
     });
   }
 
+  const resolveLineCode = (target: {
+    line_code?: string | null;
+    code?: string | null;
+    line_id?: string | null;
+    id?: string | null;
+  }): string | null => {
+    const byCode = target.line_code ?? target.code ?? null;
+    if (byCode && lineMap.has(byCode)) return byCode;
+    const lineId = target.line_id ?? null;
+    if (lineId && idToCode.has(lineId)) return idToCode.get(lineId)!;
+    if (target.id && idToCode.has(target.id)) return idToCode.get(target.id)!;
+    if (target.id && lineMap.has(target.id)) return target.id;
+    return byCode;
+  };
+
   let maxSort = study.lines.reduce((m, l) => Math.max(m, l.sortOrder), -1);
   let addedCount = 0;
   let updatedCount = 0;
   let deletedCount = 0;
 
   for (const op of deleteLineOps) {
-    const code = op.target.line_code ?? op.target.code ?? op.target.id;
+    const code = resolveLineCode(op.target);
     if (!code) {
-      throw Object.assign(new Error("delete_line sans line_code"), {
+      throw Object.assign(new Error("delete_line sans line_code / line_id"), {
         code: "STRUCTURAL_OPERATION_NOT_APPLIED",
       });
     }
@@ -786,9 +805,9 @@ async function applyTakeoffDirectInTx(
   }
 
   for (const op of updateLineOps) {
-    const code = op.target.line_code ?? op.target.code ?? op.target.id;
+    const code = resolveLineCode(op.target);
     if (!code) {
-      throw Object.assign(new Error("update_line sans line_code"), {
+      throw Object.assign(new Error("update_line sans line_code / line_id"), {
         code: "STRUCTURAL_OPERATION_NOT_APPLIED",
       });
     }
@@ -865,6 +884,7 @@ async function applyTakeoffDirectInTx(
       (op.line.quality_controls?.length ?? 0) > 0 ||
       (op.line.technical_reservations?.length ?? 0) > 0;
     lineMap.set(code, {
+      id: null,
       code,
       lot: op.line.lot,
       designation: op.line.designation,

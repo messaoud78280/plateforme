@@ -29,10 +29,12 @@ import {
 } from "@/lib/bework-patch/ui-messages";
 import {
   countAddLines,
+  countTechSheetUpdates,
   formatDisplayUnit,
   formatFormulaDisplay,
   formatQuantityWithUnit,
   isAddLineDirectChange,
+  isTechSheetUpdateChange,
   isUpdateLineMetaChange,
   natureLabel,
   parseAddLineAfter,
@@ -41,6 +43,7 @@ import {
   roleBadgeLabel,
   summarizeAddLineLots,
   summarizeAddLineStats,
+  summarizeTechSheetUpdateLots,
   type AddLinePreviewPayload,
 } from "@/lib/bework-patch/add-line-preview";
 import { TECH_REF_KIND_LABELS } from "@/lib/preparation/types";
@@ -58,6 +61,8 @@ type Props = {
   onApplied: () => void;
   /** Indique que le contexte a déjà été copié depuis la barre d’outils. */
   contextAlreadyCopied?: boolean;
+  /** enrich_tech_sheets = parcours sans prompt utilisateur. */
+  contextPurpose?: "modify" | "enrich_tech_sheets";
 };
 
 type Step = "paste" | "preview" | "confirm" | "success";
@@ -170,6 +175,7 @@ export function BeworkPatchModal({
   onClose,
   onApplied,
   contextAlreadyCopied = false,
+  contextPurpose = "modify",
 }: Props) {
   const titleId = useId();
   const pasteRef = useRef<HTMLTextAreaElement>(null);
@@ -255,6 +261,10 @@ export function BeworkPatchModal({
 
   const directCount = impact?.directChanges.length ?? analysis?.directChanges.length ?? 0;
   const addLineCount = impact ? countAddLines(impact.directChanges) : 0;
+  const techSheetUpdateCount = impact
+    ? countTechSheetUpdates(impact.directChanges)
+    : 0;
+  const isEnrichFlow = contextPurpose === "enrich_tech_sheets";
   const consequenceGroups = impact ? groupDerivedBySection(impact.derivedChanges) : [];
   const consequenceCount =
     (impact?.derivedChanges.length ?? 0) + (impact?.protectedEntities.length ?? 0);
@@ -557,39 +567,69 @@ export function BeworkPatchModal({
           {step === "paste" && (
             <div className="space-y-5">
               {mode === "chatgpt" ? (
-                <>
-                  <section className="rounded-xl border border-slate-100 bg-slate-50/80 p-3">
-                    <p className="text-sm font-semibold text-slate-900">
-                      1 — Copier les informations du chantier
-                    </p>
-                    <p className="mt-1 text-sm text-slate-600">
-                      BeWork prépare les données utiles de cette section (
-                      {sectionLabel}). Copiez-les puis utilisez-les dans votre
-                      conversation ChatGPT.
-                    </p>
-                    {contextAlreadyCopied ? (
-                      <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
-                        <CheckCircle2 className="h-4 w-4" />
-                        Contexte copié
+                isEnrichFlow ? (
+                  <>
+                    <section className="rounded-xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.04] p-3">
+                      <p className="text-sm font-semibold text-[#1e3a5f]">
+                        Enrichissement automatique des fiches techniques
                       </p>
-                    ) : (
-                      <p className="mt-2 text-xs text-slate-500">
-                        Utilisez le bouton « Copier le contexte pour ChatGPT »
-                        dans la barre d’outils.
+                      <p className="mt-1 text-sm text-slate-600">
+                        BeWork a préparé le contexte et l’instruction métier.
+                        Vous n’avez rien à rédiger.
                       </p>
-                    )}
-                  </section>
-                  <section>
-                    <p className="text-sm font-semibold text-slate-900">
-                      2 — Demander la modification à ChatGPT
-                    </p>
-                    <p className="mt-1 text-sm text-slate-600">
-                      Expliquez à ChatGPT ce que vous souhaitez changer. ChatGPT
-                      vous renverra un bloc de modifications compatible avec
-                      BeWork.
-                    </p>
-                  </section>
-                </>
+                      <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-slate-700">
+                        <li>Collez le contexte dans ChatGPT</li>
+                        <li>Copiez le JSON bework_patch_v1 renvoyé</li>
+                        <li>Collez-le ci-dessous, puis confirmez une seule fois</li>
+                      </ol>
+                      {contextAlreadyCopied ? (
+                        <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+                          <CheckCircle2 className="h-4 w-4" />
+                          Contexte d’enrichissement déjà copié
+                        </p>
+                      ) : (
+                        <p className="mt-2 text-xs text-slate-500">
+                          Utilisez « Enrichir avec ChatGPT » pour copier le
+                          contexte.
+                        </p>
+                      )}
+                    </section>
+                  </>
+                ) : (
+                  <>
+                    <section className="rounded-xl border border-slate-100 bg-slate-50/80 p-3">
+                      <p className="text-sm font-semibold text-slate-900">
+                        1 — Copier les informations du chantier
+                      </p>
+                      <p className="mt-1 text-sm text-slate-600">
+                        BeWork prépare les données utiles de cette section (
+                        {sectionLabel}). Copiez-les puis utilisez-les dans votre
+                        conversation ChatGPT.
+                      </p>
+                      {contextAlreadyCopied ? (
+                        <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+                          <CheckCircle2 className="h-4 w-4" />
+                          Contexte copié
+                        </p>
+                      ) : (
+                        <p className="mt-2 text-xs text-slate-500">
+                          Utilisez le bouton « Copier le contexte pour ChatGPT »
+                          dans la barre d’outils.
+                        </p>
+                      )}
+                    </section>
+                    <section>
+                      <p className="text-sm font-semibold text-slate-900">
+                        2 — Demander la modification à ChatGPT
+                      </p>
+                      <p className="mt-1 text-sm text-slate-600">
+                        Expliquez à ChatGPT ce que vous souhaitez changer. ChatGPT
+                        vous renverra un bloc de modifications compatible avec
+                        BeWork.
+                      </p>
+                    </section>
+                  </>
+                )
               ) : (
                 <p className="text-sm text-slate-600">
                   Collez un bloc de modifications compatible avec BeWork pour{" "}
@@ -603,7 +643,9 @@ export function BeworkPatchModal({
                   className="text-sm font-semibold text-slate-900"
                 >
                   {mode === "chatgpt"
-                    ? "3 — Coller les modifications proposées"
+                    ? isEnrichFlow
+                      ? "Coller le patch bework_patch_v1"
+                      : "3 — Coller les modifications proposées"
                     : "Coller les modifications proposées"}
                 </label>
                 <textarea
@@ -613,7 +655,11 @@ export function BeworkPatchModal({
                   onChange={(e) => setRawText(e.target.value)}
                   rows={10}
                   spellCheck={false}
-                  placeholder="Collez ici le bloc de modifications généré par ChatGPT…"
+                  placeholder={
+                    isEnrichFlow
+                      ? "Collez ici le seul bework_patch_v1 (multi update_line)…"
+                      : "Collez ici le bloc de modifications généré par ChatGPT…"
+                  }
                   className="mt-2 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-800 placeholder:font-sans placeholder:text-slate-400 focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20"
                 />
               </section>
@@ -643,6 +689,14 @@ export function BeworkPatchModal({
                       : ""}
                   </p>
                 ) : null}
+                {techSheetUpdateCount > 0 ? (
+                  <p className="mt-1 text-sm font-medium text-[#1e3a5f]">
+                    {techSheetUpdateCount} fiche
+                    {techSheetUpdateCount > 1 ? "s" : ""} technique
+                    {techSheetUpdateCount > 1 ? "s" : ""} seront enrichie
+                    {techSheetUpdateCount > 1 ? "s" : ""} si vous confirmez.
+                  </p>
+                ) : null}
               </div>
 
               {impact && addLineCount > 0 ? (
@@ -650,6 +704,10 @@ export function BeworkPatchModal({
                   changes={impact.directChanges}
                   existingLineCount={existingLineCount}
                 />
+              ) : null}
+
+              {impact && techSheetUpdateCount > 0 ? (
+                <TechSheetEnrichLotSummary changes={impact.directChanges} />
               ) : null}
 
               <DirectChangesBlock
@@ -1149,6 +1207,46 @@ function AddLinesLotSummary({
   );
 }
 
+function TechSheetEnrichLotSummary({
+  changes,
+}: {
+  changes: DirectChange[];
+}) {
+  const total = countTechSheetUpdates(changes);
+  const lots = summarizeTechSheetUpdateLots(changes);
+  if (total === 0) return null;
+  return (
+    <section className="rounded-xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.03] p-3">
+      <h4 className="text-sm font-semibold text-[#1e3a5f]">
+        {total} fiche{total > 1 ? "s" : ""} technique{total > 1 ? "s" : ""}{" "}
+        seront enrichie{total > 1 ? "s" : ""}
+      </h4>
+      {lots.length > 0 ? (
+        <div className="mt-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            Répartition par lots
+          </p>
+          <ul className="mt-1.5 space-y-1 text-sm text-slate-700">
+            {lots.map((l) => (
+              <li
+                key={l.lot}
+                className="flex items-center justify-between gap-3 rounded-md bg-white/70 px-2 py-1"
+              >
+                <span className="min-w-0 truncate font-medium text-slate-800">
+                  {l.lot}
+                </span>
+                <span className="shrink-0 tabular-nums text-[#1e3a5f]">
+                  {l.count}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 function SummaryChip({ label, value }: { label: string; value: number }) {
   if (!value) return null;
   return (
@@ -1450,7 +1548,14 @@ function BeforeAfterList({
   );
 }
 
-function UpdateLineMetaPreviewCard({ change }: { change: DirectChange }) {
+function UpdateLineMetaPreviewCard({
+  change,
+  defaultCollapsed = false,
+}: {
+  change: DirectChange;
+  defaultCollapsed?: boolean;
+}) {
+  const [open, setOpen] = useState(!defaultCollapsed);
   const before = (change.before ?? {}) as Record<string, unknown>;
   const after = (change.after ?? {}) as Record<string, unknown>;
   const list = (v: unknown): string[] =>
@@ -1473,94 +1578,143 @@ function UpdateLineMetaPreviewCard({ change }: { change: DirectChange }) {
       .filter(Boolean);
   };
 
+  const lot =
+    typeof before.lot === "string" && before.lot.trim()
+      ? before.lot.trim()
+      : null;
+  const isTech = isTechSheetUpdateChange(change);
+
   return (
     <li className="rounded-xl border border-amber-100 bg-white p-3 shadow-sm">
-      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-900">
-        Modification de ligne
-      </p>
-      <p className="mt-1 text-sm font-semibold text-slate-900">{change.label}</p>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-start justify-between gap-2 text-left"
+      >
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-900">
+            {isTech ? "Enrichissement fiche" : "Modification de ligne"}
+          </p>
+          <p className="mt-1 text-sm font-semibold text-slate-900">
+            {change.label}
+            {lot ? (
+              <span className="ml-2 text-[11px] font-medium text-slate-500">
+                {lot}
+              </span>
+            ) : null}
+          </p>
+        </div>
+        {open ? (
+          <ChevronDown className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+        ) : (
+          <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+        )}
+      </button>
       {change.manualTextsOverride ? (
         <p className="mt-2 rounded-md bg-amber-50 px-2 py-1.5 text-[12px] text-amber-950 ring-1 ring-amber-200">
           Cette fiche a été retouchée manuellement. La confirmation remplacera
           les textes existants par la proposition ChatGPT.
         </p>
       ) : null}
-      <div className="mt-3 space-y-2">
-        {after.designation !== undefined ? (
-          <BeforeAfterList
-            label="Désignation"
-            before={
-              typeof before.designation === "string" ? [before.designation] : []
-            }
-            after={
-              typeof after.designation === "string" ? [after.designation] : []
-            }
-          />
-        ) : null}
-        {after.description !== undefined ? (
-          <BeforeAfterList
-            label="Description"
-            before={
-              typeof before.description === "string" && before.description
-                ? [before.description]
-                : []
-            }
-            after={
-              typeof after.description === "string" && after.description
-                ? [after.description]
-                : after.description === null
-                  ? []
+      {open ? (
+        <div className="mt-3 space-y-2">
+          {after.designation !== undefined ? (
+            <BeforeAfterList
+              label="Désignation"
+              before={
+                typeof before.designation === "string" ? [before.designation] : []
+              }
+              after={
+                typeof after.designation === "string" ? [after.designation] : []
+              }
+            />
+          ) : null}
+          {after.description !== undefined ? (
+            <BeforeAfterList
+              label="Description"
+              before={
+                typeof before.description === "string" && before.description
+                  ? [before.description]
                   : []
-            }
-          />
-        ) : null}
-        {after.included_services !== undefined ? (
-          <BeforeAfterList
-            label="Prestations comprises"
-            before={list(before.included_services)}
-            after={list(after.included_services)}
-          />
-        ) : null}
-        {after.technical_references !== undefined ? (
-          <BeforeAfterList
-            label="Références techniques"
-            before={refsLabel(before.technical_references)}
-            after={refsLabel(after.technical_references)}
-          />
-        ) : null}
-        {after.execution_notes !== undefined ? (
-          <BeforeAfterList
-            label="Notes d’exécution"
-            before={
-              typeof before.execution_notes === "string" && before.execution_notes
-                ? [before.execution_notes]
-                : []
-            }
-            after={
-              typeof after.execution_notes === "string" && after.execution_notes
-                ? [after.execution_notes]
-                : []
-            }
-          />
-        ) : null}
-        {after.quality_controls !== undefined ? (
-          <BeforeAfterList
-            label="Contrôles qualité"
-            before={list(before.quality_controls)}
-            after={list(after.quality_controls)}
-          />
-        ) : null}
-        {after.technical_reservations !== undefined ? (
-          <BeforeAfterList
-            label="Réserves / points à confirmer"
-            before={list(before.technical_reservations)}
-            after={list(after.technical_reservations)}
-          />
-        ) : null}
-      </div>
+              }
+              after={
+                typeof after.description === "string" && after.description
+                  ? [after.description]
+                  : after.description === null
+                    ? []
+                    : []
+              }
+            />
+          ) : null}
+          {after.included_services !== undefined ? (
+            <BeforeAfterList
+              label="Prestations"
+              before={list(before.included_services)}
+              after={list(after.included_services)}
+            />
+          ) : null}
+          {after.technical_references !== undefined ? (
+            <BeforeAfterList
+              label="Références"
+              before={refsLabel(before.technical_references)}
+              after={refsLabel(after.technical_references)}
+            />
+          ) : null}
+          {after.execution_notes !== undefined ? (
+            <BeforeAfterList
+              label="Exécution"
+              before={
+                typeof before.execution_notes === "string" &&
+                before.execution_notes
+                  ? [before.execution_notes]
+                  : []
+              }
+              after={
+                typeof after.execution_notes === "string" && after.execution_notes
+                  ? [after.execution_notes]
+                  : []
+              }
+            />
+          ) : null}
+          {after.quality_controls !== undefined ? (
+            <BeforeAfterList
+              label="Contrôles"
+              before={list(before.quality_controls)}
+              after={list(after.quality_controls)}
+            />
+          ) : null}
+          {after.technical_reservations !== undefined ? (
+            <BeforeAfterList
+              label="Réserves"
+              before={list(before.technical_reservations)}
+              after={list(after.technical_reservations)}
+            />
+          ) : null}
+          {after.notes !== undefined ? (
+            <BeforeAfterList
+              label="Notes"
+              before={
+                typeof before.notes === "string" && before.notes
+                  ? [before.notes]
+                  : []
+              }
+              after={
+                typeof after.notes === "string" && after.notes
+                  ? [after.notes]
+                  : []
+              }
+            />
+          ) : null}
+        </div>
+      ) : (
+        <p className="mt-1.5 text-[12px] text-slate-500">
+          Prestations · Références · Exécution · Contrôles · Réserves
+        </p>
+      )}
     </li>
   );
 }
+
 function AddLineBadges({ line }: { line: AddLinePreviewPayload }) {
   const badges: Array<{ text: string; tone: string }> = [
     { text: "AJOUT", tone: "bg-emerald-50 text-emerald-900 ring-emerald-200" },
@@ -1610,6 +1764,8 @@ function DirectChangesBlock({
   fallback: BeworkPatchAnalyzeResult["directChanges"];
 }) {
   const changes: DirectChange[] = impact?.directChanges ?? [];
+  const techCount = countTechSheetUpdates(changes);
+  const collapseTech = techCount >= 3;
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-3">
@@ -1632,6 +1788,9 @@ function DirectChangesBlock({
               <UpdateLineMetaPreviewCard
                 key={`${c.entityType}-${c.entityId}-${c.field}-${i}`}
                 change={c}
+                defaultCollapsed={
+                  collapseTech && isTechSheetUpdateChange(c)
+                }
               />
             ) : (
               <li

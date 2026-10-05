@@ -8,6 +8,7 @@ import { d } from "@/lib/commercial/decimal";
 import {
   adaptVisitForChatgptContext,
   buildProjectContext,
+  buildTakeoffEnrichTechSheetsContext,
   buildTakeoffModifyContext,
 } from "@/lib/bework-context";
 import { VISIT_MODIFY_INSTRUCTIONS } from "@/lib/bework-context/adapters";
@@ -46,13 +47,20 @@ function isObj(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === "object" && !Array.isArray(v);
 }
 
+export type BeworkPatchContextPurpose =
+  | "modify"
+  | "enrich_tech_sheets";
+
 export async function buildUniversalPatchContext(input: {
   orgId: string;
   section: BeworkPatchSection;
   projectId?: string | null;
   entityId: string;
+  /** TAKEOFF : enrich_tech_sheets = fiches incomplètes uniquement + instruction auto. */
+  purpose?: BeworkPatchContextPurpose | null;
 }): Promise<BeworkChatgptContextV1 | null> {
   const projectId = input.projectId?.trim() || null;
+  const purpose = input.purpose ?? "modify";
 
   if (input.section === "VISIT") {
     return buildVisitContextFlexible(input.orgId, projectId, input.entityId);
@@ -69,7 +77,7 @@ export async function buildUniversalPatchContext(input: {
     case "QUOTE":
       return buildQuoteContext(input.orgId, project, input.entityId);
     case "TAKEOFF":
-      return buildTakeoffContext(input.orgId, project, input.entityId);
+      return buildTakeoffContext(input.orgId, project, input.entityId, purpose);
     case "PLANNING":
       return buildPlanningContext(input.orgId, project, input.entityId);
     case "FOLLOW_UP":
@@ -176,18 +184,27 @@ async function buildQuoteContext(
 /**
  * CTX-08 — TAKEOFF via resolver CURRENT + versions.
  * Deep-link `studyId` : peut exposer ARCHIVED (is_current false).
+ * purpose=enrich_tech_sheets → lignes incomplètes + instruction auto ChatGPT.
  */
 async function buildTakeoffContext(
   orgId: string,
   project: { id: string; title: string },
   studyId: string,
+  purpose: BeworkPatchContextPurpose = "modify",
 ): Promise<BeworkChatgptContextV1 | null> {
   try {
-    const ctx = await buildTakeoffModifyContext({
-      orgId,
-      projectId: project.id,
-      studyId,
-    });
+    const ctx =
+      purpose === "enrich_tech_sheets"
+        ? await buildTakeoffEnrichTechSheetsContext({
+            orgId,
+            projectId: project.id,
+            studyId,
+          })
+        : await buildTakeoffModifyContext({
+            orgId,
+            projectId: project.id,
+            studyId,
+          });
     if (ctx.project?.id !== project.id) return null;
     return ctx;
   } catch {

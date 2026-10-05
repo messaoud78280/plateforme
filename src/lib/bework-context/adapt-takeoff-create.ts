@@ -18,6 +18,7 @@ import { computeVisitContextVersion } from "@/lib/bework-context/visit-context-v
 import { listProjectPlanCandidateFiles } from "@/lib/preparation/plan-source";
 import { buildProjectContext } from "@/lib/bework-context/build-project-context";
 import { adaptTakeoffForChatgptContext } from "@/lib/bework-context/adapters";
+import { applyEnrichTechSheetsToTakeoffContext } from "@/lib/bework-patch/tech-sheet-enrichment";
 import {
   resolveCurrentPrepStudy,
   resolveCurrentSchedulePlan,
@@ -330,6 +331,19 @@ export async function buildTakeoffModifyContext(input: {
       },
     },
   };
+}
+
+/**
+ * Contexte TAKEOFF dédié : enrichir toutes les fiches techniques incomplètes.
+ * Lecture seule. Un seul aller-retour ChatGPT → multi update_line.
+ */
+export async function buildTakeoffEnrichTechSheetsContext(input: {
+  orgId: string;
+  projectId: string;
+  studyId?: string | null;
+}): Promise<BeworkTakeoffModifyContextV1> {
+  const ctx = await buildTakeoffModifyContext(input);
+  return applyEnrichTechSheetsToTakeoffContext(ctx) as BeworkTakeoffModifyContextV1;
 }
 
 /**

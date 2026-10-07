@@ -22,6 +22,7 @@ import { resolveTaskDurationDays } from "@/lib/preparation/schedule/duration-res
 import { recomputePersistedPlanDatesInTx } from "@/lib/preparation/schedule/recompute-plan-dates";
 import { detectDependencyCycle } from "@/lib/preparation/schedule/dependencies";
 import { d } from "@/lib/commercial/decimal";
+import { syncScheduleDomainSnapshotInTx } from "@/lib/schedule-domain/repository/sync-snapshot";
 
 export {
   PLANNING_COMMIT_SUPPORTED_OPS,
@@ -141,6 +142,21 @@ export async function applyPlanningDirectInTx(
   let depsMapWorking: Map<string, Array<{ step_id: string }>> | null = null;
   const pendingDepWrites = new Map<string, PendingDepWrite>();
 
+  const plainStrings = (raw: unknown): string[] =>
+    Array.isArray(raw)
+      ? raw.filter((item): item is string => typeof item === "string")
+      : [];
+  const typedEntries = (raw: unknown, type: string): Record<string, unknown>[] =>
+    Array.isArray(raw)
+      ? raw.filter(
+          (item): item is Record<string, unknown> =>
+            !!item &&
+            typeof item === "object" &&
+            !Array.isArray(item) &&
+            (item as { type?: unknown }).type === type,
+        )
+      : [];
+
   const ensureDepGraph = async () => {
     if (allTasksCache && depsMapWorking) return;
     allTasksCache = await tx.prepScheduleTask.findMany({
@@ -187,8 +203,55 @@ export async function applyPlanningDirectInTx(
       if (op.changes.controls !== undefined) {
         data.controlsJson = op.changes.controls as Prisma.InputJsonValue;
       }
+      if (
+        op.changes.constraints !== undefined ||
+        op.changes.assumptions !== undefined ||
+        op.changes.duration_basis !== undefined
+      ) {
+        const current = await tx.prepScheduleTask.findUnique({
+          where: { id: task.id },
+          select: { constraintsJson: true },
+        });
+        const constraints =
+          op.changes.constraints ?? plainStrings(current?.constraintsJson);
+        const assumptions =
+          op.changes.assumptions?.map((label) => ({ type: "ASSUMPTION", label })) ??
+          typedEntries(current?.constraintsJson, "ASSUMPTION");
+        const durationBasis =
+          op.changes.duration_basis === undefined
+            ? typedEntries(current?.constraintsJson, "DURATION_BASIS")
+            : op.changes.duration_basis
+              ? [{ type: "DURATION_BASIS", ...op.changes.duration_basis }]
+              : [];
+        const phases = typedEntries(current?.constraintsJson, "PHASE");
+        data.constraintsJson = [
+          ...constraints,
+          ...phases,
+          ...assumptions,
+          ...durationBasis,
+        ] as Prisma.InputJsonValue;
+      }
       if (op.changes.safety !== undefined) {
         data.safetyJson = op.changes.safety as Prisma.InputJsonValue;
+      }
+      if (
+        op.changes.proofs !== undefined ||
+        op.changes.technical_references !== undefined
+      ) {
+        const current = await tx.prepScheduleTask.findUnique({
+          where: { id: task.id },
+          select: { proofsJson: true },
+        });
+        const proofs = op.changes.proofs ?? plainStrings(current?.proofsJson);
+        const references =
+          op.changes.technical_references?.map((reference) => ({
+            type: "TECHNICAL_REFERENCE",
+            ...reference,
+          })) ?? typedEntries(current?.proofsJson, "TECHNICAL_REFERENCE");
+        data.proofsJson = [...proofs, ...references] as Prisma.InputJsonValue;
+      }
+      if (op.changes.hold_point !== undefined) {
+        data.holdPoint = op.changes.hold_point;
       }
       if (op.changes.equipment !== undefined) {
         data.equipmentJson = op.changes.equipment as Prisma.InputJsonValue;
@@ -300,6 +363,10 @@ export async function applyPlanningDirectInTx(
         crew_id: op.changes.crew_id,
         crew_size: op.changes.crew_size,
         parallelizable: op.changes.parallelizable,
+        members: op.changes.members?.map((member) => ({
+          ...member,
+          count: member.count ?? 1,
+        })),
       });
       const crewParsed = parseCrewJson(nextCrew);
       const data: Prisma.PrepScheduleTaskUpdateInput = {
@@ -327,6 +394,121 @@ export async function applyPlanningDirectInTx(
       }
 
       await tx.prepScheduleTask.update({ where: { id: row.id }, data });
+      needsDateRecompute = true;
+      touched = true;
+    }
+
+    if (op.op === "update_start_date") {
+      const startDate = op.changes.start_date
+        ? new Date(`${op.changes.start_date}T00:00:00.000Z`)
+        : null;
+      if (startDate && Number.isNaN(startDate.getTime())) {
+        throw Object.assign(new Error("Date de démarrage invalide."), {
+          code: "INVALID_FIELD",
+        });
+      }
+      await tx.prepSchedulePlan.update({
+        where: { id: plan.id },
+        data: { startDate },
+      });
+      needsDateRecompute = true;
+      touched = true;
+    }
+
+    if (op.op === "add_task") {
+      if (!Number.isFinite(op.task.duration_days) || op.task.duration_days <= 0) {
+        throw Object.assign(new Error("Durée de la nouvelle tâche invalide."), {
+          code: "INVALID_FIELD",
+        });
+      }
+      await ensureDepGraph();
+      if (depsMapWorking!.has(op.task.step_code)) {
+        throw Object.assign(new Error(`Code tâche déjà utilisé : ${op.task.step_code}`), {
+          code: "DUPLICATE_ACTIVITY_ID",
+        });
+      }
+      const knownSteps = new Set(allTasksCache!.map((task) => task.stepCode));
+      for (const dep of op.task.depends_on ?? []) {
+        if (dep.step_id === op.task.step_code || !knownSteps.has(dep.step_id)) {
+          throw Object.assign(
+            new Error(`Prédécesseur invalide pour ${op.task.step_code} : ${dep.step_id}`),
+            { code: "UNKNOWN_PREDECESSOR" },
+          );
+        }
+      }
+      const maxSort = await tx.prepScheduleTask.aggregate({
+        where: { planId: plan.id, organizationId: input.orgId },
+        _max: { sortOrder: true },
+      });
+      const crewJson =
+        op.task.kind === "WAIT"
+          ? { crew_id: null, crew_size: null, members: [] }
+          : {
+              crew_id: op.task.crew_id ?? null,
+              crew_size: op.task.crew_size ?? null,
+              members: op.task.members ?? [],
+            };
+      const constraintsJson = [
+        ...(op.task.constraints ?? []),
+        ...(op.task.assumptions ?? []).map((label) => ({
+          type: "ASSUMPTION",
+          label,
+        })),
+      ];
+      const proofsJson = [
+        ...(op.task.proofs ?? []),
+        ...(op.task.technical_references ?? []).map((reference) => ({
+          type: "TECHNICAL_REFERENCE",
+          ...reference,
+        })),
+      ];
+      const dependsOn: DepEdge[] = (op.task.depends_on ?? []).map((dep) => ({
+        stepId: dep.step_id,
+        type: dep.type ?? "FS",
+        lagDays: dep.lag_days ?? 0,
+      }));
+      const createdTask = await tx.prepScheduleTask.create({
+        data: {
+          organizationId: input.orgId,
+          planId: plan.id,
+          stepCode: op.task.step_code,
+          name: op.task.name,
+          kind: (op.task.kind ?? "WORK").toLowerCase(),
+          sortOrder: (maxSort._max.sortOrder ?? -1) + 1,
+          lot: op.task.lot ?? null,
+          description: op.task.description ?? null,
+          holdPoint: op.task.hold_point ?? false,
+          durationDays: op.task.duration_days,
+          computedDurationDays: op.task.duration_days,
+          durationMode: "manual",
+          durationCalendar: op.task.duration_calendar ?? "working",
+          durationLockedByUser: true,
+          crewJson: crewJson as Prisma.InputJsonValue,
+          equipmentJson: [],
+          suppliesJson: [],
+          preconditionsJson: (op.task.preconditions ?? []) as Prisma.InputJsonValue,
+          controlsJson: (op.task.controls ?? []) as Prisma.InputJsonValue,
+          constraintsJson: constraintsJson as Prisma.InputJsonValue,
+          safetyJson: (op.task.safety ?? []) as Prisma.InputJsonValue,
+          proofsJson: proofsJson as Prisma.InputJsonValue,
+          takeoffCodesJson: [],
+          dependsOnJson: dependsOn as unknown as Prisma.InputJsonValue,
+        },
+      });
+      allTasksCache!.push({
+        id: createdTask.id,
+        stepCode: createdTask.stepCode,
+        dependsOnJson: dependsOn,
+      });
+      depsMapWorking!.set(
+        createdTask.stepCode,
+        dependsOn.map((dep) => ({ step_id: dep.stepId })),
+      );
+      pendingDepWrites.set(createdTask.id, {
+        taskId: createdTask.id,
+        stepCode: createdTask.stepCode,
+        dependsOn,
+      });
       needsDateRecompute = true;
       touched = true;
     }
@@ -464,6 +646,11 @@ export async function applyPlanningDirectInTx(
       durationOverrides,
     });
   }
+
+  await syncScheduleDomainSnapshotInTx(tx, {
+    orgId: input.orgId,
+    planId: plan.id,
+  });
 
   await tx.prepSchedulePlan.update({
     where: { id: plan.id },

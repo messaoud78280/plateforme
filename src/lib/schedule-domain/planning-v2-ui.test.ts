@@ -3,7 +3,10 @@
  * node --import tsx src/lib/schedule-domain/planning-v2-ui.test.ts
  */
 import assert from "node:assert/strict";
-import { BEWORK_SCHEDULE_AI_FORMAT } from "./ai-contract";
+import {
+  BEWORK_SCHEDULE_AI_FORMAT,
+  BEWORK_SCHEDULE_AI_FORMAT_V2,
+} from "./ai-contract";
 import { previewAiSchedule } from "./preview";
 import {
   applyCopiedContext,
@@ -19,7 +22,10 @@ import {
   staleUserMessage,
   summarizePreviewForConfirm,
 } from "./planning-v2-ui";
-import { getAiScheduleBundleV1JsonSchema } from "./ai-contract";
+import {
+  getAiScheduleBundleV1JsonSchema,
+  getAiScheduleBundleV2JsonSchema,
+} from "./ai-contract";
 
 function aiBundle(activities: unknown[]) {
   return { format: BEWORK_SCHEDULE_AI_FORMAT, activities };
@@ -74,8 +80,9 @@ async function main() {
   {
     const schema = getAiScheduleBundleV1JsonSchema();
     assert.ok(schema);
+    assert.ok(getAiScheduleBundleV2JsonSchema());
     const ex = buildMinimalAiScheduleExample(["GO-00-01", "GO-00-02"]);
-    assert.equal(ex.format, BEWORK_SCHEDULE_AI_FORMAT);
+    assert.equal(ex.format, BEWORK_SCHEDULE_AI_FORMAT_V2);
     assert.equal(ex.activities.length, 2);
   }
 

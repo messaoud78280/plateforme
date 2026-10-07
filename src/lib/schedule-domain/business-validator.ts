@@ -7,7 +7,7 @@ import {
   buildDepsMapFromPredecessors,
   detectScheduleDependencyCycle,
 } from "./cycle";
-import type { DomainIssue, SchedulePlanV1 } from "./schema";
+import type { DomainIssue, SchedulePlan } from "./schema";
 
 export type ScheduleTakeoffLineContext = {
   code: string;
@@ -70,7 +70,7 @@ function operationalQty(line: ScheduleTakeoffLineContext): number | null {
  * @param normalizedActivityCount — count après adapter
  */
 export function validateSchedulePlanBusinessRules(
-  plan: SchedulePlanV1,
+  plan: SchedulePlan,
   sourceContext: ScheduleSourceContext,
   counts?: {
     inputActivityCount?: number;

@@ -15,6 +15,7 @@ import type { DomainIssue } from "./schema";
 import { zodIssuesToDomainIssues } from "./schema";
 
 export const BEWORK_SCHEDULE_AI_FORMAT = "bework_schedule_ai_v1" as const;
+export const BEWORK_SCHEDULE_AI_FORMAT_V2 = "bework_schedule_ai_v2" as const;
 
 const nonEmpty = z.string().trim().min(1);
 
@@ -114,6 +115,102 @@ export const AiScheduleBundleV1Schema = z
 export type AiScheduleBundleV1 = z.infer<typeof AiScheduleBundleV1Schema>;
 export type AiScheduleActivityV1 = z.infer<typeof AiScheduleActivityV1Schema>;
 
+const AiNamedResourceV2Schema = z.object({
+  id: nonEmpty,
+  label: nonEmpty,
+  count: z.number().finite().nonnegative().default(1),
+  note: z.string().nullable().optional(),
+});
+
+const AiCrewMemberV2Schema = z.object({
+  labor_id: nonEmpty,
+  role: nonEmpty,
+  count: z.number().finite().positive().default(1),
+});
+
+const AiTechnicalReferenceV2Schema = z.object({
+  code: nonEmpty,
+  label: z.string().trim().min(1).nullable().optional(),
+  applicability: z
+    .enum(["INDICATIVE", "CONTRACTUAL", "TO_CONFIRM"])
+    .default("INDICATIVE"),
+  source_url: z.string().url().nullable().optional(),
+  note: z.string().nullable().optional(),
+});
+
+const AiDurationBasisV2Schema = z.object({
+  provenance: z.enum([
+    "SOURCE_DATA",
+    "PLANNING_ASSUMPTION",
+    "USER_DECISION",
+    "PRODUCTIVITY_RATE",
+  ]),
+  min_days: z.number().finite().nonnegative().nullable().optional(),
+  max_days: z.number().finite().nonnegative().nullable().optional(),
+  rationale: z.string().trim().min(1).nullable().optional(),
+  to_validate: z.boolean().default(true),
+});
+
+export const AiScheduleActivityV2Schema = AiScheduleActivityV1Schema.innerType()
+  .extend({
+    lot: z.string().trim().min(1).nullable().optional(),
+    phase: z.string().trim().min(1).nullable().optional(),
+    crew: z
+      .object({
+        id: nonEmpty,
+        size: z.number().int().positive().optional(),
+        members: z.array(AiCrewMemberV2Schema).default([]),
+      })
+      .nullable()
+      .optional(),
+    equipment: z.array(AiNamedResourceV2Schema).default([]),
+    supplies: z.array(AiNamedResourceV2Schema).default([]),
+    preconditions: z.array(nonEmpty).default([]),
+    controls: z.array(nonEmpty).default([]),
+    constraints: z.array(nonEmpty).default([]),
+    safety: z.array(nonEmpty).default([]),
+    proofs: z.array(nonEmpty).default([]),
+    technical_references: z.array(AiTechnicalReferenceV2Schema).default([]),
+    assumptions: z.array(nonEmpty).default([]),
+    duration_basis: AiDurationBasisV2Schema.nullable().optional(),
+    hold_point: z.boolean().default(false),
+  })
+  .superRefine((act, ctx) => {
+    if (
+      act.kind === "WAIT" &&
+      (act.crew != null || act.equipment.some((item) => item.count > 0))
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["crew"],
+        message: `WAIT ${act.id} ne doit pas recevoir de ressource active`,
+      });
+    }
+  });
+
+export const AiScheduleBundleV2Schema = z.object({
+  format: z.literal(BEWORK_SCHEDULE_AI_FORMAT_V2),
+  activities: z
+    .array(AiScheduleActivityV2Schema)
+    .min(1, "Au moins une activité requise"),
+}).superRefine((bundle, ctx) => {
+  const seen = new Set<string>();
+  bundle.activities.forEach((activity, index) => {
+    if (seen.has(activity.id)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["activities", index, "id"],
+        message: `ID activité en double : ${activity.id}`,
+      });
+    }
+    seen.add(activity.id);
+  });
+});
+
+export type AiScheduleBundleV2 = z.infer<typeof AiScheduleBundleV2Schema>;
+export type AiScheduleActivityV2 = z.infer<typeof AiScheduleActivityV2Schema>;
+export type AiScheduleBundle = AiScheduleBundleV1 | AiScheduleBundleV2;
+
 export type ParseAiScheduleResult =
   | { ok: true; bundle: AiScheduleBundleV1; inputActivityCount: number }
   | { ok: false; issues: DomainIssue[]; inputActivityCount: number };
@@ -187,7 +284,42 @@ export function parseAiScheduleBundleV1(input: unknown): ParseAiScheduleResult {
   };
 }
 
+export type ParseAiScheduleAnyResult =
+  | { ok: true; bundle: AiScheduleBundle; inputActivityCount: number }
+  | { ok: false; issues: DomainIssue[]; inputActivityCount: number };
+
+/** Parse le contrat IA courant sans casser les payloads V1 déjà diffusés. */
+export function parseAiScheduleBundle(input: unknown): ParseAiScheduleAnyResult {
+  const format =
+    input && typeof input === "object" && !Array.isArray(input)
+      ? String((input as { format?: unknown }).format ?? "")
+      : "";
+  if (format !== BEWORK_SCHEDULE_AI_FORMAT_V2) {
+    return parseAiScheduleBundleV1(input);
+  }
+  const inputActivityCount =
+    input &&
+    typeof input === "object" &&
+    Array.isArray((input as { activities?: unknown }).activities)
+      ? (input as { activities: unknown[] }).activities.length
+      : 0;
+  const parsed = AiScheduleBundleV2Schema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      inputActivityCount,
+      issues: zodIssuesToDomainIssues(parsed.error.issues),
+    };
+  }
+  return {
+    ok: true,
+    bundle: parsed.data,
+    inputActivityCount: parsed.data.activities.length,
+  };
+}
+
 let cachedAiJsonSchema: Record<string, unknown> | null = null;
+let cachedAiV2JsonSchema: Record<string, unknown> | null = null;
 
 export function getAiScheduleBundleV1JsonSchema(): Record<string, unknown> {
   if (cachedAiJsonSchema) return cachedAiJsonSchema;
@@ -198,6 +330,15 @@ export function getAiScheduleBundleV1JsonSchema(): Record<string, unknown> {
   return cachedAiJsonSchema;
 }
 
+export function getAiScheduleBundleV2JsonSchema(): Record<string, unknown> {
+  if (cachedAiV2JsonSchema) return cachedAiV2JsonSchema;
+  cachedAiV2JsonSchema = zodToJsonSchema(AiScheduleBundleV2Schema, {
+    name: "BeworkScheduleAiV2",
+    $refStrategy: "none",
+  }) as Record<string, unknown>;
+  return cachedAiV2JsonSchema;
+}
+
 export const AI_SCHEDULE_V1_BUSINESS_RULES = [
   "format doit être bework_schedule_ai_v1",
   "kinds autorisés : WORK, CONTROL, WAIT — MILESTONE interdit",
@@ -206,5 +347,15 @@ export const AI_SCHEDULE_V1_BUSINESS_RULES = [
   "WAIT ne doit pas avoir de crew",
   "takeoff_codes = codes lignes métré exécutables (pas indicator)",
   "PRODUCTIVITY non exposé en IA v1",
+  "aucune activité ne peut être omise silencieusement",
+] as const;
+
+export const AI_SCHEDULE_V2_BUSINESS_RULES = [
+  "format doit être bework_schedule_ai_v2",
+  ...AI_SCHEDULE_V1_BUSINESS_RULES.slice(1, -2),
+  "WAIT ne doit recevoir ni équipe ni matériel actif",
+  "références techniques indicatives sauf preuve contractuelle",
+  "hypothèses et bases de durée à valider sont conservées",
+  "points d’arrêt explicites avant travaux irréversibles",
   "aucune activité ne peut être omise silencieusement",
 ] as const;

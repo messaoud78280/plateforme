@@ -276,9 +276,27 @@ export type OpUpdateTask = {
     lot?: string | null;
     preconditions?: string[];
     controls?: string[];
+    constraints?: string[];
     safety?: string[];
-    equipment?: Array<{ equipment_id: string; count?: number }>;
-    supplies?: Array<{ supply_id: string; count?: number }>;
+    proofs?: string[];
+    assumptions?: string[];
+    technical_references?: Array<{
+      code: string;
+      label?: string | null;
+      applicability?: "INDICATIVE" | "CONTRACTUAL" | "TO_CONFIRM";
+      source_url?: string | null;
+      note?: string | null;
+    }>;
+    duration_basis?: {
+      provenance: "SOURCE_DATA" | "PLANNING_ASSUMPTION" | "USER_DECISION" | "PRODUCTIVITY_RATE";
+      min_days?: number | null;
+      max_days?: number | null;
+      rationale?: string | null;
+      to_validate?: boolean;
+    } | null;
+    hold_point?: boolean;
+    equipment?: Array<{ equipment_id: string; label?: string; count?: number }>;
+    supplies?: Array<{ supply_id: string; label?: string; count?: number }>;
   };
 };
 
@@ -316,6 +334,12 @@ export type OpUpdateCrew = {
     crew_id?: string | null;
     crew_size?: number | null;
     parallelizable?: boolean;
+    members?: Array<{
+      labor_id: string;
+      role?: string;
+      label?: string;
+      count?: number;
+    }>;
   };
 };
 
@@ -366,8 +390,28 @@ export type OpAddTask = {
     step_code: string;
     name: string;
     duration_days: number;
+    kind?: "WORK" | "CONTROL" | "WAIT";
+    duration_calendar?: "working" | "calendar";
     lot?: string | null;
     crew_id?: string | null;
+    crew_size?: number | null;
+    members?: Array<{ labor_id: string; role?: string; label?: string; count?: number }>;
+    depends_on?: Array<{ step_id: string; type?: "FS" | "SS" | "FF"; lag_days?: number }>;
+    description?: string | null;
+    preconditions?: string[];
+    controls?: string[];
+    constraints?: string[];
+    safety?: string[];
+    proofs?: string[];
+    assumptions?: string[];
+    technical_references?: Array<{
+      code: string;
+      label?: string | null;
+      applicability?: "INDICATIVE" | "CONTRACTUAL" | "TO_CONFIRM";
+      source_url?: string | null;
+      note?: string | null;
+    }>;
+    hold_point?: boolean;
   };
 };
 

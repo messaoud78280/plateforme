@@ -453,7 +453,7 @@ export function ProjectPreparationOverview({
       return;
     }
     if (step.primaryAction === "prepare_planning_chatgpt") {
-      // Flag ON → parcours réel ROCKMAN / « Lancer » ouvre V2 (bework_schedule_ai_v1).
+      // Flag ON → parcours réel ROCKMAN / « Lancer » ouvre V2 (bework_schedule_ai_v2).
       // Legacy reste accessible via le bouton secondaire « Flux legacy ».
       if (planningV2Enabled) {
         setPlanningV2Open(true);
@@ -689,7 +689,7 @@ export function ProjectPreparationOverview({
       !workspace.global.planning.href ? (
         <div className="flex flex-wrap items-center gap-2 rounded-xl border border-emerald-200/80 bg-emerald-50/40 px-3 py-2">
           <p className="text-[12.5px] text-emerald-950">
-            Parcours principal = Planning V2 (<code className="text-[11px]">bework_schedule_ai_v1</code>).
+            Parcours principal = Planning V2 (<code className="text-[11px]">bework_schedule_ai_v2</code>).
             Le bouton « Lancer » ouvre ce flux.
           </p>
           <button

@@ -3,7 +3,10 @@
  * node --import tsx src/lib/schedule-domain/repository/mapping.test.ts
  */
 import assert from "node:assert/strict";
-import { BEWORK_SCHEDULE_AI_FORMAT } from "../ai-contract";
+import {
+  BEWORK_SCHEDULE_AI_FORMAT,
+  BEWORK_SCHEDULE_AI_FORMAT_V2,
+} from "../ai-contract";
 import { previewAiSchedule } from "../preview";
 import {
   domainSnapshotForPersist,
@@ -93,6 +96,68 @@ function run() {
   };
   assert.equal(snap.schemaVersion, 1);
   assert.equal(snap.activities.length, 2);
+
+  // V2 enrichi : aucune information chantier ne disparaît au mapping.
+  const enriched = previewAiSchedule({
+    raw: {
+      format: BEWORK_SCHEDULE_AI_FORMAT_V2,
+      activities: [{
+        id: "V2-01",
+        name: "Contrôle ferraillage",
+        kind: "CONTROL",
+        duration_days: 0.5,
+        takeoff_codes: ["GO-00-01"],
+        crew: {
+          id: "MAC-A",
+          size: 3,
+          members: [{ labor_id: "MACON", role: "Maçon", count: 2 }],
+        },
+        equipment: [{ id: "NIV-LASER", label: "Niveau laser", count: 1 }],
+        supplies: [{ id: "PV-CONTROLE", label: "Fiche de contrôle", count: 1 }],
+        preconditions: ["Plans BET validés"],
+        controls: ["Enrobage et attentes vérifiés"],
+        constraints: ["Accès toupie confirmé"],
+        safety: ["Fouilles protégées"],
+        proofs: ["PV de contrôle signé"],
+        assumptions: ["Effectif à confirmer"],
+        technical_references: [{
+          code: "NF DTU 13.1",
+          applicability: "INDICATIVE",
+        }],
+        duration_basis: {
+          provenance: "PLANNING_ASSUMPTION",
+          min_days: 0.5,
+          max_days: 1,
+          to_validate: true,
+        },
+        hold_point: true,
+        after: [],
+      }],
+    },
+    sourceContext: {
+      projectId: "p",
+      takeoffStudyId: "s",
+      takeoffVersion: 1,
+      takeoffFingerprint: "fp",
+      lines,
+    },
+  });
+  assert.equal(enriched.ok, true);
+  if (!enriched.ok) throw new Error("preview v2");
+  assert.equal(enriched.plan.schemaVersion, 2);
+  const enrichedRows = mapPlanTasksForPersistence(
+    enriched.plan,
+    enriched.calculated,
+    qty,
+  );
+  assert.equal(enrichedRows[0]?.holdPoint, true);
+  assert.deepEqual(enrichedRows[0]?.preconditionsJson, ["Plans BET validés"]);
+  assert.equal(
+    Array.isArray(enrichedRows[0]?.proofsJson)
+      ? enrichedRows[0]?.proofsJson.length
+      : 0,
+    2,
+  );
 
   // ROCKMAN fixture mémoire 22/27
   const rockLines = Array.from({ length: 22 }, (_, i) => ({

@@ -1,5 +1,5 @@
 /**
- * Preview Planning V2 — bework_schedule_ai_v1 → SchedulePlan.
+ * Preview Planning V2 — bework_schedule_ai_v1/v2 → SchedulePlan.
  * Aucune écriture. N’utilise PAS l’ancien parseBeworkScheduleBundle.
  */
 import { NextResponse } from "next/server";

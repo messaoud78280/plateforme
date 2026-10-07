@@ -13,6 +13,7 @@ export type CrewMember = {
   count: number;
   /** Libellé optionnel (affichage / patch) — non requis à la persistance. */
   label?: string;
+  role?: string;
 };
 
 export type CrewJsonObject = {
@@ -53,13 +54,14 @@ export function parseCrewMembers(raw: unknown): CrewMember[] {
     const out: CrewMember[] = [];
     for (const c of raw) {
       if (!c || typeof c !== "object") continue;
-      const o = c as { labor_id?: string; count?: number; label?: string };
+      const o = c as { labor_id?: string; count?: number; label?: string; role?: string };
       if (!o.labor_id || typeof o.labor_id !== "string") continue;
       const member: CrewMember = {
         labor_id: o.labor_id,
         count: typeof o.count === "number" && o.count > 0 ? o.count : 1,
       };
       if (typeof o.label === "string") member.label = o.label;
+      if (typeof o.role === "string") member.role = o.role;
       out.push(member);
     }
     return out;

@@ -1,12 +1,12 @@
 import type { SchedulePlanV1 } from "./schema";
-import { SCHEDULE_PLAN_SCHEMA_VERSION } from "./constants";
+import { SCHEDULE_PLAN_SCHEMA_VERSION_V1 } from "./constants";
 
 /** Plan minimal valide — 1 activité FIXED. */
 export function fixturePlanSingleActivity(
   overrides?: Partial<SchedulePlanV1>,
 ): SchedulePlanV1 {
   return {
-    schemaVersion: SCHEDULE_PLAN_SCHEMA_VERSION,
+    schemaVersion: SCHEDULE_PLAN_SCHEMA_VERSION_V1,
     sourceSnapshot: {
       projectId: "proj_test",
       takeoffStudyId: "study_test",

@@ -4,11 +4,11 @@
  */
 import type { Prisma } from "@prisma/client";
 import type { CalculatedSchedule } from "../calculate";
-import type { SchedulePlanV1 } from "../schema";
+import type { ScheduleActivity, SchedulePlan } from "../schema";
 import { toDomainSnapshotJson } from "../versioning";
 
 export function mapActivityKindToPrisma(
-  kind: SchedulePlanV1["activities"][number]["kind"],
+  kind: ScheduleActivity["kind"],
 ): "work" | "control" | "wait" {
   if (kind === "CONTROL") return "control";
   if (kind === "WAIT") return "wait";
@@ -22,30 +22,45 @@ export function mapDurationModeToPrisma(
 }
 
 export function mapCrewJson(
-  activity: SchedulePlanV1["activities"][number],
+  activity: ScheduleActivity,
 ): Prisma.InputJsonValue {
   const req = activity.resourceRequirements;
+  const members = "crewMembers" in activity
+    ? activity.crewMembers.map((member) => ({
+        labor_id: member.laborId,
+        role: member.role,
+        count: member.count,
+      }))
+    : req.labor.map((member) => ({
+        labor_id: member.laborId,
+        count: member.count,
+      }));
   return {
     crew_id: req.crewId ?? null,
     crew_size: req.crewSize ?? null,
-    members: req.labor.map((l) => ({
-      labor_id: l.laborId,
-      count: l.count,
-    })),
+    members,
   };
 }
 
 export function mapEquipmentJson(
-  activity: SchedulePlanV1["activities"][number],
+  activity: ScheduleActivity,
 ): Prisma.InputJsonValue {
-  return activity.resourceRequirements.equipment.map((e) => ({
-    equipment_id: e.equipmentId,
-    count: e.count,
+  if ("equipment" in activity) {
+    return activity.equipment.map((item) => ({
+      equipment_id: item.id,
+      label: item.label,
+      count: item.count,
+      note: item.note ?? null,
+    }));
+  }
+  return activity.resourceRequirements.equipment.map((item) => ({
+    equipment_id: item.equipmentId,
+    count: item.count,
   }));
 }
 
 export function takeoffCodesOf(
-  activity: SchedulePlanV1["activities"][number],
+  activity: ScheduleActivity,
 ): string[] {
   return activity.sourceLinks
     .filter((l) => l.type === "TAKEOFF_LINE")
@@ -53,7 +68,7 @@ export function takeoffCodesOf(
 }
 
 export function driverTakeoffCodeOf(
-  activity: SchedulePlanV1["activities"][number],
+  activity: ScheduleActivity,
 ): string | null {
   if (activity.duration.mode === "PRODUCTIVITY") {
     return activity.duration.sourceCode;
@@ -83,10 +98,18 @@ export type MappedTaskRow = {
   rateValue: number | null;
   rateUnit: string | null;
   parallelUnits: number;
+  lot: string | null;
+  holdPoint: boolean;
+  suppliesJson: Prisma.InputJsonValue;
+  preconditionsJson: Prisma.InputJsonValue;
+  controlsJson: Prisma.InputJsonValue;
+  constraintsJson: Prisma.InputJsonValue;
+  safetyJson: Prisma.InputJsonValue;
+  proofsJson: Prisma.InputJsonValue;
 };
 
 export function mapPlanTasksForPersistence(
-  plan: SchedulePlanV1,
+  plan: SchedulePlan,
   calculated: CalculatedSchedule,
   quantityByCode: Map<string, number | null>,
 ): MappedTaskRow[] {
@@ -102,6 +125,8 @@ export function mapPlanTasksForPersistence(
       kind: mapActivityKindToPrisma(act.kind),
       sortOrder: index,
       description: act.notes ?? null,
+      lot: "lot" in act ? (act.lot ?? null) : null,
+      holdPoint: "holdPoint" in act ? act.holdPoint : false,
       startDate: calc?.startDate ? new Date(calc.startDate) : null,
       endDate: calc?.endDate ? new Date(calc.endDate) : null,
       durationMode: mapDurationModeToPrisma(
@@ -137,20 +162,58 @@ export function mapPlanTasksForPersistence(
         act.duration.mode === "PRODUCTIVITY"
           ? (act.duration.parallelUnits ?? 1)
           : 1,
+      suppliesJson:
+        "supplies" in act
+          ? act.supplies.map((item) => ({
+              supply_id: item.id,
+              label: item.label,
+              count: item.count,
+              note: item.note ?? null,
+            }))
+          : [],
+      preconditionsJson: "preconditions" in act ? act.preconditions : [],
+      controlsJson: "controls" in act ? act.controls : [],
+      constraintsJson:
+        "constraints" in act
+          ? [
+              ...act.constraints,
+              ...(act.phase
+                ? [{ type: "PHASE", label: act.phase }]
+                : []),
+              ...act.assumptions.map((label) => ({
+                type: "ASSUMPTION",
+                label,
+              })),
+              ...(act.durationBasis
+                ? [{ type: "DURATION_BASIS", ...act.durationBasis }]
+                : []),
+            ]
+          : [],
+      safetyJson: "safety" in act ? act.safety : [],
+      proofsJson:
+        "proofs" in act
+          ? [
+              ...act.proofs,
+              ...act.technicalReferences.map((reference) => ({
+                type: "TECHNICAL_REFERENCE",
+                ...reference,
+              })),
+            ]
+          : [],
     };
   });
 }
 
-export function expectedDependencyCount(plan: SchedulePlanV1): number {
+export function expectedDependencyCount(plan: SchedulePlan): number {
   return plan.activities.reduce((n, a) => n + a.predecessors.length, 0);
 }
 
-export function expectedTakeoffLinkCount(plan: SchedulePlanV1): number {
+export function expectedTakeoffLinkCount(plan: SchedulePlan): number {
   return plan.activities.reduce((n, a) => n + takeoffCodesOf(a).length, 0);
 }
 
 export function domainSnapshotForPersist(
-  plan: SchedulePlanV1,
+  plan: SchedulePlan,
 ): Prisma.InputJsonValue {
   return toDomainSnapshotJson(plan) as unknown as Prisma.InputJsonValue;
 }

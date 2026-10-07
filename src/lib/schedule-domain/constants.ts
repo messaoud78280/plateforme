@@ -3,7 +3,13 @@
  * Pas de SF, pas de MILESTONE en V1.
  */
 
-export const SCHEDULE_PLAN_SCHEMA_VERSION = 1 as const;
+/** Version produite par les nouveaux CREATE. La lecture V1 reste supportée. */
+export const SCHEDULE_PLAN_SCHEMA_VERSION_V1 = 1 as const;
+export const SCHEDULE_PLAN_SCHEMA_VERSION = 2 as const;
+export const SCHEDULE_PLAN_SCHEMA_VERSIONS = [
+  SCHEDULE_PLAN_SCHEMA_VERSION_V1,
+  SCHEDULE_PLAN_SCHEMA_VERSION,
+] as const;
 
 export const SCHEDULE_ACTIVITY_KINDS_V1 = ["WORK", "CONTROL", "WAIT"] as const;
 export type ScheduleActivityKindV1 = (typeof SCHEDULE_ACTIVITY_KINDS_V1)[number];

@@ -18,7 +18,7 @@ import {
   buildDepsMapFromPredecessors,
   detectScheduleDependencyCycle,
 } from "./cycle";
-import type { DomainIssue, SchedulePlanV1 } from "./schema";
+import type { DomainIssue, SchedulePlan } from "./schema";
 
 export type CalculatedActivity = {
   id: string;
@@ -47,7 +47,7 @@ export type CalculateScheduleResult =
   | { ok: false; issues: DomainIssue[] };
 
 function resolveDurationDays(
-  plan: SchedulePlanV1,
+  plan: SchedulePlan,
   activityId: string,
   quantityByCode: Map<string, number | null>,
 ): { days: number; mode: "FIXED" | "PRODUCTIVITY"; calendar: "working" | "calendar" } {
@@ -112,7 +112,7 @@ function maxInstant(a: Instant, b: Instant): Instant {
  * Ne calcule RIEN si cycle.
  */
 export function calculateSchedule(
-  plan: SchedulePlanV1,
+  plan: SchedulePlan,
   options?: {
     quantityByCode?: Map<string, number | null>;
   },

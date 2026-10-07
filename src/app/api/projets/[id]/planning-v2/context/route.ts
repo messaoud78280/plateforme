@@ -1,6 +1,6 @@
 /**
  * Contexte CREATE Planning V2 — lecture seule.
- * expected_output = bework_schedule_ai_v1 (contrat dérivé du code).
+ * expected_output = bework_schedule_ai_v2 (contrat dérivé du code).
  */
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";

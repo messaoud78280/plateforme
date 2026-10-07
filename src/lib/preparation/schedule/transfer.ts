@@ -174,10 +174,15 @@ function serializeCrewJson(task: PlacedTask): unknown {
   });
 }
 
-function parseCrewJsonMembers(raw: unknown): Array<{ labor_id: string; count: number }> {
+function parseCrewJsonMembers(raw: unknown): Array<{
+  labor_id: string;
+  count: number;
+  role?: string;
+}> {
   return parseCrewMembers(raw).map((m) => ({
     labor_id: m.labor_id,
     count: m.count,
+    role: m.role,
   }));
 }
 
@@ -1257,12 +1262,29 @@ export type SchedulePlanViewPayload = {
     parallelizable: boolean;
     workloadPersonDays: number | null;
     workloadSource: "PROVIDED" | "DERIVED" | null;
-    crew: Array<{ labor_id: string; count: number; label: string }>;
+    crew: Array<{ labor_id: string; count: number; label: string; role?: string }>;
     equipment: Array<{ equipment_id: string; count: number; label: string }>;
     supplies: Array<{ supply_id: string; count?: number; label: string }>;
     preconditions: string[];
     controls: string[];
+    constraints: string[];
     safety: string[];
+    proofs: string[];
+    assumptions: string[];
+    technicalReferences: Array<{
+      code: string;
+      label: string | null;
+      applicability: "INDICATIVE" | "CONTRACTUAL" | "TO_CONFIRM";
+      sourceUrl: string | null;
+      note: string | null;
+    }>;
+    durationBasis: {
+      provenance: string;
+      minDays: number | null;
+      maxDays: number | null;
+      rationale: string | null;
+      toValidate: boolean;
+    } | null;
     dependsOn: Array<{ stepId: string; type: string }>;
     blockingReason: string | null;
     sellHtSnapshot: number | null;
@@ -1278,6 +1300,21 @@ function asIsoDate(v: Date | string | null | undefined): string | null {
 function asStringList(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw.filter((x): x is string => typeof x === "string");
+}
+
+function typedJsonEntries(raw: unknown, type: string): Record<string, unknown>[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter(
+    (item): item is Record<string, unknown> =>
+      !!item &&
+      typeof item === "object" &&
+      !Array.isArray(item) &&
+      (item as { type?: unknown }).type === type,
+  );
+}
+
+function asNullableText(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
 export async function buildPrepSchedulePlanPayload(
@@ -1418,7 +1455,8 @@ export async function buildPrepSchedulePlanPayload(
       crew: crewRaw.map((c) => ({
         labor_id: c.labor_id,
         count: c.count,
-        label: laborById.get(c.labor_id) ?? c.labor_id,
+        label: c.role ?? laborById.get(c.labor_id) ?? c.labor_id,
+        role: c.role,
       })),
       equipment: eqRaw
         .map((c) => {
@@ -1449,7 +1487,47 @@ export async function buildPrepSchedulePlanPayload(
         ),
       preconditions: asStringList(t.preconditionsJson),
       controls: asStringList(t.controlsJson),
+      constraints: asStringList(t.constraintsJson),
       safety: asStringList(t.safetyJson),
+      proofs: asStringList(t.proofsJson),
+      assumptions: typedJsonEntries(t.constraintsJson, "ASSUMPTION")
+        .map((item) => asNullableText(item.label))
+        .filter((item): item is string => !!item),
+      technicalReferences: typedJsonEntries(
+        t.proofsJson,
+        "TECHNICAL_REFERENCE",
+      ).flatMap((item) => {
+        const code = asNullableText(item.code);
+        if (!code) return [];
+        return [{
+          code,
+          label: asNullableText(item.label),
+          applicability: (
+            item.applicability === "CONTRACTUAL" ||
+            item.applicability === "TO_CONFIRM"
+              ? item.applicability
+              : "INDICATIVE"
+          ) as "INDICATIVE" | "CONTRACTUAL" | "TO_CONFIRM",
+          sourceUrl: asNullableText(item.sourceUrl ?? item.source_url),
+          note: asNullableText(item.note),
+        }];
+      }),
+      durationBasis: (() => {
+        const item = typedJsonEntries(t.constraintsJson, "DURATION_BASIS")[0];
+        if (!item) return null;
+        const min = item.minDays ?? item.min_days;
+        const max = item.maxDays ?? item.max_days;
+        return {
+          provenance: asNullableText(item.provenance) ?? "PLANNING_ASSUMPTION",
+          minDays: typeof min === "number" ? min : null,
+          maxDays: typeof max === "number" ? max : null,
+          rationale: asNullableText(item.rationale),
+          toValidate:
+            typeof (item.toValidate ?? item.to_validate) === "boolean"
+              ? Boolean(item.toValidate ?? item.to_validate)
+              : true,
+        };
+      })(),
       dependsOn,
       blockingReason: t.blockingReason,
       sellHtSnapshot: t.sellHtSnapshot != null ? d(t.sellHtSnapshot) : null,

@@ -328,6 +328,24 @@ export function PrepSchedulePlanView({
                 </span>
               </>
             ) : null}
+            {" · "}
+            <span className="text-emerald-700">{s.readyCount} prêtes</span>
+            {s.toValidateCount > 0 ? (
+              <>
+                {" · "}
+                <span className="text-amber-800">
+                  {s.toValidateCount} à valider
+                </span>
+              </>
+            ) : null}
+            {s.blockerCount > 0 ? (
+              <>
+                {" · "}
+                <span className="font-medium text-red-700">
+                  {s.blockerCount} bloquant{s.blockerCount > 1 ? "s" : ""}
+                </span>
+              </>
+            ) : null}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

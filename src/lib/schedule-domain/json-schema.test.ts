@@ -3,8 +3,14 @@
  * node --import tsx src/lib/schedule-domain/json-schema.test.ts
  */
 import assert from "node:assert/strict";
-import { getSchedulePlanV1JsonSchema } from "./json-schema";
-import { getAiScheduleBundleV1JsonSchema } from "./ai-contract";
+import {
+  getSchedulePlanV1JsonSchema,
+  getSchedulePlanV2JsonSchema,
+} from "./json-schema";
+import {
+  getAiScheduleBundleV1JsonSchema,
+  getAiScheduleBundleV2JsonSchema,
+} from "./ai-contract";
 
 function findProp(schema: Record<string, unknown>, ...keys: string[]): unknown {
   let cur: unknown = schema;
@@ -96,6 +102,13 @@ function run() {
   assert.ok(aiBlob.includes("bework_schedule_ai_v1"));
   assert.ok(aiBlob.includes("duration_days"));
   assert.ok(!aiBlob.includes("PRODUCTIVITY") || true); // domaine interne seulement attendu absentes de required IA
+  const v2Blob = JSON.stringify(getSchedulePlanV2JsonSchema());
+  assert.ok(v2Blob.includes('"schemaVersion"'));
+  assert.ok(v2Blob.includes('"technicalReferences"'));
+  const aiV2Blob = JSON.stringify(getAiScheduleBundleV2JsonSchema());
+  assert.ok(aiV2Blob.includes("bework_schedule_ai_v2"));
+  assert.ok(aiV2Blob.includes("technical_references"));
+  assert.ok(aiV2Blob.includes("hold_point"));
 
   console.log(
     JSON.stringify(

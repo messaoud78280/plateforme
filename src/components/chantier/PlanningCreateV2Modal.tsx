@@ -64,7 +64,7 @@ type PreviewOk = {
 };
 
 /**
- * Planning V2 parallèle — bework_schedule_ai_v1.
+ * Planning V2 parallèle — bework_schedule_ai_v2 (lecture V1 conservée).
  * N’utilise PAS planning-create legacy ni parseBeworkScheduleBundle.
  */
 export function PlanningCreateV2Modal({
@@ -143,7 +143,7 @@ export function PlanningCreateV2Modal({
         });
         return { ...next, step: next.step === "context" ? "json" : next.step };
       });
-      setToast("Contexte Planning V2 copié — collez ensuite le JSON bework_schedule_ai_v1");
+      setToast("Contexte Planning V2 copié — collez ensuite le JSON bework_schedule_ai_v2");
       window.setTimeout(() => setToast(null), 4000);
     } catch (e) {
       showError(null, null, e instanceof Error ? e.message : "Copie impossible");
@@ -274,7 +274,7 @@ export function PlanningCreateV2Modal({
               Créer le planning (domaine V2)
             </h2>
             <p className="mt-0.5 text-[12.5px] text-slate-600">
-              Contexte BeWork → ChatGPT → JSON <code className="text-[12px]">bework_schedule_ai_v1</code>{" "}
+              Contexte BeWork → ChatGPT → JSON <code className="text-[12px]">bework_schedule_ai_v2</code>{" "}
               → Preview serveur → Commit.
             </p>
           </div>
@@ -373,7 +373,7 @@ export function PlanningCreateV2Modal({
                 </h3>
                 <p className="text-[12.5px] text-slate-600">
                   Ne collez pas le contexte copié à l’étape 1. Collez uniquement la réponse
-                  ChatGPT : <code className="text-[11px]">bework_schedule_ai_v1</code> avec{" "}
+                  ChatGPT : <code className="text-[11px]">bework_schedule_ai_v2</code> avec{" "}
                   <code className="text-[11px]">activities</code>.
                 </p>
                 <textarea

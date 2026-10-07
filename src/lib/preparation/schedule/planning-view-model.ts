@@ -74,7 +74,12 @@ export type PlanningTaskVM = {
   successors: Array<{ stepId: string; type: string; name?: string }>;
   preconditions: string[];
   controls: string[];
+  constraints: string[];
   safety: string[];
+  proofs: string[];
+  assumptions: string[];
+  technicalReferences: SchedulePlanViewPayload["tasks"][number]["technicalReferences"];
+  durationBasis: SchedulePlanViewPayload["tasks"][number]["durationBasis"];
   equipment: Array<{ equipment_id: string; count: number; label: string }>;
   supplies: Array<{ supply_id: string; count?: number; label: string }>;
   description: string | null;
@@ -86,6 +91,9 @@ export type PlanningTaskVM = {
   conditional: boolean;
   conditionalConditions: string[];
   blockingReason: string | null;
+  readiness: "BLOCKING" | "TO_VALIDATE" | "READY";
+  readinessReasons: string[];
+  dateState: "PAST" | "CONFIRMED" | "UNCONFIRMED";
   visualKind: TaskVisualKind;
   missing: {
     crew: boolean;
@@ -143,6 +151,8 @@ export type PlanningSummaryVM = {
   dependencyCount: number;
   blockerCount: number;
   incompleteCount: number;
+  readyCount: number;
+  toValidateCount: number;
 };
 
 export type PlanningViewModel = {
@@ -321,6 +331,7 @@ function visualKindFor(task: {
 
 export function buildPlanningViewModel(
   plan: SchedulePlanViewPayload,
+  todayIso = new Date().toISOString().slice(0, 10),
 ): PlanningViewModel {
   const consistency = analyzeScheduleConsistency(
     plan.tasks.map((t) => ({
@@ -364,6 +375,11 @@ export function buildPlanningViewModel(
   const nameByStep = new Map(plan.tasks.map((t) => [t.stepCode, t.name]));
 
   const tasks: PlanningTaskVM[] = plan.tasks.map((t) => {
+    const constraints = t.constraints ?? [];
+    const proofs = t.proofs ?? [];
+    const assumptions = t.assumptions ?? [];
+    const technicalReferences = t.technicalReferences ?? [];
+    const durationBasis = t.durationBasis ?? null;
     const phase = resolveCanonicalPhase({
       lot: t.lot,
       name: t.name,
@@ -457,6 +473,37 @@ export function buildPlanningViewModel(
       phase,
       kind: t.kind,
     };
+    const readinessReasons: string[] = [];
+    if (t.blockingReason) readinessReasons.push(t.blockingReason);
+    if (t.holdPoint && t.holdPointBlocksNext) {
+      readinessReasons.push("Point d’arrêt non levé");
+    }
+    if (t.preconditions.length === 0 && t.kind === "work") {
+      readinessReasons.push("Prérequis à préciser");
+    }
+    if (t.controls.length === 0 && (t.kind === "work" || t.holdPoint)) {
+      readinessReasons.push("Contrôles à préciser");
+    }
+    if (assumptions.length) readinessReasons.push("Hypothèses à valider");
+    if (durationBasis?.toValidate) {
+      readinessReasons.push("Base de durée à valider");
+    }
+    if (technicalReferences.some((ref) => ref.applicability === "TO_CONFIRM")) {
+      readinessReasons.push("Références techniques à confirmer");
+    }
+    const blocking =
+      Boolean(t.blockingReason) || (t.holdPoint && t.holdPointBlocksNext);
+    const readiness = blocking
+      ? "BLOCKING"
+      : readinessReasons.length
+        ? "TO_VALIDATE"
+        : "READY";
+    const dateState =
+      !t.startDate || !t.endDate
+        ? "UNCONFIRMED"
+        : t.endDate.slice(0, 10) < todayIso
+          ? "PAST"
+          : "CONFIRMED";
 
     return {
       id: t.id,
@@ -498,7 +545,12 @@ export function buildPlanningViewModel(
       successors,
       preconditions: t.preconditions,
       controls: t.controls,
+      constraints,
       safety: t.safety ?? [],
+      proofs,
+      assumptions,
+      technicalReferences,
+      durationBasis,
       equipment: t.equipment,
       supplies: t.supplies,
       description: t.description,
@@ -510,6 +562,9 @@ export function buildPlanningViewModel(
       conditional: t.conditional,
       conditionalConditions: t.conditionalConditions,
       blockingReason: t.blockingReason,
+      readiness,
+      readinessReasons: [...new Set(readinessReasons)],
+      dateState,
       visualKind: visualKindFor(vmBase),
       missing,
       issueCodes,
@@ -599,6 +654,8 @@ export function buildPlanningViewModel(
       dependencyCount: plan.dependencies.length,
       blockerCount: consistency.blockers.length,
       incompleteCount,
+      readyCount: tasks.filter((task) => task.readiness === "READY").length,
+      toValidateCount: tasks.filter((task) => task.readiness === "TO_VALIDATE").length,
     },
     quality: {
       blockers,
@@ -659,7 +716,9 @@ export function filterPlanningTasks(
       list = list.filter((t) => t.missing.rate);
       break;
     case "with_alert":
-      list = list.filter((t) => t.issueCodes.length > 0);
+      list = list.filter(
+        (t) => t.issueCodes.length > 0 || t.readiness !== "READY",
+      );
       break;
     case "controls":
       list = list.filter(

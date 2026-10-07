@@ -10,6 +10,7 @@ import {
   getSchedulePlanV1AiContractMeta,
   toDomainSnapshotJson,
   SCHEDULE_PLAN_SCHEMA_VERSION,
+  SCHEDULE_PLAN_SCHEMA_VERSION_V1,
   isSupportedSchedulePlanSchemaVersion,
   fixturePlanSingleActivity,
   fixturePlanTwoWorkFs,
@@ -217,7 +218,7 @@ function run() {
     assert.equal(plan.ok, true);
     if (plan.ok) {
       const snap = toDomainSnapshotJson(plan.plan);
-      assert.equal(snap.schemaVersion, SCHEDULE_PLAN_SCHEMA_VERSION);
+      assert.equal(snap.schemaVersion, SCHEDULE_PLAN_SCHEMA_VERSION_V1);
       assert.ok(snap.sourceSnapshot);
       assert.ok(snap.calendar);
       assert.ok(snap.resources);
@@ -234,7 +235,7 @@ function run() {
     assert.deepEqual(meta.exclusions_v1.relations, ["SF"]);
     assert.deepEqual(meta.exclusions_v1.kinds, ["MILESTONE"]);
     assert.ok(isSupportedSchedulePlanSchemaVersion(1));
-    assert.equal(isSupportedSchedulePlanSchemaVersion(2), false);
+    assert.ok(isSupportedSchedulePlanSchemaVersion(SCHEDULE_PLAN_SCHEMA_VERSION));
   }
 
   // --- safeParse Zod direct ---

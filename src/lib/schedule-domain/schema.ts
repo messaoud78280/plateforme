@@ -13,6 +13,8 @@ import {
   SCHEDULE_DURATION_ROUNDINGS_V1,
   SCHEDULE_KIND_EXCLUDED_V1,
   SCHEDULE_PLAN_SCHEMA_VERSION,
+  SCHEDULE_PLAN_SCHEMA_VERSION_V1,
+  SCHEDULE_PLAN_SCHEMA_VERSIONS,
   SCHEDULE_RATE_PER_V1,
   SCHEDULE_RELATION_EXCLUDED_V1,
   SCHEDULE_RELATIONS_V1,
@@ -153,6 +155,60 @@ export const ScheduleActivitySchema = z.object({
   notes: z.string().nullable().optional(),
 });
 
+export const ScheduleTechnicalReferenceSchema = z.object({
+  code: nonEmpty,
+  label: z.string().trim().min(1).nullable().optional(),
+  applicability: z
+    .enum(["INDICATIVE", "CONTRACTUAL", "TO_CONFIRM"])
+    .default("INDICATIVE"),
+  sourceUrl: z.string().url().nullable().optional(),
+  note: z.string().nullable().optional(),
+});
+
+export const ScheduleCrewMemberSchema = z.object({
+  laborId: nonEmpty,
+  role: nonEmpty,
+  count: z.number().finite().positive().default(1),
+});
+
+export const ScheduleNamedResourceSchema = z.object({
+  id: nonEmpty,
+  label: nonEmpty,
+  count: z.number().finite().nonnegative().default(1),
+  note: z.string().nullable().optional(),
+});
+
+export const ScheduleDurationBasisSchema = z.object({
+  provenance: z.enum([
+    "SOURCE_DATA",
+    "PLANNING_ASSUMPTION",
+    "USER_DECISION",
+    "PRODUCTIVITY_RATE",
+  ]),
+  minDays: z.number().finite().nonnegative().nullable().optional(),
+  maxDays: z.number().finite().nonnegative().nullable().optional(),
+  rationale: z.string().trim().min(1).nullable().optional(),
+  toValidate: z.boolean().default(true),
+});
+
+/** Enrichissements chantier V2 ; les tableaux restent explicites et traçables. */
+export const ScheduleActivityV2Schema = ScheduleActivitySchema.extend({
+  lot: z.string().trim().min(1).nullable().optional(),
+  phase: z.string().trim().min(1).nullable().optional(),
+  crewMembers: z.array(ScheduleCrewMemberSchema).default([]),
+  equipment: z.array(ScheduleNamedResourceSchema).default([]),
+  supplies: z.array(ScheduleNamedResourceSchema).default([]),
+  preconditions: z.array(nonEmpty).default([]),
+  controls: z.array(nonEmpty).default([]),
+  constraints: z.array(nonEmpty).default([]),
+  safety: z.array(nonEmpty).default([]),
+  proofs: z.array(nonEmpty).default([]),
+  technicalReferences: z.array(ScheduleTechnicalReferenceSchema).default([]),
+  assumptions: z.array(nonEmpty).default([]),
+  durationBasis: ScheduleDurationBasisSchema.nullable().optional(),
+  holdPoint: z.boolean().default(false),
+});
+
 export const ScheduleLaborSchema = z.object({
   id: nonEmpty,
   role: nonEmpty,
@@ -202,9 +258,8 @@ export const ScheduleCalendarSchema = z.object({
  * Modèle métier canonique SchedulePlan V1.
  * Indépendant de ChatGPT, Prisma, React et de la saisie manuelle.
  */
-export const SchedulePlanV1Schema = z
-  .object({
-    schemaVersion: z.literal(SCHEDULE_PLAN_SCHEMA_VERSION),
+const SchedulePlanV1BaseSchema = z.object({
+    schemaVersion: z.literal(SCHEDULE_PLAN_SCHEMA_VERSION_V1),
     sourceSnapshot: ScheduleSourceSnapshotSchema,
     calendar: ScheduleCalendarSchema.default({
       workingDays: [1, 2, 3, 4, 5],
@@ -217,8 +272,17 @@ export const SchedulePlanV1Schema = z
       rates: [],
     }),
     activities: z.array(ScheduleActivitySchema).min(1, "Au moins une activité requise"),
-  })
-  .superRefine((plan, ctx) => {
+});
+
+const SchedulePlanV2BaseSchema = SchedulePlanV1BaseSchema.extend({
+  schemaVersion: z.literal(SCHEDULE_PLAN_SCHEMA_VERSION),
+  activities: z.array(ScheduleActivityV2Schema).min(1, "Au moins une activité requise"),
+});
+
+function validatePlanRelations(
+  plan: z.infer<typeof SchedulePlanV1BaseSchema> | z.infer<typeof SchedulePlanV2BaseSchema>,
+  ctx: z.RefinementCtx,
+) {
     const seen = new Set<string>();
     for (let i = 0; i < plan.activities.length; i++) {
       const id = plan.activities[i]!.id;
@@ -268,10 +332,23 @@ export const SchedulePlanV1Schema = z
         }
       }
     }
-  });
+}
+
+export const SchedulePlanV1Schema =
+  SchedulePlanV1BaseSchema.superRefine(validatePlanRelations);
+export const SchedulePlanV2Schema =
+  SchedulePlanV2BaseSchema.superRefine(validatePlanRelations);
+export const SchedulePlanSchema = z.union([
+  SchedulePlanV1Schema,
+  SchedulePlanV2Schema,
+]);
 
 export type SchedulePlanV1 = z.infer<typeof SchedulePlanV1Schema>;
+export type SchedulePlanV2 = z.infer<typeof SchedulePlanV2Schema>;
+export type SchedulePlan = SchedulePlanV1 | SchedulePlanV2;
 export type ScheduleActivityV1 = z.infer<typeof ScheduleActivitySchema>;
+export type ScheduleActivityV2 = z.infer<typeof ScheduleActivityV2Schema>;
+export type ScheduleActivity = ScheduleActivityV1 | ScheduleActivityV2;
 export type ScheduleSourceSnapshotV1 = z.infer<typeof ScheduleSourceSnapshotSchema>;
 export type ScheduleCalendarV1 = z.infer<typeof ScheduleCalendarSchema>;
 export type ScheduleResourcesV1 = z.infer<typeof ScheduleResourcesSchema>;
@@ -290,7 +367,7 @@ export type DomainIssue = {
 };
 
 export type ParseSchedulePlanResult =
-  | { ok: true; plan: SchedulePlanV1 }
+  | { ok: true; plan: SchedulePlan }
   | { ok: false; issues: DomainIssue[] };
 
 function issueCodeFromZod(issue: z.ZodIssue): string {
@@ -347,7 +424,7 @@ export function parseSchedulePlan(input: unknown): ParseSchedulePlanResult {
   const raw = input as Record<string, unknown>;
   if (
     "schemaVersion" in raw &&
-    raw.schemaVersion !== SCHEDULE_PLAN_SCHEMA_VERSION &&
+    !(SCHEDULE_PLAN_SCHEMA_VERSIONS as readonly unknown[]).includes(raw.schemaVersion) &&
     raw.schemaVersion !== undefined
   ) {
     return {
@@ -357,14 +434,17 @@ export function parseSchedulePlan(input: unknown): ParseSchedulePlanResult {
           code: "UNSUPPORTED_SCHEMA_VERSION",
           path: "schemaVersion",
           value: raw.schemaVersion,
-          message: `schemaVersion ${String(raw.schemaVersion)} non supportée — V1 attend ${SCHEDULE_PLAN_SCHEMA_VERSION}`,
+          message: `schemaVersion ${String(raw.schemaVersion)} non supportée — versions acceptées : ${SCHEDULE_PLAN_SCHEMA_VERSIONS.join(", ")}`,
           severity: "ERROR",
         },
       ],
     };
   }
 
-  const parsed = SchedulePlanV1Schema.safeParse(input);
+  const parsed =
+    raw.schemaVersion === SCHEDULE_PLAN_SCHEMA_VERSION_V1
+      ? SchedulePlanV1Schema.safeParse(input)
+      : SchedulePlanV2Schema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, issues: zodIssuesToDomainIssues(parsed.error.issues) };
   }
@@ -372,7 +452,7 @@ export function parseSchedulePlan(input: unknown): ParseSchedulePlanResult {
 }
 
 /** Accès direct (throw) — pour code interne après garde. */
-export function parseSchedulePlanOrThrow(input: unknown): SchedulePlanV1 {
+export function parseSchedulePlanOrThrow(input: unknown): SchedulePlan {
   const r = parseSchedulePlan(input);
   if (!r.ok) {
     throw Object.assign(new Error(r.issues[0]?.message ?? "SchedulePlan invalide"), {

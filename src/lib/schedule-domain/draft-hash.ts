@@ -18,7 +18,7 @@
  * Algo : SHA-256 hex (node:crypto), cohérent avec fingerprints BeWork.
  */
 import { createHash } from "node:crypto";
-import type { SchedulePlanV1 } from "./schema";
+import type { SchedulePlan } from "./schema";
 import { toDomainSnapshotJson } from "./versioning";
 
 function canonical(v: unknown): unknown {
@@ -33,7 +33,7 @@ function canonical(v: unknown): unknown {
   return v;
 }
 
-export function computeScheduleDraftHash(plan: SchedulePlanV1): string {
+export function computeScheduleDraftHash(plan: SchedulePlan): string {
   const payload = toDomainSnapshotJson(plan);
   const json = JSON.stringify(canonical(payload));
   return createHash("sha256").update(json).digest("hex");

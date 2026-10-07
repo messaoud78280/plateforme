@@ -74,6 +74,8 @@ function planningPatch(overrides?: {
   assert.ok(isPlanningCommitSupportedOp("update_productivity"));
   assert.ok(isPlanningCommitSupportedOp("update_workload"));
   assert.ok(isPlanningCommitSupportedOp("update_dependency"));
+  assert.ok(isPlanningCommitSupportedOp("update_start_date"));
+  assert.ok(isPlanningCommitSupportedOp("add_task"));
   for (const op of PLANNING_COMMIT_UNSUPPORTED_OPS) {
     assert.equal(isPlanningCommitSupportedOp(op), false);
   }
@@ -84,6 +86,8 @@ function planningPatch(overrides?: {
     "update_productivity",
     "update_workload",
     "update_dependency",
+    "update_start_date",
+    "add_task",
   ]);
   console.log("  catalog SUPPORTED/UNSUPPORTED: ok");
 }

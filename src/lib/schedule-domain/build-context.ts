@@ -1,5 +1,5 @@
 /**
- * Contexte ChatGPT Planning V2 — expected_output = bework_schedule_ai_v1.
+ * Contexte ChatGPT Planning V2 — expected_output = bework_schedule_ai_v2.
  * Contrat / JSON Schema dérivés du code (ai-contract), jamais écrits à la main dans React.
  */
 import { prisma } from "@/lib/prisma";
@@ -10,24 +10,27 @@ import { displayUnit } from "@/lib/preparation/units";
 import { isPrepLineTransferable } from "@/lib/preparation/quote-bridge/description";
 import { resolveCanonicalTakeoffQuantity } from "@/lib/preparation/schedule/resolve-planning-source";
 import {
-  AI_SCHEDULE_V1_BUSINESS_RULES,
-  BEWORK_SCHEDULE_AI_FORMAT,
-  getAiScheduleBundleV1JsonSchema,
+  AI_SCHEDULE_V2_BUSINESS_RULES,
+  BEWORK_SCHEDULE_AI_FORMAT_V2,
+  getAiScheduleBundleV2JsonSchema,
 } from "./ai-contract";
 import { buildMinimalAiScheduleExample } from "./planning-v2-ui";
 import { loadSourceContextFromDb } from "./repository/load-source-context";
 
 export const PLANNING_V2_CREATE_INSTRUCTIONS = [
   "Tu es un copilote organisation chantier BTP. Tu proposes ; le professionnel décide.",
-  "Mode CREATE Planning V2 : produis uniquement bework_schedule_ai_v1.",
+  "Mode CREATE Planning V2 : produis uniquement bework_schedule_ai_v2.",
   "Analyse d’abord le métré (quantités), le devis s’il existe, la visite et les contraintes.",
   "validated_quantity du métré est prioritaire. Ne jamais inventer une quantité opérationnelle.",
   "kinds autorisés : WORK, CONTROL, WAIT — MILESTONE interdit.",
   "after.type : FS, SS, FF — SF interdit.",
   "WAIT = attente technique sans crew.",
+  "Ajoute équipes détaillées, prérequis, contrôles, sécurité, preuves et points d’arrêt utiles.",
+  "Les DTU/normes sont indicatifs sauf pièce contractuelle sourcée ; marquer TO_CONFIRM en cas de doute.",
+  "Toute durée issue d’une hypothèse doit être explicitée dans duration_basis avec to_validate=true.",
   "takeoff_codes = codes lignes métré exécutables uniquement (pas indicator).",
   "duration_days = durée FIXED en jours ouvrés (nombres ≥ 0).",
-  "Quand les choix sont validés, produis UNIQUEMENT le JSON bework_schedule_ai_v1.",
+  "Quand les choix sont validés, produis UNIQUEMENT le JSON bework_schedule_ai_v2.",
 ] as const;
 
 function num(v: unknown): number | null {
@@ -174,8 +177,8 @@ export async function buildPlanningV2Context(input: {
     schema_version: 1,
     section: "PLANNING" as const,
     interaction_mode: "CREATE" as const,
-    engine: "schedule-domain-v1",
-    expected_output: BEWORK_SCHEDULE_AI_FORMAT,
+    engine: "schedule-domain-v2",
+    expected_output: BEWORK_SCHEDULE_AI_FORMAT_V2,
     organization: {
       id: project.organization.id,
       name: project.organization.name,
@@ -224,8 +227,8 @@ export async function buildPlanningV2Context(input: {
         }
       : null,
     sources_fingerprint: loaded.sourceContext.takeoffFingerprint,
-    json_schema: getAiScheduleBundleV1JsonSchema(),
-    business_rules: [...AI_SCHEDULE_V1_BUSINESS_RULES],
+    json_schema: getAiScheduleBundleV2JsonSchema(),
+    business_rules: [...AI_SCHEDULE_V2_BUSINESS_RULES],
     minimal_valid_example: buildMinimalAiScheduleExample(executableCodes),
     instructions: [...PLANNING_V2_CREATE_INSTRUCTIONS],
     target: {

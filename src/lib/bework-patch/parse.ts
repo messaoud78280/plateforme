@@ -592,20 +592,22 @@ function parseOperation(
       };
       const asEquip = (
         v: unknown,
-      ): Array<{ equipment_id: string; count?: number }> | undefined => {
+      ): Array<{ equipment_id: string; label?: string; count?: number }> | undefined => {
         if (!Array.isArray(v)) return undefined;
-        const out: Array<{ equipment_id: string; count?: number }> = [];
+        const out: Array<{ equipment_id: string; label?: string; count?: number }> = [];
         for (const x of v) {
           if (!x || typeof x !== "object") continue;
           const o = x as {
             equipment_id?: string;
             equipmentId?: string;
             count?: number;
+            label?: string;
           };
           const id = o.equipment_id ?? o.equipmentId;
           if (!id || typeof id !== "string") continue;
           out.push({
             equipment_id: id,
+            label: str(o.label, 200) ?? undefined,
             count: typeof o.count === "number" ? o.count : 1,
           });
         }
@@ -613,21 +615,58 @@ function parseOperation(
       };
       const asSupply = (
         v: unknown,
-      ): Array<{ supply_id: string; count?: number }> | undefined => {
+      ): Array<{ supply_id: string; label?: string; count?: number }> | undefined => {
         if (!Array.isArray(v)) return undefined;
-        const out: Array<{ supply_id: string; count?: number }> = [];
+        const out: Array<{ supply_id: string; label?: string; count?: number }> = [];
         for (const x of v) {
           if (!x || typeof x !== "object") continue;
-          const o = x as { supply_id?: string; supplyId?: string; count?: number };
+          const o = x as { supply_id?: string; supplyId?: string; count?: number; label?: string };
           const id = o.supply_id ?? o.supplyId;
           if (!id || typeof id !== "string") continue;
           out.push({
             supply_id: id,
+            label: str(o.label, 200) ?? undefined,
             count: typeof o.count === "number" ? o.count : 1,
           });
         }
         return out;
       };
+      const technicalReferences = Array.isArray(changes!.technical_references)
+        ? changes!.technical_references.flatMap((value) => {
+            if (!isObj(value)) return [];
+            const code = str(value.code, 120);
+            if (!code) return [];
+            const applicability: "INDICATIVE" | "CONTRACTUAL" | "TO_CONFIRM" =
+              value.applicability === "CONTRACTUAL" ||
+              value.applicability === "TO_CONFIRM"
+                ? value.applicability
+                : ("INDICATIVE" as const);
+            return [{
+              code,
+              label: str(value.label, 300),
+              applicability,
+              source_url: str(value.source_url ?? value.sourceUrl, 1000),
+              note: str(value.note, 2000),
+            }];
+          })
+        : undefined;
+      const durationBasis = isObj(changes!.duration_basis)
+        ? {
+            provenance: (
+              changes!.duration_basis.provenance === "SOURCE_DATA" ||
+              changes!.duration_basis.provenance === "USER_DECISION" ||
+              changes!.duration_basis.provenance === "PRODUCTIVITY_RATE"
+                ? changes!.duration_basis.provenance
+                : "PLANNING_ASSUMPTION"
+            ) as "SOURCE_DATA" | "PLANNING_ASSUMPTION" | "USER_DECISION" | "PRODUCTIVITY_RATE",
+            min_days: num(changes!.duration_basis.min_days),
+            max_days: num(changes!.duration_basis.max_days),
+            rationale: str(changes!.duration_basis.rationale, 2000),
+            to_validate: bool(changes!.duration_basis.to_validate) ?? true,
+          }
+        : changes!.duration_basis === null
+          ? null
+          : undefined;
       return {
         op,
         target: {
@@ -643,7 +682,13 @@ function parseOperation(
           lot: str(changes!.lot, 120) ?? (changes!.lot === null ? null : undefined),
           preconditions: asStringArray(changes!.preconditions),
           controls: asStringArray(changes!.controls),
+          constraints: asStringArray(changes!.constraints),
           safety: asStringArray(changes!.safety),
+          proofs: asStringArray(changes!.proofs),
+          assumptions: asStringArray(changes!.assumptions),
+          technical_references: technicalReferences,
+          duration_basis: durationBasis,
+          hold_point: bool(changes!.hold_point) ?? undefined,
           equipment: asEquip(changes!.equipment),
           supplies: asSupply(changes!.supplies),
         },
@@ -684,6 +729,19 @@ function parseOperation(
     }
     case "update_crew": {
       if (!requireTargetIds(target, `${path}.target`, ["plan_id"], issues)) return null;
+      const members = Array.isArray(changes!.members)
+        ? changes!.members.flatMap((value) => {
+            if (!isObj(value)) return [];
+            const laborId = str(value.labor_id ?? value.laborId, 80);
+            if (!laborId) return [];
+            return [{
+              labor_id: laborId,
+              role: str(value.role, 160) ?? undefined,
+              label: str(value.label, 160) ?? undefined,
+              count: num(value.count) ?? 1,
+            }];
+          })
+        : undefined;
       return {
         op,
         target: {
@@ -695,6 +753,7 @@ function parseOperation(
           crew_id: str(changes!.crew_id, 80),
           crew_size: num(changes!.crew_size),
           parallelizable: bool(changes!.parallelizable) ?? undefined,
+          members,
         },
       };
     }
@@ -767,6 +826,27 @@ function parseOperation(
         );
         return null;
       }
+      const kindRaw = str(raw.task.kind, 20)?.toUpperCase();
+      const kind =
+        kindRaw === "CONTROL" || kindRaw === "WAIT" ? kindRaw : ("WORK" as const);
+      const members = Array.isArray(raw.task.members)
+        ? raw.task.members.flatMap((value) => {
+            if (!isObj(value)) return [];
+            const laborId = str(value.labor_id ?? value.laborId, 80);
+            if (!laborId) return [];
+            return [{
+              labor_id: laborId,
+              role: str(value.role, 160) ?? undefined,
+              label: str(value.label, 160) ?? undefined,
+              count: num(value.count) ?? 1,
+            }];
+          })
+        : undefined;
+      const depends_on = normalizeDependsOnJson(raw.task.depends_on ?? raw.task.dependsOn);
+      if (kind === "WAIT" && (str(raw.task.crew_id ?? raw.task.crewId, 80) || members?.length)) {
+        issues.push(err("INVALID_FIELD", `${path}.task.crew_id`, "WAIT ne doit pas mobiliser d’équipe"));
+        return null;
+      }
       return {
         op,
         target: {
@@ -778,8 +858,52 @@ function parseOperation(
           step_code,
           name,
           duration_days,
+          kind,
+          duration_calendar:
+            raw.task.duration_calendar === "calendar" ? "calendar" : "working",
           lot: str(raw.task.lot, 120),
           crew_id: str(raw.task.crew_id ?? raw.task.crewId, 80),
+          crew_size: num(raw.task.crew_size ?? raw.task.crewSize),
+          members,
+          depends_on,
+          description: str(raw.task.description, 4000),
+          preconditions: Array.isArray(raw.task.preconditions)
+            ? raw.task.preconditions.filter((x): x is string => typeof x === "string")
+            : undefined,
+          controls: Array.isArray(raw.task.controls)
+            ? raw.task.controls.filter((x): x is string => typeof x === "string")
+            : undefined,
+          constraints: Array.isArray(raw.task.constraints)
+            ? raw.task.constraints.filter((x): x is string => typeof x === "string")
+            : undefined,
+          safety: Array.isArray(raw.task.safety)
+            ? raw.task.safety.filter((x): x is string => typeof x === "string")
+            : undefined,
+          proofs: Array.isArray(raw.task.proofs)
+            ? raw.task.proofs.filter((x): x is string => typeof x === "string")
+            : undefined,
+          assumptions: Array.isArray(raw.task.assumptions)
+            ? raw.task.assumptions.filter((x): x is string => typeof x === "string")
+            : undefined,
+          technical_references: Array.isArray(raw.task.technical_references)
+            ? raw.task.technical_references.flatMap((value) => {
+                if (!isObj(value)) return [];
+                const code = str(value.code, 120);
+                return code ? [{
+                  code,
+                  label: str(value.label, 300),
+                  applicability: (
+                    value.applicability === "CONTRACTUAL" ||
+                    value.applicability === "TO_CONFIRM"
+                      ? value.applicability
+                      : "INDICATIVE"
+                  ) as "INDICATIVE" | "CONTRACTUAL" | "TO_CONFIRM",
+                  source_url: str(value.source_url ?? value.sourceUrl, 1000),
+                  note: str(value.note, 2000),
+                }] : [];
+              })
+            : undefined,
+          hold_point: bool(raw.task.hold_point ?? raw.task.holdPoint) ?? false,
         },
       };
     }

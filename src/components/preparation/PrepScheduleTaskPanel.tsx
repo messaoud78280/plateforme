@@ -97,6 +97,31 @@ export function PrepScheduleTaskPanel({
                 BLOQUANT
               </span>
             ) : null}
+            <span
+              className={cn(
+                "rounded px-1.5 py-0.5 text-[10px] font-semibold",
+                task.readiness === "BLOCKING"
+                  ? "bg-red-100 text-red-800"
+                  : task.readiness === "TO_VALIDATE"
+                    ? "bg-amber-100 text-amber-900"
+                    : "bg-emerald-100 text-emerald-800",
+              )}
+            >
+              {task.readiness === "BLOCKING"
+                ? "BLOQUANT"
+                : task.readiness === "TO_VALIDATE"
+                  ? "À VALIDER"
+                  : "PRÊT"}
+            </span>
+            {task.dateState === "PAST" ? (
+              <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
+                DATE PASSÉE
+              </span>
+            ) : task.dateState === "UNCONFIRMED" ? (
+              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                DATE NON CONFIRMÉE
+              </span>
+            ) : null}
             {task.durationMode !== "fixed" ? (
               <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
                 {task.durationMode === "computed" || task.durationMode === "computed_workload"
@@ -194,6 +219,24 @@ export function PrepScheduleTaskPanel({
             }`}
           />
           <Row label="Mode durée" value={task.durationModeLabel} />
+          <Row
+            label="Base"
+            value={
+              task.durationBasis?.rationale ??
+              (task.durationBasis
+                ? task.durationBasis.provenance
+                : "Non documentée")
+            }
+          />
+          {task.durationBasis?.minDays != null ||
+          task.durationBasis?.maxDays != null ? (
+            <Row
+              label="Fourchette"
+              value={`${task.durationBasis.minDays ?? "?"} à ${
+                task.durationBasis.maxDays ?? "?"
+              } j`}
+            />
+          ) : null}
         </Section>
 
         {/* 4. Production */}
@@ -319,6 +362,28 @@ export function PrepScheduleTaskPanel({
           )}
         </Section>
 
+        {task.readinessReasons.length ? (
+          <Section title="À lever avant exécution">
+            <ul className="list-inside list-disc space-y-0.5 text-[12px] text-amber-900">
+              {task.readinessReasons.map((reason) => (
+                <li key={reason}>{reason}</li>
+              ))}
+            </ul>
+          </Section>
+        ) : null}
+
+        <Section title="Hypothèses / contraintes">
+          {task.assumptions.length || task.constraints.length ? (
+            <ul className="list-inside list-disc space-y-0.5 text-[12px] text-slate-700">
+              {[...task.assumptions, ...task.constraints].map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          ) : (
+            <Empty>Aucune hypothèse ou contrainte renseignée</Empty>
+          )}
+        </Section>
+
         {/* 8. Mode opératoire */}
         <Section title="Mode opératoire">
           {task.description ? (
@@ -366,6 +431,43 @@ export function PrepScheduleTaskPanel({
             </ul>
           ) : (
             <Empty>Aucun contrôle renseigné</Empty>
+          )}
+        </Section>
+
+        <Section title="Références techniques">
+          {task.technicalReferences.length ? (
+            <ul className="space-y-1 text-[12px] text-slate-700">
+              {task.technicalReferences.map((reference) => (
+                <li key={`${reference.code}-${reference.label ?? ""}`}>
+                  <span className="font-semibold">{reference.code}</span>
+                  {reference.label ? ` · ${reference.label}` : ""}
+                  <span className="ml-1 text-[10px] uppercase text-slate-500">
+                    {reference.applicability === "CONTRACTUAL"
+                      ? "contractuel"
+                      : reference.applicability === "TO_CONFIRM"
+                        ? "à confirmer"
+                        : "indicatif"}
+                  </span>
+                  {reference.note ? (
+                    <p className="text-[11px] text-slate-500">{reference.note}</p>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <Empty>Aucune référence technique renseignée</Empty>
+          )}
+        </Section>
+
+        <Section title="Preuves attendues">
+          {task.proofs.length ? (
+            <ul className="list-inside list-disc space-y-0.5 text-[12px] text-slate-700">
+              {task.proofs.map((proof) => (
+                <li key={proof}>{proof}</li>
+              ))}
+            </ul>
+          ) : (
+            <Empty>Aucune preuve attendue renseignée</Empty>
           )}
         </Section>
 

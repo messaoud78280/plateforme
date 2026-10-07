@@ -2,7 +2,7 @@
  * Helpers UI Planning V2 — testables sans React.
  * Séparation stricte des states ; classification d’erreurs.
  */
-import { BEWORK_SCHEDULE_AI_FORMAT } from "./ai-contract";
+import { BEWORK_SCHEDULE_AI_FORMAT_V2 } from "./ai-contract";
 
 export type PlanningV2Step = "context" | "json" | "preview" | "success";
 
@@ -182,13 +182,13 @@ export function summarizePreviewForConfirm(stats: {
 }
 
 export const RAW_AI_PLACEHOLDER = `{
-  "format": "bework_schedule_ai_v1",
+  "format": "bework_schedule_ai_v2",
   "activities": [...]
 }`;
 
 /**
  * Détecte un collage du contexte ChatGPT (ou du legacy) dans la zone prévue
- * pour bework_schedule_ai_v1 — erreur UX fréquente, message métier clair.
+ * pour bework_schedule_ai_v2 — erreur UX fréquente, message métier clair.
  */
 export function detectWrongPlanningV2Paste(raw: string): string | null {
   const t = raw.trim();
@@ -208,14 +208,15 @@ export function detectWrongPlanningV2Paste(raw: string): string | null {
   if (
     type === "bework_chatgpt_context_v1" ||
     expected === "bework_schedule_ai_v1" ||
+    expected === "bework_schedule_ai_v2" ||
     expected === "bework_schedule_bundle_v1" ||
     o.instructions != null ||
     o.takeoff != null
   ) {
-    return "Vous avez collé le CONTEXTE BeWork (brief pour ChatGPT), pas le planning. Dans ChatGPT, demandez le JSON puis collez uniquement un objet { \"format\": \"bework_schedule_ai_v1\", \"activities\": [...] }.";
+    return "Vous avez collé le CONTEXTE BeWork (brief pour ChatGPT), pas le planning. Dans ChatGPT, demandez le JSON puis collez uniquement un objet { \"format\": \"bework_schedule_ai_v2\", \"activities\": [...] }.";
   }
   if (format === "bework_schedule_bundle_v1") {
-    return "Format legacy bework_schedule_bundle_v1 — ce flux V2 attend bework_schedule_ai_v1.";
+    return "Format legacy bework_schedule_bundle_v1 — ce flux V2 attend bework_schedule_ai_v2 (V1 reste lisible).";
   }
   return null;
 }
@@ -225,13 +226,29 @@ export function buildMinimalAiScheduleExample(codes: string[]) {
   const c1 = codes[0] ?? "GO-00-01";
   const c2 = codes[1] ?? "GO-00-02";
   return {
-    format: BEWORK_SCHEDULE_AI_FORMAT,
+    format: BEWORK_SCHEDULE_AI_FORMAT_V2,
     activities: [
       {
         id: "P01",
         name: "Installation chantier",
         kind: "WORK" as const,
         duration_days: 1,
+        phase: "Préparation",
+        crew: {
+          id: "MAC-A",
+          size: 3,
+          members: [{ labor_id: "MACON", role: "Maçon", count: 2 }],
+        },
+        preconditions: ["Accès et plans à jour confirmés"],
+        controls: ["Implantation validée avant terrassement"],
+        technical_references: [
+          { code: "CCTP", applicability: "TO_CONFIRM" as const },
+        ],
+        duration_basis: {
+          provenance: "PLANNING_ASSUMPTION" as const,
+          to_validate: true,
+        },
+        hold_point: true,
         takeoff_codes: [c1],
         after: [] as Array<{ id: string; type: string; lag_days: number }>,
       },
@@ -240,6 +257,18 @@ export function buildMinimalAiScheduleExample(codes: string[]) {
         name: "Fouilles",
         kind: "WORK" as const,
         duration_days: 2,
+        phase: "Fondations",
+        crew: {
+          id: "TERR-A",
+          size: 2,
+          members: [{ labor_id: "TERRASSIER", role: "Terrassier", count: 1 }],
+        },
+        preconditions: ["Implantation validée", "Réseaux repérés"],
+        safety: ["Blindage ou talutage à confirmer selon profondeur et sol"],
+        duration_basis: {
+          provenance: "PLANNING_ASSUMPTION" as const,
+          to_validate: true,
+        },
         takeoff_codes: [c2],
         after: [{ id: "P01", type: "FS", lag_days: 0 }],
       },

@@ -36,7 +36,7 @@ const DEFAULTS: Record<FeatureFlagKey, boolean> = {
   aiFeaturesEnabled: false,
   /**
    * Planning CREATE domaine V2 (UI parallèle).
-   * Défaut ON — le CTA « Préparer / Lancer » ouvre Planning V2 (bework_schedule_ai_v1).
+   * Défaut ON — le CTA « Préparer / Lancer » ouvre Planning V2 (bework_schedule_ai_v2).
    * Désactiver via NEXT_PUBLIC_FF_PLANNING_V2_UI=false pour retomber sur le legacy.
    * Les routes serveur restent protégées séparément (FF_PLANNING_V2_ENABLED).
    */

@@ -8,8 +8,8 @@
  * 5. calculateSchedule
  * 6. draftHash
  */
-import { parseAiScheduleBundleV1 } from "./ai-contract";
-import { adaptAiScheduleV1ToSchedulePlan } from "./ai-adapter";
+import { parseAiScheduleBundle } from "./ai-contract";
+import { adaptAiScheduleToSchedulePlan } from "./ai-adapter";
 import {
   validateSchedulePlanBusinessRules,
   type ScheduleSourceContext,
@@ -20,7 +20,7 @@ import {
   parseSchedulePlan,
   type DomainIssue,
   type ScheduleCalendarV1,
-  type SchedulePlanV1,
+  type SchedulePlan,
   type ScheduleResourcesV1,
 } from "./schema";
 
@@ -35,7 +35,7 @@ export type PreviewAiScheduleSuccess = {
   ok: true;
   draftHash: string;
   sourceFingerprint: string;
-  plan: SchedulePlanV1;
+  plan: SchedulePlan;
   calculated: CalculatedSchedule;
   stats: {
     inputActivities: number;
@@ -66,7 +66,7 @@ export type PreviewAiScheduleResult =
 export function previewAiSchedule(
   input: PreviewAiScheduleInput,
 ): PreviewAiScheduleResult {
-  const parsedAi = parseAiScheduleBundleV1(input.raw);
+  const parsedAi = parseAiScheduleBundle(input.raw);
   if (!parsedAi.ok) {
     return {
       ok: false,
@@ -75,7 +75,7 @@ export function previewAiSchedule(
     };
   }
 
-  const adapted = adaptAiScheduleV1ToSchedulePlan({
+  const adapted = adaptAiScheduleToSchedulePlan({
     bundle: parsedAi.bundle,
     sourceSnapshot: {
       projectId: input.sourceContext.projectId,

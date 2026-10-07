@@ -1,11 +1,16 @@
 /**
  * Commit Planning V2 — rejoue Preview serveur puis transaction atomique.
  * N’accepte pas un SchedulePlan arbitraire du navigateur.
+ *
+ * Auth : même périmètre que canModifyChantierProject.
+ * Ne PAS refuser uniquement parce que role === "CLIENT"
+ * (comptes org BeWork = role CLIENT + personType INTERNAL — bug ROCKMAN).
  */
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { canModifyChantierProject } from "@/lib/chantier-dossier/access";
+import { takeoffCreateCommitForbiddenReason } from "@/lib/chantier-dossier/takeoff-create-auth";
 import { prisma } from "@/lib/prisma";
 import { commitScheduleV2 } from "@/lib/schedule-domain/repository";
 import {
@@ -28,12 +33,20 @@ export async function POST(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
   const { id: projectId } = await ctx.params;
-  const access = await canAccessChantierProject(session.user, projectId);
-  if (!access.ok) {
-    return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
-  }
-  if (session.user.role === "CLIENT") {
-    return NextResponse.json({ error: "Modification non autorisée" }, { status: 403 });
+  const access = await canModifyChantierProject(session.user, projectId);
+  const denied = takeoffCreateCommitForbiddenReason({
+    hasProjectWriteAccess: access.ok,
+    role: session.user.role,
+  });
+  if (denied.forbidden) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Création du planning non autorisée",
+        code: denied.code ?? "FORBIDDEN",
+      },
+      { status: 403 },
+    );
   }
   const project = await prisma.project.findUnique({
     where: { id: projectId },

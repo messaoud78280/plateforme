@@ -5,7 +5,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { canModifyChantierProject } from "@/lib/chantier-dossier/access";
+import { takeoffCreateCommitForbiddenReason } from "@/lib/chantier-dossier/takeoff-create-auth";
 import { prisma } from "@/lib/prisma";
 import { commitPlanningCreateFromBundle } from "@/lib/bework-context/adapt-planning-create";
 import { PrepError } from "@/lib/preparation/service";
@@ -20,12 +21,17 @@ export async function POST(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
   const { id: projectId } = await ctx.params;
-  const access = await canAccessChantierProject(session.user, projectId);
-  if (!access.ok) {
-    return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
-  }
-  if (session.user.role === "CLIENT") {
-    return NextResponse.json({ error: "Modification non autorisée" }, { status: 403 });
+  // Ne pas bloquer role CLIENT seul (comptes org BeWork) — même règle que métré / Planning V2.
+  const access = await canModifyChantierProject(session.user, projectId);
+  const denied = takeoffCreateCommitForbiddenReason({
+    hasProjectWriteAccess: access.ok,
+    role: session.user.role,
+  });
+  if (denied.forbidden) {
+    return NextResponse.json(
+      { error: "Création du planning non autorisée", code: denied.code ?? "FORBIDDEN" },
+      { status: 403 },
+    );
   }
   const project = await prisma.project.findUnique({
     where: { id: projectId },

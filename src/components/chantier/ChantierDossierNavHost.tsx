@@ -6,6 +6,8 @@ import { ChantierDossierNav } from "@/components/chantier/ChantierDossierNav";
 import { TakeoffCreateFromChatgptModal } from "@/components/chantier/TakeoffCreateFromChatgptModal";
 import { QuoteCreateFromChatgptModal } from "@/components/chantier/QuoteCreateFromChatgptModal";
 import { PlanningCreateFromChatgptModal } from "@/components/chantier/PlanningCreateFromChatgptModal";
+import { PlanningCreateV2Modal } from "@/components/chantier/PlanningCreateV2Modal";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import type {
   DossierNavSnapshot,
   DossierNavStep,
@@ -42,6 +44,8 @@ export function ChantierDossierNavHost({
   const [takeoffOpen, setTakeoffOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [planningOpen, setPlanningOpen] = useState(false);
+  const [planningV2Open, setPlanningV2Open] = useState(false);
+  const planningV2Enabled = isFeatureEnabled("planningV2Ui");
 
   useEffect(() => {
     if (initialSnapshot) {
@@ -78,7 +82,11 @@ export function ChantierDossierNavHost({
       return;
     }
     if (step.primaryAction === "prepare_planning_chatgpt") {
-      setPlanningOpen(true);
+      if (planningV2Enabled) {
+        setPlanningV2Open(true);
+      } else {
+        setPlanningOpen(true);
+      }
       return;
     }
     if (step.primaryAction === "create_follow_up") {
@@ -244,6 +252,16 @@ export function ChantierDossierNavHost({
           onClose={() => setPlanningOpen(false)}
           onCreated={() => {
             setPlanningOpen(false);
+            router.refresh();
+          }}
+        />
+      ) : null}
+      {planningV2Open ? (
+        <PlanningCreateV2Modal
+          projectId={projectId}
+          onClose={() => setPlanningV2Open(false)}
+          onCreated={() => {
+            setPlanningV2Open(false);
             router.refresh();
           }}
         />

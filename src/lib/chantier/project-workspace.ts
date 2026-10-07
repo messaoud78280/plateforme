@@ -33,6 +33,7 @@ import {
   quotePreparationStateLabel,
   quoteWorkflowActionLabel,
 } from "@/lib/chantier/quote-workflow-status";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import {
   classifyFollowUpRelation,
   classifyPlanRelation,
@@ -1563,7 +1564,9 @@ async function getProjectWorkspaceUncached(
           ? "Mettre à jour avec ChatGPT"
           : "Ouvrir"
         : globalStudy
-          ? "Préparer avec ChatGPT"
+          ? isFeatureEnabled("planningV2Ui")
+            ? "Préparer (Planning V2)"
+            : "Préparer avec ChatGPT"
           : "Métré requis",
       primaryAction: globalPlan
         ? "open"

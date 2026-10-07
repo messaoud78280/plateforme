@@ -13,7 +13,8 @@ export type FeatureFlagKey =
   | "secureStorageSignedUrls"
   | "gedLinkWithoutCopy"
   | "organizationMultiUser"
-  | "aiFeaturesEnabled";
+  | "aiFeaturesEnabled"
+  | "planningV2Ui";
 
 const DEFAULTS: Record<FeatureFlagKey, boolean> = {
   commandCenterUi: true,
@@ -33,6 +34,13 @@ const DEFAULTS: Record<FeatureFlagKey, boolean> = {
    * Catalogue /discovery toujours accessible aux internes ; pas de clé API requise.
    */
   aiFeaturesEnabled: false,
+  /**
+   * Planning CREATE domaine V2 (UI parallèle).
+   * Défaut ON — le CTA « Préparer / Lancer » ouvre Planning V2 (bework_schedule_ai_v1).
+   * Désactiver via NEXT_PUBLIC_FF_PLANNING_V2_UI=false pour retomber sur le legacy.
+   * Les routes serveur restent protégées séparément (FF_PLANNING_V2_ENABLED).
+   */
+  planningV2Ui: true,
 };
 
 function envBool(name: string): boolean | undefined {
@@ -53,6 +61,7 @@ const ENV_KEYS: Record<FeatureFlagKey, string> = {
   gedLinkWithoutCopy: "NEXT_PUBLIC_FF_GED_LINK_WITHOUT_COPY",
   organizationMultiUser: "NEXT_PUBLIC_FF_ORGANIZATION_MULTI_USER",
   aiFeaturesEnabled: "NEXT_PUBLIC_FF_AI_FEATURES",
+  planningV2Ui: "NEXT_PUBLIC_FF_PLANNING_V2_UI",
 };
 
 export function isFeatureEnabled(flag: FeatureFlagKey): boolean {
@@ -68,5 +77,7 @@ export const FEATURE_FLAG_DOCS = [
   "GED sans copie : NEXT_PUBLIC_FF_GED_LINK_WITHOUT_COPY (défaut on).",
   "Organisation multi-users : NEXT_PUBLIC_FF_ORGANIZATION_MULTI_USER (défaut on).",
   "Assistant IA exécution : NEXT_PUBLIC_FF_AI_FEATURES (défaut off — catalogue sans API).",
+  "Planning V2 UI : NEXT_PUBLIC_FF_PLANNING_V2_UI (défaut on — false pour forcer legacy).",
+  "Planning V2 serveur : FF_PLANNING_V2_ENABLED (défaut on, false = kill-switch) + FF_PLANNING_V2_COMMIT_ENABLED (défaut off).",
   "Retour arrière : désactiver le flag concerné ou NEXT_PUBLIC_FF_LEGACY_UI_FALLBACK=true.",
 ] as const;

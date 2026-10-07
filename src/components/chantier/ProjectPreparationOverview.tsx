@@ -22,8 +22,10 @@ import { computeProjectNextAction } from "@/lib/chantier/project-preparation-sta
 import { TakeoffCreateFromChatgptModal } from "@/components/chantier/TakeoffCreateFromChatgptModal";
 import { QuoteCreateFromChatgptModal } from "@/components/chantier/QuoteCreateFromChatgptModal";
 import { PlanningCreateFromChatgptModal } from "@/components/chantier/PlanningCreateFromChatgptModal";
+import { PlanningCreateV2Modal } from "@/components/chantier/PlanningCreateV2Modal";
 import { ChantierDossierNav } from "@/components/chantier/ChantierDossierNav";
 import { buildDossierNavFromWorkspace } from "@/lib/chantier/dossier-nav";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 type QuoteSectionPreview = {
   sectionId: string;
@@ -57,6 +59,8 @@ export function ProjectPreparationOverview({
   const [takeoffCreateOpen, setTakeoffCreateOpen] = useState(false);
   const [quoteCreateOpen, setQuoteCreateOpen] = useState(false);
   const [planningCreateOpen, setPlanningCreateOpen] = useState(false);
+  const [planningV2Open, setPlanningV2Open] = useState(false);
+  const planningV2Enabled = isFeatureEnabled("planningV2Ui");
 
   const unscopedMsg = formatUnscopedHumanMessage(workspace.unscoped);
   const hasUnscoped = workspace.unscoped.items.length > 0;
@@ -152,7 +156,9 @@ export function ProjectPreparationOverview({
       return {
         mode: "generate",
         reason: null,
-        busyLabel: "Ouverture ChatGPT…",
+        busyLabel: planningV2Enabled
+          ? "Ouverture Planning V2…"
+          : "Ouverture ChatGPT…",
       };
     }
     if (step.id === "planning" && step.primaryAction === "create_global_prep") {
@@ -447,7 +453,13 @@ export function ProjectPreparationOverview({
       return;
     }
     if (step.primaryAction === "prepare_planning_chatgpt") {
-      setPlanningCreateOpen(true);
+      // Flag ON → parcours réel ROCKMAN / « Lancer » ouvre V2 (bework_schedule_ai_v1).
+      // Legacy reste accessible via le bouton secondaire « Flux legacy ».
+      if (planningV2Enabled) {
+        setPlanningV2Open(true);
+      } else {
+        setPlanningCreateOpen(true);
+      }
       return;
     }
     if (step.primaryAction === "create_global_prep") {
@@ -669,6 +681,25 @@ export function ProjectPreparationOverview({
         >
           {globalError}
         </p>
+      ) : null}
+
+      {canEdit &&
+      planningV2Enabled &&
+      workspace.global.metre.href &&
+      !workspace.global.planning.href ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-emerald-200/80 bg-emerald-50/40 px-3 py-2">
+          <p className="text-[12.5px] text-emerald-950">
+            Parcours principal = Planning V2 (<code className="text-[11px]">bework_schedule_ai_v1</code>).
+            Le bouton « Lancer » ouvre ce flux.
+          </p>
+          <button
+            type="button"
+            onClick={() => setPlanningCreateOpen(true)}
+            className="inline-flex rounded-lg border border-slate-300/80 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Ouvrir le flux legacy
+          </button>
+        </div>
       ) : null}
 
       {/* 3 colonnes pilotage */}
@@ -968,6 +999,18 @@ export function ProjectPreparationOverview({
           onClose={() => setPlanningCreateOpen(false)}
           onCreated={() => {
             setPlanningCreateOpen(false);
+            router.refresh();
+          }}
+        />
+      ) : null}
+
+      {planningV2Open ? (
+        <PlanningCreateV2Modal
+          projectId={workspace.projectId}
+          studyId={workspace.global.metre.href?.match(/etudes\/([^/?#]+)/)?.[1] ?? null}
+          onClose={() => setPlanningV2Open(false)}
+          onCreated={() => {
+            setPlanningV2Open(false);
             router.refresh();
           }}
         />

@@ -5651,6 +5651,10 @@ model PrepSchedulePlan {
   studyVersionAtGeneration Int
   calendarJson             Json?
   summaryJson              Json?
+  /// Snapshot canonique SchedulePlan (schemaVersion + sourceSnapshot + calendar + resources + activities).
+  /// Nullable : plans legacy / anciens flux sans domaine V1.
+  /// Ne pas confondre avec summaryJson (méta UI / sélection).
+  domainSnapshotJson       Json?
   note                     String?   @db.Text
   watermark                String?
   idempotencyKey           String

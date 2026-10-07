@@ -32,5 +32,13 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "prisma", "scripts", "tmp"]
+  "exclude": [
+    "node_modules",
+    "prisma",
+    "scripts",
+    "tmp",
+    "src/**/*.test.ts",
+    "src/lib/schedule-domain/repository/test-db-env.ts",
+    "src/lib/schedule-domain/repository/commit.test.ts"
+  ]
 }

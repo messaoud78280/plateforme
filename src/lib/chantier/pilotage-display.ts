@@ -156,7 +156,7 @@ export function computePilotageNextAction(input: {
           : firstTodo.primaryAction === "prepare_quote_chatgpt"
             ? "Préparer le devis avec ChatGPT"
             : firstTodo.primaryAction === "prepare_planning_chatgpt"
-              ? "Préparer le planning avec ChatGPT"
+              ? "Préparer le planning (V2)"
               : firstTodo.primaryAction === "create_global_prep"
                 ? firstTodo.id === "planning"
                   ? "Générer le planning chantier"

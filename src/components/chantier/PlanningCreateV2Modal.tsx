@@ -9,6 +9,7 @@ import {
   buildCommitPayload,
   classifyPlanningV2Error,
   clearRawAiJson,
+  detectWrongPlanningV2Paste,
   formatIssueLine,
   formatPredecessorEdge,
   initialPlanningV2UiState,
@@ -171,6 +172,11 @@ export function PlanningCreateV2Modal({
     setErrorKind(null);
     setErrorLines([]);
     try {
+      const wrongPaste = detectWrongPlanningV2Paste(ui.rawAiJson);
+      if (wrongPaste) {
+        showError("CONTRACT_ERROR", null, wrongPaste);
+        return;
+      }
       const res = await fetch(`/api/projets/${projectId}/planning-v2/preview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -365,6 +371,11 @@ export function PlanningCreateV2Modal({
                 <h3 className="text-[13px] font-semibold text-[#1e3a5f]">
                   2. Coller le planning généré
                 </h3>
+                <p className="text-[12.5px] text-slate-600">
+                  Ne collez pas le contexte copié à l’étape 1. Collez uniquement la réponse
+                  ChatGPT : <code className="text-[11px]">bework_schedule_ai_v1</code> avec{" "}
+                  <code className="text-[11px]">activities</code>.
+                </p>
                 <textarea
                   value={ui.rawAiJson}
                   onChange={(e) =>
@@ -530,7 +541,17 @@ export function PlanningCreateV2Modal({
           ) : null}
         </div>
 
-        <footer className="flex flex-wrap items-center justify-end gap-2 border-t border-slate-100 px-4 py-3">
+        <footer className="space-y-2 border-t border-slate-100 px-4 py-3">
+          {errorLines.length && (ui.step === "preview" || ui.commitState === "error") ? (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[12.5px] text-red-800">
+              {errorLines.map((line) => (
+                <p key={`foot-${line}`} className="whitespace-pre-line">
+                  {line}
+                </p>
+              ))}
+            </div>
+          ) : null}
+          <div className="flex flex-wrap items-center justify-end gap-2">
           {ui.step === "success" ? (
             <button
               type="button"
@@ -570,6 +591,7 @@ export function PlanningCreateV2Modal({
               {busy ? "Calcul…" : "Prévisualiser"}
             </button>
           )}
+          </div>
         </footer>
       </div>
     </div>

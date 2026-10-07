@@ -1,9 +1,10 @@
 /**
  * Feature flags serveur Planning V2 — JAMAIS exposés au client.
  *
- * FF_PLANNING_V2_ENABLED — active context + preview (+ prérequis commit)
- *   Défaut ON (absence ou true). Kill-switch : FF_PLANNING_V2_ENABLED=false.
- * FF_PLANNING_V2_COMMIT_ENABLED — kill-switch commit (défaut false, explicite true requis)
+ * FF_PLANNING_V2_ENABLED — context + preview (+ prérequis commit)
+ *   Défaut ON. Kill-switch : FF_PLANNING_V2_ENABLED=false.
+ * FF_PLANNING_V2_COMMIT_ENABLED — commit CREATE
+ *   Défaut ON. Kill-switch : FF_PLANNING_V2_COMMIT_ENABLED=false.
  */
 import { NextResponse } from "next/server";
 
@@ -17,16 +18,20 @@ function envFalse(name: string): boolean {
   return v === "0" || v === "false" || v === "off";
 }
 
-/** Preview / context : ON sauf kill-switch explicite false. */
-export function isPlanningV2ServerEnabled(): boolean {
-  if (envFalse("FF_PLANNING_V2_ENABLED")) return false;
-  if (envTrue("FF_PLANNING_V2_ENABLED")) return true;
+function envEnabledDefaultOn(name: string): boolean {
+  if (envFalse(name)) return false;
+  if (envTrue(name)) return true;
   return true;
 }
 
-/** Commit autorisé uniquement si V2 enabled ET kill-switch commit true. */
+/** Preview / context : ON sauf kill-switch explicite false. */
+export function isPlanningV2ServerEnabled(): boolean {
+  return envEnabledDefaultOn("FF_PLANNING_V2_ENABLED");
+}
+
+/** Commit : ON sauf kill-switch explicite false (et preview actif). */
 export function isPlanningV2CommitEnabled(): boolean {
-  return isPlanningV2ServerEnabled() && envTrue("FF_PLANNING_V2_COMMIT_ENABLED");
+  return isPlanningV2ServerEnabled() && envEnabledDefaultOn("FF_PLANNING_V2_COMMIT_ENABLED");
 }
 
 export function planningV2DisabledResponse() {
@@ -44,7 +49,8 @@ export function planningV2CommitDisabledResponse() {
   return NextResponse.json(
     {
       ok: false,
-      error: "Commit Planning V2 désactivé (validation Preview uniquement)",
+      error:
+        "La création du planning V2 est temporairement désactivée sur ce serveur (FF_PLANNING_V2_COMMIT_ENABLED=false). La prévisualisation reste disponible.",
       code: "FEATURE_COMMIT_DISABLED",
     },
     { status: 403 },

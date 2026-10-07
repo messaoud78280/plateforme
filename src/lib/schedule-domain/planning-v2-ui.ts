@@ -91,6 +91,9 @@ export function classifyPlanningV2Error(
   const c = (code ?? issues?.[0]?.code ?? "").toUpperCase();
   if (c === "SOURCE_STALE") return "SOURCE_STALE";
   if (c === "PREVIEW_STALE") return "PREVIEW_STALE";
+  if (c === "FEATURE_COMMIT_DISABLED" || c === "FEATURE_DISABLED") {
+    return "CONTRACT_ERROR";
+  }
   if (c === "PLAN_STATE_STALE" || c === "PLAN_ALREADY_EXISTS") return "PLAN_STATE_STALE";
   if (c === "PARSE_ERROR" || c === "SYNTAX_ERROR" || c === "JSON_PARSE") {
     return "SYNTAX_ERROR";
@@ -182,6 +185,40 @@ export const RAW_AI_PLACEHOLDER = `{
   "format": "bework_schedule_ai_v1",
   "activities": [...]
 }`;
+
+/**
+ * Détecte un collage du contexte ChatGPT (ou du legacy) dans la zone prévue
+ * pour bework_schedule_ai_v1 — erreur UX fréquente, message métier clair.
+ */
+export function detectWrongPlanningV2Paste(raw: string): string | null {
+  const t = raw.trim();
+  if (!t) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(t);
+  } catch {
+    return null;
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+  const o = parsed as Record<string, unknown>;
+  const format = String(o.format ?? "");
+  const expected = String(o.expected_output ?? "");
+  const type = String(o.type ?? "");
+
+  if (
+    type === "bework_chatgpt_context_v1" ||
+    expected === "bework_schedule_ai_v1" ||
+    expected === "bework_schedule_bundle_v1" ||
+    o.instructions != null ||
+    o.takeoff != null
+  ) {
+    return "Vous avez collé le CONTEXTE BeWork (brief pour ChatGPT), pas le planning. Dans ChatGPT, demandez le JSON puis collez uniquement un objet { \"format\": \"bework_schedule_ai_v1\", \"activities\": [...] }.";
+  }
+  if (format === "bework_schedule_bundle_v1") {
+    return "Format legacy bework_schedule_bundle_v1 — ce flux V2 attend bework_schedule_ai_v1.";
+  }
+  return null;
+}
 
 /** Exemple minimal dérivé du contrat — pas de doc JSON manuscrite. */
 export function buildMinimalAiScheduleExample(codes: string[]) {

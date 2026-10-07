@@ -11,6 +11,7 @@ import {
   buildMinimalAiScheduleExample,
   classifyPlanningV2Error,
   clearRawAiJson,
+  detectWrongPlanningV2Paste,
   formatIssueLine,
   formatPredecessorEdge,
   initialPlanningV2UiState,
@@ -25,6 +26,35 @@ function aiBundle(activities: unknown[]) {
 }
 
 async function main() {
+  // --- Collage contexte vs planning ---
+  {
+    assert.match(
+      detectWrongPlanningV2Paste(
+        JSON.stringify({
+          type: "bework_chatgpt_context_v1",
+          expected_output: "bework_schedule_bundle_v1",
+          instructions: ["x"],
+        }),
+      ) ?? "",
+      /CONTEXTE/,
+    );
+    assert.match(
+      detectWrongPlanningV2Paste(
+        JSON.stringify({ format: "bework_schedule_bundle_v1", activities: [] }),
+      ) ?? "",
+      /legacy|bundle_v1/i,
+    );
+    assert.equal(
+      detectWrongPlanningV2Paste(
+        JSON.stringify({
+          format: BEWORK_SCHEDULE_AI_FORMAT,
+          activities: [{ id: "P01", name: "A", kind: "WORK", duration_days: 1, after: [] }],
+        }),
+      ),
+      null,
+    );
+  }
+
   // --- Séparation context / raw ---
   {
     const s0 = initialPlanningV2UiState();

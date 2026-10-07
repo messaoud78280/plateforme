@@ -11,18 +11,18 @@ async function main() {
   delete process.env.FF_PLANNING_V2_ENABLED;
   delete process.env.FF_PLANNING_V2_COMMIT_ENABLED;
   assert.equal(isPlanningV2ServerEnabled(), true, "preview default on");
-  assert.equal(isPlanningV2CommitEnabled(), false, "commit default off");
+  assert.equal(isPlanningV2CommitEnabled(), true, "commit default on");
 
   process.env.FF_PLANNING_V2_ENABLED = "true";
   process.env.FF_PLANNING_V2_COMMIT_ENABLED = "false";
   assert.equal(isPlanningV2ServerEnabled(), true);
-  assert.equal(isPlanningV2CommitEnabled(), false);
+  assert.equal(isPlanningV2CommitEnabled(), false, "commit kill-switch");
 
   process.env.FF_PLANNING_V2_COMMIT_ENABLED = "true";
   assert.equal(isPlanningV2CommitEnabled(), true);
 
   process.env.FF_PLANNING_V2_ENABLED = "false";
-  assert.equal(isPlanningV2ServerEnabled(), false, "kill-switch preview");
+  assert.equal(isPlanningV2ServerEnabled(), false, "preview kill-switch");
   assert.equal(isPlanningV2CommitEnabled(), false);
 
   delete process.env.FF_PLANNING_V2_ENABLED;
@@ -41,7 +41,7 @@ async function main() {
       suite: "server-flags.test.ts",
       uiDefaultOn: true,
       serverPreviewDefaultOn: true,
-      commitKillSwitchDefault: true,
+      commitDefaultOn: true,
     }),
   );
 }

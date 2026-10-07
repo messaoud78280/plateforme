@@ -78,6 +78,6 @@ export const FEATURE_FLAG_DOCS = [
   "Organisation multi-users : NEXT_PUBLIC_FF_ORGANIZATION_MULTI_USER (défaut on).",
   "Assistant IA exécution : NEXT_PUBLIC_FF_AI_FEATURES (défaut off — catalogue sans API).",
   "Planning V2 UI : NEXT_PUBLIC_FF_PLANNING_V2_UI (défaut on — false pour forcer legacy).",
-  "Planning V2 serveur : FF_PLANNING_V2_ENABLED (défaut on, false = kill-switch) + FF_PLANNING_V2_COMMIT_ENABLED (défaut off).",
+  "Planning V2 serveur : FF_PLANNING_V2_ENABLED + FF_PLANNING_V2_COMMIT_ENABLED (défaut on, false = kill-switch).",
   "Retour arrière : désactiver le flag concerné ou NEXT_PUBLIC_FF_LEGACY_UI_FALLBACK=true.",
 ] as const;

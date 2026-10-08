@@ -176,7 +176,17 @@ type QuoteDetail = {
   project: { id: string; title: string } | null;
 };
 
-type ClientOption = { id: string; name: string; tradeName: string | null };
+type ClientOption = {
+  id: string;
+  name: string;
+  tradeName: string | null;
+  address?: string | null;
+  city?: string | null;
+  zipCode?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  siret?: string | null;
+};
 type ProjectOption = { id: string; title: string };
 
 type MetaDraft = {
@@ -291,6 +301,9 @@ export function QuoteEditor({
   const [clientSearch, setClientSearch] = useState("");
   const [clientCreating, setClientCreating] = useState(false);
   const [newClientName, setNewClientName] = useState("");
+  const [newClientAddress, setNewClientAddress] = useState("");
+  const [newClientZip, setNewClientZip] = useState("");
+  const [newClientCity, setNewClientCity] = useState("");
   const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [projectPickerOpen, setProjectPickerOpen] = useState(false);
   const mutationSeq = useRef(0);
@@ -1006,6 +1019,12 @@ export function QuoteEditor({
         id: c.id,
         name: c.name,
         tradeName: c.tradeName,
+        address: c.address ?? null,
+        city: c.city ?? null,
+        zipCode: c.zipCode ?? null,
+        email: c.email ?? null,
+        phone: c.phone ?? null,
+        siret: c.siret ?? null,
       },
     }));
   }
@@ -1013,19 +1032,33 @@ export function QuoteEditor({
   async function createClientQuick() {
     const name = newClientName.trim();
     if (!name || clientCreating) return;
+    const address = newClientAddress.trim();
+    const zipCode = newClientZip.trim();
+    const city = newClientCity.trim();
     setClientCreating(true);
     setError(null);
     try {
       const res = await fetch("/api/commercial/clients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({
+          name,
+          address: address || null,
+          zipCode: zipCode || null,
+          city: city || null,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur");
       const created = data.client as ClientOption;
       setNewClientName("");
+      setNewClientAddress("");
+      setNewClientZip("");
+      setNewClientCity("");
       await selectClient(created);
+      if (!address && !city) {
+        setClientCoordsOpen(true);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
     } finally {
@@ -1525,6 +1558,17 @@ export function QuoteEditor({
                       {quote.clientExternalOrg?.email || clientSnap?.email}
                     </p>
                   )}
+                  {!(
+                    quote.clientExternalOrg?.address ||
+                    clientSnap?.addressLine1 ||
+                    clientSnap?.address ||
+                    clientSnap?.city
+                  ) ? (
+                    <p className="mt-1 text-[11px] font-semibold text-amber-700">
+                      Adresse client manquante sur le PDF — utiliser « Modifier
+                      les coordonnées »
+                    </p>
+                  ) : null}
                   <p className="mt-1 text-[11px] font-semibold text-[#1d4ed8]">
                     Changer le client
                   </p>
@@ -2228,21 +2272,45 @@ export function QuoteEditor({
             <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">
               + Ajouter un client
             </p>
-            <div className="flex gap-2">
+            <p className="mb-2 text-[11px] text-slate-500">
+              L’adresse client (facturation) apparaît sur le PDF — distincte de
+              l’adresse chantier.
+            </p>
+            <div className="space-y-2">
               <input
                 value={newClientName}
                 onChange={(e) => setNewClientName(e.target.value)}
-                placeholder="Nom du client"
-                className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                placeholder="Nom / société *"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
               />
-              <button
-                type="button"
-                disabled={clientCreating || !newClientName.trim()}
-                onClick={() => void createClientQuick()}
-                className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
-              >
-                Créer
-              </button>
+              <input
+                value={newClientAddress}
+                onChange={(e) => setNewClientAddress(e.target.value)}
+                placeholder="Adresse de facturation"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              />
+              <div className="flex gap-2">
+                <input
+                  value={newClientZip}
+                  onChange={(e) => setNewClientZip(e.target.value)}
+                  placeholder="CP"
+                  className="w-24 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                />
+                <input
+                  value={newClientCity}
+                  onChange={(e) => setNewClientCity(e.target.value)}
+                  placeholder="Ville"
+                  className="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                />
+                <button
+                  type="button"
+                  disabled={clientCreating || !newClientName.trim()}
+                  onClick={() => void createClientQuick()}
+                  className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
+                >
+                  Créer
+                </button>
+              </div>
             </div>
           </div>
         </ModalShell>

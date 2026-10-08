@@ -6,7 +6,10 @@ import { createHash } from "crypto";
 import type { CommercialQuoteStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { createServiceRoleClient } from "@/lib/supabase";
-import { transitionQuoteStatus } from "@/lib/commercial/quotes";
+import {
+  formatSiteAddressLabel,
+  transitionQuoteStatus,
+} from "@/lib/commercial/quotes";
 import { DOCUMENTS_BUCKET, downloadStorageObject } from "@/lib/storage/supabase-object";
 import { generateCommercialQuotePdf } from "@/lib/commercial/pdf-quote";
 import { buildQuotePdfInputFromVersion } from "@/lib/commercial/quote-pdf-input";
@@ -101,7 +104,7 @@ async function loadVersionPdfContext(orgId: string, quoteId: string, versionId: 
       acceptedAt: true,
       projectId: true,
       isDemonstration: true,
-      project: { select: { title: true } },
+      project: { select: { title: true, siteAddress: true, siteCity: true } },
     },
   });
   if (!quote) throw new Error("Devis introuvable");
@@ -116,11 +119,17 @@ async function loadVersionPdfContext(orgId: string, quoteId: string, versionId: 
   if (!version) throw new Error("Version introuvable");
 
   const settings = await ensureCommercialOrgSettings(orgId);
+  const siteFromProject = formatSiteAddressLabel(
+    quote.project?.siteAddress,
+    quote.project?.siteCity,
+  );
 
   return {
     quote: {
       ...quote,
       projectTitle: quote.project?.title ?? null,
+      siteAddressSnapshot:
+        quote.siteAddressSnapshot?.trim() || siteFromProject || null,
     },
     version,
     quoteMentions: settings.quoteMentions,

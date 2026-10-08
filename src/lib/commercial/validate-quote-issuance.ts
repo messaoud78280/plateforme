@@ -52,6 +52,7 @@ export function validateQuoteIssuancePayload(input: {
   number: string | null | undefined;
   subject: string | null | undefined;
   clientPresent: boolean;
+  clientAddressPresent?: boolean;
   issuerName: string | null | undefined;
   workLineCount: number;
   totalSellHt: number;
@@ -81,6 +82,12 @@ export function validateQuoteIssuancePayload(input: {
       code: "CLIENT",
       severity: "ERROR",
       message: "Client absent",
+    });
+  } else if (input.clientAddressPresent === false) {
+    items.push({
+      code: "CLIENT_ADDRESS",
+      severity: "WARNING",
+      message: "Adresse client absente — à compléter pour le PDF",
     });
   }
   if (!input.issuerName?.trim()) {
@@ -220,7 +227,21 @@ export async function validateQuoteForIssuance(
     name?: string;
     tradeName?: string;
   } | null;
-  const clientSnap = quote.clientSnapshotJson as { name?: string } | null;
+  const clientSnap = quote.clientSnapshotJson as {
+    name?: string;
+    address?: string | null;
+    addressLine1?: string | null;
+    city?: string | null;
+    zipCode?: string | null;
+    postalCode?: string | null;
+  } | null;
+  const clientAddressPresent = Boolean(
+    clientSnap?.addressLine1?.trim() ||
+      clientSnap?.address?.trim() ||
+      clientSnap?.city?.trim() ||
+      clientSnap?.zipCode?.trim() ||
+      clientSnap?.postalCode?.trim(),
+  );
   const workLineCount = version.lines.filter(
     (l) => l.kind === "WORK" && !l.isOptional,
   ).length;
@@ -234,6 +255,7 @@ export async function validateQuoteForIssuance(
     number: quote.number,
     subject: quote.subject,
     clientPresent: Boolean(quote.clientExternalOrgId || clientSnap?.name),
+    clientAddressPresent,
     issuerName: issuer?.tradeName || issuer?.name || null,
     workLineCount,
     totalSellHt: d(version.totalSellHt),

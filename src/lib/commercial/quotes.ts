@@ -186,12 +186,36 @@ async function buildClientSnapshot(clientExternalOrgId: string | null): Promise<
     tradeName: client.tradeName,
     siret: client.siret,
     address: client.address,
+    addressLine1: client.address,
     city: client.city,
     zipCode: client.zipCode,
+    postalCode: client.zipCode,
     phone: client.phone,
     email: client.email,
     type: client.type,
   } as Prisma.InputJsonValue;
+}
+
+/** Adresse chantier affichable sur le devis (facturation client ≠ intervention). */
+export function formatSiteAddressLabel(
+  siteAddress?: string | null,
+  siteCity?: string | null,
+): string | null {
+  const parts = [siteAddress?.trim(), siteCity?.trim()].filter(Boolean);
+  return parts.length ? parts.join(", ") : null;
+}
+
+async function siteAddressFromProject(
+  orgId: string,
+  projectId: string | null | undefined,
+): Promise<string | null> {
+  if (!projectId) return null;
+  const project = await prisma.project.findFirst({
+    where: { id: projectId, organizationId: orgId },
+    select: { siteAddress: true, siteCity: true },
+  });
+  if (!project) return null;
+  return formatSiteAddressLabel(project.siteAddress, project.siteCity);
 }
 
 export async function createQuote(input: {
@@ -260,6 +284,10 @@ export async function createQuote(input: {
   const clientSnapshotJson =
     input.clientSnapshotJson ??
     (await buildClientSnapshot(input.clientExternalOrgId ?? null));
+  const siteAddressSnapshot =
+    input.siteAddressSnapshot !== undefined
+      ? input.siteAddressSnapshot
+      : await siteAddressFromProject(input.orgId, input.projectId);
 
   const quote = await prisma.$transaction(async (tx) => {
     const number =
@@ -282,7 +310,7 @@ export async function createQuote(input: {
         clientExternalOrgId: input.clientExternalOrgId ?? null,
         clientSnapshotJson: clientSnapshotJson ?? undefined,
         issuerSnapshotJson,
-        siteAddressSnapshot: input.siteAddressSnapshot ?? null,
+        siteAddressSnapshot: siteAddressSnapshot ?? null,
         issueDate: new Date(),
         validityDate: input.validityDate ?? null,
         responsibleId: input.responsibleId ?? null,
@@ -651,7 +679,13 @@ export async function updateQuoteMeta(
 ) {
   const quote = await prisma.commercialQuote.findFirst({
     where: { id, organizationId: orgId },
-    select: { id: true, status: true, currentVersionId: true, number: true },
+    select: {
+      id: true,
+      status: true,
+      currentVersionId: true,
+      number: true,
+      siteAddressSnapshot: true,
+    },
   });
   if (!quote) throw new Error("Devis introuvable");
 
@@ -714,6 +748,15 @@ export async function updateQuoteMeta(
     clientSnapshotJson = await buildClientSnapshot(data.clientExternalOrgId);
   }
 
+  let siteAddressSnapshot: string | null | undefined = data.siteAddressSnapshot;
+  if (
+    data.projectId &&
+    data.siteAddressSnapshot === undefined &&
+    !quote.siteAddressSnapshot?.trim()
+  ) {
+    siteAddressSnapshot = await siteAddressFromProject(orgId, data.projectId);
+  }
+
   const updated = await prisma.commercialQuote.update({
     where: { id },
     data: {
@@ -732,8 +775,8 @@ export async function updateQuoteMeta(
         : {}),
       ...(data.projectId !== undefined ? { projectId: data.projectId } : {}),
       ...(data.responsibleId !== undefined ? { responsibleId: data.responsibleId } : {}),
-      ...(data.siteAddressSnapshot !== undefined
-        ? { siteAddressSnapshot: data.siteAddressSnapshot }
+      ...(siteAddressSnapshot !== undefined
+        ? { siteAddressSnapshot: siteAddressSnapshot }
         : {}),
       ...(data.validityDate !== undefined ? { validityDate: data.validityDate } : {}),
       ...(data.issueDate !== undefined ? { issueDate: data.issueDate } : {}),

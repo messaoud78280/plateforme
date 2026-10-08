@@ -285,8 +285,12 @@ export function ProjectApprovisionnementsSection({
               version={0}
               capability={getSectionCapability("SUPPLY")}
               entityLabel={projectTitle}
-              primaryActionLabel="Modifier avec ChatGPT"
-              helpText="Proposez besoins et offres fournisseurs réels (prix sourcés). Preview obligatoire avant Commit."
+              primaryActionLabel={
+                activeRows.length === 0
+                  ? "Préparer avec ChatGPT"
+                  : "Modifier avec ChatGPT"
+              }
+              helpText="Contexte chantier + métré + devis + planning. Prix vente devis ≠ prix achat. Preview obligatoire avant Commit."
               onApplied={() => void reload()}
             />
           ) : null}
@@ -361,25 +365,43 @@ export function ProjectApprovisionnementsSection({
           <p className="text-sm font-medium text-slate-700">
             Aucun besoin d’approvisionnement n’a encore été préparé.
           </p>
-          <p className="mt-1 text-xs text-slate-500">
-            Ajoutez manuellement les besoins chantier. La génération depuis le
-            métré arrivera dans une phase suivante.
+          <p className="mx-auto mt-2 max-w-lg text-xs text-slate-500">
+            Partez du métré, du devis et du planning du chantier via ChatGPT :
+            proposez matériaux, consommables, engins, locations, évacuations,
+            transports et prestations — puis validez en Preview avant
+            enregistrement. Les quantités d’achat restent distinctes du métré ;
+            les prix de vente devis ne sont jamais des prix fournisseurs.
           </p>
           {canWrite ? (
-            <button
-              type="button"
-              onClick={() => {
-                resetForm();
-                setAddOpen(true);
-              }}
-              className="mt-4 rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
-            >
-              + Ajouter un besoin
-            </button>
-          ) : null}
-          <p className="mt-3 text-[11px] text-slate-400">
-            Générer depuis le métré — bientôt disponible
-          </p>
+            <div className="mx-auto mt-5 flex max-w-xl flex-col items-center gap-3">
+              <BeworkPatchToolbar
+                section="SUPPLY"
+                projectId={projectId}
+                entityId={projectId}
+                version={0}
+                capability={getSectionCapability("SUPPLY")}
+                entityLabel={projectTitle}
+                primaryActionLabel="Préparer avec ChatGPT"
+                helpText="1) Copier le contexte · 2) ChatGPT (recherche réelle) · 3) Coller bework_patch_v1 · 4) Preview · 5) Commit"
+                onApplied={() => void reload()}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  resetForm();
+                  setAddOpen(true);
+                }}
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                + Ajouter un besoin manuellement
+              </button>
+            </div>
+          ) : (
+            <p className="mt-4 text-xs text-slate-500">
+              Consultation seule — la préparation ChatGPT est réservée aux
+              comptes internes achats / chantier.
+            </p>
+          )}
         </div>
       ) : (
         <>

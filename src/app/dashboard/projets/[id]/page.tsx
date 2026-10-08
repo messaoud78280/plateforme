@@ -698,12 +698,14 @@ export default async function ProjetDetailPage({
   const partagePanel = canManageShare ? <ChantierSharePanel projectId={id} /> : null;
 
   const materiauxReadOnly = project.chantierStatus === "TERMINE";
+  // Aligné sur l’API materiaux / actors achats internes (pas seulement AGENCE/AGENT).
+  const canWriteApprovisionnements = canSeeMateriaux && !materiauxReadOnly;
   const approvisionnementsPanel = canSeeMateriaux ? (
     <ProjectApprovisionnementsSection
       projectId={id}
       projectTitle={project.title}
       initialRows={materiauxRows}
-      canWrite={isStaff && !materiauxReadOnly}
+      canWrite={canWriteApprovisionnements}
     />
   ) : null;
 

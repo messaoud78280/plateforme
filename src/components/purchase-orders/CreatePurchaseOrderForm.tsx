@@ -31,6 +31,9 @@ export type PrefillPurchaseOrderLine = {
   unit: string;
   materialRequirementId: string;
   neededAt?: string | null;
+  /** Phase 3 — prix réel depuis offre retenue (jamais inventé) */
+  unitPriceHt?: number | null;
+  productRef?: string | null;
 };
 
 const emptyLine = (): Line => ({
@@ -48,6 +51,8 @@ export function CreatePurchaseOrderForm({
   defaultProjectId,
   prefillLines,
   earliestNeededAt,
+  defaultSupplierId,
+  defaultSupplierLabel,
 }: {
   projects: ProjectOpt[];
   team: TeamOpt[];
@@ -55,6 +60,9 @@ export function CreatePurchaseOrderForm({
   /** MATERIAUX-V1B — lignes préremplies depuis besoins sélectionnés */
   prefillLines?: PrefillPurchaseOrderLine[] | null;
   earliestNeededAt?: string | null;
+  /** Phase 3 — fournisseur de l’offre retenue (préparation uniquement) */
+  defaultSupplierId?: string | null;
+  defaultSupplierLabel?: string | null;
 }) {
   const router = useRouter();
   const initialProject =
@@ -64,9 +72,9 @@ export function CreatePurchaseOrderForm({
     projects[0]?.id ??
     "";
   const [projectId, setProjectId] = useState(initialProject);
-  const [supplierId, setSupplierId] = useState("");
+  const [supplierId, setSupplierId] = useState(defaultSupplierId ?? "");
   const [contactId, setContactId] = useState<string | null>(null);
-  const [supplierQ, setSupplierQ] = useState("");
+  const [supplierQ, setSupplierQ] = useState(defaultSupplierLabel ?? "");
   const [suppliers, setSuppliers] = useState<SupplierOpt[]>([]);
   const [subject, setSubject] = useState(
     prefillLines && prefillLines.length > 0
@@ -76,10 +84,15 @@ export function CreatePurchaseOrderForm({
   const [lines, setLines] = useState<Line[]>(() =>
     prefillLines && prefillLines.length > 0
       ? prefillLines.map((l) => ({
-          designation: l.designation,
+          designation: l.productRef
+            ? `${l.designation} (réf. ${l.productRef})`
+            : l.designation,
           quantity: String(l.quantity),
           unit: l.unit,
-          unitPriceHt: "",
+          unitPriceHt:
+            l.unitPriceHt != null && Number.isFinite(l.unitPriceHt)
+              ? String(l.unitPriceHt)
+              : "",
           materialRequirementId: l.materialRequirementId,
           neededAtHint: l.neededAt ?? null,
           costCategory: "MATERIAL",
@@ -128,6 +141,23 @@ export function CreatePurchaseOrderForm({
     const t = setTimeout(() => void searchSuppliers(supplierQ), 200);
     return () => clearTimeout(t);
   }, [supplierQ, searchSuppliers]);
+
+  useEffect(() => {
+    if (!defaultSupplierId || !defaultSupplierLabel) return;
+    setSuppliers((prev) => {
+      if (prev.some((s) => s.id === defaultSupplierId)) return prev;
+      return [
+        {
+          id: defaultSupplierId,
+          name: defaultSupplierLabel,
+          tradeName: defaultSupplierLabel,
+          activity: null,
+          primaryContact: null,
+        },
+        ...prev,
+      ];
+    });
+  }, [defaultSupplierId, defaultSupplierLabel]);
 
   function pickSupplier(s: SupplierOpt) {
     setSupplierId(s.id);

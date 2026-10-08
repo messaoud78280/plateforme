@@ -80,7 +80,8 @@ type CommitMeta = {
           | "VISIT_ONLY"
           | "FOLLOW_UP_ONLY"
           | "REPORT_ONLY"
-          | "NOTICE_ONLY";
+          | "NOTICE_ONLY"
+          | "SUPPLY_ONLY";
         buttonLabel: string;
         warnings: string[];
       }

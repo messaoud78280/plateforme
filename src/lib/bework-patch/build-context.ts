@@ -42,6 +42,7 @@ import {
   normalizeDependsOnJson,
   UPDATE_DEPENDENCY_DEPENDS_ON_CONTRACT,
 } from "@/lib/bework-patch/operation-contracts";
+import { buildSupplyContext } from "@/lib/bework-patch/build-supply-context";
 
 function isObj(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === "object" && !Array.isArray(v);
@@ -85,6 +86,8 @@ export async function buildUniversalPatchContext(input: {
     case "REPORT":
     case "NOTICE":
       return buildDocumentContext(input.orgId, project, input.entityId, input.section);
+    case "SUPPLY":
+      return buildSupplyContext(input.orgId, project, input.entityId);
     default:
       return null;
   }

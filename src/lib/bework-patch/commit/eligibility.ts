@@ -4,6 +4,7 @@
 import type { BeworkPatchV1 } from "@/lib/bework-patch/types";
 import type { AnalyzePatchImpactResult } from "@/lib/bework-patch/impact/types";
 import { isPlanningCommitSupportedOp } from "@/lib/bework-patch/commit/planning-capability";
+import { isSupplyCommitSupportedOp } from "@/lib/bework-patch/commit/supply-ops";
 
 export type SyncMode =
   | "FULL_SYNC"
@@ -13,7 +14,8 @@ export type SyncMode =
   | "VISIT_ONLY"
   | "FOLLOW_UP_ONLY"
   | "REPORT_ONLY"
-  | "NOTICE_ONLY";
+  | "NOTICE_ONLY"
+  | "SUPPLY_ONLY";
 
 export type CommitEligibility =
   | {
@@ -202,6 +204,43 @@ export function evaluateCommitEligibility(input: {
       buttonLabel: "Appliquer à la notice",
       warnings: impact.warnings
         .filter((w) => w.code === "NOTICE_SCOPE")
+        .map((w) => w.message),
+    };
+  }
+
+  // SUPPLY — Approvisionnements local (pas de métré/devis/planning/BC)
+  if (patch.origin.section === "SUPPLY") {
+    const unsupported = patch.operations.filter(
+      (op) => !isSupplyCommitSupportedOp(op.op),
+    );
+    if (unsupported.length) {
+      return {
+        ok: false,
+        reason: `Opération ${unsupported[0]!.op} non supportée pour le commit SUPPLY.`,
+        code: "OPERATION_NOT_ALLOWED_FOR_SECTION",
+      };
+    }
+    if (!patch.operations.length) {
+      return {
+        ok: false,
+        reason: "Aucune opération Approvisionnements.",
+        code: "EMPTY_OPERATIONS",
+      };
+    }
+    return {
+      ok: true,
+      mode: "SUPPLY_ONLY",
+      buttonLabel: "Appliquer aux Approvisionnements",
+      warnings: impact.warnings
+        .filter((w) =>
+          [
+            "SUPPLY_SCOPE",
+            "NEED_ALREADY_ORDERED",
+            "NEW_SUPPLIER",
+            "DELIVERY_UNKNOWN",
+            "EQUIVALENCE_TO_VERIFY",
+          ].includes(w.code),
+        )
         .map((w) => w.message),
     };
   }

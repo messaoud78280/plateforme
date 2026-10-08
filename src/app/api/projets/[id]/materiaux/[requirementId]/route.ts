@@ -43,12 +43,17 @@ export async function PATCH(req: Request, ctx: Ctx) {
       });
       return NextResponse.json({ ok: true, requirement });
     }
+    const qty =
+      body.validatedOrderQuantity != null
+        ? Number(body.validatedOrderQuantity)
+        : body.quantityRequired != null
+          ? Number(body.quantityRequired)
+          : undefined;
     const requirement = await updateMaterialRequirement({
       organizationId: orgId,
       id: requirementId,
       label: body.label != null ? String(body.label) : undefined,
-      quantityRequired:
-        body.quantityRequired != null ? Number(body.quantityRequired) : undefined,
+      quantityRequired: qty,
       unit: body.unit != null ? String(body.unit) : undefined,
       neededAt:
         body.neededAt === null
@@ -68,6 +73,30 @@ export async function PATCH(req: Request, ctx: Ctx) {
           : body.siteResourceId
             ? String(body.siteResourceId)
             : undefined,
+      category: body.category
+        ? (String(body.category) as import("@prisma/client").MaterialRequirementCategory)
+        : undefined,
+      procurementMode: body.procurementMode
+        ? (String(
+            body.procurementMode,
+          ) as import("@prisma/client").MaterialRequirementProcurementMode)
+        : undefined,
+      description:
+        body.description === null
+          ? null
+          : body.description != null
+            ? String(body.description)
+            : undefined,
+      notes:
+        body.notes === null
+          ? null
+          : body.notes != null
+            ? String(body.notes)
+            : undefined,
+      status: body.status
+        ? (String(body.status) as import("@prisma/client").MaterialRequirementStatus)
+        : undefined,
+      allowQuantityChangeWhenOrdered: Boolean(body.allowQuantityChangeWhenOrdered),
     });
     return NextResponse.json({ ok: true, requirement });
   } catch (e) {

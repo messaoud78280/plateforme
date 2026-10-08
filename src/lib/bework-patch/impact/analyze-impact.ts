@@ -122,6 +122,10 @@ export function analyzePatchImpact(input: {
     return analyzeFollowUpLocal(patch, subgraph);
   }
 
+  if (section === "SUPPLY") {
+    return analyzeSupplyLocal(patch, subgraph);
+  }
+
   if (section === "VISIT") {
     return analyzeVisitLocal(patch, subgraph);
   }
@@ -959,6 +963,267 @@ function analyzeReportLocal(
       },
     ],
   };
+}
+
+/* ─── SUPPLY local (Approvisionnements) ─── */
+
+function analyzeSupplyLocal(
+  patch: BeworkPatchV1,
+  subgraph: ImpactSubgraph,
+): AnalyzePatchImpactResult {
+  const errors: BeworkPatchIssue[] = [];
+  const warnings: BeworkPatchIssue[] = [
+    issue(
+      "SUPPLY_SCOPE",
+      "SUPPLY : métré, devis, planning, PurchaseOrder et selectedOfferId hors périmètre commit.",
+      "warn",
+    ),
+  ];
+
+  const supported = new Set([
+    "add_supply_need",
+    "update_supply_need",
+    "cancel_supply_need",
+    "add_supply_offer",
+    "update_supply_offer",
+    "archive_supply_offer",
+    "add_supplier",
+  ]);
+
+  const directChanges: DirectChange[] = [];
+
+  if (!subgraph.supply) {
+    errors.push(
+      issue(
+        "TARGET_NOT_FOUND",
+        "Hub Approvisionnements introuvable pour ce chantier.",
+        "error",
+      ),
+    );
+  } else if (patch.origin.entity_id !== subgraph.supply.projectId) {
+    errors.push(
+      issue(
+        "PROJECT_MISMATCH",
+        "entity_id SUPPLY doit être le projectId du chantier.",
+        "error",
+      ),
+    );
+  }
+
+  if (
+    subgraph.supply &&
+    patch.origin.base_version !== subgraph.supply.contextVersion
+  ) {
+    warnings.push(
+      issue(
+        "BASE_VERSION_MISMATCH",
+        "base_version différente de l’empreinte Approvisionnements — Preview à rafraîchir avant commit.",
+        "warn",
+      ),
+    );
+  }
+
+  for (const op of patch.operations) {
+    if (!supported.has(op.op)) {
+      errors.push(
+        issue(
+          "OPERATION_NOT_ALLOWED_FOR_SECTION",
+          `Opération ${op.op} non supportée pour SUPPLY (sélection d’offre / BC / métré / devis / planning interdits).`,
+          "error",
+        ),
+      );
+      continue;
+    }
+
+    if (op.op === "add_supply_need") {
+      directChanges.push({
+        entityType: "MATERIAL_REQUIREMENT",
+        entityId: "(new)",
+        label: op.need.label,
+        field: "add_supply_need",
+        before: null,
+        after: `${op.need.validated_order_quantity} ${op.need.unit}`,
+        confidence: "CERTAIN",
+        mutable: true,
+        protected: false,
+      });
+      if (op.need.is_hypothesis) {
+        warnings.push(
+          issue(
+            "HYPOTHESIS",
+            `Besoin « ${op.need.label} » marqué comme hypothèse — à valider.`,
+            "warn",
+          ),
+        );
+      }
+    } else if (op.op === "update_supply_need" || op.op === "cancel_supply_need") {
+      directChanges.push({
+        entityType: "MATERIAL_REQUIREMENT",
+        entityId: op.target.requirement_id,
+        label: op.target.requirement_id,
+        field: op.op,
+        before: null,
+        after: op.op === "cancel_supply_need" ? "CANCELLED" : "updated",
+        confidence: "CERTAIN",
+        mutable: true,
+        protected: false,
+      });
+      if (subgraph.supply && subgraph.supply.needsWithOrders > 0) {
+        warnings.push(
+          issue(
+            "NEED_ALREADY_ORDERED",
+            "Ce chantier a des besoins déjà engagés dans une commande — vérifier chaque ligne.",
+            "warn",
+          ),
+        );
+      }
+    } else if (op.op === "add_supply_offer") {
+      const o = op.offer;
+      if (o.unit_price != null && o.price_source_type === "WEB_VERIFIED") {
+        if (!o.source_url || !/^https?:\/\//i.test(o.source_url)) {
+          errors.push(
+            issue(
+              "INVALID_FIELD",
+              "SOURCE MANQUANTE / URL INVALIDE — WEB_VERIFIED avec prix exige une URL http(s).",
+              "error",
+            ),
+          );
+        }
+        if (!o.observed_at) {
+          errors.push(
+            issue(
+              "INVALID_FIELD",
+              "WEB_VERIFIED avec prix exige observed_at.",
+              "error",
+            ),
+          );
+        }
+      }
+      if (o.unit_price != null && o.unit_price < 0) {
+        errors.push(
+          issue("INVALID_FIELD", "Prix négatif interdit.", "error"),
+        );
+      }
+      if (o.delivery_fee === 0) {
+        // ok — gratuit réel
+      }
+      if (o.delivery_fee == null) {
+        warnings.push(
+          issue(
+            "DELIVERY_UNKNOWN",
+            "LIVRAISON À CONFIRMER — deliveryFee null (≠ 0).",
+            "warn",
+          ),
+        );
+      }
+      if (!o.availability_note) {
+        warnings.push(
+          issue(
+            "AVAILABILITY_UNKNOWN",
+            "DISPONIBILITÉ À CONFIRMER.",
+            "warn",
+          ),
+        );
+      }
+      if (!o.units_per_pack && o.price_unit && /PALLET|PACK/i.test(o.price_unit)) {
+        warnings.push(
+          issue(
+            "PACKAGING_UNKNOWN",
+            "CONDITIONNEMENT INCONNU — unitsPerPack absent.",
+            "warn",
+          ),
+        );
+      }
+      if (o.price_tax_mode === "TTC" && o.vat_rate == null && o.unit_price != null) {
+        warnings.push(
+          issue(
+            "TTC_NO_VAT",
+            "PRIX TTC — TVA INCONNUE (aucune conversion HT inventée).",
+            "warn",
+          ),
+        );
+      }
+      if ((o.equivalence_status ?? "TO_VERIFY") === "TO_VERIFY") {
+        warnings.push(
+          issue(
+            "EQUIVALENCE_TO_VERIFY",
+            "ÉQUIVALENCE À VÉRIFIER.",
+            "warn",
+          ),
+        );
+      }
+      directChanges.push({
+        entityType: "SUPPLY_OFFER",
+        entityId: "(new)",
+        label: o.product_label,
+        field: "add_supply_offer",
+        before: null,
+        after:
+          o.unit_price == null
+            ? "Prix à renseigner"
+            : `${o.unit_price} ${o.price_unit ?? ""} ${o.price_tax_mode ?? ""}`.trim(),
+        confidence: "CERTAIN",
+        mutable: true,
+        protected: false,
+      });
+      if (o.source_url) {
+        directChanges.push({
+          entityType: "SUPPLY_OFFER",
+          entityId: "(new)",
+          label: "source_url",
+          field: "source_url",
+          before: null,
+          after: o.source_url,
+          confidence: "CERTAIN",
+          mutable: true,
+          protected: false,
+        });
+      }
+    } else if (op.op === "update_supply_offer" || op.op === "archive_supply_offer") {
+      directChanges.push({
+        entityType: "SUPPLY_OFFER",
+        entityId: op.target.offer_id,
+        label: op.target.offer_id,
+        field: op.op,
+        before: null,
+        after: op.op === "archive_supply_offer" ? "archived" : "updated",
+        confidence: "CERTAIN",
+        mutable: true,
+        protected: false,
+      });
+    } else if (op.op === "add_supplier") {
+      warnings.push(
+        issue(
+          "NEW_SUPPLIER",
+          `NOUVEAU FOURNISSEUR proposé : ${op.supplier.name} (ref ${op.supplier.ref}) — création uniquement après Commit.`,
+          "warn",
+        ),
+      );
+      directChanges.push({
+        entityType: "EXTERNAL_ORGANIZATION",
+        entityId: `(new:${op.supplier.ref})`,
+        label: op.supplier.name,
+        field: "add_supplier",
+        before: null,
+        after: op.supplier.city ?? op.supplier.name,
+        confidence: "CERTAIN",
+        mutable: true,
+        protected: false,
+      });
+    }
+  }
+
+  return emptyResult({
+    errors,
+    warnings,
+    directChanges,
+    affectedEntities: [],
+    canonicalResolution: buildCanonicalResolution({
+      status: "NONE",
+      resolved_to: null,
+      note: "SUPPLY local — pas de propagation cross-module.",
+    }),
+  });
 }
 
 /* ─── NOTICE local (texte sûr kind NOTICE) ─── */

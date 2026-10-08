@@ -46,6 +46,10 @@ export const SECTION_PATCH_CAPABILITY: Record<
     mode: "AVAILABLE",
     label: null,
   },
+  SUPPLY: {
+    mode: "AVAILABLE",
+    label: null,
+  },
 };
 
 export function getSectionCapability(

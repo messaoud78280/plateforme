@@ -49,6 +49,7 @@ const SHORT: Record<DossierNavStepId, string> = {
   metre: "Métré",
   devis: "Devis",
   planning: "Planning",
+  approvisionnements: "Appro.",
   suivi: "Suivi",
   compte_rendu: "CR",
   notice: "Notice",

@@ -51,6 +51,7 @@ export type PreparationStepId =
   | "metre"
   | "devis"
   | "planning"
+  | "approvisionnements"
   | "suivi"
   | "compte_rendu"
   | "notice";
@@ -118,6 +119,7 @@ export type ProjectPreparationState = {
   takeoff: PreparationStep;
   quote: PreparationStep;
   planning: PreparationStep;
+  supply: PreparationStep;
   followUp: PreparationStep;
   report: PreparationStep;
   notice: PreparationStep;
@@ -479,6 +481,8 @@ export function computeProjectPreparationState(input: {
   followUps?: FollowUpLike[];
   reports?: SiteDocLike[];
   notices?: SiteDocLike[];
+  /** Besoins Approvisionnements actifs (MaterialRequirement non CANCELLED). */
+  activeSupplyNeedCount?: number;
 
   quoteSyncByQuoteId?: Record<string, PreparationQuoteSync>;
   studyVersionById?: Record<string, number | null>;
@@ -654,6 +658,22 @@ export function computeProjectPreparationState(input: {
     hrefHint: null,
   };
 
+  const supplyCount = Math.max(0, Number(input.activeSupplyNeedCount) || 0);
+  const supplyStep: PreparationStep = {
+    id: "approvisionnements",
+    label: "Approvisionnements",
+    kind: supplyCount > 0 ? "READY" : "ABSENT",
+    displayLabel:
+      supplyCount > 0
+        ? `${supplyCount} besoin${supplyCount > 1 ? "s" : ""}`
+        : "À préparer",
+    secondaryLabel: null,
+    applicable: true,
+    /** Non bloquant si vide — prêt seulement quand des besoins existent. */
+    countsAsCompleted: supplyCount > 0,
+    hrefHint: `/dashboard/projets/${input.projectId}#tab-approvisionnements`,
+  };
+
   const fu = followUpKind(input.followUps?.[0] ?? null);
   const followUpStep: PreparationStep = {
     id: "suivi",
@@ -703,6 +723,7 @@ export function computeProjectPreparationState(input: {
     takeoffStep,
     quoteStep,
     planningStep,
+    supplyStep,
     followUpStep,
     reportStep,
     noticeStep,
@@ -722,6 +743,7 @@ export function computeProjectPreparationState(input: {
     takeoff: takeoffStep,
     quote: quoteStep,
     planning: planningStep,
+    supply: supplyStep,
     followUp: followUpStep,
     report: reportStep,
     notice: noticeStep,

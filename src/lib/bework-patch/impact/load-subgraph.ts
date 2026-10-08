@@ -18,6 +18,7 @@ import {
   computeNoticeContextVersion,
   noticeDocToVersionInput,
 } from "@/lib/bework-patch/commit/notice-ops";
+import { computeSupplyContextVersion } from "@/lib/bework-patch/build-supply-context";
 import { resolveCurrentSchedulePlan } from "@/lib/chantier/resolve-workspace-entities";
 import { normalizeDependsOnJson } from "@/lib/bework-patch/operation-contracts";
 
@@ -216,6 +217,48 @@ export async function loadImpactSubgraph(input: {
         ),
       };
     }
+    return graph;
+  } else if (section === "SUPPLY") {
+    const requirements = await prisma.materialRequirement.findMany({
+      where: { organizationId: input.orgId, projectId },
+      select: {
+        id: true,
+        updatedAt: true,
+        selectedOfferId: true,
+        quantityRequired: true,
+        status: true,
+        _count: { select: { orderLinks: true, offers: true } },
+        offers: {
+          where: { archivedAt: null },
+          select: { id: true, updatedAt: true, unitPrice: true },
+        },
+      },
+    });
+    graph.supply = {
+      projectId,
+      contextVersion: computeSupplyContextVersion({
+        projectId,
+        needs: requirements.map((r) => ({
+          id: r.id,
+          updatedAt: r.updatedAt.toISOString(),
+          selectedOfferId: r.selectedOfferId,
+          quantityRequired: Number(r.quantityRequired),
+          status: r.status,
+        })),
+        offers: requirements.flatMap((r) =>
+          r.offers.map((o) => ({
+            id: o.id,
+            updatedAt: o.updatedAt.toISOString(),
+            unitPrice:
+              o.unitPrice != null ? Number(o.unitPrice) : null,
+          })),
+        ),
+      }),
+      needCount: requirements.length,
+      offerCount: requirements.reduce((s, r) => s + r.offers.length, 0),
+      needsWithOrders: requirements.filter((r) => r._count.orderLinks > 0)
+        .length,
+    };
     return graph;
   } else {
     return graph;

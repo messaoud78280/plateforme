@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { assertValidSupplierParent } from "@/lib/supply/supplier-agency";
 
 export type SupplierInput = {
   name: string;
@@ -13,6 +14,8 @@ export type SupplierInput = {
   siret?: string | null;
   paymentTerms?: string | null;
   notes?: string | null;
+  /** Agence rattachée à une enseigne (ExternalOrganization SUPPLIER) */
+  parentExternalOrgId?: string | null;
   contact?: {
     firstName: string;
     lastName: string;
@@ -317,6 +320,24 @@ export async function createSupplier(opts: {
     return { ok: false, duplicates, blockedBySiret };
   }
 
+  const parentExternalOrgId =
+    opts.data.parentExternalOrgId === undefined
+      ? undefined
+      : opts.data.parentExternalOrgId?.trim() || null;
+  if (parentExternalOrgId) {
+    // childId fictif avant create — on valide seulement le parent SUPPLIER du tenant
+    const parent = await prisma.externalOrganization.findFirst({
+      where: {
+        id: parentExternalOrgId,
+        hostOrganizationId: opts.hostOrganizationId,
+        type: "SUPPLIER",
+        status: "ACTIVE",
+      },
+      select: { id: true },
+    });
+    if (!parent) throw new Error("Enseigne parente introuvable ou inactive");
+  }
+
   const org = await prisma.externalOrganization.create({
     data: {
       hostOrganizationId: opts.hostOrganizationId,
@@ -333,6 +354,9 @@ export async function createSupplier(opts: {
       siret: cleanSiret(opts.data.siret) ?? undefined,
       paymentTerms: opts.data.paymentTerms?.trim() || undefined,
       notes: opts.data.notes?.trim() || undefined,
+      ...(parentExternalOrgId !== undefined
+        ? { parentExternalOrgId }
+        : {}),
       status: "ACTIVE",
     },
   });
@@ -376,6 +400,14 @@ export async function updateSupplier(opts: {
     }
   }
 
+  if (opts.data.parentExternalOrgId !== undefined) {
+    await assertValidSupplierParent({
+      hostOrganizationId: opts.hostOrganizationId,
+      childId: opts.id,
+      parentExternalOrgId: opts.data.parentExternalOrgId?.trim() || null,
+    });
+  }
+
   const org = await prisma.externalOrganization.update({
     where: { id: opts.id },
     data: {
@@ -392,6 +424,9 @@ export async function updateSupplier(opts: {
       paymentTerms: opts.data.paymentTerms?.trim() || null,
       notes: opts.data.notes?.trim() || null,
       status: "ACTIVE",
+      ...(opts.data.parentExternalOrgId !== undefined
+        ? { parentExternalOrgId: opts.data.parentExternalOrgId?.trim() || null }
+        : {}),
     },
   });
 

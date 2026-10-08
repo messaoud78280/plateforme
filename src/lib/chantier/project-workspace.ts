@@ -150,6 +150,7 @@ export type ChantierWorkflowStepId =
   | "metre"
   | "devis"
   | "planning"
+  | "approvisionnements"
   | "suivi"
   | "compte_rendu"
   | "notice";
@@ -844,7 +845,7 @@ async function getProjectWorkspaceUncached(
   if (!project) return null;
 
   // Vague 1 — lectures indépendantes (plus de cascade scopes→studies→quotes→plans)
-  const [scopes, studies, plans, followUpSheets, siteDocs, visitsByProject] =
+  const [scopes, studies, plans, followUpSheets, siteDocs, visitsByProject, supplyNeedCount] =
     await Promise.all([
       prisma.projectScope.findMany({
         where: { projectId, organizationId: orgId, status: "ACTIVE" },
@@ -908,6 +909,13 @@ async function getProjectWorkspaceUncached(
           status: true,
           projectId: true,
           commercialQuoteId: true,
+        },
+      }),
+      prisma.materialRequirement.count({
+        where: {
+          organizationId: orgId,
+          projectId,
+          status: { not: "CANCELLED" },
         },
       }),
     ]);
@@ -1279,6 +1287,7 @@ async function getProjectWorkspaceUncached(
         number: d.number,
         title: d.title,
       })),
+    activeSupplyNeedCount: supplyNeedCount,
     studyVersionById: Object.fromEntries(
       studies.map((s) => [s.id, s.version as number | null]),
     ),
@@ -1573,6 +1582,22 @@ async function getProjectWorkspaceUncached(
         : globalStudy
           ? "prepare_planning_chatgpt"
           : "open",
+    },
+    {
+      id: "approvisionnements",
+      label: "Approvisionnements",
+      title:
+        supplyNeedCount > 0
+          ? `${supplyNeedCount} besoin${supplyNeedCount > 1 ? "s" : ""}`
+          : "À préparer",
+      detail:
+        supplyNeedCount > 0
+          ? "Besoins chantier (matériaux, locations, évacuations…)"
+          : "Accessible sans planning — ajoutez les besoins chantier",
+      href: `/dashboard/projets/${projectId}#tab-approvisionnements`,
+      ready: prepState.supply.countsAsCompleted,
+      actionLabel: supplyNeedCount > 0 ? "Ouvrir" : "Préparer",
+      primaryAction: "open",
     },
     {
       id: "suivi",

@@ -19,6 +19,7 @@ export const BEWORK_PATCH_SECTIONS = [
   "FOLLOW_UP",
   "REPORT",
   "NOTICE",
+  "SUPPLY",
 ] as const;
 export type BeworkPatchSection = (typeof BEWORK_PATCH_SECTIONS)[number];
 
@@ -50,6 +51,11 @@ export const BEWORK_ENTITY_TYPES = [
   "PREP_SCHEDULE_TASK",
   "FOLLOW_UP_SHEET",
   "SITE_DOCUMENT",
+  /** Hub Approvisionnements — id = projectId */
+  "SUPPLY_WORKSPACE",
+  "MATERIAL_REQUIREMENT",
+  "SUPPLY_OFFER",
+  "EXTERNAL_ORGANIZATION",
 ] as const;
 export type BeworkEntityType = (typeof BEWORK_ENTITY_TYPES)[number];
 
@@ -101,6 +107,9 @@ export type BeworkPatchTargetBase = {
   task_id?: string | null;
   step_code?: string | null;
   measurement_id?: string | null;
+  requirement_id?: string | null;
+  offer_id?: string | null;
+  supplier_id?: string | null;
 };
 
 /* ─── Operations (discriminated union) ─── */
@@ -566,6 +575,175 @@ export type OpUpdateText = {
   };
 };
 
+/** Approvisionnements — besoin chantier (MaterialRequirement / SupplyNeed). */
+export type OpAddSupplyNeed = {
+  op: "add_supply_need";
+  target: BeworkPatchTargetBase & {
+    entity_type: "SUPPLY_WORKSPACE";
+    project_id: string;
+  };
+  need: {
+    label: string;
+    category?: string | null;
+    procurement_mode?: string | null;
+    description?: string | null;
+    validated_order_quantity: number;
+    unit: string;
+    source_quantity?: number | null;
+    source_unit?: string | null;
+    calculated_quantity?: number | null;
+    loss_factor?: number | null;
+    packaging?: string | null;
+    packaging_size?: number | null;
+    packaging_unit?: string | null;
+    takeoff_codes?: string[] | null;
+    schedule_task_ids?: string[] | null;
+    needed_at?: string | null;
+    notes?: string | null;
+    /** MANUAL | TAKEOFF_LINE | HYPOTHESIS | … */
+    source_type?: string | null;
+    source_label?: string | null;
+    status?: string | null;
+    /** true = hypothèse signalée (ex. engins sans preuve chantier) */
+    is_hypothesis?: boolean | null;
+  };
+};
+
+export type OpUpdateSupplyNeed = {
+  op: "update_supply_need";
+  target: BeworkPatchTargetBase & {
+    entity_type: "MATERIAL_REQUIREMENT";
+    requirement_id: string;
+  };
+  changes: {
+    label?: string;
+    category?: string | null;
+    procurement_mode?: string | null;
+    description?: string | null;
+    validated_order_quantity?: number;
+    unit?: string;
+    source_quantity?: number | null;
+    calculated_quantity?: number | null;
+    loss_factor?: number | null;
+    packaging?: string | null;
+    packaging_size?: number | null;
+    needed_at?: string | null;
+    notes?: string | null;
+    status?: string | null;
+  };
+};
+
+export type OpCancelSupplyNeed = {
+  op: "cancel_supply_need";
+  target: BeworkPatchTargetBase & {
+    entity_type: "MATERIAL_REQUIREMENT";
+    requirement_id: string;
+  };
+};
+
+/** Offre fournisseur — jamais de selectedOfferId implicite. */
+export type OpAddSupplyOffer = {
+  op: "add_supply_offer";
+  target: BeworkPatchTargetBase & {
+    entity_type: "MATERIAL_REQUIREMENT";
+    requirement_id: string;
+  };
+  offer: {
+    /** ID ExternalOrganization existant — sinon utiliser add_supplier + supplier_ref */
+    supplier_external_org_id?: string | null;
+    /** Réf. temporaire liée à add_supplier du même patch */
+    supplier_ref?: string | null;
+    product_label: string;
+    product_ref?: string | null;
+    tech_attributes?: Record<string, unknown> | null;
+    equivalence_status?: "TO_VERIFY" | "PROBABLE" | "CONFIRMED" | null;
+    unit_price?: number | null;
+    price_unit?: string | null;
+    price_tax_mode?: "HT" | "TTC" | null;
+    vat_rate?: number | null;
+    price_source_type: "WEB_VERIFIED" | "SUPPLIER_QUOTE" | "USER_ENTERED" | "IMPORT";
+    source_url?: string | null;
+    quote_number?: string | null;
+    quote_document_ref?: string | null;
+    source_note?: string | null;
+    observed_at?: string | null;
+    valid_until?: string | null;
+    packaging_label?: string | null;
+    units_per_pack?: number | null;
+    minimum_order_quantity?: number | null;
+    lead_time_days?: number | null;
+    availability_note?: string | null;
+    delivery_fee?: number | null;
+    crane_fee?: number | null;
+    other_fees?: number | null;
+  };
+};
+
+export type OpUpdateSupplyOffer = {
+  op: "update_supply_offer";
+  target: BeworkPatchTargetBase & {
+    entity_type: "SUPPLY_OFFER";
+    offer_id: string;
+  };
+  changes: {
+    product_label?: string;
+    product_ref?: string | null;
+    tech_attributes?: Record<string, unknown> | null;
+    equivalence_status?: "TO_VERIFY" | "PROBABLE" | "CONFIRMED" | null;
+    unit_price?: number | null;
+    price_unit?: string | null;
+    price_tax_mode?: "HT" | "TTC" | null;
+    vat_rate?: number | null;
+    price_source_type?: "WEB_VERIFIED" | "SUPPLIER_QUOTE" | "USER_ENTERED" | "IMPORT";
+    source_url?: string | null;
+    quote_number?: string | null;
+    quote_document_ref?: string | null;
+    source_note?: string | null;
+    observed_at?: string | null;
+    valid_until?: string | null;
+    packaging_label?: string | null;
+    units_per_pack?: number | null;
+    minimum_order_quantity?: number | null;
+    lead_time_days?: number | null;
+    availability_note?: string | null;
+    delivery_fee?: number | null;
+    crane_fee?: number | null;
+    other_fees?: number | null;
+  };
+};
+
+export type OpArchiveSupplyOffer = {
+  op: "archive_supply_offer";
+  target: BeworkPatchTargetBase & {
+    entity_type: "SUPPLY_OFFER";
+    offer_id: string;
+  };
+};
+
+/** Proposition de fournisseur / agence — création uniquement après Preview/Commit. */
+export type OpAddSupplier = {
+  op: "add_supplier";
+  target: BeworkPatchTargetBase & {
+    entity_type: "SUPPLY_WORKSPACE";
+    project_id: string;
+  };
+  supplier: {
+    /** Clé stable dans le patch pour rattacher add_supply_offer.supplier_ref */
+    ref: string;
+    name: string;
+    trade_name?: string | null;
+    parent_external_org_id?: string | null;
+    address?: string | null;
+    zip_code?: string | null;
+    city?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    website?: string | null;
+    activity?: string | null;
+    notes?: string | null;
+  };
+};
+
 export type BeworkPatchOperation =
   | OpUpdateParameter
   | OpUpdateLine
@@ -595,7 +773,14 @@ export type BeworkPatchOperation =
   | OpUpdateNotice
   | OpUpdateDocumentSection
   | OpAddDocumentSection
-  | OpUpdateText;
+  | OpUpdateText
+  | OpAddSupplyNeed
+  | OpUpdateSupplyNeed
+  | OpCancelSupplyNeed
+  | OpAddSupplyOffer
+  | OpUpdateSupplyOffer
+  | OpArchiveSupplyOffer
+  | OpAddSupplier;
 
 export type BeworkPatchOpName = BeworkPatchOperation["op"];
 

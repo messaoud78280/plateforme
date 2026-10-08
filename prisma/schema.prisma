@@ -130,6 +130,7 @@ model User {
   chantierFileFavorites ChantierFileFavorite[]
   materialRequirementsCreated  MaterialRequirement[] @relation("MaterialRequirementCreatedBy")
   materialRequirementsValidated MaterialRequirement[] @relation("MaterialRequirementValidatedBy")
+  supplyOffersRecorded         SupplyOffer[] @relation("SupplyOfferRecordedBy")
   commercialQuotesCreated      CommercialQuote[] @relation("CommercialQuoteCreatedBy")
   commercialQuotesResponsible  CommercialQuote[] @relation("CommercialQuoteResponsible")
   siteVisitsCreated            SiteVisit[] @relation("SiteVisitCreatedBy")
@@ -261,13 +262,18 @@ model ExternalOrganization {
   notes              String?  @db.Text
   /// ACTIVE | INACTIVE
   status             String   @default("ACTIVE")
+  /// Agence rattachée à une enseigne (ex. POINT.P Trappes → POINT.P)
+  parentExternalOrgId String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   hostOrganization Organization @relation(fields: [hostOrganizationId], references: [id], onDelete: Cascade)
+  parent           ExternalOrganization?  @relation("ExternalOrgAgencies", fields: [parentExternalOrgId], references: [id], onDelete: SetNull)
+  agencies         ExternalOrganization[] @relation("ExternalOrgAgencies")
   people           User[]       @relation("ExternalOrgPeople")
   contacts         ExternalOrgContact[]
   purchaseOrders   PurchaseOrder[]
+  supplyOffers     SupplyOffer[]
   projectChannels  ProjectChannel[]
   commercialQuotesAsClient CommercialQuote[] @relation("CommercialQuoteClient")
   commercialLeads          CommercialLead[]
@@ -282,6 +288,8 @@ model ExternalOrganization {
   @@index([hostOrganizationId])
   @@index([hostOrganizationId, type])
   @@index([hostOrganizationId, name])
+  @@index([parentExternalOrgId])
+  @@index([hostOrganizationId, parentExternalOrgId])
 }
 
 /// Contact rattaché à une organisation externe (plusieurs contacts ≠ plusieurs fournisseurs).
@@ -435,7 +443,10 @@ model PurchaseOrderLine {
 
 enum MaterialRequirementStatus {
   PROPOSED
+  /// Legacy MATERIAUX-V1B — besoin validé (équivalent métier TO_ORDER / prêt)
   VALIDATED
+  TO_CONSULT
+  TO_ORDER
   CANCELLED
 }
 
@@ -445,15 +456,46 @@ enum MaterialRequirementSourceType {
   DOCUMENT
   DPGF
   AI_PROPOSAL
+  TAKEOFF_LINE
+  SCHEDULE_TASK
+  HYPOTHESIS
 }
 
-/// Besoin matériau chantier (MATERIAUX-V1B) — pas un stock, pas une ligne devis.
+/// Catégorie d’approvisionnement (SupplyNeed) — défaut MATERIAL pour legacy.
+enum MaterialRequirementCategory {
+  MATERIAL
+  CONSUMABLE
+  EQUIPMENT_RENTAL
+  WASTE
+  TRANSPORT
+  EXTERNAL_SERVICE
+  OTHER
+}
+
+enum MaterialRequirementProcurementMode {
+  ACHAT
+  LOCATION
+  SOUS_TRAITANCE
+  STOCK_ENTREPRISE
+  REEMPLOI
+}
+
+/// Drift métré → besoin. Pas de logisticsStatus stocké (dérivé du BC).
+enum MaterialRequirementSourceDrift {
+  NONE
+  METRE_CHANGED
+  METRE_CHANGED_AFTER_ORDER
+}
+
+/// Besoin chantier (MATERIAUX-V1B + Approvisionnements Phase 1 / SupplyNeed).
+/// Table inchangée (compat PO / UI matériaux). Domaine expose SupplyNeed.
 model MaterialRequirement {
   id               String                        @id @default(cuid())
   organizationId   String
   projectId        String
   label            String
   siteResourceId   String?
+  /// Quantité opérationnelle pour couverture BC (legacy). Miroir de validatedOrderQuantity.
   quantityRequired Decimal                       @db.Decimal(14, 3)
   unit             String
   /// null = aucune marge ; jamais inventer 5 % / 10 %
@@ -470,6 +512,35 @@ model MaterialRequirement {
   createdAt        DateTime                      @default(now())
   updatedAt        DateTime                      @updatedAt
 
+  /// SupplyNeed — catégorie (défaut MATERIAL = legacy)
+  category         MaterialRequirementCategory        @default(MATERIAL)
+  procurementMode  MaterialRequirementProcurementMode @default(ACHAT)
+  description      String?                            @db.Text
+  /// Quantité issue de la source (ex. métré) — ne jamais écraser par une hypothèse
+  sourceQuantity   Decimal?                           @db.Decimal(14, 3)
+  sourceUnit       String?
+  /// Quantité transformée déterministe (ex. m² → blocs)
+  calculatedQuantity Decimal?                         @db.Decimal(14, 3)
+  /// Quantité validée par le professionnel pour commande (sync → quantityRequired)
+  validatedOrderQuantity Decimal?                     @db.Decimal(14, 3)
+  packaging        String?
+  packagingSize    Decimal?                           @db.Decimal(14, 3)
+  packagingUnit    String?
+  /// Codes métré source (JSON string[])
+  takeoffCodes     Json?
+  /// Ids tâches planning liées (JSON string[]) — dates enrichies plus tard
+  scheduleTaskIds  Json?
+  prepStudyId      String?
+  schedulePlanId   String?
+  sourceFingerprint String?
+  sourceDrift      MaterialRequirementSourceDrift     @default(NONE)
+  /// Uniquement si délai fournisseur réel connu / saisi
+  orderDeadlineAt  DateTime?
+  supplierLeadTimeDays Decimal?                       @db.Decimal(8, 2)
+  notes            String?                            @db.Text
+  /// Offre fournisseur retenue (Phase 3) — source unique, jamais isSelected sur l’offre
+  selectedOfferId  String?                            @unique
+
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
   siteResource SiteResource? @relation(fields: [siteResourceId], references: [id], onDelete: SetNull)
@@ -477,11 +548,93 @@ model MaterialRequirement {
   validatedBy  User?        @relation("MaterialRequirementValidatedBy", fields: [validatedById], references: [id], onDelete: SetNull)
   createdBy    User         @relation("MaterialRequirementCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
   orderLinks   MaterialRequirementOrderLink[]
+  offers       SupplyOffer[] @relation("RequirementOffers")
+  selectedOffer SupplyOffer? @relation("SelectedOffer", fields: [selectedOfferId], references: [id], onDelete: SetNull)
 
   @@index([organizationId, projectId])
   @@index([organizationId, projectId, status])
+  @@index([organizationId, projectId, category])
   @@index([siteResourceId])
   @@index([chantierFileId])
+  @@index([prepStudyId])
+  @@index([schedulePlanId])
+  @@index([sourceDrift])
+}
+
+enum SupplyOfferEquivalenceStatus {
+  TO_VERIFY
+  PROBABLE
+  CONFIRMED
+}
+
+enum SupplyOfferPriceTaxMode {
+  HT
+  TTC
+}
+
+/// Provenance réelle du prix — pas d’HISTORICAL (un ancien prix garde sa provenance).
+enum SupplyOfferPriceSourceType {
+  WEB_VERIFIED
+  SUPPLIER_QUOTE
+  USER_ENTERED
+  IMPORT
+}
+
+/// Offre réelle d’un fournisseur pour un besoin (SupplyNeed / MaterialRequirement).
+/// unitPrice null = prix inconnu (jamais inventé). deliveryFee/craneFee/otherFees : null ≠ 0.
+model SupplyOffer {
+  id                    String                       @id @default(cuid())
+  organizationId        String
+  requirementId         String
+  supplierExternalOrgId String
+
+  productLabel          String
+  productRef            String?
+  techAttributes        Json?
+  equivalenceStatus     SupplyOfferEquivalenceStatus @default(TO_VERIFY)
+
+  unitPrice             Decimal?                     @db.Decimal(14, 4)
+  /// Unité tarifaire fournisseur (≠ unité du besoin)
+  priceUnit             String                       @default("U")
+  priceTaxMode          SupplyOfferPriceTaxMode      @default(HT)
+  vatRate               Decimal?                     @db.Decimal(5, 2)
+
+  priceSourceType       SupplyOfferPriceSourceType
+  sourceUrl             String?
+  quoteNumber           String?
+  quoteDocumentRef      String?
+  sourceNote            String?                      @db.Text
+  observedAt            DateTime?
+  recordedAt            DateTime                     @default(now())
+  validUntil            DateTime?
+  recordedById          String?
+
+  packagingLabel        String?
+  unitsPerPack          Decimal?                     @db.Decimal(14, 3)
+  minimumOrderQuantity  Decimal?                     @db.Decimal(14, 3)
+
+  leadTimeDays          Decimal?                     @db.Decimal(8, 2)
+  availabilityNote      String?
+  /// null = inconnu · 0 = réellement gratuit / compris
+  deliveryFee           Decimal?                     @db.Decimal(14, 2)
+  craneFee              Decimal?                     @db.Decimal(14, 2)
+  otherFees             Decimal?                     @db.Decimal(14, 2)
+
+  archivedAt            DateTime?
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
+
+  organization Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  requirement  MaterialRequirement  @relation("RequirementOffers", fields: [requirementId], references: [id], onDelete: Cascade)
+  supplier     ExternalOrganization @relation(fields: [supplierExternalOrgId], references: [id], onDelete: Restrict)
+  recordedBy   User?                @relation("SupplyOfferRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+  selectedForRequirement MaterialRequirement? @relation("SelectedOffer")
+
+  @@index([organizationId, requirementId])
+  @@index([requirementId])
+  @@index([supplierExternalOrgId])
+  @@index([organizationId, archivedAt])
+  @@index([recordedById])
 }
 
 /// Allocation besoin → ligne BC (N–N, multi-fournisseurs). quantityAllocated = unité du besoin.
@@ -659,6 +812,7 @@ model Organization {
   purchaseOrderReceipts PurchaseOrderReceipt[]
   materialRequirements  MaterialRequirement[]
   materialRequirementOrderLinks MaterialRequirementOrderLink[]
+  supplyOffers              SupplyOffer[]
   /// Domaine Devis & Facturation (Commercial*) — isolé des Quote* / Invoice / Payment SaaS
   commercialOrgSettings     CommercialOrgSettings?
   commercialLeads           CommercialLead[]

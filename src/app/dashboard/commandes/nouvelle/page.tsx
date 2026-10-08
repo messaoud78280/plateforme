@@ -63,6 +63,8 @@ export default async function NouvelleCommandePage({
 
   let prefillLines: PrefillPurchaseOrderLine[] | null = null;
   let earliestNeededAt: string | null = null;
+  let defaultSupplierId: string | null = null;
+  let defaultSupplierLabel: string | null = null;
 
   const reqIds = (reqRaw ?? "")
     .split(",")
@@ -75,19 +77,70 @@ export default async function NouvelleCommandePage({
       projectId: projectIdParam,
     });
     const byId = new Map(rows.map((r) => [r.id, r]));
+
+    const selectedIds = rows
+      .filter((r) => reqIds.includes(r.id) && r.selectedOfferId)
+      .map((r) => r.selectedOfferId!)
+      .filter(Boolean);
+    const selectedOffers =
+      selectedIds.length > 0
+        ? await prisma.supplyOffer.findMany({
+            where: {
+              id: { in: selectedIds },
+              organizationId: orgId,
+              archivedAt: null,
+            },
+            select: {
+              id: true,
+              requirementId: true,
+              supplierExternalOrgId: true,
+              productLabel: true,
+              productRef: true,
+              unitPrice: true,
+              priceTaxMode: true,
+              priceUnit: true,
+              supplier: {
+                select: { id: true, name: true, tradeName: true },
+              },
+            },
+          })
+        : [];
+    const offerByReq = new Map(
+      selectedOffers.map((o) => [o.requirementId, o]),
+    );
+
     const lines: PrefillPurchaseOrderLine[] = [];
+    const supplierVotes = new Map<string, { label: string; n: number }>();
+
     for (const id of reqIds) {
       const r = byId.get(id);
       if (!r || r.status === "CANCELLED") continue;
       const qty = r.progress.remainingToOrder;
       if (qty <= 0) continue;
+      const offer = offerByReq.get(r.id);
+      const unitPrice =
+        offer?.unitPrice != null && offer.priceTaxMode === "HT"
+          ? Number(offer.unitPrice)
+          : null;
       lines.push({
-        designation: r.label,
+        designation: offer?.productLabel || r.label,
         quantity: qty,
-        unit: r.unit,
+        unit: offer?.priceUnit && offer.priceUnit === r.unit ? r.unit : r.unit,
         materialRequirementId: r.id,
         neededAt: r.neededAt,
+        unitPriceHt: unitPrice,
+        productRef: offer?.productRef ?? null,
       });
+      if (offer) {
+        const sid = offer.supplierExternalOrgId;
+        const label =
+          offer.supplier.tradeName || offer.supplier.name;
+        const prev = supplierVotes.get(sid);
+        supplierVotes.set(sid, {
+          label,
+          n: (prev?.n ?? 0) + 1,
+        });
+      }
       if (r.neededAt) {
         if (!earliestNeededAt || r.neededAt < earliestNeededAt) {
           earliestNeededAt = r.neededAt;
@@ -95,6 +148,13 @@ export default async function NouvelleCommandePage({
       }
     }
     if (lines.length > 0) prefillLines = lines;
+
+    // Un seul fournisseur dominant parmi les offres retenues → préremplir
+    if (supplierVotes.size === 1) {
+      const [[sid, meta]] = [...supplierVotes.entries()];
+      defaultSupplierId = sid;
+      defaultSupplierLabel = meta.label;
+    }
   }
 
   return (
@@ -109,7 +169,7 @@ export default async function NouvelleCommandePage({
         title="Nouvelle commande"
         description={
           prefillLines
-            ? "Lignes préremplies depuis les besoins matériaux du chantier — fournisseur, livraison et catégorie budgétaire."
+            ? "Lignes préremplies depuis les besoins — offre retenue utilisée si présente (préparation, pas d’engagement auto)."
             : "Fournisseur, chantier, lignes, livraison et catégorie budgétaire — engagement suivi jusqu’à la réception."
         }
       />
@@ -119,6 +179,8 @@ export default async function NouvelleCommandePage({
         defaultProjectId={projectIdParam ?? null}
         prefillLines={prefillLines}
         earliestNeededAt={earliestNeededAt}
+        defaultSupplierId={defaultSupplierId}
+        defaultSupplierLabel={defaultSupplierLabel}
       />
     </div>
   );

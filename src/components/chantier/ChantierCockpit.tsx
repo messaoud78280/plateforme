@@ -8,6 +8,7 @@ export type ChantierCockpitTabId =
   | "overview"
   | "taches"
   | "materiaux"
+  | "approvisionnements"
   | "documents"
   | "messages"
   | "partage"
@@ -32,7 +33,9 @@ type NavGroup = {
 const TAB_LABELS: Record<ChantierCockpitTabId, string> = {
   overview: "Vue d’ensemble",
   taches: "Tâches",
-  materiaux: "Matériaux",
+  /** Legacy hash — redirige vers Approvisionnements */
+  materiaux: "Approvisionnements",
+  approvisionnements: "Approvisionnements",
   documents: "Documents",
   messages: "Messages",
   partage: "Partage",
@@ -61,7 +64,14 @@ function tabFromHash(): ChantierCockpitTabId | null {
   if (typeof window === "undefined") return null;
   const h = window.location.hash.replace(/^#/, "");
   if (h === "tab-taches" || h.startsWith("tab-taches")) return "taches";
-  if (h === "tab-materiaux" || h === "materiaux") return "materiaux";
+  if (
+    h === "tab-approvisionnements" ||
+    h === "approvisionnements" ||
+    h === "tab-materiaux" ||
+    h === "materiaux"
+  ) {
+    return "approvisionnements";
+  }
   if (h === "dossier-chantier" || h === "tab-documents") return "documents";
   if (h === "tab-messages") return "messages";
   if (h === "tab-partage") return "partage";
@@ -75,7 +85,9 @@ function tabFromHash(): ChantierCockpitTabId | null {
 
 function groupForTab(tab: ChantierCockpitTabId): NavGroupId {
   if (tab === "overview") return "overview";
-  if (tab === "taches" || tab === "materiaux") return "travaux";
+  if (tab === "taches" || tab === "materiaux" || tab === "approvisionnements") {
+    return "travaux";
+  }
   if (tab === "documents") return "documents";
   if (tab === "messages" || tab === "partage") return "echanges";
   return "gestion";
@@ -117,9 +129,11 @@ export function ChantierCockpit({
       {
         id: "travaux",
         label: "Travaux",
-        tabs: [tab("taches"), tab("materiaux")].filter(
-          (t): t is TabDef => t != null,
-        ),
+        tabs: [
+          tab("taches"),
+          // Un seul onglet : Approvisionnements (legacy #tab-materiaux redirigé)
+          tab("approvisionnements") ?? tab("materiaux"),
+        ].filter((t): t is TabDef => t != null),
         externalLinks: travauxExternalLinks,
       },
       {
@@ -165,6 +179,22 @@ export function ChantierCockpit({
     if (fromHash && visibleTabs.some((t) => t.id === fromHash)) {
       setTab(fromHash);
       setGroup(groupForTab(fromHash));
+      // Legacy #tab-materiaux → hash canonique Approvisionnements
+      if (
+        typeof window !== "undefined" &&
+        fromHash === "approvisionnements"
+      ) {
+        const h = window.location.hash.replace(/^#/, "");
+        if (h === "tab-materiaux" || h === "materiaux") {
+          const url = new URL(window.location.href);
+          url.hash = "tab-approvisionnements";
+          window.history.replaceState(
+            {},
+            "",
+            url.pathname + url.search + "#tab-approvisionnements",
+          );
+        }
+      }
     }
   }, [visibleTabs]);
 

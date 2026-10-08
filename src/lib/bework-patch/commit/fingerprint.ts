@@ -25,6 +25,8 @@ export type VersionSnapshot = {
   reportVersion?: number | null;
   /** CTX-02E — empreinte déterministe NOTICE (kind NOTICE exposé). */
   noticeVersion?: number | null;
+  /** Approvisionnements — empreinte besoins + offres. */
+  supplyVersion?: number | null;
 };
 
 /**
@@ -67,6 +69,7 @@ export function collectVersionSnapshot(
     followUpVersion: subgraph.followUp?.contextVersion ?? null,
     reportVersion: subgraph.report?.contextVersion ?? null,
     noticeVersion: subgraph.notice?.contextVersion ?? null,
+    supplyVersion: subgraph.supply?.contextVersion ?? null,
   };
 }
 

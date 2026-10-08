@@ -127,6 +127,7 @@ for (const mode of [
   "FOLLOW_UP_ONLY",
   "REPORT_ONLY",
   "NOTICE_ONLY",
+  "SUPPLY_ONLY",
 ]) {
   const hint = syncModeUserHint(mode);
   assert.ok(hint.length > 10);

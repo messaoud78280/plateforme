@@ -40,6 +40,12 @@ function parseSupplierBody(body: Record<string, unknown> | null): SupplierInput 
     siret: body.siret ? String(body.siret) : null,
     paymentTerms: body.paymentTerms ? String(body.paymentTerms) : null,
     notes: body.notes ? String(body.notes) : null,
+    parentExternalOrgId:
+      body.parentExternalOrgId === undefined
+        ? undefined
+        : body.parentExternalOrgId
+          ? String(body.parentExternalOrgId)
+          : null,
     contact,
   };
 }

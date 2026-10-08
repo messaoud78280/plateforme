@@ -109,6 +109,13 @@ const baseWorkflow: ChantierWorkflowStep[] = [
     detail: "12 oct.",
   }),
   step({
+    id: "approvisionnements",
+    href: "/dashboard/projets/proj-1#tab-approvisionnements",
+    ready: false,
+    title: "À préparer",
+    actionLabel: "Préparer",
+  }),
+  step({
     id: "suivi",
     href: "/dashboard/projets/proj-1/suivi-planning",
     ready: true,
@@ -326,12 +333,35 @@ function run() {
     });
     const ser = serializeDossierNavSnapshot(snap);
     assert.equal(ser.projectId, "proj-1");
-    assert.equal(ser.steps.length, 7);
+    assert.equal(ser.steps.length, 8);
     assert.ok(!("workflow" in ser));
     console.log("serialize — ok");
   }
 
-  console.log("\nTous les tests dossier-nav A–I : OK");
+  // J — Approvisionnements présent, accessible sans planning prêt
+  {
+    const wf = baseWorkflow.map((s) =>
+      s.id === "planning"
+        ? step({
+            id: "planning",
+            href: null,
+            ready: false,
+            title: "À préparer",
+          })
+        : s,
+    );
+    const snap = buildDossierNavFromWorkspace(workspace({ workflow: wf }), {
+      activeStep: "approvisionnements",
+    });
+    const supply = snap.steps.find((s) => s.id === "approvisionnements")!;
+    assert.equal(supply.label, "approvisionnements");
+    assert.ok(supply.href?.includes("#tab-approvisionnements"));
+    assert.equal(supply.visual, "active");
+    assert.equal(snap.steps.find((s) => s.id === "planning")?.ready, false);
+    console.log("J — Approvisionnements sans planning: ok");
+  }
+
+  console.log("\nTous les tests dossier-nav A–J : OK");
 }
 
 run();

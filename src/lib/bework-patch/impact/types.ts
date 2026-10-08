@@ -266,6 +266,15 @@ export type ImpactReport = {
 /** Même forme que ImpactReport — isolation kind NOTICE vs COMPTE_RENDU. */
 export type ImpactNotice = ImpactReport;
 
+/** Hub Approvisionnements (project-level). */
+export type ImpactSupply = {
+  projectId: string;
+  contextVersion: number;
+  needCount: number;
+  offerCount: number;
+  needsWithOrders: number;
+};
+
 export type ImpactSubgraph = {
   projectId: string;
   study: ImpactStudy | null;
@@ -276,6 +285,7 @@ export type ImpactSubgraph = {
   followUp: ImpactFollowUp | null;
   report: ImpactReport | null;
   notice: ImpactNotice | null;
+  supply: ImpactSupply | null;
 };
 
 export function emptySubgraph(projectId: string): ImpactSubgraph {
@@ -289,5 +299,6 @@ export function emptySubgraph(projectId: string): ImpactSubgraph {
     followUp: null,
     report: null,
     notice: null,
+    supply: null,
   };
 }

@@ -97,12 +97,16 @@ export async function POST(req: Request, ctx: Ctx) {
       return NextResponse.json({ similar });
     }
 
+    const qty =
+      body.validatedOrderQuantity != null
+        ? Number(body.validatedOrderQuantity)
+        : Number(body.quantityRequired ?? 0);
     const result = await createMaterialRequirement({
       organizationId: orgId,
       projectId,
       createdById: session.user.id,
       label: String(body.label ?? ""),
-      quantityRequired: Number(body.quantityRequired ?? 0),
+      quantityRequired: qty,
       unit: String(body.unit ?? "U"),
       siteResourceId: body.siteResourceId ? String(body.siteResourceId) : null,
       neededAt: body.neededAt ? new Date(String(body.neededAt)) : null,
@@ -111,6 +115,19 @@ export async function POST(req: Request, ctx: Ctx) {
           ? null
           : Number(body.lossFactor),
       force: Boolean(body.force),
+      category: body.category
+        ? (String(body.category) as import("@prisma/client").MaterialRequirementCategory)
+        : undefined,
+      procurementMode: body.procurementMode
+        ? (String(
+            body.procurementMode,
+          ) as import("@prisma/client").MaterialRequirementProcurementMode)
+        : undefined,
+      description: body.description != null ? String(body.description) : null,
+      notes: body.notes != null ? String(body.notes) : null,
+      status: body.status
+        ? (String(body.status) as import("@prisma/client").MaterialRequirementStatus)
+        : undefined,
     });
 
     if (result.similar.length > 0 && !result.requirement) {

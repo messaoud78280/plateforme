@@ -44,6 +44,12 @@ function parseSupplierBody(body: Record<string, unknown> | null): SupplierInput 
     siret: body.siret ? String(body.siret) : null,
     paymentTerms: body.paymentTerms ? String(body.paymentTerms) : null,
     notes: body.notes ? String(body.notes) : null,
+    parentExternalOrgId:
+      body.parentExternalOrgId === undefined
+        ? undefined
+        : body.parentExternalOrgId
+          ? String(body.parentExternalOrgId)
+          : null,
     contact,
   };
 }
@@ -87,6 +93,7 @@ export async function GET(req: Request) {
       phone: true,
       email: true,
       status: true,
+      parentExternalOrgId: true,
       _count: { select: { contacts: true, purchaseOrders: true } },
     },
     orderBy: { name: "asc" },

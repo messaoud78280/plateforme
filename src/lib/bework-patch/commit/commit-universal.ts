@@ -31,6 +31,10 @@ import { applyVisitDirectInTx } from "@/lib/bework-patch/commit/visit-ops";
 import { applyFollowUpDirectInTx } from "@/lib/bework-patch/commit/follow-up-ops";
 import { applyReportDirectInTx } from "@/lib/bework-patch/commit/report-ops";
 import { applyNoticeDirectInTx } from "@/lib/bework-patch/commit/notice-ops";
+import {
+  applySupplyDirectInTx,
+  loadSupplyFingerprintSnapshot,
+} from "@/lib/bework-patch/commit/supply-ops";
 
 export type CommitUniversalResult =
   | {
@@ -47,6 +51,7 @@ export type CommitUniversalResult =
         followUpUpdated: boolean;
         reportUpdated: boolean;
         noticeUpdated: boolean;
+        supplyUpdated: boolean;
         quoteProtected: boolean;
       };
       impact: AnalyzePatchImpactResult;
@@ -145,7 +150,9 @@ export async function commitUniversalPatch(input: {
                 ? "Le compte rendu a été modifié depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
                 : patch.origin.section === "NOTICE"
                   ? "La notice a été modifiée depuis la génération de ce patch. Analysez de nouveau les modifications avant de les appliquer."
-                  : "Les données ont changé depuis l’analyse. Veuillez relancer la prévisualisation.",
+                  : patch.origin.section === "SUPPLY"
+                    ? "Les Approvisionnements ont changé depuis la génération de ce patch. Copiez un nouveau contexte et recommencez."
+                    : "Les données ont changé depuis l’analyse. Veuillez relancer la prévisualisation.",
       code: "PREVIEW_STALE",
       impact,
     };
@@ -185,6 +192,7 @@ export async function commitUniversalPatch(input: {
       let followUpUpdated = false;
       let reportUpdated = false;
       let noticeUpdated = false;
+      let supplyUpdated = false;
       const quoteProtected = impact.protectedEntities.some((p) => p.section === "QUOTE");
 
       let studyId: string | null = subgraph.study?.id ?? null;
@@ -203,8 +211,34 @@ export async function commitUniversalPatch(input: {
       let reportVersionAfter: number | null = null;
       let noticeId: string | null = subgraph.notice?.id ?? null;
       let noticeVersionAfter: number | null = null;
+      let supplyVersionAfter: number | null = null;
 
-      if (eligibility.mode === "NOTICE_ONLY") {
+      if (eligibility.mode === "SUPPLY_ONLY") {
+        if (!subgraph.supply) {
+          throw Object.assign(
+            new Error("Approvisionnements introuvables dans le sous-graphe."),
+            { code: "TARGET_NOT_FOUND" },
+          );
+        }
+        const applied = await applySupplyDirectInTx(tx, {
+          orgId: input.orgId,
+          projectId: resolvedProjectId,
+          userId: input.userId,
+          patch,
+          expectedVersion: subgraph.supply.contextVersion,
+        });
+        if (applied.purchaseOrdersCreated > 0) {
+          throw Object.assign(
+            new Error("Anomalie : SUPPLY a créé un PurchaseOrder — rollback."),
+            { code: "SUPPLY_PO_FORBIDDEN" },
+          );
+        }
+        supplyUpdated = applied.appliedOps.length > 0;
+        supplyVersionAfter = await loadSupplyFingerprintSnapshot(tx, {
+          orgId: input.orgId,
+          projectId: resolvedProjectId,
+        });
+      } else if (eligibility.mode === "NOTICE_ONLY") {
         if (!subgraph.notice) {
           throw Object.assign(
             new Error("Notice introuvable dans le sous-graphe."),
@@ -343,6 +377,7 @@ export async function commitUniversalPatch(input: {
         reportVersionOverride: reportVersionAfter,
         noticeId,
         noticeVersionOverride: noticeVersionAfter,
+        supplyVersionOverride: supplyVersionAfter,
       });
 
       const writtenDerived = impact.derivedChanges.filter((d) => {
@@ -356,6 +391,7 @@ export async function commitUniversalPatch(input: {
         if (eligibility.mode === "FOLLOW_UP_ONLY") return false;
         if (eligibility.mode === "REPORT_ONLY") return false;
         if (eligibility.mode === "NOTICE_ONLY") return false;
+        if (eligibility.mode === "SUPPLY_ONLY") return false;
         return true;
       });
 
@@ -372,6 +408,7 @@ export async function commitUniversalPatch(input: {
               followUpUpdated,
               reportUpdated,
               noticeUpdated,
+              supplyUpdated,
               quoteProtected,
             },
           };
@@ -419,6 +456,7 @@ export async function commitUniversalPatch(input: {
             followUpUpdated,
             reportUpdated,
             noticeUpdated,
+            supplyUpdated,
             quoteProtected,
           },
         };
@@ -521,6 +559,7 @@ async function readVersionsAfter(
     reportVersionOverride?: number | null;
     noticeId?: string | null;
     noticeVersionOverride?: number | null;
+    supplyVersionOverride?: number | null;
   },
 ): Promise<VersionSnapshot> {
   const [study, quote, plan] = await Promise.all([
@@ -557,6 +596,7 @@ async function readVersionsAfter(
     followUpVersion: ids.followUpVersionOverride ?? null,
     reportVersion: ids.reportVersionOverride ?? null,
     noticeVersion: ids.noticeVersionOverride ?? null,
+    supplyVersion: ids.supplyVersionOverride ?? null,
   };
 }
 
@@ -627,6 +667,7 @@ async function applyTakeoffDirectInTx(
       followUp: null,
       report: null,
       notice: null,
+      supply: null,
     },
   });
   if (guard.blocked) {

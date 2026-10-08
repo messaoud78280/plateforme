@@ -49,7 +49,7 @@ import { ChantierContractuelPanel } from "@/components/chantier/ChantierContract
 import { ChantierSubcontractorsPanel } from "@/components/chantier/ChantierSubcontractorsPanel";
 import { canEditPilotageOperational } from "@/lib/pilotage/access";
 import { isActionOpen, isVisaPending, isOverdue } from "@/lib/pilotage/calculations";
-import { ProjectMateriauxSection } from "@/components/projects/ProjectMateriauxSection";
+import { ProjectApprovisionnementsSection } from "@/components/projects/ProjectApprovisionnementsSection";
 import { loadMaterialRequirementsForProject } from "@/lib/materiaux/load-for-project";
 import { isInternalPurchaseOrderActor } from "@/lib/purchase-orders/access";
 import { canAccessDashboardHref } from "@/lib/equipe-acces/dashboard-policy";
@@ -698,8 +698,8 @@ export default async function ProjetDetailPage({
   const partagePanel = canManageShare ? <ChantierSharePanel projectId={id} /> : null;
 
   const materiauxReadOnly = project.chantierStatus === "TERMINE";
-  const materiauxPanel = canSeeMateriaux ? (
-    <ProjectMateriauxSection
+  const approvisionnementsPanel = canSeeMateriaux ? (
+    <ProjectApprovisionnementsSection
       projectId={id}
       projectTitle={project.title}
       initialRows={materiauxRows}
@@ -907,7 +907,7 @@ export default async function ProjetDetailPage({
         panels={{
           overview: contextCard,
           taches: tachesPanel,
-          materiaux: materiauxPanel,
+          approvisionnements: approvisionnementsPanel,
           documents: documentsPanel,
           messages: messagesPanel,
           partage: partagePanel,

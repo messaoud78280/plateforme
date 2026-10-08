@@ -48,6 +48,29 @@ export type MaterialRequirementRow = {
     received: number;
     orderStatus: string;
   }>;
+  /** Approvisionnements Phase 1/2 */
+  category: string;
+  procurementMode: string;
+  description: string | null;
+  sourceQuantity: number | null;
+  sourceUnit: string | null;
+  calculatedQuantity: number | null;
+  validatedOrderQuantity: number;
+  packaging: string | null;
+  packagingSize: number | null;
+  packagingUnit: string | null;
+  takeoffCodes: string[];
+  scheduleTaskIds: string[];
+  sourceFingerprint: string | null;
+  sourceDrift: string;
+  orderDeadlineAt: string | null;
+  supplierLeadTimeDays: number | null;
+  notes: string | null;
+  hasOrderLinks: boolean;
+  /** Phase 3 — offre retenue */
+  selectedOfferId: string | null;
+  offerCount: number;
+  hasPricedOffer: boolean;
 };
 
 export async function loadMaterialRequirementsForProject(opts: {
@@ -72,8 +95,30 @@ export async function loadMaterialRequirementsForProject(opts: {
       siteResourceId: true,
       createdAt: true,
       validatedAt: true,
+      category: true,
+      procurementMode: true,
+      description: true,
+      sourceQuantity: true,
+      sourceUnit: true,
+      calculatedQuantity: true,
+      validatedOrderQuantity: true,
+      packaging: true,
+      packagingSize: true,
+      packagingUnit: true,
+      takeoffCodes: true,
+      scheduleTaskIds: true,
+      sourceFingerprint: true,
+      sourceDrift: true,
+      orderDeadlineAt: true,
+      supplierLeadTimeDays: true,
+      notes: true,
+      selectedOfferId: true,
       siteResource: { select: { id: true, shortName: true } },
       createdBy: { select: { name: true } },
+      offers: {
+        where: { archivedAt: null },
+        select: { id: true, unitPrice: true },
+      },
       orderLinks: {
         select: {
           id: true,
@@ -159,6 +204,17 @@ export async function loadMaterialRequirementsForProject(opts: {
       allocations,
     });
 
+    const takeoffCodes = Array.isArray(r.takeoffCodes)
+      ? r.takeoffCodes.filter((x): x is string => typeof x === "string")
+      : [];
+    const scheduleTaskIds = Array.isArray(r.scheduleTaskIds)
+      ? r.scheduleTaskIds.filter((x): x is string => typeof x === "string")
+      : [];
+    const validatedOrder =
+      r.validatedOrderQuantity != null
+        ? n(r.validatedOrderQuantity)
+        : n(r.quantityRequired);
+
     return {
       id: r.id,
       label: r.label,
@@ -178,6 +234,31 @@ export async function loadMaterialRequirementsForProject(opts: {
       coverageLabel: coverageStateLabel(progress.coverageState as MaterialCoverageState),
       overOrdered: progress.ordered > progress.need + 1e-9,
       linkedOrders,
+      category: r.category ?? "MATERIAL",
+      procurementMode: r.procurementMode ?? "ACHAT",
+      description: r.description ?? null,
+      sourceQuantity: r.sourceQuantity != null ? n(r.sourceQuantity) : null,
+      sourceUnit: r.sourceUnit ?? null,
+      calculatedQuantity:
+        r.calculatedQuantity != null ? n(r.calculatedQuantity) : null,
+      validatedOrderQuantity: validatedOrder,
+      packaging: r.packaging ?? null,
+      packagingSize: r.packagingSize != null ? n(r.packagingSize) : null,
+      packagingUnit: r.packagingUnit ?? null,
+      takeoffCodes,
+      scheduleTaskIds,
+      sourceFingerprint: r.sourceFingerprint ?? null,
+      sourceDrift: r.sourceDrift ?? "NONE",
+      orderDeadlineAt: r.orderDeadlineAt
+        ? r.orderDeadlineAt.toISOString()
+        : null,
+      supplierLeadTimeDays:
+        r.supplierLeadTimeDays != null ? n(r.supplierLeadTimeDays) : null,
+      notes: r.notes ?? null,
+      hasOrderLinks: r.orderLinks.length > 0,
+      selectedOfferId: r.selectedOfferId ?? null,
+      offerCount: r.offers.length,
+      hasPricedOffer: r.offers.some((o) => o.unitPrice != null),
     };
   });
 }

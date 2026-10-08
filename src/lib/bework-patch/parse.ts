@@ -162,6 +162,9 @@ function parseTarget(
   const step_code = str(raw.step_code ?? raw.stepCode, 80);
   const measurement_id = str(raw.measurement_id ?? raw.measurementId, 80);
   const project_id = str(raw.project_id ?? raw.projectId, 80);
+  const requirement_id = str(raw.requirement_id ?? raw.requirementId, 80);
+  const offer_id = str(raw.offer_id ?? raw.offerId, 80);
+  const supplier_id = str(raw.supplier_id ?? raw.supplierId, 80);
 
   // ID + code fournis : on ne peut pas vérifier la cohérence DB ici,
   // mais on exige qu'ils soient tous deux non vides si présents en duo sur même niveau
@@ -187,6 +190,9 @@ function parseTarget(
     task_id,
     step_code,
     measurement_id,
+    requirement_id,
+    offer_id,
+    supplier_id,
   };
 }
 
@@ -345,6 +351,11 @@ function parseOperation(
     "add_task",
     "add_measurement",
     "add_document_section",
+    "add_supply_need",
+    "cancel_supply_need",
+    "add_supply_offer",
+    "archive_supply_offer",
+    "add_supplier",
   ].includes(op);
 
   if (needChanges) {
@@ -1178,6 +1189,404 @@ function parseOperation(
             target.entity_type === "FOLLOW_UP_SHEET" ? "FOLLOW_UP_SHEET" : "SITE_DOCUMENT",
         },
         changes: { field, text: textVal },
+      };
+    }
+    case "add_supply_need": {
+      const projectId = target.project_id ?? target.id;
+      if (!projectId) {
+        issues.push(err("INVALID_TARGET", `${path}.target`, "project_id requis"));
+        return null;
+      }
+      if (!isObj(raw.need)) {
+        issues.push(err("INVALID_FIELD", `${path}.need`, "need obligatoire"));
+        return null;
+      }
+      const label = str(raw.need.label, 300);
+      const unit = str(raw.need.unit, 40);
+      const qty = num(raw.need.validated_order_quantity);
+      if (!label || !unit || qty == null || qty <= 0) {
+        issues.push(
+          err(
+            "INVALID_FIELD",
+            `${path}.need`,
+            "label, unit et validated_order_quantity (>0) requis",
+          ),
+        );
+        return null;
+      }
+      return {
+        op,
+        target: {
+          ...target,
+          entity_type: "SUPPLY_WORKSPACE",
+          project_id: projectId,
+        },
+        need: {
+          label,
+          unit,
+          validated_order_quantity: qty,
+          category: str(raw.need.category, 40) ?? null,
+          procurement_mode: str(raw.need.procurement_mode, 40) ?? null,
+          description: str(raw.need.description, 5000) ?? null,
+          source_quantity: num(raw.need.source_quantity),
+          source_unit: str(raw.need.source_unit, 40) ?? null,
+          calculated_quantity: num(raw.need.calculated_quantity),
+          loss_factor: num(raw.need.loss_factor),
+          packaging: str(raw.need.packaging, 120) ?? null,
+          packaging_size: num(raw.need.packaging_size),
+          packaging_unit: str(raw.need.packaging_unit, 40) ?? null,
+          takeoff_codes: Array.isArray(raw.need.takeoff_codes)
+            ? raw.need.takeoff_codes
+                .filter((x): x is string => typeof x === "string")
+                .map((x) => x.trim())
+                .filter(Boolean)
+                .slice(0, 40)
+            : null,
+          schedule_task_ids: Array.isArray(raw.need.schedule_task_ids)
+            ? raw.need.schedule_task_ids
+                .filter((x): x is string => typeof x === "string")
+                .map((x) => x.trim())
+                .filter(Boolean)
+                .slice(0, 40)
+            : null,
+          needed_at: str(raw.need.needed_at, 40) ?? null,
+          notes: str(raw.need.notes, 5000) ?? null,
+          source_type: str(raw.need.source_type, 40) ?? null,
+          source_label: str(raw.need.source_label, 200) ?? null,
+          status: str(raw.need.status, 40) ?? null,
+          is_hypothesis:
+            typeof raw.need.is_hypothesis === "boolean"
+              ? raw.need.is_hypothesis
+              : null,
+        },
+      };
+    }
+    case "update_supply_need": {
+      const requirementId = target.requirement_id ?? target.id;
+      if (!requirementId) {
+        issues.push(
+          err("INVALID_TARGET", `${path}.target`, "requirement_id requis"),
+        );
+        return null;
+      }
+      return {
+        op,
+        target: {
+          ...target,
+          entity_type: "MATERIAL_REQUIREMENT",
+          requirement_id: requirementId,
+        },
+        changes: {
+          label: str(changes!.label, 300) ?? undefined,
+          category: changes!.category === null ? null : str(changes!.category, 40) ?? undefined,
+          procurement_mode:
+            changes!.procurement_mode === null
+              ? null
+              : str(changes!.procurement_mode, 40) ?? undefined,
+          description:
+            changes!.description === null
+              ? null
+              : str(changes!.description, 5000) ?? undefined,
+          validated_order_quantity: num(changes!.validated_order_quantity) ?? undefined,
+          unit: str(changes!.unit, 40) ?? undefined,
+          source_quantity:
+            changes!.source_quantity === null
+              ? null
+              : num(changes!.source_quantity) ?? undefined,
+          calculated_quantity:
+            changes!.calculated_quantity === null
+              ? null
+              : num(changes!.calculated_quantity) ?? undefined,
+          loss_factor:
+            changes!.loss_factor === null ? null : num(changes!.loss_factor) ?? undefined,
+          packaging:
+            changes!.packaging === null ? null : str(changes!.packaging, 120) ?? undefined,
+          packaging_size:
+            changes!.packaging_size === null
+              ? null
+              : num(changes!.packaging_size) ?? undefined,
+          needed_at:
+            changes!.needed_at === null ? null : str(changes!.needed_at, 40) ?? undefined,
+          notes: changes!.notes === null ? null : str(changes!.notes, 5000) ?? undefined,
+          status: changes!.status === null ? null : str(changes!.status, 40) ?? undefined,
+        },
+      };
+    }
+    case "cancel_supply_need": {
+      const requirementId = target.requirement_id ?? target.id;
+      if (!requirementId) {
+        issues.push(
+          err("INVALID_TARGET", `${path}.target`, "requirement_id requis"),
+        );
+        return null;
+      }
+      return {
+        op,
+        target: {
+          ...target,
+          entity_type: "MATERIAL_REQUIREMENT",
+          requirement_id: requirementId,
+        },
+      };
+    }
+    case "add_supply_offer": {
+      const requirementId = target.requirement_id ?? target.id;
+      if (!requirementId) {
+        issues.push(
+          err("INVALID_TARGET", `${path}.target`, "requirement_id requis"),
+        );
+        return null;
+      }
+      if (!isObj(raw.offer)) {
+        issues.push(err("INVALID_FIELD", `${path}.offer`, "offer obligatoire"));
+        return null;
+      }
+      const productLabel = str(raw.offer.product_label, 400);
+      const priceSourceType = str(raw.offer.price_source_type, 40);
+      if (!productLabel || !priceSourceType) {
+        issues.push(
+          err(
+            "INVALID_FIELD",
+            `${path}.offer`,
+            "product_label et price_source_type requis",
+          ),
+        );
+        return null;
+      }
+      const unitPrice =
+        raw.offer.unit_price === null || raw.offer.unit_price === undefined
+          ? null
+          : num(raw.offer.unit_price);
+      if (unitPrice != null && unitPrice < 0) {
+        issues.push(err("INVALID_FIELD", `${path}.offer.unit_price`, "prix négatif interdit"));
+        return null;
+      }
+      return {
+        op,
+        target: {
+          ...target,
+          entity_type: "MATERIAL_REQUIREMENT",
+          requirement_id: requirementId,
+        },
+        offer: {
+          supplier_external_org_id:
+            str(raw.offer.supplier_external_org_id, 80) ?? null,
+          supplier_ref: str(raw.offer.supplier_ref, 80) ?? null,
+          product_label: productLabel,
+          product_ref: str(raw.offer.product_ref, 120) ?? null,
+          tech_attributes:
+            raw.offer.tech_attributes &&
+            typeof raw.offer.tech_attributes === "object" &&
+            !Array.isArray(raw.offer.tech_attributes)
+              ? (raw.offer.tech_attributes as Record<string, unknown>)
+              : null,
+          equivalence_status: (str(raw.offer.equivalence_status, 20) as
+            | "TO_VERIFY"
+            | "PROBABLE"
+            | "CONFIRMED"
+            | null) ?? null,
+          unit_price: unitPrice,
+          price_unit: str(raw.offer.price_unit, 40) ?? null,
+          price_tax_mode: (str(raw.offer.price_tax_mode, 8) as "HT" | "TTC" | null) ?? null,
+          vat_rate: num(raw.offer.vat_rate),
+          price_source_type: priceSourceType as
+            | "WEB_VERIFIED"
+            | "SUPPLIER_QUOTE"
+            | "USER_ENTERED"
+            | "IMPORT",
+          source_url: str(raw.offer.source_url, 2000) ?? null,
+          quote_number: str(raw.offer.quote_number, 120) ?? null,
+          quote_document_ref: str(raw.offer.quote_document_ref, 200) ?? null,
+          source_note: str(raw.offer.source_note, 2000) ?? null,
+          observed_at: str(raw.offer.observed_at, 40) ?? null,
+          valid_until: str(raw.offer.valid_until, 40) ?? null,
+          packaging_label: str(raw.offer.packaging_label, 120) ?? null,
+          units_per_pack: num(raw.offer.units_per_pack),
+          minimum_order_quantity: num(raw.offer.minimum_order_quantity),
+          lead_time_days: num(raw.offer.lead_time_days),
+          availability_note: str(raw.offer.availability_note, 500) ?? null,
+          delivery_fee:
+            raw.offer.delivery_fee === null
+              ? null
+              : raw.offer.delivery_fee === undefined
+                ? null
+                : num(raw.offer.delivery_fee),
+          crane_fee:
+            raw.offer.crane_fee === null
+              ? null
+              : raw.offer.crane_fee === undefined
+                ? null
+                : num(raw.offer.crane_fee),
+          other_fees:
+            raw.offer.other_fees === null
+              ? null
+              : raw.offer.other_fees === undefined
+                ? null
+                : num(raw.offer.other_fees),
+        },
+      };
+    }
+    case "update_supply_offer": {
+      const offerId = target.offer_id ?? target.id;
+      if (!offerId) {
+        issues.push(err("INVALID_TARGET", `${path}.target`, "offer_id requis"));
+        return null;
+      }
+      return {
+        op,
+        target: {
+          ...target,
+          entity_type: "SUPPLY_OFFER",
+          offer_id: offerId,
+        },
+        changes: {
+          product_label: str(changes!.product_label, 400) ?? undefined,
+          product_ref:
+            changes!.product_ref === null
+              ? null
+              : str(changes!.product_ref, 120) ?? undefined,
+          tech_attributes:
+            changes!.tech_attributes === null
+              ? null
+              : changes!.tech_attributes &&
+                  typeof changes!.tech_attributes === "object" &&
+                  !Array.isArray(changes!.tech_attributes)
+                ? (changes!.tech_attributes as Record<string, unknown>)
+                : undefined,
+          equivalence_status: (str(changes!.equivalence_status, 20) as
+            | "TO_VERIFY"
+            | "PROBABLE"
+            | "CONFIRMED"
+            | undefined) ?? undefined,
+          unit_price:
+            changes!.unit_price === null
+              ? null
+              : num(changes!.unit_price) ?? undefined,
+          price_unit: str(changes!.price_unit, 40) ?? undefined,
+          price_tax_mode: (str(changes!.price_tax_mode, 8) as
+            | "HT"
+            | "TTC"
+            | undefined) ?? undefined,
+          vat_rate:
+            changes!.vat_rate === null ? null : num(changes!.vat_rate) ?? undefined,
+          price_source_type: (str(changes!.price_source_type, 40) as
+            | "WEB_VERIFIED"
+            | "SUPPLIER_QUOTE"
+            | "USER_ENTERED"
+            | "IMPORT"
+            | undefined) ?? undefined,
+          source_url:
+            changes!.source_url === null
+              ? null
+              : str(changes!.source_url, 2000) ?? undefined,
+          quote_number:
+            changes!.quote_number === null
+              ? null
+              : str(changes!.quote_number, 120) ?? undefined,
+          quote_document_ref:
+            changes!.quote_document_ref === null
+              ? null
+              : str(changes!.quote_document_ref, 200) ?? undefined,
+          source_note:
+            changes!.source_note === null
+              ? null
+              : str(changes!.source_note, 2000) ?? undefined,
+          observed_at:
+            changes!.observed_at === null
+              ? null
+              : str(changes!.observed_at, 40) ?? undefined,
+          valid_until:
+            changes!.valid_until === null
+              ? null
+              : str(changes!.valid_until, 40) ?? undefined,
+          packaging_label:
+            changes!.packaging_label === null
+              ? null
+              : str(changes!.packaging_label, 120) ?? undefined,
+          units_per_pack:
+            changes!.units_per_pack === null
+              ? null
+              : num(changes!.units_per_pack) ?? undefined,
+          minimum_order_quantity:
+            changes!.minimum_order_quantity === null
+              ? null
+              : num(changes!.minimum_order_quantity) ?? undefined,
+          lead_time_days:
+            changes!.lead_time_days === null
+              ? null
+              : num(changes!.lead_time_days) ?? undefined,
+          availability_note:
+            changes!.availability_note === null
+              ? null
+              : str(changes!.availability_note, 500) ?? undefined,
+          delivery_fee:
+            changes!.delivery_fee === null
+              ? null
+              : num(changes!.delivery_fee) ?? undefined,
+          crane_fee:
+            changes!.crane_fee === null ? null : num(changes!.crane_fee) ?? undefined,
+          other_fees:
+            changes!.other_fees === null
+              ? null
+              : num(changes!.other_fees) ?? undefined,
+        },
+      };
+    }
+    case "archive_supply_offer": {
+      const offerId = target.offer_id ?? target.id;
+      if (!offerId) {
+        issues.push(err("INVALID_TARGET", `${path}.target`, "offer_id requis"));
+        return null;
+      }
+      return {
+        op,
+        target: {
+          ...target,
+          entity_type: "SUPPLY_OFFER",
+          offer_id: offerId,
+        },
+      };
+    }
+    case "add_supplier": {
+      const projectId = target.project_id ?? target.id;
+      if (!projectId) {
+        issues.push(err("INVALID_TARGET", `${path}.target`, "project_id requis"));
+        return null;
+      }
+      if (!isObj(raw.supplier)) {
+        issues.push(err("INVALID_FIELD", `${path}.supplier`, "supplier obligatoire"));
+        return null;
+      }
+      const ref = str(raw.supplier.ref, 80);
+      const name = str(raw.supplier.name, 200);
+      if (!ref || !name) {
+        issues.push(
+          err("INVALID_FIELD", `${path}.supplier`, "ref et name requis"),
+        );
+        return null;
+      }
+      return {
+        op,
+        target: {
+          ...target,
+          entity_type: "SUPPLY_WORKSPACE",
+          project_id: projectId,
+        },
+        supplier: {
+          ref,
+          name,
+          trade_name: str(raw.supplier.trade_name, 200) ?? null,
+          parent_external_org_id:
+            str(raw.supplier.parent_external_org_id, 80) ?? null,
+          address: str(raw.supplier.address, 300) ?? null,
+          zip_code: str(raw.supplier.zip_code, 20) ?? null,
+          city: str(raw.supplier.city, 120) ?? null,
+          phone: str(raw.supplier.phone, 60) ?? null,
+          email: str(raw.supplier.email, 120) ?? null,
+          website: str(raw.supplier.website, 400) ?? null,
+          activity: str(raw.supplier.activity, 200) ?? null,
+          notes: str(raw.supplier.notes, 2000) ?? null,
+        },
       };
     }
     default: {

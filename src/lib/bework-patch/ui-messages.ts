@@ -12,6 +12,7 @@ export const SECTION_METIER_LABEL: Record<BeworkPatchSection, string> = {
   FOLLOW_UP: "Suivi de chantier",
   REPORT: "Compte rendu",
   NOTICE: "Notice explicative",
+  SUPPLY: "Approvisionnements",
 };
 
 export function sectionMetierLabel(section: BeworkPatchSection): string {
@@ -176,6 +177,8 @@ export function syncModeUserHint(mode: string): string {
       return "Seules les informations du compte rendu seront mises à jour.";
     case "NOTICE_ONLY":
       return "Seules les informations de la notice explicative seront mises à jour.";
+    case "SUPPLY_ONLY":
+      return "Seuls les besoins, offres et fournisseurs d’approvisionnement seront mis à jour (métré, devis, planning et commandes inchangés).";
     default:
       return "Les modifications seront enregistrées en une seule opération.";
   }

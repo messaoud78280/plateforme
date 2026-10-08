@@ -43,6 +43,11 @@ export async function createMaterialRequirement(input: {
   neededAt?: Date | null;
   lossFactor?: number | null;
   force?: boolean;
+  category?: import("@prisma/client").MaterialRequirementCategory;
+  procurementMode?: import("@prisma/client").MaterialRequirementProcurementMode;
+  description?: string | null;
+  notes?: string | null;
+  status?: import("@prisma/client").MaterialRequirementStatus;
 }) {
   const label = input.label.trim();
   const unit = input.unit.trim() || "U";
@@ -76,10 +81,17 @@ export async function createMaterialRequirement(input: {
       label,
       unit,
       quantityRequired: qty,
+      /** SupplyNeed Phase 1 — miroir opérationnel (compat Approvisionnements) */
+      validatedOrderQuantity: qty,
+      category: input.category ?? "MATERIAL",
+      procurementMode: input.procurementMode ?? "ACHAT",
+      description: input.description?.trim() || null,
+      notes: input.notes?.trim() || null,
+      sourceDrift: "NONE",
       siteResourceId: input.siteResourceId || undefined,
       neededAt: input.neededAt ?? undefined,
       lossFactor: input.lossFactor ?? undefined,
-      status: "VALIDATED",
+      status: input.status ?? "VALIDATED",
       sourceType: "MANUAL",
       sourceLabel: "Saisie manuelle",
       createdById: input.createdById,
@@ -100,13 +112,35 @@ export async function updateMaterialRequirement(input: {
   neededAt?: Date | null;
   lossFactor?: number | null;
   siteResourceId?: string | null;
+  category?: import("@prisma/client").MaterialRequirementCategory;
+  procurementMode?: import("@prisma/client").MaterialRequirementProcurementMode;
+  description?: string | null;
+  notes?: string | null;
+  status?: import("@prisma/client").MaterialRequirementStatus;
+  /** Si true, autorise le changement de qty malgré BC (BC non modifié). */
+  allowQuantityChangeWhenOrdered?: boolean;
 }) {
   const existing = await prisma.materialRequirement.findFirst({
     where: { id: input.id, organizationId: input.organizationId },
-    select: { id: true, status: true },
+    select: {
+      id: true,
+      status: true,
+      _count: { select: { orderLinks: true } },
+    },
   });
   if (!existing) throw new Error("Besoin introuvable");
   if (existing.status === "CANCELLED") throw new Error("Besoin annulé");
+
+  const hasOrders = existing._count.orderLinks > 0;
+  if (
+    hasOrders &&
+    input.quantityRequired != null &&
+    !input.allowQuantityChangeWhenOrdered
+  ) {
+    throw new Error(
+      "Ce besoin est déjà lié à une commande — confirmez explicitement la modification de quantité (la commande ne sera pas modifiée).",
+    );
+  }
 
   const data: Prisma.MaterialRequirementUpdateInput = {};
   if (input.label != null) data.label = input.label.trim();
@@ -115,9 +149,18 @@ export async function updateMaterialRequirement(input: {
     const q = Number(input.quantityRequired);
     if (!Number.isFinite(q) || q <= 0) throw new Error("Quantité invalide");
     data.quantityRequired = q;
+    /** Garde quantityRequired et validatedOrderQuantity alignés (SupplyNeed). */
+    data.validatedOrderQuantity = q;
   }
   if (input.neededAt !== undefined) data.neededAt = input.neededAt;
   if (input.lossFactor !== undefined) data.lossFactor = input.lossFactor;
+  if (input.category != null) data.category = input.category;
+  if (input.procurementMode != null) data.procurementMode = input.procurementMode;
+  if (input.description !== undefined) {
+    data.description = input.description?.trim() || null;
+  }
+  if (input.notes !== undefined) data.notes = input.notes?.trim() || null;
+  if (input.status != null) data.status = input.status;
   if (input.siteResourceId !== undefined) {
     data.siteResource = input.siteResourceId
       ? { connect: { id: input.siteResourceId } }

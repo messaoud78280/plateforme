@@ -8,8 +8,8 @@ import type {
   MaterialRequirementSourceDrift,
   MaterialRequirementSourceType,
   MaterialRequirementStatus,
-  Prisma,
 } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { findSimilarMaterialRequirements } from "@/lib/materiaux/service";
 import { computeOrderDeadline } from "@/lib/supply/deadline";

@@ -1037,15 +1037,14 @@ function analyzeSupplyLocal(
 
     if (op.op === "add_supply_need") {
       directChanges.push({
+        op: op.op,
+        section: "SUPPLY",
         entityType: "MATERIAL_REQUIREMENT",
         entityId: "(new)",
         label: op.need.label,
         field: "add_supply_need",
         before: null,
         after: `${op.need.validated_order_quantity} ${op.need.unit}`,
-        confidence: "CERTAIN",
-        mutable: true,
-        protected: false,
       });
       if (op.need.is_hypothesis) {
         warnings.push(
@@ -1058,15 +1057,14 @@ function analyzeSupplyLocal(
       }
     } else if (op.op === "update_supply_need" || op.op === "cancel_supply_need") {
       directChanges.push({
+        op: op.op,
+        section: "SUPPLY",
         entityType: "MATERIAL_REQUIREMENT",
         entityId: op.target.requirement_id,
         label: op.target.requirement_id,
         field: op.op,
         before: null,
         after: op.op === "cancel_supply_need" ? "CANCELLED" : "updated",
-        confidence: "CERTAIN",
-        mutable: true,
-        protected: false,
       });
       if (subgraph.supply && subgraph.supply.needsWithOrders > 0) {
         warnings.push(
@@ -1153,6 +1151,8 @@ function analyzeSupplyLocal(
         );
       }
       directChanges.push({
+        op: op.op,
+        section: "SUPPLY",
         entityType: "SUPPLY_OFFER",
         entityId: "(new)",
         label: o.product_label,
@@ -1162,34 +1162,29 @@ function analyzeSupplyLocal(
           o.unit_price == null
             ? "Prix à renseigner"
             : `${o.unit_price} ${o.price_unit ?? ""} ${o.price_tax_mode ?? ""}`.trim(),
-        confidence: "CERTAIN",
-        mutable: true,
-        protected: false,
       });
       if (o.source_url) {
         directChanges.push({
+          op: op.op,
+          section: "SUPPLY",
           entityType: "SUPPLY_OFFER",
           entityId: "(new)",
           label: "source_url",
           field: "source_url",
           before: null,
           after: o.source_url,
-          confidence: "CERTAIN",
-          mutable: true,
-          protected: false,
         });
       }
     } else if (op.op === "update_supply_offer" || op.op === "archive_supply_offer") {
       directChanges.push({
+        op: op.op,
+        section: "SUPPLY",
         entityType: "SUPPLY_OFFER",
         entityId: op.target.offer_id,
         label: op.target.offer_id,
         field: op.op,
         before: null,
         after: op.op === "archive_supply_offer" ? "archived" : "updated",
-        confidence: "CERTAIN",
-        mutable: true,
-        protected: false,
       });
     } else if (op.op === "add_supplier") {
       warnings.push(
@@ -1200,15 +1195,14 @@ function analyzeSupplyLocal(
         ),
       );
       directChanges.push({
+        op: op.op,
+        section: "SUPPLY",
         entityType: "EXTERNAL_ORGANIZATION",
         entityId: `(new:${op.supplier.ref})`,
         label: op.supplier.name,
         field: "add_supplier",
         before: null,
         after: op.supplier.city ?? op.supplier.name,
-        confidence: "CERTAIN",
-        mutable: true,
-        protected: false,
       });
     }
   }

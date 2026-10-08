@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
@@ -173,6 +173,20 @@ export function ChantierCockpit({
 
   const [tab, setTab] = useState<ChantierCockpitTabId>(defaultTab);
   const [group, setGroup] = useState<NavGroupId>(groupForTab(defaultTab));
+  const tabRef = useRef<ChantierCockpitTabId>(defaultTab);
+  const navRef = useRef<HTMLDivElement | null>(null);
+
+  /**
+   * Panneau métier (Appros, Tâches…) : amener la barre d’onglets en tête de viewport
+   * sans animation, uniquement si elle n’y est pas déjà (évite les à-coups).
+   */
+  function revealModulePanel() {
+    const el = navRef.current;
+    if (!el || typeof window === "undefined") return;
+    const top = el.getBoundingClientRect().top;
+    if (top >= 0 && top <= 12) return;
+    el.scrollIntoView({ behavior: "auto", block: "start" });
+  }
 
   /** Applique le hash URL → onglet visible (idempotent, sans boucle). */
   function syncTabFromHash(tabs: TabDef[]) {
@@ -191,8 +205,10 @@ export function ChantierCockpit({
 
     if (!resolved) return;
 
+    const changed = tabRef.current !== resolved;
     setTab(resolved);
     setGroup(groupForTab(resolved));
+    tabRef.current = resolved;
 
     // Legacy #tab-materiaux → hash canonique (replaceState n’émet pas hashchange)
     if (typeof window !== "undefined" && resolved === "approvisionnements") {
@@ -206,6 +222,11 @@ export function ChantierCockpit({
           url.pathname + url.search + "#tab-approvisionnements",
         );
       }
+    }
+
+    // Entrée directe #tab-approvisionnements / chaîne métier → module visible tout de suite
+    if (changed && resolved !== "overview") {
+      queueMicrotask(() => revealModulePanel());
     }
   }
 
@@ -244,6 +265,7 @@ export function ChantierCockpit({
     if (!visibleTabs.some((t) => t.id === tab) && visibleTabs[0]) {
       setTab(visibleTabs[0].id);
       setGroup(groupForTab(visibleTabs[0].id));
+      tabRef.current = visibleTabs[0].id;
     }
   }, [visibleTabs, tab]);
 
@@ -264,8 +286,10 @@ export function ChantierCockpit({
   } as const;
 
   function selectTab(id: ChantierCockpitTabId) {
+    const changed = tabRef.current !== id;
     setTab(id);
     setGroup(groupForTab(id));
+    tabRef.current = id;
     if (typeof window !== "undefined") {
       const hash =
         id === "taches"
@@ -282,6 +306,10 @@ export function ChantierCockpit({
         "",
         url.pathname + url.search + (hash ? `#${hash}` : ""),
       );
+    }
+    // Module métier : barre sticky + panneau en tête (pas de scroll si déjà en place)
+    if (changed && id !== "overview") {
+      queueMicrotask(() => revealModulePanel());
     }
   }
 
@@ -305,8 +333,10 @@ export function ChantierCockpit({
         (activeGroup.externalLinks?.length ?? 0) > 0));
 
   return (
-    <div className="space-y-4">
+    <div id="chantier-cockpit" className="space-y-4">
       <div
+        ref={navRef}
+        id="chantier-cockpit-nav"
         className={cn(
           "sticky top-0 z-10 -mx-1 px-1 py-1",
           "bg-[color-mix(in_srgb,var(--background,#f8fafc)_92%,transparent)] backdrop-blur-sm supports-[not(backdrop-filter)]:bg-slate-50",

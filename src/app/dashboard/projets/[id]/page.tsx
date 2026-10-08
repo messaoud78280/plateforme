@@ -835,19 +835,6 @@ export default async function ProjetDetailPage({
         }
       />
 
-      {!isExternalViewer && project.organizationId ? (
-        <Suspense fallback={<ProjectPreparationSkeleton />}>
-          <ProjectPreparationDeferred
-            organizationId={project.organizationId}
-            projectId={id}
-            canEdit={canEditDossier}
-            hasResponsible={!!responsibleLabel}
-            missingDocumentsCount={missingCount}
-            canAccessApprovisionnements={canSeeMateriaux}
-          />
-        </Suspense>
-      ) : null}
-
       <ChantierCockpit
         stats={[
           {
@@ -877,22 +864,36 @@ export default async function ProjetDetailPage({
         ]}
         attentionItems={attentionItems}
         opsOverview={
-          <Suspense fallback={<ChantierOpsOverviewSkeleton />}>
-            <ChantierOpsOverviewDeferred
-              projectId={id}
-              projectTitle={project.title}
-              externalViewer={isExternalViewer}
-              billingHint={
-                billingHint
-                  ? {
-                      label: billingHint.label,
-                      count: billingHint.count,
-                      href: billingHint.href,
-                    }
-                  : null
-              }
-            />
-          </Suspense>
+          <div className="space-y-4">
+            {!isExternalViewer && project.organizationId ? (
+              <Suspense fallback={<ProjectPreparationSkeleton />}>
+                <ProjectPreparationDeferred
+                  organizationId={project.organizationId}
+                  projectId={id}
+                  canEdit={canEditDossier}
+                  hasResponsible={!!responsibleLabel}
+                  missingDocumentsCount={missingCount}
+                  canAccessApprovisionnements={canSeeMateriaux}
+                />
+              </Suspense>
+            ) : null}
+            <Suspense fallback={<ChantierOpsOverviewSkeleton />}>
+              <ChantierOpsOverviewDeferred
+                projectId={id}
+                projectTitle={project.title}
+                externalViewer={isExternalViewer}
+                billingHint={
+                  billingHint
+                    ? {
+                        label: billingHint.label,
+                        count: billingHint.count,
+                        href: billingHint.href,
+                      }
+                    : null
+                }
+              />
+            </Suspense>
+          </div>
         }
         travauxExternalLinks={[
           {

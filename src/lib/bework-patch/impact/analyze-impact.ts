@@ -1212,11 +1212,8 @@ function analyzeSupplyLocal(
     warnings,
     directChanges,
     affectedEntities: [],
-    canonicalResolution: buildCanonicalResolution({
-      status: "NONE",
-      resolved_to: null,
-      note: "SUPPLY local — pas de propagation cross-module.",
-    }),
+    // SUPPLY local — pas de résolution canonique cross-module (métré/devis/planning).
+    canonicalResolution: buildCanonicalResolution({}),
   });
 }
 

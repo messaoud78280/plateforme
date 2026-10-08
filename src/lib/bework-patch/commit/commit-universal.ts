@@ -220,10 +220,24 @@ export async function commitUniversalPatch(input: {
             { code: "TARGET_NOT_FOUND" },
           );
         }
+        if (!resolvedProjectId) {
+          throw Object.assign(
+            new Error("projectId requis pour le commit Approvisionnements."),
+            { code: "INVALID_TARGET" },
+          );
+        }
+        if (!input.userId) {
+          throw Object.assign(
+            new Error("Utilisateur requis pour le commit Approvisionnements."),
+            { code: "UNAUTHORIZED" },
+          );
+        }
+        const supplyProjectId = resolvedProjectId;
+        const supplyUserId = input.userId;
         const applied = await applySupplyDirectInTx(tx, {
           orgId: input.orgId,
-          projectId: resolvedProjectId,
-          userId: input.userId,
+          projectId: supplyProjectId,
+          userId: supplyUserId,
           patch,
           expectedVersion: subgraph.supply.contextVersion,
         });
@@ -236,7 +250,7 @@ export async function commitUniversalPatch(input: {
         supplyUpdated = applied.appliedOps.length > 0;
         supplyVersionAfter = await loadSupplyFingerprintSnapshot(tx, {
           orgId: input.orgId,
-          projectId: resolvedProjectId,
+          projectId: supplyProjectId,
         });
       } else if (eligibility.mode === "NOTICE_ONLY") {
         if (!subgraph.notice) {

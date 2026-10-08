@@ -39,6 +39,13 @@ function toDate(v: string | null | undefined): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+function asJson(
+  v: Record<string, unknown> | null | undefined,
+): Prisma.InputJsonValue | undefined {
+  if (v == null) return undefined;
+  return v as Prisma.InputJsonValue;
+}
+
 function fail(message: string, code = "SUPPLY_COMMIT_REJECTED"): never {
   throw Object.assign(new Error(message), { code });
 }
@@ -478,7 +485,7 @@ export async function applySupplyDirectInTx(
           supplierExternalOrgId: supplierId,
           productLabel: op.offer.product_label.trim(),
           productRef: op.offer.product_ref?.trim() || null,
-          techAttributes: op.offer.tech_attributes ?? undefined,
+          techAttributes: asJson(op.offer.tech_attributes),
           equivalenceStatus: equiv as never,
           unitPrice: op.offer.unit_price ?? null,
           priceUnit: op.offer.price_unit?.trim() || "U",
@@ -633,8 +640,11 @@ export async function applySupplyDirectInTx(
             productRef: mergedInput.productRef?.trim() || null,
             techAttributes:
               op.changes.tech_attributes !== undefined
-                ? op.changes.tech_attributes ?? undefined
-                : (existing.techAttributes as never) ?? undefined,
+                ? asJson(op.changes.tech_attributes)
+                : asJson(
+                    (existing.techAttributes as Record<string, unknown> | null) ??
+                      undefined,
+                  ),
             equivalenceStatus: "TO_VERIFY",
             unitPrice: mergedInput.unitPrice,
             priceUnit: mergedInput.priceUnit?.trim() || "U",
@@ -676,7 +686,7 @@ export async function applySupplyDirectInTx(
             productRef: mergedInput.productRef?.trim() || null,
             techAttributes:
               op.changes.tech_attributes !== undefined
-                ? op.changes.tech_attributes ?? undefined
+                ? asJson(op.changes.tech_attributes)
                 : undefined,
             equivalenceStatus:
               op.changes.equivalence_status === "CONFIRMED"

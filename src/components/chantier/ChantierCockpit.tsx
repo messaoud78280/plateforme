@@ -174,28 +174,70 @@ export function ChantierCockpit({
   const [tab, setTab] = useState<ChantierCockpitTabId>(defaultTab);
   const [group, setGroup] = useState<NavGroupId>(groupForTab(defaultTab));
 
-  useEffect(() => {
+  /** Applique le hash URL → onglet visible (idempotent, sans boucle). */
+  function syncTabFromHash(tabs: TabDef[]) {
     const fromHash = tabFromHash();
-    if (fromHash && visibleTabs.some((t) => t.id === fromHash)) {
-      setTab(fromHash);
-      setGroup(groupForTab(fromHash));
-      // Legacy #tab-materiaux → hash canonique Approvisionnements
-      if (
-        typeof window !== "undefined" &&
-        fromHash === "approvisionnements"
-      ) {
-        const h = window.location.hash.replace(/^#/, "");
-        if (h === "tab-materiaux" || h === "materiaux") {
-          const url = new URL(window.location.href);
-          url.hash = "tab-approvisionnements";
-          window.history.replaceState(
-            {},
-            "",
-            url.pathname + url.search + "#tab-approvisionnements",
-          );
-        }
+    if (!fromHash) return;
+
+    // #tab-approvisionnements / legacy materiaux → onglet réellement monté
+    const resolved =
+      tabs.find((t) => t.id === fromHash)?.id ??
+      (fromHash === "approvisionnements"
+        ? tabs.find((t) => t.id === "materiaux")?.id
+        : undefined) ??
+      (fromHash === "materiaux"
+        ? tabs.find((t) => t.id === "approvisionnements")?.id
+        : undefined);
+
+    if (!resolved) return;
+
+    setTab(resolved);
+    setGroup(groupForTab(resolved));
+
+    // Legacy #tab-materiaux → hash canonique (replaceState n’émet pas hashchange)
+    if (typeof window !== "undefined" && resolved === "approvisionnements") {
+      const h = window.location.hash.replace(/^#/, "");
+      if (h === "tab-materiaux" || h === "materiaux") {
+        const url = new URL(window.location.href);
+        url.hash = "tab-approvisionnements";
+        window.history.replaceState(
+          {},
+          "",
+          url.pathname + url.search + "#tab-approvisionnements",
+        );
       }
     }
+  }
+
+  useEffect(() => {
+    syncTabFromHash(visibleTabs);
+
+    const onHashChange = () => syncTabFromHash(visibleTabs);
+    // Retour navigateur / History API (Next Link même page + hash)
+    const onPopState = () => syncTabFromHash(visibleTabs);
+
+    window.addEventListener("hashchange", onHashChange);
+    window.addEventListener("popstate", onPopState);
+
+    // Next.js soft-nav (pushState/replaceState) ne déclenche pas toujours hashchange
+    const push = history.pushState.bind(history);
+    const replace = history.replaceState.bind(history);
+    const wrap =
+      (fn: typeof push) =>
+      (...args: Parameters<History["pushState"]>) => {
+        const ret = fn(...args);
+        queueMicrotask(() => syncTabFromHash(visibleTabs));
+        return ret;
+      };
+    history.pushState = wrap(push);
+    history.replaceState = wrap(replace);
+
+    return () => {
+      window.removeEventListener("hashchange", onHashChange);
+      window.removeEventListener("popstate", onPopState);
+      history.pushState = push;
+      history.replaceState = replace;
+    };
   }, [visibleTabs]);
 
   useEffect(() => {

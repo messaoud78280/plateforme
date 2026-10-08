@@ -841,6 +841,7 @@ export default async function ProjetDetailPage({
             canEdit={canEditDossier}
             hasResponsible={!!responsibleLabel}
             missingDocumentsCount={missingCount}
+            canAccessApprovisionnements={canSeeMateriaux}
           />
         </Suspense>
       ) : null}

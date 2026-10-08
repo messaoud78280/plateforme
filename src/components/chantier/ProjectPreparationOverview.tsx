@@ -39,16 +39,39 @@ type QuoteSectionPreview = {
 };
 
 export function ProjectPreparationOverview({
-  workspace,
+  workspace: workspaceRaw,
   canEdit = true,
   hasResponsible = true,
   missingDocumentsCount = 0,
+  canAccessApprovisionnements = true,
 }: {
   workspace: ProjectWorkspace;
   canEdit?: boolean;
   hasResponsible?: boolean;
   missingDocumentsCount?: number;
+  /** Si false : pas de lien vers un onglet Approvisionnements invisible. */
+  canAccessApprovisionnements?: boolean;
 }) {
+  const workspace = useMemo((): ProjectWorkspace => {
+    if (canAccessApprovisionnements) return workspaceRaw;
+    return {
+      ...workspaceRaw,
+      global: {
+        ...workspaceRaw.global,
+        workflow: workspaceRaw.global.workflow.map((s) =>
+          s.id === "approvisionnements"
+            ? {
+                ...s,
+                href: null,
+                actionLabel: "Accès réservé",
+                detail:
+                  "Réservé aux comptes internes (achats / chantier).",
+              }
+            : s,
+        ),
+      },
+    };
+  }, [workspaceRaw, canAccessApprovisionnements]);
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
   const [classifyOpen, setClassifyOpen] = useState(false);
@@ -481,7 +504,35 @@ export function ProjectPreparationOverview({
       return;
     }
     if (step.href) {
+      // Même page + hash : forcer hashchange (Next soft-nav ne remonte pas le cockpit)
+      try {
+        const url = new URL(step.href, window.location.origin);
+        if (
+          url.pathname === window.location.pathname &&
+          url.hash &&
+          url.hash !== "#"
+        ) {
+          const nextHash = url.hash;
+          if (window.location.hash === nextHash) {
+            window.location.hash = "";
+            queueMicrotask(() => {
+              window.location.hash = nextHash;
+            });
+          } else {
+            window.location.hash = nextHash;
+          }
+          return;
+        }
+      } catch {
+        /* fallback router.push */
+      }
       router.push(step.href);
+      return;
+    }
+    if (step.id === "approvisionnements" && !canAccessApprovisionnements) {
+      setGlobalError(
+        "Approvisionnements réservé aux comptes internes (achats / chantier).",
+      );
       return;
     }
     setGlobalError("Aucune action disponible pour cette étape");

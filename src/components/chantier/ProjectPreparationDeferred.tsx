@@ -8,12 +8,15 @@ export async function ProjectPreparationDeferred({
   canEdit,
   hasResponsible = true,
   missingDocumentsCount = 0,
+  canAccessApprovisionnements = true,
 }: {
   organizationId: string;
   projectId: string;
   canEdit: boolean;
   hasResponsible?: boolean;
   missingDocumentsCount?: number;
+  /** Compte interne achats — sinon le lien Approvisionnements est neutralisé. */
+  canAccessApprovisionnements?: boolean;
 }) {
   const t0 = Date.now();
   const workspace = await getProjectWorkspace(
@@ -42,6 +45,7 @@ export async function ProjectPreparationDeferred({
         canEdit={canEdit}
         hasResponsible={hasResponsible}
         missingDocumentsCount={missingDocumentsCount}
+        canAccessApprovisionnements={canAccessApprovisionnements}
       />
     </div>
   );

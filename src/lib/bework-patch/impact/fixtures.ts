@@ -136,6 +136,7 @@ export function buildFixtureSubgraph54(opts?: {
     followUp: null,
     report: null,
     notice: null,
+    supply: null,
   };
 }
 

@@ -11,6 +11,7 @@ import {
 } from "react";
 import {
   AlertTriangle,
+  BookMarked,
   Calculator,
   Calendar,
   Check,
@@ -122,6 +123,46 @@ export function SupplyStudyDialog({
     need.neededAt ? need.neededAt.slice(0, 10) : "",
   );
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [catalogCap, setCatalogCap] = useState<{
+    supplyOfferId: string;
+    preview: {
+      mode: string;
+      source: {
+        productLabel: string;
+        productRef: string | null;
+        manufacturer: string | null;
+        gtin: string | null;
+        supplierName: string;
+        unitPrice: number | null;
+        priceUnit: string;
+        priceTaxMode: string;
+        priceSourceType: string;
+        observedAt: string | null;
+      };
+      proposed: {
+        material: { family: string; designation: string; unit: string };
+        product: {
+          label: string;
+          manufacturer: string | null;
+          manufacturerRef: string | null;
+          gtin: string | null;
+        };
+      };
+      existing?: {
+        catalogMaterialId: string;
+        catalogProductId: string;
+      };
+      materialCandidates: Array<{
+        id: string;
+        designation: string;
+        family: string;
+        reason: string;
+      }>;
+      productCandidates: Array<{ id: string; label: string; reason: string }>;
+      warnings: string[];
+      excludedFromCopy: string[];
+    };
+  } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [imageUrlDraft, setImageUrlDraft] = useState("");
   const [imageUrlPanelOpen, setImageUrlPanelOpen] = useState(false);
@@ -337,6 +378,66 @@ export function SupplyStudyDialog({
       window.setTimeout(() => setToast(null), 3000);
       onChanged();
       setEditDesc(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function openCapitalizePreview(offerId: string) {
+    if (!canWrite) return;
+    setBusy(true);
+    setError(null);
+    setMenuOpenId(null);
+    try {
+      const res = await fetch(
+        `/api/catalogue-materiaux/from-supply-offer?supplyOfferId=${encodeURIComponent(offerId)}`,
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Prévisualisation impossible");
+      setCatalogCap({ supplyOfferId: offerId, preview: data.preview });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function commitCapitalize(opts?: {
+    catalogMaterialId?: string | null;
+    catalogProductId?: string | null;
+    forceCreateMaterial?: boolean;
+    forceCreateProduct?: boolean;
+  }) {
+    if (!catalogCap) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/catalogue-materiaux/from-supply-offer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          supplyOfferId: catalogCap.supplyOfferId,
+          confirm: true,
+          catalogMaterialId: opts?.catalogMaterialId,
+          catalogProductId: opts?.catalogProductId,
+          forceCreateMaterial: opts?.forceCreateMaterial === true,
+          forceCreateProduct: opts?.forceCreateProduct === true,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Capitalisation impossible");
+      const href = (data.catalogHref as string | undefined) ?? "";
+      setCatalogCap(null);
+      setToast(
+        data.mode === "ALREADY_DONE"
+          ? "Déjà au catalogue — aucune écriture supplémentaire"
+          : data.mode === "ATTACH"
+            ? `Catalogue enrichi${href ? ` · ${href}` : ""}`
+            : `Enregistré au catalogue${href ? ` · ${href}` : ""}`,
+      );
+      window.setTimeout(() => setToast(null), 5000);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
     } finally {
@@ -1134,7 +1235,14 @@ export function SupplyStudyDialog({
                             <MoreHorizontal className="h-3.5 w-3.5" />
                           </button>
                           {menuOpenId === o.id ? (
-                            <div className="absolute right-0 z-20 mt-1 w-44 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                            <div className="absolute right-0 z-20 mt-1 w-52 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                              <button
+                                type="button"
+                                className="block w-full px-3 py-1.5 text-left text-xs font-semibold text-[#1e3a5f] hover:bg-slate-50"
+                                onClick={() => void openCapitalizePreview(o.id)}
+                              >
+                                Enregistrer dans le catalogue
+                              </button>
                               <button
                                 type="button"
                                 className="block w-full px-3 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50"
@@ -1200,7 +1308,16 @@ export function SupplyStudyDialog({
                       <MoreHorizontal className="h-3.5 w-3.5" />
                     </button>
                     {menuOpenId === `right-${inspected.id}` ? (
-                      <div className="absolute right-0 z-20 mt-1 w-48 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                      <div className="absolute right-0 z-20 mt-1 w-56 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                        <button
+                          type="button"
+                          className="block w-full px-3 py-1.5 text-left text-xs font-semibold text-[#1e3a5f] hover:bg-slate-50"
+                          onClick={() =>
+                            void openCapitalizePreview(inspected.id)
+                          }
+                        >
+                          Enregistrer dans le catalogue
+                        </button>
                         <button
                           type="button"
                           className="block w-full px-3 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50"
@@ -1584,15 +1701,32 @@ export function SupplyStudyDialog({
             <Eye className="h-3.5 w-3.5" />
             Prévisualiser les modifications
           </button>
-          <button
-            type="button"
-            disabled={!canWrite || busy || !inspected || Boolean(inspected?.archivedAt)}
-            onClick={() => void retainOffer()}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#2563eb] px-4 py-2 text-xs font-bold text-white hover:bg-[#1d4ed8] disabled:opacity-45"
-          >
-            <Check className="h-3.5 w-3.5" />
-            Retenir l’offre
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              disabled={
+                !canWrite || busy || !inspected || Boolean(inspected?.archivedAt)
+              }
+              onClick={() =>
+                inspected ? void openCapitalizePreview(inspected.id) : undefined
+              }
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#1e3a5f]/30 bg-white px-3 py-2 text-xs font-semibold text-[#1e3a5f] hover:bg-slate-50 disabled:opacity-45"
+            >
+              <BookMarked className="h-3.5 w-3.5" />
+              Enregistrer dans le catalogue
+            </button>
+            <button
+              type="button"
+              disabled={
+                !canWrite || busy || !inspected || Boolean(inspected?.archivedAt)
+              }
+              onClick={() => void retainOffer()}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#2563eb] px-4 py-2 text-xs font-bold text-white hover:bg-[#1d4ed8] disabled:opacity-45"
+            >
+              <Check className="h-3.5 w-3.5" />
+              Retenir l’offre
+            </button>
+          </div>
         </footer>
       </div>
 
@@ -1742,6 +1876,164 @@ export function SupplyStudyDialog({
                   Enregistrer le brouillon
                 </button>
               ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {catalogCap ? (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4">
+          <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5 shadow-xl">
+            <h3 className="text-base font-bold text-[#1e3a5f]">
+              Enregistrer dans le catalogue
+            </h3>
+            <p className="mt-1 text-xs text-slate-500">
+              Prévisualisation — l’offre chantier et son historique restent
+              inchangés. Aucune écriture sans confirmation.
+            </p>
+            <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm">
+              <p className="font-semibold text-slate-900">
+                {catalogCap.preview.source.productLabel}
+              </p>
+              <p className="text-xs text-slate-600">
+                {catalogCap.preview.source.supplierName}
+                {catalogCap.preview.source.productRef
+                  ? ` · réf. ${catalogCap.preview.source.productRef}`
+                  : ""}
+                {catalogCap.preview.source.gtin
+                  ? ` · GTIN ${catalogCap.preview.source.gtin}`
+                  : ""}
+              </p>
+              <p className="mt-1 text-xs text-slate-700">
+                Prix source :{" "}
+                {catalogCap.preview.source.unitPrice == null
+                  ? "non renseigné"
+                  : `${formatStudyMoney(catalogCap.preview.source.unitPrice)} ${catalogCap.preview.source.priceTaxMode} / ${catalogCap.preview.source.priceUnit}`}
+                {catalogCap.preview.source.observedAt
+                  ? ` · observé ${formatStudyDay(catalogCap.preview.source.observedAt)}`
+                  : ""}
+              </p>
+            </div>
+            <div className="mt-3 space-y-1 text-xs text-slate-700">
+              <p>
+                <span className="font-semibold">Mode : </span>
+                {catalogCap.preview.mode === "ALREADY_DONE"
+                  ? "Déjà capitalisé (idempotent)"
+                  : catalogCap.preview.mode === "ATTACH"
+                    ? "Rattachement / enrichissement produit existant"
+                    : "Création matériau + produit + offre + prix"}
+              </p>
+              <p>
+                Matériau proposé :{" "}
+                {catalogCap.preview.proposed.material.family} —{" "}
+                {catalogCap.preview.proposed.material.designation} (
+                {catalogCap.preview.proposed.material.unit})
+              </p>
+              <p>
+                Produit : {catalogCap.preview.proposed.product.label}
+                {catalogCap.preview.proposed.product.manufacturer
+                  ? ` · ${catalogCap.preview.proposed.product.manufacturer}`
+                  : " · fabricant à confirmer"}
+              </p>
+            </div>
+            {catalogCap.preview.excludedFromCopy.length > 0 ? (
+              <p className="mt-2 text-[11px] text-slate-500">
+                Non recopié :{" "}
+                {catalogCap.preview.excludedFromCopy.join(" · ")}
+              </p>
+            ) : null}
+            {catalogCap.preview.warnings.length > 0 ? (
+              <ul className="mt-2 list-disc space-y-1 pl-4 text-[11px] text-amber-900">
+                {catalogCap.preview.warnings.map((w) => (
+                  <li key={w}>{w}</li>
+                ))}
+              </ul>
+            ) : null}
+            {catalogCap.preview.productCandidates.length > 0 &&
+            catalogCap.preview.mode !== "ALREADY_DONE" ? (
+              <div className="mt-3">
+                <p className="text-[11px] font-bold uppercase text-slate-500">
+                  Produits catalogue proches
+                </p>
+                <ul className="mt-1 space-y-1">
+                  {catalogCap.preview.productCandidates.map((c) => (
+                    <li
+                      key={c.id}
+                      className="flex items-center justify-between gap-2 rounded-lg border border-amber-100 bg-amber-50/50 px-2 py-1.5 text-xs"
+                    >
+                      <span>
+                        {c.label}{" "}
+                        <span className="text-amber-800">({c.reason})</span>
+                      </span>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        className="font-bold text-[#2563eb]"
+                        onClick={() =>
+                          void commitCapitalize({ catalogProductId: c.id })
+                        }
+                      >
+                        Rattacher
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600"
+                onClick={() => setCatalogCap(null)}
+              >
+                Annuler
+              </button>
+              {catalogCap.preview.mode === "ALREADY_DONE" &&
+              catalogCap.preview.existing ? (
+                <a
+                  href={`/dashboard/catalogue-materiaux/${catalogCap.preview.existing.catalogMaterialId}`}
+                  className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white"
+                >
+                  Ouvrir la fiche catalogue
+                </a>
+              ) : (
+                <>
+                  {catalogCap.preview.mode === "ATTACH" &&
+                  catalogCap.preview.productCandidates[0] ? (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800"
+                      onClick={() =>
+                        void commitCapitalize({
+                          forceCreateProduct: true,
+                          forceCreateMaterial: true,
+                        })
+                      }
+                    >
+                      Créer une fiche distincte
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    disabled={busy}
+                    className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+                    onClick={() =>
+                      void commitCapitalize(
+                        catalogCap.preview.mode === "ATTACH" &&
+                          catalogCap.preview.productCandidates[0]
+                          ? {
+                              catalogProductId:
+                                catalogCap.preview.productCandidates[0].id,
+                            }
+                          : undefined,
+                      )
+                    }
+                  >
+                    Confirmer l’enregistrement
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

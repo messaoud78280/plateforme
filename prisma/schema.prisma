@@ -625,6 +625,9 @@ model SupplyOffer {
   /// USER_UPLOAD | USER_URL | SUPPLIER_URL — jamais inventé
   productImageOrigin    String?
 
+  /// Historique append-only des prix précédents (JSON array) — jamais présenté comme offre concurrente
+  priceHistory          Json?
+
   archivedAt            DateTime?
   createdAt             DateTime                     @default(now())
   updatedAt             DateTime                     @updatedAt

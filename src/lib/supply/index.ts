@@ -22,7 +22,14 @@ export {
   createSupplyOffer,
   updateSupplyOffer,
   archiveSupplyOffer,
+  deleteSupplyOffer,
   selectSupplyOffer,
   clearSelectedSupplyOffer,
   mapSupplyOfferToView,
+  SupplyOfferDuplicateError,
 } from "@/lib/supply/offer-service";
+export {
+  findSupplyOfferDuplicateCandidates,
+  canonicalizeOfferUrl,
+  normalizeProductRef,
+} from "@/lib/supply/offer-duplicates";

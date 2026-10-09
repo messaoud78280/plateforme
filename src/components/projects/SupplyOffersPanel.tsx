@@ -152,10 +152,11 @@ export function SupplyOffersPanel({
     }
   }
 
-  async function archiveOffer(offerId: string) {
-    if (!confirm("Archiver cette offre ? Elle reste consultable en historique.")) {
-      return;
-    }
+  async function archiveOffer(offerId: string, isSelected: boolean) {
+    const msg = isSelected
+      ? "Cette offre est retenue. Archiver retirera la sélection (aucun BC modifié). Continuer ?"
+      : "Archiver cette offre ? Elle reste consultable en historique.";
+    if (!confirm(msg)) return;
     setBusy(true);
     try {
       const res = await fetch(
@@ -163,7 +164,10 @@ export function SupplyOffersPanel({
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ archive: true }),
+          body: JSON.stringify({
+            archive: true,
+            allowClearSelection: isSelected,
+          }),
         },
       );
       const data = await res.json();
@@ -224,7 +228,7 @@ export function SupplyOffersPanel({
               canWrite={canWrite}
               busy={busy}
               onSelect={() => void selectOffer(o.id)}
-              onArchive={() => void archiveOffer(o.id)}
+              onArchive={() => void archiveOffer(o.id, o.isSelected)}
             />
           ))}
         </div>
@@ -486,13 +490,35 @@ function SourceBlock({ offer }: { offer: SupplyOfferView }) {
   );
 }
 
-export function SupplyAddOfferModal({
+export function SupplyAddOfferModal(props: {
+  suppliers: SupplierOpt[];
+  busy: boolean;
+  onClose: () => void;
+  onSubmit: (input: Record<string, unknown>) => Promise<void>;
+  defaultSourceType?: SupplyOfferPriceSourceType;
+  title?: string;
+  /** Préremplir pour édition (même offerId côté parent). */
+  initialOffer?: SupplyOfferView | null;
+  submitLabel?: string;
+}) {
+  // Remount à l’ouverture édition pour hydrater sans setState dans un effect.
+  return (
+    <SupplyAddOfferModalForm
+      key={props.initialOffer?.id ?? `new-${props.defaultSourceType ?? "m"}`}
+      {...props}
+    />
+  );
+}
+
+function SupplyAddOfferModalForm({
   suppliers,
   busy,
   onClose,
   onSubmit,
   defaultSourceType = "USER_ENTERED",
   title = "Ajouter une offre fournisseur",
+  initialOffer = null,
+  submitLabel,
 }: {
   suppliers: SupplierOpt[];
   busy: boolean;
@@ -500,40 +526,102 @@ export function SupplyAddOfferModal({
   onSubmit: (input: Record<string, unknown>) => Promise<void>;
   defaultSourceType?: SupplyOfferPriceSourceType;
   title?: string;
+  initialOffer?: SupplyOfferView | null;
+  submitLabel?: string;
 }) {
-  const [supplierExternalOrgId, setSupplierExternalOrgId] = useState("");
-  const [productLabel, setProductLabel] = useState("");
-  const [productRef, setProductRef] = useState("");
-  const [equivalenceStatus, setEquivalenceStatus] = useState("TO_VERIFY");
-  const [unitPrice, setUnitPrice] = useState("");
-  const [priceUnit, setPriceUnit] = useState("U");
-  const [priceTaxMode, setPriceTaxMode] = useState<"HT" | "TTC">("HT");
-  const [priceSourceType, setPriceSourceType] =
-    useState<SupplyOfferPriceSourceType>(defaultSourceType);
-  const [sourceUrl, setSourceUrl] = useState("");
-  const [quoteNumber, setQuoteNumber] = useState("");
-  const [quoteDocumentRef, setQuoteDocumentRef] = useState("");
-  const [observedAt, setObservedAt] = useState(
-    () => new Date().toISOString().slice(0, 10),
+  const [supplierExternalOrgId, setSupplierExternalOrgId] = useState(
+    () => initialOffer?.supplierExternalOrgId ?? "",
   );
-  const [packagingLabel, setPackagingLabel] = useState("");
-  const [unitsPerPack, setUnitsPerPack] = useState("");
-  const [leadTimeDays, setLeadTimeDays] = useState("");
-  const [availabilityNote, setAvailabilityNote] = useState("");
-  const [deliveryFee, setDeliveryFee] = useState("");
-  const [craneFee, setCraneFee] = useState("");
-  const [otherFees, setOtherFees] = useState("");
-  const [deliveryUnknown, setDeliveryUnknown] = useState(true);
-  const [craneUnknown, setCraneUnknown] = useState(true);
-  const [otherUnknown, setOtherUnknown] = useState(true);
+  const [productLabel, setProductLabel] = useState(
+    () => initialOffer?.productLabel ?? "",
+  );
+  const [productRef, setProductRef] = useState(
+    () => initialOffer?.productRef ?? "",
+  );
+  const [equivalenceStatus, setEquivalenceStatus] = useState(
+    () => initialOffer?.equivalenceStatus ?? "TO_VERIFY",
+  );
+  const [unitPrice, setUnitPrice] = useState(() =>
+    initialOffer?.unitPrice == null ? "" : String(initialOffer.unitPrice),
+  );
+  const [priceUnit, setPriceUnit] = useState(
+    () => initialOffer?.priceUnit || "U",
+  );
+  const [priceTaxMode, setPriceTaxMode] = useState<"HT" | "TTC">(
+    () => initialOffer?.priceTaxMode ?? "HT",
+  );
+  const [vatRate, setVatRate] = useState(() =>
+    initialOffer?.vatRate == null ? "" : String(initialOffer.vatRate),
+  );
+  const [priceSourceType, setPriceSourceType] =
+    useState<SupplyOfferPriceSourceType>(
+      () => initialOffer?.priceSourceType ?? defaultSourceType,
+    );
+  const [sourceUrl, setSourceUrl] = useState(
+    () => initialOffer?.sourceUrl ?? "",
+  );
+  const [quoteNumber, setQuoteNumber] = useState(
+    () => initialOffer?.quoteNumber ?? "",
+  );
+  const [quoteDocumentRef, setQuoteDocumentRef] = useState(
+    () => initialOffer?.quoteDocumentRef ?? "",
+  );
+  const [sourceNote, setSourceNote] = useState(
+    () => initialOffer?.sourceNote ?? "",
+  );
+  const [observedAt, setObservedAt] = useState(() =>
+    initialOffer?.observedAt
+      ? initialOffer.observedAt.slice(0, 10)
+      : new Date().toISOString().slice(0, 10),
+  );
+  const [packagingLabel, setPackagingLabel] = useState(
+    () => initialOffer?.packagingLabel ?? "",
+  );
+  const [unitsPerPack, setUnitsPerPack] = useState(() =>
+    initialOffer?.unitsPerPack == null
+      ? ""
+      : String(initialOffer.unitsPerPack),
+  );
+  const [minimumOrderQuantity, setMinimumOrderQuantity] = useState(() =>
+    initialOffer?.minimumOrderQuantity == null
+      ? ""
+      : String(initialOffer.minimumOrderQuantity),
+  );
+  const [leadTimeDays, setLeadTimeDays] = useState(() =>
+    initialOffer?.leadTimeDays == null
+      ? ""
+      : String(initialOffer.leadTimeDays),
+  );
+  const [availabilityNote, setAvailabilityNote] = useState(
+    () => initialOffer?.availabilityNote ?? "",
+  );
+  const [deliveryFee, setDeliveryFee] = useState(() =>
+    initialOffer?.deliveryFee == null ? "" : String(initialOffer.deliveryFee),
+  );
+  const [craneFee, setCraneFee] = useState(() =>
+    initialOffer?.craneFee == null ? "" : String(initialOffer.craneFee),
+  );
+  const [otherFees, setOtherFees] = useState(() =>
+    initialOffer?.otherFees == null ? "" : String(initialOffer.otherFees),
+  );
+  const [deliveryUnknown, setDeliveryUnknown] = useState(
+    () => initialOffer == null || initialOffer.deliveryFee == null,
+  );
+  const [craneUnknown, setCraneUnknown] = useState(
+    () => initialOffer == null || initialOffer.craneFee == null,
+  );
+  const [otherUnknown, setOtherUnknown] = useState(
+    () => initialOffer == null || initialOffer.otherFees == null,
+  );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 sm:items-center">
+    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/40 p-3 sm:items-center">
       <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5 shadow-xl">
         <h3 className="text-base font-bold text-slate-900">{title}</h3>
         <p className="mt-1 text-[11px] text-slate-500">
-          Le prix est facultatif. Ne jamais inventer un montant. Les frais
-          inconnus restent null (≠ 0).
+          {initialOffer
+            ? "Modification de l’offre existante — aucun doublon ne sera créé. Un changement de prix conserve l’historique."
+            : "Le prix est facultatif. Ne jamais inventer un montant. Les frais inconnus restent null (≠ 0)."}
         </p>
 
         <div className="mt-4 space-y-3">
@@ -667,19 +755,43 @@ export function SupplyAddOfferModal({
             </select>
           </label>
 
-          {priceSourceType === "WEB_VERIFIED" ? (
-            <label className="block space-y-1 text-sm">
+          <div className="grid grid-cols-2 gap-2">
+            <label className="space-y-1 text-sm">
               <span className="text-xs font-bold uppercase text-slate-500">
-                URL source
+                TVA %
               </span>
               <input
-                value={sourceUrl}
-                onChange={(e) => setSourceUrl(e.target.value)}
-                placeholder="https://…"
+                value={vatRate}
+                onChange={(e) => setVatRate(e.target.value)}
+                placeholder="facultatif"
+                inputMode="decimal"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2"
               />
             </label>
-          ) : null}
+            <label className="space-y-1 text-sm">
+              <span className="text-xs font-bold uppercase text-slate-500">
+                Date relevé
+              </span>
+              <input
+                type="date"
+                value={observedAt}
+                onChange={(e) => setObservedAt(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2"
+              />
+            </label>
+          </div>
+
+          <label className="block space-y-1 text-sm">
+            <span className="text-xs font-bold uppercase text-slate-500">
+              URL fiche produit
+            </span>
+            <input
+              value={sourceUrl}
+              onChange={(e) => setSourceUrl(e.target.value)}
+              placeholder="https://…"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2"
+            />
+          </label>
 
           {priceSourceType === "SUPPLIER_QUOTE" ? (
             <div className="grid grid-cols-2 gap-2">
@@ -708,13 +820,13 @@ export function SupplyAddOfferModal({
 
           <label className="block space-y-1 text-sm">
             <span className="text-xs font-bold uppercase text-slate-500">
-              Date
+              Notes / caractéristiques
             </span>
-            <input
-              type="date"
-              value={observedAt}
-              onChange={(e) => setObservedAt(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2"
+            <textarea
+              value={sourceNote}
+              onChange={(e) => setSourceNote(e.target.value)}
+              rows={2}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
             />
           </label>
 
@@ -741,6 +853,18 @@ export function SupplyAddOfferModal({
               />
             </label>
           </div>
+
+          <label className="block space-y-1 text-sm">
+            <span className="text-xs font-bold uppercase text-slate-500">
+              Commande minimale
+            </span>
+            <input
+              value={minimumOrderQuantity}
+              onChange={(e) => setMinimumOrderQuantity(e.target.value)}
+              inputMode="decimal"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2"
+            />
+          </label>
 
           <div className="grid grid-cols-2 gap-2">
             <label className="space-y-1 text-sm">
@@ -811,15 +935,21 @@ export function SupplyAddOfferModal({
                 unitPrice: unitPrice === "" ? null : Number(unitPrice),
                 priceUnit,
                 priceTaxMode,
+                vatRate: vatRate === "" ? null : Number(vatRate),
                 priceSourceType,
                 sourceUrl: sourceUrl || null,
                 quoteNumber: quoteNumber || null,
                 quoteDocumentRef: quoteDocumentRef || null,
+                sourceNote: sourceNote || null,
                 observedAt: observedAt || null,
                 recordedAt: new Date().toISOString(),
                 packagingLabel: packagingLabel || null,
                 unitsPerPack:
                   unitsPerPack === "" ? null : Number(unitsPerPack),
+                minimumOrderQuantity:
+                  minimumOrderQuantity === ""
+                    ? null
+                    : Number(minimumOrderQuantity),
                 leadTimeDays:
                   leadTimeDays === "" ? null : Number(leadTimeDays),
                 availabilityNote: availabilityNote || null,
@@ -842,7 +972,8 @@ export function SupplyAddOfferModal({
             }
             className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
           >
-            Enregistrer
+            {submitLabel ||
+              (initialOffer ? "Enregistrer les modifications" : "Enregistrer")}
           </button>
         </div>
       </div>

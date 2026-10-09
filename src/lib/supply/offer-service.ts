@@ -11,11 +11,27 @@ import {
   formatProductSubtotalLabel,
   proposePackagingFromOffer,
 } from "@/lib/supply/offer-cost";
+import { findSupplyOfferDuplicateCandidates } from "@/lib/supply/offer-duplicates";
 import { validateSupplyOfferInput } from "@/lib/supply/offer-validation";
 import type {
   SupplyOfferInput,
+  SupplyOfferPriceHistoryEntry,
   SupplyOfferView,
 } from "@/lib/supply/offer-types";
+
+export class SupplyOfferDuplicateError extends Error {
+  readonly code = "DUPLICATE" as const;
+  readonly candidates: ReturnType<typeof findSupplyOfferDuplicateCandidates>;
+  constructor(
+    candidates: ReturnType<typeof findSupplyOfferDuplicateCandidates>,
+  ) {
+    super(
+      "Une offre possiblement identique existe déjà pour ce besoin. Modifiez l’existante ou confirmez une offre distincte.",
+    );
+    this.name = "SupplyOfferDuplicateError";
+    this.candidates = candidates;
+  }
+}
 
 function n(v: unknown): number | null {
   if (v == null || v === "") return null;
@@ -176,9 +192,52 @@ export function mapSupplyOfferToView(
       offerId: row.id,
       productImageUrl: row.productImageUrl ?? null,
     }),
+    priceHistory: parsePriceHistory(row.priceHistory),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
+}
+
+function parsePriceHistory(raw: unknown): SupplyOfferPriceHistoryEntry[] {
+  if (!Array.isArray(raw)) return [];
+  const out: SupplyOfferPriceHistoryEntry[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const e = item as Record<string, unknown>;
+    const tax = e.priceTaxMode === "TTC" ? "TTC" : "HT";
+    const src = String(e.priceSourceType ?? "USER_ENTERED");
+    if (
+      src !== "WEB_VERIFIED" &&
+      src !== "SUPPLIER_QUOTE" &&
+      src !== "USER_ENTERED" &&
+      src !== "IMPORT"
+    ) {
+      continue;
+    }
+    out.push({
+      unitPrice: n(e.unitPrice),
+      priceUnit: String(e.priceUnit ?? "U"),
+      priceTaxMode: tax,
+      priceSourceType: src,
+      observedAt:
+        typeof e.observedAt === "string"
+          ? e.observedAt
+          : e.observedAt
+            ? String(e.observedAt)
+            : null,
+      recordedAt:
+        typeof e.recordedAt === "string"
+          ? e.recordedAt
+          : e.recordedAt
+            ? String(e.recordedAt)
+            : null,
+      changedAt:
+        typeof e.changedAt === "string"
+          ? e.changedAt
+          : new Date().toISOString(),
+    });
+  }
+  return out;
 }
 
 function productImageDisplayUrl(opts: {
@@ -275,6 +334,8 @@ export async function createSupplyOffer(opts: {
   requirementId: string;
   recordedById: string;
   input: SupplyOfferInput;
+  /** Confirmer explicitement une offre distincte malgré un doublon potentiel. */
+  forceCreate?: boolean;
 }): Promise<SupplyOfferView> {
   const validation = validateSupplyOfferInput(opts.input);
   if (!validation.ok) throw new Error(validation.error);
@@ -284,6 +345,39 @@ export async function createSupplyOffer(opts: {
     organizationId: opts.organizationId,
     supplierExternalOrgId: opts.input.supplierExternalOrgId,
   });
+
+  const existingRows = await prisma.supplyOffer.findMany({
+    where: {
+      organizationId: opts.organizationId,
+      requirementId: opts.requirementId,
+      archivedAt: null,
+    },
+    select: {
+      id: true,
+      supplierExternalOrgId: true,
+      productLabel: true,
+      productRef: true,
+      sourceUrl: true,
+      unitPrice: true,
+      archivedAt: true,
+      techAttributes: true,
+    },
+  });
+  const dups = findSupplyOfferDuplicateCandidates({
+    candidates: existingRows.map((r) => ({
+      ...r,
+      unitPrice: n(r.unitPrice),
+    })),
+    input: {
+      supplierExternalOrgId: opts.input.supplierExternalOrgId,
+      productRef: opts.input.productRef,
+      sourceUrl: opts.input.sourceUrl,
+      techAttributes: opts.input.techAttributes,
+    },
+  });
+  if (dups.length > 0 && !opts.forceCreate) {
+    throw new SupplyOfferDuplicateError(dups);
+  }
 
   const recordedAt = toDate(opts.input.recordedAt) ?? new Date();
   const unitPrice = n(opts.input.unitPrice);
@@ -449,6 +543,31 @@ export async function updateSupplyOffer(opts: {
     });
   }
 
+  const nextPrice = n(merged.unitPrice);
+  const nextUnit = merged.priceUnit?.trim() || "U";
+  const nextTax = merged.priceTaxMode ?? "HT";
+  const prevPrice = n(existing.unitPrice);
+  const priceChanged =
+    prevPrice !== nextPrice ||
+    existing.priceUnit !== nextUnit ||
+    existing.priceTaxMode !== nextTax ||
+    existing.priceSourceType !== merged.priceSourceType;
+
+  let nextHistory: Prisma.InputJsonValue | undefined;
+  if (priceChanged) {
+    const hist = parsePriceHistory(existing.priceHistory);
+    hist.push({
+      unitPrice: prevPrice,
+      priceUnit: existing.priceUnit,
+      priceTaxMode: existing.priceTaxMode,
+      priceSourceType: existing.priceSourceType,
+      observedAt: iso(existing.observedAt),
+      recordedAt: existing.recordedAt.toISOString(),
+      changedAt: new Date().toISOString(),
+    });
+    nextHistory = hist as unknown as Prisma.InputJsonValue;
+  }
+
   const row = await prisma.supplyOffer.update({
     where: { id: existing.id },
     data: {
@@ -460,9 +579,9 @@ export async function updateSupplyOffer(opts: {
           ? undefined
           : (merged.techAttributes as Prisma.InputJsonValue),
       equivalenceStatus: merged.equivalenceStatus ?? "TO_VERIFY",
-      unitPrice: n(merged.unitPrice),
-      priceUnit: merged.priceUnit?.trim() || "U",
-      priceTaxMode: merged.priceTaxMode ?? "HT",
+      unitPrice: nextPrice,
+      priceUnit: nextUnit,
+      priceTaxMode: nextTax,
       vatRate: n(merged.vatRate),
       priceSourceType: merged.priceSourceType,
       sourceUrl: merged.sourceUrl?.trim() || null,
@@ -479,6 +598,7 @@ export async function updateSupplyOffer(opts: {
       deliveryFee: n(merged.deliveryFee),
       craneFee: n(merged.craneFee),
       otherFees: n(merged.otherFees),
+      ...(nextHistory !== undefined ? { priceHistory: nextHistory } : {}),
     },
     include: OFFER_INCLUDE,
   });
@@ -555,7 +675,9 @@ export async function archiveSupplyOffer(opts: {
   projectId: string;
   requirementId: string;
   offerId: string;
-}): Promise<void> {
+  /** Requis si l’offre est actuellement retenue — évite un retrait silencieux. */
+  allowClearSelection?: boolean;
+}): Promise<{ archived: true; selectionCleared: boolean }> {
   const req = await assertRequirement(opts);
   const existing = await prisma.supplyOffer.findFirst({
     where: {
@@ -563,22 +685,108 @@ export async function archiveSupplyOffer(opts: {
       organizationId: opts.organizationId,
       requirementId: opts.requirementId,
     },
-    select: { id: true },
+    select: { id: true, archivedAt: true },
   });
   if (!existing) throw new Error("Offre introuvable");
+  if (existing.archivedAt) {
+    return { archived: true, selectionCleared: false };
+  }
 
+  const isSelected = req.selectedOfferId === existing.id;
+  if (isSelected && !opts.allowClearSelection) {
+    throw new Error(
+      "Cette offre est retenue. Confirmez l’archivage avec retrait de la sélection, ou retenez une autre offre d’abord.",
+    );
+  }
+
+  let selectionCleared = false;
   await prisma.$transaction(async (tx) => {
     await tx.supplyOffer.update({
       where: { id: existing.id },
       data: { archivedAt: new Date() },
     });
-    if (req.selectedOfferId === existing.id) {
+    if (isSelected) {
       await tx.materialRequirement.update({
         where: { id: req.id },
         data: { selectedOfferId: null },
       });
+      selectionCleared = true;
     }
   });
+  return { archived: true, selectionCleared };
+}
+
+/**
+ * Suppression définitive uniquement si aucune dépendance bloquante.
+ * Sinon → erreur invitant à archiver.
+ */
+export async function deleteSupplyOffer(opts: {
+  organizationId: string;
+  projectId: string;
+  requirementId: string;
+  offerId: string;
+}): Promise<{ deleted: true }> {
+  const req = await assertRequirement(opts);
+  const existing = await prisma.supplyOffer.findFirst({
+    where: {
+      id: opts.offerId,
+      organizationId: opts.organizationId,
+      requirementId: opts.requirementId,
+    },
+    select: {
+      id: true,
+      productImageUrl: true,
+      archivedAt: true,
+    },
+  });
+  if (!existing) throw new Error("Offre introuvable");
+
+  if (req.selectedOfferId === existing.id) {
+    throw new Error(
+      "Offre retenue — suppression interdite. Archivez-la (avec confirmation) ou retenez une autre offre.",
+    );
+  }
+
+  const orderLinks = await prisma.materialRequirementOrderLink.count({
+    where: {
+      organizationId: opts.organizationId,
+      materialRequirementId: opts.requirementId,
+    },
+  });
+  // Si le besoin a déjà des BC, on refuse la suppression destructrice des offres
+  // (historique d’approvisionnement) — archivage uniquement.
+  if (orderLinks > 0 && !existing.archivedAt) {
+    throw new Error(
+      "Ce besoin est lié à une commande — archivez l’offre plutôt que de la supprimer.",
+    );
+  }
+
+  await prisma.supplyOffer.delete({ where: { id: existing.id } });
+  // Photo storage:// : nettoyage best-effort hors transaction (ne bloque pas)
+  if (existing.productImageUrl?.startsWith("storage://")) {
+    try {
+      const { createServiceRoleClient } = await import("@/lib/supabase");
+      const {
+        DOCUMENTS_BUCKET,
+        extractStoragePathFromUrl,
+      } = await import("@/lib/storage/supabase-object");
+      const supabase = createServiceRoleClient();
+      const path = extractStoragePathFromUrl(
+        existing.productImageUrl,
+        DOCUMENTS_BUCKET,
+      );
+      if (
+        supabase &&
+        path &&
+        path.startsWith(`supply-offers/${opts.organizationId}/`)
+      ) {
+        await supabase.storage.from(DOCUMENTS_BUCKET).remove([path]);
+      }
+    } catch {
+      /* ignore cleanup errors */
+    }
+  }
+  return { deleted: true };
 }
 
 /**

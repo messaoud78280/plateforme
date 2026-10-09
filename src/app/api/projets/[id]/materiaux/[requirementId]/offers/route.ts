@@ -10,6 +10,7 @@ import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import {
   createSupplyOffer,
   listSupplyOffersForRequirement,
+  SupplyOfferDuplicateError,
 } from "@/lib/supply/offer-service";
 import { compareSupplyOffers } from "@/lib/supply/offer-compare";
 import type { SupplyOfferInput } from "@/lib/supply/offer-types";
@@ -93,19 +94,33 @@ export async function POST(req: Request, ctx: Ctx) {
   });
   if (!ok) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
 
-  const body = (await req.json().catch(() => null)) as SupplyOfferInput | null;
+  const body = (await req.json().catch(() => null)) as
+    | (SupplyOfferInput & { forceCreate?: boolean })
+    | null;
   if (!body) return NextResponse.json({ error: "Corps invalide" }, { status: 400 });
 
   try {
+    const { forceCreate, ...input } = body;
     const offer = await createSupplyOffer({
       organizationId: orgId,
       projectId,
       requirementId,
       recordedById: session.user.id,
-      input: body,
+      input,
+      forceCreate: forceCreate === true,
     });
     return NextResponse.json({ ok: true, offer }, { status: 201 });
   } catch (e) {
+    if (e instanceof SupplyOfferDuplicateError) {
+      return NextResponse.json(
+        {
+          error: e.message,
+          code: e.code,
+          candidates: e.candidates,
+        },
+        { status: 409 },
+      );
+    }
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Erreur" },
       { status: 400 },

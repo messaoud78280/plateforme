@@ -72,6 +72,7 @@ function baseOffer(
     productImageUrl: null,
     productImageOrigin: null,
     productImageDisplayUrl: null,
+    priceHistory: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...partial,

@@ -18,6 +18,7 @@ import {
   FileText,
   ImagePlus,
   Link2,
+  MoreHorizontal,
   Package,
   Pencil,
   Ruler,
@@ -92,7 +93,21 @@ export function SupplyStudyDialog({
   const [urlReady, setUrlReady] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("price_asc");
   const [showArchived, setShowArchived] = useState(false);
-  const [addMode, setAddMode] = useState<"manual" | "quote" | null>(null);
+  const [addMode, setAddMode] = useState<"manual" | "quote" | "edit" | null>(
+    null,
+  );
+  const [editOfferId, setEditOfferId] = useState<string | null>(null);
+  const [dupPrompt, setDupPrompt] = useState<{
+    input: Record<string, unknown>;
+    candidates: Array<{
+      id: string;
+      productLabel: string;
+      productRef: string | null;
+      unitPrice: number | null;
+      matchReasons: string[];
+    }>;
+  } | null>(null);
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [suppliers, setSuppliers] = useState<SupplierOpt[]>([]);
   const [editDesc, setEditDesc] = useState(false);
   const [draftLabel, setDraftLabel] = useState(need.label);
@@ -216,6 +231,13 @@ export function SupplyStudyDialog({
       );
     })();
   }, [addMode]);
+
+  function openEditOffer(offerId: string) {
+    setEditOfferId(offerId);
+    setInspectedId(offerId);
+    setAddMode("edit");
+    setMenuOpenId(null);
+  }
 
   function requestClose() {
     if (dirty) {
@@ -411,24 +433,133 @@ export function SupplyStudyDialog({
     }
   }
 
-  async function submitOffer(input: Record<string, unknown>) {
+  async function submitOffer(
+    input: Record<string, unknown>,
+    opts?: { forceCreate?: boolean },
+  ) {
     setBusy(true);
     setError(null);
     try {
+      if (addMode === "edit" && editOfferId) {
+        const res = await fetch(
+          `/api/projets/${projectId}/materiaux/${need.id}/offers/${editOfferId}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(input),
+          },
+        );
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erreur");
+        setAddMode(null);
+        setEditOfferId(null);
+        await loadOffers();
+        onChanged();
+        setToast("Offre mise à jour");
+        window.setTimeout(() => setToast(null), 3000);
+        return;
+      }
+
       const res = await fetch(
         `/api/projets/${projectId}/materiaux/${need.id}/offers`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(input),
+          body: JSON.stringify({
+            ...input,
+            forceCreate: opts?.forceCreate === true,
+          }),
         },
       );
       const data = await res.json();
+      if (res.status === 409 && data.code === "DUPLICATE") {
+        setDupPrompt({
+          input,
+          candidates: Array.isArray(data.candidates) ? data.candidates : [],
+        });
+        setAddMode(null);
+        return;
+      }
       if (!res.ok) throw new Error(data.error || "Erreur");
       setAddMode(null);
+      setDupPrompt(null);
+      if (data.offer?.id) setInspectedId(data.offer.id);
       await loadOffers();
       onChanged();
       setToast("Offre enregistrée");
+      window.setTimeout(() => setToast(null), 3000);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function archiveOfferById(
+    offerId: string,
+    isSelected: boolean,
+  ) {
+    if (!canWrite) return;
+    const msg = isSelected
+      ? "Cette offre est retenue. Archiver retirera la sélection (aucun BC modifié). Continuer ?"
+      : "Archiver cette offre ? Elle reste visible via « Archivées ».";
+    if (!confirm(msg)) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/projets/${projectId}/materiaux/${need.id}/offers/${offerId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            archive: true,
+            allowClearSelection: isSelected,
+          }),
+        },
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur archivage");
+      setMenuOpenId(null);
+      await loadOffers();
+      onChanged();
+      setToast("Offre archivée");
+      window.setTimeout(() => setToast(null), 3000);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteOfferById(offerId: string) {
+    if (!canWrite) return;
+    if (
+      !confirm(
+        "Supprimer définitivement cette offre ? Action irréversible. Si des dépendances existent, utilisez plutôt Archiver.",
+      )
+    ) {
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/projets/${projectId}/materiaux/${need.id}/offers/${offerId}`,
+        { method: "DELETE" },
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(
+          data.error ||
+            "Suppression impossible — essayez d’archiver l’offre.",
+        );
+      }
+      setMenuOpenId(null);
+      setInspectedId((prev) => (prev === offerId ? null : prev));
+      await loadOffers();
+      onChanged();
+      setToast("Offre supprimée");
       window.setTimeout(() => setToast(null), 3000);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
@@ -891,84 +1022,141 @@ export function SupplyStudyDialog({
                   o.priceSourceType === "WEB_VERIFIED" &&
                   isJustifiedPricedOffer(o);
                 return (
-                  <button
+                  <div
                     key={o.id}
-                    type="button"
-                    onClick={() => setInspectedId(o.id)}
-                    className={`w-full rounded-xl border px-3 py-3 text-left transition ${
+                    className={`relative w-full rounded-xl border px-3 py-3 transition ${
                       selected
                         ? "border-[#2563eb] bg-sky-50/40 shadow-sm"
                         : "border-slate-200 bg-white hover:border-slate-300"
                     } ${o.archivedAt ? "opacity-60" : ""}`}
                   >
-                    <div className="flex items-start gap-3">
-                      <span
-                        className={`mt-1 h-4 w-4 shrink-0 rounded-full border-2 ${
-                          selected
-                            ? "border-[#2563eb] bg-[#2563eb]"
-                            : "border-slate-300"
-                        }`}
-                        aria-hidden
-                      />
-                      {o.productImageDisplayUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={o.productImageDisplayUrl}
-                          alt=""
-                          className="h-12 w-12 shrink-0 rounded-lg border border-slate-200 object-cover"
+                    <button
+                      type="button"
+                      onClick={() => setInspectedId(o.id)}
+                      className="w-full text-left"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span
+                          className={`mt-1 h-4 w-4 shrink-0 rounded-full border-2 ${
+                            selected
+                              ? "border-[#2563eb] bg-[#2563eb]"
+                              : "border-slate-300"
+                          }`}
+                          aria-hidden
                         />
-                      ) : (
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50">
-                          <Package className="h-5 w-5 text-slate-300" />
-                        </div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate text-sm font-bold text-slate-900">
-                            {o.agencyDisplay || o.supplierName}
-                          </p>
-                          <span
-                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
-                              justified
-                                ? "bg-emerald-100 text-emerald-800"
-                                : o.priceSourceType === "SUPPLIER_QUOTE"
-                                  ? "bg-slate-200 text-slate-700"
-                                  : "bg-slate-100 text-slate-600"
-                            }`}
-                          >
-                            {qualifyOfferSourceLabel(o)}
-                          </span>
-                          {o.isSelected ? (
-                            <span className="rounded bg-[#1e3a5f] px-1.5 py-0.5 text-[10px] font-bold text-white">
-                              Retenue
+                        {o.productImageDisplayUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={o.productImageDisplayUrl}
+                            alt=""
+                            className="h-12 w-12 shrink-0 rounded-lg border border-slate-200 object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50">
+                            <Package className="h-5 w-5 text-slate-300" />
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1 pr-16">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="truncate text-sm font-bold text-slate-900">
+                              {o.agencyDisplay || o.supplierName}
+                            </p>
+                            <span
+                              className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                                justified
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : o.priceSourceType === "SUPPLIER_QUOTE"
+                                    ? "bg-slate-200 text-slate-700"
+                                    : "bg-slate-100 text-slate-600"
+                              }`}
+                            >
+                              {qualifyOfferSourceLabel(o)}
                             </span>
-                          ) : null}
-                        </div>
-                        <p className="mt-0.5 truncate text-xs text-slate-600">
-                          {o.productLabel}
-                          {o.productRef ? ` · ${o.productRef}` : ""}
-                        </p>
-                        <div className="mt-1 flex flex-wrap items-baseline gap-2">
-                          <p className="text-sm font-bold tabular-nums text-slate-900">
-                            {o.unitPrice == null
-                              ? "Prix non reçu"
-                              : `${formatStudyMoney(o.unitPrice)}/${o.priceUnit} ${o.priceTaxMode}`}
+                            {o.isSelected ? (
+                              <span className="rounded bg-[#1e3a5f] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                Retenue
+                              </span>
+                            ) : null}
+                          </div>
+                          <p className="mt-0.5 truncate text-xs text-slate-600">
+                            {o.productLabel}
+                            {o.productRef ? ` · ${o.productRef}` : ""}
                           </p>
-                          {vs ? (
-                            <span className="text-[11px] font-semibold text-red-600">
-                              {vs}
-                            </span>
-                          ) : null}
+                          <div className="mt-1 flex flex-wrap items-baseline gap-2">
+                            <p className="text-sm font-bold tabular-nums text-slate-900">
+                              {o.unitPrice == null
+                                ? "Prix non reçu"
+                                : `${formatStudyMoney(o.unitPrice)}/${o.priceUnit} ${o.priceTaxMode}`}
+                            </p>
+                            {vs ? (
+                              <span className="text-[11px] font-semibold text-red-600">
+                                {vs}
+                              </span>
+                            ) : null}
+                          </div>
+                          <p className="mt-0.5 text-[11px] text-slate-500">
+                            {o.packagingLabel || "Conditionnement —"}
+                            {" · "}
+                            {formatStudyDay(o.observedAt || o.recordedAt)}
+                            {o.sourceUrl ? " · lien source" : ""}
+                          </p>
                         </div>
-                        <p className="mt-0.5 text-[11px] text-slate-500">
-                          {o.packagingLabel || "Conditionnement —"}
-                          {" · "}
-                          {formatStudyDay(o.observedAt || o.recordedAt)}
-                          {o.sourceUrl ? " · lien source" : ""}
-                        </p>
                       </div>
-                    </div>
-                  </button>
+                    </button>
+                    {canWrite && !o.archivedAt ? (
+                      <div className="absolute right-2 top-2 flex items-center gap-0.5">
+                        <button
+                          type="button"
+                          title="Modifier l’offre"
+                          aria-label="Modifier l’offre"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditOffer(o.id);
+                          }}
+                          className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-700 hover:bg-slate-50"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <div className="relative">
+                          <button
+                            type="button"
+                            title="Plus d’actions"
+                            aria-label="Plus d’actions"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setInspectedId(o.id);
+                              setMenuOpenId((v) =>
+                                v === o.id ? null : o.id,
+                              );
+                            }}
+                            className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-700 hover:bg-slate-50"
+                          >
+                            <MoreHorizontal className="h-3.5 w-3.5" />
+                          </button>
+                          {menuOpenId === o.id ? (
+                            <div className="absolute right-0 z-20 mt-1 w-44 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                              <button
+                                type="button"
+                                className="block w-full px-3 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                                onClick={() =>
+                                  void archiveOfferById(o.id, o.isSelected)
+                                }
+                              >
+                                Archiver l’offre
+                              </button>
+                              <button
+                                type="button"
+                                className="block w-full px-3 py-1.5 text-left text-xs font-semibold text-red-700 hover:bg-red-50"
+                                onClick={() => void deleteOfferById(o.id)}
+                              >
+                                Supprimer…
+                              </button>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
                 );
               })}
             </div>
@@ -981,9 +1169,63 @@ export function SupplyStudyDialog({
 
           {/* Right — Photo fixe + détail scrollable */}
           <section className="flex min-h-0 flex-col overflow-hidden p-4 lg:col-span-4">
-            <h3 className="shrink-0 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
-              {inspected?.isSelected ? "Offre retenue" : "Détail de l’offre"}
-            </h3>
+            <div className="flex shrink-0 items-center justify-between gap-2">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                {inspected?.isSelected ? "Offre retenue" : "Détail de l’offre"}
+              </h3>
+              {inspected && canWrite && !inspected.archivedAt ? (
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => openEditOffer(inspected.id)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-50"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    Modifier l’offre
+                  </button>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      aria-label="Actions offre"
+                      onClick={() =>
+                        setMenuOpenId((v) =>
+                          v === `right-${inspected.id}`
+                            ? null
+                            : `right-${inspected.id}`,
+                        )
+                      }
+                      className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-700"
+                    >
+                      <MoreHorizontal className="h-3.5 w-3.5" />
+                    </button>
+                    {menuOpenId === `right-${inspected.id}` ? (
+                      <div className="absolute right-0 z-20 mt-1 w-48 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                        <button
+                          type="button"
+                          className="block w-full px-3 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                          onClick={() =>
+                            void archiveOfferById(
+                              inspected.id,
+                              inspected.isSelected,
+                            )
+                          }
+                        >
+                          Archiver l’offre
+                        </button>
+                        <button
+                          type="button"
+                          className="block w-full px-3 py-1.5 text-left text-xs font-semibold text-red-700 hover:bg-red-50"
+                          onClick={() => void deleteOfferById(inspected.id)}
+                        >
+                          Supprimer l’offre…
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
+            </div>
             {!inspected ? (
               <p className="mt-6 text-sm text-slate-500">
                 Sélectionnez une offre dans le comparateur pour l’inspecter.
@@ -1249,6 +1491,29 @@ export function SupplyStudyDialog({
                         ? inspected.renderedCost.displayLabel
                         : "Coût rendu chantier non disponible"}
                     </p>
+                    {inspected.priceHistory?.length ? (
+                      <div className="mt-3 border-t border-slate-200 pt-2">
+                        <p className="text-[10px] font-bold uppercase text-slate-500">
+                          Historique des prix (pas une offre concurrente)
+                        </p>
+                        <ul className="mt-1 space-y-1 text-[11px] text-slate-600">
+                          {[...inspected.priceHistory]
+                            .slice(-3)
+                            .reverse()
+                            .map((h, i) => (
+                              <li key={`${h.changedAt}-${i}`}>
+                                {h.unitPrice == null
+                                  ? "Prix non renseigné"
+                                  : `${formatStudyMoney(h.unitPrice)} / ${h.priceUnit} ${h.priceTaxMode}`}
+                                {" · "}
+                                {formatStudyDay(h.observedAt || h.recordedAt)}
+                                {" → modifié le "}
+                                {formatStudyDay(h.changedAt)}
+                              </li>
+                            ))}
+                        </ul>
+                      </div>
+                    ) : null}
                   </div>
 
                   <div className="rounded-xl border border-slate-200 p-3">
@@ -1339,13 +1604,87 @@ export function SupplyStudyDialog({
             addMode === "quote" ? "SUPPLIER_QUOTE" : "USER_ENTERED"
           }
           title={
-            addMode === "quote"
-              ? "Importer un devis fournisseur"
-              : "Ajouter une offre manuellement"
+            addMode === "edit"
+              ? "Modifier l’offre"
+              : addMode === "quote"
+                ? "Importer un devis fournisseur"
+                : "Ajouter une offre manuellement"
           }
-          onClose={() => setAddMode(null)}
-          onSubmit={submitOffer}
+          initialOffer={
+            addMode === "edit"
+              ? (offers.find((o) => o.id === editOfferId) ?? null)
+              : null
+          }
+          onClose={() => {
+            setAddMode(null);
+            setEditOfferId(null);
+          }}
+          onSubmit={(input) => submitOffer(input)}
         />
+      ) : null}
+
+      {dupPrompt ? (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+            <h3 className="text-base font-bold text-slate-900">
+              Offre déjà présente ?
+            </h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Une offre potentiellement identique existe déjà pour ce besoin.
+              Modifiez l’existante plutôt que d’en créer une troisième.
+            </p>
+            <ul className="mt-3 max-h-48 space-y-2 overflow-y-auto">
+              {dupPrompt.candidates.map((c) => (
+                <li
+                  key={c.id}
+                  className="rounded-xl border border-amber-200 bg-amber-50/60 px-3 py-2"
+                >
+                  <p className="text-sm font-semibold text-slate-900">
+                    {c.productLabel}
+                    {c.productRef ? ` · ${c.productRef}` : ""}
+                  </p>
+                  <p className="text-[11px] text-amber-900">
+                    {c.matchReasons.join(" · ")}
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    {c.unitPrice == null
+                      ? "Prix non renseigné"
+                      : formatStudyMoney(c.unitPrice)}
+                  </p>
+                  <button
+                    type="button"
+                    className="mt-1.5 text-xs font-bold text-[#2563eb]"
+                    onClick={() => {
+                      setDupPrompt(null);
+                      openEditOffer(c.id);
+                    }}
+                  >
+                    Modifier l’existante
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600"
+                onClick={() => setDupPrompt(null)}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800"
+                onClick={() =>
+                  void submitOffer(dupPrompt.input, { forceCreate: true })
+                }
+              >
+                Conserver comme nouvelle offre distincte
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
 
       {previewOpen ? (

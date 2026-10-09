@@ -10,6 +10,7 @@ import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import {
   archiveSupplyOffer,
   clearSelectedSupplyOffer,
+  deleteSupplyOffer,
   selectSupplyOffer,
   updateSupplyOffer,
 } from "@/lib/supply/offer-service";
@@ -61,19 +62,21 @@ export async function PATCH(req: Request, ctx: Ctx) {
         select?: boolean;
         clearSelection?: boolean;
         archive?: boolean;
+        allowClearSelection?: boolean;
       })
     | null;
   if (!body) return NextResponse.json({ error: "Corps invalide" }, { status: 400 });
 
   try {
     if (body.archive) {
-      await archiveSupplyOffer({
+      const result = await archiveSupplyOffer({
         organizationId: g.orgId,
         projectId,
         requirementId,
         offerId,
+        allowClearSelection: body.allowClearSelection === true,
       });
-      return NextResponse.json({ ok: true, archived: true });
+      return NextResponse.json({ ok: true, ...result });
     }
     if (body.clearSelection) {
       await clearSelectedSupplyOffer({
@@ -97,7 +100,11 @@ export async function PATCH(req: Request, ctx: Ctx) {
       });
     }
 
-    const { select: _s, clearSelection: _c, archive: _a, ...input } = body;
+    const input: Partial<SupplyOfferInput> = { ...body };
+    delete (input as { select?: boolean }).select;
+    delete (input as { clearSelection?: boolean }).clearSelection;
+    delete (input as { archive?: boolean }).archive;
+    delete (input as { allowClearSelection?: boolean }).allowClearSelection;
     const offer = await updateSupplyOffer({
       organizationId: g.orgId,
       projectId,
@@ -114,7 +121,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
   }
 }
 
-export async function DELETE(_req: Request, ctx: Ctx) {
+export async function DELETE(req: Request, ctx: Ctx) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
@@ -123,17 +130,35 @@ export async function DELETE(_req: Request, ctx: Ctx) {
   if (g instanceof NextResponse) return g;
 
   const { id: projectId, requirementId, offerId } = await ctx.params;
+  const url = new URL(req.url);
+  const mode = url.searchParams.get("mode"); // hard | archive (défaut hard)
+
   try {
-    await archiveSupplyOffer({
+    if (mode === "archive") {
+      const allowClear =
+        url.searchParams.get("allowClearSelection") === "1";
+      const result = await archiveSupplyOffer({
+        organizationId: g.orgId,
+        projectId,
+        requirementId,
+        offerId,
+        allowClearSelection: allowClear,
+      });
+      return NextResponse.json({ ok: true, ...result });
+    }
+    const result = await deleteSupplyOffer({
       organizationId: g.orgId,
       projectId,
       requirementId,
       offerId,
     });
-    return NextResponse.json({ ok: true, archived: true });
+    return NextResponse.json({ ok: true, ...result });
   } catch (e) {
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Erreur" },
+      {
+        error: e instanceof Error ? e.message : "Erreur",
+        suggestArchive: true,
+      },
       { status: 400 },
     );
   }

@@ -386,7 +386,7 @@ export async function applySupplyDirectInTx(
         );
       }
 
-      let supplierId =
+      const supplierId =
         op.offer.supplier_external_org_id?.trim() ||
         (op.offer.supplier_ref
           ? supplierRefMap.get(op.offer.supplier_ref) ?? null
@@ -429,7 +429,7 @@ export async function applySupplyDirectInTx(
       });
       if (!validation.ok) fail(validation.error, "SUPPLY_PRICE_VALIDATION");
 
-      // Idempotence
+      // Idempotence + anti-doublons (ref / URL / EAN / fournisseur sans identité)
       const key = supplyOfferIdempotencyKey({
         organizationId: orgId,
         requirementId: req.id,
@@ -442,19 +442,23 @@ export async function applySupplyDirectInTx(
         where: {
           organizationId: orgId,
           requirementId: req.id,
-          supplierExternalOrgId: supplierId,
           archivedAt: null,
         },
         select: {
           id: true,
+          supplierExternalOrgId: true,
+          productLabel: true,
           productRef: true,
           sourceUrl: true,
           observedAt: true,
           unitPrice: true,
+          archivedAt: true,
+          techAttributes: true,
         },
       });
-      const dup = existingOffers.find(
+      const dupKey = existingOffers.find(
         (e) =>
+          e.supplierExternalOrgId === supplierId &&
           supplyOfferIdempotencyKey({
             organizationId: orgId,
             requirementId: req.id,
@@ -464,9 +468,32 @@ export async function applySupplyDirectInTx(
             observedAt: e.observedAt?.toISOString() ?? null,
           }) === key,
       );
-      if (dup) {
-        warnings.push(`Offre déjà présente (idempotence) — réutilisation ${dup.id}`);
+      if (dupKey) {
+        warnings.push(`Offre déjà présente (idempotence) — réutilisation ${dupKey.id}`);
         appliedOps.push("add_supply_offer:idempotent");
+        continue;
+      }
+      const { findSupplyOfferDuplicateCandidates } = await import(
+        "@/lib/supply/offer-duplicates"
+      );
+      const softDups = findSupplyOfferDuplicateCandidates({
+        candidates: existingOffers.map((e) => ({
+          ...e,
+          unitPrice:
+            e.unitPrice == null ? null : Number(e.unitPrice),
+        })),
+        input: {
+          supplierExternalOrgId: supplierId,
+          productRef: op.offer.product_ref ?? null,
+          sourceUrl: op.offer.source_url ?? null,
+          techAttributes: op.offer.tech_attributes,
+        },
+      });
+      if (softDups.length > 0) {
+        warnings.push(
+          `Offre possiblement en doublon — réutilisation ${softDups[0].id} (${softDups[0].matchReasons.join(", ")})`,
+        );
+        appliedOps.push("add_supply_offer:duplicate_skipped");
         continue;
       }
 

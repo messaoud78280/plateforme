@@ -67,6 +67,7 @@ function base(over: Partial<SupplyOfferView> = {}): SupplyOfferView {
     productImageUrl: null,
     productImageOrigin: null,
     productImageDisplayUrl: null,
+    priceHistory: [],
     createdAt: "2026-10-08",
     updatedAt: "2026-10-08",
     ...over,

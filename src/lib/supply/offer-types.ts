@@ -134,6 +134,11 @@ export type SupplyOfferView = {
   productImageOrigin: string | null;
   /** URL affichable client (proxy auth ou https direct). */
   productImageDisplayUrl: string | null;
+  /**
+   * Historique des prix précédents (append-only).
+   * Ne constitue pas une offre concurrente active.
+   */
+  priceHistory: SupplyOfferPriceHistoryEntry[];
   packagingProposal: {
     packs: number | null;
     roundedQty: number | null;
@@ -141,4 +146,14 @@ export type SupplyOfferView = {
   } | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type SupplyOfferPriceHistoryEntry = {
+  unitPrice: number | null;
+  priceUnit: string;
+  priceTaxMode: SupplyOfferPriceTaxMode;
+  priceSourceType: SupplyOfferPriceSourceType;
+  observedAt: string | null;
+  recordedAt: string | null;
+  changedAt: string;
 };

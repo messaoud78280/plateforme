@@ -131,6 +131,10 @@ model User {
   materialRequirementsCreated  MaterialRequirement[] @relation("MaterialRequirementCreatedBy")
   materialRequirementsValidated MaterialRequirement[] @relation("MaterialRequirementValidatedBy")
   supplyOffersRecorded         SupplyOffer[] @relation("SupplyOfferRecordedBy")
+  catalogMaterialsCreated      CatalogMaterial[] @relation("CatalogMaterialCreatedBy")
+  catalogProductsCreated       CatalogProduct[] @relation("CatalogProductCreatedBy")
+  catalogSupplierOffersCreated CatalogSupplierOffer[] @relation("CatalogSupplierOfferCreatedBy")
+  catalogPriceObservationsRecorded CatalogPriceObservation[] @relation("CatalogPriceObservationRecordedBy")
   commercialQuotesCreated      CommercialQuote[] @relation("CommercialQuoteCreatedBy")
   commercialQuotesResponsible  CommercialQuote[] @relation("CommercialQuoteResponsible")
   siteVisitsCreated            SiteVisit[] @relation("SiteVisitCreatedBy")
@@ -274,6 +278,7 @@ model ExternalOrganization {
   contacts         ExternalOrgContact[]
   purchaseOrders   PurchaseOrder[]
   supplyOffers     SupplyOffer[]
+  catalogSupplierOffers CatalogSupplierOffer[]
   projectChannels  ProjectChannel[]
   commercialQuotesAsClient CommercialQuote[] @relation("CommercialQuoteClient")
   commercialLeads          CommercialLead[]
@@ -645,6 +650,161 @@ model SupplyOffer {
   @@index([recordedById])
 }
 
+// ─── Catalogue Matériaux (autonome, org-privé) ───────────────────────────────
+// Distinct de WorkItem (ouvrages), SiteResource (global) et CommercialMaterial (chiffrage).
+
+enum CatalogMaterialStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum CatalogProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+/// Fiche matériau générique (pas un SKU fournisseur).
+model CatalogMaterial {
+  id                    String                @id @default(cuid())
+  organizationId        String
+  family                String
+  designation           String
+  designationNormalized String
+  unit                  String                @default("U")
+  description           String?               @db.Text
+  techAttributes        Json?
+  status                CatalogMaterialStatus @default(DRAFT)
+  notes                 String?               @db.Text
+  createdById           String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User?            @relation("CatalogMaterialCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  products     CatalogProduct[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, family])
+  @@index([organizationId, designationNormalized])
+  @@index([createdById])
+}
+
+/// Produit commercial (fabricant + référence).
+model CatalogProduct {
+  id                         String               @id @default(cuid())
+  organizationId             String
+  catalogMaterialId          String
+  manufacturer               String?
+  manufacturerNormalized     String?
+  manufacturerRef            String?
+  manufacturerRefNormalized  String?
+  /// EAN/GTIN si réellement connu — jamais inventé
+  gtin                       String?
+  label                      String
+  dimensions                 String?
+  performances               String?              @db.Text
+  techAttributes             Json?
+  /// storage://… ou https://…
+  imageUrl                   String?
+  /// USER_UPLOAD | USER_URL | SUPPLIER_URL
+  imageOrigin                String?
+  sourceUrl                  String?
+  status                     CatalogProductStatus @default(DRAFT)
+  notes                      String?              @db.Text
+  createdById                String?
+  createdAt                  DateTime             @default(now())
+  updatedAt                  DateTime             @updatedAt
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  material     CatalogMaterial       @relation(fields: [catalogMaterialId], references: [id], onDelete: Cascade)
+  createdBy    User?                 @relation("CatalogProductCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  offers       CatalogSupplierOffer[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, catalogMaterialId])
+  @@index([organizationId, manufacturerNormalized, manufacturerRefNormalized])
+  @@index([organizationId, gtin])
+  @@index([createdById])
+}
+
+/// Offre fournisseur catalogue (sans besoin chantier).
+model CatalogSupplierOffer {
+  id                    String    @id @default(cuid())
+  organizationId        String
+  catalogProductId      String
+  supplierExternalOrgId String
+  /// Unité commerciale / conditionnement
+  priceUnit             String    @default("U")
+  packagingLabel        String?
+  unitsPerPack          Decimal?  @db.Decimal(14, 3)
+  minimumOrderQuantity  Decimal?  @db.Decimal(14, 3)
+  leadTimeDays          Decimal?  @db.Decimal(8, 2)
+  availabilityNote      String?
+  deliveryFee           Decimal?  @db.Decimal(14, 2)
+  craneFee              Decimal?  @db.Decimal(14, 2)
+  otherFees             Decimal?  @db.Decimal(14, 2)
+  sourceUrl             String?
+  /// WEB_VERIFIED | SUPPLIER_QUOTE | USER_ENTERED | IMPORT
+  priceSourceType       String?
+  quoteNumber           String?
+  quoteDocumentRef      String?
+  sourceNote            String?   @db.Text
+  /// Photo spécifique à cette offre (sinon image produit)
+  imageUrl              String?
+  imageOrigin           String?
+  archivedAt            DateTime?
+  createdById           String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  organization Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product      CatalogProduct           @relation(fields: [catalogProductId], references: [id], onDelete: Cascade)
+  supplier     ExternalOrganization     @relation(fields: [supplierExternalOrgId], references: [id], onDelete: Restrict)
+  createdBy    User?                    @relation("CatalogSupplierOfferCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  priceObservations CatalogPriceObservation[]
+
+  @@index([organizationId, catalogProductId])
+  @@index([organizationId, supplierExternalOrgId])
+  @@index([organizationId, archivedAt])
+  @@index([createdById])
+}
+
+/// Observation de prix append-only (historique).
+model CatalogPriceObservation {
+  id                     String   @id @default(cuid())
+  organizationId         String
+  catalogSupplierOfferId String
+  unitPrice              Decimal? @db.Decimal(14, 4)
+  priceUnit              String   @default("U")
+  /// HT | TTC
+  priceTaxMode           String   @default("HT")
+  vatRate                Decimal? @db.Decimal(5, 2)
+  observedAt             DateTime?
+  recordedAt             DateTime @default(now())
+  validUntil             DateTime?
+  /// WEB_VERIFIED | SUPPLIER_QUOTE | USER_ENTERED | IMPORT
+  priceSourceType        String
+  sourceUrl              String?
+  quoteNumber            String?
+  quoteDocumentRef       String?
+  sourceNote             String?  @db.Text
+  /// Lien optionnel vers une SupplyOffer chantier (capitalisation)
+  sourceSupplyOfferId    String?
+  recordedById           String?
+  createdAt              DateTime @default(now())
+
+  organization Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  offer        CatalogSupplierOffer @relation(fields: [catalogSupplierOfferId], references: [id], onDelete: Cascade)
+  recordedBy   User?                @relation("CatalogPriceObservationRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, catalogSupplierOfferId, recordedAt])
+  @@index([catalogSupplierOfferId, observedAt])
+  @@index([sourceSupplyOfferId])
+  @@index([recordedById])
+}
+
 /// Allocation besoin → ligne BC (N–N, multi-fournisseurs). quantityAllocated = unité du besoin.
 model MaterialRequirementOrderLink {
   id                     String   @id @default(cuid())
@@ -821,6 +981,11 @@ model Organization {
   materialRequirements  MaterialRequirement[]
   materialRequirementOrderLinks MaterialRequirementOrderLink[]
   supplyOffers              SupplyOffer[]
+  /// Catalogue Matériaux (org-privé) — distinct de WorkItem et CommercialMaterial
+  catalogMaterials          CatalogMaterial[]
+  catalogProducts           CatalogProduct[]
+  catalogSupplierOffers     CatalogSupplierOffer[]
+  catalogPriceObservations  CatalogPriceObservation[]
   /// Domaine Devis & Facturation (Commercial*) — isolé des Quote* / Invoice / Payment SaaS
   commercialOrgSettings     CommercialOrgSettings?
   commercialLeads           CommercialLead[]

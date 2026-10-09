@@ -32,6 +32,8 @@ const ALLOWED_HREFS: Record<PersonaNavKey, string[] | null> = {
     "/dashboard/messages",
     "/dashboard/taches",
     "/dashboard/commandes",
+    "/dashboard/catalogue-materiaux",
+    "/dashboard/fournisseurs",
     "/dashboard/documents",
     "/dashboard/messagerie",
     "/dashboard/fiches-suivi",

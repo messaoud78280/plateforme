@@ -538,7 +538,7 @@ function SupplyAddOfferModalForm({
   const [productRef, setProductRef] = useState(
     () => initialOffer?.productRef ?? "",
   );
-  const [equivalenceStatus, setEquivalenceStatus] = useState(
+  const [equivalenceStatus, setEquivalenceStatus] = useState<string>(
     () => initialOffer?.equivalenceStatus ?? "TO_VERIFY",
   );
   const [unitPrice, setUnitPrice] = useState(() =>

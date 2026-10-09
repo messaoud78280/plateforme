@@ -91,6 +91,9 @@ export function requiredHrefForApiPath(apiPath: string): string | null {
   if (path.startsWith("/api/suppliers")) {
     return "/dashboard/fournisseurs";
   }
+  if (path.startsWith("/api/catalogue-materiaux")) {
+    return "/dashboard/catalogue-materiaux";
+  }
   if (path.startsWith("/api/equipe")) {
     return "/dashboard/equipe";
   }

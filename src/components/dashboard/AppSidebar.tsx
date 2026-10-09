@@ -29,6 +29,7 @@ import {
   Users,
   Wallet,
   CircleDollarSign,
+  Package,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -127,6 +128,12 @@ function buildFamilies(): NavFamily[] {
         { href: "/dashboard/commandes", label: "Commandes", icon: Briefcase, roles: ["CLIENT"] },
         { href: "/dashboard/depenses", label: "Dépenses", icon: CircleDollarSign, roles: ["CLIENT"] },
         { href: "/dashboard/fournisseurs", label: "Fournisseurs", icon: Building2, roles: ["CLIENT"] },
+        {
+          href: "/dashboard/catalogue-materiaux",
+          label: "Catalogue Matériaux",
+          icon: Package,
+          roles: ["CLIENT"],
+        },
         { href: "/dashboard/livraisons", label: "Livraisons", icon: CalendarDays, roles: ["CLIENT"] },
       ],
     },

@@ -108,7 +108,7 @@ export default async function ProjetsPage({
         <div className="flex flex-wrap items-center gap-2">
           <CreateChantierForm
             clients={clients}
-            showClientPicker={staff && session.user.role !== "AGENT"}
+            showClientPicker={staff}
           />
         </div>
       </header>

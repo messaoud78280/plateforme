@@ -11,6 +11,7 @@ import {
 } from "@/lib/organization/access";
 import { isAgent, isBeworkStaff } from "@/lib/authz";
 import { mapChantierToProjectStatus } from "@/lib/chantier-lifecycle";
+import { CREATE_CHANTIER_STAFF_MISSING_CLIENT_ERROR } from "@/lib/chantier/create-chantier-contract";
 
 const CHANTIER_STATUSES: ChantierStatus[] = ["ETUDE", "EN_COURS", "EN_ATTENTE", "RECEPTION", "TERMINE"];
 const URGENCIES: ProjectUrgency[] = ["BASSE", "MOYENNE", "HAUTE", "URGENTE"];
@@ -96,7 +97,10 @@ export async function POST(request: Request) {
     clientId = target.id;
     organizationId = await ensureOrganizationForOwner(clientId);
   } else if (isStaff && !body.clientId) {
-    return NextResponse.json({ error: "Sélectionnez un client pour ce chantier." }, { status: 400 });
+    return NextResponse.json(
+      { error: CREATE_CHANTIER_STAFF_MISSING_CLIENT_ERROR },
+      { status: 400 },
+    );
   }
 
   const chantierStatusRaw = String(body.chantierStatus ?? "ETUDE");

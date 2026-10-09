@@ -16,11 +16,13 @@ import {
   Check,
   Eye,
   FileText,
+  ImagePlus,
   Link2,
   Package,
   Pencil,
   Ruler,
   ShoppingCart,
+  Trash2,
   X,
 } from "lucide-react";
 import type { MaterialRequirementRow } from "@/lib/materiaux/load-for-project";
@@ -107,6 +109,7 @@ export function SupplyStudyDialog({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [imageUrlDraft, setImageUrlDraft] = useState("");
+  const [imageUrlPanelOpen, setImageUrlPanelOpen] = useState(false);
   const [imageBusy, setImageBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -158,8 +161,17 @@ export function SupplyStudyDialog({
     setProductUrl("");
     setUrlError(null);
     setUrlReady(false);
+    setImageUrlDraft("");
+    setImageUrlPanelOpen(false);
     void loadOffers();
   }, [open, need, loadOffers]);
+
+  // Changement d’offre inspectée : pas de fuite d’URL/photo entre offres.
+  useEffect(() => {
+    setImageUrlDraft("");
+    setImageUrlPanelOpen(false);
+    setImageBusy(false);
+  }, [inspectedId]);
 
   useEffect(() => {
     if (!open) return;
@@ -967,9 +979,9 @@ export function SupplyStudyDialog({
             ) : null}
           </section>
 
-          {/* Right — Offer detail */}
-          <section className="flex min-h-0 flex-col overflow-y-auto p-4 lg:col-span-4">
-            <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
+          {/* Right — Photo fixe + détail scrollable */}
+          <section className="flex min-h-0 flex-col overflow-hidden p-4 lg:col-span-4">
+            <h3 className="shrink-0 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
               {inspected?.isSelected ? "Offre retenue" : "Détail de l’offre"}
             </h3>
             {!inspected ? (
@@ -979,31 +991,72 @@ export function SupplyStudyDialog({
               </p>
             ) : (
               <>
-                <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                {/* Carte photo — toujours visible, hors scroll des détails */}
+                <div className="mt-3 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2">
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-slate-600">
+                      Photo de présentation
+                    </p>
+                    {imageBusy ? (
+                      <span className="text-[10px] font-medium text-slate-500">
+                        Enregistrement…
+                      </span>
+                    ) : null}
+                  </div>
                   {inspected.productImageDisplayUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
+                      key={inspected.id}
                       src={inspected.productImageDisplayUrl}
                       alt={inspected.productLabel}
-                      className="h-40 w-full object-contain bg-white"
+                      className="h-36 w-full object-contain bg-white sm:h-40"
                     />
                   ) : (
-                    <div className="flex h-36 flex-col items-center justify-center gap-1 text-slate-400">
+                    <div className="flex h-32 flex-col items-center justify-center gap-1.5 bg-slate-50/80 px-3 text-center text-slate-400 sm:h-36">
                       <Package className="h-8 w-8" />
-                      <span className="text-xs font-medium">Aucune photo</span>
+                      <span className="text-xs font-semibold text-slate-500">
+                        Aucune photo de présentation
+                      </span>
                     </div>
                   )}
-                  {canWrite ? (
-                    <div className="space-y-2 border-t border-slate-100 bg-white p-2.5">
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          disabled={imageBusy}
-                          onClick={() => fileInputRef.current?.click()}
-                          className="rounded-lg border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-700"
-                        >
-                          Importer une image
-                        </button>
+                  <div className="space-y-2 border-t border-slate-100 bg-white p-3">
+                    {canWrite && !inspected.archivedAt ? (
+                      <>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            disabled={imageBusy}
+                            onClick={() => fileInputRef.current?.click()}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e3a5f]/20 bg-[#1e3a5f] px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-[#162d4a] disabled:opacity-45"
+                          >
+                            <ImagePlus className="h-3.5 w-3.5" />
+                            {inspected.productImageUrl
+                              ? "Remplacer"
+                              : "Importer une photo"}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={imageBusy}
+                            onClick={() =>
+                              setImageUrlPanelOpen((v) => !v)
+                            }
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-45"
+                          >
+                            <Link2 className="h-3.5 w-3.5" />
+                            Coller une URL d’image
+                          </button>
+                          {inspected.productImageUrl ? (
+                            <button
+                              type="button"
+                              disabled={imageBusy}
+                              onClick={() => void clearOfferImage()}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:opacity-45"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Supprimer
+                            </button>
+                          ) : null}
+                        </div>
                         <input
                           ref={fileInputRef}
                           type="file"
@@ -1015,206 +1068,232 @@ export function SupplyStudyDialog({
                             if (f) void uploadOfferImage(f);
                           }}
                         />
-                        {inspected.productImageUrl ? (
-                          <button
-                            type="button"
-                            disabled={imageBusy}
-                            onClick={() => void clearOfferImage()}
-                            className="rounded-lg border border-red-100 px-2 py-1 text-[11px] font-semibold text-red-700"
-                          >
-                            Supprimer
-                          </button>
-                        ) : null}
-                      </div>
-                      <div className="flex gap-1.5">
-                        <input
-                          value={imageUrlDraft}
-                          onChange={(e) => setImageUrlDraft(e.target.value)}
-                          placeholder="https://… image produit"
-                          className="min-w-0 flex-1 rounded-lg border border-slate-200 px-2 py-1 text-[11px]"
-                        />
-                        <button
-                          type="button"
-                          disabled={imageBusy || !imageUrlDraft.trim()}
-                          onClick={() => void saveOfferImageUrl()}
-                          className="rounded-lg bg-slate-900 px-2 py-1 text-[11px] font-semibold text-white disabled:opacity-45"
-                        >
-                          Lier URL
-                        </button>
-                      </div>
-                      {(() => {
-                        const preview = validateProductUrl(imageUrlDraft);
-                        if (!preview.ok) return null;
-                        return (
-                          <div className="overflow-hidden rounded-lg border border-slate-100 bg-slate-50 p-1.5">
-                            <p className="mb-1 text-[10px] font-medium text-slate-500">
-                              Aperçu avant enregistrement
+                        {imageUrlPanelOpen ? (
+                          <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50/80 p-2.5">
+                            <p className="text-[11px] font-medium text-slate-600">
+                              URL HTTPS d’image (aperçu avant enregistrement)
                             </p>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={preview.url}
-                              alt="Aperçu URL"
-                              className="mx-auto h-20 max-w-full object-contain"
-                              onError={(e) => {
-                                (e.currentTarget as HTMLImageElement).style.display =
-                                  "none";
-                              }}
-                            />
+                            <div className="flex gap-1.5">
+                              <input
+                                value={imageUrlDraft}
+                                onChange={(e) =>
+                                  setImageUrlDraft(e.target.value)
+                                }
+                                placeholder="https://…"
+                                className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs"
+                                aria-label="URL d’image produit"
+                              />
+                              <button
+                                type="button"
+                                disabled={
+                                  imageBusy || !imageUrlDraft.trim()
+                                }
+                                onClick={() => void saveOfferImageUrl()}
+                                className="rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-45"
+                              >
+                                Enregistrer
+                              </button>
+                            </div>
+                            {(() => {
+                              const preview =
+                                validateProductUrl(imageUrlDraft);
+                              if (!preview.ok) {
+                                return imageUrlDraft.trim() ? (
+                                  <p className="text-[11px] text-amber-800">
+                                    {preview.error}
+                                  </p>
+                                ) : null;
+                              }
+                              return (
+                                <div className="overflow-hidden rounded-lg border border-slate-100 bg-white p-1.5">
+                                  <p className="mb-1 text-[10px] font-medium text-slate-500">
+                                    Aperçu avant enregistrement
+                                  </p>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={preview.url}
+                                    alt="Aperçu URL"
+                                    className="mx-auto h-20 max-w-full object-contain"
+                                    onError={(e) => {
+                                      (
+                                        e.currentTarget as HTMLImageElement
+                                      ).style.display = "none";
+                                    }}
+                                  />
+                                </div>
+                              );
+                            })()}
                           </div>
-                        );
-                      })()}
-                      {inspected.productImageOrigin ? (
-                        <p className="text-[10px] text-slate-500">
-                          Origine :{" "}
-                          {inspected.productImageOrigin === "USER_UPLOAD"
-                            ? "import utilisateur"
-                            : inspected.productImageOrigin === "SUPPLIER_URL"
-                              ? "URL fournisseur (attestée)"
-                              : "URL saisie utilisateur"}
-                        </p>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </div>
-
-                <div className="mt-3 min-w-0">
-                  <p className="text-sm font-bold text-slate-900">
-                    {inspected.agencyDisplay || inspected.supplierName}
-                  </p>
-                  <p className="text-sm text-slate-700">
-                    {inspected.productLabel}
-                  </p>
-                  {inspected.productRef ? (
-                    <p className="text-xs text-slate-500">
-                      Réf. {inspected.productRef}
-                    </p>
-                  ) : null}
-                </div>
-
-                <dl className="mt-4 space-y-2 rounded-xl border border-slate-200 p-3 text-sm">
-                  <DetailRow k="Fournisseur" v={inspected.supplierName} />
-                  <DetailRow
-                    k="Prix unitaire"
-                    v={
-                      inspected.unitPrice == null
-                        ? "Non renseigné"
-                        : `${formatStudyMoney(inspected.unitPrice)} / ${inspected.priceUnit} ${inspected.priceTaxMode}`
-                    }
-                  />
-                  <DetailRow
-                    k="Fiscalité"
-                    v={
-                      inspected.vatRate != null
-                        ? `TVA ${inspected.vatRate} %`
-                        : "À confirmer"
-                    }
-                  />
-                  <DetailRow
-                    k="Quantité commerciale"
-                    v={`${formatQty(need.validatedOrderQuantity)} ${need.unit}`}
-                  />
-                  <DetailRow
-                    k="Conditionnement"
-                    v={inspected.packagingLabel || "—"}
-                  />
-                  <DetailRow
-                    k="Disponibilité"
-                    v={inspected.availabilityNote || "À confirmer"}
-                  />
-                  <DetailRow
-                    k="Délai"
-                    v={
-                      inspected.leadTimeDays != null
-                        ? `${inspected.leadTimeDays} j`
-                        : "Inconnu"
-                    }
-                  />
-                  <DetailRow
-                    k="Livraison"
-                    v={
-                      inspected.deliveryFee == null
-                        ? "Non renseignée"
-                        : formatStudyMoney(inspected.deliveryFee, 2)
-                    }
-                  />
-                  <DetailRow
-                    k="Grutage"
-                    v={
-                      inspected.craneFee == null
-                        ? "Non renseigné"
-                        : formatStudyMoney(inspected.craneFee, 2)
-                    }
-                  />
-                </dl>
-
-                <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3">
-                  <p className="text-[11px] font-bold uppercase text-slate-500">
-                    Sous-total produit
-                  </p>
-                  <p className="mt-1 text-lg font-bold tabular-nums text-[#1e3a5f]">
-                    {inspected.productCost.displayLabel}
-                  </p>
-                  {inspected.productCost.status === "KNOWN" &&
-                  inspected.unitPrice != null ? (
-                    <p className="mt-1 text-[11px] text-slate-600">
-                      {formatQty(need.validatedOrderQuantity)} {need.unit} ×{" "}
-                      {formatStudyMoney(inspected.unitPrice)}/{inspected.priceUnit}{" "}
-                      {inspected.priceTaxMode}
-                    </p>
-                  ) : null}
-                  {inspected.productCost.status === "UNKNOWN" &&
-                  inspected.productCost.reason ? (
-                    <p className="mt-1 text-[11px] text-slate-500">
-                      {inspected.productCost.reason}
-                    </p>
-                  ) : null}
-                  <p className="mt-2 text-[11px] font-medium text-slate-700">
-                    {inspected.renderedCost.completeness === "COMPLETE"
-                      ? inspected.renderedCost.displayLabel
-                      : "Coût rendu chantier non disponible"}
-                  </p>
-                </div>
-
-                <div className="mt-3 rounded-xl border border-slate-200 p-3">
-                  <p className="text-[11px] font-bold uppercase text-slate-500">
-                    Source
-                  </p>
-                  <p className="mt-1 text-xs text-slate-600">
-                    {qualifyOfferSourceLabel(inspected)} · relevé{" "}
-                    {formatStudyDay(inspected.observedAt || inspected.recordedAt)}
-                  </p>
-                  {inspected.sourceUrl ? (
-                    <a
-                      href={inspected.sourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-1 block truncate text-xs font-semibold text-[#2563eb] hover:underline"
-                    >
-                      Ouvrir la fiche fournisseur
-                    </a>
-                  ) : (
-                    <p className="mt-1 text-xs text-slate-400">Pas d’URL</p>
-                  )}
-                  {inspected.quoteNumber ? (
-                    <p className="mt-1 text-xs text-slate-600">
-                      Devis n° {inspected.quoteNumber}
-                    </p>
-                  ) : null}
-                </div>
-
-                {(offerWarnings.length > 0 || needWarnings.length > 0) && (
-                  <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/70 p-3">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase text-amber-900">
-                      <AlertTriangle className="h-3.5 w-3.5" />
-                      Points de vigilance
-                    </div>
-                    <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-amber-950">
-                      {[...offerWarnings, ...needWarnings].map((w) => (
-                        <li key={w.id}>{w.message}</li>
-                      ))}
-                    </ul>
+                        ) : null}
+                        {inspected.productImageOrigin ? (
+                          <p className="text-[10px] text-slate-500">
+                            Origine :{" "}
+                            {inspected.productImageOrigin === "USER_UPLOAD"
+                              ? "import utilisateur"
+                              : inspected.productImageOrigin ===
+                                  "SUPPLIER_URL"
+                                ? "URL fournisseur (attestée)"
+                                : "URL saisie utilisateur"}
+                          </p>
+                        ) : (
+                          <p className="text-[10px] text-slate-400">
+                            Photo liée à cette offre uniquement.
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-[11px] text-slate-500">
+                        {inspected.archivedAt
+                          ? "Offre archivée — photo en lecture seule."
+                          : "Lecture seule — vous n’avez pas le droit d’ajouter une photo."}
+                      </p>
+                    )}
                   </div>
-                )}
+                </div>
+
+                {/* Détails — défilement indépendant sous la photo */}
+                <div className="mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto pr-0.5">
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-slate-900">
+                      {inspected.agencyDisplay || inspected.supplierName}
+                    </p>
+                    <p className="text-sm text-slate-700">
+                      {inspected.productLabel}
+                    </p>
+                    {inspected.productRef ? (
+                      <p className="text-xs text-slate-500">
+                        Réf. {inspected.productRef}
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <dl className="space-y-2 rounded-xl border border-slate-200 p-3 text-sm">
+                    <DetailRow k="Fournisseur" v={inspected.supplierName} />
+                    <DetailRow
+                      k="Prix unitaire"
+                      v={
+                        inspected.unitPrice == null
+                          ? "Non renseigné"
+                          : `${formatStudyMoney(inspected.unitPrice)} / ${inspected.priceUnit} ${inspected.priceTaxMode}`
+                      }
+                    />
+                    <DetailRow
+                      k="Fiscalité"
+                      v={
+                        inspected.vatRate != null
+                          ? `TVA ${inspected.vatRate} %`
+                          : "À confirmer"
+                      }
+                    />
+                    <DetailRow
+                      k="Quantité commerciale"
+                      v={`${formatQty(need.validatedOrderQuantity)} ${need.unit}`}
+                    />
+                    <DetailRow
+                      k="Conditionnement"
+                      v={inspected.packagingLabel || "—"}
+                    />
+                    <DetailRow
+                      k="Disponibilité"
+                      v={inspected.availabilityNote || "À confirmer"}
+                    />
+                    <DetailRow
+                      k="Délai"
+                      v={
+                        inspected.leadTimeDays != null
+                          ? `${inspected.leadTimeDays} j`
+                          : "Inconnu"
+                      }
+                    />
+                    <DetailRow
+                      k="Livraison"
+                      v={
+                        inspected.deliveryFee == null
+                          ? "Non renseignée"
+                          : formatStudyMoney(inspected.deliveryFee, 2)
+                      }
+                    />
+                    <DetailRow
+                      k="Grutage"
+                      v={
+                        inspected.craneFee == null
+                          ? "Non renseigné"
+                          : formatStudyMoney(inspected.craneFee, 2)
+                      }
+                    />
+                  </dl>
+
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+                    <p className="text-[11px] font-bold uppercase text-slate-500">
+                      Sous-total produit
+                    </p>
+                    <p className="mt-1 text-lg font-bold tabular-nums text-[#1e3a5f]">
+                      {inspected.productCost.displayLabel}
+                    </p>
+                    {inspected.productCost.status === "KNOWN" &&
+                    inspected.unitPrice != null ? (
+                      <p className="mt-1 text-[11px] text-slate-600">
+                        {formatQty(need.validatedOrderQuantity)} {need.unit} ×{" "}
+                        {formatStudyMoney(inspected.unitPrice)}/
+                        {inspected.priceUnit} {inspected.priceTaxMode}
+                      </p>
+                    ) : null}
+                    {inspected.productCost.status === "UNKNOWN" &&
+                    inspected.productCost.reason ? (
+                      <p className="mt-1 text-[11px] text-slate-500">
+                        {inspected.productCost.reason}
+                      </p>
+                    ) : null}
+                    <p className="mt-2 text-[11px] font-medium text-slate-700">
+                      {inspected.renderedCost.completeness === "COMPLETE"
+                        ? inspected.renderedCost.displayLabel
+                        : "Coût rendu chantier non disponible"}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 p-3">
+                    <p className="text-[11px] font-bold uppercase text-slate-500">
+                      Source
+                    </p>
+                    <p className="mt-1 text-xs text-slate-600">
+                      {qualifyOfferSourceLabel(inspected)} · relevé{" "}
+                      {formatStudyDay(
+                        inspected.observedAt || inspected.recordedAt,
+                      )}
+                    </p>
+                    {inspected.sourceUrl ? (
+                      <a
+                        href={inspected.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 block truncate text-xs font-semibold text-[#2563eb] hover:underline"
+                      >
+                        Ouvrir la fiche fournisseur
+                      </a>
+                    ) : (
+                      <p className="mt-1 text-xs text-slate-400">Pas d’URL</p>
+                    )}
+                    {inspected.quoteNumber ? (
+                      <p className="mt-1 text-xs text-slate-600">
+                        Devis n° {inspected.quoteNumber}
+                      </p>
+                    ) : null}
+                  </div>
+
+                  {(offerWarnings.length > 0 || needWarnings.length > 0) && (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3">
+                      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase text-amber-900">
+                        <AlertTriangle className="h-3.5 w-3.5" />
+                        Points de vigilance
+                      </div>
+                      <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-amber-950">
+                        {[...offerWarnings, ...needWarnings].map((w) => (
+                          <li key={w.id}>{w.message}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </section>

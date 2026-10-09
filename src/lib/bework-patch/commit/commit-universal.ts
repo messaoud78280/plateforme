@@ -1310,7 +1310,23 @@ async function applyQuoteOnlyInTx(
   const touched = new Set<string>();
 
   for (const op of input.patch.operations) {
-    if (op.op !== "update_quote_item") continue;
+    if (op.op !== "update_quote_item") {
+      // Ops devis non supportées : refus explicite (jamais no-op silencieux)
+      if (
+        op.op === "add_quote_item" ||
+        op.op === "delete_quote_item" ||
+        op.op === "update_quote_section" ||
+        op.op === "update_quote_meta"
+      ) {
+        throw Object.assign(
+          new Error(
+            `Opération ${op.op} non committable en section QUOTE (contrat applyQuoteOnlyInTx).`,
+          ),
+          { code: "OPERATION_NOT_ALLOWED_FOR_SECTION" },
+        );
+      }
+      continue;
+    }
     const quote = input.subgraphQuotes.find((q) => q.id === op.target.quote_id);
     const line = quote?.lines.find(
       (l) => l.id === op.target.item_id || l.id === op.target.id,
@@ -1318,6 +1334,27 @@ async function applyQuoteOnlyInTx(
     if (!quote || !line || !quote.versionId) continue;
     if (["SENT", "VIEWED", "ACCEPTED", "REFUSED", "EXPIRED", "CANCELLED"].includes(quote.status)) {
       throw Object.assign(new Error("PROTECTED_ENTITY"), { code: "PROTECTED_ENTITY" });
+    }
+
+    const changeKeys = Object.keys(op.changes ?? {});
+    const unsupportedKeys = changeKeys.filter(
+      (k) =>
+        !(
+          [
+            "designation",
+            "quantity",
+            "unit_price_ht",
+            "discount_percent",
+          ] as string[]
+        ).includes(k),
+    );
+    if (unsupportedKeys.length > 0) {
+      throw Object.assign(
+        new Error(
+          `Champs non commitables sur update_quote_item : ${unsupportedKeys.join(", ")}. Autorisés : designation, quantity, unit_price_ht, discount_percent.`,
+        ),
+        { code: "OPERATION_NOT_ALLOWED_FOR_SECTION" },
+      );
     }
 
     const nextQty = op.changes.quantity ?? line.quantity;

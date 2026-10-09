@@ -9,6 +9,10 @@ import type {
   BeworkSupportedOperationSpec,
 } from "@/lib/bework-patch/types";
 import { isPlanningCommitSupportedOp } from "@/lib/bework-patch/commit/planning-capability";
+import {
+  isQuoteCommitSupportedOp,
+  QUOTE_UPDATE_ITEM_COMMITTED_FIELDS,
+} from "@/lib/bework-patch/commit/quote-capability";
 import { fieldContractsForOp } from "@/lib/bework-patch/operation-contracts";
 
 const ALL_TECHNICAL: BeworkChangeIntent[] = [
@@ -36,13 +40,15 @@ export const OPERATION_CATALOG: Record<
 > = {
   update_parameter: {
     entity_types: ["PREP_PARAMETER"],
-    sections: ["TAKEOFF", "QUOTE", "VISIT"],
+    // QUOTE retiré : non committable en section QUOTE (applyQuoteOnlyInTx)
+    sections: ["TAKEOFF", "VISIT"],
     compatible_intents: ALL_TECHNICAL,
     allowed_change_fields: ["value", "label", "note"],
   },
   update_line: {
     entity_types: ["PREP_LINE"],
-    sections: ["TAKEOFF", "QUOTE"],
+    // QUOTE retiré : sync devis via TAKEOFF / update_quote_item uniquement
+    sections: ["TAKEOFF"],
     compatible_intents: [...ALL_TECHNICAL, "DOCUMENT_EDIT"],
     allowed_change_fields: [
       "designation",
@@ -85,16 +91,11 @@ export const OPERATION_CATALOG: Record<
       "TECHNICAL_OVERRIDE",
       "DOCUMENT_EDIT",
     ],
-    allowed_change_fields: [
-      "designation",
-      "description",
-      "quantity",
-      "unit",
-      "unit_price_ht",
-      "vat_rate",
-      "discount_percent",
-    ],
+    // Aligné sur applyQuoteOnlyInTx — pas de description/unit/vat_rate
+    allowed_change_fields: [...QUOTE_UPDATE_ITEM_COMMITTED_FIELDS],
   },
+  // Ops parseables mais NON exposées en supported_operations QUOTE
+  // (filtrage via isQuoteCommitSupportedOp) — ne pas les réactiver sans commit réel.
   add_quote_item: {
     entity_types: ["COMMERCIAL_QUOTE", "QUOTE_SECTION"],
     sections: ["QUOTE"],
@@ -415,8 +416,9 @@ export function supportedOperationsForSection(
     [BeworkPatchOpName, (typeof OPERATION_CATALOG)[BeworkPatchOpName]]
   >) {
     if (!cat.sections.includes(section)) continue;
-    // Contrat honnête : PLANNING n'expose que les ops réellement commitables.
+    // Contrat honnête : n'exposer que les ops réellement commitables.
     if (section === "PLANNING" && !isPlanningCommitSupportedOp(op)) continue;
+    if (section === "QUOTE" && !isQuoteCommitSupportedOp(op)) continue;
     out.push({
       op,
       entity_types: cat.entity_types,

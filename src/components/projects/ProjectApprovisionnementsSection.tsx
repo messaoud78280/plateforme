@@ -14,9 +14,9 @@ import {
 } from "@/lib/supply/categories";
 import { summarizeSupplyNeeds } from "@/lib/supply/summary";
 import type { SupplyCategory } from "@/lib/supply/types";
-import { SupplyOffersPanel } from "@/components/projects/SupplyOffersPanel";
 import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar";
 import { getSectionCapability } from "@/lib/bework-patch/capability";
+import { SupplyStudyDialog } from "@/components/projects/supply-study/SupplyStudyDialog";
 
 function formatDay(iso: string | null): string {
   if (!iso) return "—";
@@ -606,146 +606,19 @@ export function ProjectApprovisionnementsSection({
         </div>
       ) : null}
 
-      {/* Detail / edit */}
-      {detail && !editMode ? (
-        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 p-3 sm:items-center">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5 shadow-xl">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="text-[10px] font-bold uppercase text-slate-400">
-                  {SUPPLY_CATEGORY_LABELS[detail.category as SupplyCategory] ??
-                    detail.category}
-                </p>
-                <h3 className="text-base font-bold text-slate-900">
-                  {detail.label}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setDetailId(null)}
-                className="text-xs font-semibold text-slate-500"
-              >
-                Fermer
-              </button>
-            </div>
-
-            {detail.sourceDrift !== "NONE" ? (
-              <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
-                {detail.sourceDrift === "METRE_CHANGED_AFTER_ORDER"
-                  ? "Le métré source a changé après commande. La commande n’a pas été modifiée."
-                  : "Métré modifié depuis la création de ce besoin."}
-              </div>
-            ) : null}
-
-            <Section title="Identité">
-              <Row
-                k="Mode"
-                v={
-                  SUPPLY_PROCUREMENT_LABELS[detail.procurementMode] ??
-                  detail.procurementMode
-                }
-              />
-              {detail.description ? (
-                <Row k="Description" v={detail.description} />
-              ) : null}
-            </Section>
-
-            <Section title="Quantités">
-              {detail.sourceQuantity != null ? (
-                <Row
-                  k="Métré (source)"
-                  v={`${formatQty(detail.sourceQuantity)} ${detail.sourceUnit || ""}`}
-                />
-              ) : null}
-              {detail.calculatedQuantity != null ? (
-                <Row
-                  k="Calculé"
-                  v={`${formatQty(detail.calculatedQuantity)} ${detail.unit}`}
-                />
-              ) : null}
-              {detail.lossFactor != null ? (
-                <Row k="Perte" v={`${(detail.lossFactor * 100).toFixed(1)} %`} />
-              ) : null}
-              {detail.packaging ? (
-                <Row
-                  k="Conditionnement"
-                  v={`${detail.packaging}${
-                    detail.packagingSize
-                      ? ` (${formatQty(detail.packagingSize)} ${detail.packagingUnit || ""})`
-                      : ""
-                  }`}
-                />
-              ) : null}
-              <Row
-                k="À commander"
-                v={`${formatQty(detail.validatedOrderQuantity)} ${detail.unit}`}
-              />
-            </Section>
-
-            <Section title="Provenance">
-              <Row k="Type" v={detail.sourceLabel || detail.sourceType} />
-              {detail.takeoffCodes.length > 0 ? (
-                <Row k="Codes métré" v={detail.takeoffCodes.join(", ")} />
-              ) : null}
-            </Section>
-
-            <Section title="Planification">
-              <Row k="Date besoin" v={formatDay(detail.neededAt)} />
-              <Row k="Date limite commande" v={formatDay(detail.orderDeadlineAt)} />
-            </Section>
-
-            <Section title="Achats">
-              <Row k="Couverture" v={detail.coverageLabel} />
-              <Row
-                k="Commandé / reçu"
-                v={`${formatQty(detail.progress.ordered)} / ${formatQty(detail.progress.received)}`}
-              />
-              {detail.selectedOfferId ? (
-                <Row k="Offre retenue" v="Oui — voir ci-dessous" />
-              ) : (
-                <Row k="Offre retenue" v="Aucune" />
-              )}
-              {detail.linkedOrders.length > 0 ? (
-                <ul className="mt-1 space-y-1 text-xs text-slate-600">
-                  {detail.linkedOrders.map((o) => (
-                    <li key={o.lineId}>
-                      {o.orderNumber} — {o.supplierName} (
-                      {formatQty(o.allocated)} alloués)
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-xs text-slate-500">Aucune commande liée.</p>
-              )}
-            </Section>
-
-            <SupplyOffersPanel
-              projectId={projectId}
-              requirementId={detail.id}
-              canWrite={canWrite}
-              onChanged={() => void reload()}
-            />
-
-            {canWrite ? (
-              <div className="mt-4 flex flex-wrap justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => void cancelRequirement(detail.id)}
-                  className="text-xs font-semibold text-red-700"
-                >
-                  Annuler le besoin
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openEdit(detail)}
-                  className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-semibold text-white"
-                >
-                  Modifier
-                </button>
-              </div>
-            ) : null}
-          </div>
-        </div>
+      {detail ? (
+        <SupplyStudyDialog
+          open
+          projectId={projectId}
+          projectTitle={projectTitle}
+          need={detail}
+          canWrite={canWrite}
+          onClose={() => {
+            setDetailId(null);
+            setEditMode(false);
+          }}
+          onChanged={() => void reload()}
+        />
       ) : null}
 
       {detail && editMode ? (

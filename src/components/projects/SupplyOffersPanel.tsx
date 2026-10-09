@@ -231,9 +231,10 @@ export function SupplyOffersPanel({
       )}
 
       {addOpen ? (
-        <AddOfferModal
+        <SupplyAddOfferModal
           suppliers={suppliers}
           busy={busy}
+          defaultSourceType="USER_ENTERED"
           onClose={() => setAddOpen(false)}
           onSubmit={async (input) => {
             setBusy(true);
@@ -485,16 +486,20 @@ function SourceBlock({ offer }: { offer: SupplyOfferView }) {
   );
 }
 
-function AddOfferModal({
+export function SupplyAddOfferModal({
   suppliers,
   busy,
   onClose,
   onSubmit,
+  defaultSourceType = "USER_ENTERED",
+  title = "Ajouter une offre fournisseur",
 }: {
   suppliers: SupplierOpt[];
   busy: boolean;
   onClose: () => void;
   onSubmit: (input: Record<string, unknown>) => Promise<void>;
+  defaultSourceType?: SupplyOfferPriceSourceType;
+  title?: string;
 }) {
   const [supplierExternalOrgId, setSupplierExternalOrgId] = useState("");
   const [productLabel, setProductLabel] = useState("");
@@ -504,7 +509,7 @@ function AddOfferModal({
   const [priceUnit, setPriceUnit] = useState("U");
   const [priceTaxMode, setPriceTaxMode] = useState<"HT" | "TTC">("HT");
   const [priceSourceType, setPriceSourceType] =
-    useState<SupplyOfferPriceSourceType>("USER_ENTERED");
+    useState<SupplyOfferPriceSourceType>(defaultSourceType);
   const [sourceUrl, setSourceUrl] = useState("");
   const [quoteNumber, setQuoteNumber] = useState("");
   const [quoteDocumentRef, setQuoteDocumentRef] = useState("");
@@ -525,11 +530,10 @@ function AddOfferModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 sm:items-center">
       <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5 shadow-xl">
-        <h3 className="text-base font-bold text-slate-900">
-          Ajouter une offre fournisseur
-        </h3>
+        <h3 className="text-base font-bold text-slate-900">{title}</h3>
         <p className="mt-1 text-[11px] text-slate-500">
-          Le prix est facultatif. Ne jamais inventer un montant.
+          Le prix est facultatif. Ne jamais inventer un montant. Les frais
+          inconnus restent null (≠ 0).
         </p>
 
         <div className="mt-4 space-y-3">

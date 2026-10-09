@@ -50,7 +50,8 @@ function isObj(v: unknown): v is Record<string, unknown> {
 
 export type BeworkPatchContextPurpose =
   | "modify"
-  | "enrich_tech_sheets";
+  | "enrich_tech_sheets"
+  | "analyze_product_url";
 
 export async function buildUniversalPatchContext(input: {
   orgId: string;
@@ -59,6 +60,10 @@ export async function buildUniversalPatchContext(input: {
   entityId: string;
   /** TAKEOFF : enrich_tech_sheets = fiches incomplètes uniquement + instruction auto. */
   purpose?: BeworkPatchContextPurpose | null;
+  /** SUPPLY : besoin ouvert dans l’étude d’approvisionnement. */
+  focusRequirementId?: string | null;
+  /** SUPPLY : URL produit à analyser via ChatGPT (pas de scrape serveur). */
+  productUrl?: string | null;
 }): Promise<BeworkChatgptContextV1 | null> {
   const projectId = input.projectId?.trim() || null;
   const purpose = input.purpose ?? "modify";
@@ -87,7 +92,12 @@ export async function buildUniversalPatchContext(input: {
     case "NOTICE":
       return buildDocumentContext(input.orgId, project, input.entityId, input.section);
     case "SUPPLY":
-      return buildSupplyContext(input.orgId, project, input.entityId);
+      return buildSupplyContext(input.orgId, project, input.entityId, {
+        focusRequirementId: input.focusRequirementId,
+        productUrl: input.productUrl,
+        purpose:
+          purpose === "analyze_product_url" ? "analyze_product_url" : "modify",
+      });
     default:
       return null;
   }

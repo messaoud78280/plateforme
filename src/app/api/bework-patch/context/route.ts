@@ -21,6 +21,8 @@ export async function POST(req: Request) {
       projectId?: string;
       entityId?: string;
       purpose?: string;
+      focusRequirementId?: string;
+      productUrl?: string;
     } | null;
 
     const section = body?.section?.trim() as BeworkPatchSection | undefined;
@@ -28,7 +30,13 @@ export async function POST(req: Request) {
     const entityId = body?.entityId?.trim();
     const purposeRaw = body?.purpose?.trim();
     const purpose =
-      purposeRaw === "enrich_tech_sheets" ? "enrich_tech_sheets" : "modify";
+      purposeRaw === "enrich_tech_sheets"
+        ? "enrich_tech_sheets"
+        : purposeRaw === "analyze_product_url"
+          ? "analyze_product_url"
+          : "modify";
+    const focusRequirementId = body?.focusRequirementId?.trim() || null;
+    const productUrl = body?.productUrl?.trim() || null;
     const visitStandalone = section === "VISIT";
 
     if (
@@ -53,6 +61,8 @@ export async function POST(req: Request) {
       projectId,
       entityId,
       purpose,
+      focusRequirementId,
+      productUrl,
     });
     if (!context) {
       return NextResponse.json(

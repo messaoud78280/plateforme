@@ -6,7 +6,7 @@ import type { SectionPatchCapability } from "@/lib/bework-patch/capability";
 import { BeworkPatchModal } from "@/components/bework-patch/BeworkPatchModal";
 import { sectionMetierLabel } from "@/lib/bework-patch/ui-messages";
 
-type ContextPurpose = "modify" | "enrich_tech_sheets";
+type ContextPurpose = "modify" | "enrich_tech_sheets" | "analyze_product_url";
 
 type Props = {
   section: BeworkPatchSection;
@@ -30,6 +30,10 @@ type Props = {
    * TAKEOFF : affiche « Enrichir avec ChatGPT » (contexte auto + fiches incomplètes).
    */
   showEnrichTechSheets?: boolean;
+  /** SUPPLY — besoin ouvert dans l’étude d’approvisionnement. */
+  focusRequirementId?: string | null;
+  /** SUPPLY — URL produit à inclure dans le contexte. */
+  productUrl?: string | null;
 };
 
 const btnBase =
@@ -53,12 +57,15 @@ export function BeworkPatchToolbar({
   helpText = null,
   compact = false,
   showEnrichTechSheets = false,
+  focusRequirementId = null,
+  productUrl = null,
 }: Props) {
   const [toast, setToast] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"chatgpt" | "json">("chatgpt");
-  const [contextPurpose, setContextPurpose] =
-    useState<ContextPurpose>("modify");
+  const [contextPurpose, setContextPurpose] = useState<
+    "modify" | "enrich_tech_sheets"
+  >("modify");
   const [contextBusy, setContextBusy] = useState(false);
   const [contextCopied, setContextCopied] = useState(false);
 
@@ -77,17 +84,26 @@ export function BeworkPatchToolbar({
       const res = await fetch("/api/bework-patch/context", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ section, projectId, entityId, purpose }),
+        body: JSON.stringify({
+          section,
+          projectId,
+          entityId,
+          purpose,
+          focusRequirementId: focusRequirementId || undefined,
+          productUrl: productUrl || undefined,
+        }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "Contexte indisponible");
       await navigator.clipboard.writeText(data.text);
       setContextCopied(true);
-      setContextPurpose(purpose);
+      setContextPurpose(purpose === "analyze_product_url" ? "modify" : purpose);
       setToast(
         purpose === "enrich_tech_sheets"
           ? "Contexte d’enrichissement copié"
-          : "Contexte copié",
+          : purpose === "analyze_product_url"
+            ? "Contexte d’analyse URL copié"
+            : "Contexte copié",
       );
       window.setTimeout(() => setToast(null), 3500);
       return true;

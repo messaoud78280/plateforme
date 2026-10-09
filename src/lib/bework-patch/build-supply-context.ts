@@ -68,13 +68,25 @@ export function computeSupplyContextVersion(input: {
   return Number.parseInt(hex, 16);
 }
 
+export type BuildSupplyContextOptions = {
+  /** Besoin ouvert dans l’étude d’approvisionnement — focus sans exclure les autres. */
+  focusRequirementId?: string | null;
+  /** URL produit collée — analyse ChatGPT manuelle (pas de scrape serveur). */
+  productUrl?: string | null;
+  purpose?: "modify" | "analyze_product_url" | null;
+};
+
 export async function buildSupplyContext(
   orgId: string,
   project: { id: string; title: string },
   entityId: string,
+  options?: BuildSupplyContextOptions | null,
 ): Promise<BeworkChatgptContextV1 | null> {
   // entityId = projectId (hub Approvisionnements)
   if (entityId !== project.id) return null;
+  const focusRequirementId = options?.focusRequirementId?.trim() || null;
+  const productUrl = options?.productUrl?.trim() || null;
+  const purpose = options?.purpose ?? "modify";
 
   const projectFull = await prisma.project.findFirst({
     where: { id: project.id, organizationId: orgId },
@@ -406,6 +418,26 @@ export async function buildSupplyContext(
     },
   });
 
+  const focusNeed = focusRequirementId
+    ? supplyNeeds.find((n) => n.requirement_id === focusRequirementId) ?? null
+    : null;
+
+  const focusInstructions: string[] = [];
+  if (purpose === "analyze_product_url" && productUrl) {
+    focusInstructions.push(
+      `ANALYSE URL PRODUIT (manuelle ChatGPT) : ${productUrl}`,
+      "Consultez réellement cette URL. Extrtrayez uniquement ce qui est visible : fournisseur, produit, référence, prix, unité, HT/TTC, conditionnement, disponibilité, délai, frais.",
+      "Ne créez aucune offre WEB_VERIFIED sans sourceUrl = cette URL, prix réellement observé et observed_at du relevé.",
+      "Si le prix n’est pas lisible : unit_price = null. Ne jamais inventer.",
+    );
+  }
+  if (focusNeed) {
+    focusInstructions.push(
+      `FOCUS BESOIN : ${focusNeed.label} (id=${focusNeed.id}). Prioriser add_supply_offer / update_supply_need sur ce besoin.`,
+      "Conserver les autres besoins/offres pour détecter les doublons (même product_ref / source_url).",
+    );
+  }
+
   return {
     ...skeleton,
     organization: {
@@ -419,7 +451,15 @@ export async function buildSupplyContext(
       site_city: projectFull.siteCity,
     },
     data: {
-      instructions: SUPPLY_ANTI_INVENTION_RULES,
+      instructions: [SUPPLY_ANTI_INVENTION_RULES, ...focusInstructions].join(
+        "\n",
+      ),
+      focus: {
+        purpose,
+        requirement_id: focusRequirementId,
+        product_url: productUrl,
+        need: focusNeed,
+      },
       chantier: {
         id: projectFull.id,
         title: projectFull.title,

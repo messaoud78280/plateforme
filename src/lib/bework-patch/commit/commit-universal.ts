@@ -1205,6 +1205,18 @@ async function applyTakeoffDirectInTx(
   for (const l of activeLines) {
     qtyByCode.set(l.code, engine.nodes.get(l.code)?.value ?? null);
   }
+
+  // Propagation Approvisionnements : marquage drift uniquement (pas d’auto-qty)
+  const { markSupplyDriftAfterMetreCommit } = await import(
+    "@/lib/supply/sync-metre-drift"
+  );
+  await markSupplyDriftAfterMetreCommit(tx, {
+    organizationId: input.orgId,
+    projectId: study.projectId,
+    studyId: study.id,
+    studyVersion: nextVersion,
+  });
+
   return { studyId: study.id, studyVersion: nextVersion, qtyByCode };
 }
 

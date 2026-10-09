@@ -331,6 +331,15 @@ export async function commitTechnicalImport(input: {
           actorUserId: input.userId,
         },
       });
+      const { markSupplyDriftAfterMetreCommit } = await import(
+        "@/lib/supply/sync-metre-drift"
+      );
+      await markSupplyDriftAfterMetreCommit(tx, {
+        organizationId: input.orgId,
+        projectId: input.projectId,
+        studyId: study.id,
+        studyVersion: version,
+      });
       return { studyId: study.id, importId: imp.id, kind: "REPLACE" as const };
     });
   }
@@ -371,6 +380,15 @@ export async function commitTechnicalImport(input: {
         detailJson: summary,
         actorUserId: input.userId,
       },
+    });
+    const { markSupplyDriftAfterMetreCommit } = await import(
+      "@/lib/supply/sync-metre-drift"
+    );
+    await markSupplyDriftAfterMetreCommit(tx, {
+      organizationId: input.orgId,
+      projectId: input.projectId,
+      studyId: study.id,
+      studyVersion: 1,
     });
     return { studyId: study.id, importId: imp.id, kind: "CREATE" as const };
   });

@@ -68,10 +68,26 @@ export function ProjectApprovisionnementsSection({
   const [neededAt, setNeededAt] = useState("");
   const [notes, setNotes] = useState("");
   const [confirmQtyWhenOrdered, setConfirmQtyWhenOrdered] = useState(false);
+  const [driftPreview, setDriftPreview] = useState<{
+    requirementId: string;
+    label: string;
+    drift: string;
+    unit: string;
+    currentOrderQty: number;
+    proposedSourceQty: number | null;
+    proposedOrderQty: number | null;
+    hasOrderLinks: boolean;
+    notes: string[];
+    decision: { allowedActions: readonly string[] };
+  } | null>(null);
 
   const activeRows = useMemo(
     () => rows.filter((r) => r.status !== "CANCELLED"),
     [rows],
+  );
+  const driftCount = useMemo(
+    () => activeRows.filter((r) => r.sourceDrift && r.sourceDrift !== "NONE").length,
+    [activeRows],
   );
   const filtered = useMemo(
     () =>
@@ -104,6 +120,54 @@ export function ProjectApprovisionnementsSection({
     const data = await res.json();
     if (Array.isArray(data.rows)) setRows(data.rows);
     router.refresh();
+  }
+
+  async function openDriftRevision(requirementId: string) {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/projets/${projectId}/materiaux/${requirementId}/metre-drift`,
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Prévisualisation impossible");
+      setDriftPreview(data.preview);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function commitDriftRevision(
+    action: "RECALCULATE" | "KEEP",
+    confirmQuantityWhenOrdered = false,
+  ) {
+    if (!driftPreview) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/projets/${projectId}/materiaux/${driftPreview.requirementId}/metre-drift`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action,
+            confirm: true,
+            confirmQuantityWhenOrdered,
+          }),
+        },
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Révision impossible");
+      setDriftPreview(null);
+      await reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
   }
 
   function resetForm() {
@@ -309,6 +373,20 @@ export function ProjectApprovisionnementsSection({
         </div>
       </div>
 
+      {driftCount > 0 ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-950">
+          <p className="font-bold text-amber-950">
+            {driftCount} besoin{driftCount > 1 ? "s" : ""} potentiellement
+            obsolète{driftCount > 1 ? "s" : ""} suite à une modification du
+            métré
+          </p>
+          <p className="mt-1 text-xs text-amber-900/90">
+            Aucune quantité, offre ni bon de commande n’a été modifié
+            automatiquement. Ouvrez « Réviser » pour prévisualiser et décider.
+          </p>
+        </div>
+      ) : null}
+
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
         {cards.map((c) => (
           <div
@@ -454,9 +532,23 @@ export function ProjectApprovisionnementsSection({
                         {r.selectedOfferId ? " · retenue" : ""}
                       </p>
                       {r.sourceDrift !== "NONE" ? (
-                        <p className="mt-1 text-[11px] font-semibold text-amber-800">
-                          Métré modifié
-                        </p>
+                        <div className="mt-1 flex flex-wrap items-center gap-2">
+                          <p className="text-[11px] font-semibold text-amber-800">
+                            {r.sourceDrift === "METRE_CHANGED_AFTER_ORDER"
+                              ? "Métré modifié après commande"
+                              : "Métré modifié — à réviser"}
+                          </p>
+                          {canWrite ? (
+                            <button
+                              type="button"
+                              disabled={busy}
+                              onClick={() => void openDriftRevision(r.id)}
+                              className="rounded border border-amber-300 bg-white px-1.5 py-0.5 text-[10px] font-bold text-amber-900 hover:bg-amber-50"
+                            >
+                              Réviser
+                            </button>
+                          ) : null}
+                        </div>
                       ) : null}
                     </td>
                     <td className="px-3 py-2.5 text-xs text-slate-700">
@@ -619,6 +711,79 @@ export function ProjectApprovisionnementsSection({
           }}
           onChanged={() => void reload()}
         />
+      ) : null}
+
+      {driftPreview ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
+          <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5 shadow-xl">
+            <h3 className="text-base font-bold text-[#1e3a5f]">
+              Réviser après modification du métré
+            </h3>
+            <p className="mt-1 text-sm font-semibold text-slate-900">
+              {driftPreview.label}
+            </p>
+            <p className="mt-2 text-xs text-slate-600">
+              Quantité actuelle à commander :{" "}
+              <span className="font-bold">
+                {formatQty(driftPreview.currentOrderQty)} {driftPreview.unit}
+              </span>
+            </p>
+            <p className="text-xs text-slate-600">
+              Proposition métré :{" "}
+              <span className="font-bold">
+                {driftPreview.proposedOrderQty == null
+                  ? "non calculable"
+                  : `${formatQty(driftPreview.proposedOrderQty)} ${driftPreview.unit}`}
+              </span>
+            </p>
+            {driftPreview.hasOrderLinks ? (
+              <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+                Des bons de commande existent — ils ne seront pas modifiés.
+                Une révision de quantité à commander nécessite une confirmation
+                explicite.
+              </p>
+            ) : null}
+            {driftPreview.notes.length > 0 ? (
+              <ul className="mt-2 list-disc space-y-1 pl-4 text-[11px] text-slate-600">
+                {driftPreview.notes.map((n) => (
+                  <li key={n}>{n}</li>
+                ))}
+              </ul>
+            ) : null}
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                className="text-xs font-semibold text-slate-600"
+                onClick={() => setDriftPreview(null)}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold"
+                onClick={() => void commitDriftRevision("KEEP")}
+              >
+                Conserver ma quantité
+              </button>
+              <button
+                type="button"
+                disabled={busy || driftPreview.proposedOrderQty == null}
+                className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+                onClick={() =>
+                  void commitDriftRevision(
+                    "RECALCULATE",
+                    driftPreview.hasOrderLinks,
+                  )
+                }
+              >
+                {driftPreview.hasOrderLinks
+                  ? "Appliquer qty (BC inchangé)"
+                  : "Appliquer la proposition"}
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
 
       {detail && editMode ? (

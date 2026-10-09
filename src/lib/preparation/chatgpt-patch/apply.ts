@@ -896,6 +896,17 @@ export async function applyPrepPatch(input: {
           actorUserId: input.userId,
         },
       });
+      if (quantityImpacts.length > 0 || structuralChange) {
+        const { markSupplyDriftAfterMetreCommit } = await import(
+          "@/lib/supply/sync-metre-drift"
+        );
+        await markSupplyDriftAfterMetreCommit(tx, {
+          organizationId: input.orgId,
+          projectId: loaded.projectId,
+          studyId: loaded.study.id,
+          studyVersion: version,
+        });
+      }
       return {
         version,
         patchRecordId: record.id,
@@ -1053,6 +1064,15 @@ export async function undoLastPrepPatch(input: {
           detailJson: { patchId: last.patchId, recordId: last.id },
           actorUserId: input.userId,
         },
+      });
+      const { markSupplyDriftAfterMetreCommit } = await import(
+        "@/lib/supply/sync-metre-drift"
+      );
+      await markSupplyDriftAfterMetreCommit(tx, {
+        organizationId: input.orgId,
+        projectId: loaded.projectId,
+        studyId: input.studyId,
+        studyVersion: version,
       });
       return { ok: true as const, version };
     });

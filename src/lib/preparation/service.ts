@@ -806,6 +806,15 @@ export async function commitPrepImport(
           actorUserId: input.userId,
         },
       });
+      const { markSupplyDriftAfterMetreCommit } = await import(
+        "@/lib/supply/sync-metre-drift"
+      );
+      await markSupplyDriftAfterMetreCommit(tx, {
+        organizationId: input.orgId,
+        projectId: input.projectId,
+        studyId: study.id,
+        studyVersion: version,
+      });
       return { studyId: study.id, importId: imp.id, kind: "REPLACE" as const };
     }
 
@@ -844,6 +853,15 @@ export async function commitPrepImport(
         detailJson: summary,
         actorUserId: input.userId,
       },
+    });
+    const { markSupplyDriftAfterMetreCommit } = await import(
+      "@/lib/supply/sync-metre-drift"
+    );
+    await markSupplyDriftAfterMetreCommit(tx, {
+      organizationId: input.orgId,
+      projectId: input.projectId,
+      studyId: study.id,
+      studyVersion: 1,
     });
     return { studyId: study.id, importId: imp.id, kind: "CREATE" as const };
   });
@@ -1234,6 +1252,17 @@ export async function savePrepStudyEdits(input: PrepEditInput, db: Db = prisma) 
         actorUserId: input.userId,
       },
     });
+    if (changeKind !== "text_only") {
+      const { markSupplyDriftAfterMetreCommit } = await import(
+        "@/lib/supply/sync-metre-drift"
+      );
+      await markSupplyDriftAfterMetreCommit(tx, {
+        organizationId: input.orgId,
+        projectId: study.projectId,
+        studyId: study.id,
+        studyVersion: version,
+      });
+    }
     return { version, impacted, textsUpdated: textLog.length };
   });
 }

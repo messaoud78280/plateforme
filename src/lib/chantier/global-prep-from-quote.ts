@@ -855,6 +855,22 @@ export async function createGlobalPrepFromQuote(input: {
     })),
   });
 
+  {
+    const studyMeta = await prisma.prepStudy.findFirst({
+      where: { id: studyId!, organizationId: input.orgId },
+      select: { version: true },
+    });
+    const { markSupplyDriftAfterMetreCommit } = await import(
+      "@/lib/supply/sync-metre-drift"
+    );
+    await markSupplyDriftAfterMetreCommit(prisma, {
+      organizationId: input.orgId,
+      projectId: input.projectId,
+      studyId: studyId!,
+      studyVersion: studyMeta?.version ?? 1,
+    });
+  }
+
   // Lien devis ↔ métré (transfer + links)
   const transferKey = `global-metre-link:${input.projectId}:${ctx.quote.id}:${studyId}`;
   let transfer = await prisma.prepQuoteTransfer.findUnique({

@@ -8,6 +8,7 @@ import { getSupplyOfferFreshness } from "@/lib/supply/offer-freshness";
 import {
   computeOfferRenderedCost,
   computeProductCost,
+  formatProductSubtotalLabel,
   proposePackagingFromOffer,
 } from "@/lib/supply/offer-cost";
 import { validateSupplyOfferInput } from "@/lib/supply/offer-validation";
@@ -64,6 +65,7 @@ export function mapSupplyOfferToView(
     needQuantity: number;
     needUnit: string;
     includeCrane?: boolean;
+    projectId?: string;
   },
 ): SupplyOfferView {
   const unitPrice = n(row.unitPrice);
@@ -144,8 +146,17 @@ export function mapSupplyOfferToView(
     }),
     productCost: {
       amount: product.amount,
+      taxMode: product.taxMode,
       status: product.status,
       reason: product.reason,
+      displayLabel: formatProductSubtotalLabel({
+        amount: product.amount,
+        taxMode: product.taxMode,
+        status: product.status,
+        deliveryFee: n(row.deliveryFee),
+        craneFee: n(row.craneFee),
+        otherFees: n(row.otherFees),
+      }),
     },
     renderedCost: {
       knownTotal: rendered.knownTotal,
@@ -157,9 +168,32 @@ export function mapSupplyOfferToView(
       packagingProposal.packs != null
         ? packagingProposal
         : null,
+    productImageUrl: row.productImageUrl ?? null,
+    productImageOrigin: row.productImageOrigin ?? null,
+    productImageDisplayUrl: productImageDisplayUrl({
+      projectId: opts.projectId,
+      requirementId: row.requirementId,
+      offerId: row.id,
+      productImageUrl: row.productImageUrl ?? null,
+    }),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
+}
+
+function productImageDisplayUrl(opts: {
+  projectId?: string;
+  requirementId: string;
+  offerId: string;
+  productImageUrl: string | null;
+}): string | null {
+  const raw = opts.productImageUrl?.trim() || null;
+  if (!raw) return null;
+  if (/^https:\/\//i.test(raw)) return raw;
+  if (raw.startsWith("storage://") && opts.projectId) {
+    return `/api/projets/${opts.projectId}/materiaux/${opts.requirementId}/offers/${opts.offerId}/image`;
+  }
+  return null;
 }
 
 async function assertRequirement(opts: {
@@ -230,6 +264,7 @@ export async function listSupplyOffersForRequirement(opts: {
       selectedOfferId: req.selectedOfferId,
       needQuantity: needQty,
       needUnit: req.unit,
+      projectId: req.projectId,
     }),
   );
 }
@@ -301,6 +336,7 @@ export async function createSupplyOffer(opts: {
     selectedOfferId: req.selectedOfferId,
     needQuantity: needQty,
     needUnit: req.unit,
+    projectId: req.projectId,
   });
 }
 
@@ -453,6 +489,64 @@ export async function updateSupplyOffer(opts: {
     selectedOfferId: req.selectedOfferId,
     needQuantity: needQty,
     needUnit: req.unit,
+    projectId: req.projectId,
+  });
+}
+
+export async function setSupplyOfferProductImage(opts: {
+  organizationId: string;
+  projectId: string;
+  requirementId: string;
+  offerId: string;
+  productImageUrl: string | null;
+  productImageOrigin: "USER_UPLOAD" | "USER_URL" | "SUPPLIER_URL" | null;
+}): Promise<SupplyOfferView> {
+  const req = await assertRequirement(opts);
+  const existing = await prisma.supplyOffer.findFirst({
+    where: {
+      id: opts.offerId,
+      organizationId: opts.organizationId,
+      requirementId: opts.requirementId,
+    },
+    select: { id: true },
+  });
+  if (!existing) throw new Error("Offre introuvable");
+
+  const url = opts.productImageUrl?.trim() || null;
+  if (url) {
+    const isHttps = /^https:\/\//i.test(url);
+    const isStorage = url.startsWith("storage://");
+    if (!isHttps && !isStorage) {
+      throw new Error("Image : seules les URL https:// ou storage:// sont acceptées");
+    }
+    if (isHttps) {
+      try {
+        const u = new URL(url);
+        if (u.protocol !== "https:") throw new Error("https requis");
+      } catch {
+        throw new Error("URL d’image invalide");
+      }
+    }
+  }
+
+  const row = await prisma.supplyOffer.update({
+    where: { id: existing.id },
+    data: {
+      productImageUrl: url,
+      productImageOrigin: url
+        ? opts.productImageOrigin ?? "USER_URL"
+        : null,
+    },
+    include: OFFER_INCLUDE,
+  });
+
+  const needQty =
+    n(req.validatedOrderQuantity) ?? n(req.quantityRequired) ?? 0;
+  return mapSupplyOfferToView(row, {
+    selectedOfferId: req.selectedOfferId,
+    needQuantity: needQty,
+    needUnit: req.unit,
+    projectId: req.projectId,
   });
 }
 

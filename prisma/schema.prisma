@@ -620,6 +620,11 @@ model SupplyOffer {
   craneFee              Decimal?                     @db.Decimal(14, 2)
   otherFees             Decimal?                     @db.Decimal(14, 2)
 
+  /// Photo produit liée à CETTE offre (pas au besoin) — storage://… ou https://…
+  productImageUrl       String?
+  /// USER_UPLOAD | USER_URL | SUPPLIER_URL — jamais inventé
+  productImageOrigin    String?
+
   archivedAt            DateTime?
   createdAt             DateTime                     @default(now())
   updatedAt             DateTime                     @updatedAt

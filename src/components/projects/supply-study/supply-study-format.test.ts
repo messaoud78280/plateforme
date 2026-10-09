@@ -2,9 +2,11 @@
  * Tests purs — justification prix étude d’approvisionnement.
  */
 import assert from "node:assert/strict";
+import { formatProductSubtotalLabel } from "@/lib/supply/offer-cost";
 import {
   isJustifiedPricedOffer,
   normalizeOfferUrl,
+  qualifyOfferSourceLabel,
   validateProductUrl,
 } from "./supply-study-format";
 import type { SupplyOfferView } from "@/lib/supply/offer-types";
@@ -48,18 +50,46 @@ function base(over: Partial<SupplyOfferView> = {}): SupplyOfferView {
     archivedAt: null,
     isSelected: false,
     freshness: "FRESH",
-    productCost: { amount: 1.5, status: "KNOWN", reason: null },
+    productCost: {
+      amount: 1.5,
+      taxMode: "HT",
+      status: "KNOWN",
+      reason: null,
+      displayLabel: "Sous-total produit : 1,50 € HT — hors livraison",
+    },
     renderedCost: {
       knownTotal: null,
       completeness: "PARTIAL",
       missingLabels: ["Livraison"],
-      displayLabel: "Total partiel",
+      displayLabel: "Coût rendu chantier non disponible",
     },
     packagingProposal: null,
+    productImageUrl: null,
+    productImageOrigin: null,
+    productImageDisplayUrl: null,
     createdAt: "2026-10-08",
     updatedAt: "2026-10-08",
     ...over,
   };
+}
+
+{
+  assert.equal(qualifyOfferSourceLabel(base()), "Prix web relevé");
+  assert.equal(
+    qualifyOfferSourceLabel(base({ unitPrice: null })),
+    "Produit sourcé, prix non renseigné",
+  );
+  assert.equal(
+    qualifyOfferSourceLabel(
+      base({
+        priceSourceType: "SUPPLIER_QUOTE",
+        sourceUrl: null,
+        quoteNumber: "D-9",
+      }),
+    ),
+    "Offre sur devis",
+  );
+  console.log("qualifyOfferSourceLabel OK");
 }
 
 {
@@ -105,6 +135,38 @@ function base(over: Partial<SupplyOfferView> = {}): SupplyOfferView {
   assert.equal(validateProductUrl("pas-une-url").ok, false);
   assert.ok(normalizeOfferUrl("https://A.com/Path/")?.includes("a.com"));
   console.log("URL helpers OK");
+}
+
+{
+  const withDeliveryUnknown = formatProductSubtotalLabel({
+    amount: 210.93,
+    taxMode: "TTC",
+    status: "KNOWN",
+    deliveryFee: null,
+  });
+  assert.match(withDeliveryUnknown, /210,93/);
+  assert.match(withDeliveryUnknown, /TTC/);
+  assert.match(withDeliveryUnknown, /hors livraison/);
+
+  const withDelivery = formatProductSubtotalLabel({
+    amount: 210.93,
+    taxMode: "TTC",
+    status: "KNOWN",
+    deliveryFee: 40,
+  });
+  assert.match(withDelivery, /210,93/);
+  assert.doesNotMatch(withDelivery, /hors livraison/);
+
+  assert.equal(
+    formatProductSubtotalLabel({
+      amount: null,
+      taxMode: "HT",
+      status: "UNKNOWN",
+      deliveryFee: null,
+    }),
+    "Sous-total produit non calculable",
+  );
+  console.log("formatProductSubtotalLabel OK");
 }
 
 console.log("supply-study-format tests OK");

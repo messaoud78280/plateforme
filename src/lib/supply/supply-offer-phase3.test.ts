@@ -55,7 +55,13 @@ function baseOffer(
     archivedAt: null,
     isSelected: false,
     freshness: "FRESH",
-    productCost: { amount: null, status: "UNKNOWN", reason: "Prix non disponible" },
+    productCost: {
+      amount: null,
+      taxMode: "HT",
+      status: "UNKNOWN",
+      reason: "Prix non disponible",
+      displayLabel: "Sous-total produit non calculable",
+    },
     renderedCost: {
       knownTotal: null,
       completeness: "EMPTY",
@@ -63,6 +69,9 @@ function baseOffer(
       displayLabel: "Coût rendu chantier non disponible",
     },
     packagingProposal: null,
+    productImageUrl: null,
+    productImageOrigin: null,
+    productImageDisplayUrl: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...partial,
@@ -180,7 +189,7 @@ function baseOffer(
   });
   assert.equal(r.completeness, "PARTIAL");
   assert.equal(r.knownTotal, 1380);
-  assert.ok(r.displayLabel.includes("à confirmer"));
+  assert.equal(r.displayLabel, "Coût rendu chantier non disponible");
   assert.ok(!r.displayLabel.startsWith("Coût rendu chantier :"));
   console.log("T7 — PARTIAL OK");
 }
@@ -238,24 +247,36 @@ function baseOffer(
       id: "a",
       unitPrice: 1.2,
       priceUnit: "U",
-      productCost: { amount: 1260, status: "KNOWN", reason: null },
+      productCost: {
+        amount: 1260,
+        taxMode: "HT",
+        status: "KNOWN",
+        reason: null,
+        displayLabel: "Sous-total produit : 1 260,00 € HT — hors livraison",
+      },
       renderedCost: {
         knownTotal: 1260,
         completeness: "PARTIAL",
         missingLabels: ["livraison"],
-        displayLabel: "Coût connu : 1 260 € HT + livraison à confirmer",
+        displayLabel: "Coût rendu chantier non disponible",
       },
     }),
     baseOffer({
       id: "b",
       unitPrice: 84,
       priceUnit: "PALLET",
-      productCost: { amount: null, status: "UNKNOWN", reason: "…" },
+      productCost: {
+        amount: null,
+        taxMode: "HT",
+        status: "UNKNOWN",
+        reason: "…",
+        displayLabel: "Sous-total produit non calculable",
+      },
       renderedCost: {
         knownTotal: null,
         completeness: "EMPTY",
         missingLabels: [],
-        displayLabel: "…",
+        displayLabel: "Coût rendu chantier non disponible",
       },
     }),
   ]);

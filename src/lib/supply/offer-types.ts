@@ -115,8 +115,12 @@ export type SupplyOfferView = {
   freshness: SupplyOfferFreshness;
   productCost: {
     amount: number | null;
+    /** Régime fiscal du montant (jamais converti artificiellement). */
+    taxMode: SupplyOfferPriceTaxMode;
     status: "KNOWN" | "UNKNOWN";
     reason: string | null;
+    /** Ex. « Sous-total produit : 210,93 € TTC — hors livraison » */
+    displayLabel: string;
   };
   renderedCost: {
     knownTotal: number | null;
@@ -124,6 +128,12 @@ export type SupplyOfferView = {
     missingLabels: string[];
     displayLabel: string;
   };
+  /** Photo produit — storage:// ou https:// ; null = aucune. */
+  productImageUrl: string | null;
+  /** USER_UPLOAD | USER_URL | SUPPLIER_URL */
+  productImageOrigin: string | null;
+  /** URL affichable client (proxy auth ou https direct). */
+  productImageDisplayUrl: string | null;
   packagingProposal: {
     packs: number | null;
     roundedQty: number | null;

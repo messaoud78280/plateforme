@@ -29,6 +29,31 @@ export function needStatusLabel(status: string): string {
   return SUPPLY_NEED_STATUS_LABELS[status] ?? status;
 }
 
+/**
+ * Libellé source compréhensible — dérivé des champs réels, pas seulement du type.
+ */
+export function qualifyOfferSourceLabel(o: SupplyOfferView): string {
+  const hasPrice = o.unitPrice != null && Number.isFinite(o.unitPrice);
+  const hasUrl = Boolean(o.sourceUrl?.trim());
+  const hasQuoteProof =
+    Boolean(o.quoteNumber?.trim()) || Boolean(o.quoteDocumentRef?.trim());
+
+  if (o.priceSourceType === "WEB_VERIFIED") {
+    if (hasPrice && hasUrl && o.observedAt) return "Prix web relevé";
+    if (hasUrl && !hasPrice) return "Produit sourcé, prix non renseigné";
+    if (hasPrice && (!hasUrl || !o.observedAt))
+      return "Prix web — preuve incomplète";
+    return "Produit sourcé, prix non renseigné";
+  }
+  if (o.priceSourceType === "SUPPLIER_QUOTE") {
+    if (hasPrice && hasQuoteProof) return "Offre sur devis";
+    if (!hasPrice) return "Produit sourcé, prix non renseigné";
+    return "Offre sur devis — preuve incomplète";
+  }
+  if (o.priceSourceType === "IMPORT") return "Import";
+  return "Saisie manuelle";
+}
+
 /** Prix exploitable + source justifiée (aligné offer-validation). */
 export function isJustifiedPricedOffer(o: SupplyOfferView): boolean {
   if (o.archivedAt) return false;

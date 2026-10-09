@@ -165,13 +165,10 @@ export function computeOfferRenderedCost(input: {
   if (rendered.completeness === "EMPTY") {
     displayLabel = "Coût rendu chantier non disponible";
   } else if (rendered.completeness === "COMPLETE") {
-    displayLabel = `Coût rendu chantier : ${formatMoney(knownSum)}`;
+    displayLabel = `Coût rendu chantier : ${formatMoneyHt(knownSum)}`;
   } else {
-    const missing =
-      missingLabels.length > 0
-        ? missingLabels.join(", ")
-        : "éléments manquants";
-    displayLabel = `Coût connu : ${formatMoney(knownSum)} + ${missing} à confirmer`;
+    // Frais manquants → ne jamais présenter un « rendu chantier » définitif
+    displayLabel = "Coût rendu chantier non disponible";
   }
 
   return {
@@ -188,7 +185,7 @@ export function computeOfferRenderedCost(input: {
   };
 }
 
-function formatMoney(v: number): string {
+function formatMoneyHt(v: number): string {
   return (
     new Intl.NumberFormat("fr-FR", {
       style: "currency",
@@ -196,4 +193,28 @@ function formatMoney(v: number): string {
       maximumFractionDigits: 2,
     }).format(v) + " HT"
   );
+}
+
+/** Libellé sous-total produit (régime d’origine) — hors frais inconnus. */
+export function formatProductSubtotalLabel(input: {
+  amount: number | null;
+  taxMode: "HT" | "TTC";
+  status: "KNOWN" | "UNKNOWN";
+  deliveryFee: number | null | undefined;
+  craneFee?: number | null | undefined;
+  otherFees?: number | null | undefined;
+}): string {
+  if (input.status !== "KNOWN" || input.amount == null) {
+    return "Sous-total produit non calculable";
+  }
+  const money = new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 2,
+  }).format(input.amount);
+  const tax = input.taxMode;
+  if (input.deliveryFee == null) {
+    return `Sous-total produit : ${money} ${tax} — hors livraison`;
+  }
+  return `Sous-total produit : ${money} ${tax}`;
 }

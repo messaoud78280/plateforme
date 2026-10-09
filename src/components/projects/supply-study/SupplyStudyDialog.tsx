@@ -23,6 +23,7 @@ import {
   Package,
   Pencil,
   Ruler,
+  Search,
   ShoppingCart,
   Trash2,
   X,
@@ -164,6 +165,50 @@ export function SupplyStudyDialog({
     };
   } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [catalogSearchOpen, setCatalogSearchOpen] = useState(false);
+  const [catalogSearchQ, setCatalogSearchQ] = useState("");
+  const [catalogHits, setCatalogHits] = useState<
+    Array<{
+      catalogSupplierOfferId: string;
+      family: string;
+      materialDesignation: string;
+      productLabel: string;
+      manufacturer: string | null;
+      manufacturerRef: string | null;
+      gtin: string | null;
+      imageUrl: string | null;
+      supplierName: string;
+      packagingLabel: string | null;
+      latestPrice: {
+        unitPrice: number | null;
+        priceUnit: string;
+        priceTaxMode: string;
+        observedAt: string | null;
+        recordedAt: string;
+      } | null;
+      priceFreshness: string;
+      priceFreshnessLabel: string;
+    }>
+  >([]);
+  const [catalogApplyPreview, setCatalogApplyPreview] = useState<{
+    catalogSupplierOfferId: string;
+    snapshot: {
+      productLabel: string;
+      productRef: string | null;
+      supplierName: string;
+      unitPrice: number | null;
+      priceUnit: string;
+      priceTaxMode: string;
+      observedAt: string | null;
+    };
+    compatibility: { notes: string[]; unitMatch: boolean };
+    priceFreshnessLabel: string;
+    existingOfferCandidates: Array<{
+      id: string;
+      productLabel: string;
+      matchReasons: string[];
+    }>;
+  } | null>(null);
   const [imageUrlDraft, setImageUrlDraft] = useState("");
   const [imageUrlPanelOpen, setImageUrlPanelOpen] = useState(false);
   const [imageBusy, setImageBusy] = useState(false);
@@ -378,6 +423,94 @@ export function SupplyStudyDialog({
       window.setTimeout(() => setToast(null), 3000);
       onChanged();
       setEditDesc(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function runCatalogSearch(q?: string) {
+    setBusy(true);
+    setError(null);
+    try {
+      const query = (q ?? catalogSearchQ).trim();
+      const res = await fetch(
+        `/api/catalogue-materiaux/search-for-supply?q=${encodeURIComponent(query)}&limit=20`,
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Recherche catalogue impossible");
+      setCatalogHits(Array.isArray(data.hits) ? data.hits : []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function previewCatalogApply(catalogSupplierOfferId: string) {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/projets/${projectId}/materiaux/${need.id}/offers/from-catalog?catalogSupplierOfferId=${encodeURIComponent(catalogSupplierOfferId)}`,
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Prévisualisation impossible");
+      setCatalogApplyPreview({
+        catalogSupplierOfferId,
+        ...data.preview,
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function commitCatalogApply(forceCreate = false) {
+    if (!catalogApplyPreview) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/projets/${projectId}/materiaux/${need.id}/offers/from-catalog`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            catalogSupplierOfferId:
+              catalogApplyPreview.catalogSupplierOfferId,
+            confirm: true,
+            forceCreate,
+          }),
+        },
+      );
+      const data = await res.json();
+      if (res.status === 409) {
+        setError(
+          `${data.error} — inspectez l’offre existante ou forcez une offre distincte.`,
+        );
+        if (Array.isArray(data.candidates) && data.candidates[0]?.id) {
+          setInspectedId(data.candidates[0].id);
+        }
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || "Création impossible");
+      if (data.purchaseOrdersCreated > 0) {
+        throw new Error("Anomalie : un BC a été créé — opération refusée");
+      }
+      setCatalogApplyPreview(null);
+      setCatalogSearchOpen(false);
+      setToast(
+        data.priceFreshnessLabel && data.priceFreshnessLabel !== "Prix récent"
+          ? `Offre créée depuis le catalogue (${data.priceFreshnessLabel}) — non retenue`
+          : "Offre créée depuis le catalogue — non retenue",
+      );
+      window.setTimeout(() => setToast(null), 4000);
+      await loadOffers();
+      onChanged();
+      if (data.offer?.id) setInspectedId(data.offer.id);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
     } finally {
@@ -1054,6 +1187,19 @@ export function SupplyStudyDialog({
               ) : null}
               {canWrite ? (
                 <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCatalogSearchQ(need.label);
+                      setCatalogSearchOpen(true);
+                      setCatalogApplyPreview(null);
+                      void runCatalogSearch(need.label);
+                    }}
+                    className="inline-flex items-center gap-1 rounded-full border border-[#1e3a5f]/25 bg-[#1e3a5f]/5 px-3 py-1.5 text-[12px] font-semibold text-[#1e3a5f]"
+                  >
+                    <Search className="h-3.5 w-3.5" />
+                    Rechercher dans le catalogue
+                  </button>
                   <button
                     type="button"
                     onClick={() => setAddMode("manual")}
@@ -2033,6 +2179,215 @@ export function SupplyStudyDialog({
                     Confirmer l’enregistrement
                   </button>
                 </>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {catalogSearchOpen ? (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4">
+          <div className="flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
+            <div className="flex items-start justify-between gap-2 border-b border-slate-100 px-5 py-4">
+              <div>
+                <h3 className="text-base font-bold text-[#1e3a5f]">
+                  Rechercher dans le catalogue
+                </h3>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  Créer une offre chantier depuis une fiche catalogue — sans
+                  rétention automatique ni bon de commande.
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label="Fermer"
+                onClick={() => {
+                  setCatalogSearchOpen(false);
+                  setCatalogApplyPreview(null);
+                }}
+                className="rounded-lg p-1 text-slate-500 hover:bg-slate-50"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex gap-2 border-b border-slate-100 px-5 py-3">
+              <input
+                value={catalogSearchQ}
+                onChange={(e) => setCatalogSearchQ(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void runCatalogSearch();
+                }}
+                placeholder="Matériau, fabricant, référence, GTIN…"
+                className="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void runCatalogSearch()}
+                className="rounded-xl bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
+              >
+                Chercher
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-3">
+              {catalogApplyPreview ? (
+                <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+                  <p className="text-sm font-bold text-slate-900">
+                    {catalogApplyPreview.snapshot.productLabel}
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    {catalogApplyPreview.snapshot.supplierName}
+                    {catalogApplyPreview.snapshot.productRef
+                      ? ` · réf. ${catalogApplyPreview.snapshot.productRef}`
+                      : ""}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-700">
+                    Snapshot prix :{" "}
+                    {catalogApplyPreview.snapshot.unitPrice == null
+                      ? "non renseigné"
+                      : `${formatStudyMoney(catalogApplyPreview.snapshot.unitPrice)} ${catalogApplyPreview.snapshot.priceTaxMode} / ${catalogApplyPreview.snapshot.priceUnit}`}
+                    {catalogApplyPreview.snapshot.observedAt
+                      ? ` · observé ${formatStudyDay(catalogApplyPreview.snapshot.observedAt)}`
+                      : ""}
+                  </p>
+                  <p
+                    className={`mt-1 text-xs font-semibold ${
+                      catalogApplyPreview.priceFreshnessLabel === "Prix récent"
+                        ? "text-emerald-800"
+                        : "text-amber-900"
+                    }`}
+                  >
+                    {catalogApplyPreview.priceFreshnessLabel}
+                  </p>
+                  <ul className="mt-2 list-disc space-y-1 pl-4 text-[11px] text-amber-950">
+                    {catalogApplyPreview.compatibility.notes.map((n) => (
+                      <li key={n}>{n}</li>
+                    ))}
+                  </ul>
+                  {catalogApplyPreview.existingOfferCandidates.length > 0 ? (
+                    <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+                      Offre équivalente déjà présente — inspectez-la ou créez
+                      une offre distincte.
+                      <ul className="mt-1 space-y-1">
+                        {catalogApplyPreview.existingOfferCandidates.map(
+                          (c) => (
+                            <li key={c.id}>
+                              <button
+                                type="button"
+                                className="font-bold text-[#2563eb]"
+                                onClick={() => {
+                                  setInspectedId(c.id);
+                                  setCatalogSearchOpen(false);
+                                  setCatalogApplyPreview(null);
+                                }}
+                              >
+                                Inspecter « {c.productLabel} »
+                              </button>
+                            </li>
+                          ),
+                        )}
+                      </ul>
+                    </div>
+                  ) : null}
+                  <div className="mt-4 flex flex-wrap justify-end gap-2">
+                    <button
+                      type="button"
+                      className="text-xs font-semibold text-slate-600"
+                      onClick={() => setCatalogApplyPreview(null)}
+                    >
+                      Retour
+                    </button>
+                    {catalogApplyPreview.existingOfferCandidates.length >
+                    0 ? (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold"
+                        onClick={() => void commitCatalogApply(true)}
+                      >
+                        Créer quand même (distincte)
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+                        onClick={() => void commitCatalogApply(false)}
+                      >
+                        Confirmer la création d’offre
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : catalogHits.length === 0 ? (
+                <p className="py-8 text-center text-sm text-slate-500">
+                  Aucun résultat catalogue. Capitalisez d’abord depuis une
+                  recherche chantier, ou créez une fiche catalogue.
+                </p>
+              ) : (
+                <ul className="space-y-2">
+                  {catalogHits.map((h) => (
+                    <li
+                      key={h.catalogSupplierOfferId}
+                      className="flex gap-3 rounded-xl border border-slate-200 bg-white p-3"
+                    >
+                      <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                        {h.imageUrl && /^https:\/\//i.test(h.imageUrl) ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={h.imageUrl}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-[10px] text-slate-400">
+                            Photo
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-slate-900">
+                          {h.productLabel}
+                        </p>
+                        <p className="truncate text-[11px] text-slate-500">
+                          {h.family} · {h.materialDesignation}
+                          {h.manufacturer ? ` · ${h.manufacturer}` : ""}
+                          {h.manufacturerRef
+                            ? ` · réf. ${h.manufacturerRef}`
+                            : ""}
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-slate-600">
+                          {h.supplierName}
+                          {h.latestPrice?.unitPrice != null
+                            ? ` · ${formatStudyMoney(h.latestPrice.unitPrice)} ${h.latestPrice.priceTaxMode}/${h.latestPrice.priceUnit}`
+                            : " · prix non renseigné"}
+                          {h.latestPrice?.observedAt
+                            ? ` · ${formatStudyDay(h.latestPrice.observedAt)}`
+                            : ""}
+                        </p>
+                        <p
+                          className={`text-[11px] font-semibold ${
+                            h.priceFreshness === "FRESH"
+                              ? "text-emerald-800"
+                              : "text-amber-900"
+                          }`}
+                        >
+                          {h.priceFreshnessLabel}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() =>
+                          void previewCatalogApply(h.catalogSupplierOfferId)
+                        }
+                        className="shrink-0 self-center rounded-lg border border-slate-200 px-2.5 py-1.5 text-[11px] font-bold text-[#1e3a5f] hover:bg-slate-50"
+                      >
+                        Prévisualiser
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           </div>

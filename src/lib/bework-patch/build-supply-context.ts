@@ -433,7 +433,7 @@ export async function buildSupplyContext(
   }
   if (focusNeed) {
     focusInstructions.push(
-      `FOCUS BESOIN : ${focusNeed.label} (id=${focusNeed.id}). Prioriser add_supply_offer / update_supply_need sur ce besoin.`,
+      `FOCUS BESOIN : ${focusNeed.label} (id=${focusNeed.requirement_id}). Prioriser add_supply_offer / update_supply_need sur ce besoin.`,
       "Conserver les autres besoins/offres pour détecter les doublons (même product_ref / source_url).",
     );
   }

@@ -1,5 +1,10 @@
 import { getProjectWorkspace } from "@/lib/chantier/project-workspace";
 import { ProjectPreparationOverview } from "@/components/chantier/ProjectPreparationOverview";
+import {
+  formatChantierTemplateReuseLines,
+  resolveTemplateFromScopeCodes,
+} from "@/lib/chantier/trade-templates";
+import { loadChantierTemplateReuse } from "@/lib/chantier/trade-template-reuse";
 
 /** Bloc préparation — chargé en Suspense (ne bloque pas le shell chantier). */
 export async function ProjectPreparationDeferred({
@@ -38,6 +43,20 @@ export async function ProjectPreparationDeferred({
     );
   }
   if (!workspace) return null;
+  const template = resolveTemplateFromScopeCodes(
+    workspace.scopes.map((scope) => scope.code),
+  );
+  const tradeReuseLines = template
+    ? await loadChantierTemplateReuse({
+        organizationId,
+        templateId: template.id,
+      })
+        .then((facts) => (facts ? formatChantierTemplateReuseLines(facts) : null))
+        .catch((error) => {
+          console.error("[ProjetDetail] modèle métier:", error);
+          return null;
+        })
+    : null;
   return (
     <div className="pt-1 pb-1">
       <ProjectPreparationOverview
@@ -46,6 +65,7 @@ export async function ProjectPreparationDeferred({
         hasResponsible={hasResponsible}
         missingDocumentsCount={missingDocumentsCount}
         canAccessApprovisionnements={canAccessApprovisionnements}
+        tradeReuseLines={tradeReuseLines}
       />
     </div>
   );

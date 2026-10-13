@@ -26,6 +26,7 @@ import { PlanningCreateV2Modal } from "@/components/chantier/PlanningCreateV2Mod
 import { ChantierDossierNav } from "@/components/chantier/ChantierDossierNav";
 import { buildDossierNavFromWorkspace } from "@/lib/chantier/dossier-nav";
 import { isFeatureEnabled } from "@/lib/feature-flags";
+import { resolveTemplateFromScopeCodes } from "@/lib/chantier/trade-templates";
 
 type QuoteSectionPreview = {
   sectionId: string;
@@ -44,6 +45,7 @@ export function ProjectPreparationOverview({
   hasResponsible = true,
   missingDocumentsCount = 0,
   canAccessApprovisionnements = true,
+  tradeReuseLines = null,
 }: {
   workspace: ProjectWorkspace;
   canEdit?: boolean;
@@ -51,6 +53,8 @@ export function ProjectPreparationOverview({
   missingDocumentsCount?: number;
   /** Si false : pas de lien vers un onglet Approvisionnements invisible. */
   canAccessApprovisionnements?: boolean;
+  /** Lignes lues sur la bibliothèque de l’organisation. Null si chantier vierge. */
+  tradeReuseLines?: string[] | null;
 }) {
   const workspace = useMemo((): ProjectWorkspace => {
     if (canAccessApprovisionnements) return workspaceRaw;
@@ -72,6 +76,10 @@ export function ProjectPreparationOverview({
       },
     };
   }, [workspaceRaw, canAccessApprovisionnements]);
+  const tradeTemplate = useMemo(
+    () => resolveTemplateFromScopeCodes(workspace.scopes.map((scope) => scope.code)),
+    [workspace.scopes],
+  );
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
   const [classifyOpen, setClassifyOpen] = useState(false);
@@ -965,7 +973,9 @@ export function ProjectPreparationOverview({
                 Lots / phases
               </h3>
               <p className="mt-0.5 text-[12px] text-slate-500">
-                Filtres du dossier — pas de métré ni planning séparés.
+                {tradeTemplate
+                  ? "Lots du modèle — la visite, le métré, le devis, le planning et les approvisionnements s’y rattachent."
+                  : "Filtres du dossier — pas de métré ni planning séparés."}
               </p>
             </div>
             {canEdit ? (
@@ -978,6 +988,25 @@ export function ProjectPreparationOverview({
               </button>
             ) : null}
           </div>
+          {tradeTemplate ? (
+            <div className="mt-2.5 rounded-xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.04] px-3 py-2.5 text-[12.5px] text-slate-700">
+              <p className="font-semibold text-[#1e3a5f]">
+                Modèle {tradeTemplate.label}
+              </p>
+              <p className="mt-1">{tradeTemplate.summary}</p>
+              {tradeReuseLines && tradeReuseLines.length > 0 ? (
+                <ul className="mt-2 space-y-1">
+                  {tradeReuseLines.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <p className="mt-2 text-[12px] text-slate-600">
+                Quantités, prix de ce chantier, dates et client restent à
+                valider. Aucune commande ni devis accepté n’a été recopié.
+              </p>
+            </div>
+          ) : null}
           <ul className="mt-2.5 divide-y divide-slate-100">
             {workspace.scopes.map((scope) => (
               <li key={scope.id}>
@@ -988,8 +1017,15 @@ export function ProjectPreparationOverview({
                   <span className="w-10 shrink-0 text-[11px] font-bold tabular-nums text-slate-400">
                     {scope.code}
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-[13.5px] font-semibold text-slate-900">
-                    {scope.name}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[13.5px] font-semibold text-slate-900">
+                      {scope.name}
+                    </span>
+                    {scope.description ? (
+                      <span className="mt-0.5 block truncate text-[12px] text-slate-500">
+                        {scope.description}
+                      </span>
+                    ) : null}
                   </span>
                   <span className="shrink-0 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">
                     {scope.progress.ready >= scope.progress.total &&

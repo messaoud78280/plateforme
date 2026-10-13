@@ -6,6 +6,7 @@ import {
   CREATE_CHANTIER_STAFF_MISSING_CLIENT_ERROR,
   staffRequiresClientId,
 } from "@/lib/chantier/create-chantier-contract";
+import { ChantierTradeTemplateField } from "@/components/chantier/ChantierTradeTemplateField";
 
 type ClientOption = { id: string; name: string };
 
@@ -39,6 +40,7 @@ export function CreateChantierForm({
   const [plannedStartDate, setPlannedStartDate] = useState("");
   const [plannedEndDate, setPlannedEndDate] = useState("");
   const [description, setDescription] = useState("");
+  const [tradeTemplateId, setTradeTemplateId] = useState("");
 
   const clientList = clients ?? [];
   const needsClient = staffRequiresClientId(Boolean(showClientPicker));
@@ -78,6 +80,7 @@ export function CreateChantierForm({
           plannedStartDate: plannedStartDate || null,
           plannedEndDate: plannedEndDate || null,
           description: description.trim() || null,
+          tradeTemplateId: tradeTemplateId || null,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -129,8 +132,8 @@ export function CreateChantierForm({
                 Créer un chantier
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                Les rubriques du dossier (devis, contrats, planning, DOE…)
-                seront créées automatiquement. Aucun client fictif n’est créé.
+                Les rubriques du dossier sont créées automatiquement. Un modèle
+                pose les lots et les phases types, sans quantités ni prix.
               </p>
             </div>
             <button
@@ -267,6 +270,11 @@ export function CreateChantierForm({
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
               />
             </div>
+            <ChantierTradeTemplateField
+              value={tradeTemplateId}
+              onChange={setTradeTemplateId}
+            />
+
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-slate-700">
                 Description courte

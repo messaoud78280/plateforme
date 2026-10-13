@@ -12,6 +12,8 @@ import {
 import { isAgent, isBeworkStaff } from "@/lib/authz";
 import { mapChantierToProjectStatus } from "@/lib/chantier-lifecycle";
 import { CREATE_CHANTIER_STAFF_MISSING_CLIENT_ERROR } from "@/lib/chantier/create-chantier-contract";
+import { parseTradeTemplateId } from "@/lib/chantier/trade-templates";
+import { applyChantierTradeTemplate } from "@/lib/chantier/trade-template-reuse";
 
 const CHANTIER_STATUSES: ChantierStatus[] = ["ETUDE", "EN_COURS", "EN_ATTENTE", "RECEPTION", "TERMINE"];
 const URGENCIES: ProjectUrgency[] = ["BASSE", "MOYENNE", "HAUTE", "URGENTE"];
@@ -117,6 +119,12 @@ export async function POST(request: Request) {
     return Number.isNaN(d.getTime()) ? null : d;
   };
 
+  const parsedTemplate = parseTradeTemplateId(body.tradeTemplateId);
+  if (!parsedTemplate.ok) {
+    return NextResponse.json({ error: parsedTemplate.error }, { status: 400 });
+  }
+  const tradeTemplateId = parsedTemplate.id;
+
   const signedQuoteRaw = body.signedQuoteAmount;
   let signedQuoteAmount: number | null = null;
   if (signedQuoteRaw !== null && signedQuoteRaw !== undefined && signedQuoteRaw !== "") {
@@ -127,6 +135,14 @@ export async function POST(request: Request) {
     signedQuoteAmount = n;
   }
 
+  if (tradeTemplateId && !organizationId) {
+    return NextResponse.json(
+      { error: "Organisation introuvable pour appliquer le modèle métier." },
+      { status: 400 },
+    );
+  }
+
+  let createdProjectId: string | null = null;
   try {
     const project = await prisma.project.create({
       data: {
@@ -149,11 +165,46 @@ export async function POST(request: Request) {
       },
       select: { id: true },
     });
+    createdProjectId = project.id;
 
     await ensureChantierFolders(project.id);
 
-    return NextResponse.json({ id: project.id }, { status: 201 });
+    const tradeTemplate =
+      tradeTemplateId && organizationId
+        ? await applyChantierTradeTemplate({
+            organizationId,
+            projectId: project.id,
+            templateId: tradeTemplateId,
+          })
+        : null;
+    if (tradeTemplateId && !tradeTemplate) {
+      throw new Error("Modèle métier non appliqué.");
+    }
+
+    return NextResponse.json(
+      {
+        id: project.id,
+        tradeTemplate: tradeTemplate
+          ? {
+              id: tradeTemplate.id,
+              label: tradeTemplate.label,
+              lots: tradeTemplate.lots.map((lot) => ({
+                code: lot.code,
+                name: lot.name,
+              })),
+            }
+          : null,
+      },
+      { status: 201 },
+    );
   } catch (error) {
+    if (createdProjectId) {
+      await prisma.project
+        .delete({ where: { id: createdProjectId } })
+        .catch((rollbackError) => {
+          console.error("Rollback création chantier:", rollbackError);
+        });
+    }
     console.error("Erreur création chantier:", error);
     return NextResponse.json({ error: "Erreur lors de la création du chantier." }, { status: 500 });
   }

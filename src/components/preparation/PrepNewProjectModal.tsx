@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChantierTradeTemplateField } from "@/components/chantier/ChantierTradeTemplateField";
 
 const CHANTIER_STATUSES = [
   { value: "ETUDE", label: "Étude" },
@@ -32,6 +33,7 @@ export function PrepNewProjectModal({
   const [siteAddress, setSiteAddress] = useState("");
   const [siteCity, setSiteCity] = useState("");
   const [chantierStatus, setChantierStatus] = useState("ETUDE");
+  const [tradeTemplateId, setTradeTemplateId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,6 +55,7 @@ export function PrepNewProjectModal({
           siteAddress: siteAddress.trim() || null,
           siteCity: siteCity.trim() || null,
           chantierStatus,
+          tradeTemplateId: tradeTemplateId || null,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -140,6 +143,11 @@ export function PrepNewProjectModal({
               />
             </label>
           </div>
+
+          <ChantierTradeTemplateField
+            value={tradeTemplateId}
+            onChange={setTradeTemplateId}
+          />
 
           <label className="block text-[13px] font-medium text-slate-700">
             Statut du chantier

@@ -5,6 +5,7 @@
 import { prisma } from "@/lib/prisma";
 import { createServiceRoleClient } from "@/lib/supabase";
 import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { isBeworkCrossOrgStaff } from "@/lib/authz";
 import { canAccessGedFile } from "@/lib/ged/org-scope";
 import { canAccessDocument } from "@/lib/documents/access";
 import {
@@ -538,7 +539,7 @@ async function resolveAnnexByStoredUrl(
       allowIf: async () => {
         const a = apptAtt.appointment;
         if (a.organizerId === user.id || a.clientId === user.id) return true;
-        if (user.role === "MANAGER" || user.role === "AGENCE") return true;
+        if (isBeworkCrossOrgStaff(user)) return true;
         if (a.projectId) {
           const access = await canAccessChantierProject(user, a.projectId);
           return access.ok;
@@ -674,7 +675,8 @@ async function resolveAnnexByStoredUrl(
       fileName: cctp.fileName,
       mimeType: cctp.mimeType,
       storedUrl: cctp.storageUrl,
-      allowIf: () => cctp.session.userId === user.id || user.role === "MANAGER" || user.role === "AGENCE",
+      allowIf: () =>
+        cctp.session.userId === user.id || isBeworkCrossOrgStaff(user),
     });
   }
 
@@ -696,7 +698,7 @@ async function resolveAnnexByStoredUrl(
       mimeType: ppsps.mimeType,
       storedUrl: ppsps.storageUrl,
       allowIf: () =>
-        ppsps.session.userId === user.id || user.role === "MANAGER" || user.role === "AGENCE",
+        ppsps.session.userId === user.id || isBeworkCrossOrgStaff(user),
     });
   }
 

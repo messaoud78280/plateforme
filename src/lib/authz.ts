@@ -9,7 +9,59 @@
  * voir `@/lib/chantier-dossier/access` et les modules équivalents.
  */
 
-export type SessionUser = { id?: string | null; role?: string | null } | null | undefined;
+export type SessionUser = {
+  id?: string | null;
+  role?: string | null;
+  personType?: string | null;
+  permissionProfile?: string | null;
+} | null | undefined;
+
+/** Comptes écosystème : jamais d’accès transversal, même si UserRole est staff. */
+const CLIENT_SIDE_PERSON_TYPES = new Set([
+  "CLIENT_EXT",
+  "SUPPLIER",
+  "SUBCONTRACTOR",
+  "MOE",
+  "CONTROL_OFFICE",
+  "PARTNER",
+]);
+
+const CLIENT_SIDE_PROFILES = new Set([
+  "CLIENT",
+  "FOURNISSEUR",
+  "SOUS_TRAITANT",
+  "PARTENAIRE",
+]);
+
+function isClientSideIdentity(user: SessionUser): boolean {
+  if (!user) return true;
+  if (user.role === "CLIENT") return true;
+  if (user.personType && CLIENT_SIDE_PERSON_TYPES.has(user.personType)) {
+    return true;
+  }
+  if (user.permissionProfile && CLIENT_SIDE_PROFILES.has(user.permissionProfile)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Staff BeWork opérationnel (gérant, agence, agent assigné).
+ * Exclut les comptes clients et portails externes.
+ */
+export function isBeworkOperationalStaff(user: SessionUser): boolean {
+  if (!user?.role || !isBeworkStaff(user)) return false;
+  return !isClientSideIdentity(user);
+}
+
+/**
+ * Accès transversal aux organisations : uniquement MANAGER et AGENCE BeWork.
+ * L’agent reste limité à ses chantiers assignés.
+ */
+export function isBeworkCrossOrgStaff(user: SessionUser): boolean {
+  if (!isAgencyOrManager(user)) return false;
+  return !isClientSideIdentity(user);
+}
 
 /** Gérant BeWork — accès complet, administration. */
 export function isManager(user: SessionUser): boolean {

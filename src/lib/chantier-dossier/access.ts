@@ -1,6 +1,32 @@
 import { prisma } from "@/lib/prisma";
+import {
+  isBeworkCrossOrgStaff,
+  isBeworkOperationalStaff,
+} from "@/lib/authz";
 
-type SessionUser = { id: string; role?: string | null };
+type SessionUser = {
+  id: string;
+  role?: string | null;
+  personType?: string | null;
+  permissionProfile?: string | null;
+};
+
+async function staffIdentity(user: SessionUser): Promise<SessionUser> {
+  if (user.personType !== undefined && user.permissionProfile !== undefined) {
+    return user;
+  }
+  const row = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true, personType: true, permissionProfile: true },
+  });
+  if (!row) return user;
+  return {
+    id: user.id,
+    role: row.role,
+    personType: row.personType,
+    permissionProfile: row.permissionProfile,
+  };
+}
 
 export function isChantierStaff(role?: string | null) {
   return role === "AGENCE" || role === "MANAGER" || role === "AGENT";
@@ -18,13 +44,18 @@ export async function canAccessChantierProject(
   });
   if (!project) return { ok: false as const, project: null };
 
-  if (user.role === "MANAGER" || user.role === "AGENCE") {
+  const identity = await staffIdentity(user);
+  if (isBeworkCrossOrgStaff(identity)) {
     return { ok: true as const, project };
   }
-  if (user.role === "AGENT" && project.assignedToId === user.id) {
+  if (
+    isBeworkOperationalStaff(identity) &&
+    identity.role === "AGENT" &&
+    project.assignedToId === user.id
+  ) {
     return { ok: true as const, project };
   }
-  if (user.role === "CLIENT") {
+  if (user.role === "CLIENT" || identity.role === "CLIENT" || !isBeworkOperationalStaff(identity)) {
     const { canClientAccessProject } = await import("@/lib/organization/access");
     if (await canClientAccessProject(user.id, project)) {
       return { ok: true as const, project };
@@ -50,7 +81,7 @@ export function canDeleteChantierProject(
   user: SessionUser,
   project: { clientId: string }
 ): boolean {
-  if (user.role === "MANAGER" || user.role === "AGENCE") return true;
+  if (isBeworkCrossOrgStaff(user)) return true;
   if (project.clientId === user.id) return true;
   return false;
 }

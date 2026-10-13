@@ -4,6 +4,7 @@
 import type { BeworkPatchV1 } from "@/lib/bework-patch/types";
 import type { AnalyzePatchImpactResult } from "@/lib/bework-patch/impact/types";
 import { isPlanningCommitSupportedOp } from "@/lib/bework-patch/commit/planning-capability";
+import { quotePatchCommitBlockReason } from "@/lib/bework-patch/commit/quote-capability";
 import { isSupplyCommitSupportedOp } from "@/lib/bework-patch/commit/supply-ops";
 
 export type SyncMode =
@@ -54,6 +55,14 @@ export function evaluateCommitEligibility(input: {
         ok: false,
         reason: "Devis protégé — ajustement commercial impossible.",
         code: "PROTECTED_ENTITY",
+      };
+    }
+    const blocked = quotePatchCommitBlockReason(patch);
+    if (blocked) {
+      return {
+        ok: false,
+        reason: blocked,
+        code: "OPERATION_NOT_ALLOWED_FOR_SECTION",
       };
     }
     return {
@@ -369,6 +378,14 @@ export function evaluateCommitEligibility(input: {
           ok: false,
           reason: "Devis protégé.",
           code: "PROTECTED_ENTITY",
+        };
+      }
+      const blocked = quotePatchCommitBlockReason(patch);
+      if (blocked) {
+        return {
+          ok: false,
+          reason: blocked,
+          code: "OPERATION_NOT_ALLOWED_FOR_SECTION",
         };
       }
       return {

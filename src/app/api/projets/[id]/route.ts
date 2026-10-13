@@ -3,7 +3,11 @@ import { getServerSession } from "next-auth";
 import type { ChantierStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { isAgencyOrManager, isBeworkStaff } from "@/lib/authz";
+import {
+  isBeworkCrossOrgStaff,
+  isBeworkOperationalStaff,
+} from "@/lib/authz";
+import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
 import { projectLifecycleWrite } from "@/lib/chantier-lifecycle";
 
 const CHANTIER_STATUSES: ChantierStatus[] = ["ETUDE", "EN_COURS", "EN_ATTENTE", "RECEPTION", "TERMINE"];
@@ -19,17 +23,22 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const isAgence = isAgencyOrManager(session.user);
-  const isStaff = isBeworkStaff(session.user);
+  const actor = {
+    id: session.user.id,
+    role: session.user.role,
+    personType: session.user.personType,
+    permissionProfile: session.user.permissionProfile,
+  };
+  const crossOrg = isBeworkCrossOrgStaff(actor);
+  const operationalStaff = isBeworkOperationalStaff(actor);
 
   const project = await prisma.project.findUnique({ where: { id } });
   if (!project) {
     return NextResponse.json({ error: "Projet introuvable" }, { status: 404 });
   }
 
-  // Accès lecture API : staff BeWork ou client propriétaire (mutations staff plus bas).
-  const canAccess = isStaff || project.clientId === session.user.id;
-  if (!canAccess) {
+  const access = await canAccessChantierProject(actor, id);
+  if (!access.ok) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
 
@@ -49,7 +58,7 @@ export async function PATCH(
       );
     }
 
-    if ((hasAssign || hasChantierStatus) && !isStaff) {
+    if ((hasAssign || hasChantierStatus) && !operationalStaff) {
       return NextResponse.json(
         { error: "Seul BeWork peut modifier l'assignation ou le statut chantier." },
         { status: 403 },
@@ -57,7 +66,7 @@ export async function PATCH(
     }
 
     // Assigner un agent : réservé décideurs (agence / gérant)
-    if (hasAssign && !isAgence) {
+    if (hasAssign && !crossOrg) {
       return NextResponse.json(
         { error: "Seule l'agence peut assigner un agent au projet." },
         { status: 403 },

@@ -39,3 +39,27 @@ export function isQuoteUpdateItemCommittedField(field: string): boolean {
     field,
   );
 }
+
+/** Refus avant commit si une op ou un champ devis n’est pas réellement écrit. */
+export function quotePatchCommitBlockReason(patch: {
+  operations: Array<{
+    op: string;
+    changes?: Record<string, unknown>;
+  }>;
+}): string | null {
+  for (const op of patch.operations) {
+    if (!isQuoteCommitSupportedOp(op.op)) {
+      return `Opération ${op.op} non committable en section QUOTE.`;
+    }
+    if (op.op !== "update_quote_item" || !op.changes) continue;
+    const forbidden = Object.keys(op.changes).filter(
+      (key) =>
+        op.changes![key] !== undefined &&
+        !isQuoteUpdateItemCommittedField(key),
+    );
+    if (forbidden.length) {
+      return `Champs non modifiables sur le devis : ${forbidden.join(", ")}. Autorisés : ${QUOTE_UPDATE_ITEM_COMMITTED_FIELDS.join(", ")}.`;
+    }
+  }
+  return null;
+}

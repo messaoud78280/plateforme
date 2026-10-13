@@ -43,6 +43,17 @@ export const VISIT_UPDATE_ALLOWED_FIELDS = [
   "field_notes",
 ] as const;
 
+/** Cotes réellement écrites par update_measurement / add_measurement. */
+export const VISIT_MEASUREMENT_FIELDS = [
+  "label",
+  "length_m",
+  "width_m",
+  "height_m",
+  "quantity_value",
+  "unit",
+  "observation",
+] as const;
+
 export type VisitUpdateAllowedField =
   (typeof VISIT_UPDATE_ALLOWED_FIELDS)[number];
 
@@ -266,6 +277,19 @@ export async function applyVisitDirectInTx(
       }
       // Protection : ne pas inventer de cote absente si toutes null
       const ch = op.changes;
+      const unknown = Object.keys(ch).filter(
+        (k) =>
+          (ch as Record<string, unknown>)[k] !== undefined &&
+          !(VISIT_MEASUREMENT_FIELDS as readonly string[]).includes(k),
+      );
+      if (unknown.length) {
+        throw Object.assign(
+          new Error(
+            `Champ${unknown.length > 1 ? "s" : ""} « ${unknown.join(", ")} » non autorisé pour update_measurement.`,
+          ),
+          { code: "INVALID_FIELD" },
+        );
+      }
       const hasDim =
         ch.length_m != null ||
         ch.width_m != null ||

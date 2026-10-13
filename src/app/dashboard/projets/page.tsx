@@ -8,6 +8,10 @@ import { CreateChantierForm } from "@/components/chantier/CreateChantierForm";
 import { ChantiersPortfolioList } from "@/components/chantier/ChantiersPortfolioList";
 import { ChantiersPortfolioKpis } from "@/components/chantier/ChantiersPortfolioKpis";
 import { isChantierStaff } from "@/lib/chantier-dossier/access";
+import {
+  isBeworkCrossOrgStaff,
+  isBeworkOperationalStaff,
+} from "@/lib/authz";
 import { projectWhereForClientUser } from "@/lib/organization/access";
 import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 import { loadProjectsPortfolio } from "@/lib/chantier/portfolio";
@@ -37,7 +41,14 @@ export default async function ProjetsPage({
     permissionProfile: session.user.permissionProfile,
   });
 
-  const staff = isChantierStaff(session.user.role);
+  const actor = {
+    role: session.user.role,
+    personType: session.user.personType,
+    permissionProfile: session.user.permissionProfile,
+  };
+  const crossOrg = isBeworkCrossOrgStaff(actor);
+  const operationalStaff = isBeworkOperationalStaff(actor);
+  const staff = isChantierStaff(session.user.role) && operationalStaff;
   const params = await searchParams;
   const search = (params.recherche ?? "").trim();
   const statusFilter = params.statut;
@@ -49,11 +60,11 @@ export default async function ProjetsPage({
       ? (statusFilter as ChantierStatus)
       : undefined;
 
-  const whereProject = staff
-    ? session.user.role === "AGENT"
+  const whereProject = crossOrg
+    ? {}
+    : operationalStaff && session.user.role === "AGENT"
       ? { assignedToId: session.user.id }
-      : {}
-    : await projectWhereForClientUser(session.user.id);
+      : await projectWhereForClientUser(session.user.id);
 
   const [portfolio, clients] = await Promise.all([
     loadProjectsPortfolio({

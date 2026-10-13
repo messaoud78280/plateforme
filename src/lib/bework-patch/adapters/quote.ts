@@ -60,11 +60,8 @@ export function toLegacyQuotePatch(patch: BeworkPatchV1): QuoteDelegateResult {
         itemId,
         changes: {
           designation: op.changes.designation,
-          description: op.changes.description,
           quantity: op.changes.quantity,
-          unit: op.changes.unit,
           unitPriceHt: op.changes.unit_price_ht,
-          vatRate: op.changes.vat_rate,
           discountPercent: op.changes.discount_percent,
         },
       });

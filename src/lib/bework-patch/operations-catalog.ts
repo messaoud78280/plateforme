@@ -13,6 +13,23 @@ import {
   isQuoteCommitSupportedOp,
   QUOTE_UPDATE_ITEM_COMMITTED_FIELDS,
 } from "@/lib/bework-patch/commit/quote-capability";
+import {
+  isVisitCommitSupportedOp,
+  VISIT_MEASUREMENT_FIELDS,
+  VISIT_UPDATE_ALLOWED_FIELDS,
+} from "@/lib/bework-patch/commit/visit-ops";
+import {
+  FOLLOW_UP_UPDATE_ALLOWED_FIELDS,
+  isFollowUpCommitSupportedOp,
+} from "@/lib/bework-patch/commit/follow-up-ops";
+import {
+  isReportCommitSupportedOp,
+  REPORT_UPDATE_ALLOWED_FIELDS,
+} from "@/lib/bework-patch/commit/report-ops";
+import {
+  isNoticeCommitSupportedOp,
+  NOTICE_UPDATE_ALLOWED_FIELDS,
+} from "@/lib/bework-patch/commit/notice-ops";
 import { fieldContractsForOp } from "@/lib/bework-patch/operation-contracts";
 
 const ALL_TECHNICAL: BeworkChangeIntent[] = [
@@ -198,30 +215,13 @@ export const OPERATION_CATALOG: Record<
     entity_types: ["SITE_VISIT"],
     sections: ["VISIT"],
     compatible_intents: FIELD,
-    allowed_change_fields: [
-      "subject",
-      "client_need",
-      "comments",
-      "findings",
-      "proposed_works",
-      "commercial",
-      "constraints",
-      "field_notes",
-    ],
+    allowed_change_fields: [...VISIT_UPDATE_ALLOWED_FIELDS],
   },
   update_measurement: {
     entity_types: ["SITE_VISIT_MEASUREMENT"],
     sections: ["VISIT"],
     compatible_intents: FIELD,
-    allowed_change_fields: [
-      "label",
-      "length_m",
-      "width_m",
-      "height_m",
-      "quantity_value",
-      "unit",
-      "observation",
-    ],
+    allowed_change_fields: [...VISIT_MEASUREMENT_FIELDS],
   },
   add_measurement: {
     entity_types: ["SITE_VISIT"],
@@ -233,7 +233,7 @@ export const OPERATION_CATALOG: Record<
     entity_types: ["FOLLOW_UP_SHEET"],
     sections: ["FOLLOW_UP"],
     compatible_intents: [...DOCUMENT, "FIELD_UPDATE", "ADMINISTRATIVE_UPDATE"],
-    allowed_change_fields: ["title", "notes"],
+    allowed_change_fields: [...FOLLOW_UP_UPDATE_ALLOWED_FIELDS],
   },
   update_progress: {
     entity_types: ["FOLLOW_UP_SHEET", "PREP_SCHEDULE_TASK"],
@@ -250,23 +250,13 @@ export const OPERATION_CATALOG: Record<
     entity_types: ["SITE_DOCUMENT"],
     sections: ["REPORT"],
     compatible_intents: DOCUMENT,
-    allowed_change_fields: [
-      "title",
-      "quick_notes",
-      "summary",
-      "additional_notes",
-    ],
+    allowed_change_fields: [...REPORT_UPDATE_ALLOWED_FIELDS],
   },
   update_notice: {
     entity_types: ["SITE_DOCUMENT"],
     sections: ["NOTICE"],
     compatible_intents: DOCUMENT,
-    allowed_change_fields: [
-      "title",
-      "quick_notes",
-      "summary",
-      "additional_notes",
-    ],
+    allowed_change_fields: [...NOTICE_UPDATE_ALLOWED_FIELDS],
   },
   update_document_section: {
     entity_types: ["SITE_DOCUMENT"],
@@ -419,6 +409,10 @@ export function supportedOperationsForSection(
     // Contrat honnête : n'exposer que les ops réellement commitables.
     if (section === "PLANNING" && !isPlanningCommitSupportedOp(op)) continue;
     if (section === "QUOTE" && !isQuoteCommitSupportedOp(op)) continue;
+    if (section === "VISIT" && !isVisitCommitSupportedOp(op)) continue;
+    if (section === "FOLLOW_UP" && !isFollowUpCommitSupportedOp(op)) continue;
+    if (section === "REPORT" && !isReportCommitSupportedOp(op)) continue;
+    if (section === "NOTICE" && !isNoticeCommitSupportedOp(op)) continue;
     out.push({
       op,
       entity_types: cat.entity_types,

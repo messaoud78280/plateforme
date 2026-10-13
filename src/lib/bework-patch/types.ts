@@ -213,11 +213,8 @@ export type OpUpdateQuoteItem = {
   };
   changes: {
     designation?: string;
-    description?: string | null;
     quantity?: number;
-    unit?: string;
     unit_price_ht?: number;
-    vat_rate?: number;
     discount_percent?: number;
   };
 };

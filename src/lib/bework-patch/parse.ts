@@ -490,26 +490,40 @@ function parseOperation(
         issues.push(err("INVALID_TARGET", `${path}.target`, "item_id requis"));
         return null;
       }
+      const committed: {
+        designation?: string;
+        quantity?: number;
+        unit_price_ht?: number;
+        discount_percent?: number;
+      } = {};
+      const designation = str(changes!.designation, 300);
+      if (designation) committed.designation = designation;
+      if (changes!.quantity !== undefined) {
+        const quantity = num(changes!.quantity);
+        if (quantity != null) committed.quantity = quantity;
+      }
+      if (changes!.unit_price_ht !== undefined) {
+        const unitPrice = num(changes!.unit_price_ht);
+        if (unitPrice != null) committed.unit_price_ht = unitPrice;
+      }
+      if (changes!.discount_percent !== undefined) {
+        const discount = num(changes!.discount_percent);
+        if (discount != null) committed.discount_percent = discount;
+      }
+      if (!Object.keys(committed).length) {
+        issues.push(
+          err(
+            "INVALID_FIELD",
+            `${path}.changes`,
+            "Aucun champ modifiable. Autorisés : designation, quantity, unit_price_ht, discount_percent.",
+          ),
+        );
+        return null;
+      }
       return {
         op,
         target: { ...target, entity_type: "QUOTE_ITEM", quote_id: target.quote_id! },
-        changes: {
-          designation: str(changes!.designation, 300) ?? undefined,
-          description:
-            str(changes!.description, 5000) ??
-            (changes!.description === null ? null : undefined),
-          quantity: changes!.quantity !== undefined ? num(changes!.quantity) ?? undefined : undefined,
-          unit: str(changes!.unit, 40) ?? undefined,
-          unit_price_ht:
-            changes!.unit_price_ht !== undefined
-              ? num(changes!.unit_price_ht) ?? undefined
-              : undefined,
-          vat_rate: changes!.vat_rate !== undefined ? num(changes!.vat_rate) ?? undefined : undefined,
-          discount_percent:
-            changes!.discount_percent !== undefined
-              ? num(changes!.discount_percent) ?? undefined
-              : undefined,
-        },
+        changes: committed,
       };
     }
     case "add_quote_item": {

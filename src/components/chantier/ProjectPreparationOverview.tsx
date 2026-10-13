@@ -588,13 +588,13 @@ export function ProjectPreparationOverview({
               ) : null}
               <p className="text-[13px] text-slate-600">
                 Préparation :{" "}
-                <span className="font-semibold tabular-nums text-[#1e3a5f]">
+                <span className="font-semibold tabular-nums text-bework-navy">
                   {workflowReady} / {workflowTotal}
                 </span>
               </p>
             </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.03] px-3 py-2.5">
-              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#1e3a5f]/70">
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-bework-navy/15 bg-bework-soft-navy px-3 py-2.5">
+              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-bework-navy/70">
                 Prochaine action
               </span>
               <span className="text-[13.5px] font-semibold text-slate-900">
@@ -603,7 +603,7 @@ export function ProjectPreparationOverview({
               {nextAction.href ? (
                 <Link
                   href={nextAction.href}
-                  className="ml-auto text-[12.5px] font-semibold text-[#1e3a5f] hover:underline"
+                  className="ml-auto text-[12.5px] font-semibold text-bework-navy hover:underline"
                 >
                   Ouvrir →
                 </Link>
@@ -618,7 +618,7 @@ export function ProjectPreparationOverview({
                     const step = workflow.find((s) => s.id === nextAction.stepId);
                     if (step) void runWorkflowAction(step);
                   }}
-                  className="ml-auto rounded-lg bg-[#1e3a5f] px-2.5 py-1 text-[12px] font-semibold text-white disabled:opacity-50"
+                  className="ml-auto rounded-lg bg-bework-accent px-2.5 py-1 text-[12px] font-semibold text-white disabled:opacity-50"
                 >
                   {globalBusy ? "…" : "Lancer"}
                 </button>
@@ -626,8 +626,8 @@ export function ProjectPreparationOverview({
             </div>
             {prepState?.planningSupplyDateReview &&
             prepState.planningSupplyDateReview.length > 0 ? (
-              <div className="mt-2 rounded-xl border border-amber-200/90 bg-amber-50/80 px-3 py-2.5">
-                <p className="text-[12.5px] font-semibold text-amber-950">
+              <div className="mt-2 rounded-xl border border-bework-watch/30 bg-bework-soft-watch px-3 py-2.5">
+                <p className="text-[12.5px] font-semibold text-bework-watch">
                   Approvisionnements à vérifier
                 </p>
                 <ul className="mt-1.5 space-y-1">
@@ -644,8 +644,8 @@ export function ProjectPreparationOverview({
               </div>
             ) : null}
             {prepState?.takeoffReview && prepState.takeoffReview.length > 0 ? (
-              <div className="mt-2 rounded-xl border border-amber-200/90 bg-amber-50/80 px-3 py-2.5">
-                <p className="text-[12.5px] font-semibold text-amber-950">
+              <div className="mt-2 rounded-xl border border-bework-watch/30 bg-bework-soft-watch px-3 py-2.5">
+                <p className="text-[12.5px] font-semibold text-bework-watch">
                   Métré à vérifier — données techniques de la visite
                 </p>
                 <ul className="mt-1.5 space-y-1">
@@ -668,7 +668,7 @@ export function ProjectPreparationOverview({
               <button
                 type="button"
                 onClick={() => setAddMenuOpen((v) => !v)}
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-[12.5px] font-semibold text-white hover:bg-[#152a45]"
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-bework-accent px-3.5 py-2 text-[12.5px] font-semibold text-white hover:bg-[color:var(--cc-accent-hover)]"
               >
                 <Plus className="h-3.5 w-3.5" aria-hidden />
                 Ajouter au chantier
@@ -766,7 +766,7 @@ export function ProjectPreparationOverview({
         }}
       />
       {globalBusyLabel ? (
-        <p className="text-[12.5px] font-medium text-[#1e3a5f]">
+        <p className="text-[12.5px] font-medium text-bework-navy">
           {globalBusyLabel}
         </p>
       ) : null}
@@ -783,8 +783,8 @@ export function ProjectPreparationOverview({
       planningV2Enabled &&
       workspace.global.metre.href &&
       !workspace.global.planning.href ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-emerald-200/80 bg-emerald-50/40 px-3 py-2">
-          <p className="text-[12.5px] text-emerald-950">
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-bework-ok/25 bg-bework-soft-ok px-3 py-2">
+          <p className="text-[12.5px] text-bework-ok">
             Parcours principal = Planning V2 (<code className="text-[11px]">bework_schedule_ai_v2</code>).
             Le bouton « Lancer » ouvre ce flux.
           </p>
@@ -886,7 +886,7 @@ export function ProjectPreparationOverview({
               <div className="flex flex-wrap gap-3">
                 <Link
                   href={workspace.global.devis.href}
-                  className="inline-flex text-[12.5px] font-semibold text-[#1e3a5f] hover:underline"
+                  className="inline-flex text-[12.5px] font-semibold text-bework-navy hover:underline"
                 >
                   {workspace.global.devis.ready
                     ? "Ouvrir →"
@@ -904,7 +904,7 @@ export function ProjectPreparationOverview({
                 <button
                   type="button"
                   onClick={() => setQuoteCreateOpen(true)}
-                  className="inline-flex text-[12.5px] font-semibold text-[#1e3a5f] hover:underline"
+                  className="inline-flex text-[12.5px] font-semibold text-bework-navy hover:underline"
                 >
                   Préparer avec ChatGPT →
                 </button>
@@ -919,9 +919,9 @@ export function ProjectPreparationOverview({
       </div>
 
       {hasUnscoped ? (
-        <div className="flex flex-col gap-3 rounded-xl border border-amber-200/80 bg-amber-50/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-xl border border-bework-watch/30 bg-bework-soft-watch px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[13px] font-semibold text-amber-950">
+            <p className="text-[13px] font-semibold text-bework-watch">
               {workspace.unscoped.quotes === 1 &&
               workspace.unscoped.studies === 0 &&
               workspace.unscoped.schedulePlans === 0
@@ -933,7 +933,7 @@ export function ProjectPreparationOverview({
                   : `${workspace.unscoped.items.length} élément${workspace.unscoped.items.length > 1 ? "s" : ""} à organiser`}
             </p>
             {unscopedMsg ? (
-              <p className="mt-0.5 text-[12.5px] text-amber-900/85">{unscopedMsg}</p>
+              <p className="mt-0.5 text-[12.5px] text-bework-ink">{unscopedMsg}</p>
             ) : null}
           </div>
           {canEdit ? (
@@ -942,7 +942,7 @@ export function ProjectPreparationOverview({
                 <button
                   type="button"
                   onClick={() => openCreateLotsFromQuote(primaryUnscopedQuoteId)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-[12.5px] font-semibold text-white hover:bg-[#152a45]"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-bework-accent px-3.5 py-2 text-[12.5px] font-semibold text-white hover:bg-[color:var(--cc-accent-hover)]"
                 >
                   <Layers className="h-3.5 w-3.5" aria-hidden />
                   Créer les lots depuis le devis
@@ -954,8 +954,8 @@ export function ProjectPreparationOverview({
                 className={cn(
                   "rounded-lg px-3.5 py-2 text-[12.5px] font-semibold",
                   primaryUnscopedQuoteId
-                    ? "border border-amber-300/80 bg-white text-amber-950 hover:bg-amber-50"
-                    : "bg-[#1e3a5f] text-white hover:bg-[#152a45]",
+                    ? "border border-bework-watch/40 bg-bework-surface text-bework-watch hover:bg-bework-soft-watch"
+                    : "bg-bework-accent text-white hover:bg-[color:var(--cc-accent-hover)]",
                 )}
               >
                 Classer
@@ -972,25 +972,33 @@ export function ProjectPreparationOverview({
               <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
                 Lots / phases
               </h3>
-              <p className="mt-0.5 text-[12px] text-slate-500">
+              <p className="mt-0.5 text-[12px] text-bework-muted">
                 {tradeTemplate
                   ? "Lots du modèle. Les phases restent sous chaque lot. Visite, métré, devis, planning et approvisionnements sont ceux du chantier."
-                  : "Filtres du dossier — pas de métré ni planning séparés."}
+                  : "Chaque lot filtre le dossier. Visite, métré, devis, planning et approvisionnements restent ceux du chantier."}
               </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <span className="rounded-md border border-dashed border-bework-navy/30 bg-bework-soft-navy px-2 py-0.5 text-[11px] font-semibold text-bework-navy">
+                  Document du chantier
+                </span>
+                <span className="rounded-md border border-bework-accent/25 bg-bework-soft-accent px-2 py-0.5 text-[11px] font-semibold text-bework-accent">
+                  Document du lot
+                </span>
+              </div>
             </div>
             {canEdit ? (
               <button
                 type="button"
                 onClick={() => openCreate()}
-                className="text-[12.5px] font-semibold text-[#1e3a5f] hover:underline"
+                className="text-[12.5px] font-semibold text-bework-navy hover:underline"
               >
                 {tradeTemplate ? "+ Lot" : "+ Phase"}
               </button>
             ) : null}
           </div>
           {tradeTemplate ? (
-            <div className="mt-2.5 rounded-xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.04] px-3 py-2.5 text-[12.5px] text-slate-700">
-              <p className="font-semibold text-[#1e3a5f]">
+            <div className="mt-2.5 rounded-xl border border-bework-navy/15 bg-bework-soft-navy px-3 py-2.5 text-[12.5px] text-slate-700">
+              <p className="font-semibold text-bework-navy">
                 Modèle {tradeTemplate.label}
               </p>
               <p className="mt-1">{tradeTemplate.summary}</p>
@@ -1033,11 +1041,19 @@ export function ProjectPreparationOverview({
                       </span>
                     ) : null}
                   </span>
-                  <span className="shrink-0 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">
+                  <span
+                    className={cn(
+                      "shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold",
+                      scope.progress.ready >= scope.progress.total &&
+                        scope.progress.total > 0
+                        ? "bg-bework-soft-ok text-bework-ok"
+                        : "bg-bework-soft-navy text-bework-navy",
+                    )}
+                  >
                     {scope.progress.ready >= scope.progress.total &&
                     scope.progress.total > 0
                       ? "Prêt"
-                      : "Filtre"}
+                      : "Lot"}
                   </span>
                   <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-300" />
                 </Link>
@@ -1166,11 +1182,11 @@ function EmptyPreparationState({
   onCreateFromQuote: () => void;
 }) {
   return (
-    <div className="mt-5 rounded-2xl border border-dashed border-[#1e3a5f]/20 bg-[rgba(30,58,95,0.02)] px-5 py-8 text-center sm:px-8">
-      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#1e3a5f]/70">
+    <div className="mt-5 rounded-2xl border border-dashed border-bework-navy/20 bg-bework-soft-navy px-5 py-8 text-center sm:px-8">
+      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-bework-navy/70">
         Préparation du chantier
       </p>
-      <p className="mt-2 text-[16px] font-semibold text-[#1e3a5f]">
+      <p className="mt-2 text-[16px] font-semibold text-bework-navy">
         Aucun lot de travaux n’est encore défini.
       </p>
       <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-slate-600">
@@ -1184,7 +1200,7 @@ function EmptyPreparationState({
             <button
               type="button"
               onClick={onCreateFromQuote}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-[#1e3a5f] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#152a45]"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-bework-accent px-4 py-2 text-[13px] font-semibold text-white hover:bg-[color:var(--cc-accent-hover)]"
             >
               <Layers className="h-4 w-4" aria-hidden />
               Créer les lots depuis le devis
@@ -1197,7 +1213,7 @@ function EmptyPreparationState({
               "inline-flex min-h-10 items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] font-semibold",
               hasUnscopedQuote
                 ? "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                : "bg-[#1e3a5f] text-white hover:bg-[#152a45]",
+                : "bg-bework-accent text-white hover:bg-[color:var(--cc-accent-hover)]",
             )}
           >
             <Plus className="h-4 w-4" aria-hidden />
@@ -1340,7 +1356,7 @@ function CreateLotsFromQuoteModal({
             type="button"
             disabled={busy || loading || selectedCount === 0}
             onClick={() => void submit()}
-            className="rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
+            className="rounded-lg bg-bework-accent px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
           >
             {busy
               ? "Création…"
@@ -1366,7 +1382,7 @@ function CreateLotsFromQuoteModal({
                       className={cn(
                         "flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-2.5 transition",
                         checked
-                          ? "border-[#1e3a5f]/25 bg-[rgba(30,58,95,0.03)]"
+                          ? "border-bework-navy/25 bg-bework-soft-navy"
                           : "border-slate-200 bg-white opacity-70",
                       )}
                     >
@@ -1386,7 +1402,7 @@ function CreateLotsFromQuoteModal({
                               Lot existant — rattacher
                             </span>
                           ) : (
-                            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-900">
+                            <span className="rounded-full border border-bework-ok/30 bg-bework-soft-ok px-2 py-0.5 text-[10.5px] font-semibold text-bework-ok">
                               À créer
                             </span>
                           )}
@@ -1493,7 +1509,7 @@ function CreateScopeModal({
             type="button"
             disabled={busy || !name.trim()}
             onClick={() => void submit()}
-            className="rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
+            className="rounded-lg bg-bework-accent px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
           >
             {busy ? "Création…" : "Créer"}
           </button>
@@ -1511,7 +1527,7 @@ function CreateScopeModal({
                 setCode(codeFromScopeName(e.target.value));
               }
             }}
-            className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-[14px] outline-none focus:border-[#1e3a5f]/40"
+            className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-[14px] outline-none focus:border-bework-navy/40"
             placeholder="Fondations"
             autoFocus
           />
@@ -1521,7 +1537,7 @@ function CreateScopeModal({
           <input
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
-            className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-[14px] outline-none focus:border-[#1e3a5f]/40"
+            className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-[14px] outline-none focus:border-bework-navy/40"
             placeholder="FOND"
           />
         </label>
@@ -1531,7 +1547,7 @@ function CreateScopeModal({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-[14px] outline-none focus:border-[#1e3a5f]/40"
+            className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-[14px] outline-none focus:border-bework-navy/40"
             placeholder="Lot fondations superficielles…"
           />
         </label>
@@ -1655,7 +1671,7 @@ function ClassifyItemsModal({
             type="button"
             disabled={busy || selected.size === 0}
             onClick={() => void submit()}
-            className="rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
+            className="rounded-lg bg-bework-accent px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
           >
             {busy ? "Enregistrement…" : "Classer"}
           </button>
@@ -1706,7 +1722,7 @@ function ClassifyItemsModal({
               className={cn(
                 "rounded-full px-3 py-1.5 text-[12px] font-semibold",
                 mode === "existing"
-                  ? "bg-[#1e3a5f] text-white"
+                  ? "bg-bework-accent text-white"
                   : "border border-slate-200 text-slate-700",
               )}
             >
@@ -1719,7 +1735,7 @@ function ClassifyItemsModal({
             className={cn(
               "rounded-full px-3 py-1.5 text-[12px] font-semibold",
               mode === "create"
-                ? "bg-[#1e3a5f] text-white"
+                ? "bg-bework-accent text-white"
                 : "border border-slate-200 text-slate-700",
             )}
           >

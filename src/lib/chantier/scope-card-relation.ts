@@ -136,11 +136,11 @@ export function classifyFollowUpRelation(input: {
 export function relationBadgeLabel(relation: ScopeCardRelation): string | null {
   switch (relation) {
     case "GLOBAL_FALLBACK":
-      return "Global chantier";
+      return "Document du chantier";
     case "SECTION_SPECIFIC":
-      return "Section devis";
+      return "Document du lot";
     case "SCOPE_SPECIFIC":
-      return null;
+      return "Document du lot";
     case "ABSENT":
       return null;
     default:

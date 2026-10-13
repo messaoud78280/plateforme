@@ -81,7 +81,7 @@ export function MobileBottomNav({
   return (
     <nav
       data-bework-mobile-nav
-      className="fixed inset-x-0 bottom-0 z-40 flex border-t border-slate-200 bg-white/95 px-0.5 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex border-t border-bework-border bg-bework-surface/95 px-0.5 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm lg:hidden"
       aria-label="Navigation mobile"
     >
       {tabs.map((tab) => {
@@ -113,7 +113,7 @@ export function MobileBottomNav({
             }}
             className={cn(
               "relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] font-semibold",
-              active ? "text-[#1e3a5f]" : "text-slate-500",
+              active ? "text-bework-navy" : "text-bework-muted",
               isMsg && active ? "font-bold" : null,
             )}
             aria-current={active ? "page" : undefined}
@@ -133,7 +133,7 @@ export function MobileBottomNav({
                 aria-hidden
               />
               {isMsg && msgBadge > 0 ? (
-                <span className="absolute -right-2.5 -top-1.5 inline-flex min-w-[1.05rem] items-center justify-center rounded-full bg-[#00a884] px-1 text-[9px] font-bold leading-none text-white">
+                <span className="absolute -right-2.5 -top-1.5 inline-flex min-w-[1.05rem] items-center justify-center rounded-full bg-bework-accent px-1 text-[9px] font-bold leading-none text-white">
                   {msgBadge > 99 ? "99+" : msgBadge}
                 </span>
               ) : null}
@@ -147,7 +147,7 @@ export function MobileBottomNav({
         onClick={() => {
           window.dispatchEvent(new Event("bework:open-sidebar"));
         }}
-        className="flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] font-semibold text-slate-500"
+        className="flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] font-semibold text-bework-muted"
         aria-label="Plus de modules"
       >
         <Menu className="h-5 w-5" aria-hidden />

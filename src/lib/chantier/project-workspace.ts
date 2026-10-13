@@ -112,7 +112,7 @@ export type WorkspaceCard = {
    * Absent sur les cartes purement globales chantier.
    */
   relation?: import("@/lib/chantier/scope-card-relation").ScopeCardRelation;
-  /** Badge UI : « Global chantier », « Section devis », … */
+  /** Badge UI : « Document du chantier », « Document du lot », … */
   relationLabel?: string | null;
   /** Ligne secondaire (ex. total devis multi-lots). */
   secondaryDetail?: string | null;
@@ -631,7 +631,11 @@ function buildScopeCards(input: {
     {
       kind: "plan",
       label:
-        planSourceRelation === "GLOBAL_FALLBACK" ? "Plan · Global chantier" : "Plan",
+        planSourceRelation === "GLOBAL_FALLBACK"
+          ? "Plan · document du chantier"
+          : planSourceRelation === "SCOPE_SPECIFIC"
+            ? "Plan · document du lot"
+            : "Plan",
       title: planTitle,
       href: planReady
         ? openHref
@@ -684,8 +688,10 @@ function buildScopeCards(input: {
       kind: "metre",
       label:
         metreRelation === "GLOBAL_FALLBACK"
-          ? "Métré · Global chantier"
-          : "Métré",
+          ? "Métré · document du chantier"
+          : metreRelation === "SCOPE_SPECIFIC"
+            ? "Métré · document du lot"
+            : "Métré",
       title:
         metreRelation === "GLOBAL_FALLBACK"
           ? "Métré global du chantier"
@@ -749,9 +755,9 @@ function buildScopeCards(input: {
       kind: "devis",
       label:
         quoteRelation === "SECTION_SPECIFIC"
-          ? "Devis du lot"
+          ? "Devis · document du lot"
           : quoteRelation === "GLOBAL_FALLBACK"
-            ? "Devis · Global chantier"
+            ? "Devis · document du chantier"
             : "Devis",
       title:
         quoteRelation === "SECTION_SPECIFIC" && section
@@ -813,8 +819,10 @@ function buildScopeCards(input: {
       kind: "planning",
       label:
         planRelation === "GLOBAL_FALLBACK"
-          ? "Planning · Global chantier"
-          : "Planning",
+          ? "Planning · document du chantier"
+          : planRelation === "SCOPE_SPECIFIC"
+            ? "Planning · document du lot"
+            : "Planning",
       title:
         planRelation === "GLOBAL_FALLBACK"
           ? "Planning global du chantier"
@@ -852,7 +860,12 @@ function buildScopeCards(input: {
     },
     {
       kind: "suivi",
-      label: "Suivi du lot",
+      label:
+        suiviRelation === "GLOBAL_FALLBACK"
+          ? "Suivi · document du chantier"
+          : suiviRelation === "SCOPE_SPECIFIC"
+            ? "Suivi · document du lot"
+            : "Suivi",
       title:
         suiviRelation === "ABSENT"
           ? "Aucun suivi spécifique"
@@ -868,7 +881,7 @@ function buildScopeCards(input: {
       syncHint: null,
       isReference: false,
       relation: suiviRelation,
-      relationLabel: null,
+      relationLabel: relationBadgeLabel(suiviRelation),
       secondaryDetail: globalFollowUp
         ? `Suivi global du chantier : ${followUpStatusLabel ?? globalFollowUp.status}`
         : "Aucun suivi chantier démarré.",

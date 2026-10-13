@@ -64,28 +64,28 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
       />
 
       <header>
-        <p className="text-[12px] font-semibold uppercase tracking-wide text-slate-400">
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-bework-muted">
           {scope.code}
         </p>
-        <h1 className="mt-0.5 text-[1.6rem] font-semibold text-[#1e3a5f]">
+        <h1 className="mt-0.5 text-[1.6rem] font-semibold tracking-tight text-bework-navy">
           {scope.name}
         </h1>
         {scope.description ? (
-          <p className="mt-1 text-[13px] text-slate-600">{scope.description}</p>
+          <p className="mt-1 text-[13px] text-bework-muted">{scope.description}</p>
         ) : null}
       </header>
 
-      <div className="rounded-2xl border border-[#1e3a5f]/15 bg-[rgba(30,58,95,0.03)] px-4 py-3">
-        <p className="text-[13px] font-semibold text-[#1e3a5f]">
+      <div className="rounded-2xl border border-bework-border bg-bework-surface px-4 py-3">
+        <p className="text-[13px] font-semibold text-bework-navy">
           Vue du lot dans le dossier chantier
         </p>
-        <p className="mt-1 text-[12.5px] text-slate-600">
-          Les éléments propres à ce lot sont affichés ici. Les éléments utilisés
-          à l’échelle du chantier sont signalés comme globaux.
+        <p className="mt-1 text-[12.5px] text-bework-muted">
+          Les cartes en trait plein sont les documents de ce lot. Les cartes en
+          pointillés sont les documents du chantier, partagés par tous les lots.
         </p>
         <Link
           href={chantierProjectHref(projectId)}
-          className="mt-2 inline-flex text-[12.5px] font-semibold text-[#1e3a5f] hover:underline"
+          className="mt-2 inline-flex text-[12.5px] font-semibold text-bework-accent hover:underline"
         >
           ← Retour à la chaîne chantier
         </Link>
@@ -100,7 +100,7 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
               <Link
                 key={step.id}
                 href={step.href!}
-                className="rounded-full border border-[#1e3a5f]/15 bg-white px-2.5 py-1 text-[12px] font-semibold text-[#1e3a5f] hover:bg-slate-50"
+                className="rounded-full border border-bework-border bg-bework-surface px-2.5 py-1 text-[12px] font-semibold text-bework-navy hover:bg-bework-soft-navy"
               >
                 {step.label} · {step.title}
               </Link>
@@ -123,17 +123,15 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
                     className={cn(
                       "rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
                       isGlobal
-                        ? "bg-slate-100 text-slate-600"
-                        : card.relation === "SECTION_SPECIFIC"
-                          ? "bg-[rgba(30,58,95,0.08)] text-[#1e3a5f]"
-                          : "bg-slate-50 text-slate-500",
+                        ? "border border-dashed border-bework-navy/30 bg-bework-soft-navy text-bework-navy"
+                        : "border border-bework-accent/25 bg-bework-soft-accent text-bework-accent",
                     )}
                   >
                     {card.relationLabel}
                   </span>
                 ) : null}
               </div>
-              <p className="mt-1 line-clamp-2 text-[15px] font-semibold text-[#1e3a5f]">
+              <p className="mt-1 line-clamp-2 text-[15px] font-semibold text-bework-navy">
                 {card.title}
               </p>
               {card.detail ? (
@@ -147,12 +145,12 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
                 </p>
               ) : null}
               {card.syncHint ? (
-                <p className="mt-1.5 line-clamp-2 text-[11.5px] text-amber-800/80">
+                <p className="mt-1.5 line-clamp-2 text-[11.5px] text-bework-watch">
                   {card.syncHint}
                 </p>
               ) : null}
               {card.kind === "plan" && card.planMeta?.openHref ? (
-                <p className="mt-1 text-[12px] font-medium text-[#1e3a5f]">
+                <p className="mt-1 text-[12px] font-medium text-bework-navy">
                   Plan source · Ouvrir le plan
                 </p>
               ) : null}
@@ -169,10 +167,10 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
               key={`${card.kind}-${card.title}`}
               href={href}
               className={cn(
-                "rounded-2xl border bg-white p-4 transition hover:border-[#1e3a5f]/30",
+                "rounded-2xl border bg-bework-surface p-4 transition hover:border-bework-accent/40",
                 isGlobal
-                  ? "border-slate-200 border-dashed"
-                  : "border-[#1e3a5f]/10",
+                  ? "border-dashed border-bework-navy/25"
+                  : "border-bework-accent/20",
               )}
             >
               {body}
@@ -181,10 +179,10 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
             <div
               key={`${card.kind}-${card.title}`}
               className={cn(
-                "rounded-2xl border bg-white p-4 opacity-90",
+                "rounded-2xl border bg-bework-surface p-4 opacity-90",
                 isGlobal
-                  ? "border-dashed border-slate-200"
-                  : "border-dashed border-slate-200",
+                  ? "border-dashed border-bework-navy/25"
+                  : "border-bework-accent/20",
               )}
             >
               {body}
@@ -204,8 +202,8 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
         </ul>
       ) : null}
 
-      <details className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-[13px]">
-        <summary className="cursor-pointer font-medium text-[#1e3a5f]">
+      <details className="rounded-xl border border-bework-border bg-bework-surface px-4 py-3 text-[13px]">
+        <summary className="cursor-pointer font-medium text-bework-navy">
           Autres périmètres du chantier
         </summary>
         <ul className="mt-2 space-y-1 text-slate-600">

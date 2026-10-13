@@ -9,6 +9,7 @@ import {
   classifyStudyRelation,
   isLotProjectScope,
   matchQuoteSectionForScope,
+  relationBadgeLabel,
   sumSectionSellHt,
 } from "./scope-card-relation";
 
@@ -111,5 +112,10 @@ assert.equal(
   isLotProjectScope({ code: "PLO", name: "Plomberie" }),
   false,
 );
+
+assert.equal(relationBadgeLabel("GLOBAL_FALLBACK"), "Document du chantier");
+assert.equal(relationBadgeLabel("SCOPE_SPECIFIC"), "Document du lot");
+assert.equal(relationBadgeLabel("SECTION_SPECIFIC"), "Document du lot");
+assert.equal(relationBadgeLabel("ABSENT"), null);
 
 console.log("scope-card-relation.test.ts OK");

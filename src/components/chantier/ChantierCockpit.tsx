@@ -273,16 +273,16 @@ export function ChantierCockpit({
   const active = useMemo(() => panels[tab], [panels, tab]);
 
   const toneClass = {
-    critical: "border-red-200 bg-red-50/70",
-    watch: "border-amber-200 bg-amber-50/60",
-    ok: "border-emerald-200 bg-emerald-50/50",
-    neutral: "border-slate-200 bg-white",
+    critical: "border-bework-critical/25 bg-bework-soft-critical",
+    watch: "border-bework-watch/30 bg-bework-soft-watch",
+    ok: "border-bework-ok/25 bg-bework-soft-ok",
+    neutral: "border-bework-border bg-bework-surface",
   } as const;
 
   const dot = {
-    critical: "bg-red-500",
-    watch: "bg-amber-500",
-    info: "bg-sky-500",
+    critical: "bg-bework-critical",
+    watch: "bg-bework-watch",
+    info: "bg-bework-accent",
   } as const;
 
   function selectTab(id: ChantierCockpitTabId) {
@@ -356,10 +356,10 @@ export function ChantierCockpit({
               onClick={() => selectGroup(g)}
               className={cn(
                 "shrink-0 rounded-lg px-3.5 py-2 text-xs font-semibold transition sm:text-[13px]",
-                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e3a5f]",
+                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bework-accent",
                 group === g.id
-                  ? "bg-[#1e3a5f] text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-[#1e3a5f]",
+                  ? "bg-bework-accent text-white shadow-sm"
+                  : "text-bework-muted hover:bg-bework-surface-muted hover:text-bework-navy",
               )}
             >
               {g.label}
@@ -373,7 +373,7 @@ export function ChantierCockpit({
               <Link
                 key={l.href + l.label}
                 href={l.href}
-                className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-700 hover:border-[#1e3a5f]/30 hover:text-[#1e3a5f]"
+                className="shrink-0 rounded-full border border-bework-border bg-bework-surface px-3 py-1.5 text-[12px] font-semibold text-bework-ink hover:border-bework-accent/30 hover:text-bework-accent"
               >
                 {l.label}
               </Link>

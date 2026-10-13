@@ -516,7 +516,7 @@ export default async function ProjetDetailPage({
   }
 
   const contextCard = (
-    <div className="rounded-xl border border-slate-200/90 bg-white p-4 sm:p-5">
+    <div className="cc-card p-4 sm:p-5">
       <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
         Contexte chantier
       </p>

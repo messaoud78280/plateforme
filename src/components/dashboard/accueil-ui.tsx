@@ -65,32 +65,32 @@ export function urgencyMeta(u: string): {
   if (u === "CRITIQUE") {
     return {
       label: "Critique",
-      dot: "bg-red-600",
-      text: "text-red-700",
-      row: "border-l-red-600 bg-red-50/50",
+      dot: "bg-bework-critical",
+      text: "text-bework-critical",
+      row: "border-l-bework-critical bg-bework-soft-critical",
     };
   }
   if (u === "URGENT") {
     return {
       label: "Urgent",
-      dot: "bg-orange-500",
-      text: "text-orange-700",
-      row: "border-l-orange-500 bg-orange-50/40",
+      dot: "bg-bework-watch",
+      text: "text-bework-watch",
+      row: "border-l-bework-watch bg-bework-soft-watch",
     };
   }
   if (u === "IMPORTANT") {
     return {
       label: "Important",
-      dot: "bg-sky-600",
-      text: "text-sky-800",
-      row: "border-l-sky-500 bg-sky-50/40",
+      dot: "bg-bework-accent",
+      text: "text-bework-navy",
+      row: "border-l-bework-accent bg-bework-soft-accent",
     };
   }
   return {
     label: "À surveiller",
-    dot: "bg-slate-400",
-    text: "text-slate-500",
-    row: "border-l-slate-300 bg-slate-50/60",
+    dot: "bg-bework-muted",
+    text: "text-bework-muted",
+    row: "border-l-bework-border bg-bework-surface-muted",
   };
 }
 
@@ -127,7 +127,7 @@ export function PriorityRow({
     <Link
       href={href}
       className={cn(
-        "group flex min-h-[72px] items-center gap-3 rounded-xl border-l-[3px] px-3 py-2.5 transition-colors duration-150 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30 sm:min-h-[76px]",
+        "group flex min-h-[72px] items-center gap-3 rounded-xl border-l-[3px] px-3 py-2.5 transition-colors duration-150 hover:bg-bework-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bework-accent/30 sm:min-h-[76px]",
         meta.row,
       )}
     >
@@ -141,7 +141,7 @@ export function PriorityRow({
             <span className="font-medium text-slate-500">· {typeLabel}</span>
           ) : null}
         </span>
-        <span className="mt-0.5 block truncate text-[15px] font-bold tracking-tight text-slate-950">
+        <span className="mt-0.5 block truncate text-[15px] font-bold tracking-tight text-bework-ink">
           {title}
         </span>
         {subtitle ? (
@@ -152,7 +152,7 @@ export function PriorityRow({
       </span>
       <span
         aria-hidden
-        className="shrink-0 text-[18px] font-light text-slate-400 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"
+        className="shrink-0 text-[18px] font-light text-bework-muted transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-bework-navy"
       >
         ›
       </span>
@@ -174,12 +174,12 @@ export function TodayRow({
   return (
     <Link
       href={href}
-      className="group block rounded-lg px-2 py-2 transition-colors duration-150 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
+      className="group block rounded-lg px-2 py-2 transition-colors duration-150 hover:bg-bework-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bework-accent/30"
     >
       {eyebrow ? (
         <span className="text-[12px] font-semibold text-slate-500">{eyebrow}</span>
       ) : null}
-      <span className="block truncate text-[14px] font-bold text-slate-950">
+      <span className="block truncate text-[14px] font-bold text-bework-ink">
         {title}
       </span>
       {subtitle ? (
@@ -205,10 +205,10 @@ export function FinanceMetric({
   return (
     <Link
       href={href}
-      className="block min-w-0 rounded-xl px-1 py-1 transition-colors duration-150 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
+      className="block min-w-0 rounded-xl px-1 py-1 transition-colors duration-150 hover:bg-bework-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bework-accent/30"
     >
       <p className="text-[13px] font-semibold text-slate-500">{label}</p>
-      <p className="mt-1 text-[24px] font-bold tracking-tight text-[#1e3a5f] tabular-nums sm:text-[26px]">
+      <p className="mt-1 text-[24px] font-bold tracking-tight text-bework-navy tabular-nums sm:text-[26px]">
         {value}
       </p>
       {hint ? <p className="mt-0.5 text-[12px] text-slate-500">{hint}</p> : null}

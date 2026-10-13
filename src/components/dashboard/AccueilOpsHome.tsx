@@ -78,7 +78,7 @@ function QuickActionMenu({ links }: { links: AccueilOpsSummary["links"] }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex min-h-10 items-center rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-xs font-bold text-white transition-colors duration-150 hover:bg-[#16304f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/35"
+        className="btn-cc-primary"
       >
         + Action
       </button>
@@ -153,7 +153,7 @@ export function AccueilOpsHome({
     <div className="space-y-5">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-2xl font-extrabold tracking-tight text-[#1e3a5f] sm:text-[1.75rem]">
+          <h1 className="text-2xl font-extrabold tracking-tight text-bework-navy sm:text-[1.75rem]">
             Bonjour {ops.firstName}
           </h1>
           <p className="mt-1 text-sm text-slate-500">{dateLabel}</p>
@@ -205,9 +205,9 @@ export function AccueilOpsHome({
             <Link
               key={a.href}
               href={a.href}
-              className="rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-3 transition hover:border-[#1e3a5f]/20 hover:bg-white"
+              className="rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-3 transition hover:border-bework-navy/20 hover:bg-white"
             >
-              <p className="text-[14px] font-bold text-[#1e3a5f]">{a.title}</p>
+              <p className="text-[14px] font-bold text-bework-navy">{a.title}</p>
               <p className="mt-0.5 text-[12px] text-slate-500">{a.sub}</p>
             </Link>
           ))}
@@ -266,12 +266,12 @@ export function AccueilOpsHome({
             className="rounded-2xl bw-surface-tinted-cyan px-5 py-5 shadow-sm lg:sticky lg:top-4 lg:row-span-2"
           >
             <div className="flex items-start justify-between gap-3">
-              <h2 className="text-[15px] font-bold tracking-tight text-[#1e3a5f]">
+              <h2 className="text-[15px] font-bold tracking-tight text-bework-navy">
                 {currentPanelTitle}
               </h2>
               <Link
                 href={ops.links.agenda}
-                className="text-[13px] font-semibold text-[#1d4ed8] hover:underline"
+                className="text-[13px] font-semibold text-bework-accent hover:underline"
               >
                 Voir Agenda
               </Link>
@@ -315,7 +315,7 @@ export function AccueilOpsHome({
                 </ul>
                 <Link
                   href={ops.links.commandes}
-                  className="mt-1 inline-block text-[13px] font-semibold text-[#1d4ed8] hover:underline"
+                  className="mt-1 inline-block text-[13px] font-semibold text-bework-accent hover:underline"
                 >
                   Voir les commandes
                 </Link>
@@ -339,7 +339,7 @@ export function AccueilOpsHome({
                 </ul>
                 <Link
                   href={ops.links.taches}
-                  className="mt-1 inline-block text-[13px] font-semibold text-[#1d4ed8] hover:underline"
+                  className="mt-1 inline-block text-[13px] font-semibold text-bework-accent hover:underline"
                 >
                   Voir les tâches
                 </Link>
@@ -352,12 +352,12 @@ export function AccueilOpsHome({
             className="rounded-2xl bw-surface-tinted-navy px-5 py-4 shadow-sm lg:row-span-2"
           >
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-[15px] font-bold tracking-tight text-[#1e3a5f]">
+              <h2 className="text-[15px] font-bold tracking-tight text-bework-navy">
                 Aujourd’hui
               </h2>
               <Link
                 href={ops.links.agenda}
-                className="text-[13px] font-semibold text-[#1d4ed8] hover:underline"
+                className="text-[13px] font-semibold text-bework-accent hover:underline"
               >
                 Voir Agenda
               </Link>
@@ -368,7 +368,7 @@ export function AccueilOpsHome({
             </p>
             <Link
               href={ops.links.nouvelEvenement}
-              className="mt-3 inline-block text-[13px] font-semibold text-[#1d4ed8] hover:underline"
+              className="mt-3 inline-block text-[13px] font-semibold text-bework-accent hover:underline"
             >
               Ajouter un événement
             </Link>
@@ -397,7 +397,7 @@ export function AccueilOpsHome({
                         </p>
                         <Link
                           href="/dashboard/projets"
-                          className="mt-2 inline-block text-[13px] font-semibold text-[#1d4ed8] hover:underline"
+                          className="mt-2 inline-block text-[13px] font-semibold text-bework-accent hover:underline"
                         >
                           Créer mon premier chantier
                         </Link>
@@ -405,12 +405,12 @@ export function AccueilOpsHome({
                     ) : (
                       <Link
                         href="/dashboard/rentabilite"
-                        className="block rounded-xl py-1 transition-colors duration-150 hover:bg-slate-50/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d4ed8]/30"
+                        className="block rounded-xl py-1 transition-colors duration-150 hover:bg-slate-50/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bework-accent/30"
                       >
                         <p className="text-[13px] font-semibold text-slate-500">
                           Rentabilité
                         </p>
-                        <p className="mt-1 text-[15px] font-bold text-[#1e3a5f]">
+                        <p className="mt-1 text-[15px] font-bold text-bework-navy">
                           Voir la marge
                         </p>
                         <p className="mt-0.5 text-[12px] text-slate-500">
@@ -429,7 +429,7 @@ export function AccueilOpsHome({
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-[13px] font-semibold text-slate-500">Accès utiles</p>
-                  <p className="mt-0.5 text-[14px] font-bold text-[#1e3a5f]">
+                  <p className="mt-0.5 text-[14px] font-bold text-bework-navy">
                     Retrouver rapidement les modules qui font avancer le chantier.
                   </p>
                 </div>
@@ -503,7 +503,7 @@ export function AccueilOpsHome({
                         </span>
                         <span
                           aria-hidden
-                          className="text-[18px] font-light text-slate-400 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"
+                          className="text-[18px] font-light text-slate-400 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-bework-navy"
                         >
                           ›
                         </span>

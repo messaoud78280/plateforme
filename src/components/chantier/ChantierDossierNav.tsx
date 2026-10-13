@@ -10,12 +10,25 @@ import type {
   DossierNavVariant,
 } from "@/lib/chantier/dossier-nav";
 
+function isBlockingStep(step: DossierNavStep): boolean {
+  return /bloquant/i.test(step.summary);
+}
+
 function statusGlyph(step: DossierNavStep): string {
+  if (isBlockingStep(step)) return "●";
   if (step.visual === "active") return "●";
   if (step.visual === "ready") return "✓";
   if (step.visual === "needs_attention") return "⚠";
   if (step.visual === "not_applicable") return "—";
   return "○";
+}
+
+function glyphTone(step: DossierNavStep, active: boolean): string {
+  if (isBlockingStep(step)) return "text-bework-critical";
+  if (active) return "text-bework-navy";
+  if (step.visual === "ready") return "text-bework-ok";
+  if (step.visual === "needs_attention") return "text-bework-watch";
+  return "text-bework-muted";
 }
 
 function statusHint(step: DossierNavStep): string {
@@ -89,7 +102,7 @@ export function ChantierDossierNav({
 
   const shell = cn(
     sticky &&
-      "sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/90",
+      "sticky top-0 z-30 border-b border-bework-border bg-bework-surface/95 backdrop-blur supports-[backdrop-filter]:bg-bework-surface/90",
     className,
   );
 
@@ -99,15 +112,15 @@ export function ChantierDossierNav({
       <div className="sm:hidden">
         <button
           type="button"
-          className="flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200/90 bg-white px-3.5 py-3 text-left"
+          className="flex w-full items-center justify-between gap-2 rounded-xl border border-bework-border bg-bework-surface px-3.5 py-3 text-left"
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen((v) => !v)}
         >
           <span className="min-w-0">
-            <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+            <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-bework-muted">
               Dossier chantier
             </span>
-            <span className="mt-0.5 block truncate text-[14px] font-semibold text-[#1e3a5f]">
+            <span className="mt-0.5 block truncate text-[14px] font-semibold text-bework-navy">
               {active
                 ? `${statusGlyph(active)} ${active.shortLabel} · ${statusHint(active)}`
                 : snapshot.projectTitle}
@@ -121,7 +134,7 @@ export function ChantierDossierNav({
           />
         </button>
         {mobileOpen ? (
-          <ol className="mt-2 divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200/90 bg-white">
+          <ol className="mt-2 divide-y divide-bework-border overflow-hidden rounded-xl border border-bework-border bg-bework-surface">
             {snapshot.steps.map((step) => (
               <li key={step.id}>
                 <NavStep
@@ -143,12 +156,12 @@ export function ChantierDossierNav({
       {/* Desktop / tablette — barre unique horizontale */}
       <div
         className={cn(
-          "hidden overflow-hidden rounded-xl border border-slate-200/90 bg-white sm:block",
+          "hidden overflow-hidden rounded-xl border border-bework-border bg-bework-surface sm:block",
           roomy ? "px-1 py-1" : "px-0.5 py-0.5",
         )}
       >
         {snapshot.scopeName ? (
-          <p className="border-b border-slate-100 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+          <p className="border-b border-bework-border bg-bework-soft-accent px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-bework-accent">
             Lot · {snapshot.scopeName}
           </p>
         ) : null}
@@ -164,7 +177,7 @@ export function ChantierDossierNav({
               key={step.id}
               className={cn(
                 "flex min-w-[6.5rem] flex-1 items-stretch",
-                idx > 0 && "border-l border-slate-100",
+                idx > 0 && "border-l border-bework-border",
               )}
             >
               <NavStep
@@ -202,7 +215,7 @@ function NavStep({
 
   const className = cn(
     "group flex w-full text-left outline-none transition-colors",
-    "focus-visible:bg-[#1e3a5f]/[0.04] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#1e3a5f]/30",
+    "focus-visible:bg-bework-soft-accent focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-bework-accent/30",
     stacked
       ? "items-center gap-3 px-3.5 py-3"
       : cn(
@@ -210,9 +223,9 @@ function NavStep({
           roomy ? "px-3 py-4" : "px-2.5 py-3",
         ),
     active
-      ? "bg-[#1e3a5f]/[0.045] shadow-[inset_0_-2.5px_0_0_#1e3a5f]"
+      ? "bg-bework-soft-navy shadow-[inset_0_-2.5px_0_0_var(--cc-accent)]"
       : navigable
-        ? "hover:bg-slate-50/90"
+        ? "hover:bg-bework-surface-muted"
         : "opacity-75",
   );
 
@@ -227,13 +240,7 @@ function NavStep({
         <span
           className={cn(
             "shrink-0 text-[13px] font-semibold leading-none",
-            active
-              ? "text-[#1e3a5f]"
-              : step.visual === "ready"
-                ? "text-emerald-600"
-                : step.visual === "needs_attention"
-                  ? "text-amber-600"
-                  : "text-slate-300",
+            glyphTone(step, active),
           )}
           aria-hidden
         >
@@ -242,14 +249,14 @@ function NavStep({
         <span
           className={cn(
             "truncate text-[13px] font-semibold tracking-tight",
-            active ? "text-[#1e3a5f]" : "text-slate-700",
+            active ? "text-bework-navy" : "text-bework-ink",
           )}
         >
           {step.shortLabel}
         </span>
         {navigable && !active && !stacked ? (
           <span
-            className="ml-auto hidden text-[12px] font-medium text-[#1e3a5f]/0 transition group-hover:text-[#1e3a5f]/70 lg:inline"
+            className="ml-auto hidden text-[12px] font-medium text-transparent transition group-hover:text-bework-navy/70 lg:inline"
             aria-hidden
           >
             →
@@ -259,8 +266,9 @@ function NavStep({
       <span
         className={cn(
           "line-clamp-1 text-[13px] leading-snug",
-          stacked ? "shrink-0 text-slate-500" : "mt-1 text-slate-500",
-          active && "font-medium text-slate-700",
+          stacked ? "shrink-0 text-bework-muted" : "mt-1 text-bework-muted",
+          active && "font-medium text-bework-ink",
+          isBlockingStep(step) && "text-bework-critical",
         )}
       >
         {summary}

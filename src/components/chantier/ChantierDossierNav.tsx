@@ -21,7 +21,10 @@ function statusGlyph(step: DossierNavStep): string {
 function statusHint(step: DossierNavStep): string {
   if (step.visual === "active") return "En cours";
   if (step.visual === "ready") return "À jour";
-  if (step.visual === "needs_attention") return "À revalider";
+  if (step.visual === "needs_attention") {
+    if (/métré à vérifier/i.test(step.summary)) return "Métré à vérifier";
+    return "À revalider";
+  }
   if (step.visual === "not_applicable") return "N/A";
   return step.exists ? step.summary : "À préparer";
 }

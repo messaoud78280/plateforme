@@ -47,6 +47,10 @@ export function timelineStepCaption(step: ChantierWorkflowStep): string {
   if (!step.ready) {
     if (step.id === "visite") return step.title || "Pas de visite liée";
     if (step.id === "metre") {
+      if (/métré à vérifier/i.test(`${step.detail ?? ""} ${step.title ?? ""}`)) {
+        const d = step.detail ?? "Métré à vérifier";
+        return d.length <= 52 ? d : "Métré à vérifier";
+      }
       // Ex. « Version 4 · À valider · 32 postes » → « À valider · 32 postes »
       const d = humanizeTechnicalStatus(step.detail) || step.title || "";
       const m = d.match(/(À valider|En cours)[^·]*(?:·\s*\d+\s*postes?)?/i);

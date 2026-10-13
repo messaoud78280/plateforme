@@ -410,6 +410,54 @@ assert.equal(supplyDrift.supply.countsAsCompleted, false);
 assert.equal(supplyDrift.nextAction.code, "REVIEW_SUPPLY");
 assert.equal(supplyDrift.nextAction.label, "Revoir les approvisionnements");
 
+/** R1 — visite technique modifiée après un métré déjà créé. Quantités inchangées. */
+const visitDrift = computeProjectPreparationState({
+  ...readyInput,
+  visitTakeoffDrift: {
+    stale: true,
+    summary: "Mur nord — Séjour",
+    changes: [
+      {
+        id: "m1",
+        label: "Mur nord — Séjour",
+        detail: "Longueur 5 → 6",
+      },
+    ],
+  },
+});
+assert.equal(visitDrift.takeoff.displayLabel, "Métré à vérifier");
+assert.equal(visitDrift.takeoff.kind, "ACTION_REQUIRED");
+assert.equal(visitDrift.takeoff.countsAsCompleted, false);
+assert.equal(visitDrift.core.metre.kind, "VALIDATED");
+assert.equal(visitDrift.takeoffReview?.[0]?.detail, "Longueur 5 → 6");
+assert.equal(visitDrift.nextAction.code, "VERIFY_TAKEOFF");
+assert.equal(visitDrift.nextAction.label, "Métré à vérifier");
+assert.equal(visitDrift.nextAction.reason, "VISIT_TECHNICAL_DRIFT");
+assert.equal(visitDrift.quote.kind, "DONE");
+assert.equal(visitDrift.planning.kind, "DONE");
+
+const visitInProgress = computeProjectPreparationState({
+  ...readyInput,
+  visits: [
+    {
+      id: "v-ok",
+      status: "IN_PROGRESS",
+      projectId: "p-ok",
+      commercialQuoteId: null,
+      siteAddress: null,
+      subject: null,
+      clientNeed: null,
+    },
+  ],
+  visitTakeoffDrift: {
+    stale: true,
+    summary: "Mur nord",
+    changes: [{ id: "m1", label: "Mur nord", detail: "Longueur 5 → 6" }],
+  },
+});
+assert.equal(visitInProgress.takeoff.displayLabel, "Métré à vérifier");
+assert.equal(visitInProgress.nextAction.code, "FINISH_VISIT");
+
 /** Projet vide — ne plante pas. */
 const empty = computeProjectPreparationState({
   projectId: "p-empty",

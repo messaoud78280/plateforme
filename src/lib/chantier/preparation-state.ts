@@ -94,6 +94,11 @@ export function buildPreparationSnapshot(input: {
   notices?: SiteDocLike[];
   activeSupplyNeedCount?: number;
   driftedSupplyNeedCount?: number;
+  visitTakeoffDrift?: {
+    stale: boolean;
+    summary: string | null;
+    changes: Array<{ id: string; label: string; detail: string }>;
+  } | null;
   quoteSyncByQuoteId?: Record<string, PreparationQuoteSync>;
   studyVersionById?: Record<string, number | null>;
 }): PreparationSnapshot {
@@ -115,6 +120,7 @@ export function buildPreparationSnapshot(input: {
     notices: input.notices,
     activeSupplyNeedCount: input.activeSupplyNeedCount,
     driftedSupplyNeedCount: input.driftedSupplyNeedCount,
+    visitTakeoffDrift: input.visitTakeoffDrift,
     quoteSyncByQuoteId: input.quoteSyncByQuoteId,
     studyVersionById: input.studyVersionById,
   });

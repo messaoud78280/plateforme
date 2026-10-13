@@ -21,6 +21,14 @@ import {
 } from "@/lib/chantier/portfolio-delivery";
 import { buildProjectPresentation } from "@/lib/chantier/party-labels";
 import { buildPreparationSnapshot } from "@/lib/chantier/preparation-state";
+import { resolveProjectVisit } from "@/lib/chantier/preparation-inputs";
+import { resolvePrepStudyForWorkspace } from "@/lib/chantier/resolve-workspace-entities";
+import {
+  describeMeasurementNow,
+  evaluateVisitTakeoffDrift,
+  isVisitExplicitlyLinked,
+  type VisitTakeoffDriftResult,
+} from "@/lib/site-visits/visit-takeoff-drift";
 import {
   resolveSignatureDomainsFromScopes,
   type CraftSignatureTone,
@@ -459,6 +467,7 @@ export async function loadProjectsPortfolio(opts: {
                 dossierStatus: true,
                 sourcesJson: true,
                 version: true,
+                createdAt: true,
                 _count: { select: { lines: true } },
               },
               orderBy: { updatedAt: "desc" },
@@ -604,6 +613,49 @@ export async function loadProjectsPortfolio(opts: {
     for (const s of studyRows) {
       studyVersionById[s.id] = s.version;
     }
+
+    const driftVisitIds = [
+      ...new Set(
+        visits
+          .filter((v) => v.projectId || v.commercialQuoteId)
+          .map((v) => v.id),
+      ),
+    ];
+    const driftStudyIds = studyRows.map((s) => s.id);
+    const [driftMeasurements, driftValidations] = await Promise.all([
+      driftVisitIds.length
+        ? prisma.siteVisitMeasurement.findMany({
+            where: { visitId: { in: driftVisitIds } },
+            select: {
+              id: true,
+              visitId: true,
+              label: true,
+              zone: true,
+              unit: true,
+              lengthM: true,
+              widthM: true,
+              heightM: true,
+              quantityValue: true,
+              computedQuantity: true,
+              updatedAt: true,
+            },
+            take: 2500,
+          })
+        : Promise.resolve([]),
+      driftStudyIds.length
+        ? prisma.prepStudyEvent.groupBy({
+            by: ["studyId"],
+            where: {
+              studyId: { in: driftStudyIds },
+              kind: "VALIDATE_STUDY",
+            },
+            _max: { createdAt: true },
+          })
+        : Promise.resolve([]),
+    ]);
+    const validatedAtByStudy = new Map(
+      driftValidations.map((row) => [row.studyId, row._max.createdAt]),
+    );
 
     // Attention FollowUp : batch unique — loadAttentionForSheets résout l’org par fiche
     // (portfolio multi-tenant). Ne pas forcer un seul organizationId.
@@ -836,6 +888,65 @@ export async function loadProjectsPortfolio(opts: {
         })),
       ).display;
 
+      const projectStudies = studyRows.filter((s) => s.projectId === p.id);
+      const projectQuotes = quoteRows.filter((q) => q.projectId === p.id);
+      const anchorStudy = resolvePrepStudyForWorkspace({
+        studies: projectStudies,
+        scopes: projectScopes.map((s) => ({
+          id: s.id,
+          referenceStudyId: s.referenceStudyId,
+          referenceQuoteId: s.referenceQuoteId,
+          referenceSchedulePlanId: s.referenceSchedulePlanId,
+        })),
+      });
+      const anchorRow = anchorStudy
+        ? projectStudies.find((s) => s.id === anchorStudy.id) ?? null
+        : null;
+      const resolvedVisit = resolveProjectVisit({
+        projectId: p.id,
+        siteAddress: p.siteAddress,
+        siteCity: p.siteCity,
+        title: p.title,
+        quotes: projectQuotes.map((q) => ({
+          id: q.id,
+          status: q.status,
+          isDemonstration: q.isDemonstration,
+          projectId: q.projectId,
+          sourcePrepStudyId: q.sourcePrepStudyId,
+          subject: q.subject,
+        })),
+        visits,
+      });
+      const visitLinked = isVisitExplicitlyLinked({
+        projectId: p.id,
+        visit: resolvedVisit,
+        quoteIds: projectQuotes.map((q) => q.id),
+      });
+      const visitTakeoffDrift: VisitTakeoffDriftResult = evaluateVisitTakeoffDrift({
+        hasStudy: Boolean(anchorRow),
+        visitLinked,
+        studyCreatedAt: anchorRow?.createdAt ?? null,
+        studyValidatedAt: anchorRow
+          ? validatedAtByStudy.get(anchorRow.id) ?? null
+          : null,
+        measurementTouches:
+          visitLinked && resolvedVisit
+            ? driftMeasurements
+                .filter((m) => m.visitId === resolvedVisit.id)
+                .map((m) => {
+                  const now = describeMeasurementNow(m);
+                  return {
+                    id: m.id,
+                    label: m.zone ? `${m.label} — ${m.zone}` : m.label,
+                    detail: now
+                      ? `Modifié après le métré · ${now}`
+                      : "Modifié après le métré",
+                    updatedAt: m.updatedAt,
+                  };
+                })
+            : [],
+      });
+
       const preparation = buildPreparationSnapshot({
         projectId: p.id,
         title: p.title,
@@ -843,6 +954,7 @@ export async function loadProjectsPortfolio(opts: {
         siteCity: p.siteCity,
         chantierStatus: p.chantierStatus,
         hasResponsible: Boolean(responsibleName),
+        visitTakeoffDrift,
         visits,
         studies: studyRows
           .filter((s) => s.projectId === p.id)

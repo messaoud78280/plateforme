@@ -43,6 +43,7 @@ import {
   resolvePrepPlanSource,
   type ResolvedPlanSource,
 } from "@/lib/preparation/plan-source";
+import { recordVisitTechnicalBaseline } from "@/lib/site-visits/visit-takeoff-baseline";
 
 type Db = PrismaClient | Prisma.TransactionClient;
 
@@ -815,6 +816,12 @@ export async function commitPrepImport(
         studyId: study.id,
         studyVersion: version,
       });
+      await recordVisitTechnicalBaseline(tx, {
+        organizationId: input.orgId,
+        projectId: input.projectId,
+        studyId: study.id,
+        userId: input.userId,
+      });
       return { studyId: study.id, importId: imp.id, kind: "REPLACE" as const };
     }
 
@@ -862,6 +869,12 @@ export async function commitPrepImport(
       projectId: input.projectId,
       studyId: study.id,
       studyVersion: 1,
+    });
+    await recordVisitTechnicalBaseline(tx, {
+      organizationId: input.orgId,
+      projectId: input.projectId,
+      studyId: study.id,
+      userId: input.userId,
     });
     return { studyId: study.id, importId: imp.id, kind: "CREATE" as const };
   });
@@ -1074,6 +1087,12 @@ export async function validatePrepStudy(
         },
         actorUserId: input.userId,
       },
+    });
+    await recordVisitTechnicalBaseline(tx, {
+      organizationId: input.orgId,
+      projectId: study.projectId,
+      studyId: study.id,
+      userId: input.userId,
     });
 
     return {

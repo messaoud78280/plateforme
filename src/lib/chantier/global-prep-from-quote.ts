@@ -8,6 +8,7 @@ import { d } from "@/lib/commercial/decimal";
 import { commitPrepSchedule } from "@/lib/preparation/schedule/transfer";
 import type { StoredProvenance } from "@/lib/preparation/types";
 import { resolveCurrentSchedulePlan } from "@/lib/chantier/resolve-workspace-entities";
+import { recordVisitTechnicalBaseline } from "@/lib/site-visits/visit-takeoff-baseline";
 
 const GLOBAL_STUDY_MARKER = "bework_global_metre_v1";
 
@@ -1091,6 +1092,17 @@ export async function createGlobalPrepFromQuote(input: {
       select: { id: true, code: true, name: true },
     }),
   ]);
+
+  try {
+    await recordVisitTechnicalBaseline(prisma, {
+      organizationId: input.orgId,
+      projectId: input.projectId,
+      studyId: studyId!,
+      userId: input.userId,
+    });
+  } catch (error) {
+    console.error("[visit-takeoff] empreinte non enregistrée", error);
+  }
 
   return {
     studyId: studyId!,

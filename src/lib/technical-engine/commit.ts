@@ -14,6 +14,7 @@ import {
   type NormalizedTechnicalBundle,
 } from "@/lib/technical-engine/parse";
 import { TECHNICAL_BUNDLE_FORMAT } from "@/lib/technical-engine/schema";
+import { recordVisitTechnicalBaseline } from "@/lib/site-visits/visit-takeoff-baseline";
 
 type Db = typeof prisma;
 
@@ -340,6 +341,12 @@ export async function commitTechnicalImport(input: {
         studyId: study.id,
         studyVersion: version,
       });
+      await recordVisitTechnicalBaseline(tx, {
+        organizationId: input.orgId,
+        projectId: input.projectId,
+        studyId: study.id,
+        userId: input.userId,
+      });
       return { studyId: study.id, importId: imp.id, kind: "REPLACE" as const };
     });
   }
@@ -389,6 +396,12 @@ export async function commitTechnicalImport(input: {
       projectId: input.projectId,
       studyId: study.id,
       studyVersion: 1,
+    });
+    await recordVisitTechnicalBaseline(tx, {
+      organizationId: input.orgId,
+      projectId: input.projectId,
+      studyId: study.id,
+      userId: input.userId,
     });
     return { studyId: study.id, importId: imp.id, kind: "CREATE" as const };
   });

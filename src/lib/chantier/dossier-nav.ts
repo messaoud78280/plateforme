@@ -90,7 +90,7 @@ function visualFor(
   }
   if (step.ready) return "ready";
   if (
-    /revalid|modif|attention|stale|à jour/i.test(
+    /revalid|modif|attention|stale|à jour|vérifier/i.test(
       `${step.title} ${step.detail ?? ""} ${step.actionLabel}`,
     )
   ) {
@@ -127,7 +127,16 @@ function applyScopeOverrides(
           summary: c.detail ?? c.statusLabel ?? s.summary,
           ready: c.ready,
           exists: Boolean(c.href),
-          visual: s.visual === "active" ? "active" : c.ready ? "ready" : "to_prepare",
+          visual:
+            s.visual === "active"
+              ? "active"
+              : c.ready
+                ? "ready"
+                : /vérifier|revalid|attention/i.test(
+                      `${c.detail ?? ""} ${c.statusLabel ?? ""}`,
+                    )
+                  ? "needs_attention"
+                  : "to_prepare",
         };
       }
     }

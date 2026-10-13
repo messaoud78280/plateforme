@@ -28,7 +28,11 @@ import {
   hasQuantityDiffAgainstTransfer,
 } from "@/lib/preparation/quote-bridge/quote-sync-state";
 import { evaluateCorePreparationTriple } from "@/lib/chantier/core-preparation-state";
-import { buildPreparationSnapshot } from "@/lib/chantier/preparation-state";
+import {
+  buildPreparationSnapshot,
+  resolveProjectVisit,
+} from "@/lib/chantier/preparation-state";
+import { loadProjectVisitTakeoffDrift } from "@/lib/site-visits/visit-takeoff-baseline";
 import type { ProjectPreparationState } from "@/lib/chantier/project-preparation-state";
 import {
   isQuotePreparationReady,
@@ -422,6 +426,11 @@ function buildScopeCards(input: {
   /** Métré / planning chantier (fallback — ne jamais renvoyer vers Nouvelle visite). */
   fallbackStudyId?: string | null;
   fallbackPlanHref?: string | null;
+  /** Visite technique modifiée — même métré que le dossier. */
+  metreVisitReview?: {
+    summary: string | null;
+    changes: Array<{ id: string; label: string; detail: string }>;
+  } | null;
   /** Suivi chantier global (FollowUpSheet n’a pas de scopeId). */
   globalFollowUp?: {
     id: string;
@@ -683,29 +692,48 @@ function buildScopeCards(input: {
       href: effectiveStudyId
         ? `/dashboard/visites-metres/etudes/${effectiveStudyId}`
         : null,
-      detail: study
-        ? [
-            `Version ${study.version}`,
-            study._count.lines > 0
-              ? metreRelation === "GLOBAL_FALLBACK"
-                ? `${study._count.lines} quantité${study._count.lines > 1 ? "s" : ""} au total`
-                : `${study._count.lines} quantité${study._count.lines > 1 ? "s" : ""}`
-              : null,
-          ]
+      detail: input.metreVisitReview
+        ? ["Métré à vérifier", input.metreVisitReview.summary]
             .filter(Boolean)
             .join(" · ")
-        : fallbackStudyId
-          ? "Métré global du chantier"
-          : "Générer depuis la visite / le devis (pas une nouvelle visite)",
-      syncState: study || fallbackStudyId ? "A_JOUR" : "ABSENT",
-      statusLabel: statusLabelFromSync(
-        study || fallbackStudyId ? "A_JOUR" : "ABSENT",
-        "metre",
-      ),
-      actionLabel: effectiveStudyId ? "Ouvrir" : "Générer le métré chantier",
-      ready: !!(study || fallbackStudyId),
-      syncHint:
-        metreRelation === "GLOBAL_FALLBACK"
+        : study
+          ? [
+              `Version ${study.version}`,
+              study._count.lines > 0
+                ? metreRelation === "GLOBAL_FALLBACK"
+                  ? `${study._count.lines} quantité${study._count.lines > 1 ? "s" : ""} au total`
+                  : `${study._count.lines} quantité${study._count.lines > 1 ? "s" : ""}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")
+          : fallbackStudyId
+            ? "Métré global du chantier"
+            : "Générer depuis la visite / le devis (pas une nouvelle visite)",
+      syncState: input.metreVisitReview
+        ? "A_VERIFIER"
+        : study || fallbackStudyId
+          ? "A_JOUR"
+          : "ABSENT",
+      statusLabel: input.metreVisitReview
+        ? "À vérifier"
+        : statusLabelFromSync(
+            study || fallbackStudyId ? "A_JOUR" : "ABSENT",
+            "metre",
+          ),
+      actionLabel: input.metreVisitReview
+        ? "Vérifier"
+        : effectiveStudyId
+          ? "Ouvrir"
+          : "Générer le métré chantier",
+      ready: input.metreVisitReview ? false : !!(study || fallbackStudyId),
+      syncHint: input.metreVisitReview
+        ? input.metreVisitReview.changes
+            .map((change) =>
+              change.detail ? `${change.label} — ${change.detail}` : change.label,
+            )
+            .join(" · ")
+        : metreRelation === "GLOBAL_FALLBACK"
           ? "Aucun métré spécifique n’est rattaché à ce lot."
           : null,
       isReference: !!(study && input.refs.studyId === study.id),
@@ -883,6 +911,7 @@ async function getProjectWorkspaceUncached(
           scopeId: true,
           sourcesJson: true,
           dossierStatus: true,
+          createdAt: true,
           _count: { select: { lines: true } },
         },
         orderBy: { updatedAt: "desc" },
@@ -1258,6 +1287,43 @@ async function getProjectWorkspaceUncached(
     }
   }
 
+  const preparationVisits = [
+    ...linkedVisits.map((v) => ({
+      id: v.id,
+      status: v.status,
+      projectId: v.projectId,
+      commercialQuoteId: v.commercialQuoteId,
+      siteAddress: null as string | null,
+      subject: v.subject,
+      clientNeed: null as string | null,
+    })),
+    ...addressCandidates,
+  ];
+  const resolvedVisit = resolveProjectVisit({
+    projectId,
+    siteAddress: project.siteAddress,
+    siteCity: project.siteCity,
+    title: project.title,
+    quotes: quotes.map((q) => ({
+      id: q.id,
+      status: q.status,
+      isDemonstration: q.isDemonstration,
+      projectId: q.projectId,
+      sourcePrepStudyId: q.sourcePrepStudyId,
+      subject: q.subject,
+    })),
+    visits: preparationVisits,
+  });
+  const visitTakeoffDrift = await loadProjectVisitTakeoffDrift({
+    organizationId: orgId,
+    projectId,
+    study: globalStudy
+      ? { id: globalStudy.id, createdAt: globalStudy.createdAt }
+      : null,
+    visit: resolvedVisit,
+    quoteIds: quotes.map((q) => q.id),
+  });
+
   const preparation = buildPreparationSnapshot({
     projectId,
     title: project.title,
@@ -1265,18 +1331,8 @@ async function getProjectWorkspaceUncached(
     siteCity: project.siteCity,
     chantierStatus: project.chantierStatus,
     hasResponsible,
-    visits: [
-      ...linkedVisits.map((v) => ({
-        id: v.id,
-        status: v.status,
-        projectId: v.projectId,
-        commercialQuoteId: v.commercialQuoteId,
-        siteAddress: null,
-        subject: v.subject,
-        clientNeed: null,
-      })),
-      ...addressCandidates,
-    ],
+    visits: preparationVisits,
+    visitTakeoffDrift,
     studies: studies.map((s) => ({
       id: s.id,
       scopeId: s.scopeId,
@@ -1409,6 +1465,16 @@ async function getProjectWorkspaceUncached(
       : null,
   });
 
+  const metreDrift =
+    visitTakeoffDrift.stale && visitTakeoffDrift.changes.length > 0;
+  const metreDriftHint = metreDrift
+    ? visitTakeoffDrift.changes
+        .map((change) =>
+          change.detail ? `${change.label} — ${change.detail}` : change.label,
+        )
+        .join(" · ")
+    : null;
+
   const globalMetreCard: WorkspaceCard = {
     kind: "metre",
     label: "Métré & quantitatif",
@@ -1418,25 +1484,29 @@ async function getProjectWorkspaceUncached(
       : null,
     detail: globalStudy
       ? [
-          `Version ${globalStudy.version}`,
-          globalCore.metre.displayLabel,
+          metreDrift ? "Métré à vérifier" : `Version ${globalStudy.version}`,
+          metreDrift
+            ? visitTakeoffDrift.summary
+            : globalCore.metre.displayLabel,
         ]
           .filter(Boolean)
           .join(" · ")
       : globalQuote
         ? "Générer depuis la visite et/ou le devis — sans nouvelle visite"
         : "Un devis est requis avant de générer le métré",
-    syncState: globalStudy ? "A_JOUR" : "ABSENT",
-    statusLabel: globalCore.metre.exists
-      ? (globalCore.metre.kind === "VALIDATED"
+    syncState: metreDrift ? "A_VERIFIER" : globalStudy ? "A_JOUR" : "ABSENT",
+    statusLabel: metreDrift
+      ? "À vérifier"
+      : globalCore.metre.exists
+        ? globalCore.metre.kind === "VALIDATED"
           ? "À jour"
           : globalCore.metre.kind === "NEEDS_VALIDATION"
             ? "À valider"
-            : "En cours")
-      : "À préparer",
-    actionLabel: globalStudy ? "Ouvrir" : "Générer le métré",
+            : "En cours"
+        : "À préparer",
+    actionLabel: metreDrift ? "Vérifier" : globalStudy ? "Ouvrir" : "Générer le métré",
     ready: prepState.takeoff.countsAsCompleted,
-    syncHint: null,
+    syncHint: metreDriftHint,
     isReference: true,
   };
 
@@ -1576,9 +1646,11 @@ async function getProjectWorkspaceUncached(
           : "Saisissez une visite, puis préparez le métré avec ChatGPT",
       href: globalMetreCard.href,
       ready: prepState.takeoff.countsAsCompleted,
-      actionLabel: globalStudy
-        ? "Ouvrir"
-        : "Préparer avec ChatGPT",
+      actionLabel: metreDrift
+        ? "Vérifier"
+        : globalStudy
+          ? "Ouvrir"
+          : "Préparer avec ChatGPT",
       primaryAction: globalStudy ? "open" : "prepare_takeoff_chatgpt",
     },
     {
@@ -1793,6 +1865,10 @@ async function getProjectWorkspaceUncached(
       },
       fallbackStudyId: globalStudy?.id ?? null,
       fallbackPlanHref: globalPlanHref,
+      metreVisitReview:
+        metreDrift && refStudy?.id === globalStudy?.id
+          ? visitTakeoffDrift
+          : null,
       globalFollowUp: followUp,
     });
     const ready = cards.filter((c) => c.ready).length;

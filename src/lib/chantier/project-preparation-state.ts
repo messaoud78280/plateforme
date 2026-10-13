@@ -86,6 +86,7 @@ export type ProjectNextActionCode =
   | "DO_VISIT"
   | "PREPARE_TAKEOFF"
   | "VALIDATE_TAKEOFF"
+  | "VERIFY_TAKEOFF"
   | "PREPARE_QUOTE"
   | "FINALIZE_QUOTE"
   | "REVALIDATE_QUOTE"
@@ -107,6 +108,13 @@ export type ProjectNextAction = {
   stepId: PreparationStepId | "responsable" | "documents" | null;
   /** Motif métier stable (debug / UI secondaire). */
   reason: string;
+};
+
+/** Lignes consultables — visite technique modifiée après le métré. */
+export type TakeoffReviewLine = {
+  id: string;
+  label: string;
+  detail: string;
 };
 
 export type ProjectPreparationState = {
@@ -135,6 +143,9 @@ export type ProjectPreparationState = {
   completedCount: number;
   totalCount: number;
   progressPercent: number;
+
+  /** Relevés ou périmètre technique à consulter. Null si le métré est aligné. */
+  takeoffReview: TakeoffReviewLine[] | null;
 
   nextAction: ProjectNextAction;
 };
@@ -263,7 +274,7 @@ function followUpKind(sheet: FollowUpLike | null): {
  *
  * 1. Responsable manquant
  * 2. Visite à terminer / compléter / planifier
- * 3. Métré absent / à valider
+ * 3. Métré absent / à vérifier (visite technique) / à valider
  * 4. Devis absent / brouillon / à revalider
  * 5. Planning absent / à mettre à jour / à vérifier
  * 6. Approvisionnements dont la source a dérivé
@@ -313,6 +324,18 @@ export function computeProjectNextAction(input: {
         reason: "VISIT_INCOMPLETE",
       };
     }
+  }
+
+  if (state.takeoffReview && state.takeoffReview.length > 0) {
+    return {
+      code: "VERIFY_TAKEOFF",
+      label: "Métré à vérifier",
+      href: state.visitId
+        ? `/dashboard/visites-metres/${state.visitId}`
+        : state.takeoff.hrefHint,
+      stepId: "metre",
+      reason: "VISIT_TECHNICAL_DRIFT",
+    };
   }
 
   if (state.takeoff.kind === "ABSENT") {
@@ -498,6 +521,15 @@ export function computeProjectPreparationState(input: {
   activeSupplyNeedCount?: number;
   /** Besoins actifs dont sourceDrift n’est plus NONE (quantités non réécrites). */
   driftedSupplyNeedCount?: number;
+  /**
+   * Visite explicitement liée dont les données techniques ont bougé
+   * après le métré. Lecture seule — ne réécrit rien.
+   */
+  visitTakeoffDrift?: {
+    stale: boolean;
+    summary: string | null;
+    changes: TakeoffReviewLine[];
+  } | null;
 
   quoteSyncByQuoteId?: Record<string, PreparationQuoteSync>;
   studyVersionById?: Record<string, number | null>;
@@ -622,8 +654,14 @@ export function computeProjectPreparationState(input: {
       : `/dashboard/visites-metres?projectId=${encodeURIComponent(input.projectId)}`,
   };
 
-  const metreKind: PreparationStepKind =
-    core.metre.kind === "ABSENT"
+  const review = input.visitTakeoffDrift;
+  const visitDrift = Boolean(
+    studyFull && review?.stale && review.changes.length > 0,
+  );
+  const takeoffReview = visitDrift ? review!.changes : null;
+  const metreKind: PreparationStepKind = visitDrift
+    ? "ACTION_REQUIRED"
+    : core.metre.kind === "ABSENT"
       ? "ABSENT"
       : core.metre.kind === "VALIDATED"
         ? "DONE"
@@ -634,11 +672,15 @@ export function computeProjectPreparationState(input: {
     id: "metre",
     label: "Métré",
     kind: metreKind,
-    displayLabel: core.metre.displayLabel,
-    secondaryLabel: null,
+    displayLabel: visitDrift ? "Métré à vérifier" : core.metre.displayLabel,
+    secondaryLabel: visitDrift
+      ? review?.summary ?? "Données techniques de la visite modifiées"
+      : null,
     applicable: true,
     countsAsCompleted: metreKind === "DONE",
-    hrefHint: null,
+    hrefHint: visitDrift && visit
+      ? `/dashboard/visites-metres/${visit.id}`
+      : null,
   };
 
   let quoteKind: PreparationStepKind = "ABSENT";
@@ -788,6 +830,7 @@ export function computeProjectPreparationState(input: {
     completedCount,
     totalCount,
     progressPercent,
+    takeoffReview,
   };
 
   const nextAction = computeProjectNextAction({

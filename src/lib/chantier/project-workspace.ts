@@ -33,6 +33,7 @@ import {
   resolveProjectVisit,
 } from "@/lib/chantier/preparation-state";
 import { loadProjectVisitTakeoffDrift } from "@/lib/site-visits/visit-takeoff-baseline";
+import { loadPlanningSupplyDateGapsByProject } from "@/lib/supply/planning-date-drift-load";
 import type { ProjectPreparationState } from "@/lib/chantier/project-preparation-state";
 import {
   isQuotePreparationReady,
@@ -1314,6 +1315,18 @@ async function getProjectWorkspaceUncached(
     })),
     visits: preparationVisits,
   });
+  const planningDateGapsByProject = await loadPlanningSupplyDateGapsByProject({
+    projectIds: [projectId],
+    organizationIds: [orgId],
+  });
+  const planningSupplyDateDrift = {
+    gaps: (planningDateGapsByProject.get(projectId) ?? []).map((gap) => ({
+      id: gap.id,
+      label: gap.label,
+      detail: gap.detail,
+    })),
+  };
+
   const visitTakeoffDrift = await loadProjectVisitTakeoffDrift({
     organizationId: orgId,
     projectId,
@@ -1390,6 +1403,7 @@ async function getProjectWorkspaceUncached(
       })),
     activeSupplyNeedCount: supplyNeedCount,
     driftedSupplyNeedCount: supplyDriftCount,
+    planningSupplyDateDrift,
     studyVersionById: Object.fromEntries(
       studies.map((s) => [s.id, s.version as number | null]),
     ),
@@ -1704,15 +1718,23 @@ async function getProjectWorkspaceUncached(
       label: "Approvisionnements",
       title: prepState.supply.displayLabel,
       detail:
-        supplyDriftCount > 0
-          ? "La source a changé. Les quantités validées et les commandes restent inchangées."
-          : supplyNeedCount > 0
-            ? "Besoins chantier (matériaux, locations, évacuations…)"
-            : "Accessible sans planning — ajoutez les besoins chantier",
+        (prepState.planningSupplyDateReview?.length ?? 0) > 0
+          ? "Approvisionnements à vérifier"
+          : supplyDriftCount > 0
+            ? "La source a changé. Les quantités validées et les commandes restent inchangées."
+            : supplyNeedCount > 0
+              ? "Besoins chantier (matériaux, locations, évacuations…)"
+              : "Accessible sans planning — ajoutez les besoins chantier",
       href: `/dashboard/projets/${projectId}#tab-approvisionnements`,
       ready: prepState.supply.countsAsCompleted,
       actionLabel:
-        supplyDriftCount > 0 ? "Revoir" : supplyNeedCount > 0 ? "Ouvrir" : "Préparer",
+        (prepState.planningSupplyDateReview?.length ?? 0) > 0
+          ? "Vérifier"
+          : supplyDriftCount > 0
+            ? "Revoir"
+            : supplyNeedCount > 0
+              ? "Ouvrir"
+              : "Préparer",
       primaryAction: "open",
     },
     {

@@ -99,6 +99,9 @@ export function buildPreparationSnapshot(input: {
     summary: string | null;
     changes: Array<{ id: string; label: string; detail: string }>;
   } | null;
+  planningSupplyDateDrift?: {
+    gaps: Array<{ id: string; label: string; detail: string }>;
+  } | null;
   quoteSyncByQuoteId?: Record<string, PreparationQuoteSync>;
   studyVersionById?: Record<string, number | null>;
 }): PreparationSnapshot {
@@ -121,6 +124,7 @@ export function buildPreparationSnapshot(input: {
     activeSupplyNeedCount: input.activeSupplyNeedCount,
     driftedSupplyNeedCount: input.driftedSupplyNeedCount,
     visitTakeoffDrift: input.visitTakeoffDrift,
+    planningSupplyDateDrift: input.planningSupplyDateDrift,
     quoteSyncByQuoteId: input.quoteSyncByQuoteId,
     studyVersionById: input.studyVersionById,
   });

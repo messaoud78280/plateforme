@@ -23,6 +23,9 @@ function statusHint(step: DossierNavStep): string {
   if (step.visual === "ready") return "À jour";
   if (step.visual === "needs_attention") {
     if (/métré à vérifier/i.test(step.summary)) return "Métré à vérifier";
+    if (/approvisionnements à vérifier/i.test(step.summary)) {
+      return "Approvisionnements à vérifier";
+    }
     return "À revalider";
   }
   if (step.visual === "not_applicable") return "N/A";

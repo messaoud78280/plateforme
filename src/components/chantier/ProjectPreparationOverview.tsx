@@ -616,6 +616,25 @@ export function ProjectPreparationOverview({
                 </button>
               ) : null}
             </div>
+            {prepState?.planningSupplyDateReview &&
+            prepState.planningSupplyDateReview.length > 0 ? (
+              <div className="mt-2 rounded-xl border border-amber-200/90 bg-amber-50/80 px-3 py-2.5">
+                <p className="text-[12.5px] font-semibold text-amber-950">
+                  Approvisionnements à vérifier
+                </p>
+                <ul className="mt-1.5 space-y-1">
+                  {prepState.planningSupplyDateReview.map((line) => (
+                    <li key={line.id} className="text-[12.5px] text-slate-800">
+                      <span className="font-semibold">{line.label}</span>
+                      {line.detail ? ` — ${line.detail}` : null}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1.5 text-[11.5px] text-slate-600">
+                  Commandes, offres, prix et quantités restent inchangés.
+                </p>
+              </div>
+            ) : null}
             {prepState?.takeoffReview && prepState.takeoffReview.length > 0 ? (
               <div className="mt-2 rounded-xl border border-amber-200/90 bg-amber-50/80 px-3 py-2.5">
                 <p className="text-[12.5px] font-semibold text-amber-950">

@@ -3,6 +3,11 @@
  */
 import { prisma } from "@/lib/prisma";
 import {
+  evaluatePlanningSupplyDateDrift,
+  scheduleTaskIdList,
+  type PlanningSupplyDateGap,
+} from "@/lib/supply/planning-date-drift";
+import {
   calculateMaterialRequirementProgress,
   coverageStateLabel,
   formatQty,
@@ -71,6 +76,8 @@ export type MaterialRequirementRow = {
   selectedOfferId: string | null;
   offerCount: number;
   hasPricedOffer: boolean;
+  /** Début de tâche lié différent de la date du besoin. Null si aligné. */
+  planningDateGap: PlanningSupplyDateGap | null;
 };
 
 export async function loadMaterialRequirementsForProject(opts: {
@@ -153,6 +160,30 @@ export async function loadMaterialRequirementsForProject(opts: {
     },
     orderBy: [{ status: "asc" }, { neededAt: "asc" }, { label: "asc" }],
   });
+
+  const taskIds = [
+    ...new Set(
+      requirements.flatMap((row) => scheduleTaskIdList(row.scheduleTaskIds)),
+    ),
+  ];
+  const tasks =
+    taskIds.length === 0
+      ? []
+      : await prisma.prepScheduleTask.findMany({
+          where: { id: { in: taskIds }, organizationId: opts.organizationId },
+          select: { id: true, name: true, startDate: true },
+        });
+  const gaps = evaluatePlanningSupplyDateDrift({
+    needs: requirements.map((row) => ({
+      id: row.id,
+      label: row.label,
+      status: row.status,
+      neededAt: row.neededAt,
+      scheduleTaskIds: scheduleTaskIdList(row.scheduleTaskIds),
+    })),
+    tasks,
+  });
+  const gapByNeed = new Map(gaps.map((gap) => [gap.id, gap]));
 
   return requirements.map((r) => {
     const linkedOrders: MaterialRequirementRow["linkedOrders"] = [];
@@ -259,6 +290,7 @@ export async function loadMaterialRequirementsForProject(opts: {
       selectedOfferId: r.selectedOfferId ?? null,
       offerCount: r.offers.length,
       hasPricedOffer: r.offers.some((o) => o.unitPrice != null),
+      planningDateGap: gapByNeed.get(r.id) ?? null,
     };
   });
 }

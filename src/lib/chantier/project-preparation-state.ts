@@ -147,6 +147,9 @@ export type ProjectPreparationState = {
   /** Relevés ou périmètre technique à consulter. Null si le métré est aligné. */
   takeoffReview: TakeoffReviewLine[] | null;
 
+  /** Besoins dont le début de tâche liée n’est plus la date prévue. */
+  planningSupplyDateReview: TakeoffReviewLine[] | null;
+
   nextAction: ProjectNextAction;
 };
 
@@ -410,12 +413,15 @@ export function computeProjectNextAction(input: {
   }
 
   if (state.supply.kind === "ACTION_REQUIRED") {
+    const dateDrift = (state.planningSupplyDateReview?.length ?? 0) > 0;
     return {
       code: "REVIEW_SUPPLY",
-      label: "Revoir les approvisionnements",
+      label: dateDrift
+        ? "Approvisionnements à vérifier"
+        : "Revoir les approvisionnements",
       href: `/dashboard/projets/${projectId}#tab-approvisionnements`,
       stepId: "approvisionnements",
-      reason: "SUPPLY_SOURCE_DRIFT",
+      reason: dateDrift ? "PLANNING_SUPPLY_DATE_DRIFT" : "SUPPLY_SOURCE_DRIFT",
     };
   }
 
@@ -521,6 +527,13 @@ export function computeProjectPreparationState(input: {
   activeSupplyNeedCount?: number;
   /** Besoins actifs dont sourceDrift n’est plus NONE (quantités non réécrites). */
   driftedSupplyNeedCount?: number;
+  /**
+   * Besoins liés à une tâche dont le début a changé.
+   * Lecture seule — commandes, offres, prix et quantités inchangés.
+   */
+  planningSupplyDateDrift?: {
+    gaps: TakeoffReviewLine[];
+  } | null;
   /**
    * Visite explicitement liée dont les données techniques ont bougé
    * après le métré. Lecture seule — ne réécrit rien.
@@ -727,25 +740,34 @@ export function computeProjectPreparationState(input: {
 
   const supplyCount = Math.max(0, Number(input.activeSupplyNeedCount) || 0);
   const supplyDrift = Math.max(0, Number(input.driftedSupplyNeedCount) || 0);
+  const planningDateGaps = input.planningSupplyDateDrift?.gaps ?? [];
+  const planningDateDrift = planningDateGaps.length > 0;
   const supplyStep: PreparationStep = {
     id: "approvisionnements",
     label: "Approvisionnements",
-    kind: supplyDrift > 0 ? "ACTION_REQUIRED" : supplyCount > 0 ? "READY" : "ABSENT",
-    displayLabel:
-      supplyDrift > 0
+    kind:
+      planningDateDrift || supplyDrift > 0
+        ? "ACTION_REQUIRED"
+        : supplyCount > 0
+          ? "READY"
+          : "ABSENT",
+    displayLabel: planningDateDrift
+      ? "Approvisionnements à vérifier"
+      : supplyDrift > 0
         ? supplyDrift > 1
           ? `${supplyDrift} besoins à revoir`
           : "1 besoin à revoir"
         : supplyCount > 0
           ? `${supplyCount} besoin${supplyCount > 1 ? "s" : ""}`
           : "À préparer",
-    secondaryLabel:
-      supplyDrift > 0
+    secondaryLabel: planningDateDrift
+      ? "Dates de tâches décalées — commandes, offres, prix et quantités inchangés"
+      : supplyDrift > 0
         ? "La source a changé — quantités et commandes inchangées"
         : null,
     applicable: true,
     /** Non bloquant si vide — prêt seulement quand des besoins existent et sont alignés. */
-    countsAsCompleted: supplyCount > 0 && supplyDrift === 0,
+    countsAsCompleted: supplyCount > 0 && supplyDrift === 0 && !planningDateDrift,
     hrefHint: `/dashboard/projets/${input.projectId}#tab-approvisionnements`,
   };
 
@@ -831,6 +853,7 @@ export function computeProjectPreparationState(input: {
     totalCount,
     progressPercent,
     takeoffReview,
+    planningSupplyDateReview: planningDateDrift ? planningDateGaps : null,
   };
 
   const nextAction = computeProjectNextAction({

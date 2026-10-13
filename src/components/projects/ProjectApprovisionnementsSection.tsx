@@ -89,6 +89,10 @@ export function ProjectApprovisionnementsSection({
     () => activeRows.filter((r) => r.sourceDrift && r.sourceDrift !== "NONE").length,
     [activeRows],
   );
+  const dateGaps = useMemo(
+    () => activeRows.filter((r) => r.planningDateGap),
+    [activeRows],
+  );
   const filtered = useMemo(
     () =>
       categoryFilter === "ALL"
@@ -373,6 +377,37 @@ export function ProjectApprovisionnementsSection({
         </div>
       </div>
 
+      {dateGaps.length > 0 ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-950">
+          <p className="font-bold text-amber-950">Approvisionnements à vérifier</p>
+          <ul className="mt-2 space-y-1.5">
+            {dateGaps.map((row) => (
+              <li key={row.id} className="text-[13px] text-slate-800">
+                <span className="font-semibold">{row.label}</span>
+                {row.planningDateGap ? ` — ${row.planningDateGap.detail}` : null}
+                {canWrite ? (
+                  <button
+                    type="button"
+                    className="ml-2 rounded border border-amber-300 bg-white px-1.5 py-0.5 text-[10px] font-bold text-amber-950 hover:bg-amber-50"
+                    onClick={() => {
+                      openEdit(row);
+                      setDetailId(row.id);
+                    }}
+                  >
+                    Réviser la date
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs text-amber-900/90">
+            Révision humaine : la date du besoin ne change que si vous
+            l’enregistrez. Commandes, offres, prix et quantités restent
+            inchangés.
+          </p>
+        </div>
+      ) : null}
+
       {driftCount > 0 ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-950">
           <p className="font-bold text-amber-950">
@@ -576,7 +611,14 @@ export function ProjectApprovisionnementsSection({
                       ) : null}
                     </td>
                     <td className="px-3 py-2.5 text-xs text-slate-600">
-                      {formatDay(r.neededAt)}
+                      <p>{formatDay(r.neededAt)}</p>
+                      {r.planningDateGap ? (
+                        <p className="mt-0.5 font-semibold text-amber-800">
+                          Tâche le {formatDay(r.planningDateGap.taskStart)} (
+                          {r.planningDateGap.deltaDays > 0 ? "+" : ""}
+                          {r.planningDateGap.deltaDays} j)
+                        </p>
+                      ) : null}
                     </td>
                     <td className="px-3 py-2.5">
                       <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
@@ -827,6 +869,7 @@ export function ProjectApprovisionnementsSection({
               setNeededAt={setNeededAt}
               notes={notes}
               setNotes={setNotes}
+              dateHint={detail.planningDateGap?.detail ?? null}
             />
             <div className="mt-4 flex justify-end gap-2">
               <button
@@ -898,6 +941,7 @@ function NeedFormFields(props: {
   setNeededAt: (v: string) => void;
   notes: string;
   setNotes: (v: string) => void;
+  dateHint?: string | null;
 }) {
   return (
     <div className="mt-4 space-y-3">
@@ -987,6 +1031,11 @@ function NeedFormFields(props: {
           onChange={(e) => props.setNeededAt(e.target.value)}
           className="w-full rounded-lg border border-slate-200 px-3 py-2"
         />
+        {props.dateHint ? (
+          <span className="block text-[11px] font-medium text-amber-800">
+            {props.dateHint} Enregistrez seulement si vous acceptez ce décalage.
+          </span>
+        ) : null}
       </label>
       <label className="block space-y-1 text-sm">
         <span className="text-xs font-bold uppercase text-slate-500">Notes</span>

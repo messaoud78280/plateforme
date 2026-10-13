@@ -410,6 +410,29 @@ assert.equal(supplyDrift.supply.countsAsCompleted, false);
 assert.equal(supplyDrift.nextAction.code, "REVIEW_SUPPLY");
 assert.equal(supplyDrift.nextAction.label, "Revoir les approvisionnements");
 
+/** R3 — début de tâche lié décalé. Commandes et quantités non réécrites. */
+const planningDate = computeProjectPreparationState({
+  ...readyInput,
+  activeSupplyNeedCount: 3,
+  planningSupplyDateDrift: {
+    gaps: [
+      {
+        id: "need-1",
+        label: "Carrelage",
+        detail: "Besoin le 10 oct., tâche « Pose » le 18 oct. (+8 j)",
+      },
+    ],
+  },
+});
+assert.equal(planningDate.supply.displayLabel, "Approvisionnements à vérifier");
+assert.equal(planningDate.supply.kind, "ACTION_REQUIRED");
+assert.equal(planningDate.supply.countsAsCompleted, false);
+assert.equal(planningDate.planningSupplyDateReview?.[0]?.label, "Carrelage");
+assert.equal(planningDate.nextAction.code, "REVIEW_SUPPLY");
+assert.equal(planningDate.nextAction.label, "Approvisionnements à vérifier");
+assert.equal(planningDate.nextAction.reason, "PLANNING_SUPPLY_DATE_DRIFT");
+assert.equal(planningDate.quote.kind, "DONE");
+
 /** R1 — visite technique modifiée après un métré déjà créé. Quantités inchangées. */
 const visitDrift = computeProjectPreparationState({
   ...readyInput,

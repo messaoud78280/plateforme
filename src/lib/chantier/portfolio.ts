@@ -29,6 +29,7 @@ import {
   isVisitExplicitlyLinked,
   type VisitTakeoffDriftResult,
 } from "@/lib/site-visits/visit-takeoff-drift";
+import { loadPlanningSupplyDateGapsByProject } from "@/lib/supply/planning-date-drift-load";
 import {
   resolveSignatureDomainsFromScopes,
   type CraftSignatureTone,
@@ -808,6 +809,10 @@ export async function loadProjectsPortfolio(opts: {
       number
     >;
     const total = counts.reduce((acc, c) => acc + c._count, 0);
+    const planningDateGapsByProject = await loadPlanningSupplyDateGapsByProject({
+      projectIds,
+      organizationIds: orgIds,
+    });
 
     const rows: PortfolioProjectRow[] = projects.map((p) => {
       const att = attentionByProject.get(p.id) ?? {
@@ -1029,6 +1034,13 @@ export async function loadProjectsPortfolio(opts: {
           })),
         driftedSupplyNeedCount:
           supplyDriftRows.find((row) => row.projectId === p.id)?._count._all ?? 0,
+        planningSupplyDateDrift: {
+          gaps: (planningDateGapsByProject.get(p.id) ?? []).map((gap) => ({
+            id: gap.id,
+            label: gap.label,
+            detail: gap.detail,
+          })),
+        },
         studyVersionById,
         quoteSyncByQuoteId: Object.fromEntries(
           quoteRows

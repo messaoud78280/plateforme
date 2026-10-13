@@ -256,6 +256,36 @@ export function buildTradeTemplateScopes(
   }));
 }
 
+export function phasesFromLotDescription(
+  description: string | null | undefined,
+): string[] {
+  if (!description) return [];
+  const match = /Phases types\s*:\s*([^.]*)/.exec(description);
+  if (!match?.[1]) return [];
+  return match[1]
+    .split("·")
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+export function phasesForTemplateScopeCode(code: string): readonly string[] | null {
+  const template = getChantierTradeTemplate(code.split("-")[0] ?? "");
+  if (!template || !code.startsWith(`${template.id}-`)) return null;
+  const index = Number(code.slice(template.id.length + 1));
+  if (!Number.isInteger(index) || index < 1) return null;
+  return template.lots[index - 1]?.phases ?? null;
+}
+
+/** Phases visibles du lot : texte enregistré, sinon le modèle. */
+export function visibleLotPhases(
+  description: string | null | undefined,
+  code: string,
+): string[] {
+  const stored = phasesFromLotDescription(description);
+  if (stored.length > 0) return stored;
+  return [...(phasesForTemplateScopeCode(code) ?? [])];
+}
+
 export function resolveTemplateFromScopeCodes(
   codes: readonly string[],
 ): ChantierTradeTemplate | null {

@@ -5,9 +5,11 @@ import {
   formatChantierTemplateReuseLines,
   getChantierTradeTemplate,
   parseTradeTemplateId,
+  phasesFromLotDescription,
   resolveTemplateFromScopeCodes,
   selectReusableRows,
   templateMatchesText,
+  visibleLotPhases,
 } from "./trade-templates";
 
 for (const template of CHANTIER_TRADE_TEMPLATES) {
@@ -28,6 +30,14 @@ for (const template of CHANTIER_TRADE_TEMPLATES) {
     assert.equal("purchaseOrderId" in draft, false);
   }
   assert.equal(resolveTemplateFromScopeCodes(drafts.map((draft) => draft.code))?.id, template.id);
+  for (const [index, draft] of drafts.entries()) {
+    const phases = phasesFromLotDescription(draft.description);
+    assert.deepEqual(phases, [...template.lots[index]!.phases]);
+    assert.deepEqual(
+      visibleLotPhases(draft.description, draft.code),
+      [...template.lots[index]!.phases],
+    );
+  }
 }
 
 assert.equal(getChantierTradeTemplate("pavage")?.label, "Pavage");
@@ -37,6 +47,15 @@ const unknown = parseTradeTemplateId("CUISINE");
 assert.equal(unknown.ok, false);
 assert.equal(buildTradeTemplateScopes("CUISINE"), null);
 assert.equal(resolveTemplateFromScopeCodes(["LOT-01", "ELEC-02"]), null);
+assert.equal(visibleLotPhases(null, "PAVAGE-99").length, 0);
+assert.deepEqual(visibleLotPhases("Texte libre", "PAVAGE-01"), [
+  "Implantation",
+  "Décapage",
+  "Réglage du fond de forme",
+]);
+const pavingDrafts = buildTradeTemplateScopes("PAVAGE");
+assert.equal(pavingDrafts?.length, 3);
+assert.equal(new Set(pavingDrafts?.map((draft) => draft.code)).size, 3);
 
 const paving = getChantierTradeTemplate("PAVAGE");
 assert.ok(paving);

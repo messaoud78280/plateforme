@@ -26,7 +26,7 @@ import { PlanningCreateV2Modal } from "@/components/chantier/PlanningCreateV2Mod
 import { ChantierDossierNav } from "@/components/chantier/ChantierDossierNav";
 import { buildDossierNavFromWorkspace } from "@/lib/chantier/dossier-nav";
 import { isFeatureEnabled } from "@/lib/feature-flags";
-import { resolveTemplateFromScopeCodes } from "@/lib/chantier/trade-templates";
+import { resolveTemplateFromScopeCodes, visibleLotPhases } from "@/lib/chantier/trade-templates";
 
 type QuoteSectionPreview = {
   sectionId: string;
@@ -974,7 +974,7 @@ export function ProjectPreparationOverview({
               </h3>
               <p className="mt-0.5 text-[12px] text-slate-500">
                 {tradeTemplate
-                  ? "Lots du modèle — la visite, le métré, le devis, le planning et les approvisionnements s’y rattachent."
+                  ? "Lots du modèle. Les phases restent sous chaque lot. Visite, métré, devis, planning et approvisionnements sont ceux du chantier."
                   : "Filtres du dossier — pas de métré ni planning séparés."}
               </p>
             </div>
@@ -984,7 +984,7 @@ export function ProjectPreparationOverview({
                 onClick={() => openCreate()}
                 className="text-[12.5px] font-semibold text-[#1e3a5f] hover:underline"
               >
-                + Phase
+                {tradeTemplate ? "+ Lot" : "+ Phase"}
               </button>
             ) : null}
           </div>
@@ -1008,21 +1008,27 @@ export function ProjectPreparationOverview({
             </div>
           ) : null}
           <ul className="mt-2.5 divide-y divide-slate-100">
-            {workspace.scopes.map((scope) => (
+            {workspace.scopes.map((scope) => {
+              const phases = visibleLotPhases(scope.description, scope.code);
+              return (
               <li key={scope.id}>
                 <Link
                   href={scope.href}
-                  className="flex items-center gap-3 py-2.5 transition hover:bg-slate-50/80"
+                  className="flex items-start gap-3 py-2.5 transition hover:bg-slate-50/80"
                 >
-                  <span className="w-10 shrink-0 text-[11px] font-bold tabular-nums text-slate-400">
+                  <span className="w-[6.75rem] shrink-0 pt-0.5 text-[10px] font-bold tracking-tight text-slate-400">
                     {scope.code}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13.5px] font-semibold text-slate-900">
+                    <span className="block text-[13.5px] font-semibold text-slate-900">
                       {scope.name}
                     </span>
-                    {scope.description ? (
-                      <span className="mt-0.5 block truncate text-[12px] text-slate-500">
+                    {phases.length > 0 ? (
+                      <span className="mt-0.5 block text-[12px] leading-snug text-slate-500">
+                        {phases.join(" · ")}
+                      </span>
+                    ) : scope.description ? (
+                      <span className="mt-0.5 block text-[12px] leading-snug text-slate-500">
                         {scope.description}
                       </span>
                     ) : null}
@@ -1033,10 +1039,11 @@ export function ProjectPreparationOverview({
                       ? "Prêt"
                       : "Filtre"}
                   </span>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-slate-300" />
+                  <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-300" />
                 </Link>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
       ) : (

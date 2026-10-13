@@ -89,6 +89,23 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
         >
           ← Retour à la chaîne chantier
         </Link>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {workspace.global.workflow
+            .filter(
+              (step) =>
+                (step.id === "visite" || step.id === "approvisionnements") &&
+                step.href,
+            )
+            .map((step) => (
+              <Link
+                key={step.id}
+                href={step.href!}
+                className="rounded-full border border-[#1e3a5f]/15 bg-white px-2.5 py-1 text-[12px] font-semibold text-[#1e3a5f] hover:bg-slate-50"
+              >
+                {step.label} · {step.title}
+              </Link>
+            ))}
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -192,10 +209,12 @@ export default async function ProjectScopePreparationPage({ params }: Ctx) {
           Autres périmètres du chantier
         </summary>
         <ul className="mt-2 space-y-1 text-slate-600">
-          {workspace.scopes.map((s) => (
-            <li key={s.id}>
-              <Link href={s.href} className="hover:underline">
-                {s.name}
+          {workspace.scopes
+            .filter((other) => other.id !== scope.id)
+            .map((other) => (
+            <li key={other.id}>
+              <Link href={other.href} className="hover:underline">
+                {other.name}
               </Link>
             </li>
           ))}

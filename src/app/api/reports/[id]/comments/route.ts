@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { isAgencyOrManager } from "@/lib/authz";
+import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
 
 // POST /api/reports/[id]/comments — ajouter un commentaire
 export async function POST(
@@ -37,9 +37,8 @@ export async function POST(
     return NextResponse.json({ error: "Rapport introuvable" }, { status: 404 });
   }
 
-  const isAgence = isAgencyOrManager(session.user);
-  const canAccess = isAgence || report.project.clientId === session.user.id;
-  if (!canAccess) {
+  const access = await canAccessChantierProject(session.user, report.projectId);
+  if (!access.ok) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 

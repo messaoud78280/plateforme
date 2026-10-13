@@ -8,7 +8,7 @@ import { absoluteUrl } from "@/lib/site";
 import { deductTaskCreditsIfNeeded, setTaskActionsUsed } from "@/lib/tasks/deduct-credits";
 import type { ClientDeliveryPayload } from "@/lib/tasks/client-delivery";
 import { isFeatureEnabled } from "@/lib/feature-flags";
-import { isAgencyOrManager } from "@/lib/authz";
+import { isBeworkCrossOrgStaff } from "@/lib/authz";
 
 /** GET /api/tasks/[id]/client-report — Compte rendu client (client ou équipe) */
 export async function GET(
@@ -21,7 +21,7 @@ export async function GET(
   }
 
   const { id } = await params;
-  const isStaff = isAgencyOrManager(session.user);
+  const isStaff = isBeworkCrossOrgStaff(session.user);
 
   const task = await prisma.task.findUnique({
     where: { id },
@@ -115,7 +115,7 @@ export async function POST(
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
-  if (session.user.role !== "MANAGER" && session.user.role !== "AGENCE") {
+  if (!isBeworkCrossOrgStaff(session.user)) {
     return NextResponse.json({ error: "Réservé à l'équipe BeWork" }, { status: 403 });
   }
 

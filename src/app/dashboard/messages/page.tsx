@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
+import { isBeworkCrossOrgStaff } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { BackLink } from "@/components/ui/BackLink";
@@ -34,7 +35,7 @@ export default async function MessagesPage() {
     redirect("/connexion?callbackUrl=/dashboard");
   }
 
-  const isAgence = session.user?.role === "AGENCE" || session.user?.role === "MANAGER";
+  const isAgence = isBeworkCrossOrgStaff(session.user);
   let contactRequests: {
     id: string;
     structure: string;

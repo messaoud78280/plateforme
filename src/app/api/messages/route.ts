@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import {
   canAccessProjectMessaging,
 } from "@/lib/messaging/access";
-import { isAgencyOrManager, isAgent } from "@/lib/authz";
+import { isAgent, isBeworkCrossOrgStaff } from "@/lib/authz";
 import {
   canPostToMessageChannel,
   defaultMessageChannelForPerson,
@@ -288,7 +288,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const isAgence = isAgencyOrManager(session.user);
+    const isAgence = isBeworkCrossOrgStaff(session.user);
     let finalReceiverId: string;
 
     // Destinataire technique (compat schéma) : autre participant du canal si possible

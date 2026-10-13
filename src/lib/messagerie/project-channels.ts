@@ -6,6 +6,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { resolveHostCompanyLabel } from "@/lib/platform/config";
+import { isBeworkCrossOrgStaff } from "@/lib/authz";
 
 export type ProjectChannelType =
   | "INTERNAL"
@@ -170,7 +171,7 @@ export async function canManageProjectChannelParticipants(
 
   const profile = user.permissionProfile;
   if (profile === "DIRECTION" || profile === "ADMINISTRATIF") return true;
-  if (user.role === "MANAGER" || user.role === "AGENCE") return true;
+  if (isBeworkCrossOrgStaff(user)) return true;
 
   if (profile === "CONDUCTEUR" || user.role === "AGENT") {
     const project = await prisma.project.findUnique({

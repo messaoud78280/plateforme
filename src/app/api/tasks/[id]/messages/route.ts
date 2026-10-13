@@ -6,10 +6,9 @@ import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 import {
   canAccessTaskThread,
-  isManagerRole,
-  isStaffAgent,
   taskMessageVisibilityWhere,
 } from "@/lib/messaging/access";
+import { isBeworkOperationalStaff } from "@/lib/authz";
 import { badgeFromMeta } from "@/lib/messagerie/message-links";
 import { broadcastMessagerieToUser } from "@/lib/messagerie/broadcast";
 import { formatMediaPreview, type MsgAttachment } from "@/lib/messagerie/media-preview";
@@ -176,9 +175,10 @@ export async function POST(
   }
 
   const { id: taskId } = await params;
-  const isManager = isManagerRole(session.user.role);
-  const isAgent = isStaffAgent(session.user.role);
-  const isAgenceRole = session.user.role === "AGENCE";
+  const staff = isBeworkOperationalStaff(session.user);
+  const isManager = staff && session.user.role === "MANAGER";
+  const isAgent = staff && session.user.role === "AGENT";
+  const isAgenceRole = staff && session.user.role === "AGENCE";
 
   try {
     const body = await request.json();

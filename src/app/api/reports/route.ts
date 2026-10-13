@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { isAgencyOrManager } from "@/lib/authz";
+import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
 
 // GET /api/reports?projectId=xxx — liste des rapports du projet
 export async function GET(request: Request) {
@@ -25,9 +25,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Projet introuvable" }, { status: 404 });
   }
 
-  const isAgence = isAgencyOrManager(session.user);
-  const canAccess = isAgence || project.clientId === session.user.id;
-  if (!canAccess) {
+  const access = await canAccessChantierProject(session.user, projectId);
+  if (!access.ok) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 
@@ -86,23 +85,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "content requis" }, { status: 400 });
   }
 
-  const project = await prisma.project.findFirst({
-    where: {
-      id: projectId,
-      OR: [
-        { clientId: session.user.id },
-        ...(isAgencyOrManager(session.user) ? [{}] : []),
-      ],
-    },
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
   });
 
   if (!project) {
     return NextResponse.json({ error: "Projet introuvable ou non autorisé" }, { status: 404 });
   }
 
-  const isAgence = isAgencyOrManager(session.user);
-  const canAccess = isAgence || project.clientId === session.user.id;
-  if (!canAccess) {
+  const access = await canAccessChantierProject(session.user, projectId);
+  if (!access.ok) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 

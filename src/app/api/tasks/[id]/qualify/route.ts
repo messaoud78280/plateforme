@@ -5,10 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 import { normalizeTaskPriority } from "@/lib/tasks/priority";
 import { MISSION_TYPES, type MissionType } from "@/lib/tasks/mission-types";
-
-function isManager(role?: string | null): boolean {
-  return role === "MANAGER" || role === "AGENCE";
-}
+import { isBeworkCrossOrgStaff } from "@/lib/authz";
 
 /**
  * PATCH /api/tasks/[id]/qualify — Qualifier une demande client (NOUVEAU) en mission interne.
@@ -18,7 +15,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id || !isManager(session.user.role)) {
+  if (!session?.user?.id || !isBeworkCrossOrgStaff(session.user)) {
     return NextResponse.json({ error: "Réservé au gérant" }, { status: 403 });
   }
 

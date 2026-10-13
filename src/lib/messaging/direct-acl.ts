@@ -4,7 +4,7 @@
  */
 
 import { prisma } from "@/lib/prisma";
-import { isManagerRole, isStaffAgent } from "@/lib/messaging/access";
+import { isBeworkOperationalStaff } from "@/lib/authz";
 
 export type DirectAclUser = {
   id: string;
@@ -84,9 +84,8 @@ export function evaluateDirectMessageAcl(
     }
   }
 
-  // Staff BeWork (MANAGER / AGENT / AGENCE) : peut écrire aux rôles messageables
-  // (plateforme interne BeWork — pas un bypass multi-démo).
-  if (isManagerRole(sender.role) || isStaffAgent(sender.role)) {
+  // Staff BeWork opérationnel uniquement (pas un compte client ou portail externe).
+  if (isBeworkOperationalStaff(sender)) {
     return { ok: true };
   }
 

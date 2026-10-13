@@ -4,10 +4,16 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { MISSION_TYPE_FOLDER_CODE } from "@/lib/tasks/mission-types";
 import type { MissionType } from "@/lib/tasks/mission-types";
+import {
+  isBeworkCrossOrgStaff,
+  isBeworkOperationalStaff,
+  type SessionUser,
+} from "@/lib/authz";
 
-async function getTaskWithAccess(taskId: string, userId: string, role: string) {
-  const isStaff = role === "AGENCE" || role === "MANAGER";
-  const isAgent = role === "AGENT";
+async function getTaskWithAccess(taskId: string, user: SessionUser & { id: string }) {
+  const isStaff = isBeworkCrossOrgStaff(user);
+  const isAgent = user.role === "AGENT" && isBeworkOperationalStaff(user);
+  const userId = user.id;
   const task = await prisma.task.findUnique({
     where: { id: taskId },
     select: {
@@ -37,7 +43,7 @@ export async function GET(
   }
 
   const { id } = await params;
-  const access = await getTaskWithAccess(id, session.user.id, session.user.role);
+  const access = await getTaskWithAccess(id, session.user);
   if ("error" in access) {
     return NextResponse.json({ error: access.error }, { status: access.status });
   }
@@ -107,15 +113,15 @@ export async function PATCH(
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
-  const role = session.user.role;
-  const isStaff = role === "AGENCE" || role === "MANAGER";
-  const isAgent = role === "AGENT";
-  if (!isStaff && !isAgent) {
+  if (
+    !isBeworkCrossOrgStaff(session.user) &&
+    !(session.user.role === "AGENT" && isBeworkOperationalStaff(session.user))
+  ) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
 
   const { id } = await params;
-  const access = await getTaskWithAccess(id, session.user.id, role);
+  const access = await getTaskWithAccess(id, session.user);
   if ("error" in access) {
     return NextResponse.json({ error: access.error }, { status: access.status });
   }

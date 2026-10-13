@@ -6,7 +6,11 @@ import { minutesToActions } from "@/lib/actions";
 import { createNotification } from "@/lib/notifications";
 import { normalizeTaskPriority } from "@/lib/tasks/priority";
 import { deductTaskCreditsIfNeeded } from "@/lib/tasks/deduct-credits";
-import { isAgencyOrManager, isAgent as isAgentRole } from "@/lib/authz";
+import {
+  isAgent as isAgentRole,
+  isBeworkCrossOrgStaff,
+  isBeworkOperationalStaff,
+} from "@/lib/authz";
 
 /** GET /api/tasks/[id] – Détail d'une tâche */
 export async function GET(
@@ -19,8 +23,8 @@ export async function GET(
   }
 
   const { id } = await params;
-  const isAgence = isAgencyOrManager(session.user);
-  const isAgent = isAgentRole(session.user);
+  const isAgence = isBeworkCrossOrgStaff(session.user);
+  const isAgent = isAgentRole(session.user) && isBeworkOperationalStaff(session.user);
 
   try {
     const task = await prisma.task.findUnique({
@@ -88,8 +92,8 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const isAgence = isAgencyOrManager(session.user);
-  const isAgent = isAgentRole(session.user);
+  const isAgence = isBeworkCrossOrgStaff(session.user);
+  const isAgent = isAgentRole(session.user) && isBeworkOperationalStaff(session.user);
 
   try {
     const existing = await prisma.task.findUnique({ where: { id }, include: { client: true } });
@@ -301,7 +305,7 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  const isAgence = isAgencyOrManager(session.user);
+  const isAgence = isBeworkCrossOrgStaff(session.user);
 
   try {
     const existing = await prisma.task.findUnique({ where: { id } });

@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { authOptions } from "@/lib/auth";
+import { isBeworkCrossOrgStaff } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
 import { TaskDetailClient } from "@/components/tasks/TaskDetailClient";
 import { BackLink } from "@/components/ui/BackLink";
@@ -78,7 +79,7 @@ export default async function TacheDetailPage({
       });
       if (extra) Object.assign(task, extra);
     }
-    if (session.user.role === "AGENCE" || session.user.role === "MANAGER") {
+    if (isBeworkCrossOrgStaff(session.user)) {
       agents = await prisma.user.findMany({
         where: { role: { in: ["AGENCE", "AGENT"] } },
         select: { id: true, name: true, email: true },
@@ -91,7 +92,7 @@ export default async function TacheDetailPage({
 
   if (!task) notFound();
 
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isAgence = isBeworkCrossOrgStaff(session.user);
   const isAgent = session.user.role === "AGENT";
   let canAccess = isAgence || isAgent || task.clientId === session.user.id;
   if (!canAccess && session.user.role === "CLIENT") {

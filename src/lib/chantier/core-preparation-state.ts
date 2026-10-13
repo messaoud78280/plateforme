@@ -13,6 +13,7 @@ import {
   type QuoteStudySyncDetectState,
 } from "@/lib/preparation/quote-bridge/quote-sync-state";
 import {
+  evaluatePlanningQuoteDrift,
   evaluatePlanningStudyVersionSync,
   type PlanningSyncDetectState,
 } from "@/lib/preparation/schedule/planning-sync-state";
@@ -68,6 +69,8 @@ export type PlanningCoreState = {
   progressBucket: CoreModuleProgressBucket;
   /** Plan présent (inchangé Phase 1 pour 5/7). */
   workflowReady: boolean;
+  /** Motif lisible (métré CTX-04 ou devis modifié). */
+  syncHint: string | null;
 };
 
 export type CorePreparationTriple = {
@@ -219,6 +222,11 @@ export function evaluatePlanningCoreState(input: {
     status: string;
     studyVersionAtGeneration?: number | null;
     startDateLabel?: string | null;
+    quoteId?: string | null;
+    createdAt?: Date | string | null;
+    quoteUpdatedAt?: Date | string | null;
+    quoteVersionAtGeneration?: number | null;
+    currentQuoteVersion?: number | null;
   } | null;
   archivedOnly?: boolean;
   currentStudyVersion: number | null | undefined;
@@ -239,10 +247,20 @@ export function evaluatePlanningCoreState(input: {
       secondaryLabel: null,
       progressBucket: "todo",
       workflowReady: false,
+      syncHint: null,
     };
   }
 
-  if (input.plan.status === "DRAFT") {
+  const quoteDrift = evaluatePlanningQuoteDrift({
+    hasPlan: true,
+    quoteLinked: Boolean(input.plan.quoteId),
+    planGeneratedAt: input.plan.createdAt,
+    quoteUpdatedAt: input.plan.quoteUpdatedAt,
+    quoteVersionAtGeneration: input.plan.quoteVersionAtGeneration,
+    currentQuoteVersion: input.plan.currentQuoteVersion,
+  });
+
+  if (input.plan.status === "DRAFT" && !quoteDrift.stale) {
     return {
       exists: true,
       planStatus: input.plan.status,
@@ -252,6 +270,7 @@ export function evaluatePlanningCoreState(input: {
       secondaryLabel: input.plan.startDateLabel ?? null,
       progressBucket: "progress",
       workflowReady: true,
+      syncHint: null,
     };
   }
 
@@ -261,23 +280,29 @@ export function evaluatePlanningCoreState(input: {
     studyVersionAtGeneration: input.plan.studyVersionAtGeneration,
   });
 
-  const needsUpdate = sync.syncState === "MODIFICATION_DISPONIBLE";
-  const needsVerify = sync.syncState === "A_VERIFIER";
+  const quoteOverridesStudy =
+    quoteDrift.stale && sync.syncState === "A_JOUR";
+  const syncState: PlanningSyncDetectState = quoteOverridesStudy
+    ? "A_VERIFIER"
+    : sync.syncState;
+  const needsUpdate = syncState === "MODIFICATION_DISPONIBLE";
+  const needsVerify = syncState === "A_VERIFIER";
 
-  let displayLabel = "Prêt";
+  let displayLabel = input.plan.status === "DRAFT" ? "En préparation" : "Prêt";
   if (needsUpdate) displayLabel = "Modification disponible";
   else if (needsVerify) displayLabel = "À vérifier";
 
   return {
     exists: true,
     planStatus: input.plan.status,
-    syncState: sync.syncState,
+    syncState,
     needsUpdate,
     displayLabel,
     secondaryLabel: input.plan.startDateLabel ?? null,
     // Progression Phase 1 : plan présent non-brouillon = done (86 % inchangé).
-    progressBucket: "done",
+    progressBucket: input.plan.status === "DRAFT" ? "progress" : "done",
     workflowReady: true,
+    syncHint: quoteOverridesStudy ? quoteDrift.hint : sync.hint,
   };
 }
 
@@ -302,6 +327,11 @@ export function evaluateCorePreparationTriple(input: {
     studyId?: string | null;
     studyVersionAtGeneration?: number | null;
     startDateLabel?: string | null;
+    quoteId?: string | null;
+    createdAt?: Date | string | null;
+    quoteUpdatedAt?: Date | string | null;
+    quoteVersionAtGeneration?: number | null;
+    currentQuoteVersion?: number | null;
   } | null;
   planStudyVersion?: number | null;
   archivedOnly?: boolean;

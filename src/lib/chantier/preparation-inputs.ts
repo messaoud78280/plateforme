@@ -29,6 +29,8 @@ export type PreparationQuote = {
   projectId: string | null;
   sourcePrepStudyId: string | null;
   subject: string | null;
+  updatedAt?: Date | string | null;
+  versionNumber?: number | null;
 };
 
 export type PreparationStudy = StudyLike & {
@@ -42,6 +44,9 @@ export type PreparationPlan = PlanLike & {
   projectId?: string;
   studyVersionAtGeneration?: number | null;
   startDateLabel?: string | null;
+  quoteId?: string | null;
+  /** Version devis figée dans le snapshot de génération, si connue. */
+  quoteVersionAtGeneration?: number | null;
 };
 
 export type PreparationQuoteSync = {

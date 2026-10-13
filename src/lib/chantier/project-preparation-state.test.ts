@@ -131,15 +131,15 @@ assert.equal(portfolio.followUp.countsAsCompleted, true);
 assert.equal(portfolio.report.kind, "ABSENT");
 assert.equal(portfolio.notice.kind, "ABSENT");
 assert.equal(portfolio.completedCount, 2);
-assert.equal(portfolio.totalCount, 7);
-assert.equal(portfolio.progressPercent, 29);
+assert.equal(portfolio.totalCount, 8);
+assert.equal(portfolio.progressPercent, 25);
 assert.equal(portfolio.nextAction.code, "ASSIGN_MANAGER");
 assert.equal(portfolio.nextAction.label, "Affecter un responsable");
 assert.equal(portfolio.nextAction.reason, "PROJECT_MANAGER_MISSING");
 
 const snap = buildPreparationSnapshot(morelInput);
 assert.equal(snap.nextActionCode, "ASSIGN_MANAGER");
-assert.equal(snap.progressPercent, 29);
+assert.equal(snap.progressPercent, 25);
 assert.equal(snap.completedCount, 2);
 assert.equal(snap.modules.find((m) => m.key === "metre")?.stateLabel.includes("À valider"), true);
 assert.equal(snap.modules.find((m) => m.key === "devis")?.stateLabel.includes("revalid"), true);
@@ -217,7 +217,7 @@ assert.equal(c01a.planning.kind, "ACTION_REQUIRED");
 assert.equal(c01a.visit.kind, "NOT_APPLICABLE");
 assert.equal(c01a.takeoff.kind, "DONE"); // DEMONSTRATION = validé
 assert.equal(c01a.completedCount, 1); // takeoff only (visit N/A)
-assert.equal(c01a.totalCount, 6); // 7 - visit NA
+assert.equal(c01a.totalCount, 7); // 8 étapes − visite non applicable
 assert.equal(c01a.nextAction.code, "REVALIDATE_QUOTE");
 
 /** Projet à jour — versions alignées, pas d’alerte artificielle. */
@@ -298,8 +298,117 @@ assert.equal(synced.planning.kind, "DONE");
 assert.equal(synced.core.devis.syncState, "A_JOUR");
 assert.equal(synced.core.planning.syncState, "A_JOUR");
 assert.equal(synced.completedCount, 7);
-assert.equal(synced.progressPercent, 100);
+assert.equal(synced.progressPercent, 88);
 assert.equal(synced.nextAction.code, "CONTINUE_FOLLOW_UP");
+
+const readyInput = {
+  projectId: "p-ok",
+  title: "Projet à jour",
+  hasResponsible: true,
+  visits: [
+    {
+      id: "v-ok",
+      status: "READY_TO_QUOTE",
+      projectId: "p-ok",
+      commercialQuoteId: null,
+      siteAddress: null,
+      subject: null,
+      clientNeed: null,
+    },
+  ],
+  studies: [
+    {
+      id: "s-ok",
+      scopeId: null,
+      dossierStatus: "PRO_VALIDE",
+      lineCount: 10,
+      version: 2,
+      sourcesJson: [],
+    },
+  ],
+  scopes: [
+    {
+      id: "sc-ok",
+      referenceStudyId: "s-ok",
+      referenceQuoteId: "q-ok",
+      referenceSchedulePlanId: "pl-ok",
+    },
+  ],
+  quotes: [
+    {
+      id: "q-ok",
+      status: "VALIDATED",
+      isDemonstration: false,
+      projectId: "p-ok",
+      sourcePrepStudyId: "s-ok",
+      subject: "OK",
+    },
+  ],
+  plans: [
+    {
+      id: "pl-ok",
+      studyId: "s-ok",
+      scopeId: "sc-ok",
+      status: "CURRENT",
+      revisionKind: "BASE",
+      studyVersionAtGeneration: 2,
+      startDateLabel: "5 nov.",
+    },
+  ],
+  followUps: [{ id: "fu", status: "INTERVENTION_PREVUE", title: "Suivi" }],
+  reports: [
+    { id: "r1", kind: "COMPTE_RENDU", status: "FINALIZED", number: "CR-1", title: "CR" },
+  ],
+  notices: [
+    { id: "n1", kind: "NOTICE", status: "FINALIZED", number: "N-1", title: "Notice" },
+  ],
+  quoteSyncByQuoteId: {
+    "q-ok": {
+      quoteId: "q-ok",
+      hasMetreProvenance: true,
+      currentStudyVersion: 2,
+      transferStudyVersion: 2,
+    },
+  },
+  studyVersionById: { "s-ok": 2 },
+};
+
+/** R2 — devis modifié après le planning : à vérifier, quantités non touchées. */
+const quoteAfterPlan = computeProjectPreparationState({
+  ...readyInput,
+  quotes: [
+    {
+      ...readyInput.quotes[0],
+      updatedAt: "2026-10-12T10:00:00.000Z",
+      versionNumber: 2,
+    },
+  ],
+  plans: [
+    {
+      ...readyInput.plans[0],
+      quoteId: "q-ok",
+      createdAt: "2026-10-01T10:00:00.000Z",
+      quoteVersionAtGeneration: 2,
+    },
+  ],
+});
+assert.equal(quoteAfterPlan.core.planning.syncState, "A_VERIFIER");
+assert.equal(quoteAfterPlan.planning.displayLabel, "À vérifier");
+assert.equal(quoteAfterPlan.nextAction.code, "UPDATE_PLANNING");
+assert.equal(quoteAfterPlan.nextAction.label, "Vérifier le planning");
+assert.equal(quoteAfterPlan.nextAction.reason, "PLANNING_QUOTE_DRIFT");
+
+/** R4 — besoins dont la source a dérivé, sans réécrire les quantités. */
+const supplyDrift = computeProjectPreparationState({
+  ...readyInput,
+  activeSupplyNeedCount: 4,
+  driftedSupplyNeedCount: 2,
+});
+assert.equal(supplyDrift.supply.kind, "ACTION_REQUIRED");
+assert.equal(supplyDrift.supply.displayLabel, "2 besoins à revoir");
+assert.equal(supplyDrift.supply.countsAsCompleted, false);
+assert.equal(supplyDrift.nextAction.code, "REVIEW_SUPPLY");
+assert.equal(supplyDrift.nextAction.label, "Revoir les approvisionnements");
 
 /** Projet vide — ne plante pas. */
 const empty = computeProjectPreparationState({

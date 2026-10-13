@@ -4,6 +4,7 @@
  */
 
 import {
+  evaluatePlanningQuoteDrift,
   evaluatePlanningStudyVersionSync,
   type PlanningSyncDetectState,
 } from "@/lib/preparation/schedule/planning-sync-state";
@@ -76,6 +77,11 @@ export function buildPlanningDetailState(input: {
   studyVersionAtGeneration: number | null | undefined;
   currentStudyVersion: number | null | undefined;
   startDateLabel?: string | null;
+  planGeneratedAt?: Date | string | null;
+  quoteUpdatedAt?: Date | string | null;
+  quoteVersionAtGeneration?: number | null;
+  currentQuoteVersion?: number | null;
+  quoteLinked?: boolean;
 }): PlanningDetailState {
   const status = input.status;
   const revisionNumber = input.revisionNumber ?? null;
@@ -86,8 +92,19 @@ export function buildPlanningDetailState(input: {
     currentStudyVersion: input.currentStudyVersion,
     studyVersionAtGeneration: input.studyVersionAtGeneration,
   });
+  const quoteDrift = evaluatePlanningQuoteDrift({
+    hasPlan: true,
+    quoteLinked: Boolean(input.quoteLinked),
+    planGeneratedAt: input.planGeneratedAt,
+    quoteUpdatedAt: input.quoteUpdatedAt,
+    quoteVersionAtGeneration: input.quoteVersionAtGeneration,
+    currentQuoteVersion: input.currentQuoteVersion,
+  });
 
-  const syncState = evalResult.syncState;
+  const syncState: PlanningSyncDetectState =
+    evalResult.syncState === "A_JOUR" && quoteDrift.stale
+      ? "A_VERIFIER"
+      : evalResult.syncState;
   const syncLabel = planningSyncDisplayLabel(syncState);
   const syncVariant = variantForSync(syncState);
   const needsUpdate = syncState === "MODIFICATION_DISPONIBLE";
@@ -125,7 +142,10 @@ export function buildPlanningDetailState(input: {
     syncState,
     syncLabel,
     syncVariant,
-    syncMessage: planningSyncUserMessage(syncState),
+    syncMessage:
+      evalResult.syncState === "A_JOUR" && quoteDrift.stale
+        ? quoteDrift.hint
+        : planningSyncUserMessage(syncState),
     needsUpdate,
     startDateLabel,
     primaryLabel,

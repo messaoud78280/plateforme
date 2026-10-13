@@ -318,6 +318,7 @@ export async function loadProjectsPortfolio(opts: {
       quoteRows,
       planRows,
       siteDocRows,
+      supplyDriftRows,
     ] = await Promise.all([
         projectIds.length
           ? prisma.task.groupBy({
@@ -493,6 +494,7 @@ export async function loadProjectsPortfolio(opts: {
                 sourcePrepStudyId: true,
                 subject: true,
                 updatedAt: true,
+                currentVersion: { select: { versionNumber: true, updatedAt: true } },
               },
               orderBy: { updatedAt: "desc" },
               take: 300,
@@ -510,6 +512,8 @@ export async function loadProjectsPortfolio(opts: {
                 revisionKind: true,
                 studyVersionAtGeneration: true,
                 startDate: true,
+                quoteId: true,
+                createdAt: true,
               },
               take: 300,
             })
@@ -531,6 +535,17 @@ export async function loadProjectsPortfolio(opts: {
               },
               orderBy: { updatedAt: "desc" },
               take: 400,
+            })
+          : Promise.resolve([]),
+        projectIds.length
+          ? prisma.materialRequirement.groupBy({
+              by: ["projectId"],
+              where: {
+                projectId: { in: projectIds },
+                status: { not: "CANCELLED" },
+                sourceDrift: { not: "NONE" },
+              },
+              _count: { _all: true },
             })
           : Promise.resolve([]),
       ]);
@@ -845,7 +860,18 @@ export async function loadProjectsPortfolio(opts: {
             referenceQuoteId: s.referenceQuoteId,
             referenceSchedulePlanId: s.referenceSchedulePlanId,
           })),
-        quotes: quoteRows.filter((q) => q.projectId === p.id),
+        quotes: quoteRows
+          .filter((q) => q.projectId === p.id)
+          .map((q) => ({
+            id: q.id,
+            status: q.status,
+            isDemonstration: q.isDemonstration,
+            projectId: q.projectId,
+            sourcePrepStudyId: q.sourcePrepStudyId,
+            subject: q.subject,
+            updatedAt: q.currentVersion?.updatedAt ?? q.updatedAt,
+            versionNumber: q.currentVersion?.versionNumber ?? null,
+          })),
         plans: planRows
           .filter((plan) => plan.projectId === p.id)
           .map((plan) => ({
@@ -855,6 +881,8 @@ export async function loadProjectsPortfolio(opts: {
             status: plan.status,
             revisionKind: plan.revisionKind,
             studyVersionAtGeneration: plan.studyVersionAtGeneration,
+            quoteId: plan.quoteId,
+            createdAt: plan.createdAt,
             startDateLabel: plan.startDate
               ? plan.startDate.toLocaleDateString("fr-FR", {
                   day: "numeric",
@@ -887,6 +915,8 @@ export async function loadProjectsPortfolio(opts: {
             number: d.number,
             title: d.title,
           })),
+        driftedSupplyNeedCount:
+          supplyDriftRows.find((row) => row.projectId === p.id)?._count._all ?? 0,
         studyVersionById,
         quoteSyncByQuoteId: Object.fromEntries(
           quoteRows

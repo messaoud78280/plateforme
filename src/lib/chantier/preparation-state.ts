@@ -93,6 +93,7 @@ export function buildPreparationSnapshot(input: {
   reports?: SiteDocLike[];
   notices?: SiteDocLike[];
   activeSupplyNeedCount?: number;
+  driftedSupplyNeedCount?: number;
   quoteSyncByQuoteId?: Record<string, PreparationQuoteSync>;
   studyVersionById?: Record<string, number | null>;
 }): PreparationSnapshot {
@@ -113,6 +114,7 @@ export function buildPreparationSnapshot(input: {
     reports: input.reports,
     notices: input.notices,
     activeSupplyNeedCount: input.activeSupplyNeedCount,
+    driftedSupplyNeedCount: input.driftedSupplyNeedCount,
     quoteSyncByQuoteId: input.quoteSyncByQuoteId,
     studyVersionById: input.studyVersionById,
   });

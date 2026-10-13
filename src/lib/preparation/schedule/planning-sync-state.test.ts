@@ -4,6 +4,7 @@
  */
 import assert from "node:assert/strict";
 import {
+  evaluatePlanningQuoteDrift,
   evaluatePlanningStudyVersionSync,
   isPlanningModificationDisponible,
 } from "./planning-sync-state";
@@ -178,6 +179,47 @@ function fieldsForSuccessfulPlanningSync(studyVersion: number) {
   });
   assert.equal(r.syncState, "A_VERIFIER");
   console.log("incohérence current<source → A_VERIFIER: ok");
+}
+
+// --- Devis modifié après génération → à vérifier, sans réécriture ---
+{
+  const stale = evaluatePlanningQuoteDrift({
+    hasPlan: true,
+    quoteLinked: true,
+    planGeneratedAt: "2026-10-01T08:00:00.000Z",
+    quoteUpdatedAt: "2026-10-02T08:00:00.000Z",
+  });
+  assert.equal(stale.stale, true);
+  assert.match(stale.hint ?? "", /devis a été modifié/i);
+
+  const aligned = evaluatePlanningQuoteDrift({
+    hasPlan: true,
+    quoteLinked: true,
+    planGeneratedAt: "2026-10-03T08:00:00.000Z",
+    quoteUpdatedAt: "2026-10-02T08:00:00.000Z",
+    quoteVersionAtGeneration: 2,
+    currentQuoteVersion: 2,
+  });
+  assert.equal(aligned.stale, false);
+
+  const versionAhead = evaluatePlanningQuoteDrift({
+    hasPlan: true,
+    quoteLinked: true,
+    planGeneratedAt: "2026-10-03T08:00:00.000Z",
+    quoteUpdatedAt: "2026-10-02T08:00:00.000Z",
+    quoteVersionAtGeneration: 2,
+    currentQuoteVersion: 3,
+  });
+  assert.equal(versionAhead.stale, true);
+
+  const unlinked = evaluatePlanningQuoteDrift({
+    hasPlan: true,
+    quoteLinked: false,
+    planGeneratedAt: "2026-10-01T08:00:00.000Z",
+    quoteUpdatedAt: "2026-10-02T08:00:00.000Z",
+  });
+  assert.equal(unlinked.stale, false);
+  console.log("devis modifié → planning à vérifier: ok");
 }
 
 console.log("planning-sync-state.test.ts: ok");

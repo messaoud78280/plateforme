@@ -1178,6 +1178,8 @@ export async function getPrepSchedulePlanView(orgId: string, planId: string) {
           subject: true,
           isDemonstration: true,
           totalSellHt: true,
+          updatedAt: true,
+          currentVersion: { select: { versionNumber: true, updatedAt: true } },
         },
       },
     },
@@ -1200,6 +1202,8 @@ export type SchedulePlanViewPayload = {
   siblingCurrentPlanId: string | null;
   /** Version métré au moment de la génération — CTX-04. */
   studyVersionAtGeneration: number;
+  /** Création du plan — comparaison lecture seule avec le devis lié. */
+  createdAt?: string | null;
   startDate: string | null;
   endDateBase: string | null;
   endDateWithConditional: string | null;
@@ -1215,6 +1219,8 @@ export type SchedulePlanViewPayload = {
     subject: string;
     isDemonstration: boolean;
     totalSellHt: number;
+    updatedAt?: string | null;
+    versionNumber?: number | null;
   } | null;
   quoteOptions: SchedulePreviewQuoteOption[];
   /** Total HT rattaché sans double comptage (lignes devis uniques). */
@@ -1569,6 +1575,7 @@ export async function buildPrepSchedulePlanPayload(
     revisionNumber: plan.revisionNumber,
     siblingCurrentPlanId,
     studyVersionAtGeneration: plan.studyVersionAtGeneration,
+    createdAt: plan.createdAt.toISOString(),
     startDate,
     endDateBase,
     endDateWithConditional: asIsoDate(plan.endDateWithConditional),
@@ -1597,6 +1604,10 @@ export async function buildPrepSchedulePlanPayload(
           subject: plan.quote.subject,
           isDemonstration: plan.quote.isDemonstration,
           totalSellHt: d(plan.quote.totalSellHt),
+          updatedAt: (
+            plan.quote.currentVersion?.updatedAt ?? plan.quote.updatedAt
+          ).toISOString(),
+          versionNumber: plan.quote.currentVersion?.versionNumber ?? null,
         }
       : null,
     quoteOptions: quoteOptions.map((q) => ({

@@ -91,6 +91,7 @@ export type ProjectNextActionCode =
   | "REVALIDATE_QUOTE"
   | "PREPARE_PLANNING"
   | "UPDATE_PLANNING"
+  | "REVIEW_SUPPLY"
   | "CREATE_FOLLOW_UP"
   | "CREATE_REPORT"
   | "CREATE_NOTICE"
@@ -264,8 +265,9 @@ function followUpKind(sheet: FollowUpLike | null): {
  * 2. Visite à terminer / compléter / planifier
  * 3. Métré absent / à valider
  * 4. Devis absent / brouillon / à revalider
- * 5. Planning absent / à mettre à jour
- * 6. Suivi / CR / Notice absents
+ * 5. Planning absent / à mettre à jour / à vérifier
+ * 6. Approvisionnements dont la source a dérivé
+ * 7. Suivi / CR / Notice absents
  * 7. Pièces manquantes
  * 8. Démarrage / continuer suivi
  */
@@ -374,12 +376,23 @@ export function computeProjectNextAction(input: {
     state.planning.kind === "NEEDS_VALIDATION" ||
     state.planning.kind === "IN_PROGRESS"
   ) {
+    const quoteDrift = state.core.planning.syncState === "A_VERIFIER";
     return {
       code: "UPDATE_PLANNING",
-      label: "Mettre à jour le planning",
+      label: quoteDrift ? "Vérifier le planning" : "Mettre à jour le planning",
       href: null,
       stepId: "planning",
-      reason: "PLANNING_STALE_CTX04",
+      reason: quoteDrift ? "PLANNING_QUOTE_DRIFT" : "PLANNING_STALE_CTX04",
+    };
+  }
+
+  if (state.supply.kind === "ACTION_REQUIRED") {
+    return {
+      code: "REVIEW_SUPPLY",
+      label: "Revoir les approvisionnements",
+      href: `/dashboard/projets/${projectId}#tab-approvisionnements`,
+      stepId: "approvisionnements",
+      reason: "SUPPLY_SOURCE_DRIFT",
     };
   }
 
@@ -483,6 +496,8 @@ export function computeProjectPreparationState(input: {
   notices?: SiteDocLike[];
   /** Besoins Approvisionnements actifs (MaterialRequirement non CANCELLED). */
   activeSupplyNeedCount?: number;
+  /** Besoins actifs dont sourceDrift n’est plus NONE (quantités non réécrites). */
+  driftedSupplyNeedCount?: number;
 
   quoteSyncByQuoteId?: Record<string, PreparationQuoteSync>;
   studyVersionById?: Record<string, number | null>;
@@ -574,6 +589,16 @@ export function computeProjectPreparationState(input: {
           studyId: plan.studyId,
           studyVersionAtGeneration: plan.studyVersionAtGeneration ?? null,
           startDateLabel: plan.startDateLabel ?? null,
+          quoteId: plan.quoteId ?? null,
+          createdAt: plan.createdAt ?? null,
+          quoteUpdatedAt: plan.quoteId
+            ? input.quotes.find((q) => q.id === plan.quoteId)?.updatedAt ?? null
+            : null,
+          quoteVersionAtGeneration: plan.quoteVersionAtGeneration ?? null,
+          currentQuoteVersion: plan.quoteId
+            ? input.quotes.find((q) => q.id === plan.quoteId)?.versionNumber ??
+              null
+            : null,
         }
       : null,
     planStudyVersion,
@@ -659,18 +684,26 @@ export function computeProjectPreparationState(input: {
   };
 
   const supplyCount = Math.max(0, Number(input.activeSupplyNeedCount) || 0);
+  const supplyDrift = Math.max(0, Number(input.driftedSupplyNeedCount) || 0);
   const supplyStep: PreparationStep = {
     id: "approvisionnements",
     label: "Approvisionnements",
-    kind: supplyCount > 0 ? "READY" : "ABSENT",
+    kind: supplyDrift > 0 ? "ACTION_REQUIRED" : supplyCount > 0 ? "READY" : "ABSENT",
     displayLabel:
-      supplyCount > 0
-        ? `${supplyCount} besoin${supplyCount > 1 ? "s" : ""}`
-        : "À préparer",
-    secondaryLabel: null,
+      supplyDrift > 0
+        ? supplyDrift > 1
+          ? `${supplyDrift} besoins à revoir`
+          : "1 besoin à revoir"
+        : supplyCount > 0
+          ? `${supplyCount} besoin${supplyCount > 1 ? "s" : ""}`
+          : "À préparer",
+    secondaryLabel:
+      supplyDrift > 0
+        ? "La source a changé — quantités et commandes inchangées"
+        : null,
     applicable: true,
-    /** Non bloquant si vide — prêt seulement quand des besoins existent. */
-    countsAsCompleted: supplyCount > 0,
+    /** Non bloquant si vide — prêt seulement quand des besoins existent et sont alignés. */
+    countsAsCompleted: supplyCount > 0 && supplyDrift === 0,
     hrefHint: `/dashboard/projets/${input.projectId}#tab-approvisionnements`,
   };
 

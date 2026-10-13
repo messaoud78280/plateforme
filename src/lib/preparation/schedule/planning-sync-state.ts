@@ -77,6 +77,59 @@ export function evaluatePlanningStudyVersionSync(input: {
   return { syncState: "A_JOUR", hint: null, versionGap: 0 };
 }
 
+function toEpochMs(value: Date | string | null | undefined): number | null {
+  if (value == null) return null;
+  const ms = value instanceof Date ? value.getTime() : Date.parse(value);
+  return Number.isFinite(ms) ? ms : null;
+}
+
+/**
+ * Détection lecture seule : un devis lié a bougé après la génération du planning.
+ * Ne réécrit ni durées, ni quantités, ni le plan.
+ *
+ * - pas de devis rattaché → pas d’alerte
+ * - version courante > version figée à la génération → à vérifier
+ * - même version (ou version inconnue) mais devis modifié après createdAt du plan → à vérifier
+ */
+export function evaluatePlanningQuoteDrift(input: {
+  hasPlan: boolean;
+  quoteLinked: boolean;
+  planGeneratedAt?: Date | string | null;
+  quoteUpdatedAt?: Date | string | null;
+  quoteVersionAtGeneration?: number | null;
+  currentQuoteVersion?: number | null;
+}): { stale: boolean; hint: string | null } {
+  if (!input.hasPlan || !input.quoteLinked) {
+    return { stale: false, hint: null };
+  }
+
+  const generated = input.quoteVersionAtGeneration;
+  const current = input.currentQuoteVersion;
+  if (
+    generated != null &&
+    current != null &&
+    Number.isFinite(Number(generated)) &&
+    Number.isFinite(Number(current)) &&
+    Number(current) > Number(generated)
+  ) {
+    return {
+      stale: true,
+      hint: `Le devis a été modifié (v${Number(current)}, planning généré sur v${Number(generated)}). Vérifiez le planning avant de l’utiliser.`,
+    };
+  }
+
+  const planMs = toEpochMs(input.planGeneratedAt);
+  const quoteMs = toEpochMs(input.quoteUpdatedAt);
+  if (planMs != null && quoteMs != null && quoteMs > planMs) {
+    return {
+      stale: true,
+      hint: "Le devis a été modifié après la génération de ce planning. Vérifiez le planning avant de l’utiliser.",
+    };
+  }
+
+  return { stale: false, hint: null };
+}
+
 /** Vrai si le planning doit être présenté comme « modification disponible ». */
 export function isPlanningModificationDisponible(input: {
   hasPlan: boolean;

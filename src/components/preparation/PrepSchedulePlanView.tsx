@@ -271,6 +271,10 @@ export function PrepSchedulePlanView({
     studyVersionAtGeneration: plan.studyVersionAtGeneration,
     currentStudyVersion: plan.study.version,
     startDateLabel: formatStartFr(plan.startDate),
+    quoteLinked: Boolean(plan.quote),
+    planGeneratedAt: plan.createdAt,
+    quoteUpdatedAt: plan.quote?.updatedAt,
+    currentQuoteVersion: plan.quote?.versionNumber,
   });
 
   const s = vm.summary;

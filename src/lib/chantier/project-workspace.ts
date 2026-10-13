@@ -19,7 +19,10 @@ import {
   resolveSchedulePlanForScope,
   workspaceOpenOrGenerateLabel,
 } from "@/lib/chantier/resolve-workspace-entities";
-import { evaluatePlanningStudyVersionSync } from "@/lib/preparation/schedule/planning-sync-state";
+import {
+  evaluatePlanningQuoteDrift,
+  evaluatePlanningStudyVersionSync,
+} from "@/lib/preparation/schedule/planning-sync-state";
 import {
   evaluateQuoteStudySyncState,
   hasQuantityDiffAgainstTransfer,
@@ -375,6 +378,8 @@ function buildScopeCards(input: {
     isDemonstration: boolean;
     status: string;
     scopeId: string | null;
+    updatedAt?: Date | null;
+    currentVersion?: { versionNumber: number; updatedAt: Date } | null;
   } | null;
   /** Nombre total de devis rattachés au lot (référence + autres). */
   quotesCount?: number;
@@ -390,6 +395,8 @@ function buildScopeCards(input: {
     startDate: Date | null;
     endDateBase: Date | null;
     studyVersionAtGeneration: number;
+    quoteId?: string | null;
+    createdAt?: Date | null;
   } | null;
   /**
    * Version du PrepStudy réellement lié au planning (plan.studyId).
@@ -531,6 +538,22 @@ function buildScopeCards(input: {
       level: "warning",
       message: planningHint ?? "Alignement métré / planning à vérifier.",
     });
+  } else if (plan && quote && plan.quoteId && quote.id === plan.quoteId) {
+    const quoteDrift = evaluatePlanningQuoteDrift({
+      hasPlan: true,
+      quoteLinked: true,
+      planGeneratedAt: plan.createdAt,
+      quoteUpdatedAt: quote.currentVersion?.updatedAt ?? quote.updatedAt,
+      currentQuoteVersion: quote.currentVersion?.versionNumber ?? null,
+    });
+    if (quoteDrift.stale) {
+      alerts.push({
+        level: "warning",
+        message:
+          quoteDrift.hint ??
+          "Le devis a été modifié après ce planning. Vérifiez le planning avant de l’utiliser.",
+      });
+    }
   }
 
   if (study && !quote) {
@@ -845,7 +868,7 @@ async function getProjectWorkspaceUncached(
   if (!project) return null;
 
   // Vague 1 — lectures indépendantes (plus de cascade scopes→studies→quotes→plans)
-  const [scopes, studies, plans, followUpSheets, siteDocs, visitsByProject, supplyNeedCount] =
+  const [scopes, studies, plans, followUpSheets, siteDocs, visitsByProject, supplyNeedCount, supplyDriftCount] =
     await Promise.all([
       prisma.projectScope.findMany({
         where: { projectId, organizationId: orgId, status: "ACTIVE" },
@@ -877,6 +900,7 @@ async function getProjectWorkspaceUncached(
           startDate: true,
           endDateBase: true,
           studyVersionAtGeneration: true,
+          quoteId: true,
           createdAt: true,
         },
         orderBy: [
@@ -918,6 +942,14 @@ async function getProjectWorkspaceUncached(
           status: { not: "CANCELLED" },
         },
       }),
+      prisma.materialRequirement.count({
+        where: {
+          organizationId: orgId,
+          projectId,
+          status: { not: "CANCELLED" },
+          sourceDrift: { not: "NONE" },
+        },
+      }),
     ]);
 
   const studyIds = studies.map((s) => s.id);
@@ -940,6 +972,8 @@ async function getProjectWorkspaceUncached(
       scopeId: true,
       status: true,
       currentVersionId: true,
+      updatedAt: true,
+      currentVersion: { select: { versionNumber: true, updatedAt: true } },
     },
     orderBy: { updatedAt: "desc" },
   });
@@ -1252,7 +1286,16 @@ async function getProjectWorkspaceUncached(
       version: s.version,
     })),
     scopes,
-    quotes,
+    quotes: quotes.map((q) => ({
+      id: q.id,
+      status: q.status,
+      isDemonstration: q.isDemonstration,
+      projectId: q.projectId,
+      sourcePrepStudyId: q.sourcePrepStudyId,
+      subject: q.subject,
+      updatedAt: q.currentVersion?.updatedAt ?? q.updatedAt,
+      versionNumber: q.currentVersion?.versionNumber ?? null,
+    })),
     plans: plans.map((p) => ({
       id: p.id,
       studyId: p.studyId,
@@ -1260,6 +1303,8 @@ async function getProjectWorkspaceUncached(
       status: p.status,
       revisionKind: p.revisionKind,
       studyVersionAtGeneration: p.studyVersionAtGeneration,
+      quoteId: p.quoteId,
+      createdAt: p.createdAt,
       startDateLabel: p.startDate
         ? fmtShortFr(asIso(p.startDate))
         : null,
@@ -1288,6 +1333,7 @@ async function getProjectWorkspaceUncached(
         title: d.title,
       })),
     activeSupplyNeedCount: supplyNeedCount,
+    driftedSupplyNeedCount: supplyDriftCount,
     studyVersionById: Object.fromEntries(
       studies.map((s) => [s.id, s.version as number | null]),
     ),
@@ -1475,7 +1521,9 @@ async function getProjectWorkspaceUncached(
     actionLabel: globalPlan
       ? globalCore.planning.needsUpdate
         ? "Mettre à jour avec ChatGPT"
-        : "Ouvrir"
+        : globalCore.planning.syncState === "A_VERIFIER"
+          ? "Vérifier le planning"
+          : "Ouvrir"
       : globalStudy
         ? "Préparer avec ChatGPT"
         : "Métré requis",
@@ -1483,13 +1531,7 @@ async function getProjectWorkspaceUncached(
     syncHint:
       globalCore.planning.needsUpdate ||
       globalCore.planning.syncState === "A_VERIFIER"
-        ? evaluatePlanningStudyVersionSync({
-            hasPlan: !!globalPlan,
-            currentStudyVersion: globalPlan
-              ? studyById(globalPlan.studyId)?.version ?? null
-              : null,
-            studyVersionAtGeneration: globalPlan?.studyVersionAtGeneration,
-          }).hint
+        ? globalCore.planning.syncHint
         : "Un seul planning pour tout le chantier — les lots sont des phases.",
     isReference: true,
   };
@@ -1571,7 +1613,9 @@ async function getProjectWorkspaceUncached(
       actionLabel: globalPlan
         ? globalCore.planning.needsUpdate
           ? "Mettre à jour avec ChatGPT"
-          : "Ouvrir"
+          : globalCore.planning.syncState === "A_VERIFIER"
+            ? "Vérifier le planning"
+            : "Ouvrir"
         : globalStudy
           ? isFeatureEnabled("planningV2Ui")
             ? "Préparer (Planning V2)"
@@ -1586,17 +1630,17 @@ async function getProjectWorkspaceUncached(
     {
       id: "approvisionnements",
       label: "Approvisionnements",
-      title:
-        supplyNeedCount > 0
-          ? `${supplyNeedCount} besoin${supplyNeedCount > 1 ? "s" : ""}`
-          : "À préparer",
+      title: prepState.supply.displayLabel,
       detail:
-        supplyNeedCount > 0
-          ? "Besoins chantier (matériaux, locations, évacuations…)"
-          : "Accessible sans planning — ajoutez les besoins chantier",
+        supplyDriftCount > 0
+          ? "La source a changé. Les quantités validées et les commandes restent inchangées."
+          : supplyNeedCount > 0
+            ? "Besoins chantier (matériaux, locations, évacuations…)"
+            : "Accessible sans planning — ajoutez les besoins chantier",
       href: `/dashboard/projets/${projectId}#tab-approvisionnements`,
       ready: prepState.supply.countsAsCompleted,
-      actionLabel: supplyNeedCount > 0 ? "Ouvrir" : "Préparer",
+      actionLabel:
+        supplyDriftCount > 0 ? "Revoir" : supplyNeedCount > 0 ? "Ouvrir" : "Préparer",
       primaryAction: "open",
     },
     {

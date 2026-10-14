@@ -1,37 +1,56 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { prisma } from "@/lib/prisma";
-import { deleteChantierProjectStorage } from "@/lib/chantier-dossier/delete-project-storage";
-import { DOCUMENTS_BUCKET, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
+const AUTH_ONLY_RELATIONS = new Set(["accounts", "sessions"]);
 
-/** Supprime les fichiers Storage liés aux chantiers et documents du client. */
-export async function deleteClientStorageFiles(
-  supabase: SupabaseClient,
-  clientId: string
-): Promise<void> {
-  const projects = await prisma.project.findMany({
-    where: { clientId },
-    select: { id: true },
-  });
-  for (const p of projects) {
-    await deleteChantierProjectStorage(supabase, p.id);
+const BLOCKER_LABELS: Record<string, string> = {
+  organizationsOwned: "organisation",
+  organizationMemberships: "appartenance à une organisation",
+  projects: "chantier",
+  tasks: "mission",
+  documents: "document",
+  chantierFiles: "pièce chantier",
+  commercialQuotesCreated: "devis commercial",
+  commercialInvoicesCreated: "facture commerciale",
+  commercialProgressStatementsCreated: "situation de travaux",
+  purchaseOrdersRequested: "bon de commande",
+  siteVisitsCreated: "visite chantier",
+  followUpSheetsOwned: "fiche de suivi",
+  reportsAuthored: "rapport",
+};
+
+export type ClientDeletionBlocker = {
+  relation: string;
+  label: string;
+  count: number;
+};
+
+/**
+ * Une suppression physique n'est autorisée que pour un compte vierge.
+ * Les relations NextAuth sont exclues : elles n'ont pas de valeur métier
+ * et doivent disparaître avec le compte.
+ */
+export function clientDeletionBlockersFromCounts(
+  counts: Record<string, number>,
+  options?: { hasFollowUpAlertSettings?: boolean },
+): ClientDeletionBlocker[] {
+  const blockers = Object.entries(counts)
+    .filter(
+      ([relation, count]) =>
+        !AUTH_ONLY_RELATIONS.has(relation) &&
+        Number.isFinite(count) &&
+        count > 0,
+    )
+    .map(([relation, count]) => ({
+      relation,
+      label: BLOCKER_LABELS[relation] ?? "historique métier",
+      count,
+    }));
+
+  if (options?.hasFollowUpAlertSettings) {
+    blockers.push({
+      relation: "followUpAlertSettings",
+      label: "paramétrage de suivi",
+      count: 1,
+    });
   }
 
-  const documents = await prisma.document.findMany({
-    where: { clientId },
-    select: { fileUrl: true },
-  });
-  const paths = documents
-    .map((d) => extractStoragePathFromUrl(d.fileUrl, DOCUMENTS_BUCKET))
-    .filter((p): p is string => Boolean(p));
-
-  if (paths.length === 0) return;
-
-  const chunkSize = 50;
-  for (let i = 0; i < paths.length; i += chunkSize) {
-    const chunk = paths.slice(i, i + chunkSize);
-    const { error } = await supabase.storage.from(DOCUMENTS_BUCKET).remove(chunk);
-    if (error) {
-      console.error("Suppression Storage documents client:", error.message);
-    }
-  }
+  return blockers.sort((a, b) => a.label.localeCompare(b.label));
 }

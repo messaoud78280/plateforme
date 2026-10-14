@@ -15,6 +15,7 @@ import { loadImpactSubgraph } from "@/lib/bework-patch/impact/load-subgraph";
 import { evaluatePatchSourceProtection } from "@/lib/bework-patch/impact/source-protection";
 import { simulatePlanFromQuantityMap } from "@/lib/bework-patch/impact/simulate-planning";
 import type { BeworkPatchV1 } from "@/lib/bework-patch/types";
+import type { BeworkPatchIssue } from "@/lib/bework-patch/errors";
 import type { AnalyzePatchImpactResult } from "@/lib/bework-patch/impact/types";
 import {
   buildFingerprintPayload,
@@ -60,6 +61,7 @@ export type CommitUniversalResult =
       ok: false;
       error: string;
       code: string;
+      errors?: BeworkPatchIssue[];
       impact?: AnalyzePatchImpactResult;
     };
 
@@ -77,6 +79,7 @@ export async function commitUniversalPatch(input: {
       ok: false,
       error: parsed.errors[0]?.message ?? "Patch invalide",
       code: parsed.errors[0]?.code ?? "INVALID_JSON",
+      errors: parsed.errors,
     };
   }
   const patch = parsed.patch;

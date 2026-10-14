@@ -66,7 +66,16 @@ export async function POST(req: Request) {
     });
     if (!context) {
       return NextResponse.json(
-        { error: "Contexte introuvable (projet / entité / organisation)" },
+        {
+          error:
+            section === "FOLLOW_UP"
+              ? "Aucune fiche de suivi applicable n’est liée à ce planning. Le pipeline ne propose pas d’opération non prise en charge au commit."
+              : "Contexte introuvable (projet / entité / organisation)",
+          code:
+            section === "FOLLOW_UP"
+              ? "PATCH_TARGET_NOT_COMMITTABLE"
+              : "CONTEXT_NOT_FOUND",
+        },
         { status: 404 },
       );
     }

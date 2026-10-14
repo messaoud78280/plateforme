@@ -5,6 +5,7 @@ import {
   intentsForSection,
   supportedOperationsForSection,
 } from "@/lib/bework-patch/operations-catalog";
+import { buildPatchOutputContract } from "@/lib/bework-patch/patch-contract";
 import {
   BEWORK_CONTEXT_FORMAT,
   BEWORK_CONTEXT_SCHEMA_VERSION,
@@ -67,6 +68,13 @@ export function buildChatgptContextSkeleton(input: {
   data?: Record<string, unknown>;
   quoteItems?: BeworkContextRelationshipQuoteItem[];
 }): BeworkChatgptContextV1 {
+  const patchContract = buildPatchOutputContract({
+    section: input.section,
+    projectId: input.project?.id ?? null,
+    entityId: input.target.id,
+    baseVersion: input.target.version,
+    data: input.data,
+  });
   return {
     type: BEWORK_CONTEXT_FORMAT,
     schema_version: BEWORK_CONTEXT_SCHEMA_VERSION,
@@ -80,6 +88,10 @@ export function buildChatgptContextSkeleton(input: {
     supported_change_intents: intentsForSection(input.section),
     supported_operations: supportedOperationsForSection(input.section),
     expected_output: BEWORK_PATCH_FORMAT,
+    patch_contract: patchContract,
+    patch_template: patchContract.patch_template,
+    valid_patch_example: patchContract.valid_patch_example,
+    validation_rules: patchContract.validation_rules,
   };
 }
 

@@ -22,6 +22,8 @@ const SUPPLY_ANTI_INVENTION_RULES = [
   "Priorité géographique : proximité pour béton, granulats, évacuation, engins, locations, transport lourd. Produits standards : livraisons nationales acceptables. Aucune enseigne hardcodée.",
   "Hypothèses (ex. pelle 8 t / 2 j) : signaler is_hypothesis: true — jamais comme certitude.",
   "Le prix de vente client (devis) n’est JAMAIS une preuve de prix fournisseur.",
+  "Un même patch peut contenir plusieurs add_supply_need. Chaque besoin doit rester distinct et traçable.",
+  "add_supply_offer exige un requirement_id déjà présent dans supply_needs. Après création de nouveaux besoins, valider le premier patch puis recopier le contexte avant de proposer leurs offres.",
   "Sortie attendue : bework_patch_v1 uniquement (pas de format supply dédié).",
 ].join("\n");
 
@@ -426,7 +428,7 @@ export async function buildSupplyContext(
   if (purpose === "analyze_product_url" && productUrl) {
     focusInstructions.push(
       `ANALYSE URL PRODUIT (manuelle ChatGPT) : ${productUrl}`,
-      "Consultez réellement cette URL. Extrtrayez uniquement ce qui est visible : fournisseur, produit, référence, prix, unité, HT/TTC, conditionnement, disponibilité, délai, frais.",
+      "Consultez réellement cette URL. Extrayez uniquement ce qui est visible : fournisseur, produit, référence, prix, unité, HT/TTC, conditionnement, disponibilité, délai, frais.",
       "Ne créez aucune offre WEB_VERIFIED sans sourceUrl = cette URL, prix réellement observé et observed_at du relevé.",
       "Si le prix n’est pas lisible : unit_price = null. Ne jamais inventer.",
     );

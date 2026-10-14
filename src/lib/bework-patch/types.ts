@@ -829,6 +829,65 @@ export type BeworkSupportedOperationSpec = {
   }>;
 };
 
+/**
+ * Contrat de sortie inclus dans chaque bework_chatgpt_context_v1.
+ * Additif en V1 : il documente le parser/commit sans changer le format.
+ */
+export type BeworkPatchOperationOutputContract = {
+  op: BeworkPatchOpName;
+  commit_supported: true;
+  target: {
+    type: "object";
+    entity_types: BeworkEntityType[];
+    required: string[];
+    one_of?: string[][];
+  };
+  payload: {
+    key:
+      | "changes"
+      | "line"
+      | "task"
+      | "measurement"
+      | "need"
+      | "offer"
+      | "supplier"
+      | null;
+    type: "object" | null;
+    required_fields: string[];
+    allowed_fields: string[];
+    rule?: string;
+  };
+  compatible_intents: BeworkChangeIntent[];
+};
+
+export type BeworkPatchOutputContractV1 = {
+  format: typeof BEWORK_PATCH_FORMAT;
+  schema_version: typeof BEWORK_PATCH_SCHEMA_VERSION;
+  root: {
+    type: "object";
+    required: readonly [
+      "type",
+      "schema_version",
+      "patch_id",
+      "origin",
+      "change_intent",
+      "operations",
+    ];
+    additional_root_target_forbidden: true;
+  };
+  origin: {
+    meaning: string;
+    type: "object";
+    required: string[];
+    exact_value: BeworkPatchOrigin;
+    forbidden_examples: readonly ["CHATGPT"];
+  };
+  operations: BeworkPatchOperationOutputContract[];
+  validation_rules: string[];
+  patch_template: Record<string, unknown>;
+  valid_patch_example: Record<string, unknown>;
+};
+
 export type BeworkChatgptContextV1 = {
   type: typeof BEWORK_CONTEXT_FORMAT;
   schema_version: typeof BEWORK_CONTEXT_SCHEMA_VERSION;
@@ -884,4 +943,11 @@ export type BeworkChatgptContextV1 = {
   supported_change_intents: BeworkChangeIntent[];
   supported_operations: BeworkSupportedOperationSpec[];
   expected_output: typeof BEWORK_PATCH_FORMAT;
+  /** Contrat exécutable réellement accepté par preview + commit. */
+  patch_contract: BeworkPatchOutputContractV1;
+  /** Raccourci explicite pour éviter la confusion origin: "CHATGPT". */
+  patch_template: Record<string, unknown>;
+  /** Exemple structurel de la section ; les valeurs métier restent à valider. */
+  valid_patch_example: Record<string, unknown>;
+  validation_rules: string[];
 };

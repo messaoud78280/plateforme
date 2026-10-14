@@ -13,6 +13,11 @@ import {
 } from "@/lib/bework-patch/operations-catalog";
 import { normalizeDependsOnJson, parseAddLinePayload, parseUpdateLineTechChanges } from "@/lib/bework-patch/operation-contracts";
 import {
+  BEWORK_PATCH_ORIGIN_MEANING,
+  BEWORK_PATCH_ORIGIN_REQUIRED,
+  BEWORK_PATCH_ROOT_REQUIRED,
+} from "@/lib/bework-patch/patch-contract";
+import {
   BEWORK_CHANGE_INTENTS,
   BEWORK_ENTITY_TYPES,
   BEWORK_PATCH_FORMAT,
@@ -73,7 +78,12 @@ function parseRawInput(rawInput: unknown): { obj: Record<string, unknown> | null
       if (!isObj(parsed)) {
         return {
           obj: null,
-          issues: [err("INVALID_JSON", "$", "Le JSON racine doit être un objet")],
+          issues: [
+            err("INVALID_JSON", "$", "Le JSON racine doit être un objet", {
+              expected: `objet { ${BEWORK_PATCH_ROOT_REQUIRED.join(", ")} }`,
+              received: parsed,
+            }),
+          ],
         };
       }
       return { obj: parsed, issues };
@@ -101,6 +111,10 @@ function parseSection(v: unknown, path: string, issues: BeworkPatchIssue[]): Bew
         "INVALID_SECTION",
         path,
         `Section invalide « ${s ?? "?"} ». Attendu : ${BEWORK_PATCH_SECTIONS.join(", ")}`,
+        {
+          expected: BEWORK_PATCH_SECTIONS.join(" | "),
+          received: v,
+        },
       ),
     );
     return null;
@@ -116,6 +130,10 @@ function parseIntent(v: unknown, path: string, issues: BeworkPatchIssue[]): Bewo
         "UNSUPPORTED_INTENT",
         path,
         `change_intent invalide « ${s ?? "?"} »`,
+        {
+          expected: BEWORK_CHANGE_INTENTS.join(" | "),
+          received: v,
+        },
       ),
     );
     return null;
@@ -126,7 +144,12 @@ function parseIntent(v: unknown, path: string, issues: BeworkPatchIssue[]): Bewo
 function parseEntityType(v: unknown, path: string, issues: BeworkPatchIssue[]): BeworkEntityType | null {
   const s = str(v, 60);
   if (!s || !(BEWORK_ENTITY_TYPES as readonly string[]).includes(s)) {
-    issues.push(err("INVALID_TARGET", path, `entity_type invalide « ${s ?? "?"} »`));
+    issues.push(
+      err("INVALID_TARGET", path, `entity_type invalide « ${s ?? "?"} »`, {
+        expected: BEWORK_ENTITY_TYPES.join(" | "),
+        received: v,
+      }),
+    );
     return null;
   }
   return s as BeworkEntityType;
@@ -138,7 +161,12 @@ function parseTarget(
   issues: BeworkPatchIssue[],
 ): BeworkPatchTargetBase | null {
   if (!isObj(raw)) {
-    issues.push(err("INVALID_TARGET", path, "target doit être un objet"));
+    issues.push(
+      err("INVALID_TARGET", path, "target doit être un objet", {
+        expected: "objet avec entity_type et identifiants exigés par l'opération",
+        received: raw,
+      }),
+    );
     return null;
   }
   const entity_type = parseEntityType(raw.entity_type ?? raw.entityType, `${path}.entity_type`, issues);
@@ -207,7 +235,12 @@ function requireTargetIds(
     const v = target[key];
     if (v == null || v === "") {
       issues.push(
-        err("INVALID_TARGET", `${path}.${key}`, `Champ target.${String(key)} obligatoire`),
+        err(
+          "INVALID_TARGET",
+          `${path}.${key}`,
+          `Champ target.${String(key)} obligatoire`,
+          { expected: "chaîne non vide", received: v },
+        ),
       );
       ok = false;
     }
@@ -222,7 +255,12 @@ function parseChangesObject(
   issues: BeworkPatchIssue[],
 ): Record<string, unknown> | null {
   if (!isObj(raw)) {
-    issues.push(err("INVALID_FIELD", path, "changes doit être un objet"));
+    issues.push(
+      err("INVALID_FIELD", path, "changes doit être un objet", {
+        expected: `objet { ${allowed.join(", ")} }`,
+        received: raw,
+      }),
+    );
     return null;
   }
   const out: Record<string, unknown> = {};
@@ -284,6 +322,10 @@ function parseChangesObject(
           "INVALID_FIELD",
           `${path}.${k}`,
           `Champ « ${k} » non autorisé. Autorisés : ${allowed.join(", ") || "(aucun)"}`,
+          {
+            expected: allowed.join(" | ") || "aucun champ",
+            received: v,
+          },
         ),
       );
       continue;
@@ -306,13 +348,26 @@ function parseOperation(
 ): BeworkPatchOperation | null {
   const path = `operations[${index}]`;
   if (!isObj(raw)) {
-    issues.push(err("UNKNOWN_OPERATION", path, "Opération non objet"));
+    issues.push(
+      err("UNKNOWN_OPERATION", path, "Opération non objet", {
+        expected: "objet { op, target, payload }",
+        received: raw,
+      }),
+    );
     return null;
   }
   const opName = str(raw.op ?? raw.operation, 60);
   if (!opName || !(opName in OPERATION_CATALOG)) {
     issues.push(
-      err("UNKNOWN_OPERATION", `${path}.op`, `Opération inconnue « ${opName ?? "?"} »`),
+      err(
+        "UNKNOWN_OPERATION",
+        `${path}.op`,
+        `Opération inconnue « ${opName ?? "?"} »`,
+        {
+          expected: Object.keys(OPERATION_CATALOG).join(" | "),
+          received: raw.op ?? raw.operation,
+        },
+      ),
     );
     return null;
   }
@@ -334,6 +389,10 @@ function parseOperation(
         "INVALID_TARGET",
         `${path}.target.entity_type`,
         `${op} n'accepte pas entity_type=${target.entity_type}`,
+        {
+          expected: catalog.entity_types.join(" | "),
+          received: target.entity_type,
+        },
       ),
     );
     return null;
@@ -1650,6 +1709,7 @@ export function parseBeworkPatch(rawInput: unknown): ParseBeworkPatchResult {
         "INVALID_PATCH_TYPE",
         "type",
         `type attendu « ${BEWORK_PATCH_FORMAT} », reçu « ${type ?? "?"} »`,
+        { expected: BEWORK_PATCH_FORMAT, received: obj.type ?? obj.format },
       ),
     );
   }
@@ -1661,6 +1721,10 @@ export function parseBeworkPatch(rawInput: unknown): ParseBeworkPatchResult {
         "UNSUPPORTED_SCHEMA_VERSION",
         "schema_version",
         `schema_version=${schemaVersion ?? "?"} non supportée (attendu ${BEWORK_PATCH_SCHEMA_VERSION})`,
+        {
+          expected: String(BEWORK_PATCH_SCHEMA_VERSION),
+          received: obj.schema_version ?? obj.schemaVersion,
+        },
       ),
     );
   }
@@ -1668,12 +1732,41 @@ export function parseBeworkPatch(rawInput: unknown): ParseBeworkPatchResult {
   const patchId = str(obj.patch_id ?? obj.patchId, 120);
   if (!patchId || patchId.length < 4) {
     errors.push(
-      err("INVALID_PATCH_ID", "patch_id", "patch_id requis (min. 4 caractères)"),
+      err("INVALID_PATCH_ID", "patch_id", "patch_id requis (min. 4 caractères)", {
+        expected: "chaîne unique de 4 à 120 caractères",
+        received: obj.patch_id ?? obj.patchId,
+      }),
+    );
+  }
+
+  if ("target" in obj) {
+    errors.push(
+      err(
+        "INVALID_TARGET",
+        "target",
+        "target n’est pas autorisé à la racine. La cible/version racine doit être décrite dans origin ; chaque opération possède ensuite son propre target.",
+        {
+          expected: "origin à la racine + operations[].target",
+          received: obj.target,
+        },
+      ),
     );
   }
 
   if (!isObj(obj.origin)) {
-    errors.push(err("INVALID_TARGET", "origin", "origin obligatoire"));
+    errors.push(
+      err(
+        "INVALID_TARGET",
+        "origin",
+        `${BEWORK_PATCH_ORIGIN_MEANING} Reçu : ${
+          obj.origin === "CHATGPT" ? "« CHATGPT »" : "valeur non objet"
+        }.`,
+        {
+          expected: `objet { ${BEWORK_PATCH_ORIGIN_REQUIRED.join(", ")} }`,
+          received: obj.origin,
+        },
+      ),
+    );
     return { ok: false, errors, warnings };
   }
 
@@ -1686,7 +1779,12 @@ export function parseBeworkPatch(rawInput: unknown): ParseBeworkPatchResult {
   const baseVersion = num(obj.origin.base_version ?? obj.origin.baseVersion);
   const visitStandalone = section === "VISIT";
   if (!projectId && !visitStandalone) {
-    errors.push(err("INVALID_TARGET", "origin.project_id", "project_id requis"));
+    errors.push(
+      err("INVALID_TARGET", "origin.project_id", "project_id requis", {
+        expected: "ID du chantier copié depuis patch_contract.origin.exact_value",
+        received: obj.origin.project_id ?? obj.origin.projectId,
+      }),
+    );
   }
   if (!entityId) {
     errors.push(
@@ -1696,12 +1794,23 @@ export function parseBeworkPatch(rawInput: unknown): ParseBeworkPatchResult {
         visitStandalone
           ? "entity_id / visit_id requis pour VISIT"
           : "entity_id requis",
+        {
+          expected: "ID de target copié depuis patch_contract.origin.exact_value",
+          received:
+            obj.origin.entity_id ??
+            obj.origin.entityId ??
+            obj.origin.visit_id ??
+            obj.origin.visitId,
+        },
       ),
     );
   }
   if (baseVersion == null || !Number.isInteger(baseVersion) || baseVersion < 1) {
     errors.push(
-      err("VERSION_CONFLICT", "origin.base_version", "base_version entier ≥ 1 requis"),
+      err("VERSION_CONFLICT", "origin.base_version", "base_version entier ≥ 1 requis", {
+        expected: "entier égal à target.version du contexte",
+        received: obj.origin.base_version ?? obj.origin.baseVersion,
+      }),
     );
   }
 
@@ -1714,7 +1823,12 @@ export function parseBeworkPatch(rawInput: unknown): ParseBeworkPatchResult {
   }
 
   if (!Array.isArray(obj.operations) || obj.operations.length === 0) {
-    errors.push(err("EMPTY_OPERATIONS", "operations", "Au moins une opération requise"));
+    errors.push(
+      err("EMPTY_OPERATIONS", "operations", "Au moins une opération requise", {
+        expected: "tableau non vide d'opérations listées dans patch_contract.operations",
+        received: obj.operations,
+      }),
+    );
   }
 
   if (

@@ -30,6 +30,7 @@ import {
   isNoticeCommitSupportedOp,
   NOTICE_UPDATE_ALLOWED_FIELDS,
 } from "@/lib/bework-patch/commit/notice-ops";
+import { isSupplyCommitSupportedOp } from "@/lib/bework-patch/commit/supply-ops";
 import { fieldContractsForOp } from "@/lib/bework-patch/operation-contracts";
 
 const ALL_TECHNICAL: BeworkChangeIntent[] = [
@@ -405,14 +406,7 @@ export function supportedOperationsForSection(
   for (const [op, cat] of Object.entries(OPERATION_CATALOG) as Array<
     [BeworkPatchOpName, (typeof OPERATION_CATALOG)[BeworkPatchOpName]]
   >) {
-    if (!cat.sections.includes(section)) continue;
-    // Contrat honnête : n'exposer que les ops réellement commitables.
-    if (section === "PLANNING" && !isPlanningCommitSupportedOp(op)) continue;
-    if (section === "QUOTE" && !isQuoteCommitSupportedOp(op)) continue;
-    if (section === "VISIT" && !isVisitCommitSupportedOp(op)) continue;
-    if (section === "FOLLOW_UP" && !isFollowUpCommitSupportedOp(op)) continue;
-    if (section === "REPORT" && !isReportCommitSupportedOp(op)) continue;
-    if (section === "NOTICE" && !isNoticeCommitSupportedOp(op)) continue;
+    if (!isOperationCommitSupportedForSection(section, op)) continue;
     out.push({
       op,
       entity_types: cat.entity_types,
@@ -422,6 +416,43 @@ export function supportedOperationsForSection(
     });
   }
   return out;
+}
+
+const TAKEOFF_COMMIT_SUPPORTED_OPS = new Set<BeworkPatchOpName>([
+  "update_parameter",
+  "update_line",
+  "add_line",
+  "delete_line",
+  "update_hypothesis",
+]);
+
+/**
+ * Source unique « annoncé = committable » pour export, tests et documentation.
+ */
+export function isOperationCommitSupportedForSection(
+  section: BeworkPatchSection,
+  op: BeworkPatchOpName,
+): boolean {
+  const catalog = OPERATION_CATALOG[op];
+  if (!catalog.sections.includes(section)) return false;
+  switch (section) {
+    case "TAKEOFF":
+      return TAKEOFF_COMMIT_SUPPORTED_OPS.has(op);
+    case "QUOTE":
+      return isQuoteCommitSupportedOp(op);
+    case "PLANNING":
+      return isPlanningCommitSupportedOp(op);
+    case "VISIT":
+      return isVisitCommitSupportedOp(op);
+    case "FOLLOW_UP":
+      return isFollowUpCommitSupportedOp(op);
+    case "REPORT":
+      return isReportCommitSupportedOp(op);
+    case "NOTICE":
+      return isNoticeCommitSupportedOp(op);
+    case "SUPPLY":
+      return isSupplyCommitSupportedOp(op);
+  }
 }
 
 export function intentsForSection(section: BeworkPatchSection): BeworkChangeIntent[] {

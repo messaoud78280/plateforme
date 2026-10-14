@@ -71,14 +71,53 @@ export type BeworkPatchIssue = {
   path: string;
   message: string;
   severity: "error" | "warn";
+  /** Structure ou valeur attendue, exploitable par l'UI et ChatGPT. */
+  expected?: string;
+  /** Valeur reçue résumée, sans sérialiser de payload métier volumineux. */
+  received?: string;
 };
+
+type IssueDetails = {
+  expected?: string;
+  received?: unknown;
+};
+
+function summarizeReceived(value: unknown): string {
+  if (value === undefined) return "absent";
+  if (value === null) return "null";
+  if (typeof value === "string") {
+    const normalized = value.replace(/\s+/g, " ").trim();
+    return JSON.stringify(
+      normalized.length > 120 ? `${normalized.slice(0, 117)}…` : normalized,
+    );
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  if (Array.isArray(value)) return `array(${value.length})`;
+  if (typeof value === "object") {
+    const keys = Object.keys(value as Record<string, unknown>).slice(0, 12);
+    return `object{${keys.join(", ")}}`;
+  }
+  return typeof value;
+}
 
 export function err(
   code: BeworkPatchErrorCode,
   path: string,
   message: string,
+  details?: IssueDetails,
 ): BeworkPatchIssue {
-  return { code, path, message, severity: "error" };
+  return {
+    code,
+    path,
+    message,
+    severity: "error",
+    ...(details?.expected ? { expected: details.expected } : {}),
+    ...(details && "received" in details
+      ? { received: summarizeReceived(details.received) }
+      : {}),
+  };
 }
 
 export function warn(

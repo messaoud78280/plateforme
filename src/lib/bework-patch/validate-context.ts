@@ -150,6 +150,43 @@ export function validatePatchAgainstChatgptContext(
   const base = validatePatchContext(patch, snapshot);
   if (!base.ok) return base;
 
+  if (patch.origin.section !== context.section) {
+    return {
+      ok: false,
+      errors: [
+        err(
+          "INVALID_SECTION",
+          "origin.section",
+          `La section du patch (${patch.origin.section}) ne correspond pas au contexte exporté (${context.section}).`,
+          {
+            expected: context.section,
+            received: patch.origin.section,
+          },
+        ),
+      ],
+      warnings: base.warnings,
+      code: "INVALID",
+    };
+  }
+  if (patch.origin.entity_id !== context.target.id) {
+    return {
+      ok: false,
+      errors: [
+        err(
+          "INVALID_TARGET",
+          "origin.entity_id",
+          "L’entité d’origine du patch ne correspond pas à la cible du contexte exporté.",
+          {
+            expected: context.target.id,
+            received: patch.origin.entity_id,
+          },
+        ),
+      ],
+      warnings: base.warnings,
+      code: "INVALID",
+    };
+  }
+
   const warnings = [...base.warnings];
   for (const item of context.relationships.quote_items ?? []) {
     if (item.canonical_resolution.status === "PARTIAL") {

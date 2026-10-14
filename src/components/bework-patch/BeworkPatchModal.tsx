@@ -321,7 +321,26 @@ export function BeworkPatchModal({
         });
         setUserError(mapped);
         setTechDetail(
-          [data?.code, data?.error].filter(Boolean).join(" — ") ||
+          Array.isArray(data?.errors) && data.errors.length > 0
+            ? data.errors
+                .map(
+                  (issue: {
+                    path?: string;
+                    message?: string;
+                    expected?: string;
+                    received?: string;
+                  }) =>
+                    [
+                      issue.path,
+                      issue.message,
+                      issue.expected ? `attendu: ${issue.expected}` : null,
+                      issue.received ? `reçu: ${issue.received}` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" — "),
+                )
+                .join("\n")
+            : [data?.code, data?.error].filter(Boolean).join(" — ") ||
             `HTTP ${res.status}`,
         );
         return;
@@ -376,7 +395,26 @@ export function BeworkPatchModal({
         });
         setUserError(mapped);
         setTechDetail(
-          [data?.code, data?.error].filter(Boolean).join(" — ") ||
+          Array.isArray(data?.errors) && data.errors.length > 0
+            ? data.errors
+                .map(
+                  (issue: {
+                    path?: string;
+                    message?: string;
+                    expected?: string;
+                    received?: string;
+                  }) =>
+                    [
+                      issue.path,
+                      issue.message,
+                      issue.expected ? `attendu: ${issue.expected}` : null,
+                      issue.received ? `reçu: ${issue.received}` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" — "),
+                )
+                .join("\n")
+            : [data?.code, data?.error].filter(Boolean).join(" — ") ||
             `HTTP ${res.status}`,
         );
         if (data?.code === "PREVIEW_STALE" || data?.code === "VERSION_CONFLICT") {
@@ -799,7 +837,13 @@ export function BeworkPatchModal({
                   <ul className="mt-2 space-y-1">
                     {analysis.errors.map((e, i) => (
                       <li key={i} className="text-sm text-red-900">
+                        <span className="font-medium">{e.path}</span>
+                        {" — "}
                         {e.message}
+                        {e.expected && e.expected !== e.message
+                          ? ` Attendu : ${e.expected}.`
+                          : ""}
+                        {e.received ? ` Reçu : ${e.received}.` : ""}
                       </li>
                     ))}
                     {elig && !elig.ok && (

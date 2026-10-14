@@ -116,6 +116,7 @@ function noticePatch(overrides?: {
       "PLANNING",
       "QUOTE",
       "REPORT",
+      "SUPPLY",
       "TAKEOFF",
       "VISIT",
     ].sort(),

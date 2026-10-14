@@ -48,6 +48,7 @@ export async function POST(req: Request) {
         {
           error: result.error,
           code: result.code,
+          errors: result.errors ?? result.impact?.errors ?? [],
           impact: result.impact ?? null,
         },
         { status },

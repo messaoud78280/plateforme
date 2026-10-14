@@ -18,6 +18,7 @@ import { computeVisitContextVersion } from "@/lib/bework-context/visit-context-v
 import { listProjectPlanCandidateFiles } from "@/lib/preparation/plan-source";
 import { buildProjectContext } from "@/lib/bework-context/build-project-context";
 import { adaptTakeoffForChatgptContext } from "@/lib/bework-context/adapters";
+import { buildChatgptContextSkeleton } from "@/lib/bework-patch/context";
 import { applyEnrichTechSheetsToTakeoffContext } from "@/lib/bework-patch/tech-sheet-enrichment";
 import {
   resolveCurrentPrepStudy,
@@ -260,17 +261,11 @@ export async function buildTakeoffModifyContext(input: {
   // Snapshot n’embarque que les non-archivées — fallback minimal si ARCHIVED.
   let ctx = adaptTakeoffForChatgptContext(snap, studyRow.id);
   if (!ctx) {
-    ctx = {
-      type: BEWORK_CONTEXT_FORMAT,
-      schema_version: BEWORK_CONTEXT_SCHEMA_VERSION,
+    ctx = buildChatgptContextSkeleton({
       section: "TAKEOFF",
       project: {
         id: snap.project.id,
         title: snap.project.title,
-      },
-      organization: {
-        id: snap.organization.id,
-        name: snap.organization.name,
       },
       target: {
         entity_type: "PREP_STUDY",
@@ -280,10 +275,11 @@ export async function buildTakeoffModifyContext(input: {
         code: studyRow.title,
       },
       data: {},
-      relationships: { quote_items: [] },
-      supported_change_intents: [],
-      supported_operations: [],
-      expected_output: BEWORK_PATCH_FORMAT,
+      quoteItems: [],
+    });
+    ctx.organization = {
+      id: snap.organization.id,
+      name: snap.organization.name,
     };
   }
 

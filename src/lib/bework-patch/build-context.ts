@@ -44,10 +44,6 @@ import {
 } from "@/lib/bework-patch/operation-contracts";
 import { buildSupplyContext } from "@/lib/bework-patch/build-supply-context";
 
-function isObj(v: unknown): v is Record<string, unknown> {
-  return !!v && typeof v === "object" && !Array.isArray(v);
-}
-
 export type BeworkPatchContextPurpose =
   | "modify"
   | "enrich_tech_sheets"
@@ -591,9 +587,9 @@ async function buildFollowUpContext(
   // entityId peut être follow-up sheet OU planId (suivi chantier)
   const sheet = await prisma.followUpSheet.findFirst({
     where: {
-      id: entityId,
       organizationId: orgId,
       projectId: project.id,
+      OR: [{ id: entityId }, { prepSchedulePlanId: entityId }],
     },
     select: {
       id: true,
@@ -628,45 +624,9 @@ async function buildFollowUpContext(
     });
   }
 
-  // Fallback : plan de suivi
-  const plan = await prisma.prepSchedulePlan.findFirst({
-    where: { id: entityId, organizationId: orgId, projectId: project.id },
-    include: {
-      tasks: {
-        orderBy: { sortOrder: "asc" },
-        select: {
-          id: true,
-          stepCode: true,
-          name: true,
-          executionStatus: true,
-          progressPercent: true,
-        },
-        take: 80,
-      },
-    },
-  });
-  if (!plan) return null;
-
-  return buildChatgptContextSkeleton({
-    section: "FOLLOW_UP",
-    project,
-    target: {
-      entity_type: "PREP_SCHEDULE_PLAN",
-      id: plan.id,
-      version: plan.revisionNumber,
-      code: plan.title,
-    },
-    data: {
-      mode: "planning_suivi",
-      tasks: plan.tasks.map((t) => ({
-        task_id: t.id,
-        step_code: t.stepCode,
-        name: t.name,
-        execution_status: t.executionStatus,
-        progress_percent: t.progressPercent,
-      })),
-    },
-  });
+  // Aucun fallback PREP_SCHEDULE_PLAN : update_follow_up ne commit que FOLLOW_UP_SHEET.
+  // Exposer un planning ici produirait un contexte impossible à appliquer.
+  return null;
 }
 
 async function buildDocumentContext(

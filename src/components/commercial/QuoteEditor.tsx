@@ -331,7 +331,7 @@ export function QuoteEditor({
   }, [finalizeIntent]);
 
   const version = quote.currentVersion;
-  const lines = version?.lines ?? [];
+  const lines = useMemo(() => version?.lines ?? [], [version?.lines]);
 
   const workLineCount = useMemo(
     () =>
@@ -2573,7 +2573,10 @@ function SectionTitleInput({
   onCommit: (t: string) => void;
 }) {
   const [value, setValue] = useState(title);
-  useEffect(() => setValue(title), [title]);
+  useEffect(() => {
+    // Synchronise le brouillon local après le rechargement serveur du devis.
+    setValue(title);
+  }, [title]);
   return (
     <input
       value={value}
@@ -2621,6 +2624,8 @@ function LineRow({
     pricingState !== "NOT_APPLICABLE" && !(line.unitSellHt > 0);
 
   useEffect(() => {
+    // Réconcilie les champs locaux après la réponse d’une sauvegarde optimiste.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRef(line.reference ?? "");
     setDes(line.designation);
     setDesc(line.description ?? "");

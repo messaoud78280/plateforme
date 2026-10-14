@@ -413,23 +413,31 @@ Sans fusion brutale :
 
 ### Lots de cet audit
 
-À compléter après chaque correction validée avec fichiers, tests, commit, push et déploiement réel.
+- `40451763` : `plan-source` borné au tenant sur GET/PATCH/DELETE, intention du DELETE local préservée.
+- `f3b2545d` : politique d’écriture chantier séparée de la lecture ; routes mutantes communes sécurisées, collaboration GED externe conservée.
+- `4a8cf6de` : suppression physique client limitée aux comptes vierges, transaction sérialisable et aucun effacement Storage avant validation DB.
+- `e29c057e` : création chantier + rattachement du devis accepté atomiques et protégés contre la double soumission.
+- `875136fd` : création et mise à jour du suivi refusées sur un planning archivé.
+- `92ae943c` : cycle documentaire `DRAFT → FINALIZED → ARCHIVED` imposé à l’API, aux imports/undo ChatGPT et au pipeline universel, avec verrou optimiste.
+- `8e28d6e9` : snapshot Facturation branché sur `CommercialInvoice` / `CommercialProgressStatement`, filtré par organisation et chantier.
+- `4186cd7c` : distinction explicite entre prix manquant et gratuit ; validation, envoi et acceptation refusés tant qu’un PU nul n’est pas confirmé gratuit.
+- `bd5950b3` : commande `npm run test:business-critical` regroupant les huit gardes de non-régression.
+
+Tous ces commits sont poussés sur `main`. Les tests ciblés, le lint des services/routes, TypeScript et les builds de chaque lot passent. Le test PDF a sauté son intégration DB faute de connexion Supabase, sans être compté comme preuve production. Le déploiement Railway n’est pas confirmé : le token CLI local est invalide ou expiré ; aucun statut SUCCESS du dernier commit ne peut être revendiqué.
 
 ---
 
 ## H. Corrections restantes
 
-Ordre recommandé :
+Ordre recommandé restant :
 
-1. P0 `plan-source`.
-2. P0 séparation lecture/écriture chantier et inventaire des routes mutantes.
-3. P0 suppression client sûre.
-4. P1 atomicité devis accepté → chantier.
-5. P1 protection planning archivé et document finalisé.
-6. P1 distinction ligne non chiffrée / gratuite.
-7. P1 correction des KPI branchés sur les modèles legacy.
-8. Agrégation des tests et garde de livraison.
-9. Décisions d’architecture nécessitant migration.
+1. Renouveler l’accès Railway, déployer `main`, vérifier le statut `SUCCESS`, le commit déployé et HTTP 200.
+2. Rejouer les contrôles Supabase production en lecture seule lorsque la connexion est disponible.
+3. Étendre progressivement la politique d’écriture aux routes mutantes résiduelles non couvertes par le premier inventaire.
+4. Décider la source de vérité client chantier / client contractuel avant toute migration.
+5. Définir les responsabilités et la trajectoire non destructive des deux moteurs de planning et des deux moteurs financiers.
+6. Préparer les contrôles de données pour `CURRENT` unique, organisation chantier, versions acceptées et registres legacy.
+7. Ajouter les tests transactionnels DB isolés et la garde CI autour de `test:business-critical`.
 
 Aucune migration de données ou de schéma importante ne doit être appliquée dans ces lots sans validation spécifique.
 

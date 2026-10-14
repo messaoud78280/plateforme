@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import {
+  canAccessChantierProject,
+  canModifyChantierProject,
+} from "@/lib/chantier-dossier/access";
 import {
   createGlobalPrepFromQuote,
   previewGlobalPrepFromQuote,
@@ -10,8 +13,14 @@ import {
 
 type Ctx = { params: Promise<{ id: string }> };
 
-async function resolveProject(projectId: string, user: { id: string; role: string }) {
-  const access = await canAccessChantierProject(user, projectId);
+async function resolveProject(
+  projectId: string,
+  user: { id: string; role: string },
+  requireWrite = false,
+) {
+  const access = requireWrite
+    ? await canModifyChantierProject(user, projectId)
+    : await canAccessChantierProject(user, projectId);
   if (!access.ok) return null;
   return prisma.project.findUnique({
     where: { id: projectId },
@@ -59,7 +68,7 @@ export async function POST(req: Request, ctx: Ctx) {
   }
 
   const { id: projectId } = await ctx.params;
-  const project = await resolveProject(projectId, session.user);
+  const project = await resolveProject(projectId, session.user, true);
   if (!project?.organizationId) {
     return NextResponse.json({ error: "Introuvable" }, { status: 404 });
   }

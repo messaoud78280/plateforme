@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { canModifyChantierProject } from "@/lib/chantier-dossier/access";
 import {
   attachQuoteToScope,
   attachSchedulePlanToScope,
@@ -25,7 +25,7 @@ export async function POST(req: Request, ctx: Ctx) {
   }
 
   const { id: projectId } = await ctx.params;
-  const access = await canAccessChantierProject(session.user, projectId);
+  const access = await canModifyChantierProject(session.user, projectId);
   if (!access.ok) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
 
   const project = await prisma.project.findUnique({

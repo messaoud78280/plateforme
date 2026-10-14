@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { canModifyChantierProject } from "@/lib/chantier-dossier/access";
 import { linkMissionToProjectAndSync } from "@/lib/chantier-dossier/sync-mission-documents";
 
 /** POST — Rattacher une mission au chantier et importer ses pièces dans le classeur */
@@ -20,7 +20,7 @@ export async function POST(
   }
 
   const { id: projectId } = await params;
-  const access = await canAccessChantierProject(session.user, projectId);
+  const access = await canModifyChantierProject(session.user, projectId);
   if (!access.ok) {
     return NextResponse.json({ error: "Chantier non autorisé" }, { status: 403 });
   }

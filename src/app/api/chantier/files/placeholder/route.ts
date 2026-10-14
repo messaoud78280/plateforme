@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { canModifyChantierProject } from "@/lib/chantier-dossier/access";
 
 /** POST — Marquer une pièce attendue (sans fichier) : statut MANQUANT ou A_RELANCER */
 export async function POST(request: Request) {
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Chantier, rubrique et intitulé requis." }, { status: 400 });
   }
 
-  const access = await canAccessChantierProject(session.user, projectId);
+  const access = await canModifyChantierProject(session.user, projectId);
   if (!access.ok || !access.project) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }

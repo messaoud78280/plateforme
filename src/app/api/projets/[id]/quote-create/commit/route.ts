@@ -5,7 +5,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { canModifyChantierProject } from "@/lib/chantier-dossier/access";
 import { prisma } from "@/lib/prisma";
 import { commitQuoteCreateFromBundle } from "@/lib/bework-context/adapt-quote-create";
 import { PrepError } from "@/lib/preparation/service";
@@ -20,12 +20,9 @@ export async function POST(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
   const { id: projectId } = await ctx.params;
-  const access = await canAccessChantierProject(session.user, projectId);
+  const access = await canModifyChantierProject(session.user, projectId);
   if (!access.ok) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
-  }
-  if (session.user.role === "CLIENT") {
-    return NextResponse.json({ error: "Modification non autorisée" }, { status: 403 });
   }
   const project = await prisma.project.findUnique({
     where: { id: projectId },

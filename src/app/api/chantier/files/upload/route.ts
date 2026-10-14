@@ -5,8 +5,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createServiceRoleClient } from "@/lib/supabase";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import {
+  canAccessChantierProject,
+  canModifyChantierProject,
+} from "@/lib/chantier-dossier/access";
 import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
+import { userHasProjectScope } from "@/lib/equipe-acces/project-access";
 import { ensureChantierPdfPreview, needsPdfConversion } from "@/lib/storage/chantier-pdf-preview";
 import { buildDocumentsStorageRef } from "@/lib/storage/supabase-object";
 import {
@@ -218,6 +222,17 @@ export async function POST(request: Request) {
   const access = await canAccessChantierProject(session.user, projectId);
   if (!access.ok || !access.project) {
     return NextResponse.json({ error: "Chantier non autorisé" }, { status: 403 });
+  }
+  const modify = await canModifyChantierProject(session.user, projectId);
+  const canDepositSharedDocument =
+    !modify.ok &&
+    (await userHasProjectScope(
+      session.user.id,
+      access.project,
+      "documents",
+    ));
+  if (!modify.ok && !canDepositSharedDocument) {
+    return NextResponse.json({ error: "Dépôt de document non autorisé" }, { status: 403 });
   }
 
   await ensureChantierFolders(projectId);

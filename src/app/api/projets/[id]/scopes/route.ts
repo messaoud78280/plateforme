@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import {
+  canAccessChantierProject,
+  canModifyChantierProject,
+} from "@/lib/chantier-dossier/access";
 import {
   codeFromScopeName,
   ensureProjectScope,
@@ -11,8 +14,14 @@ import {
 
 type Ctx = { params: Promise<{ id: string }> };
 
-async function resolveOrgProject(projectId: string, userId: string, role: string) {
-  const access = await canAccessChantierProject({ id: userId, role }, projectId);
+async function resolveOrgProject(
+  projectId: string,
+  user: { id: string; role: string },
+  requireWrite = false,
+) {
+  const access = requireWrite
+    ? await canModifyChantierProject(user, projectId)
+    : await canAccessChantierProject(user, projectId);
   if (!access.ok) return null;
   const project = await prisma.project.findUnique({
     where: { id: projectId },
@@ -31,8 +40,7 @@ export async function GET(_req: Request, ctx: Ctx) {
   const { id: projectId } = await ctx.params;
   const project = await resolveOrgProject(
     projectId,
-    session.user.id,
-    session.user.role,
+    session.user,
   );
   if (!project) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
 
@@ -60,8 +68,8 @@ export async function POST(req: Request, ctx: Ctx) {
   const { id: projectId } = await ctx.params;
   const project = await resolveOrgProject(
     projectId,
-    session.user.id,
-    session.user.role,
+    session.user,
+    true,
   );
   if (!project?.organizationId) {
     return NextResponse.json({ error: "Introuvable" }, { status: 404 });

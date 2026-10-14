@@ -10,6 +10,10 @@ import {
   computeReportContextVersion,
   type ReportContextVersionInput,
 } from "@/lib/bework-context/report-context-version";
+import {
+  assertSiteDocumentMutationAllowed,
+  SiteDocumentLifecycleError,
+} from "@/lib/site-documents/service";
 
 export const NOTICE_COMMIT_SUPPORTED_OPS = ["update_notice"] as const;
 
@@ -120,6 +124,7 @@ export async function applyNoticeDirectInTx(
       status: true,
       quickNotes: true,
       payloadJson: true,
+      updatedAt: true,
     },
   });
   if (!doc) {
@@ -133,6 +138,10 @@ export async function applyNoticeDirectInTx(
       { code: "PROJECT_MISMATCH" },
     );
   }
+  assertSiteDocumentMutationAllowed({
+    currentStatus: doc.status,
+    contentMutation: true,
+  });
 
   const versionBefore = computeNoticeContextVersion(
     noticeDocToVersionInput(doc),
@@ -239,10 +248,22 @@ export async function applyNoticeDirectInTx(
     data.payloadJson = payload as Prisma.InputJsonValue;
   }
 
-  await tx.siteDocument.update({
-    where: { id: doc.id },
+  const write = await tx.siteDocument.updateMany({
+    where: {
+      id: doc.id,
+      organizationId: input.orgId,
+      projectId: input.projectId,
+      kind: "NOTICE",
+      status: doc.status,
+      updatedAt: doc.updatedAt,
+    },
     data,
   });
+  if (write.count !== 1) {
+    throw new SiteDocumentLifecycleError(
+      "La notice a changé pendant l’application — analysez de nouveau les modifications.",
+    );
+  }
 
   const after = await tx.siteDocument.findFirst({
     where: {

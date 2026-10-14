@@ -20,6 +20,68 @@ import {
 import { prisma } from "@/lib/prisma";
 import type { Prisma, SiteDocumentKind } from "@prisma/client";
 
+export const SITE_DOCUMENT_STATUSES = [
+  "DRAFT",
+  "FINALIZED",
+  "ARCHIVED",
+] as const;
+export type SiteDocumentStatus = (typeof SITE_DOCUMENT_STATUSES)[number];
+
+export class SiteDocumentLifecycleError extends Error {
+  public readonly code = "DOCUMENT_LOCKED";
+
+  constructor(
+    message: string,
+    public readonly statusCode: 400 | 409 = 409,
+  ) {
+    super(message);
+    this.name = "SiteDocumentLifecycleError";
+  }
+}
+
+function normalizeSiteDocumentStatus(value: string): SiteDocumentStatus | null {
+  const normalized = value.trim().toUpperCase();
+  return SITE_DOCUMENT_STATUSES.includes(normalized as SiteDocumentStatus)
+    ? (normalized as SiteDocumentStatus)
+    : null;
+}
+
+export function assertSiteDocumentMutationAllowed(input: {
+  currentStatus: string;
+  nextStatus?: string;
+  contentMutation: boolean;
+}): SiteDocumentStatus {
+  const current = normalizeSiteDocumentStatus(input.currentStatus);
+  if (!current) {
+    throw new SiteDocumentLifecycleError(
+      "Statut documentaire historique inconnu — archivez ou dupliquez le document avant modification.",
+    );
+  }
+  const next =
+    input.nextStatus == null
+      ? current
+      : normalizeSiteDocumentStatus(input.nextStatus);
+  if (!next) {
+    throw new SiteDocumentLifecycleError("Statut documentaire invalide.", 400);
+  }
+  if (current === "ARCHIVED" && next !== "ARCHIVED") {
+    throw new SiteDocumentLifecycleError(
+      "Un document archivé ne peut pas être réactivé — dupliquez-le pour créer une révision.",
+    );
+  }
+  if (current === "FINALIZED" && next === "DRAFT") {
+    throw new SiteDocumentLifecycleError(
+      "Un document finalisé ne peut pas revenir en brouillon — dupliquez-le pour créer une révision.",
+    );
+  }
+  if (current !== "DRAFT" && input.contentMutation) {
+    throw new SiteDocumentLifecycleError(
+      "Le contenu d’un document finalisé ou archivé est figé — dupliquez-le pour créer une révision.",
+    );
+  }
+  return next;
+}
+
 const DOC_VERSION_SELECT = {
   id: true,
   kind: true,
@@ -32,6 +94,7 @@ const DOC_VERSION_SELECT = {
   weather: true,
   authorName: true,
   sourceFormat: true,
+  updatedAt: true,
 } as const;
 
 export function getDocumentContentVersion(doc: {
@@ -167,11 +230,31 @@ export async function updateSiteDocument(input: {
   const existing = await getSiteDocument(input.orgId, input.projectId, input.docId);
   if (!existing) return null;
 
-  return prisma.siteDocument.update({
-    where: { id: existing.id },
+  const contentMutation =
+    input.title !== undefined ||
+    input.visitDate !== undefined ||
+    input.visitTime !== undefined ||
+    input.weather !== undefined ||
+    input.authorName !== undefined ||
+    input.quickNotes !== undefined ||
+    input.payload !== undefined;
+  const nextStatus = assertSiteDocumentMutationAllowed({
+    currentStatus: existing.status,
+    nextStatus: input.status,
+    contentMutation,
+  });
+
+  const write = await prisma.siteDocument.updateMany({
+    where: {
+      id: existing.id,
+      organizationId: input.orgId,
+      projectId: input.projectId,
+      status: existing.status,
+      updatedAt: existing.updatedAt,
+    },
     data: {
       ...(input.title != null ? { title: input.title } : {}),
-      ...(input.status != null ? { status: input.status } : {}),
+      status: nextStatus,
       ...(input.visitDate !== undefined
         ? { visitDate: input.visitDate ? new Date(input.visitDate) : null }
         : {}),
@@ -184,15 +267,13 @@ export async function updateSiteDocument(input: {
         : {}),
       updatedById: input.userId,
     },
-    include: {
-      media: { orderBy: { sortOrder: "asc" } },
-      chatgptImports: {
-        where: { status: "APPLIED" },
-        orderBy: { appliedAt: "desc" },
-        take: 1,
-      },
-    },
   });
+  if (write.count !== 1) {
+    throw new SiteDocumentLifecycleError(
+      "Le document a changé pendant la modification — rechargez avant de réessayer.",
+    );
+  }
+  return getSiteDocument(input.orgId, input.projectId, input.docId);
 }
 
 export async function duplicateSiteDocument(input: {
@@ -250,7 +331,25 @@ export async function duplicateSiteDocument(input: {
 export async function deleteSiteDocument(orgId: string, projectId: string, docId: string) {
   const existing = await getSiteDocument(orgId, projectId, docId);
   if (!existing) return false;
-  await prisma.siteDocument.delete({ where: { id: existing.id } });
+  if (normalizeSiteDocumentStatus(existing.status) !== "DRAFT") {
+    throw new SiteDocumentLifecycleError(
+      "Seul un brouillon peut être supprimé. Archivez le document finalisé pour préserver l’historique.",
+    );
+  }
+  const deleted = await prisma.siteDocument.deleteMany({
+    where: {
+      id: existing.id,
+      organizationId: orgId,
+      projectId,
+      status: "DRAFT",
+      updatedAt: existing.updatedAt,
+    },
+  });
+  if (deleted.count !== 1) {
+    throw new SiteDocumentLifecycleError(
+      "Le statut du document a changé — rechargez avant de réessayer.",
+    );
+  }
   return true;
 }
 
@@ -293,6 +392,10 @@ export async function applyChatgptImport(input: {
           code: "NOT_FOUND",
         });
       }
+      assertSiteDocumentMutationAllowed({
+        currentStatus: existing.status,
+        contentMutation: true,
+      });
 
       const currentVersion = computeSiteDocumentContentVersionFromRow(existing);
       if (currentVersion !== input.documentBaseVersion) {
@@ -353,8 +456,14 @@ export async function applyChatgptImport(input: {
         ? ((merged as SiteReportPayload).author ?? existing.authorName)
         : existing.authorName;
 
-      const doc = await tx.siteDocument.update({
-        where: { id: existing.id },
+      const write = await tx.siteDocument.updateMany({
+        where: {
+          id: existing.id,
+          organizationId: input.orgId,
+          projectId: input.projectId,
+          status: existing.status,
+          updatedAt: existing.updatedAt,
+        },
         data: {
           payloadJson: merged as unknown as Prisma.InputJsonValue,
           sourceFormat: input.format,
@@ -365,8 +474,26 @@ export async function applyChatgptImport(input: {
           authorName: nextAuthor,
           updatedById: input.userId,
         },
+      });
+      if (write.count !== 1) {
+        throw new SiteDocumentLifecycleError(
+          "Le document a changé pendant l’import — vérifiez de nouveau le contenu avant de l’appliquer.",
+        );
+      }
+      const doc = await tx.siteDocument.findFirst({
+        where: {
+          id: existing.id,
+          organizationId: input.orgId,
+          projectId: input.projectId,
+          status: existing.status,
+        },
         select: DOC_VERSION_SELECT,
       });
+      if (!doc) {
+        throw new SiteDocumentLifecycleError(
+          "Le document a changé pendant l’import — vérifiez de nouveau le contenu avant de l’appliquer.",
+        );
+      }
 
       const versionAfter = computeSiteDocumentContentVersionFromRow(doc);
 
@@ -427,6 +554,14 @@ export async function applyChatgptImport(input: {
         writePerformed: false as const,
       };
     }
+    if (e instanceof SiteDocumentLifecycleError) {
+      return {
+        ok: false as const,
+        error: e.message,
+        code: e.code,
+        writePerformed: false as const,
+      };
+    }
     throw e;
   }
 }
@@ -469,6 +604,10 @@ export async function undoLastChatgptImport(input: {
           code: "NOT_FOUND",
         });
       }
+      assertSiteDocumentMutationAllowed({
+        currentStatus: live.status,
+        contentMutation: true,
+      });
 
       const importRow = await tx.siteDocumentChatgptImport.findFirst({
         where: {
@@ -494,10 +633,21 @@ export async function undoLastChatgptImport(input: {
       }
 
       const undoData = buildUndoDataFromSnapshot(importRow.snapshotBeforeJson);
-      await tx.siteDocument.update({
-        where: { id: existing.id },
+      const restored = await tx.siteDocument.updateMany({
+        where: {
+          id: existing.id,
+          organizationId: input.orgId,
+          projectId: input.projectId,
+          status: live.status,
+          updatedAt: live.updatedAt,
+        },
         data: undoData,
       });
+      if (restored.count !== 1) {
+        throw new SiteDocumentLifecycleError(
+          "Le document a changé pendant l’annulation — rechargez avant de réessayer.",
+        );
+      }
       await tx.siteDocumentChatgptImport.update({
         where: { id: importRow.id },
         data: { status: "UNDONE", undoneAt: new Date() },
@@ -522,6 +672,14 @@ export async function undoLastChatgptImport(input: {
       return {
         ok: false as const,
         error: e instanceof Error ? e.message : "Annulation impossible",
+        writePerformed: false as const,
+      };
+    }
+    if (e instanceof SiteDocumentLifecycleError) {
+      return {
+        ok: false as const,
+        error: e.message,
+        code: e.code,
         writePerformed: false as const,
       };
     }

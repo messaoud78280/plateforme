@@ -3,6 +3,7 @@ import { requireSiteDocumentAccess } from "@/lib/site-documents/access";
 import {
   deleteSiteDocument,
   getSiteDocument,
+  SiteDocumentLifecycleError,
   updateSiteDocument,
 } from "@/lib/site-documents/service";
 import type { PpspsPayload, SiteReportPayload } from "@/lib/site-documents/types";
@@ -41,17 +42,27 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (!body) {
     return NextResponse.json({ error: "Corps invalide" }, { status: 400 });
   }
-  const document = await updateSiteDocument({
-    orgId: auth.orgId,
-    projectId,
-    docId,
-    userId: auth.userId,
-    ...body,
-  });
-  if (!document) {
-    return NextResponse.json({ error: "Document introuvable" }, { status: 404 });
+  try {
+    const document = await updateSiteDocument({
+      orgId: auth.orgId,
+      projectId,
+      docId,
+      userId: auth.userId,
+      ...body,
+    });
+    if (!document) {
+      return NextResponse.json({ error: "Document introuvable" }, { status: 404 });
+    }
+    return NextResponse.json({ document });
+  } catch (error) {
+    if (error instanceof SiteDocumentLifecycleError) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode },
+      );
+    }
+    throw error;
   }
-  return NextResponse.json({ document });
 }
 
 export async function DELETE(_req: Request, ctx: Ctx) {
@@ -60,9 +71,19 @@ export async function DELETE(_req: Request, ctx: Ctx) {
   if (!auth.ok) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
-  const ok = await deleteSiteDocument(auth.orgId, projectId, docId);
-  if (!ok) {
-    return NextResponse.json({ error: "Document introuvable" }, { status: 404 });
+  try {
+    const ok = await deleteSiteDocument(auth.orgId, projectId, docId);
+    if (!ok) {
+      return NextResponse.json({ error: "Document introuvable" }, { status: 404 });
+    }
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    if (error instanceof SiteDocumentLifecycleError) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode },
+      );
+    }
+    throw error;
   }
-  return NextResponse.json({ ok: true });
 }

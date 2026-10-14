@@ -5,15 +5,6 @@ import { prisma } from "@/lib/prisma";
 import { mapChantierToProjectStatus } from "@/lib/chantier-lifecycle";
 import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
 
-async function resolveOrgOwnerUserId(organizationId: string): Promise<string> {
-  const org = await prisma.organization.findFirst({
-    where: { id: organizationId },
-    select: { ownerUserId: true },
-  });
-  if (!org?.ownerUserId) throw new Error("Propriétaire organisation introuvable");
-  return org.ownerUserId;
-}
-
 export async function linkAcceptedQuoteToProject(opts: {
   organizationId: string;
   quoteId: string;
@@ -51,55 +42,78 @@ export async function createProjectFromAcceptedQuote(opts: {
   siteAddress?: string | null;
   siteCity?: string | null;
 }) {
-  const quote = await prisma.commercialQuote.findFirst({
-    where: { id: opts.quoteId, organizationId: opts.organizationId },
-    select: {
-      id: true,
-      status: true,
-      projectId: true,
-      subject: true,
-      siteAddressSnapshot: true,
-      totalSellHt: true,
-    },
+  const project = await prisma.$transaction(async (tx) => {
+    const quote = await tx.commercialQuote.findFirst({
+      where: { id: opts.quoteId, organizationId: opts.organizationId },
+      select: {
+        id: true,
+        status: true,
+        projectId: true,
+        subject: true,
+        siteAddressSnapshot: true,
+        totalSellHt: true,
+      },
+    });
+    if (!quote) throw new Error("Devis introuvable");
+    if (quote.status !== "ACCEPTED") {
+      throw new Error("Seuls les devis acceptés peuvent créer un chantier");
+    }
+    if (quote.projectId) {
+      throw new Error("Ce devis est déjà lié à un chantier");
+    }
+
+    const title = (opts.title ?? quote.subject).trim();
+    if (!title) throw new Error("Nom du chantier obligatoire");
+
+    let clientUserId = opts.clientUserId;
+    if (!clientUserId) {
+      const org = await tx.organization.findUnique({
+        where: { id: opts.organizationId },
+        select: { ownerUserId: true },
+      });
+      if (!org?.ownerUserId) {
+        throw new Error("Propriétaire organisation introuvable");
+      }
+      clientUserId = org.ownerUserId;
+    }
+
+    const address =
+      opts.siteAddress !== undefined
+        ? opts.siteAddress
+        : quote.siteAddressSnapshot;
+
+    const created = await tx.project.create({
+      data: {
+        title,
+        clientId: clientUserId,
+        organizationId: opts.organizationId,
+        siteAddress: address?.trim() || null,
+        siteCity: opts.siteCity?.trim() || null,
+        chantierStatus: "ETUDE",
+        status: mapChantierToProjectStatus("ETUDE"),
+        signedQuoteAmount: quote.totalSellHt,
+        description: "Créé depuis le devis commercial accepté.",
+      },
+    });
+
+    const linked = await tx.commercialQuote.updateMany({
+      where: {
+        id: quote.id,
+        organizationId: opts.organizationId,
+        status: "ACCEPTED",
+        projectId: null,
+      },
+      data: { projectId: created.id },
+    });
+    if (linked.count !== 1) {
+      throw new Error("Ce devis vient d’être lié à un autre chantier");
+    }
+    return created;
   });
-  if (!quote) throw new Error("Devis introuvable");
-  if (quote.status !== "ACCEPTED") {
-    throw new Error("Seuls les devis acceptés peuvent créer un chantier");
-  }
-  if (quote.projectId) {
-    throw new Error("Ce devis est déjà lié à un chantier");
-  }
 
-  const title = (opts.title ?? quote.subject).trim();
-  if (!title) throw new Error("Nom du chantier obligatoire");
-
-  const clientUserId =
-    opts.clientUserId ?? (await resolveOrgOwnerUserId(opts.organizationId));
-
-  const address =
-    opts.siteAddress !== undefined
-      ? opts.siteAddress
-      : quote.siteAddressSnapshot;
-
-  const project = await prisma.project.create({
-    data: {
-      title,
-      clientId: clientUserId,
-      organizationId: opts.organizationId,
-      siteAddress: address?.trim() || null,
-      siteCity: opts.siteCity?.trim() || null,
-      chantierStatus: "ETUDE",
-      status: mapChantierToProjectStatus("ETUDE"),
-      signedQuoteAmount: quote.totalSellHt,
-      description: `Créé depuis le devis commercial accepté.`,
-    },
-  });
-
-  await ensureChantierFolders(project.id).catch(() => null);
-
-  await prisma.commercialQuote.update({
-    where: { id: quote.id },
-    data: { projectId: project.id },
+  // Les rubriques sont dérivées et réparables ; le lien devis↔chantier est déjà atomique.
+  await ensureChantierFolders(project.id).catch((error) => {
+    console.error("[link-project] Initialisation des rubriques:", error);
   });
 
   return project;

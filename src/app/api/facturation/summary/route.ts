@@ -3,6 +3,7 @@ import { getCachedServerSession } from "@/lib/auth/cached-session";
 import { canAccessFacturation } from "@/lib/facturation/access";
 import { forbiddenUnlessDashboardHref } from "@/lib/equipe-acces/assert-api-dashboard-access";
 import { getBillingSnapshot } from "@/lib/facturation/snapshot";
+import { resolveCommercialOrgId } from "@/lib/commercial/access";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,10 @@ export async function GET() {
     "/dashboard/facturation",
   );
   if (personaDeny) return personaDeny;
+  const organizationId = await resolveCommercialOrgId(session.user);
+  if (!organizationId) {
+    return NextResponse.json({ error: "Organisation introuvable" }, { status: 403 });
+  }
 
   const snap = await getBillingSnapshot({
     user: {
@@ -33,6 +38,7 @@ export async function GET() {
       role: session.user.role,
       personType: session.user.personType ?? null,
     },
+    organizationId,
   });
 
   return NextResponse.json({

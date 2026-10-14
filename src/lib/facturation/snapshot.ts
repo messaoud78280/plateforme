@@ -35,6 +35,16 @@ import {
 
 const FACTURATION_HREF = "/dashboard/facturation";
 
+export function buildCommercialBillingScope(
+  organizationId: string,
+  projectId?: string | null,
+): { organizationId: string; projectId?: string } {
+  return {
+    organizationId,
+    ...(projectId ? { projectId } : {}),
+  };
+}
+
 function daysBetween(from: Date, to: Date): number {
   const a = new Date(from);
   a.setHours(0, 0, 0, 0);
@@ -45,6 +55,7 @@ function daysBetween(from: Date, to: Date): number {
 
 export async function getBillingSnapshot(opts: {
   user: { id: string; role?: string | null; personType?: string | null };
+  organizationId: string;
   filter?: BillingFilter;
   projectId?: string | null;
   now?: Date;
@@ -69,6 +80,7 @@ export async function getBillingSnapshot(opts: {
     where: {
       AND: [
         accessWhere,
+        { organizationId: opts.organizationId },
         { status: { in: [...statusFilter] } },
         ...(opts.projectId ? [{ projectId: opts.projectId }] : []),
       ],
@@ -93,9 +105,6 @@ export async function getBillingSnapshot(opts: {
   }),
   );
 
-  const organizationId =
-    sheets.find((s) => s.organizationId)?.organizationId ?? null;
-
   const attentionBatch = await timedBranch(
     "facturation.attention",
     loadAttentionForSheets({
@@ -107,7 +116,7 @@ export async function getBillingSnapshot(opts: {
       nextActionDone: s.nextActionDone,
       urgencyOverride: s.urgencyOverride,
     })),
-    organizationId,
+    organizationId: opts.organizationId,
     now,
   }),
   );
@@ -302,8 +311,12 @@ export async function getBillingSnapshot(opts: {
               : items;
 
   const [invoiceCount, situationCount] = await Promise.all([
-    prisma.invoice.count(),
-    prisma.workSituation.count({ where: { archivedAt: null } }),
+    prisma.commercialInvoice.count({
+      where: buildCommercialBillingScope(opts.organizationId, opts.projectId),
+    }),
+    prisma.commercialProgressStatement.count({
+      where: buildCommercialBillingScope(opts.organizationId, opts.projectId),
+    }),
   ]);
 
   return {
@@ -346,6 +359,7 @@ export async function getBillingSnapshot(opts: {
 /** Synthèse compacte pour un chantier (cockpit). */
 export async function getProjectBillingHint(opts: {
   user: { id: string; role?: string | null; personType?: string | null };
+  organizationId: string;
   projectId: string;
 }): Promise<{
   show: boolean;
@@ -355,6 +369,7 @@ export async function getProjectBillingHint(opts: {
 } | null> {
   const snap = await getBillingSnapshot({
     user: opts.user,
+    organizationId: opts.organizationId,
     projectId: opts.projectId,
     filter: "all",
   });

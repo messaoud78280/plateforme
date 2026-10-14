@@ -4,7 +4,6 @@ import { redirect, notFound } from "next/navigation";
 import { after } from "next/server";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
 import { buildProjectPresentation } from "@/lib/chantier/party-labels";
 import { withReturnTo } from "@/lib/navigation/safe-return-to";
 import {
@@ -352,7 +351,7 @@ export default async function ProjetDetailPage({
             },
           })
         : Promise.resolve(null),
-      !isExternalViewer
+      !isExternalViewer && project.organizationId
         ? import("@/lib/facturation/snapshot")
             .then(({ getProjectBillingHint }) =>
               getProjectBillingHint({
@@ -361,6 +360,7 @@ export default async function ProjetDetailPage({
                   role: session.user.role,
                   personType: session.user.personType ?? null,
                 },
+                organizationId: project.organizationId!,
                 projectId: id,
               }),
             )

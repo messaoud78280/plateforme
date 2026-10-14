@@ -5,6 +5,7 @@ import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-
 import { canAccessFacturation } from "@/lib/facturation/access";
 import { getBillingSnapshot } from "@/lib/facturation/snapshot";
 import type { BillingFilter } from "@/lib/facturation/types";
+import { resolveCommercialOrgId } from "@/lib/commercial/access";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BackLink } from "@/components/ui/BackLink";
 import { cn } from "@/lib/cn";
@@ -61,6 +62,8 @@ export default async function FacturationPage({
     personType: session.user.personType,
     permissionProfile: session.user.permissionProfile,
   });
+  const organizationId = await resolveCommercialOrgId(session.user);
+  if (!organizationId) redirect("/dashboard");
 
   const sp = await searchParams;
   const filtreRaw = sp.filtre ?? "all";
@@ -74,6 +77,7 @@ export default async function FacturationPage({
       role: session.user.role,
       personType: session.user.personType ?? null,
     },
+    organizationId,
     filter,
   });
 

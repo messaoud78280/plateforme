@@ -58,6 +58,8 @@ export async function PATCH(req: Request, ctx: Ctx) {
         body.compositionSnapshotJson !== undefined
           ? (body.compositionSnapshotJson as never)
           : undefined,
+      isFree:
+        body.isFree !== undefined ? body.isFree === true : undefined,
     });
     return NextResponse.json({ line });
   } catch (e) {

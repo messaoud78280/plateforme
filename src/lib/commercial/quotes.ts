@@ -15,6 +15,10 @@ import {
   validatePaymentSchedule,
   type PaymentSchedule,
 } from "@/lib/commercial/payment-schedule";
+import {
+  findUnpricedQuoteLines,
+  withQuoteLineFreeConfirmation,
+} from "@/lib/commercial/quote-line-pricing";
 
 import {
   companyProfileToIssuerSnapshot,
@@ -948,6 +952,7 @@ export async function upsertLine(
     compositionSnapshotJson?: Prisma.InputJsonValue | null;
     sortOrder?: number;
     isOptional?: boolean;
+    isFree?: boolean;
   },
 ) {
   const quote = await assertEditableVersion(orgId, quoteId);
@@ -962,6 +967,39 @@ export async function upsertLine(
   const discountPercent = input.discountPercent ?? 0;
   const vatRate = input.vatRate ?? d(quote.defaultVatRate);
   const isOptional = input.isOptional ?? kind === "OPTION";
+  const existingLine = input.lineId
+    ? await prisma.commercialQuoteLine.findFirst({
+        where: { id: input.lineId, organizationId: orgId, versionId },
+        select: { id: true, compositionSnapshotJson: true },
+      })
+    : null;
+  if (input.lineId && !existingLine) throw new Error("Ligne introuvable");
+
+  let compositionSnapshotJson =
+    input.compositionSnapshotJson !== undefined
+      ? input.compositionSnapshotJson
+      : existingLine?.compositionSnapshotJson ?? null;
+  let compositionSnapshotTouched = input.compositionSnapshotJson !== undefined;
+  if (kind === "COMMENT" || kind === "SUBTOTAL" || unitSellHt > 0) {
+    if (
+      input.kind !== undefined ||
+      input.unitSellHt !== undefined ||
+      input.isFree !== undefined
+    ) {
+      compositionSnapshotJson = withQuoteLineFreeConfirmation(
+        compositionSnapshotJson,
+        false,
+      ) as Prisma.InputJsonValue | null;
+      compositionSnapshotTouched = true;
+    }
+  } else if (input.isFree !== undefined) {
+    compositionSnapshotJson = withQuoteLineFreeConfirmation(
+      compositionSnapshotJson,
+      input.isFree,
+    ) as Prisma.InputJsonValue | null;
+    compositionSnapshotTouched = true;
+  }
+
   const calc = calculateLine({
     kind,
     quantity,
@@ -993,11 +1031,6 @@ export async function upsertLine(
 
   let lineId = input.lineId;
   if (lineId) {
-    const existing = await prisma.commercialQuoteLine.findFirst({
-      where: { id: lineId, organizationId: orgId, versionId },
-      select: { id: true },
-    });
-    if (!existing) throw new Error("Ligne introuvable");
     await prisma.commercialQuoteLine.update({
       where: { id: lineId },
       data: {
@@ -1006,12 +1039,12 @@ export async function upsertLine(
         ...(input.commercialWorkItemId !== undefined
           ? { commercialWorkItemId: input.commercialWorkItemId }
           : {}),
-        ...(input.compositionSnapshotJson !== undefined
+        ...(compositionSnapshotTouched
           ? {
               compositionSnapshotJson:
-                input.compositionSnapshotJson === null
+                compositionSnapshotJson === null
                   ? Prisma.JsonNull
-                  : input.compositionSnapshotJson,
+                  : compositionSnapshotJson,
             }
           : {}),
         ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {}),
@@ -1030,8 +1063,8 @@ export async function upsertLine(
         commercialWorkItemId: input.commercialWorkItemId ?? null,
         sortOrder: input.sortOrder ?? (max._max.sortOrder ?? -1) + 1,
         ...baseFields,
-        ...(input.compositionSnapshotJson != null
-          ? { compositionSnapshotJson: input.compositionSnapshotJson }
+        ...(compositionSnapshotJson != null
+          ? { compositionSnapshotJson }
           : {}),
       },
     });
@@ -1421,7 +1454,20 @@ export async function transitionQuoteStatus(
 ) {
   const quote = await prisma.commercialQuote.findFirst({
     where: { id: quoteId, organizationId: orgId },
-    include: { currentVersion: true },
+    include: {
+      currentVersion: {
+        include: {
+          lines: {
+            select: {
+              kind: true,
+              designation: true,
+              unitSellHt: true,
+              compositionSnapshotJson: true,
+            },
+          },
+        },
+      },
+    },
   });
   if (!quote) throw new Error("Devis introuvable");
 
@@ -1438,6 +1484,24 @@ export async function transitionQuoteStatus(
   const allowed = ALLOWED_TRANSITIONS[quote.status] ?? [];
   if (!allowed.includes(toStatus)) {
     throw new Error(`Transition ${quote.status} → ${toStatus} non autorisée`);
+  }
+
+  if (
+    toStatus === "VALIDATED" ||
+    toStatus === "SENT" ||
+    toStatus === "ACCEPTED"
+  ) {
+    const unpriced = findUnpricedQuoteLines(quote.currentVersion?.lines ?? []);
+    if (unpriced.length > 0) {
+      const examples = unpriced
+        .slice(0, 3)
+        .map((line) => `« ${line.designation} »`)
+        .join(", ");
+      const suffix = unpriced.length > 3 ? "…" : "";
+      throw new Error(
+        `${unpriced.length} ligne${unpriced.length > 1 ? "s" : ""} sans prix : ${examples}${suffix}. Renseignez un prix ou confirmez explicitement la gratuité avant finalisation.`,
+      );
+    }
   }
 
   /** Finalisation (VALIDATED / SENT) : échéancier actif doit totaliser 100 %. */

@@ -51,6 +51,7 @@ import {
   type PaymentSchedule,
   parsePaymentSchedule,
 } from "@/lib/commercial/payment-schedule";
+import { quoteLinePricingState } from "@/lib/commercial/quote-line-pricing";
 
 function fmtMoney(n: number) {
   return roundMoney(n, 2).toLocaleString("fr-FR", {
@@ -2615,6 +2616,9 @@ function LineRow({
   );
   const isSpecial =
     line.kind === "COMMENT" || line.kind === "SUBTOTAL" || line.kind === "OPTION";
+  const pricingState = quoteLinePricingState(line);
+  const canConfirmFree =
+    pricingState !== "NOT_APPLICABLE" && !(line.unitSellHt > 0);
 
   useEffect(() => {
     setRef(line.reference ?? "");
@@ -2702,6 +2706,15 @@ function LineRow({
                     Option
                   </span>
                 )}
+                {pricingState === "UNPRICED" ? (
+                  <span className="mr-1 text-[10px] font-bold uppercase text-amber-700">
+                    Prix à renseigner
+                  </span>
+                ) : pricingState === "FREE_CONFIRMED" ? (
+                  <span className="mr-1 text-[10px] font-bold uppercase text-emerald-700">
+                    Gratuit confirmé
+                  </span>
+                ) : null}
                 <input
                   disabled={!canEdit}
                   value={des}
@@ -2826,6 +2839,29 @@ function LineRow({
                 onLiveValue={(n) => onLiveNumeric({ unitSellHt: n })}
                 onCommit={(n) => commitNumeric({ unitSellHt: n })}
               />
+              {canConfirmFree ? (
+                <label className="mt-1 flex items-center justify-end gap-1 text-[10px] font-medium text-slate-500">
+                  <input
+                    type="checkbox"
+                    checked={pricingState === "FREE_CONFIRMED"}
+                    disabled={!canEdit}
+                    onChange={(event) =>
+                      onPatch({
+                        reference: ref.trim() || null,
+                        designation: des,
+                        description: desc.trim() || null,
+                        unit,
+                        quantity: line.quantity,
+                        unitSellHt: line.unitSellHt,
+                        vatRate: line.vatRate,
+                        isFree: event.target.checked,
+                      })
+                    }
+                    className="h-3 w-3 rounded border-slate-300"
+                  />
+                  Gratuit
+                </label>
+              ) : null}
             </div>
             <div className="flex items-center gap-2 md:block">
               <span className="w-14 shrink-0 text-[10px] font-bold uppercase text-slate-400 md:hidden">

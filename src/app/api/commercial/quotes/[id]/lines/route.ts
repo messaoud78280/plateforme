@@ -36,6 +36,8 @@ export async function POST(req: Request, ctx: Ctx) {
         body.compositionSnapshotJson !== undefined
           ? (body.compositionSnapshotJson as never)
           : undefined,
+      isFree:
+        body.isFree !== undefined ? body.isFree === true : undefined,
       isOptional: Boolean(body.isOptional),
       sortOrder: body.sortOrder != null ? Number(body.sortOrder) : undefined,
     });

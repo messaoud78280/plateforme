@@ -17,6 +17,14 @@ export const EXECUTION_STATUSES = [
 ] as const;
 export type ExecutionStatus = (typeof EXECUTION_STATUSES)[number];
 
+export function assertPlanningSuiviPlanWritable(status: string | null | undefined): void {
+  if ((status ?? "").toUpperCase() === "ARCHIVED") {
+    throw new Error(
+      "Ce planning est archivé — ouvrez le planning courant avant de modifier le suivi.",
+    );
+  }
+}
+
 export type SuiviTaskRow = {
   id: string;
   stepCode: string;
@@ -148,13 +156,20 @@ export async function ensurePlanningSuivi(input: {
           organizationId: input.orgId,
           projectId: input.projectId,
         },
-        select: { id: true, studyId: true, title: true, _count: { select: { tasks: true } } },
+        select: {
+          id: true,
+          studyId: true,
+          title: true,
+          status: true,
+          _count: { select: { tasks: true } },
+        },
       })
     : await resolveGlobalPlanForProject(input.orgId, input.projectId);
 
   if (!plan) {
     throw new Error("Aucun planning global sur ce chantier — générez-le d’abord.");
   }
+  assertPlanningSuiviPlanWritable(plan.status);
 
   const existing = await prisma.followUpSheet.findFirst({
     where: {
@@ -247,11 +262,12 @@ export async function updatePlanningSuiviTask(input: {
 }): Promise<SuiviTaskRow> {
   const task = await prisma.prepScheduleTask.findFirst({
     where: { id: input.taskId, organizationId: input.orgId },
-    include: { plan: { select: { projectId: true } } },
+    include: { plan: { select: { projectId: true, status: true } } },
   });
   if (!task || task.plan.projectId !== input.projectId) {
     throw new Error("Tâche introuvable sur ce chantier");
   }
+  assertPlanningSuiviPlanWritable(task.plan.status);
 
   let status = input.executionStatus ?? (task.executionStatus as ExecutionStatus);
   if (!EXECUTION_STATUSES.includes(status)) status = "NOT_STARTED";
@@ -261,8 +277,15 @@ export async function updatePlanningSuiviTask(input: {
   if (status === "DONE") progress = 100;
   if (status === "NOT_STARTED" && input.progressPercent == null) progress = 0;
 
-  const updated = await prisma.prepScheduleTask.update({
-    where: { id: task.id },
+  const write = await prisma.prepScheduleTask.updateMany({
+    where: {
+      id: task.id,
+      organizationId: input.orgId,
+      plan: {
+        projectId: input.projectId,
+        status: { not: "ARCHIVED" },
+      },
+    },
     data: {
       executionStatus: status,
       progressPercent: progress,
@@ -292,9 +315,14 @@ export async function updatePlanningSuiviTask(input: {
         : {}),
     },
   });
+  if (write.count !== 1) {
+    throw new Error(
+      "Le planning a été archivé pendant la modification — aucune donnée n’a été changée.",
+    );
+  }
 
-  const rows = await listPlanningSuiviTasks(input.orgId, updated.planId);
-  const row = rows.find((r) => r.id === updated.id);
+  const rows = await listPlanningSuiviTasks(input.orgId, task.planId);
+  const row = rows.find((r) => r.id === task.id);
   if (!row) throw new Error("Tâche mise à jour introuvable");
   return row;
 }

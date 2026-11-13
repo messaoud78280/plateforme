@@ -3,8 +3,7 @@ import { SITE_URL } from "@/lib/site";
 
 type ChangeFreq = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
 
-/** Date de contenu vitrine V3. */
-const SITEMAP_STATIC_LASTMOD = new Date("2026-09-14T00:00:00.000Z");
+const SITEMAP_STATIC_LASTMOD = new Date("2026-11-13T00:00:00.000Z");
 
 function entry(
   path: string,
@@ -19,37 +18,29 @@ function entry(
   };
 }
 
-/** Sitemap BeWork V3 — uniquement le cœur formation (pas de cluster BTP / prompts). */
-const FORMATION_CORE = [
+/** Sitemap commercial BeWork — prestations BTP. */
+const BTP_CORE = [
   "/",
-  "/formation",
-  "/pour-qui",
-  "/tarifs",
-  "/faq",
+  "/conduite-de-travaux",
+  "/expertises-tce",
+  "/pilotage-chantier",
+  "/marches-publics-prives",
+  "/plateforme-ia",
+  "/notre-methode",
+  "/a-propos",
+  "/demande-de-devis",
   "/contact",
-  "/organisme-formation",
-  "/demonstrations",
-  "/demonstrations/messagerie",
-  "/demonstrations/agenda",
-  "/demonstrations/reservation",
-  "/demonstrations/crm",
-  "/demonstrations/dashboard",
-  "/demonstrations/espace-client",
-  "/demonstrations/documents",
-  "/demonstrations/site",
   "/mentions-legales",
   "/politique-confidentialite",
   "/conditions-generales-vente",
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return FORMATION_CORE.map((path) => {
+  return BTP_CORE.map((path) => {
     if (path === "/") return entry(path, 1, "weekly");
-    if (path === "/formation" || path === "/demonstrations" || path === "/contact") {
-      return entry(path, 0.95, "weekly");
+    if (path === "/conduite-de-travaux" || path === "/demande-de-devis") {
+      return entry(path, 0.98, "weekly");
     }
-    if (path === "/organisme-formation") return entry(path, 0.85, "monthly");
-    if (path.startsWith("/demonstrations/")) return entry(path, 0.88);
     if (
       path === "/mentions-legales" ||
       path === "/politique-confidentialite" ||
@@ -57,6 +48,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ) {
       return entry(path, 0.35, "yearly");
     }
-    return entry(path, 0.9);
+    return entry(path, 0.9, "weekly");
   });
 }

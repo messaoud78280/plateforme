@@ -1,6 +1,6 @@
 /**
- * Chemins publics legacy à retirer de l’accès (confidentialité / positionnement V3).
- * Utilisé par proxy + robots — le contenu ne doit plus être servi.
+ * Chemins publics legacy — confidentialité / migration SEO vers le site BTP.
+ * Utilisé par proxy + robots — le contenu ne doit plus être servi comme offre commerciale.
  */
 
 /** Ressources qui exposent outils, prompts, méthode ou stack. */
@@ -21,7 +21,10 @@ export const BEWORK_V3_LEGACY_RESOURCE_HUBS = [
   "/ressources/tutos",
 ] as const;
 
-/** Landings SaaS / BTP — redirigées vers la formation (plus de promesse plateforme). */
+/**
+ * Anciennes landings SaaS / BTP / formation commerciale.
+ * Redirigées vers les nouvelles pages de prestations (ou l’accueil).
+ */
 export const BEWORK_V3_LEGACY_BTP_PREFIXES = [
   "/services",
   "/assistant-travaux-",
@@ -51,19 +54,77 @@ export const BEWORK_V3_LEGACY_BTP_PREFIXES = [
   "/blog",
 ] as const;
 
+/** Anciennes pages formation retirées de l’expérience commerciale. */
+export const BEWORK_FORMATION_COMMERCIAL_PREFIXES = [
+  "/formation",
+  "/pour-qui",
+  "/tarifs",
+  "/demonstrations",
+  "/faq",
+] as const;
+
+/** Destinations 301/308 pour chemins legacy connus. */
+export const BEWORK_LEGACY_REDIRECT_MAP: Record<string, string> = {
+  "/pilotage-travaux": "/pilotage-chantier",
+  "/reponse-appel-offres-btp": "/marches-publics-prives",
+  "/gestion-marche-public-btp": "/marches-publics-prives",
+  "/checklist-depot-appel-offres-btp": "/marches-publics-prives",
+  "/situation-travaux-btp": "/pilotage-chantier",
+  "/chantier-mal-suivi": "/conduite-de-travaux",
+  "/services": "/conduite-de-travaux",
+  "/formation": "/",
+  "/pour-qui": "/",
+  "/tarifs": "/demande-de-devis",
+  "/demonstrations": "/plateforme-ia",
+  "/faq": "/",
+};
+
 export function isBeworkV3ConfidentialPath(pathname: string): boolean {
   const p = pathname.toLowerCase();
   if (p.startsWith("/ressources/pdf/")) return true;
-  return BEWORK_V3_CONFIDENTIAL_PREFIXES.some((prefix) => p.startsWith(prefix.toLowerCase()));
+  return BEWORK_V3_CONFIDENTIAL_PREFIXES.some((prefix) =>
+    p.startsWith(prefix.toLowerCase()),
+  );
 }
 
 export function isBeworkV3LegacyBtpPath(pathname: string): boolean {
   const p = pathname.toLowerCase();
-  if (BEWORK_V3_LEGACY_RESOURCE_HUBS.some((h) => p === h || p === `${h}/`)) return true;
-  // Éditoriaux BTP sous /ressources/* non listés comme confidentiels
+  if (BEWORK_V3_LEGACY_RESOURCE_HUBS.some((h) => p === h || p === `${h}/`)) {
+    return true;
+  }
   if (p.startsWith("/ressources/")) return true;
   return BEWORK_V3_LEGACY_BTP_PREFIXES.some((prefix) => {
     const pre = prefix.toLowerCase();
     return p === pre || p === `${pre}/` || p.startsWith(pre);
   });
+}
+
+export function isBeworkFormationCommercialPath(pathname: string): boolean {
+  const p = pathname.toLowerCase();
+  return BEWORK_FORMATION_COMMERCIAL_PREFIXES.some((prefix) => {
+    const pre = prefix.toLowerCase();
+    return p === pre || p === `${pre}/` || p.startsWith(`${pre}/`);
+  });
+}
+
+/** Résout la destination de redirection pour un chemin legacy. */
+export function resolveLegacyMarketingRedirect(pathname: string): string {
+  const p = pathname.toLowerCase().replace(/\/$/, "") || "/";
+  if (BEWORK_LEGACY_REDIRECT_MAP[p]) return BEWORK_LEGACY_REDIRECT_MAP[p];
+
+  if (p.startsWith("/demonstrations")) return "/plateforme-ia";
+  if (p.startsWith("/formation")) return "/";
+  if (p.startsWith("/assistant-travaux") || p.startsWith("/pilotage")) {
+    return "/pilotage-chantier";
+  }
+  if (
+    p.includes("appel-offres") ||
+    p.includes("marche-public") ||
+    p.includes("chorus")
+  ) {
+    return "/marches-publics-prives";
+  }
+  if (isBeworkV3LegacyBtpPath(pathname)) return "/conduite-de-travaux";
+  if (isBeworkFormationCommercialPath(pathname)) return "/";
+  return "/";
 }

@@ -1,13 +1,11 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { MarketingSitePreFooter } from "@/components/layout/MarketingSitePreFooter";
-import { QualiopiMark } from "@/components/qualiopi/QualiopiMark";
-import { DEMO_PROJECTS, BEWORK_FORMATION_TAGLINE } from "@/lib/bework-formation";
 import {
-  FORMATION_LEGAL_ENTITY,
-  QUALIOPI_CERTIFICATION,
-  QUALIOPI_COPY,
-} from "@/lib/formation-organism";
+  BTP_CTA_PRIMARY,
+  BTP_NAV_ITEMS,
+  BEWORK_BTP_BRAND_SHORT,
+  BEWORK_BTP_SIGNATURE,
+} from "@/lib/bework-btp-services";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import {
   BEWORK_FOUNDER_LINKEDIN_URL,
@@ -16,10 +14,14 @@ import {
 } from "@/lib/site";
 
 const COL_LINK =
-  "text-base text-slate-400 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70";
+  "text-base text-slate-400 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C59B58]/70";
 
 function ColumnTitle({ children }: { children: ReactNode }) {
-  return <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{children}</h3>;
+  return (
+    <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+      {children}
+    </h3>
+  );
 }
 
 function socialLabel(url: string): "linkedin" | "facebook" | "instagram" | "tiktok" | "youtube" | "other" {
@@ -41,30 +43,6 @@ function SocialIcon({ type }: { type: ReturnType<typeof socialLabel> }) {
           <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
         </svg>
       );
-    case "facebook":
-      return (
-        <svg className={common} fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-        </svg>
-      );
-    case "instagram":
-      return (
-        <svg className={common} fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-        </svg>
-      );
-    case "tiktok":
-      return (
-        <svg className={common} fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-          <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z" />
-        </svg>
-      );
-    case "youtube":
-      return (
-        <svg className={common} fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-        </svg>
-      );
     default:
       return (
         <svg className={common} fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24" aria-hidden>
@@ -74,232 +52,191 @@ function SocialIcon({ type }: { type: ReturnType<typeof socialLabel> }) {
   }
 }
 
-/** Pied de page marketing — positionnement formation création IA. */
+/** Pied de page marketing — prestations BTP. */
 export function MarketingSiteFooter() {
   const year = new Date().getFullYear();
   const organizationProfiles = getOrgSameAs();
   const socialProfiles = organizationProfiles.length
     ? organizationProfiles
     : [BEWORK_FOUNDER_LINKEDIN_URL];
-  const demoLinks = DEMO_PROJECTS.slice(0, 5);
 
   return (
-    <>
-      <MarketingSitePreFooter />
-      <footer className="bw-footer-blend relative z-10 bg-[#0b1220] text-slate-300">
-        <div className="relative z-10 mx-auto max-w-site px-5 py-14 sm:px-6 lg:py-16">
-          <div className="grid grid-cols-2 gap-10 sm:gap-12 md:grid-cols-3 lg:grid-cols-6 lg:gap-8">
-            <div className="col-span-2 md:col-span-3 lg:col-span-1 lg:max-w-xs">
-              <Link
-                href="/"
-                className="inline-block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-              >
-                <span className="text-xl font-extrabold tracking-tight text-white">
-                  Be<span className="text-[color:var(--accent-500)]">Work</span>
-                </span>
-              </Link>
-              <p className="mt-3 text-sm font-medium leading-snug text-slate-300">
-                {BEWORK_FORMATION_TAGLINE}
-              </p>
-              <p className="mt-4 text-xs leading-relaxed text-slate-400">
-                Une marque d’{FORMATION_LEGAL_ENTITY.legalNameDisplay}.
-              </p>
-              <p className="mt-2 text-xs leading-relaxed text-slate-500">
-                Organisme de formation certifié Qualiopi au titre des actions de
-                formation.
-              </p>
-              <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
-                SIREN&nbsp;: {FORMATION_LEGAL_ENTITY.siren}
-                <br />
-                NDA&nbsp;: {FORMATION_LEGAL_ENTITY.nda}
-              </p>
-              <div className="mt-4 max-w-[16rem] rounded-xl border border-slate-700/80 bg-white/95 p-3">
-                <QualiopiMark variant="compact" />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <ColumnTitle>Formation</ColumnTitle>
-              <ul className="flex flex-col gap-3">
-                <li>
-                  <Link href="/formation" className={COL_LINK}>
-                    La formation
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/pour-qui" className={COL_LINK}>
-                    Pour qui ?
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/tarifs" className={COL_LINK}>
-                    Parcours et tarifs
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact#participer" className={COL_LINK}>
-                    Participer
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <ColumnTitle>Démonstrations</ColumnTitle>
-              <ul className="flex flex-col gap-3">
-                <li>
-                  <Link href="/demonstrations" className={COL_LINK}>
-                    Toutes les démos
-                  </Link>
-                </li>
-                {demoLinks.map((d) => (
-                  <li key={d.slug}>
-                    <Link href={`/demonstrations/${d.slug}`} className={COL_LINK}>
-                      {d.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <ColumnTitle>Ressources</ColumnTitle>
-              <ul className="flex flex-col gap-3">
-                <li>
-                  <Link href="/faq" className={COL_LINK}>
-                    FAQ
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/formation#programme" className={COL_LINK}>
-                    Programme
-                  </Link>
-                </li>
-                <li>
-                  <Link href={QUALIOPI_COPY.learnMoreHref} className={COL_LINK}>
-                    Notre organisme de formation
-                  </Link>
-                </li>
-                <li>
-                  <Link href={`${QUALIOPI_COPY.learnMoreHref}#certification`} className={COL_LINK}>
-                    Certification Qualiopi
-                  </Link>
-                </li>
-                <li>
-                  <a
-                    href={QUALIOPI_CERTIFICATION.certificatePdfHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={COL_LINK}
-                  >
-                    Consulter notre certificat
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <ColumnTitle>Légal</ColumnTitle>
-              <ul className="flex flex-col gap-3">
-                <li>
-                  <Link href="/mentions-legales" className={COL_LINK}>
-                    Mentions légales
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/politique-confidentialite" className={COL_LINK}>
-                    Politique de confidentialité
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/conditions-generales-vente" className={COL_LINK}>
-                    Conditions générales de vente
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <ColumnTitle>Contact</ColumnTitle>
-              <ul className="flex flex-col gap-3">
-                <li>
-                  <Link
-                    href="/contact"
-                    className={COL_LINK}
-                    {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "footer-column")}
-                  >
-                    Nous écrire
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact#participer" className={COL_LINK}>
-                    Inscription session
-                  </Link>
-                </li>
-              </ul>
-            </div>
+    <footer className="relative z-10 bg-[#14263B] text-slate-300">
+      <div className="relative z-10 mx-auto max-w-site px-5 py-14 sm:px-6 lg:py-16">
+        <div className="grid grid-cols-2 gap-10 sm:gap-12 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
+          <div className="col-span-2 md:col-span-3 lg:col-span-1 lg:max-w-xs">
+            <Link
+              href="/"
+              className="inline-block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C59B58]"
+            >
+              <span className="text-xl font-extrabold tracking-tight text-white">
+                Be<span className="text-[#C59B58]">Work</span>
+              </span>
+            </Link>
+            <p className="mt-3 text-sm font-medium leading-snug text-slate-300">
+              {BEWORK_BTP_BRAND_SHORT}
+            </p>
+            <p className="mt-3 text-xs leading-relaxed text-slate-500">
+              {BEWORK_BTP_SIGNATURE}
+            </p>
+            <p className="mt-4 text-[11px] leading-relaxed text-slate-500">
+              Informations juridiques (SIREN, siège, assurances) — à valider avant publication.
+            </p>
+            <Link
+              href={BTP_CTA_PRIMARY.href}
+              className="mt-5 inline-flex items-center gap-2 rounded-md bg-[#C59B58] px-4 py-2.5 text-sm font-semibold text-[#14263B] transition hover:brightness-105"
+              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "footer-devis")}
+            >
+              {BTP_CTA_PRIMARY.label}
+              <span aria-hidden>→</span>
+            </Link>
           </div>
-        </div>
 
-        <div className="border-t border-slate-800/90">
-          <div className="mx-auto flex max-w-site flex-col gap-6 px-5 py-6 sm:px-6 md:flex-row md:items-center md:justify-between md:gap-4">
-            <p className="text-sm text-slate-500 sm:text-base">© {year} BeWork. Tous droits réservés.</p>
+          <div className="flex flex-col gap-4">
+            <ColumnTitle>Prestations</ColumnTitle>
+            <ul className="flex flex-col gap-3">
+              {BTP_NAV_ITEMS.slice(0, 4).map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className={COL_LINK}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            <div className="flex flex-wrap items-center gap-5 md:justify-end">
-              {socialProfiles.length > 0 ? (
-                <>
-                  <div className="flex items-center gap-2">
-                    {socialProfiles.map((url) => {
-                      const t = socialLabel(url);
-                      const isFounderProfile = url === BEWORK_FOUNDER_LINKEDIN_URL;
-                      return (
-                        <a
-                          key={url}
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-600 text-slate-400 transition-colors hover:border-slate-400 hover:text-white"
-                          aria-label={
-                            isFounderProfile
-                              ? `Laure Olivie, fondatrice de BeWork, sur ${t}`
-                              : t === "other"
-                                ? "BeWork — lien externe"
-                                : `BeWork sur ${t}`
-                          }
-                        >
-                          <SocialIcon type={t} />
-                        </a>
-                      );
-                    })}
-                  </div>
-                  <span className="hidden h-8 w-px bg-slate-700 sm:block" aria-hidden />
-                </>
-              ) : null}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-slate-400 sm:text-base">
-                <Link
-                  href="/faq"
-                  className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
-                >
-                  FAQ
+          <div className="flex flex-col gap-4">
+            <ColumnTitle>Entreprise</ColumnTitle>
+            <ul className="flex flex-col gap-3">
+              <li>
+                <Link href="/plateforme-ia" className={COL_LINK}>
+                  Plateforme & IA
                 </Link>
-                <Link
-                  href="/contact"
-                  className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
-                  {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "footer-bar")}
-                >
+              </li>
+              <li>
+                <Link href="/notre-methode" className={COL_LINK}>
+                  Notre méthode
+                </Link>
+              </li>
+              <li>
+                <Link href="/a-propos" className={COL_LINK}>
+                  À propos
+                </Link>
+              </li>
+              <li>
+                <Link href="/demande-de-devis" className={COL_LINK}>
+                  Demande de devis
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className={COL_LINK}>
                   Contact
                 </Link>
-                <a
-                  href={`${SITE_URL}/sitemap.xml`}
-                  className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
+              </li>
+            </ul>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <ColumnTitle>Légal</ColumnTitle>
+            <ul className="flex flex-col gap-3">
+              <li>
+                <Link href="/mentions-legales" className={COL_LINK}>
+                  Mentions légales
+                </Link>
+              </li>
+              <li>
+                <Link href="/politique-confidentialite" className={COL_LINK}>
+                  Politique de confidentialité
+                </Link>
+              </li>
+              <li>
+                <Link href="/conditions-generales-vente" className={COL_LINK}>
+                  Conditions générales
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <ColumnTitle>Contact</ColumnTitle>
+            <ul className="flex flex-col gap-3">
+              <li>
+                <Link
+                  href="/contact"
+                  className={COL_LINK}
+                  {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "footer-column")}
                 >
-                  Plan du site
-                </a>
-              </div>
+                  Nous écrire
+                </Link>
+              </li>
+              <li>
+                <Link href="/demande-de-devis?besoin=conducteur_travaux" className={COL_LINK}>
+                  Conducteur de travaux
+                </Link>
+              </li>
+              <li>
+                <Link href="/demande-de-devis?besoin=assistance_marches_publics" className={COL_LINK}>
+                  Étude de marché
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-white/10">
+        <div className="mx-auto flex max-w-site flex-col gap-6 px-5 py-6 sm:px-6 md:flex-row md:items-center md:justify-between md:gap-4">
+          <p className="text-sm text-slate-500 sm:text-base">
+            © {year} BeWork. Tous droits réservés.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-5 md:justify-end">
+            {socialProfiles.length > 0 ? (
+              <>
+                <div className="flex items-center gap-2">
+                  {socialProfiles.map((url) => {
+                    const t = socialLabel(url);
+                    return (
+                      <a
+                        key={url}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-600 text-slate-400 transition-colors hover:border-[#C59B58] hover:text-white"
+                        aria-label={t === "other" ? "BeWork — lien externe" : `BeWork sur ${t}`}
+                      >
+                        <SocialIcon type={t} />
+                      </a>
+                    );
+                  })}
+                </div>
+                <span className="hidden h-8 w-px bg-slate-700 sm:block" aria-hidden />
+              </>
+            ) : null}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-slate-400 sm:text-base">
+              <Link
+                href="/demande-de-devis"
+                className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C59B58]/70"
+              >
+                Devis
+              </Link>
+              <Link
+                href="/contact"
+                className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C59B58]/70"
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "footer-bar")}
+              >
+                Contact
+              </Link>
+              <a
+                href={`${SITE_URL}/sitemap.xml`}
+                className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C59B58]/70"
+              >
+                Plan du site
+              </a>
             </div>
           </div>
         </div>
-      </footer>
-    </>
+      </div>
+    </footer>
   );
 }

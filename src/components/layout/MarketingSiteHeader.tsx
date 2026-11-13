@@ -4,24 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
-import { QualiopiMark } from "@/components/qualiopi/QualiopiMark";
-import { QUALIOPI_COPY } from "@/lib/formation-organism";
+import {
+  BTP_CTA_PRIMARY,
+  BTP_NAV_ITEMS,
+  BEWORK_BTP_SIGNATURE,
+} from "@/lib/bework-btp-services";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import styles from "./MarketingSiteHeader.module.css";
 
 type Props = {
   plainBg?: boolean;
 };
-
-const NAV_ITEMS = [
-  { href: "/#hero", label: "Découvrir", match: "home" },
-  { href: "/#demonstrations", label: "Possibilités", match: "demonstrations" },
-  { href: "/demonstrations", label: "Démonstrations", match: "/demonstrations" },
-  { href: "/formation#programme", label: "Programme", match: "programme" },
-  { href: "/faq", label: "FAQ", match: "/faq" },
-] as const;
-
-const PLATFORM_HREF = "/dashboard";
 
 function cx(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -50,40 +43,16 @@ function LockIcon({ className }: { className?: string }) {
   );
 }
 
-function useActiveNav() {
-  const pathname = usePathname();
-  const [hash, setHash] = useState("");
-
-  useEffect(() => {
-    const sync = () => setHash(window.location.hash.replace(/^#/, ""));
-    sync();
-    window.addEventListener("hashchange", sync);
-    return () => window.removeEventListener("hashchange", sync);
-  }, [pathname]);
-
-  return (match: (typeof NAV_ITEMS)[number]["match"]) => {
-    if (match.startsWith("/")) {
-      return pathname.startsWith(match);
-    }
-    if (match === "programme") {
-      return pathname.startsWith("/formation");
-    }
-    if (pathname !== "/" && pathname !== "") return false;
-    if (match === "home") return !hash || hash === "hero";
-    return hash === match;
-  };
-}
-
-/** Header marketing flottant — deux étages dans un seul panneau premium. */
+/** Header marketing — site commercial BTP. */
 export function MarketingSiteHeader({ plainBg = false }: Props) {
+  const pathname = usePathname() || "/";
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobilePanelRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const isActive = useActiveNav();
-  const privateHref = PLATFORM_HREF;
-  const privateLabel = "Accès privé";
-  const privateAria = "Accès privé — connexion à la plateforme";
+  const privateHref = "/dashboard";
+  const privateLabel = "Accès plateforme";
+  const privateAria = "Accès plateforme — connexion à l’espace collaboratif";
 
   useEffect(() => {
     const onScroll = () => {
@@ -151,11 +120,15 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
     return () => desktop.removeEventListener("change", closeOnDesktop);
   }, []);
 
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   return (
     <header className={cx(styles.root, plainBg && styles.rootPlain)}>
       <div className={styles.shell}>
         <div className={cx(styles.panel, scrolled && styles.panelScrolled)}>
-          {/* ——— Étage 1 : marque + signature + CTA ——— */}
           <div className={styles.tierBrand}>
             <div className={styles.brandCluster}>
               <Link href="/" className={styles.brand} aria-label="BeWork — Accueil">
@@ -164,83 +137,55 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
 
               <span className={styles.brandDivider} aria-hidden />
 
-              <p
-                className={styles.signature}
-                aria-label="En une journée, passez de l’idée au projet. Créez avec l’IA, sans savoir coder."
-              >
+              <p className={styles.signature} aria-label={BEWORK_BTP_SIGNATURE}>
                 <span className={styles.signatureBody}>
                   <span className={styles.signaturePrimary}>
                     <span className={styles.signaturePrimaryFull}>
-                      En{"\u00a0"}une{"\u00a0"}journée, passez{" "}
-                      <span className={styles.accent}>
-                        de{"\u00a0"}l’idée au{"\u00a0"}projet
-                      </span>
-                      .
+                      Conduite de travaux ·{" "}
+                      <span className={styles.accent}>Pilotage TCE</span>
                     </span>
                     <span className={styles.signaturePrimaryShort}>
-                      Passez{" "}
-                      <span className={styles.accent}>
-                        de{"\u00a0"}l’idée au{"\u00a0"}projet
-                      </span>
-                      .
+                      <span className={styles.accent}>Conduite de travaux</span>
                     </span>
                   </span>
                   <span className={styles.signatureSecondary}>
                     <span className={styles.signatureSecondaryFull}>
-                      Créez <span className={styles.accent}>avec{"\u00a0"}l’IA</span>,{" "}
-                      <span className={styles.accent}>sans{"\u00a0"}savoir{"\u00a0"}coder</span>.
+                      Ingénierie opérationnelle BTP
                     </span>
                     <span className={styles.signatureSecondaryShort}>
-                      Créez <span className={styles.accent}>avec{"\u00a0"}l’IA</span>,{" "}
-                      <span className={styles.accent}>sans{"\u00a0"}savoir{"\u00a0"}coder</span>.
+                      Pilotage TCE
                     </span>
                   </span>
                 </span>
               </p>
             </div>
 
-            <div className={styles.qualiopiSlot}>
-              <Link
-                href={QUALIOPI_COPY.learnMoreHref}
-                className={styles.qualiopiBrand}
-                aria-label="Organisme de formation certifié Qualiopi — OFC Création d’entreprise"
-                title="Organisme certifié Qualiopi"
-              >
-                <QualiopiMark variant="header" showCategoryMention={false} />
-              </Link>
-            </div>
-
             <div className={styles.actions}>
-              <Link
-                href="/formation"
-                className={styles.ctaSecondary}
-                aria-label="Découvrir la formation"
-                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-formation")}
-              >
+              <Link href="/contact" className={styles.ctaSecondary} aria-label="Contact">
                 <span className={styles.ctaSecondaryFull} aria-hidden>
-                  Découvrir la formation
+                  Contact
                 </span>
                 <span className={styles.ctaSecondaryShort} aria-hidden>
-                  Formation
+                  Contact
                 </span>
               </Link>
               <Link
-                href="/contact#participer"
+                href={BTP_CTA_PRIMARY.href}
                 className={styles.cta}
-                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-participer")}
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-devis")}
               >
-                Participer
+                {BTP_CTA_PRIMARY.label}
                 <span aria-hidden>→</span>
               </Link>
             </div>
 
             <div className={styles.mobileTopActions}>
               <Link
-                href="/contact#participer"
+                href={BTP_CTA_PRIMARY.href}
                 className={styles.ctaCompact}
-                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-participer-mobile")}
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-devis-mobile")}
               >
-                Participer
+                Devis
               </Link>
               <button
                 ref={menuButtonRef}
@@ -266,25 +211,20 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             </div>
           </div>
 
-          {/* ——— Étage 2 : navigation + accès privé ——— */}
           <div className={styles.tierNav}>
             <nav className={styles.nav} aria-label="Navigation principale">
-              {NAV_ITEMS.map((item) => (
+              {BTP_NAV_ITEMS.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={cx(styles.navLink, isActive(item.match) && styles.navLinkActive)}
+                  className={cx(styles.navLink, isActive(item.href) && styles.navLinkActive)}
                 >
                   {item.label}
                 </Link>
               ))}
             </nav>
 
-            <Link
-              href={privateHref}
-              className={styles.privateAccess}
-              aria-label={privateAria}
-            >
+            <Link href={privateHref} className={styles.privateAccess} aria-label={privateAria}>
               <LockIcon className={styles.privateAccessIcon} />
               <span>{privateLabel}</span>
             </Link>
@@ -303,7 +243,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       >
         <div className={styles.mobileInner}>
           <nav className={styles.mobileNav} aria-label="Navigation mobile">
-            {NAV_ITEMS.map((item) => (
+            {BTP_NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -313,6 +253,13 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 {item.label}
               </Link>
             ))}
+            <Link
+              href="/contact"
+              className={styles.mobileLink}
+              onClick={() => setMobileOpen(false)}
+            >
+              Contact
+            </Link>
           </nav>
 
           <div className={styles.mobilePrivateWrap}>
@@ -329,18 +276,11 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
 
           <div className={styles.mobileActions}>
             <Link
-              href="/formation"
-              className={styles.ctaSecondaryMobile}
-              onClick={() => setMobileOpen(false)}
-            >
-              Découvrir la formation
-            </Link>
-            <Link
-              href="/contact#participer"
+              href={BTP_CTA_PRIMARY.href}
               className={styles.ctaMobile}
               onClick={() => setMobileOpen(false)}
             >
-              Participer →
+              {BTP_CTA_PRIMARY.label} →
             </Link>
           </div>
         </div>

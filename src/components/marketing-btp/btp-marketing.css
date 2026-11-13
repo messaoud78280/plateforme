@@ -1,0 +1,154 @@
+/* Identité visuelle BeWork BTP — site commercial */
+
+.bw-btp-site {
+  --btp-night: #14263b;
+  --btp-steel: #29465b;
+  --btp-white: #ffffff;
+  --btp-mist: #f3f5f7;
+  --btp-muted: #667587;
+  --btp-copper: #c59b58;
+  --btp-ink: #0f1a26;
+  --btp-border: rgba(20, 38, 59, 0.12);
+  --btp-shadow: 0 12px 40px rgba(20, 38, 59, 0.1);
+
+  color: var(--btp-ink);
+  background: var(--btp-mist);
+  font-family:
+    var(--font-inter),
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+}
+
+.bw-btp-site h1,
+.bw-btp-site h2,
+.bw-btp-site h3 {
+  font-family: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--btp-night);
+}
+
+.bw-btp-container {
+  width: min(1120px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+.bw-btp-container-wide {
+  width: min(1240px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+.bw-btp-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--btp-copper);
+}
+
+.bw-btp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.85rem;
+  padding: 0.75rem 1.35rem;
+  border-radius: 0.55rem;
+  font-size: 0.95rem;
+  font-weight: 650;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.bw-btp-btn:focus-visible {
+  outline: 2px solid var(--btp-copper);
+  outline-offset: 3px;
+}
+
+.bw-btp-btn-primary {
+  background: var(--btp-night);
+  color: var(--btp-white);
+  border: 1px solid var(--btp-night);
+}
+
+.bw-btp-btn-primary:hover {
+  background: var(--btp-steel);
+  border-color: var(--btp-steel);
+}
+
+.bw-btp-btn-secondary {
+  background: transparent;
+  color: var(--btp-white);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.bw-btp-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.bw-btp-btn-secondary-dark {
+  background: transparent;
+  color: var(--btp-night);
+  border: 1px solid rgba(20, 38, 59, 0.28);
+}
+
+.bw-btp-btn-secondary-dark:hover {
+  background: rgba(20, 38, 59, 0.05);
+}
+
+.bw-btp-btn-copper {
+  background: var(--btp-copper);
+  color: var(--btp-night);
+  border: 1px solid var(--btp-copper);
+}
+
+.bw-btp-btn-copper:hover {
+  filter: brightness(1.05);
+}
+
+.bw-btp-card {
+  background: var(--btp-white);
+  border: 1px solid var(--btp-border);
+  border-radius: 1rem;
+  padding: 1.35rem 1.4rem;
+  box-shadow: 0 1px 2px rgba(20, 38, 59, 0.03);
+}
+
+.bw-btp-section {
+  padding: 4.5rem 0;
+}
+
+@media (min-width: 768px) {
+  .bw-btp-section {
+    padding: 5.5rem 0;
+  }
+}
+
+.bw-btp-section-alt {
+  background: var(--btp-white);
+}
+
+.bw-btp-section-night {
+  background: var(--btp-night);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.bw-btp-section-night h2,
+.bw-btp-section-night h3 {
+  color: var(--btp-white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bw-btp-btn {
+    transition: none;
+  }
+}

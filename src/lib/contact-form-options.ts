@@ -56,7 +56,6 @@ export function labelMarketType(value: string): string {
 
 export function labelMainNeed(value: string): string {
   if (needLabels[value]) return needLabels[value];
-  // Intents formulaire « idée » (homepage repositionnée)
   const ideaLabels: Record<string, string> = {
     automatiser_processus: "Automatiser un processus",
     exploiter_documents_ia: "Exploiter mes documents avec l'IA",
@@ -66,7 +65,20 @@ export function labelMainNeed(value: string): string {
     decouvrir_bework: "Découvrir BeWork",
     ne_sais_pas_encore: "Je ne sais pas encore",
   };
-  return ideaLabels[value] ?? value;
+  const btpLabels: Record<string, string> = {
+    conducteur_travaux: "Conducteur de travaux",
+    chef_chantier: "Chef de chantier",
+    direction_travaux: "Direction de travaux",
+    pilotage_tce: "Pilotage TCE",
+    gestion_chantier: "Gestion de chantier",
+    audit_redressement: "Audit / redressement",
+    assistance_marches_publics: "Assistance marchés publics",
+    assistance_marches_prives: "Assistance marchés privés",
+    etudes_prix: "Études de prix",
+    gestion_financiere: "Gestion financière de chantier",
+    autre: "Autre prestation",
+  };
+  return ideaLabels[value] ?? btpLabels[value] ?? value;
 }
 
 export function labelProjectStage(value: string): string {

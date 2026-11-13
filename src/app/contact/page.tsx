@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
-import { ParticiperPageContent } from "@/components/contact/ParticiperPageContent";
+import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { BtpPageHero } from "@/components/marketing-btp/BtpPageHero";
+import "@/components/marketing-btp/btp-marketing.css";
+import { BTP_SEO_PAGES } from "@/lib/bework-btp-services";
 import {
   breadcrumbJsonLd,
   buildMarketingPageMetadata,
-  SEO_PAGES,
 } from "@/lib/seo-formation-pages";
-import type { TrainingOfferId } from "@/lib/bework-formation";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
-const seo = SEO_PAGES.contact;
+const seo = BTP_SEO_PAGES.contact;
 const pageUrl = absoluteUrl(seo.path);
 
 export const metadata: Metadata = buildMarketingPageMetadata({
@@ -34,29 +35,58 @@ const contactJsonLd = {
     },
     breadcrumbJsonLd([
       { name: "Accueil", path: "/" },
-      { name: "Participer", path: "/contact" },
+      { name: "Contact", path: "/contact" },
     ]),
   ],
 };
 
-type ContactPageProps = {
-  searchParams: Promise<{ parcours?: string | string[] }>;
-};
-
-export default async function ContactPage({ searchParams }: ContactPageProps) {
-  const requestedOffer = (await searchParams).parcours;
-  const initialOfferId: TrainingOfferId =
-    requestedOffer === "complete" ? "complete" : "essential";
-
+export default function ContactPage() {
   return (
-    <div className="min-h-screen min-w-0 overflow-x-clip bg-transparent">
+    <div className="bw-btp-site min-h-screen min-w-0 overflow-x-clip">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd) }}
       />
       <MarketingSiteHeader plainBg />
       <main>
-        <ParticiperPageContent initialOfferId={initialOfferId} />
+        <BtpPageHero
+          eyebrow="CONTACT"
+          title="Parlons de votre besoin opérationnel."
+          subtitle="Pour une proposition précise, utilisez le formulaire de devis. Pour une question courte, écrivez-nous via le parcours ci-dessous."
+          primaryHref="/demande-de-devis"
+          primaryLabel="Demander un devis"
+        />
+
+        <section className="bw-btp-section bw-btp-section-alt">
+          <div className="bw-btp-container grid gap-6 md:grid-cols-2">
+            <article className="bw-btp-card">
+              <h2 className="text-xl font-bold">Demande de devis</h2>
+              <p className="mt-3 text-sm leading-relaxed text-[var(--btp-muted)]">
+                Le parcours recommandé pour décrire un chantier, une mission de
+                conduite de travaux ou une étude de marché.
+              </p>
+              <Link href="/demande-de-devis" className="bw-btp-btn bw-btp-btn-primary mt-6">
+                Ouvrir le formulaire
+              </Link>
+            </article>
+            <article className="bw-btp-card">
+              <h2 className="text-xl font-bold">Accès plateforme</h2>
+              <p className="mt-3 text-sm leading-relaxed text-[var(--btp-muted)]">
+                Espace collaboratif réservé aux missions et aux comptes
+                autorisés. Connexion sécurisée requise.
+              </p>
+              <Link href="/dashboard" className="bw-btp-btn bw-btp-btn-secondary-dark mt-6">
+                Accéder à la plateforme
+              </Link>
+            </article>
+          </div>
+          <div className="bw-btp-container mt-8">
+            <p className="text-sm text-[var(--btp-muted)]">
+              Zone d’intervention prioritaire : Yvelines et Île-de-France —
+              autres zones étudiées selon la mission.
+            </p>
+          </div>
+        </section>
       </main>
       <MarketingSiteFooter />
     </div>

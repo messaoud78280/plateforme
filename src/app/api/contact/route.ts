@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { labelBtpServiceNeed } from "@/lib/bework-btp-services";
 import { labelMainNeed, labelMarketType, labelProjectStage } from "@/lib/contact-form-options";
 import { sendEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
@@ -101,28 +102,45 @@ export async function POST(request: NextRequest) {
   const contactNameRaw = String(body.contactName ?? "").trim();
   const email = String(body.email ?? "").trim().toLowerCase();
   const phone = String(body.phone ?? "").trim();
-  const isIdea = String(body.formKind ?? "").trim() === "idea";
-  const marketType = String(body.marketType ?? "").trim() || (isIdea ? "autre" : "");
+  const formKind = String(body.formKind ?? "").trim();
+  const source =
+    String(body.source ?? "homepage_contact_form").trim().slice(0, 120) ||
+    "homepage_contact_form";
+  const isIdea = formKind === "idea";
+  const isBtpDevis = formKind === "btp_devis" || source === "btp_devis_form";
+  const marketType = String(body.marketType ?? "").trim() || (isIdea || isBtpDevis ? "autre" : "");
   const tradeActivity = String(body.tradeActivity ?? "").trim();
-  const mainNeed = String(body.mainNeed ?? "").trim() || (isIdea ? "ne_sais_pas_encore" : "");
+  const mainNeed =
+    String(body.mainNeed ?? "").trim() || (isIdea ? "ne_sais_pas_encore" : "");
   const projectStage = String(body.projectStage ?? "").trim();
   const rawMessage = String(body.message ?? "").trim();
   const stageLine = projectStage ? `Étape : ${labelProjectStage(projectStage)}` : "";
-  const message = [stageLine, rawMessage].filter(Boolean).join("\n\n").slice(0, 2000);
-  const source = String(body.source ?? "homepage_contact_form").trim().slice(0, 120) || "homepage_contact_form";
+  const message = [stageLine, rawMessage].filter(Boolean).join("\n\n").slice(0, 4000);
   const isTrainingInterest = source === "formation_interest";
   const consent = body.consent === true;
   const contactName = contactNameRaw || companyName;
+  const needLabel = isBtpDevis ? labelBtpServiceNeed(mainNeed) : labelMainNeed(mainNeed);
 
   if (!companyName || !email || !marketType || !mainNeed) {
     return NextResponse.json(
-      { error: "Nom / entreprise, email, type de marché et besoin principal sont requis." },
+      {
+        error: isBtpDevis
+          ? "Entreprise, e-mail et prestation sont requis."
+          : "Nom / entreprise, email, type de marché et besoin principal sont requis.",
+      },
       { status: 400 }
     );
   }
 
-  if (isIdea && !rawMessage) {
-    return NextResponse.json({ error: "Décrivez votre besoin ou votre idée." }, { status: 400 });
+  if ((isIdea || isBtpDevis) && !rawMessage) {
+    return NextResponse.json(
+      { error: isBtpDevis ? "Décrivez votre chantier ou votre besoin." : "Décrivez votre besoin ou votre idée." },
+      { status: 400 }
+    );
+  }
+
+  if (isBtpDevis && !contactNameRaw) {
+    return NextResponse.json({ error: "Le nom du contact est requis." }, { status: 400 });
   }
 
   if (!isValidEmail(email)) {
@@ -134,9 +152,10 @@ export async function POST(request: NextRequest) {
   }
 
   const createdAt = new Date();
+  let requestId: string | null = null;
 
   try {
-    await prisma.contactRequest.create({
+    const created = await prisma.contactRequest.create({
       data: {
         structure: companyName,
         contactName,
@@ -149,7 +168,9 @@ export async function POST(request: NextRequest) {
         consent,
         source,
       },
+      select: { id: true },
     });
+    requestId = created.id;
   } catch {
     console.error("[contact] ContactRequest create error");
     return NextResponse.json(
@@ -169,17 +190,30 @@ export async function POST(request: NextRequest) {
 <html>
 <head><meta charset="utf-8"><title>${isTrainingInterest ? "Nouvelle demande de place BeWork" : "Nouvelle demande de contact BeWork"}</title></head>
 <body style="font-family: sans-serif; line-height: 1.5; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <h1 style="color: #0f172a;">${isTrainingInterest ? "Nouvelle demande de place" : "Nouvelle demande de contact"}</h1>
-  <p>${isTrainingInterest ? "Une demande concerne la formation BeWork." : "Une demande a été envoyée depuis le formulaire BeWork."}</p>
+  <h1 style="color: #0f172a;">${
+    isTrainingInterest
+      ? "Nouvelle demande de place"
+      : isBtpDevis
+        ? "Nouvelle demande de devis BTP"
+        : "Nouvelle demande de contact"
+  }</h1>
+  <p>${
+    isTrainingInterest
+      ? "Une demande concerne la formation BeWork."
+      : isBtpDevis
+        ? "Une demande de devis prestations BTP a été envoyée."
+        : "Une demande a été envoyée depuis le formulaire BeWork."
+  }</p>
 
   <ul style="list-style: none; padding: 0;">
+    ${requestId ? `<li><strong>Référence :</strong> ${escapeHtml(requestId)}</li>` : ""}
     ${isTrainingInterest ? "" : `<li><strong>Entreprise :</strong> ${escapeHtml(companyName)}</li>`}
     <li><strong>Contact :</strong> ${escapeHtml(contactName)}</li>
     <li><strong>Email :</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></li>
     ${phone ? `<li><strong>Téléphone :</strong> ${escapeHtml(phone)}</li>` : ""}
-    ${isTrainingInterest ? "" : `<li><strong>Effectif :</strong> ${escapeHtml(labelMarketType(marketType))}</li>`}
-    ${tradeActivity ? `<li><strong>Activité :</strong> ${escapeHtml(tradeActivity)}</li>` : ""}
-    ${isTrainingInterest ? "" : `<li><strong>Besoin principal :</strong> ${escapeHtml(labelMainNeed(mainNeed))}</li>`}
+    ${isTrainingInterest || isBtpDevis ? "" : `<li><strong>Effectif :</strong> ${escapeHtml(labelMarketType(marketType))}</li>`}
+    ${tradeActivity ? `<li><strong>Activité / opération :</strong> ${escapeHtml(tradeActivity)}</li>` : ""}
+    ${isTrainingInterest ? "" : `<li><strong>Besoin principal :</strong> ${escapeHtml(needLabel)}</li>`}
     ${projectStage && !isTrainingInterest ? `<li><strong>Avancement du projet :</strong> ${escapeHtml(labelProjectStage(projectStage))}</li>` : ""}
     <li><strong>Date de demande :</strong> ${escapeHtml(dateLabel)}</li>
     <li><strong>Source :</strong> ${escapeHtml(source)}</li>
@@ -211,7 +245,9 @@ export async function POST(request: NextRequest) {
         replyTo: email,
         subject: isTrainingInterest
           ? `[BeWork] Demande de place – ${contactName}`
-          : `[BeWork] Demande de contact – ${companyName}`,
+          : isBtpDevis
+            ? `[BeWork] Devis BTP – ${needLabel} – ${companyName}`
+            : `[BeWork] Demande de contact – ${companyName}`,
         html,
       });
       if (!r.ok) {
@@ -229,6 +265,7 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     ok: true,
+    id: requestId,
     emailNotificationSent: emailSent,
     ...(providerErrorMessage ? { emailError: providerErrorMessage } : {}),
   });

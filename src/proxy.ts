@@ -13,8 +13,10 @@ import {
   requiredHrefForApiPath,
 } from "@/lib/equipe-acces/dashboard-policy";
 import {
+  isBeworkFormationCommercialPath,
   isBeworkV3ConfidentialPath,
   isBeworkV3LegacyBtpPath,
+  resolveLegacyMarketingRedirect,
 } from "@/lib/bework-v3-public-gate";
 
 /** Hôte canonique (ex. www.bework.fr) — dérivé de NEXT_PUBLIC_SITE_URL en prod. */
@@ -208,14 +210,17 @@ export async function proxy(request: NextRequest) {
     });
   }
 
-  // BeWork V3 — landings SaaS / BTP : redirection vers la formation.
-  if (isBeworkV3LegacyBtpPath(pathname)) {
+  // Migration SEO — anciennes landings BTP / formation commerciale → site BTP.
+  if (
+    isBeworkV3LegacyBtpPath(pathname) ||
+    isBeworkFormationCommercialPath(pathname)
+  ) {
     const url = request.nextUrl.clone();
     if (!host || !PASSTHROUGH_HOSTS.has(host)) {
       url.protocol = "https:";
       url.host = canonicalHost;
     }
-    url.pathname = "/formation";
+    url.pathname = resolveLegacyMarketingRedirect(pathname);
     url.search = "";
     return NextResponse.redirect(url, 308);
   }

@@ -1,115 +1,101 @@
 /**
  * Expressions cibles SEO / AEO — positionnement BeWork :
- * formation pratique à la création avec l’intelligence artificielle.
- * Cette liste guide le contenu ; elle n’est pas émise en meta keywords (ignorée par Google).
+ * conduite de travaux, pilotage TCE, marchés, plateforme collaborative.
  */
-import { TRAINING_OFFERS } from "@/lib/bework-formation";
 
-/** Niche principale : apprendre à créer avec l’IA (intentions de recherche). */
+/** Niche principale : prestations BTP. */
 export const SEO_KEYWORDS_FORMATION_IA = [
-  "créer avec l'IA sans coder",
-  "formation IA débutant",
-  "créer application sans programmer",
-  "créer site internet avec IA",
-  "formation intelligence artificielle pratique",
-  "apprendre à créer avec l'IA",
-  "formation créer outils numériques",
-  "formation IA une journée",
-  "créer CRM avec IA",
-  "créer système de réservation IA",
-  "devenir autonome avec l'IA",
-  "passer de l'idée au projet numérique",
+  "conducteur de travaux externalisé",
+  "prestation conducteur de travaux",
+  "conduite de travaux externalisée",
+  "conducteur de travaux VRD",
+  "conducteur de travaux TCE",
+  "chef de chantier externalisé",
+  "gestion de chantier BTP",
+  "pilotage de chantier TCE",
+  "assistance chantier",
+  "coordination de travaux",
 ] as const;
 
-/** Preuves / exemples de projets (démonstrations). */
 export const SEO_KEYWORDS_DEMOS = [
-  "démonstration messagerie interne",
-  "exemple agenda professionnel IA",
-  "exemple CRM créé avec IA",
-  "démonstration tableau de bord",
-  "espace client démonstration",
-  "créer outil métier avec IA",
+  "gestion de chantier avec IA",
+  "suivi de chantier numérique",
+  "plateforme collaborative BTP",
+  "outils IA construction",
+  "tableau de bord chantier",
 ] as const;
 
-/** Publics cibles. */
 export const SEO_KEYWORDS_AUDIENCE = [
-  "formation IA entrepreneurs",
-  "formation IA artisans",
-  "formation IA indépendants",
-  "formation IA TPE PME",
-  "formation IA porteurs de projet",
-  "créer outil métier sans développeur",
+  "assistance marchés publics BTP",
+  "réponse appel d'offres BTP",
+  "études de prix BTP",
+  "PME BTP",
+  "entreprise générale",
+  "entreprise VRD",
 ] as const;
 
-/** Signaux géographiques francophones (conservés, reformulés). */
 export const SEO_KEYWORDS_GEO_SCOPE = [
-  "formation IA France",
-  "formation création numérique en français",
+  "conduite de travaux Yvelines",
+  "pilotage chantier Île-de-France",
+  "conducteur de travaux Île-de-France",
 ] as const;
 
-/** Liste fusionnée layout racine. */
 export const SEO_KEYWORDS_GLOBAL: string[] = [
   ...SEO_KEYWORDS_FORMATION_IA,
   ...SEO_KEYWORDS_DEMOS,
   ...SEO_KEYWORDS_AUDIENCE,
   ...SEO_KEYWORDS_GEO_SCOPE,
   "BeWork",
-  "formation BeWork",
-  "parcours BeWork",
+  "BeWork conduite de travaux",
+  "BeWork pilotage TCE",
 ];
 
 export const SEO_KEYWORDS_HOME: string[] = [
   ...SEO_KEYWORDS_FORMATION_IA,
   ...SEO_KEYWORDS_AUDIENCE,
-  "BeWork formation IA",
-  "formation IA débutant 7 heures",
-  "formation IA pratique 14 heures",
+  "BeWork conduite de travaux",
+  "pilotage chantier TCE",
 ];
 
-/**
- * Signature courte officielle BeWork (header, titres SEO, OG, JSON-LD).
- */
-export const BEWORK_BRAND_SIGNATURE = "Créer à l’ère de l’IA";
+export const BEWORK_BRAND_SIGNATURE =
+  "Conduite de travaux & pilotage TCE";
 
-/** Signature institutionnelle (footer, clôture). */
-export const BEWORK_BRAND_INSTITUTIONAL = "Formation pratique. Création avec l’IA. Méthode réutilisable.";
+export const BEWORK_BRAND_INSTITUTIONAL =
+  "Prestations de conduite de travaux. Pilotage TCE. Ingénierie opérationnelle.";
 
-/** Slogan BeWork — contenu, OG, JSON-LD. */
-export const BEWORK_SLOGAN = "Vous avez une idée. Nous vous apprenons à la construire avec l’IA.";
+export const BEWORK_SLOGAN =
+  "Des professionnels pour vos chantiers. Des méthodes pour vos performances. Des outils IA pour mieux piloter vos opérations.";
 
-/** Accroche complémentaire (home / AEO). */
 export const BEWORK_SLOGAN_DECISION =
-  "Un parcours pratique de 7 h ou 14 h, en petit groupe : apprendre à commencer, puis approfondir si vous le souhaitez — sans devenir développeur.";
+  "Renforcez votre organisation avec des missions de conduite de travaux, d’encadrement opérationnel et de coordination TCE.";
 
-/** Phrase de positionnement citables par les IA / extraits AEO. */
 export const BEWORK_AEO_DEFINITION =
-  "BeWork propose une formation progressive de 7 h ou 14 h pour apprendre à créer sites, applications et outils numériques avec l’intelligence artificielle, sans prérequis en programmation. Le Jour 1 apprend à commencer et continuer seul ; le Jour 2 permet de pratiquer davantage et de construire plus loin.";
+  "BeWork propose des prestations de conduite de travaux externalisée, de pilotage de chantier et d’assistance aux marchés publics et privés, appuyées par une plateforme collaborative et des outils IA développés en interne.";
 
-/** Title SEO / OG racine (aligné home). */
-export const SEO_SITE_TITLE_DEFAULT = "BeWork | Créer avec l’IA sans savoir coder";
+export const SEO_SITE_TITLE_DEFAULT =
+  "BeWork | Conduite de travaux & pilotage TCE";
 
-export const SEO_SITE_TITLE_OG = "BeWork — Créer avec l’IA sans savoir coder";
+export const SEO_SITE_TITLE_OG =
+  "BeWork — Conduite de travaux & pilotage TCE";
 
-/** Meta description site (layout racine) — ≤160 car. */
 export const SEO_VALUE_PROPOSITION =
-  `Apprenez à créer avec l’IA sans coder. Parcours ${TRAINING_OFFERS.essential.hours} h (${TRAINING_OFFERS.essential.price} €) ou ${TRAINING_OFFERS.complete.hours} h (${TRAINING_OFFERS.complete.price} €). Demandez une place BeWork.`;
+  "BeWork : conduite de travaux, pilotage TCE et assistance aux marchés. Plateforme collaborative et outils IA pour organiser délais, coûts et avancement.";
 
-/** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  `Formation progressive pour créer avec l’IA sans coder : ${TRAINING_OFFERS.essential.hours} h ou ${TRAINING_OFFERS.complete.hours} h, dès ${TRAINING_OFFERS.essential.price} €.`;
+  "Prestations de conduite de travaux et pilotage TCE, renforcées par une plateforme collaborative et des outils IA.";
 
-/** Tagline institutionnelle (OG image, footer). */
-export const BEWORK_TECH_AROUND_YOU = "Sans savoir coder. Créez ce que vous imaginez.";
+export const BEWORK_TECH_AROUND_YOU =
+  "Expertise terrain. Méthode. Outils IA pour le chantier.";
 
-/** Alias historiques — évite les imports cassés ailleurs (orientés formation). */
+/** Alias historiques — évite les imports cassés ailleurs. */
 export const SEO_KEYWORDS_SOLUTIONS_IA = SEO_KEYWORDS_FORMATION_IA;
 export const SEO_KEYWORDS_PLATEFORME = SEO_KEYWORDS_DEMOS;
 export const SEO_KEYWORDS_PARTENAIRE_CORE = SEO_KEYWORDS_AUDIENCE;
 export const SEO_KEYWORDS_BTP_PME = SEO_KEYWORDS_AUDIENCE;
 export const SEO_KEYWORDS_PERSONAS_BTP = SEO_KEYWORDS_AUDIENCE;
 export const SEO_KEYWORDS_TECHNIQUE = SEO_KEYWORDS_DEMOS;
-export const SEO_KEYWORDS_MARCHES_TRAVAUX = SEO_KEYWORDS_FORMATION_IA;
+export const SEO_KEYWORDS_MARCHES_TRAVAUX = SEO_KEYWORDS_AUDIENCE;
 export const SEO_KEYWORDS_ASSISTANT_TRAVAUX = SEO_KEYWORDS_FORMATION_IA;
-export const SEO_KEYWORDS_APPELS_OFFRES = SEO_KEYWORDS_FORMATION_IA;
+export const SEO_KEYWORDS_APPELS_OFFRES = SEO_KEYWORDS_AUDIENCE;
 export const SEO_KEYWORDS_CHANTIER_ADMIN = SEO_KEYWORDS_DEMOS;
-export const SEO_KEYWORDS_MARCHES_PUBLIC_EXECUTION = SEO_KEYWORDS_DEMOS;
+export const SEO_KEYWORDS_MARCHES_PUBLIC_EXECUTION = SEO_KEYWORDS_AUDIENCE;

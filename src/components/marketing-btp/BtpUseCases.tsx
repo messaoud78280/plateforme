@@ -20,9 +20,16 @@ export function BtpUseCases() {
                 Scénario type
               </p>
               <h3 className="mt-2 font-bold">{item.title}</h3>
-              <p className="mt-3 text-base text-[var(--btp-muted)]">{item.context}</p>
-              <p className="mt-3 text-base font-medium text-[var(--btp-heading)]">
-                Solution BeWork : {item.solution}
+              <p className="mt-3 text-base text-[var(--btp-muted)]">
+                <span className="font-semibold text-[var(--btp-heading)]">Problème : </span>
+                {item.context}
+              </p>
+              <p className="mt-2 text-base text-[var(--btp-muted)]">
+                <span className="font-semibold text-[var(--btp-heading)]">Intervention : </span>
+                {item.solution}
+              </p>
+              <p className="mt-2 text-base font-medium text-[var(--btp-heading)]">
+                Livrables types : {item.livrables}
               </p>
               <Link
                 href={`/demande-de-devis?besoin=${item.besoin}`}

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { BtpCommercialOffers } from "@/components/marketing-btp/BtpCommercialOffers";
 import { BtpCtaBand } from "@/components/marketing-btp/BtpCtaBand";
+import { BtpDeliverables } from "@/components/marketing-btp/BtpDeliverables";
 import { BtpPageHero } from "@/components/marketing-btp/BtpPageHero";
 import "@/components/marketing-btp/btp-marketing.css";
 import { BTP_SEO_PAGES } from "@/lib/bework-btp-services";
@@ -118,6 +120,9 @@ export default function PilotageChantierPage() {
             </p>
           </div>
         </section>
+
+        <BtpCommercialOffers />
+        <BtpDeliverables compact />
 
         <BtpCtaBand
           title="Un chantier à structurer et à suivre ?"

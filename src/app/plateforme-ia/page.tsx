@@ -3,8 +3,10 @@ import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { BtpCtaBand } from "@/components/marketing-btp/BtpCtaBand";
+import { BtpDeliverables } from "@/components/marketing-btp/BtpDeliverables";
 import { BtpIaSection } from "@/components/marketing-btp/BtpIaSection";
 import { BtpPageHero } from "@/components/marketing-btp/BtpPageHero";
+import { BtpPlatformJourney } from "@/components/marketing-btp/BtpPlatformJourney";
 import { BtpPlatformShowcase } from "@/components/marketing-btp/BtpPlatformShowcase";
 import "@/components/marketing-btp/btp-marketing.css";
 import { BTP_SEO_PAGES } from "@/lib/bework-btp-services";
@@ -13,8 +15,9 @@ import { buildMarketingPageMetadata } from "@/lib/seo-formation-pages";
 const seo = BTP_SEO_PAGES.plateforme;
 export const metadata: Metadata = buildMarketingPageMetadata({
   path: seo.path,
-  title: seo.title,
-  description: seo.description,
+  title: "Outils IA et plateforme collaborative chantier",
+  description:
+    "Plateforme collaborative BeWork et outils IA conçus pour les conducteurs de travaux : visite, métrés, devis, planning, approvisionnements, suivi et reporting.",
 });
 
 export default function PlateformeIaPage() {
@@ -24,8 +27,8 @@ export default function PlateformeIaPage() {
       <main>
         <BtpPageHero
           eyebrow="PLATEFORME & IA"
-          title="Des professionnels de terrain. Une technologie conçue pour le chantier."
-          subtitle="Nos missions de conduite de travaux s’appuient sur un environnement numérique développé autour des besoins réels des entreprises du BTP."
+          title="Nos propres outils IA, conçus pour ceux qui pilotent les chantiers."
+          subtitle="BeWork associe expertise opérationnelle, plateforme collaborative et intelligence artificielle pour faciliter la gestion quotidienne des opérations BTP."
           primaryHref="/demande-de-devis"
           primaryLabel="Obtenir un devis"
           secondaryHref="/dashboard"
@@ -35,22 +38,23 @@ export default function PlateformeIaPage() {
         <section className="bw-btp-section bw-btp-section-alt">
           <div className="bw-btp-container max-w-3xl">
             <p className="text-base leading-relaxed text-[var(--btp-muted)]">
-              Nous ne nous contentons pas d’intervenir sur vos chantiers. Nous
-              structurons l’information, facilitons les échanges et utilisons
-              nos propres outils IA pour aider nos équipes à anticiper, analyser
-              et suivre les opérations. L’IA n’est jamais autonome sur les
-              décisions techniques ou de sécurité.
+              Les entreprises ne viennent pas acheter un logiciel. Elles nous
+              confient une mission. La plateforme est une valeur ajoutée pour
+              mieux préparer, documenter, organiser et suivre nos interventions.
             </p>
             <p className="mt-4 text-base leading-relaxed text-[var(--btp-muted)]">
-              Parcours type : données chantier → outils BeWork → analyse
-              assistée par IA → validation par le professionnel → suivi et
-              décision.
+              Collaboration possible selon accès contractuels : informations,
+              documents, planning, actions, rapports et observations. Aucun
+              portail client généralisé n’est promis au-delà des droits
+              réellement ouverts.
             </p>
           </div>
         </section>
 
+        <BtpPlatformJourney />
         <BtpPlatformShowcase />
         <BtpIaSection />
+        <BtpDeliverables />
 
         <section className="bw-btp-section">
           <div className="bw-btp-container">
@@ -59,7 +63,7 @@ export default function PlateformeIaPage() {
                 Démonstration commerciale — données fictives
               </p>
               <h2 className="mt-3 font-bold">
-                Découvrez comment nous suivons une opération.
+                Interface métier, pas une promesse technologique abstraite.
               </h2>
               <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {[
@@ -74,16 +78,8 @@ export default function PlateformeIaPage() {
                   </div>
                 ))}
               </div>
-              <ul className="mt-6 grid gap-2 text-base text-[var(--btp-muted)] sm:grid-cols-2">
-                <li>Synthèse du conducteur de travaux</li>
-                <li>Suivi des quantités</li>
-                <li>Indicateurs de coûts</li>
-                <li>Documents associés</li>
-              </ul>
               <p className="mt-5 text-xs text-[var(--btp-muted)]">
-                Exemple anonymisé / fictif explicitement identifié — ne
-                correspond pas à un chantier client réel. Aucune capture de
-                données client n’est affichée.
+                Exemple fictif — aucune donnée client réelle n’est affichée.
               </p>
             </div>
 

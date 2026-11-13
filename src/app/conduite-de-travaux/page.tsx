@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { BtpCommercialOffers } from "@/components/marketing-btp/BtpCommercialOffers";
 import { BtpCtaBand } from "@/components/marketing-btp/BtpCtaBand";
+import { BtpDeliverables } from "@/components/marketing-btp/BtpDeliverables";
 import { BtpPageHero } from "@/components/marketing-btp/BtpPageHero";
+import { BtpProfessionals } from "@/components/marketing-btp/BtpProfessionals";
 import "@/components/marketing-btp/btp-marketing.css";
 import {
+  BTP_COMPETENCE_SHEETS,
   BTP_MISSION_DURATION_OPTIONS,
   BTP_SEO_PAGES,
 } from "@/lib/bework-btp-services";
@@ -18,70 +22,6 @@ export const metadata: Metadata = buildMarketingPageMetadata({
   description: seo.description,
 });
 
-const offers = [
-  {
-    title: "Conducteur de travaux externalisé",
-    besoin: "conducteur_travaux",
-    items: [
-      "Préparation technique des opérations",
-      "Étude des dossiers d’exécution",
-      "Analyse des contraintes contractuelles",
-      "Organisation des moyens humains et matériels",
-      "Établissement et suivi des plannings",
-      "Coordination des équipes et sous-traitants",
-      "Gestion des approvisionnements",
-      "Contrôle de l’avancement",
-      "Suivi budgétaire et analyse des dépenses",
-      "Suivi des situations de travaux",
-      "Organisation des réunions",
-      "Comptes rendus et reporting",
-      "Anticipation des blocages",
-      "Assistance à la réception",
-    ],
-  },
-  {
-    title: "Chef de chantier opérationnel",
-    besoin: "chef_chantier",
-    items: [
-      "Organisation quotidienne",
-      "Répartition des tâches",
-      "Préparation des postes de travail",
-      "Encadrement terrain",
-      "Contrôle d’implantation et d’exécution",
-      "Suivi des quantités produites",
-      "Gestion des moyens et matériels",
-      "Remontée des anomalies",
-      "Suivi des règles de prévention",
-    ],
-  },
-  {
-    title: "Direction de travaux externalisée",
-    besoin: "direction_travaux",
-    items: [
-      "Supervision d’opérations multiples",
-      "Coordination de plusieurs conducteurs",
-      "Analyse des performances",
-      "Gestion des priorités",
-      "Appui au dirigeant ou au responsable d’exploitation",
-      "Gestion des situations complexes",
-      "Reporting de direction",
-    ],
-  },
-  {
-    title: "Intervention sur chantier en difficulté",
-    besoin: "audit_redressement",
-    items: [
-      "Audit initial",
-      "Identification des causes de retard",
-      "Analyse des pertes de rendement",
-      "Vérification des ressources",
-      "Plan de rattrapage",
-      "Réorganisation des interventions",
-      "Suivi des actions correctives",
-    ],
-  },
-] as const;
-
 export default function ConduiteDeTravauxPage() {
   return (
     <div className="bw-btp-site min-h-screen">
@@ -90,73 +30,83 @@ export default function ConduiteDeTravauxPage() {
         <BtpPageHero
           eyebrow="PRESTATION PRINCIPALE"
           title="Des conducteurs de travaux pour renforcer vos opérations."
-          subtitle="Besoin de piloter un chantier, d’absorber une surcharge d’activité ou de renforcer votre encadrement technique ? BeWork intervient sur des missions de conduite de travaux adaptées aux besoins de votre entreprise."
+          subtitle="Besoin de piloter un chantier, d’absorber une surcharge ou de renforcer votre encadrement ? BeWork propose des missions contractualisées — périmètre, responsabilités et livrables définis. Pas du travail temporaire."
           primaryHref="/demande-de-devis?besoin=conducteur_travaux"
           primaryLabel="Demander un conducteur de travaux"
           secondaryHref="/demande-de-devis"
           secondaryLabel="Obtenir un devis"
         />
 
-        <section className="bw-btp-section bw-btp-section-alt">
-          <div className="bw-btp-container space-y-10">
-            {offers.map((offer) => (
-              <article key={offer.title} className="bw-btp-card">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <h2 className="text-2xl font-bold">{offer.title}</h2>
+        <BtpProfessionals />
+
+        <section className="bw-btp-section" aria-labelledby="competences-title">
+          <div className="bw-btp-container">
+            <p className="bw-btp-eyebrow">Compétences types</p>
+            <h2 id="competences-title" className="mt-2 font-bold">
+              Des spécialités mobilisables selon vos opérations.
+            </h2>
+            <p className="mt-3 max-w-3xl text-base text-[var(--btp-muted)]">
+              Fiches génériques — aucun profil nominatif, photo ou expérience
+              individuelle inventés. La disponibilité est confirmée lors de
+              l’étude de votre besoin.
+            </p>
+            <div className="mt-10 grid gap-5 md:grid-cols-3">
+              {BTP_COMPETENCE_SHEETS.map((sheet) => (
+                <article key={sheet.title} className="bw-btp-card flex flex-col">
+                  <h3 className="font-bold">{sheet.title}</h3>
+                  <p className="mt-3 text-xs font-bold uppercase tracking-[0.1em] text-[var(--btp-steel)]">
+                    Spécialités
+                  </p>
+                  <ul className="mt-2 space-y-1">
+                    {sheet.specialites.map((s) => (
+                      <li key={s} className="text-base text-[var(--btp-muted)]">
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-4 text-xs font-bold uppercase tracking-[0.1em] text-[var(--btp-steel)]">
+                    Missions
+                  </p>
+                  <ul className="mt-2 flex-1 space-y-1">
+                    {sheet.missions.map((m) => (
+                      <li key={m} className="text-base text-[var(--btp-muted)]">
+                        {m}
+                      </li>
+                    ))}
+                  </ul>
                   <Link
-                    href={`/demande-de-devis?besoin=${offer.besoin}`}
-                    className="bw-btp-btn bw-btp-btn-primary text-base"
+                    href={`/demande-de-devis?besoin=${sheet.besoin}&operation=${sheet.specialiteQuery}`}
+                    className="bw-btp-btn bw-btp-btn-secondary-dark mt-6 self-start"
                   >
-                    Demander cette mission
+                    Demander cette compétence
                   </Link>
-                </div>
-                <ul className="mt-6 grid gap-2 sm:grid-cols-2">
-                  {offer.items.map((item) => (
-                    <li
-                      key={item}
-                      className="flex gap-2 text-base text-[var(--btp-muted)]"
-                    >
-                      <span className="text-[var(--btp-copper)]" aria-hidden>
-                        •
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
-        <section className="bw-btp-section">
+        <BtpCommercialOffers />
+        <BtpDeliverables />
+
+        <section className="bw-btp-section bw-btp-section-alt">
           <div className="bw-btp-container">
-            <h2 className="text-3xl font-bold">Modalités de mission</h2>
-            <p className="mt-3 max-w-2xl text-[var(--btp-muted)]">
-              Toutes les missions sont personnalisées et font l’objet d’un devis.
-              La nature exacte des responsabilités, l’autonomie, les pouvoirs de
-              décision, les assurances et les conditions d’intervention sont
-              définis contractuellement.
-            </p>
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
-              {BTP_MISSION_DURATION_OPTIONS.map((m) => (
-                <div key={m.value} className="bw-btp-card">
-                  <h3 className="text-lg font-bold">{m.label}</h3>
-                  <p className="mt-2 text-base text-[var(--btp-muted)]">{m.hint}</p>
+            <h2 className="font-bold">Durées de mission</h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {BTP_MISSION_DURATION_OPTIONS.map((d) => (
+                <div key={d.value} className="bw-btp-card">
+                  <h3 className="font-bold">{d.label}</h3>
+                  <p className="mt-2 text-base text-[var(--btp-muted)]">{d.hint}</p>
                 </div>
               ))}
             </div>
-            <p className="mt-8 max-w-3xl text-base leading-relaxed text-[var(--btp-muted)]">
-              BeWork commercialise des prestations de conduite et de pilotage de
-              travaux. Ces missions ne sont pas présentées comme une location de
-              salariés ni comme du travail temporaire.
-            </p>
           </div>
         </section>
 
         <BtpCtaBand
-          title="Besoin d’un renfort de conduite de travaux ?"
+          title="Besoin d’un conducteur de travaux ?"
           ctaHref="/demande-de-devis?besoin=conducteur_travaux"
-          ctaLabel="Demander un devis"
+          ctaLabel="Demander un conducteur de travaux"
         />
       </main>
       <MarketingSiteFooter />

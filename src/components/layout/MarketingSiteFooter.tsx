@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   BTP_CTA_PRIMARY,
   BTP_NAV_ITEMS,
+  BTP_SERVICE_LINKS,
   BEWORK_BTP_BRAND_SHORT,
   BEWORK_BTP_SIGNATURE,
 } from "@/lib/bework-btp-services";
@@ -95,31 +96,18 @@ export function MarketingSiteFooter() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <ColumnTitle>Entreprise</ColumnTitle>
+            <ColumnTitle>Nos services</ColumnTitle>
             <ul className="flex flex-col gap-3">
-              <li>
-                <Link href="/plateforme-ia" className={COL_LINK}>
-                  Plateforme & IA
-                </Link>
-              </li>
-              <li>
-                <Link href="/notre-methode" className={COL_LINK}>
-                  Notre méthode
-                </Link>
-              </li>
-              <li>
-                <Link href="/a-propos" className={COL_LINK}>
-                  À propos
-                </Link>
-              </li>
+              {BTP_SERVICE_LINKS.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className={COL_LINK}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
               <li>
                 <Link href="/demande-de-devis" className={COL_LINK}>
                   Demande de devis
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className={COL_LINK}>
-                  Contact
                 </Link>
               </li>
             </ul>

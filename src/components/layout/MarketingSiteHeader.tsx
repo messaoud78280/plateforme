@@ -141,11 +141,11 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 <span className={styles.signatureBody}>
                   <span className={styles.signaturePrimary}>
                     <span className={styles.signaturePrimaryFull}>
-                      Maîtrise d’œuvre ·{" "}
+                      Conduite de travaux ·{" "}
                       <span className={styles.accent}>Pilotage de chantier</span>
                     </span>
                     <span className={styles.signaturePrimaryShort}>
-                      Maîtrise d’œuvre
+                      Conduite de travaux
                     </span>
                   </span>
                   <span className={styles.signatureSecondary}>

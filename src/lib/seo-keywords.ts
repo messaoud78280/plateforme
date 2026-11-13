@@ -58,31 +58,31 @@ export const SEO_KEYWORDS_HOME: string[] = [
 ];
 
 export const BEWORK_BRAND_SIGNATURE =
-  "Maîtrise d’œuvre & pilotage de chantier";
+  "Conduite de travaux & pilotage de chantier";
 
 export const BEWORK_BRAND_INSTITUTIONAL =
-  "Maîtrise d’œuvre. Suivi et pilotage de chantier. Coordination BTP.";
+  "Conduite de travaux. Suivi et pilotage de chantier. Coordination TCE.";
 
 export const BEWORK_SLOGAN =
-  "L’expertise du chantier, renforcée par une méthode et des outils numériques.";
+  "Des conducteurs de travaux pour piloter vos chantiers.";
 
 export const BEWORK_SLOGAN_DECISION =
-  "Confiez le suivi et le pilotage de vos opérations à des professionnels du BTP.";
+  "Confiez la conduite et le suivi de vos opérations à des professionnels du BTP.";
 
 export const BEWORK_AEO_DEFINITION =
-  "BeWork propose des prestations de maîtrise d’œuvre, de suivi et de pilotage de chantier BTP, ainsi qu’une assistance aux marchés publics et privés. Les outils numériques et l’IA sont utilisés en interne par les équipes pour renforcer l’organisation et la traçabilité des missions.";
+  "BeWork propose aux entreprises du BTP des prestations de conduite de travaux externalisée, de gestion et de suivi de chantier, de maîtrise d’œuvre d’exécution lorsque le cadre le permet, et d’assistance aux marchés publics et privés. Les outils numériques et l’IA sont utilisés en interne par les intervenants BeWork.";
 
 export const SEO_SITE_TITLE_DEFAULT =
-  "BeWork | Maîtrise d’œuvre & pilotage de chantier";
+  "BeWork | Conduite de travaux & pilotage de chantier";
 
 export const SEO_SITE_TITLE_OG =
-  "BeWork — Maîtrise d’œuvre & pilotage de chantier";
+  "BeWork — Conduite de travaux & pilotage de chantier";
 
 export const SEO_VALUE_PROPOSITION =
-  "BeWork : maîtrise d’œuvre, suivi et pilotage de chantier BTP, assistance aux marchés. Les outils numériques et l’IA sont utilisés en interne pour renforcer le suivi des missions.";
+  "BeWork : conduite de travaux externalisée, suivi et pilotage de chantier BTP, assistance aux marchés. Les outils numériques et l’IA sont utilisés en interne par nos intervenants.";
 
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Prestations de maîtrise d’œuvre, suivi et pilotage de chantier BTP — sur devis.";
+  "Conducteurs de travaux et professionnels du suivi de chantier BTP — prestations sur devis.";
 
 export const BEWORK_TECH_AROUND_YOU =
   "Expertise terrain. Méthode. Outils internes au service du chantier.";

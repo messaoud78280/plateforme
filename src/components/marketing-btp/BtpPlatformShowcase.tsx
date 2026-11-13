@@ -10,7 +10,7 @@ export function BtpPlatformShowcase() {
           Des outils utilisés par nos équipes sur le terrain.
         </h2>
         <p className="bw-btp-lead mt-4 max-w-3xl">
-          Nos gestionnaires et pilotes de chantier s’appuient sur un
+          Nos conducteurs de travaux et pilotes de chantier s’appuient sur un
           environnement de suivi interne pour préparer, documenter et
           coordonner les missions — avec une validation professionnelle à
           chaque étape.
@@ -63,8 +63,11 @@ export function BtpPlatformShowcase() {
           <Link href="/plateforme-ia" className="bw-btp-btn bw-btp-btn-primary">
             Voir notre approche outils &amp; méthode
           </Link>
-          <Link href="/demande-de-devis" className="bw-btp-btn bw-btp-btn-secondary">
-            Demander une mission
+          <Link
+            href="/demande-de-devis?besoin=conducteur_travaux"
+            className="bw-btp-btn bw-btp-btn-secondary"
+          >
+            Demander un conducteur de travaux
           </Link>
         </div>
       </div>

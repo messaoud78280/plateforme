@@ -139,7 +139,8 @@ const jsonLd = {
       name: "BeWork",
       alternateName: [
         `BeWork — ${BEWORK_BRAND_SIGNATURE}`,
-        "BeWork — Maîtrise d’œuvre et pilotage de chantier",
+        "BeWork — Conduite de travaux et pilotage de chantier",
+        "Conducteur de travaux externalisé",
         "Suivi de chantier BTP",
       ],
       description: SEO_VALUE_PROPOSITION,
@@ -174,7 +175,7 @@ const jsonLd = {
         name: "Laure Olivie",
         jobTitle: "Fondatrice",
         knowsAbout: [
-          "Maîtrise d’œuvre et suivi de chantier",
+          "Conduite de travaux et suivi de chantier",
           "Terrassements et VRD",
           "Pilotage TCE",
           "Marchés publics et privés BTP",
@@ -191,10 +192,12 @@ const jsonLd = {
       ],
       ...(orgSameAs.length ? { sameAs: orgSameAs } : {}),
       knowsAbout: [
-        "Maîtrise d’œuvre BTP",
+        "Conduite de travaux externalisée",
+        "Conducteur de travaux",
         "Suivi de chantier",
         "Pilotage de chantier TCE",
         "Coordination de travaux",
+        "Maîtrise d’œuvre d’exécution",
         "Assistance marchés publics BTP",
         "Études de prix BTP",
         "Gestion de chantier",

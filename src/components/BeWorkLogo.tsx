@@ -61,7 +61,7 @@ export function BeWorkLogo({
     <span className={`inline-flex flex-col ${className}`}>
       <Image
         src={LOGO_PATH}
-        alt="BeWork — Maîtrise d’œuvre et pilotage de chantier"
+        alt="BeWork — Conduite de travaux et pilotage de chantier"
         width={displayWidth}
         height={displayHeight}
         className={`block shrink-0 object-contain object-left ${override || box.heightClass} ${override ? "" : "w-auto"}`}

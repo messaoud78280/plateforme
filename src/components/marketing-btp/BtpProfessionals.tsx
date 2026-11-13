@@ -7,55 +7,39 @@ export function BtpProfessionals() {
       <div className="bw-btp-container">
         <p className="bw-btp-eyebrow">Nos professionnels</p>
         <h2 id="pros-title" className="mt-2 font-bold">
-          Les compétences nécessaires à vos opérations.
+          Les professionnels BeWork au service de vos opérations.
         </h2>
         <p className="mt-3 max-w-3xl text-base text-[var(--btp-muted)]">
           Prestations de mission contractualisées — pas du travail temporaire.
           Les profils proposés dépendent des compétences et disponibilités
-          effectivement mobilisables.
+          effectivement mobilisables. Aucun effectif ni disponibilité n’est
+          inventé.
         </p>
         <div className="mt-10 grid gap-5 md:grid-cols-2">
           {BTP_PROFESSIONAL_PROFILES.map((p) => (
             <article key={p.title} className="bw-btp-card flex flex-col">
               <h3 className="font-bold">{p.title}</h3>
-              <p className="mt-3 text-base text-[var(--btp-muted)]">
-                <span className="font-semibold text-[var(--btp-heading)]">Quand : </span>
-                {p.when}
+              <p className="mt-3 text-base leading-relaxed text-[var(--btp-muted)]">
+                {p.mission}
               </p>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.1em] text-[var(--btp-steel)]">
-                    Responsabilités possibles
-                  </p>
-                  <ul className="mt-2 space-y-1">
-                    {p.responsibilities.map((r) => (
-                      <li key={r} className="text-base text-[var(--btp-muted)]">
-                        {r}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.1em] text-[var(--btp-steel)]">
-                    Livrables types
-                  </p>
-                  <ul className="mt-2 space-y-1">
-                    {p.livrables.map((l) => (
-                      <li key={l} className="text-base text-[var(--btp-muted)]">
-                        {l}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              <p className="mt-4 text-sm text-[var(--btp-muted)]">
-                Domaines : {p.domaines.join(" · ")}
+              <p className="mt-5 text-xs font-bold uppercase tracking-[0.1em] text-[var(--btp-steel)]">
+                Prestations possibles
               </p>
+              <ul className="mt-2 flex-1 space-y-1.5">
+                {p.prestations.map((item) => (
+                  <li key={item} className="flex gap-2 text-base text-[var(--btp-muted)]">
+                    <span className="text-[var(--btp-accent)]" aria-hidden>
+                      •
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
               <Link
                 href={`/demande-de-devis?besoin=${p.besoin}`}
-                className="mt-5 text-base font-semibold text-[var(--btp-steel)] hover:underline"
+                className="bw-btp-btn bw-btp-btn-secondary-dark mt-6 self-start"
               >
-                Demander cette mission →
+                Demander cette compétence
               </Link>
             </article>
           ))}

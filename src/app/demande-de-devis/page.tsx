@@ -22,8 +22,8 @@ export default function DemandeDeDevisPage() {
       <main>
         <BtpPageHero
           eyebrow="DEVIS"
-          title="Demandez une proposition adaptée à votre chantier."
-          subtitle="Deux étapes : choisissez votre besoin, décrivez l’opération. Nous analysons le périmètre et vous adressons une proposition personnalisée. Aucun tarif public."
+          title="Demandez un conducteur de travaux ou une mission de pilotage."
+          subtitle="Deux étapes : choisissez votre besoin (conducteur de travaux, chef de chantier, direction, pilotage TCE…), décrivez l’opération. Nous analysons le périmètre et vous adressons une proposition personnalisée. Aucun tarif public."
           primaryHref="#formulaire-devis"
           primaryLabel="Commencer"
           secondaryHref="/contact"

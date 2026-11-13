@@ -28,13 +28,14 @@ export default function ConduiteDeTravauxPage() {
       <MarketingSiteHeader />
       <main>
         <BtpPageHero
-          eyebrow="MAÎTRISE D’ŒUVRE & CONDUITE DE TRAVAUX"
-          title="Des professionnels pour suivre et piloter vos opérations."
-          subtitle="Maîtrise d’œuvre, conduite de travaux, chef de chantier ou direction de travaux : missions contractualisées avec périmètre, responsabilités et livrables définis. Cadre MOE / MOEX précisé contractuellement selon assurances et qualifications. Pas du travail temporaire."
+          eyebrow="CONDUITE DE TRAVAUX EXTERNALISÉE"
+          title="Des conducteurs de travaux pour gérer et suivre vos chantiers."
+          subtitle="Conducteur de travaux, chef de chantier, direction de travaux ou pilotage TCE : missions contractualisées avec périmètre, responsabilités et livrables définis. La maîtrise d’œuvre d’exécution est proposée lorsque le cadre contractuel et les assurances le permettent. Pas du travail temporaire."
           primaryHref="/demande-de-devis?besoin=conducteur_travaux"
-          primaryLabel="Confier votre chantier"
+          primaryLabel="Demander un conducteur de travaux"
           secondaryHref="/notre-methode"
-          secondaryLabel="Comprendre notre méthode"
+          secondaryLabel="Découvrir notre méthode"
+          note="Missions ponctuelles ou suivies • TCE • VRD • Bâtiment • Prestations sur devis"
         />
 
         <BtpProfessionals />

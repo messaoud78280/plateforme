@@ -9,7 +9,7 @@ import { BtpPageHero } from "@/components/marketing-btp/BtpPageHero";
 import { BtpPlatformJourney } from "@/components/marketing-btp/BtpPlatformJourney";
 import { BtpPlatformShowcase } from "@/components/marketing-btp/BtpPlatformShowcase";
 import "@/components/marketing-btp/btp-marketing.css";
-import { BTP_SEO_PAGES } from "@/lib/bework-btp-services";
+import { BTP_CTA_CONDUCTEUR, BTP_CTA_METHOD, BTP_SEO_PAGES } from "@/lib/bework-btp-services";
 import { buildMarketingPageMetadata } from "@/lib/seo-formation-pages";
 
 const seo = BTP_SEO_PAGES.plateforme;
@@ -25,13 +25,16 @@ export default function PlateformeIaPage() {
       <MarketingSiteHeader />
       <main>
         <BtpPageHero
-          eyebrow="NOTRE MÉTHODE • PILOTAGE AUGMENTÉ PAR L'IA"
-          title="L'expertise du chantier, la précision du numérique."
-          subtitle="Chez BeWork, nos professionnels assurent la maîtrise d'œuvre, le suivi et la coordination des opérations BTP. Ils s'appuient sur notre méthodologie, notre plateforme collaborative interne et nos outils d'intelligence artificielle pour renforcer la qualité du pilotage, la traçabilité et la maîtrise des coûts et des délais."
-          primaryHref="/demande-de-devis"
-          primaryLabel="Confier une mission"
-          secondaryHref="/notre-methode"
-          secondaryLabel="Découvrir notre méthode"
+          eyebrow="NOTRE MÉTHODE • PILOTAGE DE CHANTIER AUGMENTÉ"
+          title="Nos conducteurs de travaux, renforcés par l'intelligence artificielle."
+          subtitle="Les professionnels BeWork assurent la conduite, la coordination et le suivi des opérations BTP. Ils utilisent nos propres outils de gestion et d'intelligence artificielle pour préparer les interventions, suivre les délais et les coûts, centraliser les informations et produire des rapports structurés."
+          primaryHref={BTP_CTA_CONDUCTEUR.href}
+          primaryLabel={BTP_CTA_CONDUCTEUR.label}
+          secondaryHref={BTP_CTA_METHOD.href}
+          secondaryLabel={BTP_CTA_METHOD.label}
+          imageSrc="/marketing/btp-hero-chantier.jpg"
+          imageAlt="Conducteur de travaux utilisant des outils numériques sur chantier"
+          showUiPreview
         />
 
         <section className="bw-btp-section bw-btp-section-alt">
@@ -44,15 +47,15 @@ export default function PlateformeIaPage() {
               rendus, suivre l’avancement et documenter les décisions.
             </p>
             <p className="mt-4 text-base leading-relaxed text-[var(--btp-muted)]">
-              Chaque mission reste conduite par des professionnels du BTP. Les
-              outils renforcent l’organisation, la traçabilité et la qualité du
-              reporting — sous validation humaine.
+              Ces outils ne constituent pas un logiciel commercialisé
+              séparément. Chaque mission reste conduite par des professionnels
+              du BTP — sous validation humaine.
             </p>
             <ul className="mt-6 space-y-2 text-base text-[var(--btp-muted)]">
               <li>• Structurer les informations chantier</li>
-              <li>• Préparer les opérations</li>
+              <li>• Préparer les interventions</li>
               <li>• Produire des comptes rendus</li>
-              <li>• Suivre l’avancement et les actions</li>
+              <li>• Suivre les délais, les coûts et les actions</li>
               <li>• Centraliser documents et observations</li>
               <li>• Assister l’analyse, sans remplacer le jugement terrain</li>
             </ul>
@@ -93,20 +96,20 @@ export default function PlateformeIaPage() {
             </div>
 
             <div className="mt-10 flex flex-wrap gap-3">
-              <Link href="/demande-de-devis" className="bw-btp-btn bw-btp-btn-primary">
-                Confier une mission
+              <Link href={BTP_CTA_CONDUCTEUR.href} className="bw-btp-btn bw-btp-btn-primary">
+                {BTP_CTA_CONDUCTEUR.label}
               </Link>
-              <Link href="/notre-methode" className="bw-btp-btn bw-btp-btn-secondary">
-                Découvrir notre méthode
+              <Link href={BTP_CTA_METHOD.href} className="bw-btp-btn bw-btp-btn-secondary">
+                {BTP_CTA_METHOD.label}
               </Link>
             </div>
           </div>
         </section>
 
         <BtpCtaBand
-          title="Confier le pilotage de votre chantier ?"
-          ctaHref="/demande-de-devis"
-          ctaLabel="Demander un devis"
+          title="Besoin d’un conducteur de travaux ?"
+          ctaHref={BTP_CTA_CONDUCTEUR.href}
+          ctaLabel={BTP_CTA_CONDUCTEUR.label}
         />
       </main>
       <MarketingSiteFooter />

@@ -23,12 +23,12 @@ export default function AProposPage() {
       <main>
         <BtpPageHero
           eyebrow="À PROPOS"
-          title="Une société de suivi et de pilotage de chantier."
+          title="Une société de conduite de travaux et de pilotage de chantier."
           subtitle={BEWORK_BTP_VALUE_PROPOSITION}
-          primaryHref="/demande-de-devis"
-          primaryLabel="Demander une mission"
+          primaryHref="/demande-de-devis?besoin=conducteur_travaux"
+          primaryLabel="Demander un conducteur de travaux"
           secondaryHref="/notre-methode"
-          secondaryLabel="Notre méthode"
+          secondaryLabel="Découvrir notre méthode"
         />
 
         <section className="bw-btp-section bw-btp-section-alt">
@@ -71,7 +71,7 @@ export default function AProposPage() {
         <BtpCtaBand
           title="Échanger sur votre besoin opérationnel ?"
           ctaHref="/demande-de-devis?besoin=conducteur_travaux"
-          ctaLabel="Confier une mission à BeWork"
+          ctaLabel="Demander un conducteur de travaux"
         />
       </main>
       <MarketingSiteFooter />

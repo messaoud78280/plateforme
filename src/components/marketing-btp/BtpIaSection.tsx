@@ -18,10 +18,10 @@ export function BtpIaSection() {
           Un pilotage renforcé par nos outils IA.
         </h2>
         <p className="bw-btp-lead mt-4 max-w-3xl">
-          L’IA assiste nos équipes dans l’analyse documentaire, la
-          préparation, l’organisation et le reporting. Elle n’est pas un
-          produit vendu seul et n’autonomise pas les décisions techniques ou de
-          sécurité.
+          L’IA assiste nos conducteurs de travaux dans l’analyse documentaire,
+          la préparation, l’organisation et le reporting. Elle renforce nos
+          missions sans remplacer le jugement professionnel ni les décisions
+          techniques et de sécurité.
         </p>
 
         <ol className="mt-10 flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-stretch">

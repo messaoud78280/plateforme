@@ -75,10 +75,10 @@ export function BtpExpertiseTerrain({ compact = false }: Props) {
               href="/demande-de-devis?besoin=conducteur_travaux"
               className="bw-btp-btn bw-btp-btn-primary"
             >
-              Confier une mission à BeWork
+              Demander un conducteur de travaux
             </Link>
             <Link href="/conduite-de-travaux" className="bw-btp-btn bw-btp-btn-secondary">
-              Nos prestations
+              Découvrir nos prestations
             </Link>
           </div>
         </div>

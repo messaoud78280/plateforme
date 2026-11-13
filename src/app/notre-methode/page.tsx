@@ -22,10 +22,10 @@ export default function NotreMethodePage() {
       <main>
         <BtpPageHero
           eyebrow="MÉTHODE"
-          title="Une méthode de suivi structurée."
-          subtitle="Du premier échange à la clôture : besoin, étude, proposition, pilotage et visibilité. Nos équipes s’appuient en interne sur des outils de gestion et d’IA — la mission reste une prestation humaine."
-          primaryHref="/demande-de-devis"
-          primaryLabel="Demander une mission"
+          title="Une méthode de conduite et de suivi structurée."
+          subtitle="Du premier échange à la clôture : besoin, étude, proposition, pilotage et reporting. Nos conducteurs de travaux s’appuient en interne sur des outils de gestion et d’IA — la mission reste une prestation humaine."
+          primaryHref="/demande-de-devis?besoin=conducteur_travaux"
+          primaryLabel="Demander un conducteur de travaux"
           secondaryHref="/plateforme-ia"
           secondaryLabel="Outils & méthode"
         />

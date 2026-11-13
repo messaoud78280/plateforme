@@ -4,22 +4,22 @@
  */
 
 export const BEWORK_BTP_SIGNATURE =
-  "MAÎTRISE D’ŒUVRE • PILOTAGE DE CHANTIER • BTP";
+  "CONDUITE DE TRAVAUX • PILOTAGE DE CHANTIER • BTP";
 
 export const BEWORK_BTP_VALUE_PROPOSITION =
-  "BeWork accompagne les acteurs du BTP avec des prestations de maîtrise d’œuvre, de suivi de chantier et de pilotage opérationnel. Nos intervenants s’appuient sur une organisation rigoureuse et, en interne, sur des outils de gestion et d’intelligence artificielle pour améliorer le suivi, la coordination et la traçabilité des opérations.";
+  "BeWork propose aux entreprises du BTP des prestations de conduite de travaux externalisée et de mobilisation de professionnels pour gérer et suivre les chantiers. Nos activités comprennent aussi la maîtrise d’œuvre d’exécution lorsque le cadre contractuel et les assurances le permettent, ainsi que l’assistance aux marchés publics et privés. Les outils IA et la plateforme collaborative sont utilisés en interne par les intervenants BeWork.";
 
 export const BEWORK_BTP_SLOGAN =
-  "L’expertise du chantier, renforcée par une méthode et des outils numériques.";
+  "Des conducteurs de travaux pour piloter vos chantiers.";
 
 export const BEWORK_BTP_BRAND_SHORT =
-  "Maîtrise d’œuvre, suivi et pilotage de chantier BTP";
+  "Conduite de travaux, suivi et pilotage de chantier BTP";
 
 export const BEWORK_BTP_HERO_SUBTITLE =
-  "Confiez le suivi et le pilotage de vos opérations à des professionnels du BTP. BeWork structure la préparation, la coordination et le reporting — avec, en appui interne, des outils de gestion et d’IA au service de la mission.";
+  "BeWork accompagne les entreprises du BTP avec des prestations de conduite de travaux externalisée, de gestion et de suivi de chantier, de maîtrise d’œuvre d’exécution et de coordination TCE. Nos professionnels utilisent notre plateforme collaborative et nos outils IA pour renforcer l’organisation, le reporting et le suivi des opérations.";
 
 export const BEWORK_BTP_COMMERCIAL_PROPOSITION =
-  "Des gestionnaires et pilotes de chantier pour vos opérations BTP. L’IA et nos outils de suivi sont utilisés par nos équipes pour mieux organiser et documenter les missions.";
+  "Des conducteurs de travaux, chefs de chantier, responsables et directeurs de travaux pour vos opérations BTP. Missions définies et contractualisées — les outils numériques et l’IA renforcent le pilotage de nos intervenants.";
 
 export const BTP_CTA_EXPERTISES = {
   href: "/expertises-tce",
@@ -33,12 +33,12 @@ export const BTP_CTA_PRESTATIONS = {
 
 export const BTP_CTA_METHOD = {
   href: "/notre-methode",
-  label: "Comprendre notre méthode",
+  label: "Découvrir notre méthode",
 } as const;
 
-/** Navigation principale — orientée services BTP (pas produit logiciel). */
+/** Navigation principale — orientée prestations humaines BTP. */
 export const BTP_NAV_ITEMS = [
-  { href: "/conduite-de-travaux", label: "Maîtrise d’œuvre" },
+  { href: "/conduite-de-travaux", label: "Conduite de travaux" },
   { href: "/pilotage-chantier", label: "Suivi de chantier" },
   { href: "/expertises-tce", label: "Expertises TCE" },
   { href: "/marches-publics-prives", label: "Marchés" },
@@ -48,25 +48,25 @@ export const BTP_NAV_ITEMS = [
 
 /** Liens secondaires (footer). */
 export const BTP_SERVICE_LINKS = [
-  { href: "/plateforme-ia", label: "Outils & méthode" },
+  { href: "/plateforme-ia", label: "Méthode & outils internes" },
   { href: "/demande-de-devis?besoin=audit_redressement", label: "Audit de chantier" },
   { href: "/contact", label: "Contact" },
-  { href: "/demande-de-devis", label: "Demander un devis" },
+  { href: "/demande-de-devis?besoin=conducteur_travaux", label: "Demander un conducteur" },
 ] as const;
 
 export const BTP_CTA_PRIMARY = {
-  href: "/demande-de-devis",
+  href: "/demande-de-devis?besoin=conducteur_travaux",
   label: "Demander un devis",
 } as const;
 
 export const BTP_CTA_MISSION = {
-  href: "/demande-de-devis",
-  label: "Demander une mission",
+  href: "/demande-de-devis?besoin=conducteur_travaux",
+  label: "Demander un conducteur de travaux",
 } as const;
 
 export const BTP_CTA_CONDUCTEUR = {
   href: "/demande-de-devis?besoin=conducteur_travaux",
-  label: "Confier votre chantier",
+  label: "Demander un conducteur de travaux",
 } as const;
 
 export type BtpServiceNeedId =
@@ -370,16 +370,16 @@ export const BTP_FAQ = [
 export const BTP_SEO_PAGES = {
   home: {
     path: "/",
-    title: "Maîtrise d’œuvre & pilotage de chantier BTP",
-    absoluteTitle: "BeWork — Maîtrise d’œuvre & pilotage de chantier",
+    title: "Conducteur de travaux & pilotage de chantier BTP",
+    absoluteTitle: "BeWork — Conduite de travaux & pilotage de chantier",
     description:
-      "Maîtrise d’œuvre, suivi et pilotage de chantier BTP. Gestionnaires et conducteurs de travaux pour organiser, coordonner et documenter vos opérations — sur devis.",
+      "Conducteurs de travaux, chefs de chantier et professionnels du suivi TCE pour piloter vos chantiers BTP. Conduite de travaux externalisée, maîtrise d’œuvre d’exécution et coordination — sur devis.",
   },
   conduite: {
     path: "/conduite-de-travaux",
-    title: "Maîtrise d’œuvre et conduite de travaux",
+    title: "Conduite de travaux externalisée",
     description:
-      "Maîtrise d’œuvre, conduite de travaux, chef de chantier ou direction de travaux. Missions contractualisées BTP — périmètre, responsabilités et livrables définis.",
+      "Conducteur de travaux, chef de chantier, direction de travaux et pilotage TCE. Missions contractualisées pour gérer et suivre vos chantiers BTP.",
   },
   expertises: {
     path: "/expertises-tce",
@@ -401,33 +401,33 @@ export const BTP_SEO_PAGES = {
   },
   plateforme: {
     path: "/plateforme-ia",
-    title: "Outils & méthode de pilotage",
+    title: "Méthode & outils de pilotage de chantier",
     description:
-      "Comment les équipes BeWork s’appuient en interne sur des outils de gestion et d’IA pour mieux suivre, documenter et coordonner les missions de chantier.",
+      "Nos conducteurs de travaux s’appuient sur une plateforme collaborative et des outils d’IA internes pour préparer, suivre et documenter les missions de chantier.",
   },
   methode: {
     path: "/notre-methode",
     title: "Notre méthode d’intervention",
     description:
-      "Comment se déroule une mission BeWork : besoin, étude, proposition, pilotage et visibilité — livrables et transparence.",
+      "Comment se déroule une mission BeWork : besoin, étude, proposition, pilotage et reporting — conduite de travaux structurée.",
   },
   aPropos: {
     path: "/a-propos",
     title: "À propos de BeWork",
     description:
-      "BeWork propose des prestations de maîtrise d’œuvre, de suivi et de pilotage de chantier BTP, avec une méthode structurée et des outils internes d’appui.",
+      "BeWork mobilise des professionnels du BTP pour la conduite de travaux, le suivi de chantier et la coordination TCE, avec des outils numériques internes.",
   },
   devis: {
     path: "/demande-de-devis",
-    title: "Demande de devis",
+    title: "Demande de devis — conducteur de travaux",
     description:
-      "Décrivez votre chantier et le type de mission. BeWork étudie votre besoin et vous propose une intervention adaptée.",
+      "Demandez un conducteur de travaux, un chef de chantier ou une mission de pilotage. BeWork étudie votre besoin et propose une intervention sur devis.",
   },
   contact: {
     path: "/contact",
     title: "Contact",
     description:
-      "Contactez BeWork pour une prestation de conduite de travaux, de pilotage de chantier ou d’assistance aux marchés.",
+      "Contactez BeWork pour une prestation de conduite de travaux, de suivi de chantier ou d’assistance aux marchés.",
   },
 } as const;
 
@@ -734,58 +734,54 @@ export const BTP_COMMERCIAL_OFFERS = [
   },
 ] as const;
 
-/** Profils génériques — pas de noms / photos inventés. */
+/** Profils génériques — pas de noms / photos / effectifs inventés. */
 export const BTP_PROFESSIONAL_PROFILES = [
   {
     title: "Conducteur de travaux",
-    when: "Quand vous devez préparer, organiser et suivre une opération dans la durée.",
-    responsibilities: [
-      "Préparation technique",
-      "Planning et coordination",
-      "Suivi budgétaire",
-      "Reporting",
+    mission:
+      "Préparation, organisation, coordination, suivi financier et reporting sur un périmètre défini.",
+    prestations: [
+      "Préparation technique et planning",
+      "Coordination des intervenants",
+      "Suivi budgétaire et délais",
+      "Comptes rendus et alertes",
     ],
-    domaines: ["VRD", "Gros œuvre", "TCE", "Génie civil"],
-    livrables: ["Planning", "Comptes rendus", "Suivi d’avancement", "Alertes"],
     besoin: "conducteur_travaux" as BtpServiceNeedId,
   },
   {
     title: "Chef de chantier",
-    when: "Quand l’organisation quotidienne du terrain et le contrôle d’exécution sont prioritaires.",
-    responsibilities: [
+    mission:
+      "Encadrement terrain, suivi de production et contrôle des travaux au quotidien.",
+    prestations: [
       "Organisation journalière",
-      "Encadrement terrain",
+      "Encadrement des équipes",
       "Contrôle d’exécution",
-      "Remontée d’anomalies",
+      "Remontée des anomalies",
     ],
-    domaines: ["VRD", "Maçonnerie", "Aménagements"],
-    livrables: ["Rapports journaliers", "Quantités", "Photos", "Actions terrain"],
     besoin: "chef_chantier" as BtpServiceNeedId,
   },
   {
-    title: "Directeur de travaux",
-    when: "Quand plusieurs opérations ou un périmètre multi-chantiers nécessitent une supervision.",
-    responsibilities: [
+    title: "Direction de travaux",
+    mission:
+      "Supervision d’opérations et coordination de plusieurs chantiers, selon le périmètre contractuel.",
+    prestations: [
       "Supervision multi-opérations",
-      "Priorisation",
-      "Appui direction",
+      "Priorisation et arbitrages",
+      "Appui à la direction",
       "Reporting consolidé",
     ],
-    domaines: ["TCE", "Entreprises générales", "Exploitation"],
-    livrables: ["Synthèses direction", "Tableaux de bord", "Décisions à arbitrer"],
     besoin: "direction_travaux" as BtpServiceNeedId,
   },
   {
-    title: "Responsable méthodes et planning",
-    when: "Quand le phasage, les méthodes d’exécution et la planification des moyens sont critiques.",
-    responsibilities: [
-      "Méthodes d’exécution",
-      "Phasage",
-      "Planification des ressources",
-      "Interfaces lots",
+    title: "Pilotage TCE",
+    mission:
+      "Planning, interfaces techniques et coordination des corps d’état sur l’opération.",
+    prestations: [
+      "Planning et phasage",
+      "Interfaces entre lots",
+      "Gestion des coactivités",
+      "Suivi des points bloquants",
     ],
-    domaines: ["TCE", "VRD", "Génie civil"],
-    livrables: ["Planning phasé", "Notes de méthodes", "Points d’interface"],
     besoin: "pilotage_tce" as BtpServiceNeedId,
   },
 ] as const;
@@ -930,7 +926,7 @@ export const BTP_LIFECYCLE_STAGES = [
   {
     title: "Fin de travaux",
     body: "Contrôle, réception, DOE, décomptes et clôture.",
-    href: "/demande-de-devis",
+    href: "/demande-de-devis?besoin=conducteur_travaux",
   },
 ] as const;
 

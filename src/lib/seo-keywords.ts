@@ -58,34 +58,34 @@ export const SEO_KEYWORDS_HOME: string[] = [
 ];
 
 export const BEWORK_BRAND_SIGNATURE =
-  "Conduite de travaux & pilotage TCE";
+  "Maîtrise d’œuvre & pilotage de chantier";
 
 export const BEWORK_BRAND_INSTITUTIONAL =
-  "Prestations de conduite de travaux. Pilotage TCE. Ingénierie opérationnelle.";
+  "Maîtrise d’œuvre. Suivi et pilotage de chantier. Coordination BTP.";
 
 export const BEWORK_SLOGAN =
-  "Des professionnels pour vos chantiers. Des méthodes pour vos performances. Des outils IA pour mieux piloter vos opérations.";
+  "Nous pilotons les chantiers, nous ne vendons pas un logiciel.";
 
 export const BEWORK_SLOGAN_DECISION =
-  "Renforcez votre organisation avec des missions de conduite de travaux, d’encadrement opérationnel et de coordination TCE.";
+  "Confiez le suivi et le pilotage de vos opérations à des professionnels du BTP.";
 
 export const BEWORK_AEO_DEFINITION =
-  "BeWork propose des prestations de conduite de travaux externalisée, de pilotage de chantier et d’assistance aux marchés publics et privés, appuyées par une plateforme collaborative et des outils IA développés en interne.";
+  "BeWork propose des prestations de maîtrise d’œuvre, de suivi et de pilotage de chantier BTP, ainsi qu’une assistance aux marchés publics et privés. Les outils numériques et l’IA sont utilisés en interne par les équipes pour renforcer l’organisation et la traçabilité des missions.";
 
 export const SEO_SITE_TITLE_DEFAULT =
-  "BeWork | Conduite de travaux & pilotage TCE";
+  "BeWork | Maîtrise d’œuvre & pilotage de chantier";
 
 export const SEO_SITE_TITLE_OG =
-  "BeWork — Conduite de travaux & pilotage TCE";
+  "BeWork — Maîtrise d’œuvre & pilotage de chantier";
 
 export const SEO_VALUE_PROPOSITION =
-  "BeWork : conduite de travaux, pilotage TCE et assistance aux marchés. Plateforme collaborative et outils IA pour organiser délais, coûts et avancement.";
+  "BeWork : maîtrise d’œuvre, suivi et pilotage de chantier BTP, assistance aux marchés. Les outils numériques et l’IA sont utilisés en interne pour renforcer le suivi des missions.";
 
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Prestations de conduite de travaux et pilotage TCE, renforcées par une plateforme collaborative et des outils IA.";
+  "Prestations de maîtrise d’œuvre, suivi et pilotage de chantier BTP — sur devis.";
 
 export const BEWORK_TECH_AROUND_YOU =
-  "Expertise terrain. Méthode. Outils IA pour le chantier.";
+  "Expertise terrain. Méthode. Outils internes au service du chantier.";
 
 /** Alias historiques — évite les imports cassés ailleurs. */
 export const SEO_KEYWORDS_SOLUTIONS_IA = SEO_KEYWORDS_FORMATION_IA;

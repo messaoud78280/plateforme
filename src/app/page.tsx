@@ -6,7 +6,6 @@ import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { BtpCommercialOffers } from "@/components/marketing-btp/BtpCommercialOffers";
 import { BtpCtaBand } from "@/components/marketing-btp/BtpCtaBand";
 import { BtpDeliverables } from "@/components/marketing-btp/BtpDeliverables";
-import { BtpEconomicCase } from "@/components/marketing-btp/BtpEconomicCase";
 import { BtpExpertiseTerrain } from "@/components/marketing-btp/BtpExpertiseTerrain";
 import { BtpFaq } from "@/components/marketing-btp/BtpFaq";
 import { BtpIaSection } from "@/components/marketing-btp/BtpIaSection";
@@ -18,7 +17,7 @@ import { BtpWhyBework } from "@/components/marketing-btp/BtpWhyBework";
 import "@/components/marketing-btp/btp-marketing.css";
 import {
   BTP_CTA_CONDUCTEUR,
-  BTP_CTA_PRESTATIONS,
+  BTP_CTA_METHOD,
   BTP_CTA_PRIMARY,
   BTP_EXPERTISE_FAMILIES,
   BTP_FAQ,
@@ -27,6 +26,7 @@ import {
   BTP_SEO_PAGES,
   BEWORK_BTP_COMMERCIAL_PROPOSITION,
   BEWORK_BTP_HERO_SUBTITLE,
+  BEWORK_BTP_SLOGAN,
   BEWORK_BTP_VALUE_PROPOSITION,
 } from "@/lib/bework-btp-services";
 import { buildMarketingPageMetadata } from "@/lib/seo-formation-pages";
@@ -51,9 +51,9 @@ const homeJsonLd = {
       description: home.description,
       isPartOf: { "@id": `${SITE_URL}/#website` },
       about: [
-        { "@type": "Thing", name: "Conduite de travaux externalisée" },
-        { "@type": "Thing", name: "Pilotage TCE" },
-        { "@type": "Thing", name: "Gestion de chantier BTP" },
+        { "@type": "Thing", name: "Maîtrise d’œuvre BTP" },
+        { "@type": "Thing", name: "Suivi de chantier" },
+        { "@type": "Thing", name: "Pilotage de chantier" },
       ],
     },
     {
@@ -66,7 +66,7 @@ const homeJsonLd = {
     },
     {
       "@type": "Service",
-      name: "Conduite de travaux externalisée",
+      name: "Maîtrise d’œuvre et pilotage de chantier",
       provider: { "@id": `${SITE_URL}/#organization` },
       description: BEWORK_BTP_COMMERCIAL_PROPOSITION,
       areaServed: "FR",
@@ -83,37 +83,37 @@ export default function HomePage() {
       />
       <MarketingSiteHeader plainBg />
       <main>
-        {/* 1 — Hero */}
+        {/* 1 — Hero prestation */}
         <section className="bw-btp-hero">
           <div className="bw-btp-container-wide grid items-center gap-10 py-12 lg:grid-cols-2 lg:gap-14 lg:py-16">
             <div>
               <p className="bw-btp-eyebrow">
-                BEWORK — CONDUITE DE TRAVAUX & PILOTAGE TCE
+                BEWORK — MAÎTRISE D’ŒUVRE & PILOTAGE DE CHANTIER
               </p>
               <h1 className="mt-4 max-w-2xl font-bold tracking-tight">
-                Un conducteur de travaux pour piloter vos chantiers.
+                Nous pilotons vos chantiers.
               </h1>
               <p className="bw-btp-lead mt-5 max-w-2xl">{BEWORK_BTP_HERO_SUBTITLE}</p>
-              <p className="mt-4 max-w-2xl text-base font-medium text-[var(--btp-heading)]">
-                {BEWORK_BTP_COMMERCIAL_PROPOSITION}
+              <p className="mt-4 max-w-2xl text-base font-semibold text-[var(--btp-heading)]">
+                {BEWORK_BTP_SLOGAN}
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href={BTP_CTA_CONDUCTEUR.href} className="bw-btp-btn bw-btp-btn-primary">
                   {BTP_CTA_CONDUCTEUR.label}
                 </Link>
-                <Link href={BTP_CTA_PRESTATIONS.href} className="bw-btp-btn bw-btp-btn-secondary">
-                  {BTP_CTA_PRESTATIONS.label}
+                <Link href={BTP_CTA_METHOD.href} className="bw-btp-btn bw-btp-btn-secondary">
+                  {BTP_CTA_METHOD.label}
                 </Link>
               </div>
               <p className="mt-5 text-base text-[var(--btp-muted)]">
                 Missions ponctuelles ou suivies · Marchés publics et privés ·
-                Interventions adaptées aux opérations · Prestations sur devis
+                Prestations sur devis
               </p>
             </div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-[var(--btp-border)] bg-[var(--btp-soft)] shadow-[var(--btp-shadow)] lg:aspect-[5/4]">
               <Image
                 src="/marketing/btp-hero-chantier.jpg"
-                alt="Professionnel BTP consultant des plans sur un chantier — illustration d’ambiance, non présentée comme référence client BeWork"
+                alt="Professionnel BTP en suivi de chantier — illustration d’ambiance, non présentée comme référence client BeWork"
                 fill
                 priority
                 className="object-cover object-center"
@@ -140,8 +140,8 @@ export default function HomePage() {
                   <p className="mt-2 text-base leading-relaxed text-[var(--btp-muted)]">
                     {item.answer}
                   </p>
-                  <span className="mt-4 inline-block text-base font-semibold text-[var(--btp-steel)]">
-                    Demander cette mission →
+                  <span className="mt-4 inline-block text-base font-semibold text-[var(--btp-accent)]">
+                    Demander une mission →
                   </span>
                 </Link>
               ))}
@@ -149,53 +149,24 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Offres 3 niveaux */}
+        {/* 3 — Prestations / profils */}
         <BtpCommercialOffers />
-
-        {/* 3 — Professionnels */}
         <BtpProfessionals />
 
-        {/* 4 — Expertise terrain */}
+        {/* 4 — Expertise */}
         <BtpExpertiseTerrain compact />
 
         {/* 5 — Livrables */}
         <BtpDeliverables compact />
 
-        {/* 6 — Plateforme & IA */}
+        {/* 6 — Méthode */}
+        <BtpMissionFlow />
+
+        {/* 7 — Outils internes (différenciation, pas produit) */}
         <BtpPlatformShowcase />
         <BtpIaSection />
 
-        {/* 7 — Expertises TCE */}
-        <section className="bw-btp-section" aria-labelledby="tce-title">
-          <div className="bw-btp-container">
-            <p className="bw-btp-eyebrow">Tous corps d’état</p>
-            <h2 id="tce-title" className="mt-2 font-bold">
-              Pilotage et coordination — pas d’exécution de tous les lots.
-            </h2>
-            <p className="mt-4 max-w-2xl text-[var(--btp-muted)]">
-              Familles d’intervention et de coordination possibles. BeWork
-              pilote et coordonne selon mission ; nous n’affirmons pas exécuter
-              directement tous ces travaux.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              {BTP_EXPERTISE_FAMILIES.map((f) => (
-                <span
-                  key={f.id}
-                  className="rounded-md border border-[var(--btp-border)] bg-white px-3.5 py-2 text-base font-medium text-[var(--btp-heading)]"
-                >
-                  {f.title}
-                </span>
-              ))}
-            </div>
-            <div className="mt-8">
-              <Link href="/expertises-tce" className="bw-btp-btn bw-btp-btn-primary">
-                Voir nos expertises TCE
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* 8 — Cycle de vie */}
+        {/* 8 — Marchés / cycle */}
         <section className="bw-btp-section bw-btp-section-alt" aria-labelledby="lifecycle-title">
           <div className="bw-btp-container">
             <h2 id="lifecycle-title" className="font-bold">
@@ -210,32 +181,53 @@ export default function HomePage() {
                 >
                   <h3 className="text-lg font-bold">{s.title}</h3>
                   <p className="mt-3 text-base text-[var(--btp-muted)]">{s.body}</p>
-                  <span className="mt-4 inline-block text-base font-semibold text-[var(--btp-steel)]">
+                  <span className="mt-4 inline-block text-base font-semibold text-[var(--btp-accent)]">
                     En savoir plus →
                   </span>
                 </Link>
               ))}
             </div>
+            <div className="mt-8">
+              <Link href="/marches-publics-prives" className="bw-btp-btn bw-btp-btn-secondary-dark">
+                Voir l’offre marchés
+              </Link>
+            </div>
           </div>
         </section>
 
-        <BtpEconomicCase />
+        <section className="bw-btp-section" aria-labelledby="tce-title">
+          <div className="bw-btp-container">
+            <p className="bw-btp-eyebrow">Coordination TCE</p>
+            <h2 id="tce-title" className="mt-2 font-bold">
+              Pilotage et coordination des opérations.
+            </h2>
+            <p className="mt-4 max-w-2xl text-[var(--btp-muted)]">
+              Domaines de coordination possibles selon mission. BeWork n’affirme
+              pas exécuter directement tous les lots.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              {BTP_EXPERTISE_FAMILIES.map((f) => (
+                <span
+                  key={f.id}
+                  className="rounded-md border border-[var(--btp-border)] bg-white px-3.5 py-2 text-base font-medium text-[var(--btp-heading)]"
+                >
+                  {f.title}
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        {/* 9 — Mission flow */}
-        <BtpMissionFlow />
-
-        {/* 10 — Cas */}
         <BtpUseCases />
-
         <BtpWhyBework />
 
-        {/* 11 — FAQ */}
-        <BtpFaq items={BTP_FAQ} title="FAQ — prestations BTP" />
+        {/* 9 — FAQ */}
+        <BtpFaq items={BTP_FAQ} title="FAQ — missions BTP" />
 
-        {/* 12 — CTA devis */}
+        {/* 10 — CTA */}
         <BtpCtaBand
-          title="Confiez-nous votre besoin opérationnel."
-          subtitle="Décrivez votre chantier et le profil recherché. Nous étudions le périmètre et vous proposons une intervention sur devis."
+          title="Confiez-nous le suivi de votre opération."
+          subtitle="Décrivez votre chantier et le besoin d’encadrement. Nous étudions le périmètre et vous proposons une mission sur devis."
           ctaHref={BTP_CTA_PRIMARY.href}
           ctaLabel="Demander un devis"
         />

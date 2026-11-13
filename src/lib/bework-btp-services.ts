@@ -4,22 +4,22 @@
  */
 
 export const BEWORK_BTP_SIGNATURE =
-  "CONDUITE DE TRAVAUX • PILOTAGE TCE • INGÉNIERIE OPÉRATIONNELLE";
+  "MAÎTRISE D’ŒUVRE • PILOTAGE DE CHANTIER • BTP";
 
 export const BEWORK_BTP_VALUE_PROPOSITION =
-  "BeWork accompagne les entreprises du BTP avec des prestations de conduite de travaux, d’encadrement opérationnel et de coordination TCE. Nos professionnels s’appuient sur des méthodes éprouvées et sur nos propres outils numériques et IA pour organiser, suivre et optimiser vos opérations.";
+  "BeWork accompagne les acteurs du BTP avec des prestations de maîtrise d’œuvre, de suivi de chantier et de pilotage opérationnel. Nos intervenants s’appuient sur une organisation rigoureuse et, en interne, sur des outils de gestion et d’intelligence artificielle pour améliorer le suivi, la coordination et la traçabilité des opérations.";
 
 export const BEWORK_BTP_SLOGAN =
-  "Des professionnels pour vos chantiers. Des méthodes pour optimiser vos opérations. Une plateforme collaborative et des outils IA pour mieux piloter.";
+  "Nous pilotons les chantiers, nous ne vendons pas un logiciel.";
 
 export const BEWORK_BTP_BRAND_SHORT =
-  "Votre partenaire en conduite de travaux et pilotage TCE";
+  "Maîtrise d’œuvre, suivi et pilotage de chantier BTP";
 
 export const BEWORK_BTP_HERO_SUBTITLE =
-  "Renforcez votre organisation avec des prestations de conduite de travaux externalisée, de coordination TCE et de gestion opérationnelle. Nous associons expertise terrain, méthodes de pilotage et outils IA développés en interne pour améliorer le suivi de vos opérations.";
+  "Confiez le suivi et le pilotage de vos opérations à des professionnels du BTP. BeWork structure la préparation, la coordination et le reporting — avec, en appui interne, des outils de gestion et d’IA au service de la mission.";
 
 export const BEWORK_BTP_COMMERCIAL_PROPOSITION =
-  "Des professionnels expérimentés pour piloter vos chantiers, accompagnés de nos propres outils collaboratifs et IA.";
+  "Des gestionnaires et pilotes de chantier pour vos opérations BTP. L’IA et nos outils de suivi sont utilisés par nos équipes pour mieux organiser et documenter les missions.";
 
 export const BTP_CTA_EXPERTISES = {
   href: "/expertises-tce",
@@ -31,21 +31,27 @@ export const BTP_CTA_PRESTATIONS = {
   label: "Découvrir nos prestations",
 } as const;
 
-/** Navigation principale site commercial BTP. */
+export const BTP_CTA_METHOD = {
+  href: "/notre-methode",
+  label: "Comprendre notre méthode",
+} as const;
+
+/** Navigation principale — orientée services BTP (pas produit logiciel). */
 export const BTP_NAV_ITEMS = [
-  { href: "/conduite-de-travaux", label: "Conduite de travaux" },
+  { href: "/conduite-de-travaux", label: "Maîtrise d’œuvre" },
+  { href: "/pilotage-chantier", label: "Suivi de chantier" },
   { href: "/expertises-tce", label: "Expertises TCE" },
-  { href: "/pilotage-chantier", label: "Nos services" },
-  { href: "/plateforme-ia", label: "Plateforme & IA" },
+  { href: "/marches-publics-prives", label: "Marchés" },
+  { href: "/notre-methode", label: "Notre méthode" },
   { href: "/a-propos", label: "À propos" },
 ] as const;
 
-/** Liens secondaires (footer / pages services). */
+/** Liens secondaires (footer). */
 export const BTP_SERVICE_LINKS = [
-  { href: "/pilotage-chantier", label: "Pilotage chantier" },
-  { href: "/marches-publics-prives", label: "Marchés publics & privés" },
-  { href: "/notre-methode", label: "Méthode" },
+  { href: "/plateforme-ia", label: "Outils & méthode" },
   { href: "/demande-de-devis?besoin=audit_redressement", label: "Audit de chantier" },
+  { href: "/contact", label: "Contact" },
+  { href: "/demande-de-devis", label: "Demander un devis" },
 ] as const;
 
 export const BTP_CTA_PRIMARY = {
@@ -53,9 +59,14 @@ export const BTP_CTA_PRIMARY = {
   label: "Demander un devis",
 } as const;
 
+export const BTP_CTA_MISSION = {
+  href: "/demande-de-devis",
+  label: "Demander une mission",
+} as const;
+
 export const BTP_CTA_CONDUCTEUR = {
   href: "/demande-de-devis?besoin=conducteur_travaux",
-  label: "Demander un conducteur de travaux",
+  label: "Confier votre chantier",
 } as const;
 
 export type BtpServiceNeedId =
@@ -359,16 +370,16 @@ export const BTP_FAQ = [
 export const BTP_SEO_PAGES = {
   home: {
     path: "/",
-    title: "Conduite de travaux & pilotage TCE",
-    absoluteTitle: "BeWork — Conduite de travaux & pilotage TCE",
+    title: "Maîtrise d’œuvre & pilotage de chantier BTP",
+    absoluteTitle: "BeWork — Maîtrise d’œuvre & pilotage de chantier",
     description:
-      "Conducteur de travaux externalisé, pilotage TCE et gestion de chantier. Expertise terrain, livrables structurés, plateforme collaborative et outils IA — prestations sur devis.",
+      "Maîtrise d’œuvre, suivi et pilotage de chantier BTP. Gestionnaires et conducteurs de travaux pour organiser, coordonner et documenter vos opérations — sur devis.",
   },
   conduite: {
     path: "/conduite-de-travaux",
-    title: "Conducteurs de travaux externalisés",
+    title: "Maîtrise d’œuvre et conduite de travaux",
     description:
-      "Prestation conducteur de travaux, chef de chantier ou direction de travaux. Compétences VRD, gros œuvre, TCE — missions sur devis, livrables et périmètre définis.",
+      "Maîtrise d’œuvre, conduite de travaux, chef de chantier ou direction de travaux. Missions contractualisées BTP — périmètre, responsabilités et livrables définis.",
   },
   expertises: {
     path: "/expertises-tce",
@@ -390,9 +401,9 @@ export const BTP_SEO_PAGES = {
   },
   plateforme: {
     path: "/plateforme-ia",
-    title: "Plateforme collaborative et outils IA",
+    title: "Outils & méthode de pilotage",
     description:
-      "Environnement numérique BeWork et outils IA d’aide à l’analyse, à la préparation et au suivi de chantier, sous contrôle professionnel.",
+      "Comment les équipes BeWork s’appuient en interne sur des outils de gestion et d’IA pour mieux suivre, documenter et coordonner les missions de chantier.",
   },
   methode: {
     path: "/notre-methode",
@@ -404,7 +415,7 @@ export const BTP_SEO_PAGES = {
     path: "/a-propos",
     title: "À propos de BeWork",
     description:
-      "BeWork associe expertise de terrain BTP, méthodologie de gestion et outils numériques pour des prestations de conduite de travaux.",
+      "BeWork propose des prestations de maîtrise d’œuvre, de suivi et de pilotage de chantier BTP, avec une méthode structurée et des outils internes d’appui.",
   },
   devis: {
     path: "/demande-de-devis",

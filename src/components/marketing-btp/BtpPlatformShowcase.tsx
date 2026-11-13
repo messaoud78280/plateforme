@@ -5,16 +5,15 @@ export function BtpPlatformShowcase() {
   return (
     <section className="bw-btp-section" aria-labelledby="platform-showcase-title">
       <div className="bw-btp-container">
-        <p className="bw-btp-eyebrow">Plateforme collaborative</p>
+        <p className="bw-btp-eyebrow">Outils internes</p>
         <h2 id="platform-showcase-title" className="mt-2 max-w-4xl font-bold">
-          Nos conducteurs de travaux disposent de leurs propres outils de
-          pilotage.
+          Des outils utilisés par nos équipes sur le terrain.
         </h2>
         <p className="bw-btp-lead mt-4 max-w-3xl">
-          BeWork a conçu un environnement numérique dédié à la préparation, à
-          la coordination et au suivi des chantiers. Une technologie développée
-          pour répondre aux besoins concrets du terrain — associée à la mission
-          humaine, pas en remplacement.
+          Nous ne vendons pas un logiciel. Nos gestionnaires et pilotes de
+          chantier s’appuient en interne sur un environnement de suivi pour
+          préparer, documenter et coordonner les missions — sous contrôle
+          humain.
         </p>
 
         <div className="mt-10 overflow-hidden rounded-xl border border-[var(--btp-border)] bg-white p-5 sm:p-7">
@@ -62,10 +61,10 @@ export function BtpPlatformShowcase() {
 
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/plateforme-ia" className="bw-btp-btn bw-btp-btn-primary">
-            Découvrir la plateforme &amp; l’IA
+            Voir notre approche outils &amp; méthode
           </Link>
-          <Link href="/dashboard" className="bw-btp-btn bw-btp-btn-secondary">
-            Accès plateforme
+          <Link href="/demande-de-devis" className="bw-btp-btn bw-btp-btn-secondary">
+            Demander une mission
           </Link>
         </div>
       </div>

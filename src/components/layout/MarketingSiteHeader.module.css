@@ -50,7 +50,7 @@
   display: flex;
   flex-direction: column;
   border-radius: 1.15rem;
-  border: 1px solid #dde3df;
+  border: 1px solid #DCE4EE;
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 1px 3px rgba(39, 49, 45, 0.04);
   overflow: hidden;
@@ -61,7 +61,7 @@
 }
 
 .panelScrolled {
-  border-color: #c8d0cb;
+  border-color: #C5D0DE;
   box-shadow: 0 4px 16px rgba(39, 49, 45, 0.06);
 }
 
@@ -229,7 +229,7 @@
 
 .signaturePrimary {
   display: block;
-  color: #27312D;
+  color: #1F2A37;
   font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: -0.025em;
@@ -335,7 +335,7 @@
 }
 
 .accent {
-  color: #2D6A56;
+  color: #1E4E8C;
   font-weight: 800;
   animation: none;
 }
@@ -414,7 +414,7 @@
   border-radius: 0.55rem;
   border: 1px solid rgba(39, 49, 45, 0.18);
   background: #ffffff;
-  color: #27312D;
+  color: #1F2A37;
   font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -454,13 +454,13 @@
 }
 
 .ctaSecondary:hover {
-  border-color: #c8d0cb;
-  background: #e9efeb;
-  color: #27312D;
+  border-color: #C5D0DE;
+  background: #EAF2FB;
+  color: #1F2A37;
 }
 
 .ctaSecondary:focus-visible {
-  outline: 2px solid #2D6A56;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -471,7 +471,7 @@
   gap: 0.4rem;
   padding: 0 1.2rem;
   border-radius: 0.55rem;
-  background: #2d6a56;
+  background: #1E4E8C;
   color: #fff;
   font-size: 1.15rem;
   font-weight: 750;
@@ -491,11 +491,11 @@
 }
 
 .cta:hover {
-  background: #22503f;
+  background: #163A68;
 }
 
 .cta:focus-visible {
-  outline: 2px solid #2D6A56;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -518,7 +518,7 @@
   align-items: center;
   padding: 0 0.95rem;
   border-radius: 0.5rem;
-  background: #2d6a56;
+  background: #1E4E8C;
   color: #fff;
   font-size: 1.1rem;
   font-weight: 750;
@@ -535,7 +535,7 @@
 }
 
 .ctaCompact:focus-visible {
-  outline: 2px solid #2D6A56;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -594,7 +594,7 @@
   justify-content: center;
   min-height: 3.6rem;
   padding: 0.4rem 0.85rem 0.6rem;
-  background: #fafaf7;
+  background: #F8FAFC;
   border-top: 1px solid rgba(39, 49, 45, 0.08);
   transition: min-height 0.35s ease, padding 0.35s ease;
 }
@@ -659,7 +659,7 @@
   font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: -0.015em;
-  color: #27312D;
+  color: #1F2A37;
   text-decoration: none;
   white-space: nowrap;
   transition:
@@ -676,20 +676,20 @@
 }
 
 .navLink:hover {
-  color: #27312D;
+  color: #1F2A37;
   background: #ffffff;
   border-color: rgba(39, 49, 45, 0.12);
 }
 
 .navLinkActive {
-  color: #27312D;
+  color: #1F2A37;
   background: #ffffff;
   border-color: rgba(184, 137, 63, 0.55);
   font-weight: 800;
 }
 
 .navLink:focus-visible {
-  outline: 2px solid #2D6A56;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -704,8 +704,8 @@
   padding: 0 1.05rem;
   border-radius: 0.55rem;
   border: 1px solid rgba(39, 49, 45, 0.16);
-  background: #fafaf7;
-  color: #27312D;
+  background: #F8FAFC;
+  color: #1F2A37;
   font-size: 1.08rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -736,9 +736,9 @@
 }
 
 .privateAccess:hover {
-  background: #e9efeb;
+  background: #EAF2FB;
   border-color: rgba(39, 49, 45, 0.28);
-  color: #27312D;
+  color: #1F2A37;
   transform: none;
 }
 
@@ -747,7 +747,7 @@
 }
 
 .privateAccess:focus-visible {
-  outline: 2px solid #2D6A56;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -836,16 +836,16 @@
 .mobileLink {
   border-radius: 0.75rem;
   border: 1px solid rgba(39, 49, 45, 0.1);
-  background: #fafaf7;
+  background: #F8FAFC;
   padding: 1.15rem 1.3rem;
   font-size: 1.3rem;
   font-weight: 750;
-  color: #27312D;
+  color: #1F2A37;
   text-decoration: none;
 }
 
 .mobileLink:focus-visible {
-  outline: 2px solid #2D6A56;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -865,7 +865,7 @@
   border-radius: 0.55rem;
   border: 1px solid rgba(39, 49, 45, 0.18);
   background: #ffffff;
-  color: #27312D;
+  color: #1F2A37;
   font-size: 1.15rem;
   font-weight: 650;
   text-decoration: none;
@@ -873,7 +873,7 @@
 }
 
 .ctaSecondaryMobile:focus-visible {
-  outline: 2px solid #2D6A56;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -884,7 +884,7 @@
   justify-content: center;
   gap: 0.45rem;
   border-radius: 0.55rem;
-  background: #2d6a56;
+  background: #1E4E8C;
   color: #fff;
   font-size: 1.2rem;
   font-weight: 650;
@@ -893,7 +893,7 @@
 }
 
 .ctaMobile:focus-visible {
-  outline: 2px solid #2D6A56;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 

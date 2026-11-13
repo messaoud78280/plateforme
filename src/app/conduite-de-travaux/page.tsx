@@ -28,13 +28,13 @@ export default function ConduiteDeTravauxPage() {
       <MarketingSiteHeader />
       <main>
         <BtpPageHero
-          eyebrow="PRESTATION PRINCIPALE"
-          title="Des conducteurs de travaux pour renforcer vos opérations."
-          subtitle="Besoin de piloter un chantier, d’absorber une surcharge ou de renforcer votre encadrement ? BeWork propose des missions contractualisées — périmètre, responsabilités et livrables définis. Pas du travail temporaire."
+          eyebrow="MAÎTRISE D’ŒUVRE & CONDUITE DE TRAVAUX"
+          title="Des professionnels pour suivre et piloter vos opérations."
+          subtitle="Maîtrise d’œuvre, conduite de travaux, chef de chantier ou direction de travaux : missions contractualisées avec périmètre, responsabilités et livrables définis. Cadre MOE / MOEX précisé contractuellement selon assurances et qualifications. Pas du travail temporaire."
           primaryHref="/demande-de-devis?besoin=conducteur_travaux"
-          primaryLabel="Demander un conducteur de travaux"
-          secondaryHref="/demande-de-devis"
-          secondaryLabel="Obtenir un devis"
+          primaryLabel="Confier votre chantier"
+          secondaryHref="/notre-methode"
+          secondaryLabel="Comprendre notre méthode"
         />
 
         <BtpProfessionals />

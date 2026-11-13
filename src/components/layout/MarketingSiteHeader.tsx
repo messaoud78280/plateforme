@@ -141,19 +141,19 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 <span className={styles.signatureBody}>
                   <span className={styles.signaturePrimary}>
                     <span className={styles.signaturePrimaryFull}>
-                      Conduite de travaux ·{" "}
-                      <span className={styles.accent}>Pilotage TCE</span>
+                      Maîtrise d’œuvre ·{" "}
+                      <span className={styles.accent}>Pilotage de chantier</span>
                     </span>
                     <span className={styles.signaturePrimaryShort}>
-                      Conduite de travaux
+                      Maîtrise d’œuvre
                     </span>
                   </span>
                   <span className={styles.signatureSecondary}>
                     <span className={styles.signatureSecondaryFull}>
-                      Ingénierie opérationnelle BTP
+                      Suivi opérationnel · BTP
                     </span>
                     <span className={styles.signatureSecondaryShort}>
-                      Pilotage TCE
+                      Pilotage BTP
                     </span>
                   </span>
                 </span>

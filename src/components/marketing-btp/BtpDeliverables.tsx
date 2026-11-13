@@ -66,7 +66,7 @@ export function BtpDeliverables({ compact = false }: Props) {
                   </div>
                 ) : null}
                 {doc.id === "direction" ? (
-                  <div className="mt-5 rounded-lg border border-[rgba(45,106,86,0.25)] bg-[rgba(45,106,86,0.08)] p-3 text-sm text-[var(--btp-steel)]">
+                  <div className="mt-5 rounded-lg border border-[rgba(30,78,140,0.25)] bg-[rgba(30,78,140,0.08)] p-3 text-sm text-[var(--btp-steel)]">
                     Point bloquant : interface lots VRD / réseaux — décision
                     attendue sous 48 h (données fictives).
                   </div>

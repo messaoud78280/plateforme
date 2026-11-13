@@ -13,14 +13,14 @@ export function BtpIaSection() {
   return (
     <section className="bw-btp-section bw-btp-section-soft" aria-labelledby="ia-title">
       <div className="bw-btp-container">
-        <p className="bw-btp-eyebrow">Intelligence artificielle</p>
+        <p className="bw-btp-eyebrow">Appui IA interne</p>
         <h2 id="ia-title" className="mt-2 max-w-4xl font-bold">
-          L’intelligence artificielle au service de la performance de chantier.
+          Un pilotage renforcé par nos outils IA.
         </h2>
         <p className="bw-btp-lead mt-4 max-w-3xl">
-          Nos outils IA assistent les professionnels dans l’analyse
-          documentaire, la préparation, l’organisation et le suivi des
-          opérations. Ils n’autonomisent pas les décisions techniques ou de
+          L’IA assiste nos équipes dans l’analyse documentaire, la
+          préparation, l’organisation et le reporting. Elle n’est pas un
+          produit vendu seul et n’autonomise pas les décisions techniques ou de
           sécurité.
         </p>
 
@@ -53,7 +53,7 @@ export function BtpIaSection() {
         </p>
         <div className="mt-6">
           <Link href="/plateforme-ia" className="bw-btp-btn bw-btp-btn-secondary-dark">
-            Voir les usages IA détaillés
+            Comprendre notre approche
           </Link>
         </div>
       </div>

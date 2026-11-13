@@ -1,34 +1,36 @@
-/* BeWork marketing — direction artistique claire (cabinet ingénierie) */
+/* BeWork marketing — charte bleu & blanc (cabinet ingénierie BTP) */
 
 .bw-btp-site {
-  /* Tokens palette obligatoire */
-  --btp-canvas: #fafaf7;
+  --btp-canvas: #f8fafc;
   --btp-white: #ffffff;
-  --btp-sage: #e9efeb;
-  --btp-beige: #f0ede6;
-  --btp-border: #dde3df;
-  --btp-border-strong: #c8d0cb;
-  --btp-heading: #27312d;
-  --btp-ink: #27312d;
-  --btp-muted: #59645e;
-  --btp-steel: #59645e;
-  --btp-accent: #2d6a56;
-  --btp-accent-hover: #22503f;
-  --btp-shadow: 0 1px 2px rgba(39, 49, 45, 0.04);
-  --btp-shadow-hover: 0 6px 18px rgba(39, 49, 45, 0.06);
+  --btp-blue-soft: #eaf2fb;
+  --btp-blue: #1e4e8c;
+  --btp-blue-mid: #2f6fb2;
+  --btp-border: #dce4ee;
+  --btp-border-strong: #c5d0de;
+  --btp-heading: #1f2a37;
+  --btp-ink: #1f2a37;
+  --btp-muted: #5b6776;
+  --btp-steel: #5b6776;
+  --btp-accent: #1e4e8c;
+  --btp-accent-hover: #163a68;
+  --btp-shadow: 0 1px 2px rgba(31, 42, 55, 0.04);
+  --btp-shadow-hover: 0 6px 18px rgba(31, 42, 55, 0.06);
   --btp-radius: 0.875rem;
   --btp-radius-sm: 0.75rem;
 
-  /* Alias rétrocompatibilité (anciennes refs cuivre / soft / mist) */
+  /* Alias rétrocompatibilité */
   --btp-copper: var(--btp-accent);
-  --btp-copper-soft: rgba(45, 106, 86, 0.1);
-  --btp-soft: var(--btp-sage);
-  --btp-mist: var(--btp-beige);
+  --btp-copper-soft: rgba(30, 78, 140, 0.1);
+  --btp-soft: var(--btp-blue-soft);
+  --btp-sage: var(--btp-blue-soft);
+  --btp-beige: var(--btp-canvas);
+  --btp-mist: var(--btp-blue-soft);
   --btp-night: var(--btp-heading);
 
   color: var(--btp-ink);
   background: var(--btp-canvas);
-  font-size: 1.0625rem; /* 17px */
+  font-size: 1.0625rem;
   line-height: 1.6;
   font-family:
     var(--font-inter),
@@ -42,13 +44,12 @@
 
 @media (min-width: 768px) {
   .bw-btp-site {
-    font-size: 1.125rem; /* 18px */
+    font-size: 1.125rem;
   }
 }
 
-/* Typographie — éviter le surdimensionnement des utilitaires Tailwind */
 .bw-btp-site :where(.text-xs) {
-  font-size: 0.875rem !important; /* 14px min */
+  font-size: 0.875rem !important;
   line-height: 1.5;
 }
 .bw-btp-site :where(.text-sm) {
@@ -78,19 +79,19 @@
 }
 
 .bw-btp-site h1 {
-  font-size: clamp(2.125rem, 4.5vw, 3.75rem) !important; /* 34–60px */
+  font-size: clamp(2.125rem, 4.5vw, 3.75rem) !important;
   font-weight: 700;
   max-width: 18ch;
 }
 
 .bw-btp-site h2 {
-  font-size: clamp(1.75rem, 3vw, 2.5rem) !important; /* 28–40px */
+  font-size: clamp(1.75rem, 3vw, 2.5rem) !important;
   font-weight: 650;
-  max-width: 24ch;
+  max-width: 26ch;
 }
 
 .bw-btp-site h3 {
-  font-size: clamp(1.375rem, 1.5vw, 1.625rem) !important; /* 22–26px */
+  font-size: clamp(1.375rem, 1.5vw, 1.625rem) !important;
   font-weight: 600;
 }
 
@@ -117,7 +118,7 @@
   font-weight: 650;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--btp-accent);
+  color: var(--btp-blue-mid);
 }
 
 .bw-btp-btn {
@@ -163,7 +164,7 @@
 }
 
 .bw-btp-btn-secondary:hover {
-  background: var(--btp-sage);
+  background: var(--btp-blue-soft);
   border-color: var(--btp-border-strong);
 }
 
@@ -174,7 +175,7 @@
 }
 
 .bw-btp-btn-secondary-dark:hover {
-  background: rgba(45, 106, 86, 0.08);
+  background: rgba(30, 78, 140, 0.08);
 }
 
 .bw-btp-btn-copper {
@@ -225,21 +226,21 @@
 }
 
 .bw-btp-section {
-  padding: 3.75rem 0; /* ~60px mobile */
+  padding: 3.75rem 0;
 }
 
 @media (min-width: 768px) {
   .bw-btp-section {
-    padding: 6.25rem 0; /* ~100px */
+    padding: 6.25rem 0;
   }
 }
 
 .bw-btp-section-alt {
-  background: var(--btp-sage);
+  background: var(--btp-blue-soft);
 }
 
 .bw-btp-section-soft {
-  background: var(--btp-beige);
+  background: var(--btp-canvas);
   color: var(--btp-ink);
   border-block: 1px solid var(--btp-border);
 }
@@ -250,7 +251,7 @@
 }
 
 .bw-btp-section-night {
-  background: var(--btp-beige);
+  background: var(--btp-blue-soft);
   color: var(--btp-ink);
   border-block: 1px solid var(--btp-border);
 }
@@ -304,7 +305,6 @@
   }
 }
 
-/* Apparition discrète des sections */
 @keyframes bw-btp-fade-up {
   from {
     opacity: 0;

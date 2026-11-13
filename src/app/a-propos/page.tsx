@@ -23,10 +23,10 @@ export default function AProposPage() {
       <main>
         <BtpPageHero
           eyebrow="À PROPOS"
-          title="Une expertise de terrain au service de vos opérations."
+          title="Une société de suivi et de pilotage de chantier."
           subtitle={BEWORK_BTP_VALUE_PROPOSITION}
-          primaryHref="/demande-de-devis?besoin=conducteur_travaux"
-          primaryLabel="Confier une mission à BeWork"
+          primaryHref="/demande-de-devis"
+          primaryLabel="Demander une mission"
           secondaryHref="/notre-methode"
           secondaryLabel="Notre méthode"
         />

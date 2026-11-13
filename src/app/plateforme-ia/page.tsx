@@ -3,8 +3,10 @@ import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { BtpCtaBand } from "@/components/marketing-btp/BtpCtaBand";
+import { BtpDeliverables } from "@/components/marketing-btp/BtpDeliverables";
 import { BtpIaSection } from "@/components/marketing-btp/BtpIaSection";
 import { BtpPageHero } from "@/components/marketing-btp/BtpPageHero";
+import { BtpPlatformJourney } from "@/components/marketing-btp/BtpPlatformJourney";
 import { BtpPlatformShowcase } from "@/components/marketing-btp/BtpPlatformShowcase";
 import "@/components/marketing-btp/btp-marketing.css";
 import { BTP_SEO_PAGES } from "@/lib/bework-btp-services";
@@ -23,43 +25,53 @@ export default function PlateformeIaPage() {
       <MarketingSiteHeader />
       <main>
         <BtpPageHero
-          eyebrow="PLATEFORME & IA"
-          title="Des professionnels de terrain. Une technologie conçue pour le chantier."
-          subtitle="Nos missions de conduite de travaux s’appuient sur un environnement numérique développé autour des besoins réels des entreprises du BTP."
+          eyebrow="OUTILS & MÉTHODE"
+          title="Nous ne vendons pas un logiciel. Nous pilotons vos chantiers."
+          subtitle="BeWork accompagne les acteurs du BTP avec des prestations de maîtrise d’œuvre, de suivi de chantier et de pilotage opérationnel. Nos intervenants s’appuient sur une organisation rigoureuse, des outils de gestion internes et une intelligence artificielle au service de la mission."
           primaryHref="/demande-de-devis"
-          primaryLabel="Obtenir un devis"
-          secondaryHref="/dashboard"
-          secondaryLabel="Accès plateforme"
+          primaryLabel="Demander une mission"
+          secondaryHref="/notre-methode"
+          secondaryLabel="Comprendre notre méthode"
         />
 
         <section className="bw-btp-section bw-btp-section-alt">
           <div className="bw-btp-container max-w-3xl">
-            <p className="text-base leading-relaxed text-[var(--btp-muted)]">
-              Nous ne nous contentons pas d’intervenir sur vos chantiers. Nous
-              structurons l’information, facilitons les échanges et utilisons
-              nos propres outils IA pour aider nos équipes à anticiper, analyser
-              et suivre les opérations. L’IA n’est jamais autonome sur les
-              décisions techniques ou de sécurité.
+            <h2 className="font-bold">Des outils utilisés par nos équipes</h2>
+            <p className="mt-4 text-base leading-relaxed text-[var(--btp-muted)]">
+              La plateforme et les outils IA BeWork ne sont pas le produit
+              commercialisé. Ce sont des moyens internes pour structurer
+              l’information, préparer les opérations, produire des comptes
+              rendus, suivre l’avancement et documenter les décisions.
             </p>
             <p className="mt-4 text-base leading-relaxed text-[var(--btp-muted)]">
-              Parcours type : données chantier → outils BeWork → analyse
-              assistée par IA → validation par le professionnel → suivi et
-              décision.
+              Le client confie une mission humaine de suivi ou de pilotage. Nos
+              équipes utilisent ces outils pour mieux organiser et traçabiliser
+              l’intervention — sous validation professionnelle.
             </p>
+            <ul className="mt-6 space-y-2 text-base text-[var(--btp-muted)]">
+              <li>• Structurer les informations chantier</li>
+              <li>• Préparer les opérations</li>
+              <li>• Produire des comptes rendus</li>
+              <li>• Suivre l’avancement et les actions</li>
+              <li>• Centraliser documents et observations</li>
+              <li>• Assister l’analyse, sans remplacer le jugement terrain</li>
+            </ul>
           </div>
         </section>
 
+        <BtpPlatformJourney />
         <BtpPlatformShowcase />
         <BtpIaSection />
+        <BtpDeliverables />
 
         <section className="bw-btp-section">
           <div className="bw-btp-container">
-            <div className="rounded-xl border border-[var(--btp-border)] bg-[var(--btp-mist)] p-6 sm:p-8">
+            <div className="rounded-xl border border-[var(--btp-border)] bg-white p-6 sm:p-8">
               <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--btp-steel)]">
-                Démonstration commerciale — données fictives
+                Illustration interne — données fictives
               </p>
               <h2 className="mt-3 font-bold">
-                Découvrez comment nous suivons une opération.
+                Un pilotage mieux documenté, au service de la mission.
               </h2>
               <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {[
@@ -74,31 +86,28 @@ export default function PlateformeIaPage() {
                   </div>
                 ))}
               </div>
-              <ul className="mt-6 grid gap-2 text-base text-[var(--btp-muted)] sm:grid-cols-2">
-                <li>Synthèse du conducteur de travaux</li>
-                <li>Suivi des quantités</li>
-                <li>Indicateurs de coûts</li>
-                <li>Documents associés</li>
-              </ul>
               <p className="mt-5 text-xs text-[var(--btp-muted)]">
-                Exemple anonymisé / fictif explicitement identifié — ne
-                correspond pas à un chantier client réel. Aucune capture de
-                données client n’est affichée.
+                Exemple fictif — aucune donnée client réelle. Accès plateforme
+                réservé aux comptes autorisés (header).
               </p>
             </div>
 
             <div className="mt-10 flex flex-wrap gap-3">
-              <Link href="/dashboard" className="bw-btp-btn bw-btp-btn-primary">
-                Accès plateforme
+              <Link href="/demande-de-devis" className="bw-btp-btn bw-btp-btn-primary">
+                Demander une mission
               </Link>
-              <Link href="/demande-de-devis" className="bw-btp-btn bw-btp-btn-secondary-dark">
-                Demander une démonstration cadrée
+              <Link href="/notre-methode" className="bw-btp-btn bw-btp-btn-secondary">
+                Notre méthode
               </Link>
             </div>
           </div>
         </section>
 
-        <BtpCtaBand title="Associer expertise terrain et outils BeWork ?" />
+        <BtpCtaBand
+          title="Confier le pilotage de votre chantier ?"
+          ctaHref="/demande-de-devis"
+          ctaLabel="Demander un devis"
+        />
       </main>
       <MarketingSiteFooter />
     </div>

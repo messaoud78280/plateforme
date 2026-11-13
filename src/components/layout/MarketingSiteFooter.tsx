@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   BTP_CTA_PRIMARY,
   BTP_NAV_ITEMS,
+  BTP_SERVICE_LINKS,
   BEWORK_BTP_BRAND_SHORT,
   BEWORK_BTP_SIGNATURE,
 } from "@/lib/bework-btp-services";
@@ -10,11 +11,11 @@ import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { SITE_URL, getOrgSameAs } from "@/lib/site";
 
 const COL_LINK =
-  "text-[1.1rem] text-[#3f4d5c] transition-colors hover:text-[#15202b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b8893f]";
+  "text-[1.05rem] text-[#5B6776] transition-colors hover:text-[#1F2A37] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E4E8C]";
 
 function ColumnTitle({ children }: { children: ReactNode }) {
   return (
-    <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-[#1c2430]">
+    <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-[#1F2A37]">
       {children}
     </h3>
   );
@@ -40,31 +41,31 @@ function SocialIcon({ type }: { type: ReturnType<typeof socialLabel> }) {
   );
 }
 
-/** Pied de page marketing — thème clair. */
+/** Pied de page marketing — charte claire cabinet ingénierie. */
 export function MarketingSiteFooter() {
   const year = new Date().getFullYear();
   const socialProfiles = getOrgSameAs();
 
   return (
-    <footer className="relative z-10 border-t border-[rgba(28,36,48,0.1)] bg-[#f6f7f9] text-[#1c2430]">
-      <div className="relative z-10 mx-auto max-w-site px-5 py-12 sm:px-6 lg:py-14">
+    <footer className="relative z-10 border-t border-[#DCE4EE] bg-[#F8FAFC] text-[#1F2A37]">
+      <div className="relative z-10 mx-auto max-w-site px-5 py-12 sm:px-6 lg:py-16">
         <div className="grid grid-cols-2 gap-10 sm:gap-12 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
           <div className="col-span-2 md:col-span-3 lg:col-span-1 lg:max-w-xs">
             <Link
               href="/"
-              className="inline-block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b8893f]"
+              className="inline-block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E4E8C]"
             >
-              <span className="text-xl font-extrabold tracking-tight text-[#1c2430]">
-                Be<span className="text-[#b8893f]">Work</span>
+              <span className="text-xl font-extrabold tracking-tight text-[#1F2A37]">
+                Be<span className="text-[#1E4E8C]">Work</span>
               </span>
             </Link>
-            <p className="mt-3 text-sm font-medium leading-snug text-[#3a5368]">
+            <p className="mt-3 text-sm font-medium leading-snug text-[#5B6776]">
               {BEWORK_BTP_BRAND_SHORT}
             </p>
-            <p className="mt-3 text-xs leading-relaxed text-[#5a6878]">
+            <p className="mt-3 text-xs leading-relaxed text-[#5B6776]">
               {BEWORK_BTP_SIGNATURE}
             </p>
-            <p className="mt-4 text-[11px] leading-relaxed text-[#5a6878]">
+            <p className="mt-4 text-[11px] leading-relaxed text-[#5B6776]">
               Éditeur : OFC Création d’entreprise —{" "}
               <Link href="/mentions-legales" className="underline-offset-2 hover:underline">
                 mentions légales
@@ -73,7 +74,7 @@ export function MarketingSiteFooter() {
             </p>
             <Link
               href={BTP_CTA_PRIMARY.href}
-              className="mt-5 inline-flex items-center gap-2 rounded-md bg-[#1c2430] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#3a5368]"
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#1E4E8C] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#163A68]"
               {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "footer-devis")}
             >
               {BTP_CTA_PRIMARY.label}
@@ -95,31 +96,18 @@ export function MarketingSiteFooter() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <ColumnTitle>Entreprise</ColumnTitle>
+            <ColumnTitle>Nos services</ColumnTitle>
             <ul className="flex flex-col gap-3">
-              <li>
-                <Link href="/plateforme-ia" className={COL_LINK}>
-                  Plateforme & IA
-                </Link>
-              </li>
-              <li>
-                <Link href="/notre-methode" className={COL_LINK}>
-                  Notre méthode
-                </Link>
-              </li>
-              <li>
-                <Link href="/a-propos" className={COL_LINK}>
-                  À propos
-                </Link>
-              </li>
+              {BTP_SERVICE_LINKS.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className={COL_LINK}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
               <li>
                 <Link href="/demande-de-devis" className={COL_LINK}>
                   Demande de devis
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className={COL_LINK}>
-                  Contact
                 </Link>
               </li>
             </ul>
@@ -173,9 +161,9 @@ export function MarketingSiteFooter() {
         </div>
       </div>
 
-      <div className="border-t border-[rgba(28,36,48,0.1)]">
+      <div className="border-t border-[#DCE4EE]">
         <div className="mx-auto flex max-w-site flex-col gap-6 px-5 py-5 sm:px-6 md:flex-row md:items-center md:justify-between md:gap-4">
-          <p className="text-sm text-[#5a6878]">© {year} BeWork. Tous droits réservés.</p>
+          <p className="text-sm text-[#5B6776]">© {year} BeWork. Tous droits réservés.</p>
 
           <div className="flex flex-wrap items-center gap-5 md:justify-end">
             {socialProfiles.length > 0 ? (
@@ -189,7 +177,7 @@ export function MarketingSiteFooter() {
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(28,36,48,0.14)] text-[#5a6878] transition-colors hover:border-[#b8893f] hover:text-[#1c2430]"
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-[#DCE4EE] text-[#5B6776] transition-colors hover:border-[#1E4E8C] hover:text-[#1F2A37]"
                         aria-label={t === "other" ? "BeWork — lien externe" : `BeWork sur ${t}`}
                       >
                         <SocialIcon type={t} />
@@ -197,26 +185,26 @@ export function MarketingSiteFooter() {
                     );
                   })}
                 </div>
-                <span className="hidden h-8 w-px bg-[rgba(28,36,48,0.12)] sm:block" aria-hidden />
+                <span className="hidden h-8 w-px bg-[#DCE4EE] sm:block" aria-hidden />
               </>
             ) : null}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-[#5a6878]">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-[#5B6776]">
               <Link
                 href="/demande-de-devis"
-                className="transition-colors hover:text-[#1c2430] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b8893f]"
+                className="transition-colors hover:text-[#1F2A37] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E4E8C]"
               >
                 Devis
               </Link>
               <Link
                 href="/contact"
-                className="transition-colors hover:text-[#1c2430] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b8893f]"
+                className="transition-colors hover:text-[#1F2A37] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E4E8C]"
                 {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "footer-bar")}
               >
                 Contact
               </Link>
               <a
                 href={`${SITE_URL}/sitemap.xml`}
-                className="transition-colors hover:text-[#1c2430] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b8893f]"
+                className="transition-colors hover:text-[#1F2A37] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E4E8C]"
               >
                 Plan du site
               </a>

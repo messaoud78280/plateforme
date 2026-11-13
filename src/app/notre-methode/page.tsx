@@ -22,10 +22,12 @@ export default function NotreMethodePage() {
       <main>
         <BtpPageHero
           eyebrow="MÉTHODE"
-          title="Une intervention structurée, des livrables clairs."
-          subtitle="Du premier échange à la clôture : besoin, étude, proposition, pilotage et visibilité — avec des livrables et une traçabilité définis contractuellement."
+          title="Une méthode de suivi structurée."
+          subtitle="Du premier échange à la clôture : besoin, étude, proposition, pilotage et visibilité. Nos équipes s’appuient en interne sur des outils de gestion et d’IA — la mission reste une prestation humaine."
           primaryHref="/demande-de-devis"
-          primaryLabel="Étudions votre besoin"
+          primaryLabel="Demander une mission"
+          secondaryHref="/plateforme-ia"
+          secondaryLabel="Outils & méthode"
         />
 
         <BtpMissionFlow />

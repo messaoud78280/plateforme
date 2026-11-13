@@ -23,9 +23,9 @@ export default function DemandeDeDevisPage() {
         <BtpPageHero
           eyebrow="DEVIS"
           title="Demandez une proposition adaptée à votre chantier."
-          subtitle="Décrivez votre besoin. Nous analysons le périmètre et vous adressons une proposition personnalisée. Aucun tarif public n’est affiché."
+          subtitle="Deux étapes : choisissez votre besoin, décrivez l’opération. Nous analysons le périmètre et vous adressons une proposition personnalisée. Aucun tarif public."
           primaryHref="#formulaire-devis"
-          primaryLabel="Remplir le formulaire"
+          primaryLabel="Commencer"
           secondaryHref="/contact"
           secondaryLabel="Nous contacter"
         />

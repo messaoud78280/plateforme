@@ -29,7 +29,7 @@ export function BtpExpertiseTerrain({ compact = false }: Props) {
         <div>
           <p className="bw-btp-eyebrow">Expertise terrain</p>
           <h2 id="expertise-terrain-title" className="mt-2 font-bold">
-            Une expertise du terrain au service de vos opérations
+            Une expertise construite sur le terrain.
           </h2>
           <p className="bw-btp-lead mt-4">
             BeWork repose sur une expérience professionnelle de plus de 20 ans

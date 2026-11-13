@@ -4,33 +4,54 @@
  */
 
 export const BEWORK_BTP_SIGNATURE =
-  "CONDUITE DE TRAVAUX • PILOTAGE TCE • INGÉNIERIE OPÉRATIONNELLE";
+  "MAÎTRISE D’ŒUVRE • PILOTAGE DE CHANTIER • BTP";
 
 export const BEWORK_BTP_VALUE_PROPOSITION =
-  "BeWork accompagne les entreprises du BTP avec des prestations de conduite de travaux, d’encadrement opérationnel et de coordination TCE. Nos professionnels s’appuient sur des méthodes éprouvées et sur nos propres outils numériques et IA pour organiser, suivre et optimiser vos opérations.";
+  "BeWork accompagne les acteurs du BTP avec des prestations de maîtrise d’œuvre, de suivi de chantier et de pilotage opérationnel. Nos intervenants s’appuient sur une organisation rigoureuse et, en interne, sur des outils de gestion et d’intelligence artificielle pour améliorer le suivi, la coordination et la traçabilité des opérations.";
 
 export const BEWORK_BTP_SLOGAN =
-  "Des professionnels pour vos chantiers. Des méthodes pour optimiser vos opérations. Une plateforme collaborative et des outils IA pour mieux piloter.";
+  "Nous pilotons les chantiers, nous ne vendons pas un logiciel.";
 
 export const BEWORK_BTP_BRAND_SHORT =
-  "Votre partenaire en conduite de travaux et pilotage TCE";
+  "Maîtrise d’œuvre, suivi et pilotage de chantier BTP";
 
-export const BEWORK_BTP_HERO_SUBTITLE = BEWORK_BTP_VALUE_PROPOSITION;
+export const BEWORK_BTP_HERO_SUBTITLE =
+  "Confiez le suivi et le pilotage de vos opérations à des professionnels du BTP. BeWork structure la préparation, la coordination et le reporting — avec, en appui interne, des outils de gestion et d’IA au service de la mission.";
+
+export const BEWORK_BTP_COMMERCIAL_PROPOSITION =
+  "Des gestionnaires et pilotes de chantier pour vos opérations BTP. L’IA et nos outils de suivi sont utilisés par nos équipes pour mieux organiser et documenter les missions.";
 
 export const BTP_CTA_EXPERTISES = {
   href: "/expertises-tce",
   label: "Découvrir nos expertises",
 } as const;
 
-/** Navigation principale site commercial BTP. */
+export const BTP_CTA_PRESTATIONS = {
+  href: "/conduite-de-travaux",
+  label: "Découvrir nos prestations",
+} as const;
+
+export const BTP_CTA_METHOD = {
+  href: "/notre-methode",
+  label: "Comprendre notre méthode",
+} as const;
+
+/** Navigation principale — orientée services BTP (pas produit logiciel). */
 export const BTP_NAV_ITEMS = [
-  { href: "/conduite-de-travaux", label: "Conduite de travaux" },
+  { href: "/conduite-de-travaux", label: "Maîtrise d’œuvre" },
+  { href: "/pilotage-chantier", label: "Suivi de chantier" },
   { href: "/expertises-tce", label: "Expertises TCE" },
-  { href: "/pilotage-chantier", label: "Pilotage chantier" },
   { href: "/marches-publics-prives", label: "Marchés" },
-  { href: "/plateforme-ia", label: "Plateforme & IA" },
-  { href: "/notre-methode", label: "Méthode" },
+  { href: "/notre-methode", label: "Notre méthode" },
   { href: "/a-propos", label: "À propos" },
+] as const;
+
+/** Liens secondaires (footer). */
+export const BTP_SERVICE_LINKS = [
+  { href: "/plateforme-ia", label: "Outils & méthode" },
+  { href: "/demande-de-devis?besoin=audit_redressement", label: "Audit de chantier" },
+  { href: "/contact", label: "Contact" },
+  { href: "/demande-de-devis", label: "Demander un devis" },
 ] as const;
 
 export const BTP_CTA_PRIMARY = {
@@ -38,9 +59,14 @@ export const BTP_CTA_PRIMARY = {
   label: "Demander un devis",
 } as const;
 
+export const BTP_CTA_MISSION = {
+  href: "/demande-de-devis",
+  label: "Demander une mission",
+} as const;
+
 export const BTP_CTA_CONDUCTEUR = {
   href: "/demande-de-devis?besoin=conducteur_travaux",
-  label: "Demander un conducteur de travaux",
+  label: "Confier votre chantier",
 } as const;
 
 export type BtpServiceNeedId =
@@ -266,36 +292,34 @@ export const BTP_METHOD_STEPS = [
 
 export const BTP_HOME_PROBLEMS = [
   {
-    problem: "Conducteur de travaux indisponible",
-    answer: "Mission de conduite de travaux externalisée, ponctuelle ou suivie.",
+    problem: "Vous manquez de conducteurs de travaux",
+    answer: "Intervention externalisée sur un périmètre défini — préparation, coordination et reporting.",
+    href: "/demande-de-devis?besoin=conducteur_travaux",
   },
   {
-    problem: "Surcharge d’activité",
-    answer: "Renfort opérationnel pour absorber un pic sans désorganiser vos équipes.",
+    problem: "Vos équipes sont surchargées",
+    answer: "Renfort opérationnel et organisation du travail pour absorber le pic d’activité.",
+    href: "/demande-de-devis?besoin=gestion_chantier",
   },
   {
-    problem: "Multiplication des chantiers",
-    answer: "Pilotage structuré et reporting pour garder la visibilité.",
+    problem: "Vos chantiers prennent du retard",
+    answer: "Diagnostic, coordination et plan de rattrapage — sans promesse de délai garanti.",
+    href: "/demande-de-devis?besoin=audit_redressement",
   },
   {
-    problem: "Retards d’exécution",
-    answer: "Audit, plan de rattrapage et suivi des actions correctives.",
+    problem: "Vos coûts dérivent",
+    answer: "Suivi des dépenses, quantités et rendements pour mieux voir les écarts.",
+    href: "/demande-de-devis?besoin=gestion_financiere",
   },
   {
-    problem: "Problèmes d’approvisionnement",
-    answer: "Anticipation des besoins et coordination avec le planning.",
+    problem: "Les intervenants communiquent mal",
+    answer: "Coordination TCE et centralisation de l’information entre les lots.",
+    href: "/demande-de-devis?besoin=pilotage_tce",
   },
   {
-    problem: "Coordination insuffisante",
-    answer: "Coordination TCE, interfaces inter-lots et phasage des interventions.",
-  },
-  {
-    problem: "Coûts mal maîtrisés",
-    answer: "Suivi budgétaire, situations de travaux et analyse des écarts.",
-  },
-  {
-    problem: "Manque de visibilité sur l’avancement",
-    answer: "Tableaux de bord, comptes rendus et indicateurs traçables.",
+    problem: "Vous manquez de visibilité",
+    answer: "Reporting, tableaux de bord et suivi des actions prioritaires.",
+    href: "/demande-de-devis?besoin=pilotage_tce",
   },
 ] as const;
 
@@ -346,16 +370,16 @@ export const BTP_FAQ = [
 export const BTP_SEO_PAGES = {
   home: {
     path: "/",
-    title: "Conduite de travaux & pilotage TCE",
-    absoluteTitle: "BeWork — Conduite de travaux & pilotage TCE",
+    title: "Maîtrise d’œuvre & pilotage de chantier BTP",
+    absoluteTitle: "BeWork — Maîtrise d’œuvre & pilotage de chantier",
     description:
-      "Prestations de conduite de travaux, encadrement opérationnel et coordination TCE. Plateforme collaborative et outils IA pour piloter délais, coûts et avancement.",
+      "Maîtrise d’œuvre, suivi et pilotage de chantier BTP. Gestionnaires et conducteurs de travaux pour organiser, coordonner et documenter vos opérations — sur devis.",
   },
   conduite: {
     path: "/conduite-de-travaux",
-    title: "Conducteurs de travaux externalisés",
+    title: "Maîtrise d’œuvre et conduite de travaux",
     description:
-      "Conducteur de travaux, chef de chantier ou direction de travaux externalisée. Missions ponctuelles, temporaires ou complètes — devis personnalisé.",
+      "Maîtrise d’œuvre, conduite de travaux, chef de chantier ou direction de travaux. Missions contractualisées BTP — périmètre, responsabilités et livrables définis.",
   },
   expertises: {
     path: "/expertises-tce",
@@ -377,9 +401,9 @@ export const BTP_SEO_PAGES = {
   },
   plateforme: {
     path: "/plateforme-ia",
-    title: "Plateforme collaborative et outils IA",
+    title: "Outils & méthode de pilotage",
     description:
-      "Environnement numérique BeWork et outils IA d’aide à l’analyse, à la préparation et au suivi de chantier, sous contrôle professionnel.",
+      "Comment les équipes BeWork s’appuient en interne sur des outils de gestion et d’IA pour mieux suivre, documenter et coordonner les missions de chantier.",
   },
   methode: {
     path: "/notre-methode",
@@ -391,7 +415,7 @@ export const BTP_SEO_PAGES = {
     path: "/a-propos",
     title: "À propos de BeWork",
     description:
-      "BeWork associe expertise de terrain BTP, méthodologie de gestion et outils numériques pour des prestations de conduite de travaux.",
+      "BeWork propose des prestations de maîtrise d’œuvre, de suivi et de pilotage de chantier BTP, avec une méthode structurée et des outils internes d’appui.",
   },
   devis: {
     path: "/demande-de-devis",
@@ -586,31 +610,35 @@ export const BTP_USE_CASES = [
   {
     title: "Conducteur de travaux indisponible",
     context:
-      "Une PME doit maintenir le pilotage d’un chantier alors que son conducteur de travaux est indisponible.",
+      "Une PME doit assurer le pilotage d’une opération pendant une période déterminée.",
     solution:
-      "Mission temporaire de conduite de travaux avec organisation, coordination et reporting.",
+      "Conduite de travaux externalisée, planning, coordination et suivi.",
+    livrables: "Planning, rapports d’avancement, actions prioritaires.",
     besoin: "conducteur_travaux" as BtpServiceNeedId,
   },
   {
     title: "Chantier TCE en retard",
     context:
-      "Plusieurs entreprises interviennent simultanément et rencontrent des difficultés de coordination.",
+      "Difficultés de coordination et interfaces entre corps d’état.",
     solution:
-      "Analyse du planning, coordination des interfaces, identification des points bloquants et plan d’action.",
+      "Analyse du planning, phasage, coordination et suivi des points bloquants.",
+    livrables: "Planning actualisé, compte rendu, plan d’action.",
     besoin: "pilotage_tce" as BtpServiceNeedId,
   },
   {
-    title: "Manque de visibilité financière",
+    title: "Chantier VRD avec défauts de préparation",
     context:
-      "Une entreprise ne dispose pas d’indicateurs suffisamment précis sur les coûts de son chantier.",
-    solution: "Suivi des dépenses, quantités, heures, rendements et écarts.",
-    besoin: "gestion_financiere" as BtpServiceNeedId,
+      "Contraintes d’implantation, approvisionnements et moyens techniques mal anticipés.",
+    solution:
+      "Analyse des plans, préparation des méthodes, coordination et suivi des travaux.",
+    livrables: "Points techniques, préparation, rapport de chantier et alertes.",
+    besoin: "conducteur_travaux" as BtpServiceNeedId,
   },
   {
-    title: "Réponse à un marché public",
-    context: "Une entreprise souhaite répondre à une consultation BTP.",
-    solution:
-      "Analyse du DCE, étude de prix, mémoire technique, méthodologie et préparation de l’offre.",
+    title: "Réponse à un appel d’offres",
+    context: "Une PME doit préparer une offre technique et financière.",
+    solution: "Analyse du DCE, métrés, étude de prix, mémoire technique.",
+    livrables: "Documents de réponse définis au contrat.",
     besoin: "assistance_marches_publics" as BtpServiceNeedId,
   },
 ] as const;
@@ -639,5 +667,376 @@ export const BTP_COMMERCIAL_BENEFITS = [
   {
     title: "Technologie",
     body: "Associer l’expérience humaine à des outils numériques conçus pour les réalités du chantier.",
+  },
+] as const;
+
+/** Offres commerciales à 3 niveaux + marchés (sur devis uniquement). */
+export const BTP_COMMERCIAL_OFFERS = [
+  {
+    id: "renfort",
+    level: "Offre 1",
+    title: "Renfort opérationnel",
+    body: "Pour un chantier nécessitant une compétence supplémentaire sur une phase définie.",
+    items: [
+      "Préparation d’une opération",
+      "Coordination d’intervenants",
+      "Suivi d’une phase",
+      "Remise en organisation",
+      "Gestion d’un besoin temporaire",
+    ],
+    besoin: "gestion_chantier" as BtpServiceNeedId,
+    cta: "Demander un renfort",
+  },
+  {
+    id: "pilotage",
+    level: "Offre 2",
+    title: "Pilotage de chantier",
+    body: "Accompagnement structuré selon le périmètre contractuel.",
+    items: [
+      "Préparation et planning",
+      "Coordination et suivi des moyens",
+      "Suivi financier",
+      "Reporting et priorités",
+      "Assistance à la réception",
+    ],
+    besoin: "pilotage_tce" as BtpServiceNeedId,
+    cta: "Demander un pilotage",
+  },
+  {
+    id: "audit",
+    level: "Offre 3",
+    title: "Audit et performance",
+    body: "Pour une opération en difficulté ou une entreprise qui veut améliorer sa gestion.",
+    items: [
+      "Diagnostic de chantier",
+      "Analyse des rendements et moyens",
+      "Recherche des causes de retard",
+      "Analyse des coûts",
+      "Plan d’action et suivi correctif",
+    ],
+    besoin: "audit_redressement" as BtpServiceNeedId,
+    cta: "Demander un audit",
+  },
+  {
+    id: "marches",
+    level: "Offre dédiée",
+    title: "Études & marchés",
+    body: "De l’analyse de consultation à la préparation de l’offre — sans garantie d’attribution.",
+    items: [
+      "Analyse DCE / RC / CCTP / CCAP",
+      "Métrés et études de prix",
+      "Mémoire technique",
+      "Méthodologie et planning",
+      "Accompagnement contractuel",
+    ],
+    besoin: "assistance_marches_publics" as BtpServiceNeedId,
+    cta: "Confier une étude de marché",
+  },
+] as const;
+
+/** Profils génériques — pas de noms / photos inventés. */
+export const BTP_PROFESSIONAL_PROFILES = [
+  {
+    title: "Conducteur de travaux",
+    when: "Quand vous devez préparer, organiser et suivre une opération dans la durée.",
+    responsibilities: [
+      "Préparation technique",
+      "Planning et coordination",
+      "Suivi budgétaire",
+      "Reporting",
+    ],
+    domaines: ["VRD", "Gros œuvre", "TCE", "Génie civil"],
+    livrables: ["Planning", "Comptes rendus", "Suivi d’avancement", "Alertes"],
+    besoin: "conducteur_travaux" as BtpServiceNeedId,
+  },
+  {
+    title: "Chef de chantier",
+    when: "Quand l’organisation quotidienne du terrain et le contrôle d’exécution sont prioritaires.",
+    responsibilities: [
+      "Organisation journalière",
+      "Encadrement terrain",
+      "Contrôle d’exécution",
+      "Remontée d’anomalies",
+    ],
+    domaines: ["VRD", "Maçonnerie", "Aménagements"],
+    livrables: ["Rapports journaliers", "Quantités", "Photos", "Actions terrain"],
+    besoin: "chef_chantier" as BtpServiceNeedId,
+  },
+  {
+    title: "Directeur de travaux",
+    when: "Quand plusieurs opérations ou un périmètre multi-chantiers nécessitent une supervision.",
+    responsibilities: [
+      "Supervision multi-opérations",
+      "Priorisation",
+      "Appui direction",
+      "Reporting consolidé",
+    ],
+    domaines: ["TCE", "Entreprises générales", "Exploitation"],
+    livrables: ["Synthèses direction", "Tableaux de bord", "Décisions à arbitrer"],
+    besoin: "direction_travaux" as BtpServiceNeedId,
+  },
+  {
+    title: "Responsable méthodes et planning",
+    when: "Quand le phasage, les méthodes d’exécution et la planification des moyens sont critiques.",
+    responsibilities: [
+      "Méthodes d’exécution",
+      "Phasage",
+      "Planification des ressources",
+      "Interfaces lots",
+    ],
+    domaines: ["TCE", "VRD", "Génie civil"],
+    livrables: ["Planning phasé", "Notes de méthodes", "Points d’interface"],
+    besoin: "pilotage_tce" as BtpServiceNeedId,
+  },
+] as const;
+
+/** Compétences types (fiches génériques, sans profils nominatifs). */
+export const BTP_COMPETENCE_SHEETS = [
+  {
+    title: "Conducteur de travaux VRD",
+    specialites: [
+      "Terrassement",
+      "Réseaux EP/EU",
+      "AEP",
+      "Voirie",
+      "Aménagements urbains",
+      "Génie civil",
+    ],
+    missions: [
+      "Préparation technique",
+      "Coordination des équipes",
+      "Planning",
+      "Approvisionnements",
+      "Contrôle de production",
+      "Suivi financier",
+      "Reporting",
+    ],
+    besoin: "conducteur_travaux" as BtpServiceNeedId,
+    specialiteQuery: "vrd",
+  },
+  {
+    title: "Conducteur de travaux gros œuvre",
+    specialites: [
+      "Fondations",
+      "Maçonnerie",
+      "Béton armé",
+      "Structure",
+      "Dallages",
+    ],
+    missions: [
+      "Préparation",
+      "Suivi d’exécution",
+      "Coordination sous-traitants",
+      "Contrôle d’avancement",
+      "Reporting",
+    ],
+    besoin: "conducteur_travaux" as BtpServiceNeedId,
+    specialiteQuery: "gros_oeuvre",
+  },
+  {
+    title: "Coordination TCE",
+    specialites: [
+      "Interfaces inter-lots",
+      "Phasage",
+      "Coactivité",
+      "Synthèse des contraintes",
+    ],
+    missions: [
+      "Analyse planning",
+      "Coordination des intervenants",
+      "Points bloquants",
+      "Suivi des réserves",
+    ],
+    besoin: "pilotage_tce" as BtpServiceNeedId,
+    specialiteQuery: "tce",
+  },
+] as const;
+
+export const BTP_DELIVERABLES = [
+  {
+    id: "rapport",
+    title: "Rapport de chantier",
+    items: [
+      "Date et chantier",
+      "Effectifs",
+      "Travaux réalisés",
+      "Quantités",
+      "Photos",
+      "Difficultés",
+      "Actions correctives",
+      "Prochaines étapes",
+    ],
+  },
+  {
+    id: "planning",
+    title: "Planning",
+    items: [
+      "Phases",
+      "Tâches",
+      "Durées",
+      "Responsables",
+      "Dates clés",
+      "Avancement",
+    ],
+  },
+  {
+    id: "financier",
+    title: "Tableau de bord financier",
+    items: [
+      "Budget de référence",
+      "Dépenses suivies",
+      "Quantités",
+      "Écarts",
+      "Points d’attention",
+    ],
+  },
+  {
+    id: "direction",
+    title: "Synthèse de direction",
+    items: [
+      "État général",
+      "Points bloquants",
+      "Risques identifiés",
+      "Décisions à prendre",
+      "Actions prioritaires",
+    ],
+  },
+] as const;
+
+export const BTP_DELIVERABLE_LIST = [
+  "Planning de chantier",
+  "Rapport journalier",
+  "Compte rendu de réunion",
+  "Suivi des effectifs",
+  "Quantités réalisées",
+  "Suivi des dépenses",
+  "Tableau d’avancement",
+  "Liste des réserves et non-conformités",
+  "Actions correctives",
+  "Suivi documentaire",
+] as const;
+
+export const BTP_LIFECYCLE_STAGES = [
+  {
+    title: "Avant travaux",
+    body: "Études, marchés, métrés, prix, planning et préparation.",
+    href: "/marches-publics-prives",
+  },
+  {
+    title: "Pendant les travaux",
+    body: "Organisation, pilotage, coordination et suivi de production.",
+    href: "/pilotage-chantier",
+  },
+  {
+    title: "Fin de travaux",
+    body: "Contrôle, réception, DOE, décomptes et clôture.",
+    href: "/demande-de-devis",
+  },
+] as const;
+
+export const BTP_WHY_BEWORK = [
+  "Expertise pratique du chantier",
+  "Compréhension des marchés et contraintes contractuelles",
+  "Gestion rigoureuse des opérations",
+  "Outils de suivi collaboratifs",
+  "Utilisation encadrée de l’IA",
+  "Prestations adaptées aux besoins réels",
+] as const;
+
+export const BTP_COST_RISKS = [
+  "Arrêt d’une équipe par manque de matériaux",
+  "Engin immobilisé",
+  "Défaut d’implantation nécessitant une reprise",
+  "Sous-traitant intervenant au mauvais moment",
+  "Travaux supplémentaires non suivis",
+  "Quantités réalisées mal comptabilisées",
+  "Planning désorganisé",
+  "Défaut de coordination entre lots",
+] as const;
+
+export const BTP_MARCHES_FLOW = [
+  {
+    n: "01",
+    title: "Vous transmettez le dossier",
+    body: "Consultation, pièces disponibles et objectif de réponse.",
+  },
+  {
+    n: "02",
+    title: "Nous l’analysons",
+    body: "Contraintes techniques, critères, risques et charge de réponse.",
+  },
+  {
+    n: "03",
+    title: "Nous définissons la mission",
+    body: "Périmètre, livrables, délais et conditions sur devis.",
+  },
+  {
+    n: "04",
+    title: "Nous produisons les livrables",
+    body: "Analyse, métrés, prix, mémoire ou pièces selon contrat.",
+  },
+  {
+    n: "05",
+    title: "Vous validez",
+    body: "Relecture, ajustements et dépôt sous votre responsabilité.",
+  },
+] as const;
+
+export const BTP_PLATFORM_JOURNEY = [
+  {
+    id: "visite",
+    title: "Visite chantier",
+    input: "Observations, photos, contraintes terrain",
+    action: "Relevé et structuration",
+    result: "Dossier de visite exploitable",
+    ia: "Aide à classer observations et manques",
+  },
+  {
+    id: "metres",
+    title: "Métrés",
+    input: "Plans, relevés, quantités",
+    action: "Quantitatif et contrôles de cohérence",
+    result: "Base pour devis ou suivi",
+    ia: "Assistance à la structuration des quantités",
+  },
+  {
+    id: "devis",
+    title: "Devis",
+    input: "Ouvrages, déboursés, bibliothèque",
+    action: "Étude de prix",
+    result: "Devis et variantes",
+    ia: "Aide à l’analyse et au chiffrage assisté",
+  },
+  {
+    id: "planning",
+    title: "Planning",
+    input: "Tâches, phasage, affectations",
+    action: "Organisation des interventions",
+    result: "Planning suivi",
+    ia: "Aide à la préparation des actions",
+  },
+  {
+    id: "appro",
+    title: "Approvisionnements",
+    input: "Besoins liés au planning",
+    action: "Commandes et suivi livraisons",
+    result: "Visibilité matériels",
+    ia: "Points d’attention sur les manques",
+  },
+  {
+    id: "suivi",
+    title: "Suivi de chantier",
+    input: "Avancement, incidents, décisions",
+    action: "Pilotage quotidien",
+    result: "Traçabilité opérationnelle",
+    ia: "Synthèses et alertes assistées",
+  },
+  {
+    id: "reporting",
+    title: "Reporting",
+    input: "Données consolidées",
+    action: "Comptes rendus et tableaux de bord",
+    result: "Visibilité direction",
+    ia: "Assistance à la rédaction structurée",
   },
 ] as const;

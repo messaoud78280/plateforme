@@ -19,8 +19,8 @@
   z-index: -1;
   background: linear-gradient(
     to bottom,
-    rgba(246, 247, 249, 0.95) 0%,
-    rgba(246, 247, 249, 0.45) 55%,
+    rgba(250, 250, 247, 0.95) 0%,
+    rgba(250, 250, 247, 0.45) 55%,
     transparent 100%
   );
 }
@@ -50,18 +50,19 @@
   display: flex;
   flex-direction: column;
   border-radius: 1.15rem;
-  border: 1px solid rgba(21, 32, 43, 0.12);
-  background: #ffffff;
-  box-shadow: 0 8px 28px rgba(21, 32, 43, 0.07);
+  border: 1px solid #DCE4EE;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 1px 3px rgba(39, 49, 45, 0.04);
   overflow: hidden;
+  backdrop-filter: blur(10px);
   transition:
-    box-shadow 0.25s ease,
-    border-color 0.25s ease;
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .panelScrolled {
-  border-color: rgba(21, 32, 43, 0.16);
-  box-shadow: 0 10px 32px rgba(21, 32, 43, 0.1);
+  border-color: #C5D0DE;
+  box-shadow: 0 4px 16px rgba(39, 49, 45, 0.06);
 }
 
 @media (min-width: 900px) {
@@ -165,7 +166,7 @@
   flex-shrink: 0;
   width: 1px;
   height: 2.4rem;
-  background: rgba(21, 32, 43, 0.14);
+  background: rgba(39, 49, 45, 0.14);
 }
 
 @media (min-width: 768px) {
@@ -228,7 +229,7 @@
 
 .signaturePrimary {
   display: block;
-  color: #15202b;
+  color: #1F2A37;
   font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: -0.025em;
@@ -334,7 +335,7 @@
 }
 
 .accent {
-  color: #b8893f;
+  color: #1E4E8C;
   font-weight: 800;
   animation: none;
 }
@@ -411,9 +412,9 @@
   justify-content: center;
   padding: 0 1.1rem;
   border-radius: 0.55rem;
-  border: 1px solid rgba(21, 32, 43, 0.18);
+  border: 1px solid rgba(39, 49, 45, 0.18);
   background: #ffffff;
-  color: #15202b;
+  color: #1F2A37;
   font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -453,13 +454,13 @@
 }
 
 .ctaSecondary:hover {
-  border-color: rgba(21, 32, 43, 0.3);
-  background: #f6f7f9;
-  color: #15202b;
+  border-color: #C5D0DE;
+  background: #EAF2FB;
+  color: #1F2A37;
 }
 
 .ctaSecondary:focus-visible {
-  outline: 2px solid #b8893f;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -470,7 +471,7 @@
   gap: 0.4rem;
   padding: 0 1.2rem;
   border-radius: 0.55rem;
-  background: #15202b;
+  background: #1E4E8C;
   color: #fff;
   font-size: 1.15rem;
   font-weight: 750;
@@ -490,11 +491,11 @@
 }
 
 .cta:hover {
-  background: #334859;
+  background: #163A68;
 }
 
 .cta:focus-visible {
-  outline: 2px solid #b8893f;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -517,7 +518,7 @@
   align-items: center;
   padding: 0 0.95rem;
   border-radius: 0.5rem;
-  background: #15202b;
+  background: #1E4E8C;
   color: #fff;
   font-size: 1.1rem;
   font-weight: 750;
@@ -534,7 +535,7 @@
 }
 
 .ctaCompact:focus-visible {
-  outline: 2px solid #b8893f;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -593,8 +594,8 @@
   justify-content: center;
   min-height: 3.6rem;
   padding: 0.4rem 0.85rem 0.6rem;
-  background: #f6f7f9;
-  border-top: 1px solid rgba(21, 32, 43, 0.08);
+  background: #F8FAFC;
+  border-top: 1px solid rgba(39, 49, 45, 0.08);
   transition: min-height 0.35s ease, padding 0.35s ease;
 }
 
@@ -658,7 +659,7 @@
   font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: -0.015em;
-  color: #15202b;
+  color: #1F2A37;
   text-decoration: none;
   white-space: nowrap;
   transition:
@@ -675,20 +676,20 @@
 }
 
 .navLink:hover {
-  color: #15202b;
+  color: #1F2A37;
   background: #ffffff;
-  border-color: rgba(21, 32, 43, 0.12);
+  border-color: rgba(39, 49, 45, 0.12);
 }
 
 .navLinkActive {
-  color: #15202b;
+  color: #1F2A37;
   background: #ffffff;
   border-color: rgba(184, 137, 63, 0.55);
   font-weight: 800;
 }
 
 .navLink:focus-visible {
-  outline: 2px solid #b8893f;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -702,9 +703,9 @@
   height: 2.9rem;
   padding: 0 1.05rem;
   border-radius: 0.55rem;
-  border: 1px solid rgba(21, 32, 43, 0.16);
-  background: #f6f7f9;
-  color: #15202b;
+  border: 1px solid rgba(39, 49, 45, 0.16);
+  background: #F8FAFC;
+  color: #1F2A37;
   font-size: 1.08rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -735,9 +736,9 @@
 }
 
 .privateAccess:hover {
-  background: #eef1f4;
-  border-color: rgba(21, 32, 43, 0.28);
-  color: #15202b;
+  background: #EAF2FB;
+  border-color: rgba(39, 49, 45, 0.28);
+  color: #1F2A37;
   transform: none;
 }
 
@@ -746,7 +747,7 @@
 }
 
 .privateAccess:focus-visible {
-  outline: 2px solid #b8893f;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -834,17 +835,17 @@
 
 .mobileLink {
   border-radius: 0.75rem;
-  border: 1px solid rgba(21, 32, 43, 0.1);
-  background: #f6f7f9;
+  border: 1px solid rgba(39, 49, 45, 0.1);
+  background: #F8FAFC;
   padding: 1.15rem 1.3rem;
   font-size: 1.3rem;
   font-weight: 750;
-  color: #15202b;
+  color: #1F2A37;
   text-decoration: none;
 }
 
 .mobileLink:focus-visible {
-  outline: 2px solid #b8893f;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -862,9 +863,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 0.55rem;
-  border: 1px solid rgba(21, 32, 43, 0.18);
+  border: 1px solid rgba(39, 49, 45, 0.18);
   background: #ffffff;
-  color: #15202b;
+  color: #1F2A37;
   font-size: 1.15rem;
   font-weight: 650;
   text-decoration: none;
@@ -872,7 +873,7 @@
 }
 
 .ctaSecondaryMobile:focus-visible {
-  outline: 2px solid #b8893f;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 
@@ -883,7 +884,7 @@
   justify-content: center;
   gap: 0.45rem;
   border-radius: 0.55rem;
-  background: #15202b;
+  background: #1E4E8C;
   color: #fff;
   font-size: 1.2rem;
   font-weight: 650;
@@ -892,7 +893,7 @@
 }
 
 .ctaMobile:focus-visible {
-  outline: 2px solid #b8893f;
+  outline: 2px solid #1E4E8C;
   outline-offset: 2px;
 }
 

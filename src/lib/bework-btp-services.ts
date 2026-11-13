@@ -10,7 +10,7 @@ export const BEWORK_BTP_VALUE_PROPOSITION =
   "BeWork accompagne les acteurs du BTP avec des prestations de maîtrise d’œuvre, de suivi de chantier et de pilotage opérationnel. Nos intervenants s’appuient sur une organisation rigoureuse et, en interne, sur des outils de gestion et d’intelligence artificielle pour améliorer le suivi, la coordination et la traçabilité des opérations.";
 
 export const BEWORK_BTP_SLOGAN =
-  "Nous pilotons les chantiers, nous ne vendons pas un logiciel.";
+  "L’expertise du chantier, renforcée par une méthode et des outils numériques.";
 
 export const BEWORK_BTP_BRAND_SHORT =
   "Maîtrise d’œuvre, suivi et pilotage de chantier BTP";

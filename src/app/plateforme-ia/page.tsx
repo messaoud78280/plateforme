@@ -25,28 +25,28 @@ export default function PlateformeIaPage() {
       <MarketingSiteHeader />
       <main>
         <BtpPageHero
-          eyebrow="OUTILS & MÉTHODE"
-          title="Nous ne vendons pas un logiciel. Nous pilotons vos chantiers."
-          subtitle="BeWork accompagne les acteurs du BTP avec des prestations de maîtrise d’œuvre, de suivi de chantier et de pilotage opérationnel. Nos intervenants s’appuient sur une organisation rigoureuse, des outils de gestion internes et une intelligence artificielle au service de la mission."
+          eyebrow="NOTRE MÉTHODE • PILOTAGE AUGMENTÉ PAR L'IA"
+          title="L'expertise du chantier, la précision du numérique."
+          subtitle="Chez BeWork, nos professionnels assurent la maîtrise d'œuvre, le suivi et la coordination des opérations BTP. Ils s'appuient sur notre méthodologie, notre plateforme collaborative interne et nos outils d'intelligence artificielle pour renforcer la qualité du pilotage, la traçabilité et la maîtrise des coûts et des délais."
           primaryHref="/demande-de-devis"
-          primaryLabel="Demander une mission"
+          primaryLabel="Confier une mission"
           secondaryHref="/notre-methode"
-          secondaryLabel="Comprendre notre méthode"
+          secondaryLabel="Découvrir notre méthode"
         />
 
         <section className="bw-btp-section bw-btp-section-alt">
           <div className="bw-btp-container max-w-3xl">
-            <h2 className="font-bold">Des outils utilisés par nos équipes</h2>
+            <h2 className="font-bold">Des outils au service de nos missions</h2>
             <p className="mt-4 text-base leading-relaxed text-[var(--btp-muted)]">
-              La plateforme et les outils IA BeWork ne sont pas le produit
-              commercialisé. Ce sont des moyens internes pour structurer
+              Nos équipes s’appuient sur une plateforme collaborative interne et
+              des outils d’intelligence artificielle pour structurer
               l’information, préparer les opérations, produire des comptes
               rendus, suivre l’avancement et documenter les décisions.
             </p>
             <p className="mt-4 text-base leading-relaxed text-[var(--btp-muted)]">
-              Le client confie une mission humaine de suivi ou de pilotage. Nos
-              équipes utilisent ces outils pour mieux organiser et traçabiliser
-              l’intervention — sous validation professionnelle.
+              Chaque mission reste conduite par des professionnels du BTP. Les
+              outils renforcent l’organisation, la traçabilité et la qualité du
+              reporting — sous validation humaine.
             </p>
             <ul className="mt-6 space-y-2 text-base text-[var(--btp-muted)]">
               <li>• Structurer les informations chantier</li>
@@ -94,10 +94,10 @@ export default function PlateformeIaPage() {
 
             <div className="mt-10 flex flex-wrap gap-3">
               <Link href="/demande-de-devis" className="bw-btp-btn bw-btp-btn-primary">
-                Demander une mission
+                Confier une mission
               </Link>
               <Link href="/notre-methode" className="bw-btp-btn bw-btp-btn-secondary">
-                Notre méthode
+                Découvrir notre méthode
               </Link>
             </div>
           </div>

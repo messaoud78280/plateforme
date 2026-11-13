@@ -1,10 +1,10 @@
 import Image from "next/image";
 import { BEWORK_BRAND_SIGNATURE } from "@/lib/seo-keywords";
 
-/** Logo wordmark BeWork — conduite de travaux & pilotage TCE */
-const LOGO_PATH = "/BeWork.logo.brand.png";
+/** Logo wordmark BeWork sans ancien slogan formation */
+const LOGO_PATH = "/BeWork.logo.wordmark-clean.png";
 /** Ratio intrinsèque du fichier (évite déformation) */
-const LOGO_RATIO = 1024 / 334;
+const LOGO_RATIO = 1048 / 217;
 
 interface BeWorkLogoProps {
   className?: string;

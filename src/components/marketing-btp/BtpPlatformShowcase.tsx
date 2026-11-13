@@ -10,10 +10,10 @@ export function BtpPlatformShowcase() {
           Des outils utilisés par nos équipes sur le terrain.
         </h2>
         <p className="bw-btp-lead mt-4 max-w-3xl">
-          Nous ne vendons pas un logiciel. Nos gestionnaires et pilotes de
-          chantier s’appuient en interne sur un environnement de suivi pour
-          préparer, documenter et coordonner les missions — sous contrôle
-          humain.
+          Nos gestionnaires et pilotes de chantier s’appuient sur un
+          environnement de suivi interne pour préparer, documenter et
+          coordonner les missions — avec une validation professionnelle à
+          chaque étape.
         </p>
 
         <div className="mt-10 overflow-hidden rounded-xl border border-[var(--btp-border)] bg-white p-5 sm:p-7">

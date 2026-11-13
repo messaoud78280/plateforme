@@ -64,7 +64,7 @@ export const BEWORK_BRAND_INSTITUTIONAL =
   "Maîtrise d’œuvre. Suivi et pilotage de chantier. Coordination BTP.";
 
 export const BEWORK_SLOGAN =
-  "Nous pilotons les chantiers, nous ne vendons pas un logiciel.";
+  "L’expertise du chantier, renforcée par une méthode et des outils numériques.";
 
 export const BEWORK_SLOGAN_DECISION =
   "Confiez le suivi et le pilotage de vos opérations à des professionnels du BTP.";

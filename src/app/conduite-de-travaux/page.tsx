@@ -36,6 +36,8 @@ export default function ConduiteDeTravauxPage() {
           secondaryHref="/notre-methode"
           secondaryLabel="Découvrir notre méthode"
           note="Missions ponctuelles ou suivies • TCE • VRD • Bâtiment • Prestations sur devis"
+          imageSrc="/marketing/bework-pole-conduite-travaux.jpg"
+          imageAlt="Conducteur de travaux sur chantier avec plans — photo d’ambiance illustrative"
         />
 
         <BtpProfessionals />

@@ -36,22 +36,52 @@ export const BTP_CTA_METHOD = {
   label: "Découvrir notre méthode",
 } as const;
 
-/** Navigation principale — orientée prestations humaines BTP. */
-export const BTP_NAV_ITEMS = [
-  { href: "/conduite-de-travaux", label: "Conduite de travaux" },
+export type BtpNavChild = { href: string; label: string };
+
+export type BtpNavItem = {
+  href: string;
+  label: string;
+  children?: readonly BtpNavChild[];
+};
+
+/** Navigation principale — prestations humaines BTP. */
+export const BTP_NAV_ITEMS: readonly BtpNavItem[] = [
+  { href: "/conduite-de-travaux", label: "Maîtrise d’œuvre" },
   { href: "/pilotage-chantier", label: "Suivi de chantier" },
-  { href: "/expertises-tce", label: "Expertises TCE" },
-  { href: "/marches-publics-prives", label: "Marchés" },
+  { href: "/expertises-tce", label: "Expertises" },
+  {
+    href: "#nos-services",
+    label: "Nos services",
+    children: [
+      {
+        href: "/equipes-tp-vrd",
+        label: "Équipes opérationnelles TP/VRD",
+      },
+      {
+        href: "/accompagnement-technique-chantier",
+        label: "Accompagnement technique des compagnons",
+      },
+      {
+        href: "/marches-publics-prives",
+        label: "Marchés publics et privés",
+      },
+      {
+        href: "/demande-de-devis?besoin=audit_redressement",
+        label: "Audit et optimisation de chantier",
+      },
+    ],
+  },
   { href: "/notre-methode", label: "Notre méthode" },
   { href: "/a-propos", label: "À propos" },
 ] as const;
 
 /** Liens secondaires (footer). */
 export const BTP_SERVICE_LINKS = [
+  { href: "/equipes-tp-vrd", label: "Équipes TP/VRD" },
+  { href: "/accompagnement-technique-chantier", label: "Accompagnement technique" },
+  { href: "/marches-publics-prives", label: "Marchés publics & privés" },
   { href: "/plateforme-ia", label: "Méthode & outils internes" },
-  { href: "/demande-de-devis?besoin=audit_redressement", label: "Audit de chantier" },
-  { href: "/contact", label: "Contact" },
-  { href: "/demande-de-devis?besoin=conducteur_travaux", label: "Demander un conducteur" },
+  { href: "/demande-de-devis?besoin=conducteur_travaux", label: "Demander un devis" },
 ] as const;
 
 export const BTP_CTA_PRIMARY = {
@@ -69,6 +99,16 @@ export const BTP_CTA_CONDUCTEUR = {
   label: "Demander un conducteur de travaux",
 } as const;
 
+export const BTP_CTA_EQUIPE_TP_VRD = {
+  href: "/demande-de-devis?besoin=equipe_tp_vrd",
+  label: "Demander une équipe TP/VRD",
+} as const;
+
+export const BTP_CTA_ACCOMPAGNEMENT = {
+  href: "/demande-de-devis?besoin=accompagnement_technique",
+  label: "Demander un accompagnement technique",
+} as const;
+
 export type BtpServiceNeedId =
   | "conducteur_travaux"
   | "chef_chantier"
@@ -80,6 +120,11 @@ export type BtpServiceNeedId =
   | "assistance_marches_prives"
   | "etudes_prix"
   | "gestion_financiere"
+  | "equipe_tp_vrd"
+  | "chef_equipe_tp_vrd"
+  | "macon_vrd"
+  | "accompagnement_technique"
+  | "assistance_modes_operatoires"
   | "autre";
 
 export const BTP_SERVICE_NEED_OPTIONS: Array<{
@@ -91,6 +136,17 @@ export const BTP_SERVICE_NEED_OPTIONS: Array<{
   { value: "direction_travaux", label: "Directeur de travaux" },
   { value: "pilotage_tce", label: "Pilotage TCE" },
   { value: "gestion_chantier", label: "Gestion de chantier" },
+  { value: "equipe_tp_vrd", label: "Équipe opérationnelle TP/VRD" },
+  { value: "chef_equipe_tp_vrd", label: "Chef d’équipe TP/VRD" },
+  { value: "macon_vrd", label: "Maçon VRD" },
+  {
+    value: "accompagnement_technique",
+    label: "Accompagnement technique des compagnons",
+  },
+  {
+    value: "assistance_modes_operatoires",
+    label: "Assistance aux modes opératoires",
+  },
   { value: "audit_redressement", label: "Audit de chantier" },
   { value: "assistance_marches_publics", label: "Assistance marchés publics" },
   { value: "assistance_marches_prives", label: "Assistance marchés privés" },
@@ -364,6 +420,14 @@ export const BTP_FAQ = [
     q: "Quelle est votre zone d’intervention ?",
     a: "Priorité Yvelines et Île-de-France. D’autres zones peuvent être étudiées selon la mission — à confirmer dans le devis.",
   },
+  {
+    q: "Proposez-vous des équipes TP/VRD ?",
+    a: "Oui. BeWork peut proposer des prestations opérationnelles TP/VRD (chef d’équipe, maçon VRD, équipe selon disponibilités réelles), en intervention ponctuelle, en régie ou en sous-traitance définie. Aucun effectif n’est garanti avant devis.",
+  },
+  {
+    q: "Qu’est-ce que l’accompagnement technique des compagnons ?",
+    a: "Il s’agit d’un accompagnement terrain pour transmettre les modes opératoires et accompagner l’exécution. Ce n’est pas une formation réglementaire, une habilitation ou une certification.",
+  },
 ] as const;
 
 /** SEO pages cœur commercial. */
@@ -373,7 +437,7 @@ export const BTP_SEO_PAGES = {
     title: "Conducteur de travaux & pilotage de chantier BTP",
     absoluteTitle: "BeWork — Conduite de travaux & pilotage de chantier",
     description:
-      "Conducteurs de travaux, chefs de chantier et professionnels du suivi TCE pour piloter vos chantiers BTP. Conduite de travaux externalisée, maîtrise d’œuvre d’exécution et coordination — sur devis.",
+      "Conducteurs de travaux, équipes TP/VRD, accompagnement technique des compagnons et études de marchés. Prestations BTP contractualisées — sur devis.",
   },
   conduite: {
     path: "/conduite-de-travaux",
@@ -399,6 +463,18 @@ export const BTP_SEO_PAGES = {
     description:
       "Assistance aux appels d’offres, études de prix, constitution d’offre et suivi d’exécution de marché BTP.",
   },
+  equipesTpVrd: {
+    path: "/equipes-tp-vrd",
+    title: "Équipes opérationnelles TP/VRD",
+    description:
+      "Chefs d’équipe et maçons VRD pour des prestations opérationnelles en travaux publics : régie, forfait ou sous-traitance définie — sur devis.",
+  },
+  accompagnementTechnique: {
+    path: "/accompagnement-technique-chantier",
+    title: "Accompagnement technique des compagnons",
+    description:
+      "Accompagnement terrain pour transmettre les modes opératoires et accompagner vos compagnons dans la qualité d’exécution — hors formations réglementaires.",
+  },
   plateforme: {
     path: "/plateforme-ia",
     title: "Méthode & outils de pilotage de chantier",
@@ -419,17 +495,258 @@ export const BTP_SEO_PAGES = {
   },
   devis: {
     path: "/demande-de-devis",
-    title: "Demande de devis — conducteur de travaux",
+    title: "Demande de devis BTP",
     description:
-      "Demandez un conducteur de travaux, un chef de chantier ou une mission de pilotage. BeWork étudie votre besoin et propose une intervention sur devis.",
+      "Demandez un conducteur de travaux, une équipe TP/VRD, un accompagnement technique ou une étude de marché. BeWork étudie votre besoin — sur devis.",
   },
   contact: {
     path: "/contact",
     title: "Contact",
     description:
-      "Contactez BeWork pour une prestation de conduite de travaux, de suivi de chantier ou d’assistance aux marchés.",
+      "Contactez BeWork pour une prestation de conduite de travaux, d’équipe TP/VRD, d’accompagnement technique ou d’assistance aux marchés.",
   },
 } as const;
+
+/** Quatre pôles commerciaux — page d’accueil. */
+export const BTP_HOME_POLES = [
+  {
+    id: "conduite",
+    title: "Conduite de travaux",
+    body: "Des professionnels pour préparer, coordonner et piloter vos opérations.",
+    href: "/demande-de-devis?besoin=conducteur_travaux",
+    cta: "Demander un conducteur de travaux",
+    pageHref: "/conduite-de-travaux",
+    imageSrc: "/marketing/bework-pole-conduite-travaux.jpg",
+    imageAlt:
+      "Conducteur de travaux sur chantier avec plans — photo d’ambiance illustrative",
+  },
+  {
+    id: "equipes",
+    title: "Équipes TP/VRD",
+    body: "Des chefs d’équipe et maçons VRD pour la réalisation de prestations opérationnelles sur chantier.",
+    href: "/demande-de-devis?besoin=equipe_tp_vrd",
+    cta: "Demander une équipe TP/VRD",
+    pageHref: "/equipes-tp-vrd",
+    imageSrc: "/marketing/bework-pole-equipes-tp-vrd.jpg",
+    imageAlt:
+      "Maçon VRD posant des pavés — photo d’ambiance illustrative",
+  },
+  {
+    id: "accompagnement",
+    title: "Accompagnement technique",
+    body: "Des spécialistes terrain pour transmettre les modes opératoires et accompagner vos compagnons.",
+    href: "/demande-de-devis?besoin=accompagnement_technique",
+    cta: "Accompagner mes équipes",
+    pageHref: "/accompagnement-technique-chantier",
+    imageSrc: "/marketing/bework-pole-accompagnement.jpg",
+    imageAlt:
+      "Accompagnement technique sur chantier — photo d’ambiance illustrative",
+  },
+  {
+    id: "marches",
+    title: "Études & marchés",
+    body: "Une expertise pour analyser, chiffrer et préparer vos marchés publics et privés.",
+    href: "/demande-de-devis?besoin=assistance_marches_publics",
+    cta: "Confier une étude",
+    pageHref: "/marches-publics-prives",
+    imageSrc: "/marketing/bework-pole-etudes-marches.jpg",
+    imageAlt:
+      "Étude de plans et dossiers de marché — photo d’ambiance illustrative",
+  },
+] as const;
+
+export const BTP_EQUIPE_TP_VRD_PROFILES = [
+  {
+    title: "Chef d’équipe TP/VRD",
+    skills: [
+      "Organisation quotidienne",
+      "Répartition des travaux",
+      "Lecture de plans",
+      "Implantation",
+      "Contrôle altimétrique",
+      "Coordination des compagnons",
+      "Gestion du matériel",
+      "Suivi de production",
+      "Contrôle d’exécution",
+      "Application des modes opératoires",
+    ],
+    besoin: "chef_equipe_tp_vrd" as BtpServiceNeedId,
+    imageSrc: "/marketing/bework-hero-equipes-tp-vrd.jpg",
+    imageAlt:
+      "Chef d’équipe TP/VRD sur travaux de bordures — photo d’ambiance illustrative",
+  },
+  {
+    title: "Maçon VRD",
+    skills: [
+      "Pose de bordures",
+      "Pose de caniveaux",
+      "Pose de pavés",
+      "Pose de dalles",
+      "Travaux de maçonnerie urbaine",
+      "Regards et ouvrages annexes",
+      "Petits ouvrages béton",
+      "Réglage des supports",
+      "Réalisation de finitions",
+      "Reprises de travaux",
+    ],
+    besoin: "macon_vrd" as BtpServiceNeedId,
+    imageSrc: "/marketing/bework-pole-equipes-tp-vrd.jpg",
+    imageAlt: "Maçon VRD en pose de pavés — photo d’ambiance illustrative",
+  },
+] as const;
+
+export const BTP_EQUIPE_TP_VRD_DOMAINES = [
+  "Voiries et aménagements urbains",
+  "Bordures et caniveaux",
+  "Pavage et dallage",
+  "Réseaux humides EU/EP/AEP",
+  "Terrassements et préparation des supports",
+  "Ouvrages béton et maçonnerie VRD",
+  "Travaux de finition et reprises",
+] as const;
+
+export const BTP_EQUIPE_TP_VRD_MODALITES = [
+  {
+    title: "Intervention ponctuelle",
+    body: "Réalisation d’un périmètre de travaux défini.",
+  },
+  {
+    title: "Prestation en régie",
+    body: "Intervention avec suivi du temps réellement consacré aux travaux, dans le cadre d’un contrat de prestation précisant les responsabilités et l’organisation.",
+  },
+  {
+    title: "Sous-traitance de travaux",
+    body: "Réalisation de travaux spécifiés avec moyens et obligations contractuelles définis.",
+  },
+  {
+    title: "Intervenants indépendants",
+    body: "Possibilité de mobiliser des professionnels autonomes selon leur spécialité et leur disponibilité, sous réserve du respect des règles applicables.",
+  },
+] as const;
+
+export const BTP_ACCOMPAGNEMENT_OBJECTIFS = [
+  "Améliorer la compréhension des plans",
+  "Expliquer les exigences techniques",
+  "Définir les étapes de réalisation",
+  "Transmettre les gestes professionnels",
+  "Limiter les erreurs d’exécution évitables",
+  "Améliorer les méthodes de travail",
+  "Renforcer l’autonomie des compagnons",
+  "Favoriser la qualité des ouvrages",
+  "Contribuer à l’amélioration des rendements",
+] as const;
+
+export const BTP_ACCOMPAGNEMENT_STEPS = [
+  {
+    n: "01",
+    title: "Analyse de l’ouvrage",
+    items: [
+      "Étude des plans",
+      "CCTP",
+      "Prescriptions techniques",
+      "Contraintes d’exécution",
+      "Tolérances applicables",
+      "Moyens et matériels nécessaires",
+    ],
+  },
+  {
+    n: "02",
+    title: "Présentation du mode opératoire",
+    items: [
+      "Explication des étapes",
+      "Organisation du poste",
+      "Choix des moyens adaptés",
+      "Points de vigilance",
+      "Contrôles à effectuer",
+    ],
+  },
+  {
+    n: "03",
+    title: "Démonstration pratique",
+    items: [
+      "Présentation de la méthode",
+      "Démonstration sur chantier",
+      "Transmission des gestes",
+      "Explication des erreurs fréquentes",
+    ],
+  },
+  {
+    n: "04",
+    title: "Accompagnement des compagnons",
+    items: [
+      "Observation de la mise en œuvre",
+      "Conseils techniques",
+      "Ajustement des pratiques",
+      "Vérification de la compréhension",
+    ],
+  },
+  {
+    n: "05",
+    title: "Bilan d’intervention",
+    items: [
+      "Méthodes transmises",
+      "Observations",
+      "Points d’amélioration",
+      "Recommandations",
+      "Éventuelle fiche de mode opératoire",
+    ],
+  },
+] as const;
+
+export const BTP_ACCOMPAGNEMENT_EXAMPLES = [
+  {
+    title: "Pose de dallages",
+    items: [
+      "Préparation du support",
+      "Réglage du lit de pose",
+      "Calepinage",
+      "Contrôle des niveaux",
+      "Alignement",
+      "Tolérances",
+      "Protection des éléments",
+    ],
+  },
+  {
+    title: "Pose de bordures et caniveaux",
+    items: [
+      "Implantation",
+      "Préparation du support",
+      "Alignement",
+      "Altimétrie",
+      "Mise en œuvre du béton",
+      "Contrôle de pose",
+    ],
+  },
+  {
+    title: "Pose de réseaux",
+    items: [
+      "Lecture des plans",
+      "Implantation",
+      "Pentes",
+      "Préparation du fond de fouille",
+      "Mise en œuvre selon prescriptions",
+      "Contrôles",
+    ],
+  },
+  {
+    title: "Ouvrages béton",
+    items: [
+      "Préparation",
+      "Coffrage",
+      "Armatures",
+      "Bétonnage",
+      "Contrôles",
+      "Cure et protection",
+    ],
+  },
+] as const;
+
+export const BTP_INTERVENTION_MODE_OPTIONS = [
+  { value: "regie", label: "Régie" },
+  { value: "forfait", label: "Forfait" },
+  { value: "sous_traitance", label: "Sous-traitance" },
+  { value: "autre", label: "Autre / à préciser" },
+] as const;
 
 export function isBtpServiceNeedId(v: string): v is BtpServiceNeedId {
   return BTP_SERVICE_NEED_OPTIONS.some((o) => o.value === v);

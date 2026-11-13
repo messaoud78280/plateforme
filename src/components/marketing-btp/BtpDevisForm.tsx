@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 import {
+  BTP_INTERVENTION_MODE_OPTIONS,
   BTP_MISSION_DURATION_OPTIONS,
   BTP_OPERATION_TYPE_OPTIONS,
   BTP_SERVICE_NEED_OPTIONS,
@@ -20,6 +21,11 @@ const STEP1_NEEDS: BtpServiceNeedId[] = [
   "chef_chantier",
   "direction_travaux",
   "pilotage_tce",
+  "equipe_tp_vrd",
+  "chef_equipe_tp_vrd",
+  "macon_vrd",
+  "accompagnement_technique",
+  "assistance_modes_operatoires",
   "audit_redressement",
   "assistance_marches_publics",
   "assistance_marches_prives",
@@ -27,8 +33,27 @@ const STEP1_NEEDS: BtpServiceNeedId[] = [
   "autre",
 ];
 
+const EQUIPE_NEEDS: BtpServiceNeedId[] = [
+  "equipe_tp_vrd",
+  "chef_equipe_tp_vrd",
+  "macon_vrd",
+];
+
+const ACCOMPAGNEMENT_NEEDS: BtpServiceNeedId[] = [
+  "accompagnement_technique",
+  "assistance_modes_operatoires",
+];
+
 function isOperationTypeId(v: string): v is BtpOperationTypeId {
   return BTP_OPERATION_TYPE_OPTIONS.some((o) => o.value === v);
+}
+
+function isEquipeNeed(need: BtpServiceNeedId) {
+  return EQUIPE_NEEDS.includes(need);
+}
+
+function isAccompagnementNeed(need: BtpServiceNeedId) {
+  return ACCOMPAGNEMENT_NEEDS.includes(need);
 }
 
 export function BtpDevisForm() {
@@ -54,6 +79,8 @@ export function BtpDevisForm() {
   const step1Options = BTP_SERVICE_NEED_OPTIONS.filter((o) =>
     STEP1_NEEDS.includes(o.value),
   );
+  const showEquipeFields = isEquipeNeed(mainNeed);
+  const showAccompagnementFields = isAccompagnementNeed(mainNeed);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -81,6 +108,16 @@ export function BtpDevisForm() {
     const consent = data.get("consent") === "on";
     const website = String(data.get("website") ?? "").trim();
 
+    const chefEquipeSouhaite = String(data.get("chefEquipeSouhaite") ?? "").trim();
+    const nbCompagnons = String(data.get("nbCompagnons") ?? "").trim();
+    const modeIntervention = String(data.get("modeIntervention") ?? "").trim();
+    const materielsDisponibles = String(data.get("materielsDisponibles") ?? "").trim();
+    const natureTravaux = String(data.get("natureTravaux") ?? "").trim();
+    const typeOuvrage = String(data.get("typeOuvrage") ?? "").trim();
+    const natureModeOperatoire = String(data.get("natureModeOperatoire") ?? "").trim();
+    const difficultes = String(data.get("difficultes") ?? "").trim();
+    const documentsTechniques = String(data.get("documentsTechniques") ?? "").trim();
+
     const operationLabel =
       BTP_OPERATION_TYPE_OPTIONS.find((o) => o.value === operationType)?.label ||
       operationType ||
@@ -89,6 +126,11 @@ export function BtpDevisForm() {
       BTP_MISSION_DURATION_OPTIONS.find((o) => o.value === missionKind)?.label ||
       missionKind ||
       "—";
+    const modeLabel =
+      BTP_INTERVENTION_MODE_OPTIONS.find((o) => o.value === modeIntervention)
+        ?.label ||
+      modeIntervention ||
+      "—";
 
     const composedMessage = [
       `Nature de l’opération : ${operationLabel}`,
@@ -96,10 +138,36 @@ export function BtpDevisForm() {
       `Démarrage souhaité : ${startDate || "—"}`,
       `Durée prévisionnelle : ${duration || "—"}`,
       `Type de mission : ${missionLabel}`,
+      showEquipeFields
+        ? [
+            "",
+            "— Détails équipe TP/VRD —",
+            `Nature des travaux : ${natureTravaux || "—"}`,
+            `Chef d’équipe souhaité : ${chefEquipeSouhaite || "—"}`,
+            `Nombre de compagnons envisagé : ${nbCompagnons || "—"} (indicatif, non garanti)`,
+            `Mode d’intervention envisagé : ${modeLabel}`,
+            `Matériels disponibles sur chantier : ${materielsDisponibles || "—"}`,
+          ].join("\n")
+        : "",
+      showAccompagnementFields
+        ? [
+            "",
+            "— Détails accompagnement technique —",
+            `Type d’ouvrage : ${typeOuvrage || "—"}`,
+            `Nature du mode opératoire : ${natureModeOperatoire || "—"}`,
+            `Nombre de compagnons : ${nbCompagnons || "—"} (indicatif)`,
+            `Difficultés rencontrées : ${difficultes || "—"}`,
+            `Documents techniques disponibles : ${documentsTechniques || "—"}`,
+          ].join("\n")
+        : "",
       "",
       "Description :",
       message || "—",
-    ].join("\n");
+      "",
+      "Rappel : aucune disponibilité, effectif ou cadre contractuel n’est confirmé avant étude et devis.",
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     try {
       const res = await fetch("/api/contact", {
@@ -316,13 +384,13 @@ export function BtpDevisForm() {
               </div>
               <div>
                 <label htmlFor="location" className={labelClass}>
-                  Ville
+                  Localisation / ville
                 </label>
                 <input id="location" name="location" className={fieldClass} />
               </div>
               <div>
                 <label htmlFor="startDate" className={labelClass}>
-                  Date de début souhaitée
+                  Date de démarrage souhaitée
                 </label>
                 <input
                   id="startDate"
@@ -342,27 +410,166 @@ export function BtpDevisForm() {
                   placeholder="Ex. 3 mois"
                 />
               </div>
-              <div className="sm:col-span-2">
-                <label htmlFor="missionKind" className={labelClass}>
-                  Mission ponctuelle ou suivie
-                </label>
-                <select
-                  id="missionKind"
-                  name="missionKind"
-                  className={fieldClass}
-                  defaultValue=""
-                >
-                  <option value="">À préciser</option>
-                  {BTP_MISSION_DURATION_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+
+              {showEquipeFields ? (
+                <>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="natureTravaux" className={labelClass}>
+                      Nature des travaux
+                    </label>
+                    <input
+                      id="natureTravaux"
+                      name="natureTravaux"
+                      className={fieldClass}
+                      placeholder="Ex. pose de bordures, dallage, réseaux…"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="chefEquipeSouhaite" className={labelClass}>
+                      Chef d’équipe souhaité
+                    </label>
+                    <select
+                      id="chefEquipeSouhaite"
+                      name="chefEquipeSouhaite"
+                      className={fieldClass}
+                      defaultValue=""
+                    >
+                      <option value="">À préciser</option>
+                      <option value="oui">Oui</option>
+                      <option value="non">Non</option>
+                      <option value="selon_besoin">Selon besoin</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="nbCompagnons" className={labelClass}>
+                      Nombre de compagnons envisagé
+                    </label>
+                    <input
+                      id="nbCompagnons"
+                      name="nbCompagnons"
+                      className={fieldClass}
+                      placeholder="Indicatif — non garanti"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="modeIntervention" className={labelClass}>
+                      Mode d’intervention envisagé
+                    </label>
+                    <select
+                      id="modeIntervention"
+                      name="modeIntervention"
+                      className={fieldClass}
+                      defaultValue=""
+                    >
+                      <option value="">À préciser</option>
+                      {BTP_INTERVENTION_MODE_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="materielsDisponibles" className={labelClass}>
+                      Matériels disponibles sur chantier
+                    </label>
+                    <input
+                      id="materielsDisponibles"
+                      name="materielsDisponibles"
+                      className={fieldClass}
+                      placeholder="À préciser"
+                    />
+                  </div>
+                </>
+              ) : null}
+
+              {showAccompagnementFields ? (
+                <>
+                  <div>
+                    <label htmlFor="typeOuvrage" className={labelClass}>
+                      Type d’ouvrage
+                    </label>
+                    <input
+                      id="typeOuvrage"
+                      name="typeOuvrage"
+                      className={fieldClass}
+                      placeholder="Ex. dallage, bordures, réseaux…"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="natureModeOperatoire" className={labelClass}>
+                      Nature du mode opératoire
+                    </label>
+                    <input
+                      id="natureModeOperatoire"
+                      name="natureModeOperatoire"
+                      className={fieldClass}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="nbCompagnons" className={labelClass}>
+                      Nombre de compagnons
+                    </label>
+                    <input
+                      id="nbCompagnons"
+                      name="nbCompagnons"
+                      className={fieldClass}
+                      placeholder="Indicatif"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="documentsTechniques" className={labelClass}>
+                      Documents techniques disponibles
+                    </label>
+                    <input
+                      id="documentsTechniques"
+                      name="documentsTechniques"
+                      className={fieldClass}
+                      placeholder="Plans, CCTP, notes…"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="difficultes" className={labelClass}>
+                      Difficultés rencontrées
+                    </label>
+                    <textarea
+                      id="difficultes"
+                      name="difficultes"
+                      rows={3}
+                      className={fieldClass}
+                    />
+                  </div>
+                </>
+              ) : null}
+
+              {!showEquipeFields && !showAccompagnementFields ? (
+                <div className="sm:col-span-2">
+                  <label htmlFor="missionKind" className={labelClass}>
+                    Mission ponctuelle ou suivie
+                  </label>
+                  <select
+                    id="missionKind"
+                    name="missionKind"
+                    className={fieldClass}
+                    defaultValue=""
+                  >
+                    <option value="">À préciser</option>
+                    {BTP_MISSION_DURATION_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <input type="hidden" name="missionKind" value="" />
+              )}
+
               <div className="sm:col-span-2">
                 <label htmlFor="message" className={labelClass}>
-                  Description du besoin *
+                  {showEquipeFields
+                    ? "Description des ouvrages *"
+                    : "Description du besoin *"}
                 </label>
                 <textarea
                   id="message"
@@ -370,13 +577,20 @@ export function BtpDevisForm() {
                   required
                   rows={5}
                   className={fieldClass}
-                  placeholder="Chantier, périmètre, contraintes, résultat attendu."
+                  placeholder={
+                    showEquipeFields
+                      ? "Ouvrages, contraintes, résultat attendu."
+                      : showAccompagnementFields
+                        ? "Contexte chantier, objectifs d’accompagnement, contraintes."
+                        : "Chantier, périmètre, contraintes, résultat attendu."
+                  }
                 />
               </div>
             </div>
             <p className="text-xs text-[var(--btp-muted)]">
               Les pièces (DCE, plans…) pourront être transmises de façon
               sécurisée après premier contact — pas d’upload public non sécurisé.
+              Aucun effectif ni disponibilité n’est confirmé avant devis.
             </p>
           </fieldset>
 

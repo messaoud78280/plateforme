@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { HeaderDropdown } from "@/components/ui/HeaderDropdown";
 import {
   BTP_CTA_PRIMARY,
   BTP_NAV_ITEMS,
@@ -121,9 +122,16 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
   }, []);
 
   const isActive = (href: string) => {
+    if (!href || href.startsWith("#")) return false;
     if (href === "/") return pathname === "/";
-    return pathname === href || pathname.startsWith(`${href}/`);
+    const pathOnly = href.split("?")[0] || href;
+    return pathname === pathOnly || pathname.startsWith(`${pathOnly}/`);
   };
+
+  const isServicesActive = BTP_NAV_ITEMS.some(
+    (item) =>
+      item.children?.some((child) => isActive(child.href.split("?")[0] || child.href)),
+  );
 
   return (
     <header className={cx(styles.root, plainBg && styles.rootPlain)}>
@@ -217,15 +225,56 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
 
           <div className={styles.tierNav}>
             <nav className={styles.nav} aria-label="Navigation principale">
-              {BTP_NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cx(styles.navLink, isActive(item.href) && styles.navLinkActive)}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {BTP_NAV_ITEMS.map((item) =>
+                item.children?.length ? (
+                  <HeaderDropdown
+                    key={item.label}
+                    align="left"
+                    width={340}
+                    panelClassName={styles.servicesPanel}
+                    trigger={({ onClick, expanded, triggerRef }) => (
+                      <button
+                        ref={triggerRef}
+                        type="button"
+                        className={cx(
+                          styles.navLink,
+                          styles.navButton,
+                          (expanded || isServicesActive) && styles.navLinkActive,
+                        )}
+                        aria-expanded={expanded}
+                        aria-haspopup="menu"
+                        onClick={onClick}
+                      >
+                        {item.label}
+                        <span className={styles.navCaret} aria-hidden>
+                          ▾
+                        </span>
+                      </button>
+                    )}
+                  >
+                    <div className={styles.servicesMenu} role="menu">
+                      {item.children.map((child) => (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          className={styles.servicesLink}
+                          role="menuitem"
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </HeaderDropdown>
+                ) : (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cx(styles.navLink, isActive(item.href) && styles.navLinkActive)}
+                  >
+                    {item.label}
+                  </Link>
+                ),
+              )}
             </nav>
           </div>
         </div>
@@ -242,16 +291,32 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       >
         <div className={styles.mobileInner}>
           <nav className={styles.mobileNav} aria-label="Navigation mobile">
-            {BTP_NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={styles.mobileLink}
-                onClick={() => setMobileOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {BTP_NAV_ITEMS.map((item) =>
+              item.children?.length ? (
+                <div key={item.label} className={styles.mobileGroup}>
+                  <p className={styles.mobileGroupTitle}>{item.label}</p>
+                  {item.children.map((child) => (
+                    <Link
+                      key={child.href}
+                      href={child.href}
+                      className={styles.mobileLink}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {child.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={styles.mobileLink}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ),
+            )}
             <Link
               href="/contact"
               className={styles.mobileLink}

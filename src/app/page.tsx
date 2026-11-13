@@ -7,6 +7,7 @@ import { BtpCtaBand } from "@/components/marketing-btp/BtpCtaBand";
 import { BtpDeliverables } from "@/components/marketing-btp/BtpDeliverables";
 import { BtpExpertiseTerrain } from "@/components/marketing-btp/BtpExpertiseTerrain";
 import { BtpFaq } from "@/components/marketing-btp/BtpFaq";
+import { BtpHomePoles } from "@/components/marketing-btp/BtpHomePoles";
 import { BtpIaSection } from "@/components/marketing-btp/BtpIaSection";
 import { BtpMissionFlow } from "@/components/marketing-btp/BtpMissionFlow";
 import { BtpPageHero } from "@/components/marketing-btp/BtpPageHero";
@@ -98,10 +99,13 @@ export default function HomePage() {
           showUiPreview
         />
 
-        {/* 2 — Prestations professionnelles */}
+        {/* 2 — Quatre pôles */}
+        <BtpHomePoles />
+
+        {/* 3 — Prestations professionnelles (conduite) */}
         <BtpProfessionals />
 
-        {/* 3 — Missions / besoins */}
+        {/* 4 — Missions / besoins */}
         <section className="bw-btp-section" aria-labelledby="problems-title">
           <div className="bw-btp-container">
             <h2 id="problems-title" className="max-w-3xl font-bold">

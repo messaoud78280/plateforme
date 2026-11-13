@@ -22,6 +22,8 @@ function entry(
 const BTP_CORE = [
   "/",
   "/conduite-de-travaux",
+  "/equipes-tp-vrd",
+  "/accompagnement-technique-chantier",
   "/expertises-tce",
   "/pilotage-chantier",
   "/marches-publics-prives",
@@ -38,7 +40,12 @@ const BTP_CORE = [
 export default function sitemap(): MetadataRoute.Sitemap {
   return BTP_CORE.map((path) => {
     if (path === "/") return entry(path, 1, "weekly");
-    if (path === "/conduite-de-travaux" || path === "/demande-de-devis") {
+    if (
+      path === "/conduite-de-travaux" ||
+      path === "/equipes-tp-vrd" ||
+      path === "/accompagnement-technique-chantier" ||
+      path === "/demande-de-devis"
+    ) {
       return entry(path, 0.98, "weekly");
     }
     if (

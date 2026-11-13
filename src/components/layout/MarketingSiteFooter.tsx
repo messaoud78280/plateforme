@@ -85,7 +85,7 @@ export function MarketingSiteFooter() {
           <div className="flex flex-col gap-4">
             <ColumnTitle>Prestations</ColumnTitle>
             <ul className="flex flex-col gap-3">
-              {BTP_NAV_ITEMS.slice(0, 4).map((item) => (
+              {BTP_NAV_ITEMS.filter((item) => !item.children).map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className={COL_LINK}>
                     {item.label}

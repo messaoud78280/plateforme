@@ -81,6 +81,8 @@ export default function MarchesPage() {
           primaryLabel="Confier une étude de marché"
           secondaryHref="/demande-de-devis?besoin=etudes_prix"
           secondaryLabel="Études de prix"
+          imageSrc="/marketing/bework-pole-etudes-marches.jpg"
+          imageAlt="Analyse de plans et dossiers de marché — photo d’ambiance illustrative"
         />
 
         <section className="bw-btp-section bw-btp-section-alt">

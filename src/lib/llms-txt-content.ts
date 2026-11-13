@@ -24,14 +24,18 @@ ${buildLlmsAiPolicySection()}
 ## Ce que propose BeWork
 
 - Des prestations de conduite de travaux externalisée, d’encadrement opérationnel et de coordination TCE.
+- Des équipes opérationnelles TP/VRD (chef d’équipe, maçon VRD) pour des travaux définis.
+- Un accompagnement technique terrain pour transmettre les modes opératoires aux compagnons.
 - Des missions contractualisées (périmètre, responsabilités, livrables) — pas du travail temporaire.
-- Une plateforme collaborative et des outils IA développés pour la préparation, la coordination et le suivi de chantier.
+- Une plateforme collaborative et des outils IA utilisés en interne pour la préparation, la coordination et le suivi.
 - Une assistance aux marchés publics et privés (analyse DCE, études de prix, mémoire technique).
 
 ## Pages clés
 
-${line("Accueil", "/", "Un conducteur de travaux pour piloter vos chantiers.")}
+${line("Accueil", "/", "Des conducteurs de travaux pour piloter vos chantiers.")}
 ${line("Conduite de travaux", "/conduite-de-travaux", "Conducteur, chef de chantier, direction de travaux.")}
+${line("Équipes TP/VRD", "/equipes-tp-vrd", "Chefs d’équipe et maçons VRD — sur devis.")}
+${line("Accompagnement technique", "/accompagnement-technique-chantier", "Modes opératoires et accompagnement compagnons.")}
 ${line("Expertises TCE", "/expertises-tce")}
 ${line("Pilotage chantier", "/pilotage-chantier")}
 ${line("Marchés publics et privés", "/marches-publics-prives")}

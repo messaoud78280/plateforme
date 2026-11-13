@@ -190,7 +190,7 @@ export function MarketingSitePreFooter() {
               </div>
             </div>
 
-            <p className={styles.signature}>Apprendre aujourd&apos;hui. Construire demain.</p>
+            <p className={styles.signature}>L&apos;expertise du chantier, la précision du numérique.</p>
 
             <div className={styles.note} aria-hidden>
               <p className={styles.noteText}>Des outils réels, pour des projets réels.</p>

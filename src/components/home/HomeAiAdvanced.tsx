@@ -148,7 +148,7 @@ export function HomeAiAdvanced() {
                 <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/60 sm:text-base">
                   Nous utilisons la technologie adaptée au problème à résoudre.{" "}
                   <strong className="font-semibold text-white/80">
-                    L&apos;IA n&apos;est pas le produit. C&apos;est l&apos;un des outils que nous pouvons utiliser pour construire la bonne solution.
+                    L&apos;intelligence artificielle renforce nos missions de pilotage : plus de précision, de traçabilité et de maîtrise opérationnelle.
                   </strong>
                 </p>
                 <div className="mt-7 flex flex-wrap items-center justify-center gap-3">

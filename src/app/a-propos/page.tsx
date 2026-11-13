@@ -67,7 +67,7 @@ export default function AProposPage() {
             <h3 className="mt-10 text-xl font-bold">Compétences mobilisées</h3>
             <ul className="mt-4 grid gap-2 sm:grid-cols-2">
               {pillars.map((item) => (
-                <li key={item} className="flex gap-2 text-sm text-[var(--btp-muted)]">
+                <li key={item} className="flex gap-2 text-base text-[var(--btp-muted)]">
                   <span className="text-[var(--btp-copper)]" aria-hidden>
                     •
                   </span>
@@ -76,7 +76,7 @@ export default function AProposPage() {
               ))}
             </ul>
 
-            <p className="mt-10 rounded-xl border border-[rgba(197,155,88,0.35)] bg-[rgba(197,155,88,0.08)] p-4 text-sm text-[var(--btp-steel)]">
+            <p className="mt-10 rounded-xl border border-[rgba(197,155,88,0.35)] bg-[rgba(197,155,88,0.08)] p-4 text-base text-[var(--btp-steel)]">
               Informations juridiques (structure, SIREN, siège, assurances,
               responsable de publication) : à valider avant mise en production.
               Ne pas réutiliser automatiquement l’identité d’un ancien organisme

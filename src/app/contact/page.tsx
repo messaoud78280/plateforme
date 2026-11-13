@@ -61,7 +61,7 @@ export default function ContactPage() {
           <div className="bw-btp-container grid gap-6 md:grid-cols-2">
             <article className="bw-btp-card">
               <h2 className="text-xl font-bold">Demande de devis</h2>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--btp-muted)]">
+              <p className="mt-3 text-base leading-relaxed text-[var(--btp-muted)]">
                 Le parcours recommandé pour décrire un chantier, une mission de
                 conduite de travaux ou une étude de marché.
               </p>
@@ -71,7 +71,7 @@ export default function ContactPage() {
             </article>
             <article className="bw-btp-card">
               <h2 className="text-xl font-bold">Accès plateforme</h2>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--btp-muted)]">
+              <p className="mt-3 text-base leading-relaxed text-[var(--btp-muted)]">
                 Espace collaboratif réservé aux missions et aux comptes
                 autorisés. Connexion sécurisée requise.
               </p>
@@ -81,7 +81,7 @@ export default function ContactPage() {
             </article>
           </div>
           <div className="bw-btp-container mt-8">
-            <p className="text-sm text-[var(--btp-muted)]">
+            <p className="text-base text-[var(--btp-muted)]">
               Zone d’intervention prioritaire : Yvelines et Île-de-France —
               autres zones étudiées selon la mission.
             </p>

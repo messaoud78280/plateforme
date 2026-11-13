@@ -38,7 +38,7 @@ export default function NotreMethodePage() {
                 </div>
               </article>
             ))}
-            <p className="max-w-3xl pt-4 text-sm text-[var(--btp-muted)]">
+            <p className="max-w-3xl pt-4 text-base text-[var(--btp-muted)]">
               L’accent est mis sur les livrables, la traçabilité des décisions et
               la transparence des échanges tout au long de la mission.
             </p>

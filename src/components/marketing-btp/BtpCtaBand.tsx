@@ -15,21 +15,19 @@ export function BtpCtaBand({
   ctaLabel = "Demander un devis personnalisé",
 }: Props) {
   return (
-    <section className="bw-btp-section bw-btp-section-night" aria-labelledby="btp-cta-band-title">
+    <section className="bw-btp-section bw-btp-section-soft" aria-labelledby="btp-cta-band-title">
       <div className="bw-btp-container text-center">
-        <h2 id="btp-cta-band-title" className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
+        <h2 id="btp-cta-band-title" className="font-bold tracking-tight">
           {title}
         </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
-          {subtitle}
-        </p>
+        <p className="bw-btp-lead mx-auto mt-4 max-w-3xl">{subtitle}</p>
         <div className="mt-8">
-          <Link href={ctaHref} className="bw-btp-btn bw-btp-btn-copper">
+          <Link href={ctaHref} className="bw-btp-btn bw-btp-btn-primary">
             {ctaLabel}
             <span aria-hidden>→</span>
           </Link>
         </div>
-        <p className="mt-5 text-sm text-white/50">
+        <p className="mt-5 text-sm text-[var(--btp-muted)]">
           Interventions ponctuelles ou suivies · Marchés publics et privés · Prestations sur devis
         </p>
       </div>

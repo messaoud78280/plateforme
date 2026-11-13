@@ -105,7 +105,7 @@ export default function ConduiteDeTravauxPage() {
                   <h2 className="text-2xl font-bold">{offer.title}</h2>
                   <Link
                     href={`/demande-de-devis?besoin=${offer.besoin}`}
-                    className="bw-btp-btn bw-btp-btn-primary text-sm"
+                    className="bw-btp-btn bw-btp-btn-primary text-base"
                   >
                     Demander cette mission
                   </Link>
@@ -114,7 +114,7 @@ export default function ConduiteDeTravauxPage() {
                   {offer.items.map((item) => (
                     <li
                       key={item}
-                      className="flex gap-2 text-sm text-[var(--btp-muted)]"
+                      className="flex gap-2 text-base text-[var(--btp-muted)]"
                     >
                       <span className="text-[var(--btp-copper)]" aria-hidden>
                         •
@@ -141,11 +141,11 @@ export default function ConduiteDeTravauxPage() {
               {BTP_MISSION_DURATION_OPTIONS.map((m) => (
                 <div key={m.value} className="bw-btp-card">
                   <h3 className="text-lg font-bold">{m.label}</h3>
-                  <p className="mt-2 text-sm text-[var(--btp-muted)]">{m.hint}</p>
+                  <p className="mt-2 text-base text-[var(--btp-muted)]">{m.hint}</p>
                 </div>
               ))}
             </div>
-            <p className="mt-8 max-w-3xl text-sm leading-relaxed text-[var(--btp-muted)]">
+            <p className="mt-8 max-w-3xl text-base leading-relaxed text-[var(--btp-muted)]">
               BeWork commercialise des prestations de conduite et de pilotage de
               travaux. Ces missions ne sont pas présentées comme une location de
               salariés ni comme du travail temporaire.

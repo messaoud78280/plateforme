@@ -126,8 +126,8 @@ export function BtpDevisForm() {
   }
 
   const fieldClass =
-    "mt-1.5 w-full rounded-lg border border-[rgba(20,38,59,0.15)] bg-white px-3 py-2.5 text-sm text-[var(--btp-night)] outline-none focus:border-[var(--btp-copper)] focus:ring-2 focus:ring-[rgba(197,155,88,0.25)]";
-  const labelClass = "block text-sm font-semibold text-[var(--btp-night)]";
+    "mt-1.5 w-full rounded-lg border border-[rgba(20,38,59,0.15)] bg-white px-3 py-2.5 text-base text-[var(--btp-night)] outline-none focus:border-[var(--btp-copper)] focus:ring-2 focus:ring-[rgba(197,155,88,0.25)]";
+  const labelClass = "block text-base font-semibold text-[var(--btp-night)]";
 
   if (status === "success") {
     return (
@@ -139,7 +139,7 @@ export function BtpDevisForm() {
           vous recontacterons.
         </p>
         {reference ? (
-          <p className="mt-3 text-sm font-medium text-[var(--btp-steel)]">
+          <p className="mt-3 text-base font-medium text-[var(--btp-steel)]">
             Référence : {reference}
           </p>
         ) : null}
@@ -312,7 +312,7 @@ export function BtpDevisForm() {
       </div>
 
       <div className="space-y-4">
-        <label className="flex items-start gap-3 text-sm text-[var(--btp-muted)]">
+        <label className="flex items-start gap-3 text-base text-[var(--btp-muted)]">
           <input
             type="checkbox"
             name="consent"
@@ -330,7 +330,7 @@ export function BtpDevisForm() {
         </label>
 
         {error ? (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-base text-red-700" role="alert">
             {error}
           </p>
         ) : null}

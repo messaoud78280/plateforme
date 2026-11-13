@@ -89,7 +89,7 @@ export default function MarchesPage() {
                 <h2 className="text-xl font-bold">{block.title}</h2>
                 <ul className="mt-4 space-y-2">
                   {block.items.map((item) => (
-                    <li key={item} className="text-sm text-[var(--btp-muted)]">
+                    <li key={item} className="text-base text-[var(--btp-muted)]">
                       {item}
                     </li>
                   ))}

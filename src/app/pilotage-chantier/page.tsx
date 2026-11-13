@@ -102,7 +102,7 @@ export default function PilotageChantierPage() {
                 <h2 className="text-xl font-bold">{block.title}</h2>
                 <ul className="mt-4 space-y-2">
                   {block.items.map((item) => (
-                    <li key={item} className="text-sm text-[var(--btp-muted)]">
+                    <li key={item} className="text-base text-[var(--btp-muted)]">
                       {item}
                     </li>
                   ))}
@@ -111,7 +111,7 @@ export default function PilotageChantierPage() {
             ))}
           </div>
           <div className="bw-btp-container mt-8">
-            <p className="max-w-3xl text-sm text-[var(--btp-muted)]">
+            <p className="max-w-3xl text-base text-[var(--btp-muted)]">
               Les missions réglementées de coordination SPS ou de maîtrise
               d’œuvre ne sont pas annoncées comme acquises sans qualification et
               cadre contractuel adaptés.

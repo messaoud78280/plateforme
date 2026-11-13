@@ -20,7 +20,7 @@ export function BtpFaq({
         <h2 id="btp-faq-title" className="mt-2 text-2xl font-bold sm:text-3xl">
           {title}
         </h2>
-        <div className="mt-8 divide-y divide-[rgba(20,38,59,0.1)] border-y border-[rgba(20,38,59,0.1)]">
+        <div className="mt-8 divide-y divide-[var(--btp-border)] border-y border-[var(--btp-border)]">
           {items.map((item, i) => {
             const isOpen = open === i;
             return (
@@ -31,20 +31,18 @@ export function BtpFaq({
                   aria-expanded={isOpen}
                   onClick={() => setOpen(isOpen ? null : i)}
                 >
-                  <span className="text-base font-semibold text-[var(--btp-night)] sm:text-lg">
+                  <span className="text-xl font-semibold text-[var(--btp-heading)]">
                     {item.q}
                   </span>
                   <span
-                    className="mt-1 shrink-0 text-lg text-[var(--btp-muted)]"
+                    className="mt-1 shrink-0 text-lg font-medium text-[var(--btp-steel)]"
                     aria-hidden
                   >
                     {isOpen ? "−" : "+"}
                   </span>
                 </button>
                 {isOpen ? (
-                  <p className="pb-5 pr-8 text-sm leading-relaxed text-[var(--btp-muted)] sm:text-base">
-                    {item.a}
-                  </p>
+                  <p className="bw-btp-lead pb-5 pr-8">{item.a}</p>
                 ) : null}
               </div>
             );

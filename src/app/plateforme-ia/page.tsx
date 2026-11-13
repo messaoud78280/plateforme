@@ -179,7 +179,7 @@ export default function PlateformeIaPage() {
                   </div>
                   <ul className="mt-4 space-y-1.5">
                     {mod.items.map((item) => (
-                      <li key={item} className="text-sm text-[var(--btp-muted)]">
+                      <li key={item} className="text-base text-[var(--btp-muted)]">
                         {item}
                       </li>
                     ))}
@@ -191,7 +191,7 @@ export default function PlateformeIaPage() {
             <h2 className="mt-14 text-2xl font-bold sm:text-3xl">
               Intelligence artificielle appliquée au chantier
             </h2>
-            <p className="mt-3 max-w-2xl text-sm text-[var(--btp-muted)]">
+            <p className="mt-3 max-w-2xl text-base text-[var(--btp-muted)]">
               Outils d’aide et de productivité sous contrôle de professionnels
               qualifiés. Aucune garantie de métré, de détection exhaustive des
               risques ou de conformité d’ouvrage.
@@ -200,38 +200,38 @@ export default function PlateformeIaPage() {
               {iaUses.map((item) => (
                 <div key={item.title} className="bw-btp-card">
                   <h3 className="font-bold">{item.title}</h3>
-                  <p className="mt-2 text-sm text-[var(--btp-muted)]">{item.body}</p>
+                  <p className="mt-2 text-base text-[var(--btp-muted)]">{item.body}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-14 overflow-hidden rounded-2xl border border-[rgba(20,38,59,0.1)] bg-[var(--btp-night)] p-6 text-white sm:p-8">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--btp-copper)]">
+            <div className="mt-14 rounded-xl border border-[var(--btp-border)] bg-[var(--btp-mist)] p-6 sm:p-8">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--btp-steel)]">
                 Démonstration commerciale — données fictives
               </p>
-              <h2 className="mt-3 text-2xl font-bold text-white">
+              <h2 className="mt-3 text-2xl font-bold">
                 Découvrez comment nous suivons une opération.
               </h2>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {[
                   { k: "Avancement", v: "72 %" },
                   { k: "Actions ouvertes", v: "5" },
                   { k: "Points bloquants", v: "1" },
                   { k: "Écart budget", v: "+2,4 %" },
                 ].map((m) => (
-                  <div key={m.k} className="rounded-xl bg-white/5 p-4">
-                    <p className="text-xs text-white/50">{m.k}</p>
-                    <p className="mt-1 text-2xl font-bold">{m.v}</p>
+                  <div key={m.k} className="bw-btp-metric">
+                    <p className="bw-btp-metric-label">{m.k}</p>
+                    <p className="bw-btp-metric-value">{m.v}</p>
                   </div>
                 ))}
               </div>
-              <ul className="mt-6 grid gap-2 text-sm text-white/70 sm:grid-cols-2">
+              <ul className="mt-6 grid gap-2 text-base text-[var(--btp-muted)] sm:grid-cols-2">
                 <li>Synthèse du conducteur de travaux</li>
                 <li>Suivi des quantités</li>
                 <li>Indicateurs de coûts</li>
                 <li>Documents associés</li>
               </ul>
-              <p className="mt-5 text-xs text-white/45">
+              <p className="mt-5 text-xs text-[var(--btp-muted)]">
                 Exemple anonymisé / fictif explicitement identifié — ne
                 correspond pas à un chantier client réel.
               </p>

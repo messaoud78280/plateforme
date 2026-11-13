@@ -145,7 +145,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                       <span className={styles.accent}>Pilotage TCE</span>
                     </span>
                     <span className={styles.signaturePrimaryShort}>
-                      <span className={styles.accent}>Conduite de travaux</span>
+                      Conduite de travaux
                     </span>
                   </span>
                   <span className={styles.signatureSecondary}>
@@ -161,6 +161,10 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             </div>
 
             <div className={styles.actions}>
+              <Link href={privateHref} className={styles.privateAccess} aria-label={privateAria}>
+                <LockIcon className={styles.privateAccessIcon} />
+                <span>{privateLabel}</span>
+              </Link>
               <Link href="/contact" className={styles.ctaSecondary} aria-label="Contact">
                 <span className={styles.ctaSecondaryFull} aria-hidden>
                   Contact
@@ -223,11 +227,6 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 </Link>
               ))}
             </nav>
-
-            <Link href={privateHref} className={styles.privateAccess} aria-label={privateAria}>
-              <LockIcon className={styles.privateAccessIcon} />
-              <span>{privateLabel}</span>
-            </Link>
           </div>
         </div>
       </div>

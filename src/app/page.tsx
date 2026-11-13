@@ -123,46 +123,46 @@ export default function HomePage() {
       />
       <MarketingSiteHeader plainBg />
       <main>
-        {/* Hero */}
-        <section className="relative min-h-[78vh] overflow-hidden bg-[var(--btp-night)] text-white">
-          <Image
-            src="/marketing/btp-hero-chantier.jpg"
-            alt="Conducteur de travaux consultant des plans sur un chantier BTP"
-            fill
-            priority
-            className="object-cover object-center"
-            sizes="100vw"
-          />
-          <div
-            className="absolute inset-0 bg-gradient-to-r from-[rgba(20,38,59,0.92)] via-[rgba(20,38,59,0.78)] to-[rgba(20,38,59,0.45)]"
-            aria-hidden
-          />
-          <div className="bw-btp-container relative flex min-h-[78vh] flex-col justify-center py-16">
-            <p className="bw-btp-eyebrow text-[var(--btp-copper)]">
-              BEWORK — CONDUITE DE TRAVAUX & PILOTAGE TCE
-            </p>
-            <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl md:text-6xl">
-              Un conducteur de travaux pour piloter vos chantiers.
-            </h1>
-            <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
-              Renforcez votre organisation avec nos prestations de conduite de
-              travaux, d’encadrement opérationnel et de coordination TCE. Nos
-              professionnels s’appuient sur nos propres outils IA et notre
-              plateforme collaborative pour maîtriser les délais, les coûts et
-              l’avancement de vos opérations.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href={BTP_CTA_CONDUCTEUR.href} className="bw-btp-btn bw-btp-btn-copper">
-                {BTP_CTA_CONDUCTEUR.label}
-              </Link>
-              <Link href="/conduite-de-travaux" className="bw-btp-btn bw-btp-btn-secondary">
-                Découvrir nos prestations
-              </Link>
+        {/* Hero clair */}
+        <section className="bw-btp-hero">
+          <div className="bw-btp-container-wide grid items-center gap-10 py-12 lg:grid-cols-2 lg:gap-14 lg:py-16">
+            <div>
+              <p className="bw-btp-eyebrow">
+                BEWORK — CONDUITE DE TRAVAUX & PILOTAGE TCE
+              </p>
+              <h1 className="mt-4 max-w-2xl font-bold tracking-tight">
+                Un conducteur de travaux pour piloter vos chantiers.
+              </h1>
+              <p className="bw-btp-lead mt-5 max-w-2xl">
+                Renforcez votre organisation avec nos prestations de conduite de
+                travaux, d’encadrement opérationnel et de coordination TCE. Nos
+                professionnels s’appuient sur nos propres outils IA et notre
+                plateforme collaborative pour maîtriser les délais, les coûts et
+                l’avancement de vos opérations.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href={BTP_CTA_CONDUCTEUR.href} className="bw-btp-btn bw-btp-btn-primary">
+                  {BTP_CTA_CONDUCTEUR.label}
+                </Link>
+                <Link href="/conduite-de-travaux" className="bw-btp-btn bw-btp-btn-secondary">
+                  Découvrir nos prestations
+                </Link>
+              </div>
+              <p className="mt-5 text-base text-[var(--btp-muted)]">
+                Interventions ponctuelles ou suivies · Marchés publics et privés ·
+                Prestations sur devis
+              </p>
             </div>
-            <p className="mt-6 text-sm text-white/55">
-              Interventions ponctuelles ou suivies · Marchés publics et privés ·
-              Prestations sur devis
-            </p>
+            <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-[var(--btp-border)] bg-[var(--btp-soft)] shadow-[var(--btp-shadow)] lg:aspect-[5/4]">
+              <Image
+                src="/marketing/btp-hero-chantier.jpg"
+                alt="Conducteur de travaux consultant des plans sur un chantier BTP"
+                fill
+                priority
+                className="object-cover object-center"
+                sizes="(max-width: 1024px) 100vw, 560px"
+              />
+            </div>
           </div>
         </section>
 
@@ -170,10 +170,10 @@ export default function HomePage() {
         <section className="bw-btp-section bw-btp-section-alt" aria-labelledby="pillars-title">
           <div className="bw-btp-container">
             <p className="bw-btp-eyebrow">BeWork</p>
-            <h2 id="pillars-title" className="mt-2 max-w-2xl text-3xl font-bold sm:text-4xl">
+            <h2 id="pillars-title" className="mt-2 max-w-3xl font-bold">
               Votre renfort opérationnel pour vos projets BTP.
             </h2>
-            <p className="mt-4 max-w-2xl text-[var(--btp-muted)]">{BEWORK_BTP_VALUE_PROPOSITION}</p>
+            <p className="bw-btp-lead mt-4 max-w-2xl">{BEWORK_BTP_VALUE_PROPOSITION}</p>
             <div className="mt-10 grid gap-5 md:grid-cols-3">
               {pillars.map((p) => (
                 <Link
@@ -182,8 +182,8 @@ export default function HomePage() {
                   className="bw-btp-card block transition hover:border-[rgba(197,155,88,0.45)]"
                 >
                   <h3 className="text-lg font-bold">{p.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-[var(--btp-muted)]">{p.body}</p>
-                  <span className="mt-5 inline-block text-sm font-semibold text-[var(--btp-steel)]">
+                  <p className="mt-3 text-base leading-relaxed text-[var(--btp-muted)]">{p.body}</p>
+                  <span className="mt-5 inline-block text-base font-semibold text-[var(--btp-steel)]">
                     En savoir plus →
                   </span>
                 </Link>
@@ -203,7 +203,7 @@ export default function HomePage() {
               {BTP_HOME_PROBLEMS.map((item) => (
                 <div key={item.problem} className="bw-btp-card">
                   <p className="font-semibold text-[var(--btp-night)]">{item.problem}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-[var(--btp-muted)]">
+                  <p className="mt-2 text-base leading-relaxed text-[var(--btp-muted)]">
                     {item.answer}
                   </p>
                 </div>
@@ -223,10 +223,10 @@ export default function HomePage() {
               {professionals.map((p) => (
                 <div key={p.title} className="bw-btp-card flex flex-col">
                   <h3 className="text-lg font-bold">{p.title}</h3>
-                  <p className="mt-3 flex-1 text-sm text-[var(--btp-muted)]">{p.body}</p>
+                  <p className="mt-3 flex-1 text-base text-[var(--btp-muted)]">{p.body}</p>
                   <Link
                     href={p.href}
-                    className="mt-5 text-sm font-semibold text-[var(--btp-steel)] hover:underline"
+                    className="mt-5 text-base font-semibold text-[var(--btp-steel)] hover:underline"
                   >
                     Demander une mission →
                   </Link>
@@ -252,7 +252,7 @@ export default function HomePage() {
               {BTP_EXPERTISE_FAMILIES.map((f) => (
                 <span
                   key={f.id}
-                  className="rounded-full border border-[rgba(20,38,59,0.12)] bg-white px-4 py-2 text-sm font-medium text-[var(--btp-night)]"
+                  className="rounded-md border border-[var(--btp-border)] bg-white px-3.5 py-2 text-base font-medium text-[var(--btp-heading)]"
                 >
                   {f.title}
                 </span>
@@ -267,41 +267,41 @@ export default function HomePage() {
         </section>
 
         {/* Différence numérique */}
-        <section className="bw-btp-section bw-btp-section-night" aria-labelledby="diff-title">
+        <section className="bw-btp-section bw-btp-section-soft" aria-labelledby="diff-title">
           <div className="bw-btp-container">
             <p className="bw-btp-eyebrow">Notre différence</p>
-            <h2 id="diff-title" className="mt-2 max-w-3xl text-3xl font-bold text-white sm:text-4xl">
+            <h2 id="diff-title" className="mt-2 max-w-3xl text-3xl font-bold sm:text-4xl">
               Le terrain, la méthode et l’intelligence artificielle.
             </h2>
-            <p className="mt-4 max-w-2xl text-white/70">
+            <p className="bw-btp-lead mt-4 max-w-2xl">
               {BEWORK_BTP_SIGNATURE}. Information centralisée, collaboration,
               suivi des délais et des coûts, rapports structurés, assistance IA
               et traçabilité — sous contrôle humain.
             </p>
-            <div className="mt-10 overflow-hidden rounded-2xl border border-white/15 bg-[rgba(255,255,255,0.04)] p-5 sm:p-8">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--btp-copper)]">
+            <div className="mt-10 rounded-xl border border-[var(--btp-border)] bg-white p-5 sm:p-7">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--btp-steel)]">
                 Exemple fictif — suivi d’opération
               </p>
-              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {[
                   { k: "Avancement", v: "68 %" },
                   { k: "Actions en attente", v: "7" },
                   { k: "Écart planning", v: "−3 j" },
                   { k: "Alertes", v: "2" },
                 ].map((m) => (
-                  <div key={m.k} className="rounded-xl bg-white/5 p-4">
-                    <p className="text-xs text-white/50">{m.k}</p>
-                    <p className="mt-1 text-2xl font-bold text-white">{m.v}</p>
+                  <div key={m.k} className="bw-btp-metric">
+                    <p className="bw-btp-metric-label">{m.k}</p>
+                    <p className="bw-btp-metric-value">{m.v}</p>
                   </div>
                 ))}
               </div>
-              <p className="mt-5 text-sm text-white/55">
+              <p className="mt-5 text-base text-[var(--btp-muted)]">
                 Simulation visuelle à des fins de démonstration — ne correspond
                 pas à un chantier client réel.
               </p>
             </div>
             <div className="mt-8">
-              <Link href="/plateforme-ia" className="bw-btp-btn bw-btp-btn-copper">
+              <Link href="/plateforme-ia" className="bw-btp-btn bw-btp-btn-primary">
                 Découvrir notre plateforme
               </Link>
             </div>
@@ -331,7 +331,7 @@ export default function HomePage() {
               ].map((s) => (
                 <div key={s.t} className="bw-btp-card">
                   <h3 className="text-lg font-bold">{s.t}</h3>
-                  <p className="mt-3 text-sm text-[var(--btp-muted)]">{s.b}</p>
+                  <p className="mt-3 text-base text-[var(--btp-muted)]">{s.b}</p>
                 </div>
               ))}
             </div>
@@ -353,9 +353,9 @@ export default function HomePage() {
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {BTP_METHOD_STEPS.map((step) => (
                 <div key={step.n} className="bw-btp-card">
-                  <p className="text-sm font-bold text-[var(--btp-copper)]">{step.n}</p>
+                  <p className="text-base font-bold text-[var(--btp-copper)]">{step.n}</p>
                   <h3 className="mt-2 text-lg font-bold">{step.title}</h3>
-                  <p className="mt-2 text-sm text-[var(--btp-muted)]">{step.body}</p>
+                  <p className="mt-2 text-base text-[var(--btp-muted)]">{step.body}</p>
                 </div>
               ))}
             </div>
@@ -381,7 +381,7 @@ export default function HomePage() {
               {benefits.map((b) => (
                 <li
                   key={b}
-                  className="flex items-start gap-3 rounded-xl border border-[rgba(20,38,59,0.08)] bg-white px-4 py-3 text-sm font-medium text-[var(--btp-night)]"
+                  className="flex items-start gap-3 rounded-lg border border-[var(--btp-border)] bg-white px-4 py-3 text-base font-medium text-[var(--btp-heading)]"
                 >
                   <span className="mt-0.5 text-[var(--btp-copper)]" aria-hidden>
                     ✓

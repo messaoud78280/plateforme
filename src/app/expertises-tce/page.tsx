@@ -31,7 +31,7 @@ export default function ExpertisesTcePage() {
 
         <section className="bw-btp-section bw-btp-section-alt">
           <div className="bw-btp-container">
-            <p className="max-w-3xl text-sm leading-relaxed text-[var(--btp-muted)]">
+            <p className="max-w-3xl text-base leading-relaxed text-[var(--btp-muted)]">
               Les familles ci-dessous décrivent des domaines d’intervention et
               de coordination possibles. Elles ne constituent pas l’affirmation
               de disposer immédiatement de spécialistes internes dans chaque
@@ -46,7 +46,7 @@ export default function ExpertisesTcePage() {
                     {family.items.map((item) => (
                       <li
                         key={item}
-                        className="flex gap-2 text-sm text-[var(--btp-muted)]"
+                        className="flex gap-2 text-base text-[var(--btp-muted)]"
                       >
                         <span className="text-[var(--btp-copper)]" aria-hidden>
                           •

@@ -134,7 +134,7 @@ export default function HomePage() {
                 <Link
                   key={item.problem}
                   href={item.href}
-                  className="bw-btp-card block transition hover:border-[rgba(197,155,88,0.45)]"
+                  className="bw-btp-card block transition hover:border-[var(--btp-border-strong)]"
                 >
                   <p className="font-semibold text-[var(--btp-night)]">{item.problem}</p>
                   <p className="mt-2 text-base leading-relaxed text-[var(--btp-muted)]">
@@ -206,7 +206,7 @@ export default function HomePage() {
                 <Link
                   key={s.title}
                   href={s.href}
-                  className="bw-btp-card block transition hover:border-[rgba(197,155,88,0.45)]"
+                  className="bw-btp-card block transition hover:border-[var(--btp-border-strong)]"
                 >
                   <h3 className="text-lg font-bold">{s.title}</h3>
                   <p className="mt-3 text-base text-[var(--btp-muted)]">{s.body}</p>

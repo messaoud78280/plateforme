@@ -36,7 +36,7 @@ export function BtpPlatformJourney() {
               className={`rounded-md border px-3 py-2 text-sm font-semibold transition ${
                 i === active
                   ? "border-[var(--btp-ink)] bg-[var(--btp-ink)] text-white"
-                  : "border-[var(--btp-border)] bg-white text-[var(--btp-heading)] hover:border-[rgba(197,155,88,0.45)]"
+                  : "border-[var(--btp-border)] bg-white text-[var(--btp-heading)] hover:border-[var(--btp-border-strong)]"
               }`}
               onClick={() => setActive(i)}
             >

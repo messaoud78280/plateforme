@@ -1,26 +1,35 @@
-/* Identité visuelle BeWork BTP — clair, grand, lisible */
+/* BeWork marketing — direction artistique claire (cabinet ingénierie) */
 
 .bw-btp-site {
-  --btp-ink: #15202b;
-  --btp-heading: #15202b;
-  --btp-steel: #334859;
+  /* Tokens palette obligatoire */
+  --btp-canvas: #fafaf7;
   --btp-white: #ffffff;
-  --btp-mist: #f6f7f9;
-  --btp-soft: #eef1f4;
-  --btp-muted: #3f4d5c;
-  --btp-copper: #b8893f;
-  --btp-copper-soft: #f7f0e4;
-  --btp-border: rgba(21, 32, 43, 0.12);
-  --btp-border-strong: rgba(21, 32, 43, 0.2);
-  --btp-shadow: 0 1px 2px rgba(21, 32, 43, 0.04);
+  --btp-sage: #e9efeb;
+  --btp-beige: #f0ede6;
+  --btp-border: #dde3df;
+  --btp-border-strong: #c8d0cb;
+  --btp-heading: #27312d;
+  --btp-ink: #27312d;
+  --btp-muted: #59645e;
+  --btp-steel: #59645e;
+  --btp-accent: #2d6a56;
+  --btp-accent-hover: #22503f;
+  --btp-shadow: 0 1px 2px rgba(39, 49, 45, 0.04);
+  --btp-shadow-hover: 0 6px 18px rgba(39, 49, 45, 0.06);
+  --btp-radius: 0.875rem;
+  --btp-radius-sm: 0.75rem;
 
-  /* Alias rétrocompatibilité */
+  /* Alias rétrocompatibilité (anciennes refs cuivre / soft / mist) */
+  --btp-copper: var(--btp-accent);
+  --btp-copper-soft: rgba(45, 106, 86, 0.1);
+  --btp-soft: var(--btp-sage);
+  --btp-mist: var(--btp-beige);
   --btp-night: var(--btp-heading);
 
   color: var(--btp-ink);
-  background: var(--btp-white);
-  font-size: 1.1875rem; /* 19px */
-  line-height: 1.7;
+  background: var(--btp-canvas);
+  font-size: 1.0625rem; /* 17px */
+  line-height: 1.6;
   font-family:
     var(--font-inter),
     -apple-system,
@@ -33,112 +42,82 @@
 
 @media (min-width: 768px) {
   .bw-btp-site {
-    font-size: 1.25rem; /* 20px */
+    font-size: 1.125rem; /* 18px */
   }
 }
 
-/* Forcer la lisibilité malgré les utilitaires Tailwind */
+/* Typographie — éviter le surdimensionnement des utilitaires Tailwind */
 .bw-btp-site :where(.text-xs) {
-  font-size: 1rem !important;
+  font-size: 0.875rem !important; /* 14px min */
+  line-height: 1.5;
 }
 .bw-btp-site :where(.text-sm) {
-  font-size: 1.125rem !important;
+  font-size: 0.9375rem !important;
 }
 .bw-btp-site :where(.text-base) {
-  font-size: 1.25rem !important;
+  font-size: 1.0625rem !important;
 }
 .bw-btp-site :where(.text-lg) {
-  font-size: 1.35rem !important;
+  font-size: 1.125rem !important;
 }
 .bw-btp-site :where(.text-xl) {
-  font-size: 1.5rem !important;
+  font-size: 1.25rem !important;
 }
 .bw-btp-site :where(.text-2xl) {
-  font-size: 1.85rem !important;
-}
-.bw-btp-site :where(.text-3xl) {
-  font-size: 2.25rem !important;
-}
-.bw-btp-site :where(.text-4xl) {
-  font-size: 2.75rem !important;
-}
-.bw-btp-site :where(.text-5xl) {
-  font-size: 3.25rem !important;
-}
-.bw-btp-site :where(.sm\:text-4xl) {
-  font-size: inherit;
-}
-@media (min-width: 640px) {
-  .bw-btp-site :where(.sm\:text-4xl) {
-    font-size: 2.75rem !important;
-  }
-  .bw-btp-site :where(.sm\:text-5xl) {
-    font-size: 3.35rem !important;
-  }
-  .bw-btp-site :where(.sm\:text-lg) {
-    font-size: 1.4rem !important;
-  }
-  .bw-btp-site :where(.sm\:text-xl) {
-    font-size: 1.55rem !important;
-  }
+  font-size: 1.5rem !important;
 }
 
 .bw-btp-site h1,
 .bw-btp-site h2,
 .bw-btp-site h3 {
   font-family: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
   color: var(--btp-heading);
-  font-weight: 750;
-  line-height: 1.18;
+  font-weight: 650;
+  line-height: 1.2;
 }
 
 .bw-btp-site h1 {
-  font-size: clamp(2.5rem, 4.2vw, 3.75rem) !important;
+  font-size: clamp(2.125rem, 4.5vw, 3.75rem) !important; /* 34–60px */
+  font-weight: 700;
+  max-width: 18ch;
 }
 
 .bw-btp-site h2 {
-  font-size: clamp(2rem, 3vw, 2.75rem) !important;
+  font-size: clamp(1.75rem, 3vw, 2.5rem) !important; /* 28–40px */
+  font-weight: 650;
+  max-width: 24ch;
 }
 
 .bw-btp-site h3 {
-  font-size: clamp(1.35rem, 1.6vw, 1.65rem) !important;
+  font-size: clamp(1.375rem, 1.5vw, 1.625rem) !important; /* 22–26px */
+  font-weight: 600;
 }
 
 .bw-btp-site p,
 .bw-btp-site li {
-  font-size: 1.25rem;
-  line-height: 1.7;
+  font-size: inherit;
+  line-height: 1.6;
   color: inherit;
 }
 
 .bw-btp-container {
-  width: min(1320px, calc(100% - 2.5rem));
+  width: min(1240px, calc(100% - 2.5rem));
   margin-inline: auto;
 }
 
 .bw-btp-container-wide {
-  width: min(1440px, calc(100% - 2.5rem));
+  width: min(1280px, calc(100% - 2.5rem));
   margin-inline: auto;
-}
-
-@media (min-width: 1600px) {
-  .bw-btp-container {
-    width: min(1400px, calc(100% - 4rem));
-  }
-
-  .bw-btp-container-wide {
-    width: min(1520px, calc(100% - 4rem));
-  }
 }
 
 .bw-btp-eyebrow {
   display: inline-block;
-  font-size: 0.95rem !important;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-size: 0.8125rem !important;
+  font-weight: 650;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--btp-steel);
+  color: var(--btp-accent);
 }
 
 .bw-btp-btn {
@@ -146,106 +125,121 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-height: 3.35rem;
-  padding: 0.9rem 1.55rem;
-  border-radius: 0.55rem;
-  font-size: 1.2rem !important;
-  font-weight: 650;
+  min-height: 3rem;
+  padding: 0.75rem 1.35rem;
+  border-radius: var(--btp-radius-sm);
+  font-size: 1rem !important;
+  font-weight: 600;
   line-height: 1.2;
   text-decoration: none;
   transition:
-    background 0.15s ease,
-    color 0.15s ease,
-    border-color 0.15s ease;
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
 }
 
 .bw-btp-btn:focus-visible {
-  outline: 2px solid var(--btp-copper);
+  outline: 2px solid var(--btp-accent);
   outline-offset: 3px;
 }
 
 .bw-btp-btn-primary {
-  background: var(--btp-ink);
-  color: var(--btp-white);
-  border: 1px solid var(--btp-ink);
+  background: var(--btp-accent);
+  color: #ffffff;
+  border: 1px solid var(--btp-accent);
 }
 
 .bw-btp-btn-primary:hover {
-  background: var(--btp-steel);
-  border-color: var(--btp-steel);
+  background: var(--btp-accent-hover);
+  border-color: var(--btp-accent-hover);
 }
 
 .bw-btp-btn-secondary {
   background: var(--btp-white);
-  color: var(--btp-ink);
+  color: var(--btp-heading);
   border: 1px solid var(--btp-border-strong);
 }
 
 .bw-btp-btn-secondary:hover {
-  background: var(--btp-mist);
-  border-color: rgba(21, 32, 43, 0.3);
+  background: var(--btp-sage);
+  border-color: var(--btp-border-strong);
 }
 
 .bw-btp-btn-secondary-dark {
   background: transparent;
-  color: var(--btp-ink);
-  border: 1px solid var(--btp-border-strong);
+  color: var(--btp-accent);
+  border: 1px solid var(--btp-accent);
 }
 
 .bw-btp-btn-secondary-dark:hover {
-  background: var(--btp-soft);
+  background: rgba(45, 106, 86, 0.08);
 }
 
 .bw-btp-btn-copper {
-  background: var(--btp-copper);
+  background: var(--btp-accent);
   color: #fff;
-  border: 1px solid var(--btp-copper);
+  border: 1px solid var(--btp-accent);
 }
 
 .bw-btp-btn-copper:hover {
-  filter: brightness(0.96);
+  background: var(--btp-accent-hover);
+  border-color: var(--btp-accent-hover);
 }
 
 .bw-btp-card {
   background: var(--btp-white);
   border: 1px solid var(--btp-border);
-  border-radius: 0.85rem;
-  padding: 1.5rem 1.55rem;
-  box-shadow: none;
+  border-radius: var(--btp-radius);
+  padding: 1.35rem 1.4rem;
+  box-shadow: var(--btp-shadow);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+@media (min-width: 768px) {
+  .bw-btp-card {
+    padding: 1.75rem 1.85rem;
+  }
 }
 
 .bw-btp-card:hover {
   border-color: var(--btp-border-strong);
+  box-shadow: var(--btp-shadow-hover);
+  transform: translateY(-2px);
 }
 
 .bw-btp-card p,
 .bw-btp-card li {
-  font-size: 1.2rem !important;
-  line-height: 1.65;
+  font-size: 1.0625rem !important;
+  line-height: 1.6;
   color: var(--btp-muted);
 }
 
 .bw-btp-card h3 {
-  font-size: 1.45rem !important;
+  font-size: 1.375rem !important;
   line-height: 1.3;
 }
 
 .bw-btp-section {
-  padding: 4.5rem 0;
+  padding: 3.75rem 0; /* ~60px mobile */
 }
 
 @media (min-width: 768px) {
   .bw-btp-section {
-    padding: 5.75rem 0;
+    padding: 6.25rem 0; /* ~100px */
   }
 }
 
 .bw-btp-section-alt {
-  background: var(--btp-mist);
+  background: var(--btp-sage);
 }
 
 .bw-btp-section-soft {
-  background: var(--btp-soft);
+  background: var(--btp-beige);
   color: var(--btp-ink);
   border-block: 1px solid var(--btp-border);
 }
@@ -256,7 +250,7 @@
 }
 
 .bw-btp-section-night {
-  background: var(--btp-soft);
+  background: var(--btp-beige);
   color: var(--btp-ink);
   border-block: 1px solid var(--btp-border);
 }
@@ -267,7 +261,7 @@
 }
 
 .bw-btp-hero {
-  background: var(--btp-mist);
+  background: var(--btp-canvas);
   border-bottom: 1px solid var(--btp-border);
   color: var(--btp-ink);
 }
@@ -279,37 +273,64 @@
 .bw-btp-metric {
   background: var(--btp-white);
   border: 1px solid var(--btp-border);
-  border-radius: 0.7rem;
-  padding: 1.15rem 1.2rem;
+  border-radius: var(--btp-radius-sm);
+  padding: 1rem 1.1rem;
 }
 
 .bw-btp-metric-label {
-  font-size: 1.05rem !important;
+  font-size: 0.875rem !important;
   color: var(--btp-muted);
 }
 
 .bw-btp-metric-value {
-  margin-top: 0.3rem;
-  font-size: 2rem !important;
-  font-weight: 750;
+  margin-top: 0.25rem;
+  font-size: 1.65rem !important;
+  font-weight: 700;
   color: var(--btp-heading);
   letter-spacing: -0.02em;
+  font-family: var(--font-manrope), var(--font-inter), sans-serif;
 }
 
 .bw-btp-lead {
   color: var(--btp-muted);
-  font-size: 1.3rem !important;
-  line-height: 1.7;
+  font-size: 1.125rem !important;
+  line-height: 1.65;
+  max-width: 42rem;
 }
 
 @media (min-width: 768px) {
   .bw-btp-lead {
-    font-size: 1.4rem !important;
+    font-size: 1.1875rem !important;
   }
 }
 
+/* Apparition discrète des sections */
+@keyframes bw-btp-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bw-btp-site main > section {
+  animation: bw-btp-fade-up 0.35s ease both;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .bw-btp-btn {
+  .bw-btp-btn,
+  .bw-btp-card {
     transition: none;
+  }
+
+  .bw-btp-card:hover {
+    transform: none;
+  }
+
+  .bw-btp-site main > section {
+    animation: none;
   }
 }

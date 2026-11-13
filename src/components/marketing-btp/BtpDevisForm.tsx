@@ -148,7 +148,7 @@ export function BtpDevisForm() {
   }
 
   const fieldClass =
-    "mt-1.5 w-full rounded-lg border border-[rgba(20,38,59,0.15)] bg-white px-3 py-2.5 text-base text-[var(--btp-night)] outline-none focus:border-[var(--btp-copper)] focus:ring-2 focus:ring-[rgba(197,155,88,0.25)]";
+    "mt-1.5 w-full rounded-xl border border-[var(--btp-border)] bg-white px-3 py-2.5 text-base text-[var(--btp-heading)] outline-none focus:border-[var(--btp-accent)] focus:ring-2 focus:ring-[rgba(45,106,86,0.2)]";
   const labelClass = "block text-base font-semibold text-[var(--btp-night)]";
 
   if (status === "success") {
@@ -207,8 +207,8 @@ export function BtpDevisForm() {
                 key={o.value}
                 className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition ${
                   mainNeed === o.value
-                    ? "border-[var(--btp-copper)] bg-[rgba(197,155,88,0.08)]"
-                    : "border-[var(--btp-border)] bg-white hover:border-[rgba(197,155,88,0.35)]"
+                    ? "border-[var(--btp-accent)] bg-[rgba(45,106,86,0.08)]"
+                    : "border-[var(--btp-border)] bg-white hover:border-[var(--btp-border-strong)]"
                 }`}
               >
                 <input

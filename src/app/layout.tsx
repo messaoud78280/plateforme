@@ -20,7 +20,6 @@ import {
 import { SEO_OG_LOCALE_PRIMARY } from "@/lib/seo-francophonie";
 import {
   absoluteUrl,
-  BEWORK_FOUNDER_LINKEDIN_URL,
   getOrgSameAs,
   SITE_URL,
 } from "@/lib/site";
@@ -140,8 +139,8 @@ const jsonLd = {
       name: "BeWork",
       alternateName: [
         `BeWork — ${BEWORK_BRAND_SIGNATURE}`,
-        "BeWork — formation création avec l’IA",
-        "Apprendre à créer sites et applications avec l’IA",
+        "BeWork — Conduite de travaux et pilotage TCE",
+        "Conducteur de travaux externalisé",
       ],
       description: SEO_VALUE_PROPOSITION,
       inLanguage: "fr-FR",
@@ -174,12 +173,12 @@ const jsonLd = {
         "@type": "Person",
         name: "Laure Olivie",
         jobTitle: "Fondatrice",
-        sameAs: BEWORK_FOUNDER_LINKEDIN_URL,
         knowsAbout: [
-          "Formation création avec l’intelligence artificielle",
-          "Autonomie numérique professionnelle",
-          "Création d’outils métiers sans programmation",
-          "Pédagogie pratique petit groupe",
+          "Conduite et organisation de chantiers",
+          "Terrassements et VRD",
+          "Pilotage TCE",
+          "Marchés publics et privés BTP",
+          "Gestion de chantier",
         ],
       },
       contactPoint: [
@@ -192,12 +191,13 @@ const jsonLd = {
       ],
       ...(orgSameAs.length ? { sameAs: orgSameAs } : {}),
       knowsAbout: [
-        "Formation création avec l’IA",
-        "Créer une application sans savoir coder",
-        "Créer un site avec l’intelligence artificielle",
-        "Outils numériques professionnels",
-        "Autonomie numérique",
-        "Formation pratique petit groupe",
+        "Conduite de travaux externalisée",
+        "Pilotage de chantier TCE",
+        "Chef de chantier externalisé",
+        "Assistance marchés publics BTP",
+        "Études de prix BTP",
+        "Gestion de chantier avec IA",
+        "Plateforme collaborative BTP",
       ],
     },
   ],

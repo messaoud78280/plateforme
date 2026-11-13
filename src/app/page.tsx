@@ -3,18 +3,24 @@ import Image from "next/image";
 import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { BtpBenefitsGrid } from "@/components/marketing-btp/BtpBenefitsGrid";
 import { BtpCtaBand } from "@/components/marketing-btp/BtpCtaBand";
+import { BtpExpertiseTerrain } from "@/components/marketing-btp/BtpExpertiseTerrain";
 import { BtpFaq } from "@/components/marketing-btp/BtpFaq";
+import { BtpIaSection } from "@/components/marketing-btp/BtpIaSection";
+import { BtpMissionFlow } from "@/components/marketing-btp/BtpMissionFlow";
+import { BtpPlatformShowcase } from "@/components/marketing-btp/BtpPlatformShowcase";
+import { BtpUseCases } from "@/components/marketing-btp/BtpUseCases";
 import "@/components/marketing-btp/btp-marketing.css";
 import {
   BTP_CTA_CONDUCTEUR,
+  BTP_CTA_EXPERTISES,
   BTP_CTA_PRIMARY,
   BTP_EXPERTISE_FAMILIES,
   BTP_FAQ,
   BTP_HOME_PROBLEMS,
-  BTP_METHOD_STEPS,
   BTP_SEO_PAGES,
-  BEWORK_BTP_SIGNATURE,
+  BEWORK_BTP_HERO_SUBTITLE,
   BEWORK_BTP_VALUE_PROPOSITION,
 } from "@/lib/bework-btp-services";
 import { buildMarketingPageMetadata } from "@/lib/seo-formation-pages";
@@ -39,7 +45,7 @@ const homeJsonLd = {
       description: home.description,
       isPartOf: { "@id": `${SITE_URL}/#website` },
       about: [
-        { "@type": "Thing", name: "Conduite de travaux" },
+        { "@type": "Thing", name: "Conduite de travaux externalisée" },
         { "@type": "Thing", name: "Pilotage TCE" },
         { "@type": "Thing", name: "Gestion de chantier BTP" },
       ],
@@ -66,7 +72,7 @@ const homeJsonLd = {
 const pillars = [
   {
     title: "Conduite de travaux externalisée",
-    body: "Renforcez votre encadrement avec des missions adaptées à vos chantiers et à votre charge d’activité.",
+    body: "Renforcez votre encadrement avec des missions contractualisées, périmètre et livrables définis.",
     href: "/conduite-de-travaux",
   },
   {
@@ -75,8 +81,8 @@ const pillars = [
     href: "/pilotage-chantier",
   },
   {
-    title: "Gestion numérique assistée par IA",
-    body: "Centralisez l’information et appuyez-vous sur des outils IA internes pour préparer, suivre et rendre compte.",
+    title: "Plateforme collaborative & IA",
+    body: "Centralisez l’information et appuyez-vous sur des outils numériques conçus pour le terrain.",
     href: "/plateforme-ia",
   },
 ] as const;
@@ -102,16 +108,26 @@ const professionals = [
     body: "Méthodes d’exécution, phasage et planification des ressources.",
     href: "/demande-de-devis?besoin=pilotage_tce",
   },
-] as const;
-
-const benefits = [
-  "Meilleure visibilité sur l’avancement",
-  "Organisation renforcée",
-  "Anticipation des difficultés",
-  "Coordination plus fluide",
-  "Suivi documenté",
-  "Maîtrise des coûts",
-  "Décisions plus rapides",
+  {
+    title: "Mission de pilotage TCE",
+    body: "Coordination inter-lots, interfaces et suivi d’avancement multi-intervenants.",
+    href: "/demande-de-devis?besoin=pilotage_tce",
+  },
+  {
+    title: "Audit de chantier",
+    body: "Diagnostic organisationnel, points bloquants et plan d’action.",
+    href: "/demande-de-devis?besoin=audit_redressement",
+  },
+  {
+    title: "Assistance marchés publics",
+    body: "Analyse DCE, études de prix, mémoire technique et constitution d’offre.",
+    href: "/demande-de-devis?besoin=assistance_marches_publics",
+  },
+  {
+    title: "Assistance marchés privés",
+    body: "Appui à la consultation, au chiffrage et au suivi d’exécution privée.",
+    href: "/demande-de-devis?besoin=assistance_marches_prives",
+  },
 ] as const;
 
 export default function HomePage() {
@@ -123,7 +139,6 @@ export default function HomePage() {
       />
       <MarketingSiteHeader plainBg />
       <main>
-        {/* Hero clair */}
         <section className="bw-btp-hero">
           <div className="bw-btp-container-wide grid items-center gap-10 py-12 lg:grid-cols-2 lg:gap-14 lg:py-16">
             <div>
@@ -133,30 +148,24 @@ export default function HomePage() {
               <h1 className="mt-4 max-w-2xl font-bold tracking-tight">
                 Un conducteur de travaux pour piloter vos chantiers.
               </h1>
-              <p className="bw-btp-lead mt-5 max-w-2xl">
-                Renforcez votre organisation avec nos prestations de conduite de
-                travaux, d’encadrement opérationnel et de coordination TCE. Nos
-                professionnels s’appuient sur nos propres outils IA et notre
-                plateforme collaborative pour maîtriser les délais, les coûts et
-                l’avancement de vos opérations.
-              </p>
+              <p className="bw-btp-lead mt-5 max-w-2xl">{BEWORK_BTP_HERO_SUBTITLE}</p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href={BTP_CTA_CONDUCTEUR.href} className="bw-btp-btn bw-btp-btn-primary">
                   {BTP_CTA_CONDUCTEUR.label}
                 </Link>
-                <Link href="/conduite-de-travaux" className="bw-btp-btn bw-btp-btn-secondary">
-                  Découvrir nos prestations
+                <Link href={BTP_CTA_EXPERTISES.href} className="bw-btp-btn bw-btp-btn-secondary">
+                  {BTP_CTA_EXPERTISES.label}
                 </Link>
               </div>
               <p className="mt-5 text-base text-[var(--btp-muted)]">
-                Interventions ponctuelles ou suivies · Marchés publics et privés ·
-                Prestations sur devis
+                Missions contractualisées · Périmètre et livrables définis ·
+                Marchés publics et privés · Prestations sur devis
               </p>
             </div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-[var(--btp-border)] bg-[var(--btp-soft)] shadow-[var(--btp-shadow)] lg:aspect-[5/4]">
               <Image
                 src="/marketing/btp-hero-chantier.jpg"
-                alt="Conducteur de travaux consultant des plans sur un chantier BTP"
+                alt="Professionnel BTP consultant des plans sur un chantier — illustration d’ambiance, non présentée comme référence client BeWork"
                 fill
                 priority
                 className="object-cover object-center"
@@ -166,7 +175,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Présentation */}
         <section className="bw-btp-section bw-btp-section-alt" aria-labelledby="pillars-title">
           <div className="bw-btp-container">
             <p className="bw-btp-eyebrow">BeWork</p>
@@ -192,10 +200,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Problèmes */}
         <section className="bw-btp-section" aria-labelledby="problems-title">
           <div className="bw-btp-container">
-            <h2 id="problems-title" className="max-w-3xl text-3xl font-bold sm:text-4xl">
+            <h2 id="problems-title" className="max-w-3xl font-bold">
               Vos chantiers exigent du temps, des compétences et une organisation
               rigoureuse.
             </h2>
@@ -212,13 +219,17 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Professionnels */}
         <section className="bw-btp-section bw-btp-section-alt" aria-labelledby="pros-title">
           <div className="bw-btp-container">
             <p className="bw-btp-eyebrow">Nos professionnels</p>
-            <h2 id="pros-title" className="mt-2 text-3xl font-bold sm:text-4xl">
+            <h2 id="pros-title" className="mt-2 font-bold">
               Le bon profil pour votre opération.
             </h2>
+            <p className="mt-3 max-w-3xl text-base text-[var(--btp-muted)]">
+              Prestations de mission — pas du travail temporaire ni du prêt de
+              salariés. Périmètre, autonomie, responsabilités et livrables
+              définis contractuellement.
+            </p>
             <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {professionals.map((p) => (
                 <div key={p.title} className="bw-btp-card flex flex-col">
@@ -236,11 +247,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* TCE */}
+        <BtpExpertiseTerrain compact />
+
         <section className="bw-btp-section" aria-labelledby="tce-title">
           <div className="bw-btp-container">
             <p className="bw-btp-eyebrow">Tous corps d’état</p>
-            <h2 id="tce-title" className="mt-2 text-3xl font-bold sm:text-4xl">
+            <h2 id="tce-title" className="mt-2 font-bold">
               Une vision globale des travaux.
             </h2>
             <p className="mt-4 max-w-2xl text-[var(--btp-muted)]">
@@ -266,52 +278,14 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Différence numérique */}
-        <section className="bw-btp-section bw-btp-section-soft" aria-labelledby="diff-title">
-          <div className="bw-btp-container">
-            <p className="bw-btp-eyebrow">Notre différence</p>
-            <h2 id="diff-title" className="mt-2 max-w-3xl text-3xl font-bold sm:text-4xl">
-              Le terrain, la méthode et l’intelligence artificielle.
-            </h2>
-            <p className="bw-btp-lead mt-4 max-w-2xl">
-              {BEWORK_BTP_SIGNATURE}. Information centralisée, collaboration,
-              suivi des délais et des coûts, rapports structurés, assistance IA
-              et traçabilité — sous contrôle humain.
-            </p>
-            <div className="mt-10 rounded-xl border border-[var(--btp-border)] bg-white p-5 sm:p-7">
-              <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--btp-steel)]">
-                Exemple fictif — suivi d’opération
-              </p>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {[
-                  { k: "Avancement", v: "68 %" },
-                  { k: "Actions en attente", v: "7" },
-                  { k: "Écart planning", v: "−3 j" },
-                  { k: "Alertes", v: "2" },
-                ].map((m) => (
-                  <div key={m.k} className="bw-btp-metric">
-                    <p className="bw-btp-metric-label">{m.k}</p>
-                    <p className="bw-btp-metric-value">{m.v}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-5 text-base text-[var(--btp-muted)]">
-                Simulation visuelle à des fins de démonstration — ne correspond
-                pas à un chantier client réel.
-              </p>
-            </div>
-            <div className="mt-8">
-              <Link href="/plateforme-ia" className="bw-btp-btn bw-btp-btn-primary">
-                Découvrir notre plateforme
-              </Link>
-            </div>
-          </div>
-        </section>
+        <BtpPlatformShowcase />
+        <BtpIaSection />
+        <BtpMissionFlow />
+        <BtpUseCases />
 
-        {/* Marchés */}
         <section className="bw-btp-section bw-btp-section-alt" aria-labelledby="marches-title">
           <div className="bw-btp-container">
-            <h2 id="marches-title" className="text-3xl font-bold sm:text-4xl">
+            <h2 id="marches-title" className="font-bold">
               Nous intervenons avant, pendant et après les travaux.
             </h2>
             <div className="mt-10 grid gap-5 md:grid-cols-3">
@@ -343,56 +317,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Méthode */}
-        <section className="bw-btp-section" aria-labelledby="method-title">
-          <div className="bw-btp-container">
-            <p className="bw-btp-eyebrow">Méthodologie</p>
-            <h2 id="method-title" className="mt-2 text-3xl font-bold sm:text-4xl">
-              Six étapes pour une mission claire.
-            </h2>
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {BTP_METHOD_STEPS.map((step) => (
-                <div key={step.n} className="bw-btp-card">
-                  <p className="text-base font-bold text-[var(--btp-copper)]">{step.n}</p>
-                  <h3 className="mt-2 text-lg font-bold">{step.title}</h3>
-                  <p className="mt-2 text-base text-[var(--btp-muted)]">{step.body}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-8">
-              <Link href="/notre-methode" className="bw-btp-btn bw-btp-btn-secondary-dark">
-                Notre méthode en détail
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Bénéfices */}
-        <section className="bw-btp-section bw-btp-section-alt" aria-labelledby="benefits-title">
-          <div className="bw-btp-container">
-            <h2 id="benefits-title" className="text-3xl font-bold sm:text-4xl">
-              Objectifs de prestation.
-            </h2>
-            <p className="mt-3 max-w-2xl text-[var(--btp-muted)]">
-              Ces bénéfices décrivent les finalités recherchées — ce ne sont pas
-              des résultats garantis.
-            </p>
-            <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {benefits.map((b) => (
-                <li
-                  key={b}
-                  className="flex items-start gap-3 rounded-lg border border-[var(--btp-border)] bg-white px-4 py-3 text-base font-medium text-[var(--btp-heading)]"
-                >
-                  <span className="mt-0.5 text-[var(--btp-copper)]" aria-hidden>
-                    ✓
-                  </span>
-                  {b}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
+        <BtpBenefitsGrid />
         <BtpFaq items={BTP_FAQ} title="FAQ — prestations BTP" />
         <BtpCtaBand
           ctaHref={BTP_CTA_PRIMARY.href}

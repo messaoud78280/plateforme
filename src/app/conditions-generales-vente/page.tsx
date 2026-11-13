@@ -11,7 +11,7 @@ const pageUrl = absoluteUrl(path);
 export const metadata: Metadata = {
   title: { absolute: "Conditions générales | BeWork" },
   description:
-    "Conditions applicables aux prestations BeWork de conduite de travaux, pilotage de chantier et assistance aux marchés — à valider avant publication.",
+    "Conditions applicables aux prestations BeWork de conduite de travaux, pilotage de chantier et assistance aux marchés. Cadre général — le contrat de mission prévaut.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   robots: { index: true, follow: true },
 };
@@ -25,11 +25,11 @@ export default function ConditionsGeneralesVentePage() {
           <h1 className="text-3xl font-bold text-[var(--btp-night)]">
             Conditions générales
           </h1>
-          <p className="mt-4 rounded-xl border border-[rgba(197,155,88,0.4)] bg-[rgba(197,155,88,0.1)] p-4 text-sm text-[var(--btp-steel)]">
-            <strong>À VALIDER avant mise en production.</strong> Les conditions
-            ci-dessous décrivent le cadre général des prestations BTP. Elles ne
-            remplacent pas un contrat de mission signé. Les anciennes CGV
-            formation ne s’appliquent plus à l’offre commerciale publique.
+          <p className="mt-4 rounded-xl border border-[var(--btp-border)] bg-white p-4 text-sm text-[var(--btp-muted)]">
+            Les conditions ci-dessous décrivent le cadre général des prestations
+            BTP. Elles ne remplacent pas un contrat de mission signé. Le
+            périmètre, les livrables et les responsabilités sont précisés dans
+            chaque devis accepté.
           </p>
           <h2 className="mt-8 text-xl font-bold">Objet</h2>
           <p className="mt-3 text-[var(--btp-muted)]">

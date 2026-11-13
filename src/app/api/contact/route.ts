@@ -143,6 +143,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Le nom du contact est requis." }, { status: 400 });
   }
 
+  if (isBtpDevis && !phone) {
+    return NextResponse.json({ error: "Le téléphone est requis." }, { status: 400 });
+  }
+
   if (!isValidEmail(email)) {
     return NextResponse.json({ error: "Adresse email invalide." }, { status: 400 });
   }

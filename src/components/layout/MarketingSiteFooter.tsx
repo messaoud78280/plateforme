@@ -7,11 +7,7 @@ import {
   BEWORK_BTP_SIGNATURE,
 } from "@/lib/bework-btp-services";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
-import {
-  BEWORK_FOUNDER_LINKEDIN_URL,
-  SITE_URL,
-  getOrgSameAs,
-} from "@/lib/site";
+import { SITE_URL, getOrgSameAs } from "@/lib/site";
 
 const COL_LINK =
   "text-[1.1rem] text-[#3f4d5c] transition-colors hover:text-[#15202b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b8893f]";
@@ -47,10 +43,7 @@ function SocialIcon({ type }: { type: ReturnType<typeof socialLabel> }) {
 /** Pied de page marketing — thème clair. */
 export function MarketingSiteFooter() {
   const year = new Date().getFullYear();
-  const organizationProfiles = getOrgSameAs();
-  const socialProfiles = organizationProfiles.length
-    ? organizationProfiles
-    : [BEWORK_FOUNDER_LINKEDIN_URL];
+  const socialProfiles = getOrgSameAs();
 
   return (
     <footer className="relative z-10 border-t border-[rgba(28,36,48,0.1)] bg-[#f6f7f9] text-[#1c2430]">
@@ -72,7 +65,11 @@ export function MarketingSiteFooter() {
               {BEWORK_BTP_SIGNATURE}
             </p>
             <p className="mt-4 text-[11px] leading-relaxed text-[#5a6878]">
-              Informations juridiques (SIREN, siège, assurances) — à valider avant publication.
+              Éditeur : OFC Création d’entreprise —{" "}
+              <Link href="/mentions-legales" className="underline-offset-2 hover:underline">
+                mentions légales
+              </Link>
+              .
             </p>
             <Link
               href={BTP_CTA_PRIMARY.href}

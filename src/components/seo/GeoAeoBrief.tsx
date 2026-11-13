@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { BEWORK_AEO_DEFINITION, getGeoAeoBriefItems } from "@/lib/seo";
-import { BEWORK_SESSION_PRICE_EUR } from "@/lib/bework-formation";
 
 type Props = {
   className?: string;
@@ -8,10 +7,10 @@ type Props = {
 
 /**
  * Bloc GEO/AEO : réponses courtes pour moteurs classiques et IA génératives.
- * Aligné BeWork V3 — formation journée (pas BTP / SaaS).
+ * Aligné positionnement commercial BTP.
  */
 export function GeoAeoBrief({ className = "" }: Props) {
-  const items = getGeoAeoBriefItems(String(BEWORK_SESSION_PRICE_EUR));
+  const items = getGeoAeoBriefItems();
 
   return (
     <section
@@ -31,16 +30,25 @@ export function GeoAeoBrief({ className = "" }: Props) {
         ))}
       </dl>
       <p className="mt-6 text-sm text-slate-600">
-        <Link href="/tarifs" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">
-          Voir le tarif
+        <Link
+          href="/demande-de-devis"
+          className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]"
+        >
+          Demander un devis
         </Link>
         {" · "}
-        <Link href="/contact#participer" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">
-          Participer
+        <Link
+          href="/conduite-de-travaux"
+          className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]"
+        >
+          Conduite de travaux
         </Link>
         {" · "}
-        <Link href="/faq" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">
-          FAQ
+        <Link
+          href="/contact"
+          className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]"
+        >
+          Contact
         </Link>
       </p>
     </section>

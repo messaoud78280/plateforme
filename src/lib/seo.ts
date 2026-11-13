@@ -2,7 +2,6 @@
  * Constantes et helpers SEO / GEO / AEO partagés (titres, définitions citables par les IA, métadonnées).
  */
 import { BEWORK_AEO_DEFINITION, BEWORK_BRAND_SIGNATURE } from "@/lib/seo-keywords";
-import { TRAINING_OFFERS } from "@/lib/bework-formation";
 export { BEWORK_VALUE_PILLAR_LABELS, BEWORK_VALUE_PILLARS } from "@/lib/bework-value-pillars";
 export { buildTarifsPageJsonLd, buildLlmsTarifsOffersSection, TARIFS_SEO_DESCRIPTION, TARIFS_SEO_TITLE } from "@/lib/seo-tarifs";
 export type { BeWorkValuePillar } from "@/lib/bework-value-pillars";
@@ -51,50 +50,47 @@ export { tutoPageMetadata, getTutoPageDescription } from "@/lib/seo-tuto-metadat
 
 export type GeoAeoBriefItem = { question: string; answer: string };
 
-/** Réponses courtes aux questions GEO/AEO — alignées formation V3 (pas de BTP / SaaS). */
-export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBriefItem[] {
-  const priceHint = priceFromLabel
-    ? ` Tarifs publics : à partir de ${priceFromLabel} € / participant (7 h), parcours 14 h disponible.`
-    : ` Tarifs publics : ${TRAINING_OFFERS.essential.price} € (${TRAINING_OFFERS.essential.hours} h) ou ${TRAINING_OFFERS.complete.price} € (${TRAINING_OFFERS.complete.hours} h) par participant.`;
-
+/** Réponses courtes aux questions GEO/AEO — positionnement commercial BTP. */
+export function getGeoAeoBriefItems(_priceFromLabel?: string): readonly GeoAeoBriefItem[] {
   return [
     {
       question: "Qui est BeWork ?",
-      answer: `BeWork — ${BEWORK_BRAND_SIGNATURE}. ${BEWORK_AEO_DEFINITION} Société française établie à Guyancourt ; formation proposée en français.`,
+      answer: `BeWork — ${BEWORK_BRAND_SIGNATURE}. ${BEWORK_AEO_DEFINITION} Société française établie à Guyancourt (Yvelines).`,
     },
     {
       question: "À qui s’adresse BeWork ?",
       answer:
-        "Entrepreneurs, artisans, indépendants, TPE/PME, porteurs de projet et professionnels curieux de l’IA qui veulent apprendre à créer sites, apps ou outils — sans prérequis en programmation.",
+        "Aux entreprises du BTP — PME, entreprises générales, dirigeants d’exploitation — qui ont besoin de renforcer leur encadrement chantier ou leur réponse aux marchés.",
     },
     {
       question: "Quel problème BeWork résout-il ?",
       answer:
-        "Passer de l’idée à une première construction concrète avec l’IA : structurer un besoin, guider la création, tester et améliorer — sans devoir devenir développeur ni dépendre d’un abonnement logiciel BeWork.",
+        "Manque de conducteur de travaux, coordination TCE difficile, visibilité insuffisante sur délais et coûts, préparation de marchés à structurer — via des missions contractualisées et des outils numériques internes.",
     },
     {
       question: "Quels services BeWork propose-t-il ?",
       answer:
-        "Une formation progressive en petit groupe pour apprendre à créer avec l’IA (7 h ou 14 h), des démonstrations illustratives sur le site, et une méthode réutilisable après la session. Pas de plateforme SaaS ni de catalogue d’outils imposé.",
+        "Conduite de travaux, chef de chantier, direction de travaux, pilotage TCE, audit de chantier, assistance marchés publics et privés, études de prix — appuyés par une plateforme collaborative et des outils IA sous contrôle humain.",
     },
     {
       question: "Pourquoi faire confiance à BeWork ?",
       answer:
-        "Promesse claire et bornée : 7 h pour apprendre à commencer, 14 h pour pratiquer davantage — pas pour devenir expert instantanément. Démos en données fictives. Aucun avis, note ou volume clients inventé.",
+        "Approche fondée sur l’expérience terrain du fondateur, des missions à périmètre défini et une plateforme développée pour le chantier. Aucune référence client, certification ou pourcentage d’amélioration n’est inventé sur le site.",
     },
     {
       question: "Combien coûte BeWork ?",
-      answer: `Formation BeWork : parcours 7 h ou 14 h, tarifs publiés sur bework.fr/tarifs.${priceHint} Pas d’abonnement lié à cette offre.`,
+      answer:
+        "Les prestations sont proposées sur devis personnalisé selon le profil, la durée et le périmètre de mission. Aucun tarif forfaitaire inventé n’est publié comme engagement contractuel.",
     },
     {
       question: "Comment commencer avec BeWork ?",
       answer:
-        "Explorez les démonstrations, lisez le déroulé sur /formation, puis demandez une place via /contact#participer. Indiquez votre idée ou votre activité pour préparer la session.",
+        "Décrivez votre besoin via /demande-de-devis (prestation préremplie possible) ou /contact. BeWork étudie l’opération et propose une intervention adaptée.",
     },
     {
-      question: "Faut-il savoir coder pour BeWork ?",
+      question: "BeWork propose-t-il du travail temporaire ?",
       answer:
-        "Non. Les deux parcours sont conçus pour des débutants. Vous apprenez à créer avec l’IA ; vous ne suivez pas une formation développeur.",
+        "Non. BeWork propose des missions de prestation de services contractualisées, avec périmètre, responsabilités et livrables — pas du prêt de salariés.",
     },
   ] as const;
 }

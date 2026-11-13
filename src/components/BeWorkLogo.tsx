@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { BEWORK_BRAND_SIGNATURE } from "@/lib/seo-keywords";
 
-/** Logo wordmark BeWork + baseline « Apprendre aujourd’hui / Créer demain » */
+/** Logo wordmark BeWork — conduite de travaux & pilotage TCE */
 const LOGO_PATH = "/BeWork.logo.brand.png";
 /** Ratio intrinsèque du fichier (évite déformation) */
 const LOGO_RATIO = 1024 / 334;
@@ -61,7 +61,7 @@ export function BeWorkLogo({
     <span className={`inline-flex flex-col ${className}`}>
       <Image
         src={LOGO_PATH}
-        alt="BeWork — Apprendre aujourd’hui, créer demain"
+        alt="BeWork — Conduite de travaux et pilotage TCE"
         width={displayWidth}
         height={displayHeight}
         className={`block shrink-0 object-contain object-left ${override || box.heightClass} ${override ? "" : "w-auto"}`}

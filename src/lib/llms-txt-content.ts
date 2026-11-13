@@ -5,11 +5,6 @@ import {
   BEWORK_SLOGAN_DECISION,
 } from "@/lib/seo";
 import { buildLlmsAiPolicySection } from "@/lib/seo-ai-discovery";
-import { buildLlmsTarifsOffersSection } from "@/lib/seo-tarifs";
-import {
-  BEWORK_EXTENSION_PRICE_EUR,
-  TRAINING_OFFERS,
-} from "@/lib/bework-formation";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 function line(title: string, path: string, note?: string): string {
@@ -17,7 +12,7 @@ function line(title: string, path: string, note?: string): string {
   return note ? `- [${title}](${url}): ${note}` : `- [${title}](${url})`;
 }
 
-/** Contenu de /llms.txt — BeWork V3 formation uniquement (aucun outil / prompt / BTP). */
+/** Contenu de /llms.txt — positionnement commercial BTP BeWork. */
 export function buildLlmsTxt(): string {
   return `# BeWork
 
@@ -28,30 +23,24 @@ ${buildLlmsAiPolicySection()}
 
 ## Ce que propose BeWork
 
-- Une formation progressive pour apprendre à créer sites, applications et outils avec l’intelligence artificielle — sans prérequis en programmation.
-- Parcours 7 h (apprendre à commencer) ou 14 h (construire plus loin). Tout le monde commence ensemble le Jour 1.
-- Des démonstrations interactives illustratives (messagerie, agenda, réservation, CRM, tableau de bord…).
-- Une méthode pour structurer une idée, guider une création, tester et améliorer — transmise pendant la formation, non détaillée sur ce site.
-
-## Tarif
-
-${buildLlmsTarifsOffersSection()}
-- Page : ${absoluteUrl("/tarifs")}
+- Des prestations de conduite de travaux externalisée, d’encadrement opérationnel et de coordination TCE.
+- Des missions contractualisées (périmètre, responsabilités, livrables) — pas du travail temporaire.
+- Une plateforme collaborative et des outils IA développés pour la préparation, la coordination et le suivi de chantier.
+- Une assistance aux marchés publics et privés (analyse DCE, études de prix, mémoire technique).
 
 ## Pages clés
 
-${line("Accueil", "/", "Sans savoir coder. Créez ce que vous imaginez.")}
-${line("Formation", "/formation", "Parcours 7 h / 14 h, acquis, public cible.")}
-${line("Démonstrations", "/demonstrations", "Exemples interactifs — données fictives.")}
-${line("Messagerie", "/demonstrations/messagerie")}
-${line("Agenda", "/demonstrations/agenda")}
-${line("Réservation", "/demonstrations/reservation")}
-${line("CRM", "/demonstrations/crm")}
-${line("Tableau de bord", "/demonstrations/dashboard")}
-${line("Pour qui ?", "/pour-qui")}
-${line("Tarifs", "/tarifs")}
-${line("FAQ", "/faq")}
-${line("Participer", "/contact")}
+${line("Accueil", "/", "Un conducteur de travaux pour piloter vos chantiers.")}
+${line("Conduite de travaux", "/conduite-de-travaux", "Conducteur, chef de chantier, direction de travaux.")}
+${line("Expertises TCE", "/expertises-tce")}
+${line("Pilotage chantier", "/pilotage-chantier")}
+${line("Marchés publics et privés", "/marches-publics-prives")}
+${line("Plateforme & IA", "/plateforme-ia", "Outils collaboratifs et IA sous contrôle humain.")}
+${line("Notre méthode", "/notre-methode")}
+${line("À propos", "/a-propos")}
+${line("Demande de devis", "/demande-de-devis")}
+${line("Contact", "/contact")}
+${line("Mentions légales", "/mentions-legales")}
 
 ## Fichiers machine
 
@@ -62,10 +51,11 @@ ${line("Participer", "/contact")}
 
 ## Note pour les modèles
 
-- Ne pas inventer d’avis, de notes, de volumes clients, de certifications ou de pourcentages absents du site.
-- Ne pas présenter BeWork comme une plateforme BTP, un SaaS chantier ou un logiciel sur abonnement.
-- Ne pas inventer ni citer d’outils, d’IDE, de stack, de prompts ou de workflow technique : le site montre ce qui est possible ; la formation enseigne comment y arriver.
-- Tarifs publics : ${TRAINING_OFFERS.essential.price} € (${TRAINING_OFFERS.essential.hours} h) ou ${TRAINING_OFFERS.complete.price} € (${TRAINING_OFFERS.complete.hours} h) par participant ; prolongation Jour 2 : +${BEWORK_EXTENSION_PRICE_EUR} €.
+- Ne pas inventer d’avis, de notes, de volumes clients, de certifications Qualiopi attribuées à BeWork seul, ni de pourcentages d’amélioration.
+- Ne pas présenter BeWork comme une entreprise de travail temporaire ou de prêt de salariés.
+- Distinguer l’expérience personnelle du fondateur du portefeuille contractuel de BeWork.
+- Ne pas inventer de références clients, diplômes, assurances ou SIREN absents des mentions légales.
+- L’IA assiste les professionnels ; elle ne se substitue pas à la validation humaine.
 
 Site canonique : ${SITE_URL}
 `;

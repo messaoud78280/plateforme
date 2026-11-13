@@ -91,7 +91,11 @@ export function publicAppOriginForEmails(preferredFromRequest?: string): string 
   return "https://www.bework.fr";
 }
 
-/** Profil public de la fondatrice — à rattacher à Person, pas à Organization.sameAs. */
+/**
+ * Profil LinkedIn personnel — ne pas afficher sur le site commercial public
+ * tant que le lien n’est pas validé comme page entreprise / profil autorisé.
+ * Ne pas utiliser en Organization.sameAs.
+ */
 export const BEWORK_FOUNDER_LINKEDIN_URL = "https://www.linkedin.com/in/laure-olivie";
 
 /**

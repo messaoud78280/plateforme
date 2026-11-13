@@ -181,9 +181,9 @@ export function BtpDevisForm() {
           </div>
           <div>
             <label htmlFor="phone" className={labelClass}>
-              Téléphone
+              Téléphone *
             </label>
-            <input id="phone" name="phone" type="tel" className={fieldClass} autoComplete="tel" />
+            <input id="phone" name="phone" type="tel" required className={fieldClass} autoComplete="tel" />
           </div>
         </div>
       </fieldset>

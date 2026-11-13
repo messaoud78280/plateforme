@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { BtpCtaBand } from "@/components/marketing-btp/BtpCtaBand";
+import { BtpMissionFlow } from "@/components/marketing-btp/BtpMissionFlow";
 import { BtpPageHero } from "@/components/marketing-btp/BtpPageHero";
 import "@/components/marketing-btp/btp-marketing.css";
 import { BTP_METHOD_STEPS, BTP_SEO_PAGES } from "@/lib/bework-btp-services";
@@ -22,18 +23,28 @@ export default function NotreMethodePage() {
         <BtpPageHero
           eyebrow="MÉTHODE"
           title="Une intervention structurée, des livrables clairs."
-          subtitle="Six étapes pour comprendre le besoin, définir la mission, piloter les opérations et clôturer avec transparence."
+          subtitle="Du premier échange à la clôture : besoin, étude, proposition, pilotage et visibilité — avec des livrables et une traçabilité définis contractuellement."
           primaryHref="/demande-de-devis"
-          primaryLabel="Demander un devis"
+          primaryLabel="Étudions votre besoin"
         />
+
+        <BtpMissionFlow />
 
         <section className="bw-btp-section bw-btp-section-alt">
           <div className="bw-btp-container space-y-5">
+            <h2 className="font-bold">Méthodologie opérationnelle détaillée</h2>
+            <p className="max-w-3xl text-base text-[var(--btp-muted)]">
+              Au-delà du parcours commercial, nos missions s’appuient sur une
+              méthode de travail en six étapes.
+            </p>
             {BTP_METHOD_STEPS.map((step) => (
-              <article key={step.n} className="bw-btp-card grid gap-4 md:grid-cols-[5rem_1fr] md:items-start">
+              <article
+                key={step.n}
+                className="bw-btp-card grid gap-4 md:grid-cols-[5rem_1fr] md:items-start"
+              >
                 <p className="text-2xl font-bold text-[var(--btp-copper)]">{step.n}</p>
                 <div>
-                  <h2 className="text-xl font-bold">{step.title}</h2>
+                  <h3 className="text-xl font-bold">{step.title}</h3>
                   <p className="mt-2 text-[var(--btp-muted)]">{step.body}</p>
                 </div>
               </article>
@@ -45,7 +56,11 @@ export default function NotreMethodePage() {
           </div>
         </section>
 
-        <BtpCtaBand title="Prêt à cadrer une mission ?" />
+        <BtpCtaBand
+          title="Prêt à cadrer une mission ?"
+          ctaHref="/demande-de-devis"
+          ctaLabel="Étudions votre besoin"
+        />
       </main>
       <MarketingSiteFooter />
     </div>

@@ -104,31 +104,10 @@ export function BtpHomeHero() {
               alt="Conducteur de travaux étudiant un plan sur un chantier BTP — photo d’ambiance illustrative"
               fill
               priority
-              className="object-cover object-center"
-              sizes="(max-width: 1024px) 100vw, 48vw"
+              className="bw-home-hero-img"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 90vw, 48vw"
             />
           </div>
-
-          <aside className="bw-home-float bw-home-float-suivi" aria-hidden>
-            <p className="bw-home-float-title">Suivi de chantier</p>
-            <p className="bw-home-float-caption">Exemple illustratif</p>
-            <div className="bw-home-progress">
-              <div className="bw-home-progress-bar" style={{ width: "72%" }} />
-            </div>
-            <p className="bw-home-progress-label">Avancement 72 %</p>
-            <ul className="bw-home-float-list">
-              <li className="is-done">Terrassement</li>
-              <li className="is-done">Réseaux VRD</li>
-              <li>Voirie</li>
-              <li>Finitions</li>
-            </ul>
-          </aside>
-
-          <aside className="bw-home-float bw-home-float-equipe" aria-hidden>
-            <p className="bw-home-float-title">Équipe sur site</p>
-            <p className="bw-home-float-caption">Illustration — composition type</p>
-            <p className="bw-home-float-value">Chef d’équipe + compagnons</p>
-          </aside>
         </div>
       </div>
     </section>

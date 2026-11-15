@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -23,10 +24,14 @@ type HeaderDropdownProps = {
   align?: "left" | "right";
   width?: number;
   panelId?: string;
-  /** Défaut 9999 (header). Préférer ~50 pour menus de page (sous modales z-80). */
+  /** Défaut 9999 (header). Préférer ~50–100 pour menus de page (sous modales z-80+). */
   zIndex?: number;
 };
 
+/**
+ * Dropdown générique via portal (document.body).
+ * Évite le clipping par overflow-hidden / stacking contexts parents.
+ */
 export function HeaderDropdown({
   trigger,
   children,
@@ -52,8 +57,27 @@ export function HeaderDropdown({
     const rect = el.getBoundingClientRect();
     let left = align === "right" ? rect.right - width : rect.left;
     left = Math.max(8, Math.min(left, window.innerWidth - width - 8));
-    setPosition({ top: rect.bottom + 6, left });
+
+    const panelH = panelRef.current?.offsetHeight ?? 0;
+    const estimatedH = panelH > 0 ? panelH : 220;
+    const gap = 6;
+    const spaceBelow = window.innerHeight - rect.bottom - gap;
+    const spaceAbove = rect.top - gap;
+    let top = rect.bottom + gap;
+    if (spaceBelow < estimatedH && spaceAbove > spaceBelow) {
+      top = Math.max(8, rect.top - estimatedH - gap);
+    } else {
+      // Garde le bas du menu dans le viewport si possible
+      top = Math.min(top, Math.max(8, window.innerHeight - estimatedH - 8));
+    }
+
+    setPosition({ top, left });
   }, [align, width]);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    updatePosition();
+  }, [open, updatePosition, children]);
 
   useEffect(() => {
     if (!open) return;
@@ -75,12 +99,16 @@ export function HeaderDropdown({
     }
     function onMouse(e: MouseEvent) {
       const target = e.target as Node;
-      if (triggerRef.current?.contains(target) || panelRef.current?.contains(target)) return;
+      if (triggerRef.current?.contains(target) || panelRef.current?.contains(target))
+        return;
       setOpen(false);
     }
     function onPanelClick(e: MouseEvent) {
       const el = e.target as HTMLElement | null;
-      if (el?.closest?.("a[href]")) setOpen(false);
+      // Fermer après action (lien ou bouton) — pas si clic sur le panneau vide
+      if (el?.closest?.("a[href], button, [data-dropdown-close], [role='menuitem']")) {
+        setOpen(false);
+      }
     }
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onMouse);
@@ -116,7 +144,7 @@ export function HeaderDropdown({
           >
             {children}
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );

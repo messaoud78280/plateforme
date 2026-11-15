@@ -150,7 +150,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   <span className={styles.signaturePrimary}>
                     <span className={styles.signaturePrimaryFull}>
                       Conduite de travaux ·{" "}
-                      <span className={styles.accent}>Pilotage de chantier</span>
+                      <span className={styles.accent}>Équipes travaux</span>
                     </span>
                     <span className={styles.signaturePrimaryShort}>
                       Conduite de travaux
@@ -158,10 +158,10 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   </span>
                   <span className={styles.signatureSecondary}>
                     <span className={styles.signatureSecondaryFull}>
-                      Suivi opérationnel · BTP
+                      TP / VRD · BTP
                     </span>
                     <span className={styles.signatureSecondaryShort}>
-                      Pilotage BTP
+                      Équipes BTP
                     </span>
                   </span>
                 </span>

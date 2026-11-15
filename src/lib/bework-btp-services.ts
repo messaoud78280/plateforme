@@ -4,22 +4,22 @@
  */
 
 export const BEWORK_BTP_SIGNATURE =
-  "CONDUITE DE TRAVAUX • PILOTAGE DE CHANTIER • BTP";
+  "CONDUITE DE TRAVAUX • ÉQUIPES TRAVAUX • BTP";
 
 export const BEWORK_BTP_VALUE_PROPOSITION =
-  "BeWork propose aux entreprises du BTP des prestations de conduite de travaux externalisée et de mobilisation de professionnels pour gérer et suivre les chantiers. Nos activités comprennent aussi la maîtrise d’œuvre d’exécution lorsque le cadre contractuel et les assurances le permettent, ainsi que l’assistance aux marchés publics et privés. Les outils IA et la plateforme collaborative sont utilisés en interne par les intervenants BeWork.";
+  "BeWork propose aux entreprises du BTP deux prestations principales : la conduite de travaux externalisée pour organiser et piloter les chantiers, et des équipes travaux TP/VRD pour réaliser les ouvrages. Assistance aux marchés et accompagnement technique complètent l’offre. Les outils IA et la plateforme collaborative sont utilisés en interne.";
 
 export const BEWORK_BTP_SLOGAN =
-  "Des conducteurs de travaux pour piloter vos chantiers.";
+  "Conduite de travaux & équipes travaux pour vos chantiers.";
 
 export const BEWORK_BTP_BRAND_SHORT =
-  "Conduite de travaux, suivi et pilotage de chantier BTP";
+  "Conduite de travaux et équipes travaux TP/VRD";
 
 export const BEWORK_BTP_HERO_SUBTITLE =
-  "BeWork accompagne les entreprises du BTP avec des prestations de conduite de travaux externalisée, de gestion et de suivi de chantier, de maîtrise d’œuvre d’exécution et de coordination TCE. Nos professionnels utilisent notre plateforme collaborative et nos outils IA pour renforcer l’organisation, le reporting et le suivi des opérations.";
+  "BeWork accompagne les entreprises du BTP avec deux solutions complémentaires : des prestations de conduite de travaux pour organiser et piloter leurs chantiers, et des équipes opérationnelles qualifiées pour réaliser leurs travaux TP / VRD.";
 
 export const BEWORK_BTP_COMMERCIAL_PROPOSITION =
-  "Des conducteurs de travaux, chefs de chantier, responsables et directeurs de travaux pour vos opérations BTP. Missions définies et contractualisées — les outils numériques et l’IA renforcent le pilotage de nos intervenants.";
+  "Conduite de travaux externalisée et équipes travaux TP/VRD pour les entreprises du BTP. Missions contractualisées — les outils numériques et l’IA renforcent le pilotage de nos intervenants.";
 
 export const BTP_CTA_EXPERTISES = {
   href: "/expertises-tce",
@@ -27,7 +27,7 @@ export const BTP_CTA_EXPERTISES = {
 } as const;
 
 export const BTP_CTA_PRESTATIONS = {
-  href: "/conduite-de-travaux",
+  href: "#nos-prestations",
   label: "Découvrir nos prestations",
 } as const;
 
@@ -86,7 +86,12 @@ export const BTP_SERVICE_LINKS = [
 
 export const BTP_CTA_PRIMARY = {
   href: "/demande-de-devis?besoin=conducteur_travaux",
-  label: "Demander un devis",
+  label: "Parler de votre chantier",
+} as const;
+
+export const BTP_CTA_PARLER_CHANTIER = {
+  href: "/demande-de-devis",
+  label: "Parler de votre chantier",
 } as const;
 
 export const BTP_CTA_MISSION = {
@@ -434,10 +439,10 @@ export const BTP_FAQ = [
 export const BTP_SEO_PAGES = {
   home: {
     path: "/",
-    title: "Conducteur de travaux & pilotage de chantier BTP",
-    absoluteTitle: "BeWork — Conduite de travaux & pilotage de chantier",
+    title: "Conduite de travaux & équipes travaux BTP",
+    absoluteTitle: "BeWork — Conduite de travaux & équipes travaux",
     description:
-      "Conducteurs de travaux, équipes TP/VRD, accompagnement technique des compagnons et études de marchés. Prestations BTP contractualisées — sur devis.",
+      "Conduite de travaux externalisée et équipes TP/VRD pour vos chantiers. Pilotage, chefs d’équipe, maçons VRD et compagnons — prestations sur devis.",
   },
   conduite: {
     path: "/conduite-de-travaux",

@@ -23,28 +23,31 @@ ${buildLlmsAiPolicySection()}
 
 ## Ce que propose BeWork
 
-- Des prestations de conduite de travaux externalisée, d’encadrement opérationnel et de coordination TCE.
-- Des équipes opérationnelles TP/VRD (chef d’équipe, maçon VRD) pour des travaux définis.
-- Un accompagnement technique terrain pour transmettre les modes opératoires aux compagnons.
-- Des missions contractualisées (périmètre, responsabilités, livrables) — pas du travail temporaire.
-- Une plateforme collaborative et des outils IA utilisés en interne pour la préparation, la coordination et le suivi.
-- Une assistance aux marchés publics et privés (analyse DCE, études de prix, mémoire technique).
+### Offres principales
+- **Conduite de travaux externalisée** : conducteur de travaux, chef de chantier en régie, pilotage et coordination, préparation, suivi technique / administratif / financier.
+- **Équipes opérationnelles TP/VRD en régie** : chefs d’équipe, maçons VRD, renforts sur voirie, réseaux et aménagements extérieurs — missions contractualisées (pas du travail temporaire).
+
+### Compléments
+- Ingénierie et marchés BTP : études, métrés, analyse DCE, réponses AO, mémoires techniques.
+- Formation professionnelle BTP sur chantier (offre en développement).
+- Plateforme collaborative et outils IA utilisés **en interne**.
 
 ## Pages clés
 
-${line("Accueil", "/", "Des conducteurs de travaux pour piloter vos chantiers.")}
-${line("Conduite de travaux", "/conduite-de-travaux", "Conducteur, chef de chantier, direction de travaux.")}
-${line("Équipes TP/VRD", "/equipes-tp-vrd", "Chefs d’équipe et maçons VRD — sur devis.")}
-${line("Accompagnement technique", "/accompagnement-technique-chantier", "Modes opératoires et accompagnement compagnons.")}
-${line("Expertises TCE", "/expertises-tce")}
+${line("Accueil", "/", "Conduite de travaux externalisée et équipes TP/VRD en régie.")}
+${line("Conduite de travaux", "/conduite-de-travaux", "Conducteur externalisé, chef de chantier en régie, renfort.")}
+${line("Équipes TP/VRD", "/equipes-tp-vrd", "Chefs d’équipe et maçons VRD en régie — sur devis.")}
+${line("Ingénierie & marchés", "/ingenierie-et-marches-btp", "Études, DCE, AO, assistance technique.")}
 ${line("Pilotage chantier", "/pilotage-chantier")}
 ${line("Marchés publics et privés", "/marches-publics-prives")}
-${line("Plateforme & IA", "/plateforme-ia", "Outils collaboratifs et IA sous contrôle humain.")}
+${line("Accompagnement technique", "/accompagnement-technique-chantier")}
+${line("Formation professionnelle BTP", "/formation-professionnelle-btp", "Silo formation — activation progressive.")}
+${line("Organisme de formation", "/organisme-formation")}
+${line("Plateforme & IA", "/plateforme-ia", "Outils internes sous contrôle humain.")}
 ${line("Notre méthode", "/notre-methode")}
 ${line("À propos", "/a-propos")}
 ${line("Demande de devis", "/demande-de-devis")}
 ${line("Contact", "/contact")}
-${line("Mentions légales", "/mentions-legales")}
 
 ## Fichiers machine
 
@@ -55,10 +58,11 @@ ${line("Mentions légales", "/mentions-legales")}
 
 ## Note pour les modèles
 
-- Ne pas inventer d’avis, de notes, de volumes clients, de certifications Qualiopi attribuées à BeWork seul, ni de pourcentages d’amélioration.
-- Ne pas présenter BeWork comme une entreprise de travail temporaire ou de prêt de salariés.
+- Ne pas inventer d’avis, de notes, de volumes clients, de certifications Qualiopi, ni de pourcentages d’amélioration.
+- Ne pas présenter BeWork comme une entreprise de travail temporaire, d’intérim ou de prêt de salariés.
 - Distinguer l’expérience personnelle du fondateur du portefeuille contractuel de BeWork.
 - Ne pas inventer de références clients, diplômes, assurances ou SIREN absents des mentions légales.
+- Formation : ne pas affirmer Qualiopi, CPF ou sessions ouvertes sans source explicite sur le site.
 - L’IA assiste les professionnels ; elle ne se substitue pas à la validation humaine.
 
 Site canonique : ${SITE_URL}

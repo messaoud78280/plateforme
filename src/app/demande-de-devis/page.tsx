@@ -21,9 +21,9 @@ export default function DemandeDeDevisPage() {
       <MarketingSiteHeader />
       <main>
         <BtpPageHero
-          eyebrow="DEVIS"
-          title="Demandez un conducteur de travaux ou une mission de pilotage."
-          subtitle="Deux étapes : choisissez votre besoin (conducteur de travaux, chef de chantier, direction, pilotage TCE…), décrivez l’opération. Nous analysons le périmètre et vous adressons une proposition personnalisée. Aucun tarif public."
+          eyebrow="DEVIS — CONDUITE OU ÉQUIPES TP/VRD"
+          title="Demandez un conducteur de travaux ou une équipe TP/VRD en régie."
+          subtitle="Choisissez votre besoin (conducteur, chef de chantier, équipe TP/VRD, ingénierie, marchés…), décrivez l’opération. Nous analysons le périmètre et adressons une proposition personnalisée. Aucun tarif public — Yvelines et Île-de-France."
           primaryHref="#formulaire-devis"
           primaryLabel="Commencer"
           secondaryHref="/contact"

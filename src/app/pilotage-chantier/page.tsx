@@ -90,13 +90,13 @@ export default function PilotageChantierPage() {
       <MarketingSiteHeader />
       <main>
         <BtpPageHero
-          eyebrow="SUIVI & GESTION DE CHANTIER"
-          title="Des professionnels pour organiser, coordonner et suivre vos chantiers."
-          subtitle="Chaque chantier doit être piloté avec des informations fiables et des décisions traçables. BeWork mobilise des conducteurs de travaux et gestionnaires pour structurer la préparation, la production, le suivi financier et le reporting."
+          eyebrow="PILOTAGE — PROFONDEUR DE LA CONDUITE DE TRAVAUX"
+          title="Organiser, coordonner et suivre vos chantiers au quotidien."
+          subtitle="Le pilotage de chantier prolonge la conduite de travaux externalisée BeWork : préparation, production, suivi financier, qualité et reporting. Informations fiables, décisions traçables — missions contractualisées."
           primaryHref="/demande-de-devis?besoin=conducteur_travaux"
           primaryLabel="Demander un conducteur de travaux"
           secondaryHref="/conduite-de-travaux"
-          secondaryLabel="Découvrir nos prestations"
+          secondaryLabel="Voir la conduite de travaux"
         />
 
         <section className="bw-btp-section bw-btp-section-alt">

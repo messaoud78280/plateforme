@@ -20,13 +20,13 @@ export default function ExpertisesTcePage() {
       <MarketingSiteHeader />
       <main>
         <BtpPageHero
-          eyebrow="EXPERTISES TCE"
+          eyebrow="INGÉNIERIE — EXPERTISES TCE"
           title="Une vision globale des travaux, tous corps d’état."
-          subtitle="Un chantier TCE mobilise de nombreux intervenants, des interfaces techniques complexes et des contraintes de planning importantes. BeWork accompagne la préparation, l’organisation et la coordination des opérations pour faciliter l’enchaînement des travaux."
+          subtitle="Complément à la conduite de travaux : préparation, organisation et coordination des opérations TCE pour faciliter l’enchaînement des lots. Les expertises mobilisées sont précisées avant engagement contractuel."
           primaryHref="/demande-de-devis?besoin=pilotage_tce"
           primaryLabel="Demander un pilotage TCE"
-          secondaryHref="/conduite-de-travaux"
-          secondaryLabel="Voir la conduite de travaux"
+          secondaryHref="/ingenierie-et-marches-btp"
+          secondaryLabel="Voir l’ingénierie & marchés"
         />
 
         <section className="bw-btp-section bw-btp-section-alt">

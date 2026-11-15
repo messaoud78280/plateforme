@@ -28,14 +28,14 @@ export default function ConduiteDeTravauxPage() {
       <MarketingSiteHeader />
       <main>
         <BtpPageHero
-          eyebrow="CONDUITE DE TRAVAUX EXTERNALISÉE"
-          title="Des conducteurs de travaux pour gérer et suivre vos chantiers."
-          subtitle="Conducteur de travaux, chef de chantier, direction de travaux ou pilotage TCE : missions contractualisées avec périmètre, responsabilités et livrables définis. La maîtrise d’œuvre d’exécution est proposée lorsque le cadre contractuel et les assurances le permettent. Pas du travail temporaire."
+          eyebrow="CONDUITE DE TRAVAUX EXTERNALISÉE • EN RÉGIE"
+          title="Conducteur de travaux externalisé pour piloter vos chantiers."
+          subtitle="Conducteur de travaux, chef de chantier en régie, direction de travaux ou pilotage TCE : organisation, coordination, suivi technique, administratif et financier. Mission ponctuelle, renfort temporaire, suivi régulier ou opération complète — périmètre et livrables contractualisés. Pas du travail temporaire."
           primaryHref="/demande-de-devis?besoin=conducteur_travaux"
           primaryLabel="Demander un conducteur de travaux"
-          secondaryHref="/notre-methode"
-          secondaryLabel="Découvrir notre méthode"
-          note="Missions ponctuelles ou suivies • TCE • VRD • Bâtiment • Prestations sur devis"
+          secondaryHref="/pilotage-chantier"
+          secondaryLabel="Voir le pilotage de chantier"
+          note="Yvelines · Île-de-France · TCE · VRD · Bâtiment · Prestations sur devis"
           imageSrc="/marketing/bework-pole-conduite-travaux.jpg"
           imageAlt="Conducteur de travaux sur chantier avec plans — photo d’ambiance illustrative"
         />

@@ -2,8 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   BEWORK_BTP_HERO_SUBTITLE,
-  BTP_CTA_PARLER_CHANTIER,
-  BTP_CTA_PRESTATIONS,
+  BEWORK_BTP_SLOGAN,
+  BTP_CTA_CONDUCTEUR,
+  BTP_CTA_EQUIPE_TP_VRD,
 } from "@/lib/bework-btp-services";
 
 export function BtpHomeHero() {
@@ -12,10 +13,10 @@ export function BtpHomeHero() {
       <div className="bw-btp-container-wide bw-home-hero-grid">
         <div className="bw-home-hero-copy">
           <p className="bw-btp-eyebrow">
-            BEWORK — CONDUITE DE TRAVAUX &amp; ÉQUIPES TRAVAUX
+            BEWORK — CONDUITE DE TRAVAUX &amp; ÉQUIPES TP/VRD EN RÉGIE
           </p>
           <h1 id="home-hero-title" className="bw-home-hero-title">
-            Conduite de travaux &amp; équipes travaux pour vos chantiers.
+            {BEWORK_BTP_SLOGAN.replace(/^BeWork —\s*/, "")}
           </h1>
           <p className="bw-btp-lead mt-5">{BEWORK_BTP_HERO_SUBTITLE}</p>
 
@@ -40,7 +41,7 @@ export function BtpHomeHero() {
                   />
                 </svg>
               </span>
-              <span>Prestation de conduite de travaux</span>
+              <span>Conduite de travaux externalisée</span>
               <span className="bw-home-chip-arrow" aria-hidden>
                 →
               </span>
@@ -68,7 +69,7 @@ export function BtpHomeHero() {
                   />
                 </svg>
               </span>
-              <span>Équipes travaux TP / VRD</span>
+              <span>Équipes TP/VRD en régie</span>
               <span className="bw-home-chip-arrow" aria-hidden>
                 →
               </span>
@@ -77,23 +78,23 @@ export function BtpHomeHero() {
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href={BTP_CTA_PARLER_CHANTIER.href}
+              href={BTP_CTA_CONDUCTEUR.href}
               className="bw-btp-btn bw-btp-btn-primary"
             >
-              {BTP_CTA_PARLER_CHANTIER.label}
+              {BTP_CTA_CONDUCTEUR.label}
               <span aria-hidden>→</span>
             </Link>
             <Link
-              href={BTP_CTA_PRESTATIONS.href}
+              href={BTP_CTA_EQUIPE_TP_VRD.href}
               className="bw-btp-btn bw-btp-btn-secondary"
             >
-              Découvrir nos prestations
+              {BTP_CTA_EQUIPE_TP_VRD.label}
             </Link>
           </div>
 
           <p className="bw-home-hero-tags">
-            TP · VRD · Bâtiment · Coordination · Suivi de chantier · Compagnons ·
-            Chef d’équipe · Maçon VRD
+            Yvelines · Île-de-France · Conducteur externalisé · Chef de chantier
+            en régie · Renfort TP/VRD · Maçon VRD
           </p>
         </div>
 

@@ -13,7 +13,6 @@ import {
   BTP_CTA_PARLER_CHANTIER,
   BTP_FAQ,
   BTP_SEO_PAGES,
-  BEWORK_BTP_COMMERCIAL_PROPOSITION,
   BEWORK_BTP_VALUE_PROPOSITION,
 } from "@/lib/bework-btp-services";
 import { buildMarketingPageMetadata } from "@/lib/seo-formation-pages";
@@ -39,9 +38,9 @@ const homeJsonLd = {
       isPartOf: { "@id": `${SITE_URL}/#website` },
       about: [
         { "@type": "Thing", name: "Conduite de travaux externalisée" },
-        { "@type": "Thing", name: "Équipes travaux TP VRD" },
-        { "@type": "Thing", name: "Chef d’équipe TP/VRD" },
-        { "@type": "Thing", name: "Maçon VRD" },
+        { "@type": "Thing", name: "Équipes TP/VRD en régie" },
+        { "@type": "Thing", name: "Conducteur de travaux externalisé" },
+        { "@type": "Thing", name: "Maçon VRD en régie" },
       ],
     },
     {
@@ -54,10 +53,21 @@ const homeJsonLd = {
     },
     {
       "@type": "Service",
-      name: "Conduite de travaux et équipes travaux BTP",
+      name: "Conduite de travaux externalisée",
       provider: { "@id": `${SITE_URL}/#organization` },
-      description: BEWORK_BTP_COMMERCIAL_PROPOSITION,
-      areaServed: "FR",
+      description:
+        "Conducteur de travaux externalisé, chef de chantier en régie, pilotage et coordination des chantiers BTP — missions contractualisées.",
+      areaServed: ["Yvelines", "Île-de-France", "France"],
+      url: `${SITE_URL}/conduite-de-travaux`,
+    },
+    {
+      "@type": "Service",
+      name: "Équipes opérationnelles TP/VRD en régie",
+      provider: { "@id": `${SITE_URL}/#organization` },
+      description:
+        "Chefs d’équipe et maçons VRD pour renforcer les chantiers TP, voirie, réseaux et aménagements — prestations en régie contractualisées.",
+      areaServed: ["Yvelines", "Île-de-France", "France"],
+      url: `${SITE_URL}/equipes-tp-vrd`,
     },
   ],
 };
@@ -79,7 +89,7 @@ export default function HomePage() {
         <BtpFaq items={BTP_FAQ} title="FAQ — missions BTP" />
         <BtpCtaBand
           title="Parlons de votre chantier."
-          subtitle="Conduite de travaux ou équipes TP/VRD : décrivez votre besoin. Nous étudions le périmètre et proposons une mission sur devis."
+          subtitle="Demandez un conducteur de travaux ou une équipe TP/VRD en régie. Nous étudions le périmètre et proposons une mission sur devis."
           ctaHref={BTP_CTA_PARLER_CHANTIER.href}
           ctaLabel={BTP_CTA_PARLER_CHANTIER.label}
         />

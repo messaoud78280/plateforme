@@ -28,14 +28,14 @@ export default function AccompagnementTechniqueChantierPage() {
       <MarketingSiteHeader />
       <main>
         <BtpPageHero
-          eyebrow="MÉTHODES D'EXÉCUTION • ACCOMPAGNEMENT TERRAIN"
+          eyebrow="COMPLÉMENT — MODES OPÉRATOIRES & COMPAGNONS"
           title="Nous accompagnons vos compagnons dans la maîtrise des modes opératoires."
-          subtitle="BeWork intervient directement sur chantier pour accompagner les compagnons dans la compréhension et l’application des méthodes d’exécution adaptées aux exigences de l’ouvrage. Notre approche associe transmission du savoir-faire, démonstrations pratiques, organisation des postes et suivi de la qualité d’exécution."
+          subtitle="Prestation complémentaire aux offres principales : transmission du savoir-faire, démonstrations pratiques et suivi de la qualité d’exécution sur chantier. Lien naturel avec la formation professionnelle BTP en développement."
           primaryHref={BTP_CTA_ACCOMPAGNEMENT.href}
           primaryLabel={BTP_CTA_ACCOMPAGNEMENT.label}
-          secondaryHref="/demande-de-devis?besoin=assistance_modes_operatoires"
-          secondaryLabel="Assistance aux modes opératoires"
-          note="Accompagnement technique opérationnel • Prestations sur devis"
+          secondaryHref="/formation-professionnelle-btp"
+          secondaryLabel="Voir la formation BTP"
+          note="Complément commercial • Prestations sur devis"
           imageSrc="/marketing/bework-hero-accompagnement-technique.jpg"
           imageAlt="Accompagnement technique de compagnons sur chantier — photo d’ambiance illustrative"
         />

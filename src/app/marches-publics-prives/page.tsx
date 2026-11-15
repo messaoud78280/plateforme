@@ -74,13 +74,13 @@ export default function MarchesPage() {
       <MarketingSiteHeader />
       <main>
         <BtpPageHero
-          eyebrow="MARCHÉS PUBLICS & PRIVÉS"
+          eyebrow="INGÉNIERIE & MARCHÉS — COMPLÉMENT"
           title="Nous vous accompagnons de l’étude du marché à sa réalisation."
-          subtitle="Analyse de consultation, études de prix, constitution d’offre et suivi d’exécution — sans garantie d’attribution du marché."
+          subtitle="Analyse de consultation, études de prix, constitution d’offre et suivi d’exécution — complément à la conduite de travaux et aux équipes TP/VRD. Sans garantie d’attribution du marché."
           primaryHref="/demande-de-devis?besoin=assistance_marches_publics"
           primaryLabel="Confier une étude de marché"
-          secondaryHref="/demande-de-devis?besoin=etudes_prix"
-          secondaryLabel="Études de prix"
+          secondaryHref="/ingenierie-et-marches-btp"
+          secondaryLabel="Voir le hub ingénierie"
           imageSrc="/marketing/bework-pole-etudes-marches.jpg"
           imageAlt="Analyse de plans et dossiers de marché — photo d’ambiance illustrative"
         />

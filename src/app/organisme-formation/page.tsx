@@ -1,216 +1,112 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { QualiopiCertificateActions } from "@/components/qualiopi/QualiopiCertificateActions";
-import { QualiopiMark } from "@/components/qualiopi/QualiopiMark";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
-import { TrainingOffersSection } from "@/components/marketing/TrainingOffersSection";
-import {
-  FORMATION_LEGAL_ENTITY,
-  QUALIOPI_CERTIFICATION,
-  QUALIOPI_COPY,
-} from "@/lib/formation-organism";
-import {
-  breadcrumbJsonLd,
-  buildMarketingPageMetadata,
-  SEO_PAGES,
-} from "@/lib/seo-formation-pages";
-import { absoluteUrl, SITE_URL } from "@/lib/site";
-import styles from "./organisme-formation.module.css";
+import { BtpCtaBand } from "@/components/marketing-btp/BtpCtaBand";
+import { BtpPageHero } from "@/components/marketing-btp/BtpPageHero";
+import "@/components/marketing-btp/btp-marketing.css";
+import { BTP_SEO_PAGES } from "@/lib/bework-btp-services";
+import { buildMarketingPageMetadata } from "@/lib/seo-formation-pages";
+import { SITE_URL } from "@/lib/site";
 
-const seo = SEO_PAGES.organismeFormation;
-const pageUrl = absoluteUrl(seo.path);
-
+const seo = BTP_SEO_PAGES.organismeFormation;
 export const metadata: Metadata = buildMarketingPageMetadata({
   path: seo.path,
   title: seo.title,
-  absoluteTitle: seo.absoluteTitle,
   description: seo.description,
 });
 
-const orgJsonLd = {
+const jsonLd = {
   "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebPage",
-      "@id": `${pageUrl}#webpage`,
-      url: pageUrl,
-      name: seo.absoluteTitle,
-      description: seo.description,
-      isPartOf: { "@id": `${SITE_URL}/#website` },
-      about: { "@id": `${SITE_URL}/#organization` },
-    },
-    breadcrumbJsonLd([
-      { name: "Accueil", path: "/" },
-      { name: "Organisme de formation", path: seo.path },
-    ]),
-  ],
+  "@type": "WebPage",
+  name: seo.title,
+  description: seo.description,
+  url: `${SITE_URL}${seo.path}`,
+  isPartOf: { "@type": "WebSite", name: "BeWork", url: SITE_URL },
 };
 
-/** Page institutionnelle — OFC Création d'entreprise & Qualiopi. */
 export default function OrganismeFormationPage() {
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="bw-btp-site min-h-screen">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <MarketingSiteHeader plainBg />
-
+      <MarketingSiteHeader />
       <main>
-        <section className={styles.hero} aria-labelledby="org-hero-title">
-          <div className={styles.shell}>
-            <p className={styles.eyebrow}>L&apos;organisme de formation</p>
-            <h1 id="org-hero-title" className={styles.heroTitle}>
-              BeWork.
-              <span className={styles.heroAccent}>
-                {" "}
-                Une ambition pédagogique portée par un organisme certifié.
-              </span>
-            </h1>
-            <p className={styles.heroLead}>{QUALIOPI_COPY.primary}</p>
-          </div>
-        </section>
-
-        <section className={styles.section} aria-labelledby="org-present-title">
-          <div className={styles.shellNarrow}>
-            <h2 id="org-present-title" className={styles.h2}>
-              Un organisme de formation
-              <span className={styles.h2Accent}> au service de vos projets.</span>
-            </h2>
-            <div className={styles.prose}>
-              <p>
-                <strong>{FORMATION_LEGAL_ENTITY.legalNameDisplay}</strong> est l&apos;organisme
-                qui porte juridiquement les formations.{" "}
-                <strong>{FORMATION_LEGAL_ENTITY.brand}</strong> est la marque dédiée aux
-                formations à la création numérique assistée par intelligence artificielle.
-              </p>
-              <p>
-                L&apos;objectif des parcours BeWork est de permettre à des non-développeurs
-                d&apos;apprendre à construire leurs propres projets numériques — sites,
-                applications et outils métier — sans connaissances préalables en
-                programmation.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section
-          id="certification"
-          className={styles.sectionSoft}
-          aria-labelledby="org-cert-title"
-        >
-          <div className={styles.shell}>
-            <header className={styles.sectionHead}>
-              <p className={styles.eyebrow}>Certification qualité</p>
-              <h2 id="org-cert-title" className={styles.h2}>
-                Une certification Qualiopi
-                <span className={styles.h2Accent}> au titre des actions de formation.</span>
-              </h2>
-            </header>
-
-            <article className={styles.certCard}>
-              <QualiopiMark variant="card" />
-              <dl className={styles.dl}>
-                <div>
-                  <dt>Titulaire</dt>
-                  <dd>{FORMATION_LEGAL_ENTITY.legalNameDisplay}</dd>
-                </div>
-                <div>
-                  <dt>Certificateur</dt>
-                  <dd>{QUALIOPI_CERTIFICATION.certificator}</dd>
-                </div>
-                <div>
-                  <dt>Certificat</dt>
-                  <dd>n° {QUALIOPI_CERTIFICATION.certificateNumber}</dd>
-                </div>
-                <div>
-                  <dt>Validité indiquée</dt>
-                  <dd>
-                    {QUALIOPI_CERTIFICATION.validFromLabel} →{" "}
-                    {QUALIOPI_CERTIFICATION.validToLabel}
-                  </dd>
-                </div>
-              </dl>
-              <p className={styles.surveillance}>
-                {QUALIOPI_CERTIFICATION.surveillanceNote}
-              </p>
-            </article>
-          </div>
-        </section>
-
-        <section className={styles.section} aria-labelledby="org-meaning-title">
-          <div className={styles.shellNarrow}>
-            <h2 id="org-meaning-title" className={styles.h2}>
-              Que signifie la certification Qualiopi&nbsp;?
-            </h2>
-            <div className={styles.prose}>
-              <p>{QUALIOPI_COPY.whatIs}</p>
-              <p>
-                Cette certification ne valide pas automatiquement les projets créés par les
-                participants, et ne constitue pas une garantie de résultat professionnel.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section
-          id="certificat"
-          className={styles.sectionSoft}
-          aria-labelledby="org-pdf-title"
-        >
-          <div className={styles.shellNarrow}>
-            <h2 id="org-pdf-title" className={styles.h2}>
-              Consulter notre certificat
-            </h2>
-            <p className={styles.lead}>
-              Le certificat officiel délivré par {QUALIOPI_CERTIFICATION.certificator} est
-              disponible en PDF. Son contenu n&apos;a pas été modifié.
-            </p>
-            <QualiopiCertificateActions />
-          </div>
-        </section>
-
-        <TrainingOffersSection
-          id="formations"
-          analyticsPrefix="organisme-formation"
-          headingLevel="h2"
+        <BtpPageHero
+          eyebrow="ORGANISME DE FORMATION"
+          title="Présentation de l’activité formation BeWork."
+          subtitle="BeWork prépare une offre de formation professionnelle BTP orientée chantier. Cette page présente l’intention pédagogique — sans afficher de certification Qualiopi, d’éligibilité CPF ou de financement non vérifié pour la structure concernée."
+          primaryHref="/demande-de-devis?besoin=autre"
+          primaryLabel="Exprimer un besoin formation"
+          secondaryHref="/formation-professionnelle-btp"
+          secondaryLabel="Voir le hub formation"
+          note="Transparence commerciale • Aucune certification inventée"
         />
 
-        <section className={styles.section} aria-labelledby="org-admin-title">
-          <div className={styles.shellNarrow}>
-            <h2 id="org-admin-title" className={styles.h2}>
-              Informations de l&apos;organisme
+        <section className="bw-btp-section" aria-labelledby="mission-title">
+          <div className="bw-btp-container max-w-3xl">
+            <h2 id="mission-title" className="font-bold">
+              Intention pédagogique.
             </h2>
-            <div className={styles.adminCard}>
-              <p className={styles.adminName}>{FORMATION_LEGAL_ENTITY.legalNameDisplay}</p>
-              <ul className={styles.adminList}>
-                <li>
-                  <span>SIREN</span>
-                  <strong>{FORMATION_LEGAL_ENTITY.siren}</strong>
-                </li>
-                <li>
-                  <span>NDA</span>
-                  <strong>{FORMATION_LEGAL_ENTITY.nda}</strong>
-                </li>
-                <li>
-                  <span>Siège social</span>
-                  <strong>
-                    {FORMATION_LEGAL_ENTITY.addressLine}, {FORMATION_LEGAL_ENTITY.postalCity}
-                  </strong>
-                </li>
-              </ul>
-              <p className={styles.ndaDisclaimer}>{FORMATION_LEGAL_ENTITY.ndaDisclaimer}</p>
-              <p className={styles.adminLinks}>
-                <Link href="/mentions-legales">Mentions légales</Link>
-                <Link href="/formation">Découvrir les formations</Link>
-                <Link href="/contact#participer">Demander une place</Link>
-              </p>
+            <p className="mt-4 text-base text-[var(--btp-muted)]">
+              L’objectif est de transmettre des compétences opérationnelles aux
+              salariés du BTP : conduite de travaux, encadrement de chantier,
+              chefs d’équipe TP/VRD et compagnons — en privilégiant les
+              formations pratiques sur les ouvrages.
+            </p>
+            <ul className="bw-home-offer-list mt-8">
+              <li>Formations adaptées aux méthodes d’exécution</li>
+              <li>Ancrage terrain et exigences des entreprises</li>
+              <li>Programmes précisés après étude du besoin</li>
+              <li>Activation commerciale progressive</li>
+            </ul>
+            <p className="mt-8 text-sm text-[var(--btp-muted)]">
+              Les éventuelles certifications, agréments ou financements publics
+              ne sont mentionnés que lorsqu’ils sont vérifiés et documentés pour
+              l’entité concernée. En l’absence de preuve publiée ici, aucune
+              affirmation Qualiopi ou CPF n’est faite.
+            </p>
+          </div>
+        </section>
+
+        <section className="bw-btp-section bw-btp-section-alt">
+          <div className="bw-btp-container">
+            <h2 className="font-bold">Liens utiles</h2>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/formation-professionnelle-btp"
+                className="bw-btp-btn bw-btp-btn-secondary"
+              >
+                Hub formation BTP
+              </Link>
+              <Link
+                href="/conduite-de-travaux"
+                className="bw-btp-btn bw-btp-btn-secondary"
+              >
+                Conduite de travaux
+              </Link>
+              <Link
+                href="/equipes-tp-vrd"
+                className="bw-btp-btn bw-btp-btn-secondary"
+              >
+                Équipes TP/VRD
+              </Link>
+              <Link href="/mentions-legales" className="bw-btp-btn bw-btp-btn-secondary">
+                Mentions légales
+              </Link>
             </div>
           </div>
         </section>
-      </main>
 
+        <BtpCtaBand
+          title="Une question sur la formation BeWork ?"
+          subtitle="Décrivez votre besoin. Nous précisons le cadre sans engagement sur des labels non vérifiés."
+          ctaHref="/contact"
+          ctaLabel="Nous contacter"
+        />
+      </main>
       <MarketingSiteFooter />
     </div>
   );

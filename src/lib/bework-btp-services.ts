@@ -4,22 +4,22 @@
  */
 
 export const BEWORK_BTP_SIGNATURE =
-  "CONDUITE DE TRAVAUX • ÉQUIPES TRAVAUX • BTP";
+  "CONDUITE DE TRAVAUX • ÉQUIPES TP/VRD EN RÉGIE • BTP";
 
 export const BEWORK_BTP_VALUE_PROPOSITION =
-  "BeWork propose aux entreprises du BTP deux prestations principales : la conduite de travaux externalisée pour organiser et piloter les chantiers, et des équipes travaux TP/VRD pour réaliser les ouvrages. Assistance aux marchés et accompagnement technique complètent l’offre. Les outils IA et la plateforme collaborative sont utilisés en interne.";
+  "BeWork accompagne les entreprises du BTP avec deux prestations principales : la conduite de travaux externalisée pour piloter les chantiers, et des équipes opérationnelles TP/VRD en régie pour renforcer les moyens humains. L’ingénierie, les marchés et la formation professionnelle BTP complètent l’offre. Les outils IA et la plateforme collaborative sont utilisés en interne.";
 
 export const BEWORK_BTP_SLOGAN =
-  "Conduite de travaux & équipes travaux pour vos chantiers.";
+  "BeWork — Conduite de travaux externalisée et équipes opérationnelles BTP en régie.";
 
 export const BEWORK_BTP_BRAND_SHORT =
-  "Conduite de travaux et équipes travaux TP/VRD";
+  "Conduite de travaux externalisée et équipes TP/VRD en régie";
 
 export const BEWORK_BTP_HERO_SUBTITLE =
-  "BeWork accompagne les entreprises du BTP avec deux solutions complémentaires : des prestations de conduite de travaux pour organiser et piloter leurs chantiers, et des équipes opérationnelles qualifiées pour réaliser leurs travaux TP / VRD.";
+  "Nous accompagnons les entreprises du BTP dans le pilotage de leurs chantiers et renforçons leurs équipes avec des professionnels expérimentés en travaux publics, VRD et aménagements extérieurs.";
 
 export const BEWORK_BTP_COMMERCIAL_PROPOSITION =
-  "Conduite de travaux externalisée et équipes travaux TP/VRD pour les entreprises du BTP. Missions contractualisées — les outils numériques et l’IA renforcent le pilotage de nos intervenants.";
+  "Conduite de travaux externalisée et équipes opérationnelles TP/VRD en régie pour les entreprises du BTP. Missions contractualisées — Yvelines et Île-de-France. Les outils numériques et l’IA renforcent le pilotage de nos intervenants.";
 
 export const BTP_CTA_EXPERTISES = {
   href: "/expertises-tce",
@@ -44,30 +44,51 @@ export type BtpNavItem = {
   children?: readonly BtpNavChild[];
 };
 
-/** Navigation principale — prestations humaines BTP. */
+/** Navigation principale — piliers conduite + équipes, compléments ingénierie/formation. */
 export const BTP_NAV_ITEMS: readonly BtpNavItem[] = [
-  { href: "/conduite-de-travaux", label: "Maîtrise d’œuvre" },
-  { href: "/pilotage-chantier", label: "Suivi de chantier" },
-  { href: "/expertises-tce", label: "Expertises" },
+  { href: "/conduite-de-travaux", label: "Conduite de travaux" },
+  { href: "/equipes-tp-vrd", label: "Équipes TP/VRD" },
   {
-    href: "#nos-services",
-    label: "Nos services",
+    href: "/ingenierie-et-marches-btp",
+    label: "Ingénierie & marchés",
     children: [
       {
-        href: "/equipes-tp-vrd",
-        label: "Équipes opérationnelles TP/VRD",
-      },
-      {
-        href: "/accompagnement-technique-chantier",
-        label: "Accompagnement technique des compagnons",
+        href: "/ingenierie-et-marches-btp",
+        label: "Vue d’ensemble ingénierie",
       },
       {
         href: "/marches-publics-prives",
         label: "Marchés publics et privés",
       },
       {
-        href: "/demande-de-devis?besoin=audit_redressement",
-        label: "Audit et optimisation de chantier",
+        href: "/expertises-tce",
+        label: "Expertises TCE",
+      },
+      {
+        href: "/accompagnement-technique-chantier",
+        label: "Accompagnement technique",
+      },
+    ],
+  },
+  {
+    href: "/formation-professionnelle-btp",
+    label: "Formation",
+    children: [
+      {
+        href: "/formation-professionnelle-btp",
+        label: "Formation professionnelle BTP",
+      },
+      {
+        href: "/formation-conducteur-de-travaux",
+        label: "Formation conducteur de travaux",
+      },
+      {
+        href: "/formation-chef-de-chantier",
+        label: "Formation chef de chantier",
+      },
+      {
+        href: "/organisme-formation",
+        label: "Organisme de formation",
       },
     ],
   },
@@ -77,10 +98,10 @@ export const BTP_NAV_ITEMS: readonly BtpNavItem[] = [
 
 /** Liens secondaires (footer). */
 export const BTP_SERVICE_LINKS = [
-  { href: "/equipes-tp-vrd", label: "Équipes TP/VRD" },
-  { href: "/accompagnement-technique-chantier", label: "Accompagnement technique" },
-  { href: "/marches-publics-prives", label: "Marchés publics & privés" },
-  { href: "/plateforme-ia", label: "Méthode & outils internes" },
+  { href: "/conduite-de-travaux", label: "Conduite de travaux" },
+  { href: "/equipes-tp-vrd", label: "Équipes TP/VRD en régie" },
+  { href: "/ingenierie-et-marches-btp", label: "Ingénierie & marchés" },
+  { href: "/formation-professionnelle-btp", label: "Formation BTP" },
   { href: "/demande-de-devis?besoin=conducteur_travaux", label: "Demander un devis" },
 ] as const;
 
@@ -439,16 +460,17 @@ export const BTP_FAQ = [
 export const BTP_SEO_PAGES = {
   home: {
     path: "/",
-    title: "Conduite de travaux & équipes travaux BTP",
-    absoluteTitle: "BeWork — Conduite de travaux & équipes travaux",
+    title: "Conduite de travaux & équipes TP/VRD en régie",
+    absoluteTitle:
+      "BeWork — Conduite de travaux externalisée et équipes TP/VRD en régie",
     description:
-      "Conduite de travaux externalisée et équipes TP/VRD pour vos chantiers. Pilotage, chefs d’équipe, maçons VRD et compagnons — prestations sur devis.",
+      "Conducteur de travaux externalisé et équipes TP/VRD en régie pour les entreprises du BTP. Renforts opérationnels — Yvelines et Île-de-France.",
   },
   conduite: {
     path: "/conduite-de-travaux",
     title: "Conduite de travaux externalisée",
     description:
-      "Conducteur de travaux, chef de chantier, direction de travaux et pilotage TCE. Missions contractualisées pour gérer et suivre vos chantiers BTP.",
+      "Conducteur de travaux externalisé, chef de chantier en régie et pilotage TCE. Mission ponctuelle ou complète — Yvelines et Île-de-France.",
   },
   expertises: {
     path: "/expertises-tce",
@@ -460,55 +482,103 @@ export const BTP_SEO_PAGES = {
     path: "/pilotage-chantier",
     title: "Pilotage et gestion de chantier",
     description:
-      "Préparation, planification, production, suivi financier, qualité et reporting pour organiser et maîtriser vos chantiers.",
+      "Préparation, planification, production, suivi financier, qualité et reporting — profondeur de la conduite de travaux BeWork.",
   },
   marches: {
     path: "/marches-publics-prives",
     title: "Marchés publics et privés",
     description:
-      "Assistance aux appels d’offres, études de prix, constitution d’offre et suivi d’exécution de marché BTP.",
+      "Assistance aux appels d’offres, analyse DCE, études de prix, mémoires techniques et suivi contractuel BTP.",
+  },
+  ingenierie: {
+    path: "/ingenierie-et-marches-btp",
+    title: "Ingénierie et marchés BTP",
+    description:
+      "Études techniques, métrés, chiffrage, analyse DCE/CCTP, réponses AO et assistance technique — complément aux prestations de conduite et d’équipes.",
   },
   equipesTpVrd: {
     path: "/equipes-tp-vrd",
-    title: "Équipes opérationnelles TP/VRD",
+    title: "Équipes TP/VRD en régie",
     description:
-      "Chefs d’équipe et maçons VRD pour des prestations opérationnelles en travaux publics : régie, forfait ou sous-traitance définie — sur devis.",
+      "Chefs d’équipe et maçons VRD en régie pour renforcer vos chantiers TP, voirie, réseaux et aménagements extérieurs — missions contractualisées sur devis.",
   },
   accompagnementTechnique: {
     path: "/accompagnement-technique-chantier",
     title: "Accompagnement technique des compagnons",
     description:
-      "Accompagnement terrain pour transmettre les modes opératoires et accompagner vos compagnons dans la qualité d’exécution — hors formations réglementaires.",
+      "Accompagnement terrain pour transmettre les modes opératoires et accompagner vos compagnons dans la qualité d’exécution.",
   },
   plateforme: {
     path: "/plateforme-ia",
     title: "Méthode & outils de pilotage de chantier",
     description:
-      "Nos conducteurs de travaux s’appuient sur une plateforme collaborative et des outils d’IA internes pour préparer, suivre et documenter les missions de chantier.",
+      "Nos intervenants s’appuient sur une plateforme collaborative et des outils d’IA internes pour préparer, suivre et documenter les missions de chantier.",
   },
   methode: {
     path: "/notre-methode",
     title: "Notre méthode d’intervention",
     description:
-      "Comment se déroule une mission BeWork : besoin, étude, proposition, pilotage et reporting — conduite de travaux structurée.",
+      "Comment se déroule une mission BeWork : besoin, étude, proposition, pilotage et reporting — conduite de travaux et équipes en régie.",
   },
   aPropos: {
     path: "/a-propos",
     title: "À propos de BeWork",
     description:
-      "BeWork mobilise des professionnels du BTP pour la conduite de travaux, le suivi de chantier et la coordination TCE, avec des outils numériques internes.",
+      "BeWork propose aux entreprises du BTP la conduite de travaux externalisée et des équipes TP/VRD en régie, avec ingénierie et formation en complément.",
   },
   devis: {
     path: "/demande-de-devis",
     title: "Demande de devis BTP",
     description:
-      "Demandez un conducteur de travaux, une équipe TP/VRD, un accompagnement technique ou une étude de marché. BeWork étudie votre besoin — sur devis.",
+      "Demandez un conducteur de travaux, une équipe TP/VRD en régie, une assistance marchés ou un accompagnement technique. Étude du besoin — sur devis.",
   },
   contact: {
     path: "/contact",
     title: "Contact",
     description:
-      "Contactez BeWork pour une prestation de conduite de travaux, d’équipe TP/VRD, d’accompagnement technique ou d’assistance aux marchés.",
+      "Contactez BeWork pour une prestation de conduite de travaux, d’équipe TP/VRD en régie, d’ingénierie ou de formation BTP.",
+  },
+  formationHub: {
+    path: "/formation-professionnelle-btp",
+    title: "Formation professionnelle BTP",
+    description:
+      "Formations pratiques sur chantier pour conducteurs, chefs de chantier, chefs d’équipe TP/VRD et compagnons — offre en développement, sur devis.",
+  },
+  formationConducteur: {
+    path: "/formation-conducteur-de-travaux",
+    title: "Formation conducteur de travaux",
+    description:
+      "Formation pratique orientée conduite de travaux et pilotage de chantier pour les salariés du BTP — sur devis, sans certification inventée.",
+  },
+  formationChefChantier: {
+    path: "/formation-chef-de-chantier",
+    title: "Formation chef de chantier",
+    description:
+      "Formation terrain pour chefs de chantier : organisation, exécution, contrôle qualité et coordination — Yvelines et Île-de-France.",
+  },
+  formationChefEquipe: {
+    path: "/formation-chef-equipe-tp-vrd",
+    title: "Formation chef d’équipe TP/VRD",
+    description:
+      "Formation pratique pour chefs d’équipe TP/VRD : organisation quotidienne, implantation, contrôle d’exécution et modes opératoires.",
+  },
+  formationCompagnons: {
+    path: "/formation-compagnons-chantier",
+    title: "Formation des compagnons sur chantier",
+    description:
+      "Accompagnement et formation des compagnons directement sur les ouvrages : gestes professionnels, exigences techniques et qualité d’exécution.",
+  },
+  formationModes: {
+    path: "/formation-modes-operatoires-chantier",
+    title: "Formation modes opératoires chantier",
+    description:
+      "Transmission des modes opératoires et exigences techniques des ouvrages aux équipes de production — formation pratique sur chantier.",
+  },
+  organismeFormation: {
+    path: "/organisme-formation",
+    title: "Organisme de formation BeWork",
+    description:
+      "Présentation de l’activité formation BeWork pour les entreprises du BTP. Aucune certification Qualiopi ni éligibilité CPF affirmée sans vérification.",
   },
 } as const;
 
@@ -516,8 +586,8 @@ export const BTP_SEO_PAGES = {
 export const BTP_HOME_POLES = [
   {
     id: "conduite",
-    title: "Conduite de travaux",
-    body: "Des professionnels pour préparer, coordonner et piloter vos opérations.",
+    title: "Conduite de travaux externalisée",
+    body: "Conducteur, chef de chantier et pilotage pour organiser, coordonner et suivre vos opérations.",
     href: "/demande-de-devis?besoin=conducteur_travaux",
     cta: "Demander un conducteur de travaux",
     pageHref: "/conduite-de-travaux",
@@ -527,8 +597,8 @@ export const BTP_HOME_POLES = [
   },
   {
     id: "equipes",
-    title: "Équipes TP/VRD",
-    body: "Des chefs d’équipe et maçons VRD pour la réalisation de prestations opérationnelles sur chantier.",
+    title: "Équipes TP/VRD en régie",
+    body: "Chefs d’équipe et maçons VRD pour renforcer vos moyens humains sur travaux publics et aménagements.",
     href: "/demande-de-devis?besoin=equipe_tp_vrd",
     cta: "Demander une équipe TP/VRD",
     pageHref: "/equipes-tp-vrd",
@@ -539,7 +609,7 @@ export const BTP_HOME_POLES = [
   {
     id: "accompagnement",
     title: "Accompagnement technique",
-    body: "Des spécialistes terrain pour transmettre les modes opératoires et accompagner vos compagnons.",
+    body: "Transmission des modes opératoires et accompagnement des compagnons sur la qualité d’exécution.",
     href: "/demande-de-devis?besoin=accompagnement_technique",
     cta: "Accompagner mes équipes",
     pageHref: "/accompagnement-technique-chantier",
@@ -549,14 +619,54 @@ export const BTP_HOME_POLES = [
   },
   {
     id: "marches",
-    title: "Études & marchés",
-    body: "Une expertise pour analyser, chiffrer et préparer vos marchés publics et privés.",
+    title: "Ingénierie & marchés",
+    body: "Études, métrés, analyse DCE et assistance aux appels d’offres publics et privés.",
     href: "/demande-de-devis?besoin=assistance_marches_publics",
     cta: "Confier une étude",
-    pageHref: "/marches-publics-prives",
+    pageHref: "/ingenierie-et-marches-btp",
     imageSrc: "/marketing/bework-pole-etudes-marches.jpg",
     imageAlt:
       "Étude de plans et dossiers de marché — photo d’ambiance illustrative",
+  },
+] as const;
+
+/** Pages formation — silo SEO (activation commerciale progressive). */
+export const BTP_FORMATION_PAGES = [
+  {
+    path: "/formation-professionnelle-btp",
+    title: "Formation professionnelle BTP",
+    summary:
+      "Formations pratiques adaptées aux ouvrages, méthodes d’exécution et exigences des entreprises.",
+  },
+  {
+    path: "/formation-conducteur-de-travaux",
+    title: "Formation conducteur de travaux",
+    summary:
+      "Pilotage, organisation, coordination et suivi de chantier pour les salariés du BTP.",
+  },
+  {
+    path: "/formation-chef-de-chantier",
+    title: "Formation chef de chantier",
+    summary:
+      "Organisation quotidienne, exécution, contrôles et interfaces avec les lots.",
+  },
+  {
+    path: "/formation-chef-equipe-tp-vrd",
+    title: "Formation chef d’équipe TP/VRD",
+    summary:
+      "Organisation d’équipe, implantation, production et contrôle d’exécution VRD.",
+  },
+  {
+    path: "/formation-compagnons-chantier",
+    title: "Formation des compagnons sur chantier",
+    summary:
+      "Gestes professionnels et exigences techniques directement sur l’ouvrage.",
+  },
+  {
+    path: "/formation-modes-operatoires-chantier",
+    title: "Formation modes opératoires",
+    summary:
+      "Transmission des modes opératoires et des points de vigilance techniques.",
   },
 ] as const;
 

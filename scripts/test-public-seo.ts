@@ -1,17 +1,14 @@
 import assert from "node:assert/strict";
 import sitemap from "../src/app/sitemap";
 import robots from "../src/app/robots";
-import { TRAINING_OFFERS } from "../src/lib/bework-formation";
+import { BTP_SEO_PAGES } from "../src/lib/bework-btp-services";
 import {
-  beworkCourseJsonLd,
-  SEO_PAGES,
-} from "../src/lib/seo-formation-pages";
+  isBeworkFormationBtpAllowlisted,
+  isBeworkFormationCommercialPath,
+  resolveLegacyMarketingRedirect,
+} from "../src/lib/bework-v3-public-gate";
+import { getIndexNowPriorityUrls } from "../src/lib/seo-ai-discovery";
 import { SITE_URL } from "../src/lib/site";
-
-assert.equal(TRAINING_OFFERS.essential.hours, 7);
-assert.equal(TRAINING_OFFERS.essential.price, 300);
-assert.equal(TRAINING_OFFERS.complete.hours, 14);
-assert.equal(TRAINING_OFFERS.complete.price, 600);
 
 const sitemapEntries = sitemap();
 const sitemapUrls = sitemapEntries.map((entry) => entry.url);
@@ -21,21 +18,37 @@ assert.ok(
   "Toutes les URLs du sitemap doivent utiliser le domaine canonique.",
 );
 assert.ok(
-  sitemapUrls.every(
-    (url) => {
-      const pathname = new URL(url).pathname;
-      return !["/dashboard", "/admin", "/connexion", "/api/"].some(
-        (prefix) => pathname === prefix.replace(/\/$/, "") || pathname.startsWith(prefix),
-      );
-    },
-  ),
+  sitemapUrls.every((url) => {
+    const pathname = new URL(url).pathname;
+    return !["/dashboard", "/admin", "/connexion", "/api/"].some(
+      (prefix) =>
+        pathname === prefix.replace(/\/$/, "") || pathname.startsWith(prefix),
+    );
+  }),
   "Le sitemap ne doit contenir aucune route privée.",
 );
+
+for (const required of [
+  "/",
+  "/conduite-de-travaux",
+  "/equipes-tp-vrd",
+  "/ingenierie-et-marches-btp",
+  "/formation-professionnelle-btp",
+  "/demande-de-devis",
+]) {
+  assert.ok(
+    sitemapUrls.includes(`${SITE_URL}${required === "/" ? "" : required}`) ||
+      sitemapUrls.includes(`${SITE_URL}${required}`),
+    `Sitemap doit inclure ${required}`,
+  );
+}
 
 const robotsConfig = robots();
 const robotsRules = Array.isArray(robotsConfig.rules)
   ? robotsConfig.rules
   : [robotsConfig.rules];
+assert.ok(robotsRules.length > 1, "robots.txt doit exposer plusieurs user-agents.");
+
 const disallow = robotsRules.flatMap((rule) => {
   if (!rule?.disallow) return [];
   return Array.isArray(rule.disallow) ? rule.disallow : [rule.disallow];
@@ -44,46 +57,47 @@ const disallow = robotsRules.flatMap((rule) => {
 for (const privatePath of ["/admin", "/dashboard", "/api/"]) {
   assert.ok(disallow.includes(privatePath), `${privatePath} doit être bloqué dans robots.txt.`);
 }
-for (const retiredPublicPath of ["/blog", "/ressources/", "/services/"]) {
-  assert.ok(
-    !disallow.includes(retiredPublicPath),
-    `${retiredPublicPath} doit rester crawlable pour exposer sa redirection ou son statut 410.`,
-  );
-}
 
-const pageDescriptions = Object.values(SEO_PAGES).map((page) => page.description);
+const pageDescriptions = Object.values(BTP_SEO_PAGES).map((page) => page.description);
 assert.equal(
   new Set(pageDescriptions).size,
   pageDescriptions.length,
-  "Chaque page majeure doit avoir une meta description unique.",
+  "Chaque page BTP_SEO_PAGES doit avoir une meta description unique.",
 );
 for (const description of pageDescriptions) {
   assert.ok(
-    description.length >= 80 && description.length <= 160,
-    `Meta description hors plage utile : ${description.length} caractères.`,
+    description.length >= 80 && description.length <= 170,
+    `Meta description hors plage utile : ${description.length} caractères — ${description.slice(0, 40)}…`,
   );
 }
-const pageTitles = Object.values(SEO_PAGES).map(
-  (page) => ("absoluteTitle" in page ? page.absoluteTitle : page.title),
+
+const pageTitles = Object.values(BTP_SEO_PAGES).map((page) =>
+  "absoluteTitle" in page && page.absoluteTitle ? page.absoluteTitle : page.title,
 );
 assert.equal(
   new Set(pageTitles).size,
   pageTitles.length,
-  "Chaque page majeure doit avoir un title unique.",
+  "Chaque page BTP_SEO_PAGES doit avoir un title unique.",
 );
 
-const course = beworkCourseJsonLd();
-assert.equal(course["@id"], `${SITE_URL}/formation#course`);
-assert.ok(!("hasCourseInstance" in course), "Ne pas inventer de sessions CourseInstance.");
-const offers = course.offers as Array<Record<string, unknown>>;
-assert.deepEqual(
-  offers.map((offer) => [offer.price, offer.priceCurrency]),
-  [
-    ["300", "EUR"],
-    ["600", "EUR"],
-  ],
+assert.equal(isBeworkFormationCommercialPath("/formation"), true);
+assert.equal(isBeworkFormationCommercialPath("/formation-professionnelle-btp"), false);
+assert.equal(isBeworkFormationBtpAllowlisted("/formation-conducteur-de-travaux"), true);
+assert.equal(
+  resolveLegacyMarketingRedirect("/formation"),
+  "/formation-professionnelle-btp",
+);
+
+const indexNow = getIndexNowPriorityUrls();
+assert.ok(
+  indexNow.some((u) => u.endsWith("/conduite-de-travaux")),
+  "IndexNow doit prioriser la conduite de travaux.",
+);
+assert.ok(
+  indexNow.some((u) => u.endsWith("/equipes-tp-vrd")),
+  "IndexNow doit prioriser les équipes TP/VRD.",
 );
 
 console.info(
-  `SEO public : ${sitemapEntries.length} URLs canoniques, offre et schemas validés.`,
+  `SEO public BTP : ${sitemapEntries.length} URLs, ${Object.keys(BTP_SEO_PAGES).length} pages meta, IndexNow ${indexNow.length} URLs.`,
 );

@@ -28,14 +28,14 @@ export default function EquipesTpVrdPage() {
       <MarketingSiteHeader />
       <main>
         <BtpPageHero
-          eyebrow="TRAVAUX PUBLICS • VRD • ÉQUIPES OPÉRATIONNELLES"
-          title="Des équipes TP/VRD expérimentées pour vos travaux."
-          subtitle="BeWork propose aux entreprises du BTP des prestations opérationnelles en travaux publics et VRD, réalisées par des chefs d’équipe et des maçons spécialisés. Nos interventions sont adaptées aux besoins des chantiers, qu’il s’agisse de travaux ponctuels, d’une phase d’exécution ou d’un besoin temporaire de capacité de production."
+          eyebrow="ÉQUIPES TP/VRD EN RÉGIE • RENFORT OPÉRATIONNEL"
+          title="Des équipes TP/VRD en régie pour renforcer vos chantiers."
+          subtitle="BeWork propose des prestations opérationnelles en travaux publics et VRD : chefs d’équipe, maçons VRD et équipes de pose pour voirie, réseaux et aménagements extérieurs. Interventions en régie contractualisées, adaptées aux contraintes de l’entreprise — compétence métier, autonomie et qualité d’exécution. Aucune mise à disposition de personnel affirmée hors cadre contractuel validé."
           primaryHref={BTP_CTA_EQUIPE_TP_VRD.href}
           primaryLabel={BTP_CTA_EQUIPE_TP_VRD.label}
           secondaryHref="/demande-de-devis?besoin=equipe_tp_vrd"
           secondaryLabel="Décrire mes travaux"
-          note="Prestations sur devis • Aucun effectif ni disponibilité inventés"
+          note="Yvelines · Île-de-France · Prestations sur devis • Aucun effectif inventé"
           imageSrc="/marketing/bework-hero-equipes-tp-vrd.jpg"
           imageAlt="Équipe TP/VRD posant des bordures sur un chantier urbain — photo d’ambiance illustrative"
         />

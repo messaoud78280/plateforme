@@ -1,20 +1,23 @@
 import Link from "next/link";
-import { BTP_CTA_EQUIPE_TP_VRD } from "@/lib/bework-btp-services";
+import {
+  BTP_CTA_CONDUCTEUR,
+  BTP_CTA_EQUIPE_TP_VRD,
+} from "@/lib/bework-btp-services";
 
 const CONDUITE_ITEMS = [
-  "Organisation et planification",
-  "Suivi d’exécution et coordination",
-  "Gestion des intervenants",
-  "Reporting et avancement",
-  "Suivi administratif et financier",
+  "Conducteur de travaux externalisé",
+  "Chef de chantier en régie",
+  "Pilotage, coordination et préparation",
+  "Suivi technique, administratif et financier",
+  "Mission ponctuelle, renfort ou opération complète",
 ] as const;
 
 const EQUIPES_ITEMS = [
-  "Chefs d’équipe expérimentés",
+  "Chefs d’équipe TP/VRD",
   "Maçons VRD qualifiés",
+  "Voirie, réseaux et aménagements extérieurs",
   "Renfort opérationnel sur chantier",
-  "Travaux de terrassement, voirie et réseaux",
-  "Prestations adaptées aux besoins du chantier",
+  "Prestations en régie contractualisées",
 ] as const;
 
 export function BtpDualOffers() {
@@ -25,13 +28,14 @@ export function BtpDualOffers() {
       aria-labelledby="dual-offers-title"
     >
       <div className="bw-btp-container">
-        <p className="bw-btp-eyebrow">Nos deux prestations principales</p>
+        <p className="bw-btp-eyebrow">Deux offres principales</p>
         <h2 id="dual-offers-title" className="mt-2 max-w-3xl font-bold">
-          Deux réponses concrètes pour vos chantiers.
+          Nous pilotons les chantiers et fournissons des renforts opérationnels
+          TP/VRD.
         </h2>
         <p className="mt-3 max-w-3xl text-base text-[var(--btp-muted)]">
-          Pilotage d’un côté, exécution terrain de l’autre. Chaque mission est
-          définie et contractualisée — prestations sur devis.
+          Chaque mission est définie et contractualisée. BeWork n’est pas une
+          entreprise de travail temporaire — prestations sur devis.
         </p>
 
         <div className="bw-home-dual-grid mt-10">
@@ -55,21 +59,31 @@ export function BtpDualOffers() {
                 />
               </svg>
             </div>
-            <h3 className="bw-home-offer-title">Conduite de travaux</h3>
+            <h3 className="bw-home-offer-title">
+              Conduite de travaux externalisée
+            </h3>
             <p className="bw-home-offer-lead">
-              Pilotage et gestion de vos chantiers.
+              Compétences opérationnelles pour gérer et suivre vos chantiers.
             </p>
             <ul className="bw-home-offer-list">
               {CONDUITE_ITEMS.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
-            <Link
-              href="/conduite-de-travaux"
-              className="bw-btp-btn bw-btp-btn-primary mt-7 self-start"
-            >
-              Découvrir la conduite de travaux
-            </Link>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                href={BTP_CTA_CONDUCTEUR.href}
+                className="bw-btp-btn bw-btp-btn-primary self-start"
+              >
+                {BTP_CTA_CONDUCTEUR.label}
+              </Link>
+              <Link
+                href="/conduite-de-travaux"
+                className="bw-btp-btn bw-btp-btn-secondary self-start"
+              >
+                En savoir plus
+              </Link>
+            </div>
           </article>
 
           <article id="offre-equipes" className="bw-home-offer-card">
@@ -89,21 +103,29 @@ export function BtpDualOffers() {
                 />
               </svg>
             </div>
-            <h3 className="bw-home-offer-title">Équipes travaux</h3>
+            <h3 className="bw-home-offer-title">Équipes TP/VRD en régie</h3>
             <p className="bw-home-offer-lead">
-              Des professionnels opérationnels pour vos chantiers TP / VRD.
+              Renforts opérationnels pour vos travaux publics et VRD.
             </p>
             <ul className="bw-home-offer-list">
               {EQUIPES_ITEMS.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
-            <Link
-              href={BTP_CTA_EQUIPE_TP_VRD.href}
-              className="bw-btp-btn bw-btp-btn-primary mt-7 self-start"
-            >
-              Demander une équipe travaux
-            </Link>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                href={BTP_CTA_EQUIPE_TP_VRD.href}
+                className="bw-btp-btn bw-btp-btn-primary self-start"
+              >
+                {BTP_CTA_EQUIPE_TP_VRD.label}
+              </Link>
+              <Link
+                href="/equipes-tp-vrd"
+                className="bw-btp-btn bw-btp-btn-secondary self-start"
+              >
+                En savoir plus
+              </Link>
+            </div>
           </article>
         </div>
       </div>

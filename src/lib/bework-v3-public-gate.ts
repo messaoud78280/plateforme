@@ -54,13 +54,29 @@ export const BEWORK_V3_LEGACY_BTP_PREFIXES = [
   "/blog",
 ] as const;
 
-/** Anciennes pages formation retirées de l’expérience commerciale. */
-export const BEWORK_FORMATION_COMMERCIAL_PREFIXES = [
+/**
+ * Ancien funnel formation « créer avec l’IA » (hors silo BTP).
+ * Les nouvelles pages `/formation-*` métier BTP restent indexables.
+ */
+export const BEWORK_FORMATION_COMMERCIAL_EXACT = [
   "/formation",
   "/pour-qui",
   "/tarifs",
-  "/demonstrations",
   "/faq",
+] as const;
+
+export const BEWORK_FORMATION_COMMERCIAL_PREFIXES = [
+  "/demonstrations",
+] as const;
+
+/** Nouveau silo formation BTP — ne pas rediriger. */
+export const BEWORK_FORMATION_BTP_ALLOWLIST = [
+  "/formation-professionnelle-btp",
+  "/formation-conducteur-de-travaux",
+  "/formation-chef-de-chantier",
+  "/formation-chef-equipe-tp-vrd",
+  "/formation-compagnons-chantier",
+  "/formation-modes-operatoires-chantier",
 ] as const;
 
 /** Destinations 301/308 pour chemins legacy connus. */
@@ -72,7 +88,7 @@ export const BEWORK_LEGACY_REDIRECT_MAP: Record<string, string> = {
   "/situation-travaux-btp": "/pilotage-chantier",
   "/chantier-mal-suivi": "/conduite-de-travaux",
   "/services": "/conduite-de-travaux",
-  "/formation": "/",
+  "/formation": "/formation-professionnelle-btp",
   "/pour-qui": "/",
   "/tarifs": "/demande-de-devis",
   "/demonstrations": "/plateforme-ia",
@@ -99,21 +115,33 @@ export function isBeworkV3LegacyBtpPath(pathname: string): boolean {
   });
 }
 
+export function isBeworkFormationBtpAllowlisted(pathname: string): boolean {
+  const p = pathname.toLowerCase().replace(/\/$/, "") || "/";
+  return BEWORK_FORMATION_BTP_ALLOWLIST.some((path) => p === path.toLowerCase());
+}
+
 export function isBeworkFormationCommercialPath(pathname: string): boolean {
-  const p = pathname.toLowerCase();
+  if (isBeworkFormationBtpAllowlisted(pathname)) return false;
+  const p = pathname.toLowerCase().replace(/\/$/, "") || "/";
+  if (BEWORK_FORMATION_COMMERCIAL_EXACT.some((path) => p === path.toLowerCase())) {
+    return true;
+  }
   return BEWORK_FORMATION_COMMERCIAL_PREFIXES.some((prefix) => {
     const pre = prefix.toLowerCase();
-    return p === pre || p === `${pre}/` || p.startsWith(`${pre}/`);
+    return p === pre || p.startsWith(`${pre}/`);
   });
 }
 
 /** Résout la destination de redirection pour un chemin legacy. */
 export function resolveLegacyMarketingRedirect(pathname: string): string {
   const p = pathname.toLowerCase().replace(/\/$/, "") || "/";
+  if (isBeworkFormationBtpAllowlisted(p)) return p;
   if (BEWORK_LEGACY_REDIRECT_MAP[p]) return BEWORK_LEGACY_REDIRECT_MAP[p];
 
   if (p.startsWith("/demonstrations")) return "/plateforme-ia";
-  if (p.startsWith("/formation")) return "/";
+  if (p === "/formation" || p.startsWith("/formation/")) {
+    return "/formation-professionnelle-btp";
+  }
   if (p.startsWith("/assistant-travaux") || p.startsWith("/pilotage")) {
     return "/pilotage-chantier";
   }

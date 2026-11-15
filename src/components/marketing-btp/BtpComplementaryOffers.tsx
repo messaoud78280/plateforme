@@ -2,35 +2,35 @@ import Link from "next/link";
 
 const COMPLEMENTS = [
   {
-    id: "marches",
-    title: "Assistance aux marchés BTP",
-    body: "Analyse DCE, réponses aux appels d’offres, métrés, chiffrage et suivi contractuel.",
+    id: "ingenierie",
+    title: "Ingénierie et marchés BTP",
+    body: "Études techniques, métrés, analyse DCE et assistance aux appels d’offres — en soutien des deux offres principales.",
     items: [
-      "Analyse DCE",
-      "Réponses aux appels d’offres",
+      "Études et méthodes d’exécution",
       "Métrés et chiffrage",
-      "Suivi contractuel",
+      "Analyse DCE / CCTP / CCAP",
+      "Mémoires techniques et AO",
     ],
-    href: "/marches-publics-prives",
-    cta: "Voir l’offre marchés",
+    href: "/ingenierie-et-marches-btp",
+    cta: "Voir l’ingénierie & marchés",
   },
   {
     id: "formation",
-    title: "Formation des compagnons sur chantier",
-    body: "Transmission des modes opératoires et accompagnement technique sur le terrain — hors formations réglementaires.",
+    title: "Formation professionnelle BTP",
+    body: "Formations pratiques sur chantier pour conducteurs, chefs d’équipe et compagnons — offre en développement.",
     items: [
-      "Transmission des modes opératoires",
-      "Accompagnement technique",
-      "Respect des prescriptions de l’ouvrage",
-      "Amélioration des méthodes d’exécution",
+      "Formation conducteur de travaux",
+      "Formation chef de chantier",
+      "Formation chef d’équipe TP/VRD",
+      "Modes opératoires sur ouvrage",
     ],
-    href: "/accompagnement-technique-chantier",
-    cta: "Découvrir l’accompagnement",
+    href: "/formation-professionnelle-btp",
+    cta: "Voir la formation BTP",
   },
   {
     id: "outils",
-    title: "Outils numériques et intelligence artificielle",
-    body: "Des outils internes au service de nos missions humaines : reporting, documents, suivi et collaboration.",
+    title: "Méthode et outils internes",
+    body: "Plateforme collaborative et IA utilisées en interne pour préparer, suivre et documenter les missions.",
     items: [
       "Reporting chantier",
       "Organisation documentaire",
@@ -49,13 +49,13 @@ export function BtpComplementaryOffers() {
       aria-labelledby="complements-title"
     >
       <div className="bw-btp-container">
-        <p className="bw-btp-eyebrow">Prestations complémentaires</p>
+        <p className="bw-btp-eyebrow">Compétences complémentaires</p>
         <h2 id="complements-title" className="mt-2 max-w-3xl font-bold">
-          Des expertises qui renforcent vos opérations.
+          Ingénierie, formation et outils — au service des chantiers.
         </h2>
         <p className="mt-3 max-w-3xl text-base text-[var(--btp-muted)]">
-          Elles complètent la conduite de travaux et les équipes terrain — sans
-          remplacer nos deux offres principales.
+          Elles complètent la conduite de travaux et les équipes TP/VRD en régie
+          — sans prendre le dessus sur les deux offres principales.
         </p>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-3">

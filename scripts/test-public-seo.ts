@@ -87,6 +87,9 @@ assert.equal(
   resolveLegacyMarketingRedirect("/formation"),
   "/formation-professionnelle-btp",
 );
+assert.equal(resolveLegacyMarketingRedirect("/pour-qui"), "/a-propos");
+assert.equal(resolveLegacyMarketingRedirect("/tarifs"), "/demande-de-devis");
+assert.equal(resolveLegacyMarketingRedirect("/faq"), "/contact");
 
 const indexNow = getIndexNowPriorityUrls();
 assert.ok(

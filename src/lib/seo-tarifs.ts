@@ -1,76 +1,72 @@
 /**
- * SEO / GEO / JSON-LD — page /tarifs (parcours 7 h / 14 h).
- * Conservé pour exports historiques ; la page /tarifs utilise aussi seo-formation-pages.
+ * SEO / JSON-LD — ancienne page /tarifs (redirigée vers /demande-de-devis).
+ * Métadonnées alignées BTP ; ne plus exposer les tarifs formation IA.
  */
 
-import {
-  BEWORK_COMPLETE_PRICE_EUR,
-  BEWORK_SESSION_PRICE_EUR,
-  TRAINING_OFFERS,
-} from "@/lib/bework-formation";
-import { SEO_KEYWORDS_FORMATION_IA } from "@/lib/seo-keywords";
-import { SCHEMA_ORG_ID, buildWebPageAndBreadcrumbJsonLd } from "@/lib/schema";
-import { absoluteUrl } from "@/lib/site";
-import {
-  beworkCompleteOfferJsonLd,
-  beworkSessionOfferJsonLd,
-} from "@/lib/seo-formation-pages";
+import { SEO_KEYWORDS_PLATFORM_IA } from "@/lib/seo-keywords";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 export const TARIFS_PAGE_PATH = "/tarifs" as const;
 
-export const TARIFS_SEO_TITLE = `Tarifs formation IA — ${BEWORK_SESSION_PRICE_EUR} € ou ${BEWORK_COMPLETE_PRICE_EUR} € | BeWork`;
+/** /tarifs est redirigé vers /demande-de-devis — métadonnées alignées BTP. */
+export const TARIFS_SEO_TITLE =
+  "Devis prestations BTP BeWork | Conduite de travaux & équipes";
 
-export const TARIFS_SEO_DESCRIPTION = `Parcours BeWork : ${BEWORK_SESSION_PRICE_EUR} € (${TRAINING_OFFERS.essential.hours} h) ou ${BEWORK_COMPLETE_PRICE_EUR} € (${TRAINING_OFFERS.complete.hours} h) par participant. Même point de départ, prolongation possible. Pas d’abonnement.`;
+export const TARIFS_SEO_DESCRIPTION =
+  "Les prestations BeWork (conduite de travaux, équipes TP/VRD, ingénierie, formation) sont proposées sur devis après étude du besoin — Yvelines et Île-de-France.";
 
 export const TARIFS_SEO_KEYWORDS = [
-  "tarif formation IA",
-  "prix formation créer avec IA",
-  `formation IA ${BEWORK_SESSION_PRICE_EUR} euros`,
-  `formation IA ${BEWORK_COMPLETE_PRICE_EUR} euros`,
-  "formation IA 7 heures",
-  "formation IA 14 heures",
-  ...SEO_KEYWORDS_FORMATION_IA.slice(0, 6),
+  "devis conduite de travaux",
+  "tarif conducteur de travaux externalisé",
+  "devis équipe TP VRD",
+  "prestation BTP sur devis",
+  ...SEO_KEYWORDS_PLATFORM_IA.slice(0, 6),
 ] as const;
 
-export const TARIFS_H1 = "Un même point de départ. À vous de choisir jusqu’où aller.";
+export const TARIFS_H1 = "Prestations BeWork sur devis.";
 
-/** Section llms.txt — tarifs publics. */
+/** Section llms — plus de prix formation IA publics. */
 export function buildLlmsTarifsOffersSection(): string {
   return [
-    `- **Parcours 7 h** — ${BEWORK_SESSION_PRICE_EUR} € / participant.`,
-    `- **Parcours 14 h** — ${BEWORK_COMPLETE_PRICE_EUR} € / participant.`,
-    `- Prolongation Jour 2 après 7 h : +${BEWORK_SESSION_PRICE_EUR} €.`,
-    "- Pas d’abonnement lié à cette offre. Demander une place via /contact#participer.",
+    "- Prestations BeWork proposées **sur devis** après étude du besoin.",
+    "- Conduite de travaux externalisée, équipes TP/VRD en régie, ingénierie et formation BTP.",
+    "- Demande : /demande-de-devis ou /contact.",
   ].join("\n");
 }
 
-/** @graph JSON-LD pour /tarifs (deux Offers). */
+/** @graph JSON-LD pour /tarifs (WebPage BTP — pas d’Offers formation IA). */
 export function buildTarifsPageJsonLd() {
   const pageUrl = absoluteUrl(TARIFS_PAGE_PATH);
-
-  const webPage = buildWebPageAndBreadcrumbJsonLd({
-    pagePath: TARIFS_PAGE_PATH,
-    h1: TARIFS_H1,
-    description: TARIFS_SEO_DESCRIPTION,
-    breadcrumbItems: [
-      { name: "Accueil", href: "/" },
-      { name: "Tarifs", href: TARIFS_PAGE_PATH },
-    ],
-  });
+  const devisUrl = absoluteUrl("/demande-de-devis");
 
   return {
     "@context": "https://schema.org",
     "@graph": [
-      ...webPage["@graph"],
       {
-        "@type": "Product",
-        "@id": `${pageUrl}#product`,
-        name: "Formation BeWork",
+        "@type": "WebPage",
+        "@id": `${pageUrl}#webpage`,
+        url: devisUrl,
+        name: TARIFS_SEO_TITLE,
         description: TARIFS_SEO_DESCRIPTION,
-        brand: { "@type": "Brand", name: "BeWork" },
-        category: "Formation professionnelle",
-        offers: [beworkSessionOfferJsonLd(), beworkCompleteOfferJsonLd()],
-        provider: { "@id": SCHEMA_ORG_ID },
+        isPartOf: { "@id": `${SITE_URL}/#website` },
+        inLanguage: "fr-FR",
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Accueil",
+            item: absoluteUrl("/"),
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Demande de devis",
+            item: devisUrl,
+          },
+        ],
       },
     ],
   };

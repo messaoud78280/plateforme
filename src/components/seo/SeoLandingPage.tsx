@@ -79,22 +79,22 @@ export function SeoLandingPage({
           <div className="mt-14 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
             <h2 className="font-heading text-[1.35rem] font-bold leading-snug text-black md:text-2xl">Passer à l’action</h2>
             <p className="mt-3 text-base leading-relaxed text-slate-700">
-              BeWork vous apprend à créer avec l’IA sans savoir coder. Commencez avec le
-              parcours essentiel de 7&nbsp;h, puis poursuivez à 14&nbsp;h si vous souhaitez
-              pratiquer davantage et construire plus loin.
+              BeWork accompagne les entreprises du BTP : conduite de travaux
+              externalisée, équipes TP/VRD en régie, ingénierie et formation sur
+              chantier. Décrivez votre besoin pour une proposition sur devis.
             </p>
             <div className={`mt-6 ${CTA_GROUP}`}>
-              <Link href="/contact#participer" className={CTA_PRIMARY}>
-                Demander une place
+              <Link href="/demande-de-devis" className={CTA_PRIMARY}>
+                Demander un devis
               </Link>
-              <Link href="/formation" className={CTA_SECONDARY}>
-                Découvrir la formation
+              <Link href="/conduite-de-travaux" className={CTA_SECONDARY}>
+                Conduite de travaux
               </Link>
-              <Link href="/tarifs" className={CTA_SOFT}>
-                Comparer les parcours
+              <Link href="/equipes-tp-vrd" className={CTA_SOFT}>
+                Équipes TP/VRD
               </Link>
-              <Link href="/formation#programme" className={CTA_SECONDARY}>
-                Voir le programme
+              <Link href="/formation-professionnelle-btp" className={CTA_SECONDARY}>
+                Formation BTP
               </Link>
             </div>
             <p className="mt-5 text-sm text-slate-600">

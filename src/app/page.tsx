@@ -39,8 +39,8 @@ const homeJsonLd = {
       about: [
         { "@type": "Thing", name: "Conduite de travaux externalisée" },
         { "@type": "Thing", name: "Équipes TP/VRD en régie" },
-        { "@type": "Thing", name: "Conducteur de travaux externalisé" },
-        { "@type": "Thing", name: "Maçon VRD en régie" },
+        { "@type": "Thing", name: "Ingénierie BTP" },
+        { "@type": "Thing", name: "Formation professionnelle BTP" },
       ],
     },
     {

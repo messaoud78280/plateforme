@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { TRAINING_OFFERS } from "@/lib/bework-formation";
 import { absoluteUrl } from "@/lib/site";
 
 function escapeXml(s: string): string {
@@ -11,35 +10,51 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
+/** Flux RSS — pages commerciales BTP (plus de funnel formation IA). */
 const FEED_PAGES = [
   {
-    path: "/formation",
-    title: "Formation BeWork — Créer avec l’IA sans savoir coder",
-    description: `Un parcours progressif de ${TRAINING_OFFERS.essential.hours} h ou ${TRAINING_OFFERS.complete.hours} h pour apprendre à commencer, puis construire plus loin.`,
+    path: "/",
+    title: "BeWork | Conduite de travaux externalisée & ingénierie BTP",
+    description:
+      "Conduite de travaux externalisée, équipes TP/VRD en régie, ingénierie et marchés BTP.",
   },
   {
-    path: "/tarifs",
-    title: "Parcours et tarifs BeWork",
-    description: `${TRAINING_OFFERS.essential.hours} h à ${TRAINING_OFFERS.essential.price} € ou ${TRAINING_OFFERS.complete.hours} h à ${TRAINING_OFFERS.complete.price} € par participant.`,
+    path: "/conduite-de-travaux",
+    title: "Conduite de travaux externalisée",
+    description:
+      "Conducteur de travaux externalisé, chef de chantier en régie et pilotage de chantier.",
   },
   {
-    path: "/demonstrations",
-    title: "Démonstrations BeWork",
-    description: "Des exemples concrets de sites, applications et outils numériques pour comprendre les possibilités.",
+    path: "/equipes-tp-vrd",
+    title: "Équipes TP/VRD en régie",
+    description:
+      "Chefs d’équipe et maçons VRD pour renforcer les chantiers TP, voirie et réseaux.",
   },
   {
-    path: "/faq",
-    title: "FAQ — Formation BeWork",
-    description: "Prérequis, déroulement, parcours, modalités et réponses utiles avant de participer.",
+    path: "/ingenierie-et-marches-btp",
+    title: "Ingénierie et marchés BTP",
+    description:
+      "Études, métrés, analyse DCE et assistance aux appels d’offres publics et privés.",
+  },
+  {
+    path: "/formation-professionnelle-btp",
+    title: "Formation professionnelle BTP",
+    description:
+      "Formations pratiques sur chantier pour conducteurs, chefs d’équipe et compagnons.",
+  },
+  {
+    path: "/demande-de-devis",
+    title: "Demande de devis BTP",
+    description:
+      "Demandez un conducteur de travaux, une équipe TP/VRD ou une assistance marchés.",
   },
 ] as const;
 
-/** Flux RSS 2.0 du site public — uniquement les ressources formation actives. */
 export function GET() {
-  const channelTitle = "BeWork — Formation création avec l’IA";
+  const channelTitle = "BeWork — Conduite de travaux & équipes BTP";
   const channelLink = absoluteUrl("/");
   const channelDescription =
-    "Apprendre à créer des sites, applications et outils numériques avec l’intelligence artificielle, sans prérequis en programmation.";
+    "BeWork accompagne les entreprises du BTP : conduite de travaux externalisée, équipes TP/VRD en régie, ingénierie, marchés publics et formation sur chantier.";
 
   const items = FEED_PAGES.map((page) => {
     const link = absoluteUrl(page.path);

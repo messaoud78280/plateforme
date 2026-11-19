@@ -460,11 +460,11 @@ export const BTP_FAQ = [
 export const BTP_SEO_PAGES = {
   home: {
     path: "/",
-    title: "Conduite de travaux & équipes TP/VRD en régie",
+    title: "Conduite de travaux externalisée & ingénierie BTP",
     absoluteTitle:
-      "BeWork — Conduite de travaux externalisée et équipes TP/VRD en régie",
+      "BeWork | Conduite de travaux externalisée & ingénierie BTP",
     description:
-      "Conducteur de travaux externalisé et équipes TP/VRD en régie pour les entreprises du BTP. Renforts opérationnels — Yvelines et Île-de-France.",
+      "BeWork accompagne les entreprises du BTP : conduite de travaux externalisée, équipes TP/VRD en régie, ingénierie, marchés publics et formation sur chantier.",
   },
   conduite: {
     path: "/conduite-de-travaux",

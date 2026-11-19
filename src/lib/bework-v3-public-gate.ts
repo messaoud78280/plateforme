@@ -89,10 +89,10 @@ export const BEWORK_LEGACY_REDIRECT_MAP: Record<string, string> = {
   "/chantier-mal-suivi": "/conduite-de-travaux",
   "/services": "/conduite-de-travaux",
   "/formation": "/formation-professionnelle-btp",
-  "/pour-qui": "/",
+  "/pour-qui": "/a-propos",
   "/tarifs": "/demande-de-devis",
   "/demonstrations": "/plateforme-ia",
-  "/faq": "/",
+  "/faq": "/contact",
 };
 
 export function isBeworkV3ConfidentialPath(pathname: string): boolean {

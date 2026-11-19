@@ -1,7 +1,7 @@
 /**
- * SEO BeWork V3 — metadata & JSON-LD du cœur formation.
- * Intention : créer avec l’IA / sans coder / parcours pratique.
- * Pas de stuffing ; titres ≤ ~60 car. ; descriptions ≈ 150–160 car.
+ * Helpers metadata marketing + registry legacy (anciennes URLs formation IA).
+ * Les pages /formation, /tarifs, /pour-qui, etc. sont redirigées vers le site BTP.
+ * Ce registry ne doit plus exposer le positionnement « créer avec l’IA ».
  */
 
 import type { Metadata } from "next";
@@ -116,94 +116,104 @@ export function beworkCompleteOfferJsonLd(
   };
 }
 
+/**
+ * JSON-LD Course — silo formation BTP (sans tarifs IA hérités).
+ * Les anciennes URLs /formation restent redirigées ; ne plus publier 300 € / 600 €.
+ */
 export function beworkCourseJsonLd(overrides?: {
   name?: string;
   description?: string;
   url?: string;
 }): Record<string, unknown> {
-  const courseUrl = overrides?.url ?? absoluteUrl("/formation");
+  const courseUrl =
+    overrides?.url ?? absoluteUrl("/formation-professionnelle-btp");
   return {
     "@type": "Course",
     "@id": `${courseUrl}#course`,
-    name: overrides?.name ?? "Formation BeWork — Créer avec l’IA sans savoir coder",
+    name:
+      overrides?.name ??
+      "Formation professionnelle BTP — pratiques sur chantier",
     description:
       overrides?.description ??
-      `Formation progressive : ${TRAINING_OFFERS.essential.hours} h pour une première version (${TRAINING_OFFERS.essential.price} €), ou ${TRAINING_OFFERS.complete.hours} h jusqu’à la publication (${TRAINING_OFFERS.complete.price} €). Sans prérequis en programmation.`,
+      "Formations pratiques orientées conduite de travaux, encadrement de chantier, équipes TP/VRD et modes opératoires — offre en développement, sur devis.",
     provider: { "@id": `${SITE_URL}/#organization` },
     url: courseUrl,
     inLanguage: "fr-FR",
     isAccessibleForFree: false,
-    educationalLevel: "Débutant",
-    coursePrerequisites: "Aucune connaissance en programmation n’est nécessaire.",
+    educationalLevel: "Professionnel BTP",
     audience: {
       "@type": "Audience",
       audienceType:
-        "Débutants, non-développeurs, entrepreneurs, artisans, indépendants, salariés et porteurs de projet",
+        "Salariés et entreprises du BTP — conducteurs, chefs de chantier, chefs d’équipe, compagnons",
     },
     teaches: [
-      "Structurer une idée en projet numérique",
-      "Guider une création assistée par l’IA",
-      "Tester et améliorer un résultat",
-      "Continuer un projet après la session",
+      "Organisation et pilotage de chantier",
+      "Modes opératoires et exigences techniques",
+      "Encadrement d’équipes TP/VRD",
+      "Contrôle qualité et exécution",
     ],
     about: [
-      { "@type": "Thing", name: "Créer avec l’IA" },
-      { "@type": "Thing", name: "Créer sans savoir coder" },
-      { "@type": "Thing", name: "Formation IA débutant" },
+      { "@type": "Thing", name: "Formation professionnelle BTP" },
+      { "@type": "Thing", name: "Formation conducteur de travaux" },
+      { "@type": "Thing", name: "Formation modes opératoires chantier" },
     ],
-    offers: [beworkSessionOfferJsonLd(), beworkCompleteOfferJsonLd()],
   };
 }
 
-/** Metadata canoniques par page cœur. */
+/**
+ * Registry legacy — métadonnées BTP si une ancienne page est encore rendue.
+ * Les URLs correspondantes sont redirigées (301) vers le site BTP.
+ */
 export const SEO_PAGES = {
   home: {
     path: "/",
-    absoluteTitle: "BeWork | Créer avec l’IA sans savoir coder",
+    absoluteTitle: "BeWork | Conduite de travaux externalisée & ingénierie BTP",
     description:
-      `Apprenez à créer des sites, applications et outils avec l’IA, sans savoir coder. Parcours 7 h (${BEWORK_SESSION_PRICE_EUR} €) ou 14 h (${BEWORK_COMPLETE_PRICE_EUR} €).`,
+      "BeWork accompagne les entreprises du BTP : conduite de travaux externalisée, équipes TP/VRD en régie, ingénierie, marchés publics et formation sur chantier.",
   },
   formation: {
     path: "/formation",
-    title: "Formation IA débutant — Créer sans savoir coder",
-    absoluteTitle: "Formation IA débutant — Créer sans savoir coder | BeWork",
+    title: "Formation professionnelle BTP",
+    absoluteTitle: "Formation professionnelle BTP | BeWork",
     description:
-      `Formation pratique pour débutants : créez sites, applications et outils avec l’IA, sans coder. Parcours 7 h (${BEWORK_SESSION_PRICE_EUR} €) ou 14 h (${BEWORK_COMPLETE_PRICE_EUR} €), présentiel ou visio.`,
+      "Formations pratiques sur chantier pour conducteurs, chefs de chantier, chefs d’équipe TP/VRD et compagnons — offre BeWork en développement.",
   },
   demonstrations: {
     path: "/demonstrations",
-    title: "Démonstrations — exemples créés avec l’IA",
+    title: "Méthode et outils de pilotage de chantier",
     description:
-      "Essayez messagerie, agenda, CRM, réservation, dashboard… Démos BeWork interactives, données fictives. Voyez ce qu’il est possible de créer.",
+      "Outils collaboratifs et méthode BeWork utilisés en interne pour préparer, suivre et documenter les missions de chantier BTP.",
   },
   pourQui: {
     path: "/pour-qui",
-    title: "À qui s’adresse la formation IA sans coder ?",
+    title: "Entreprises BTP accompagnées par BeWork",
     description:
-      "Entrepreneurs, artisans, indépendants, TPE/PME, porteurs de projet : à qui s’adresse BeWork pour apprendre à créer avec l’IA.",
+      "BeWork s’adresse aux entreprises du BTP qui ont besoin de conduite de travaux externalisée, d’équipes TP/VRD en régie ou d’ingénierie.",
   },
   tarifs: {
     path: "/tarifs",
-    title: `Tarifs formation IA — ${BEWORK_SESSION_PRICE_EUR} € ou ${BEWORK_COMPLETE_PRICE_EUR} €`,
-    description: `Parcours BeWork : ${BEWORK_SESSION_PRICE_EUR} € (7 h) ou ${BEWORK_COMPLETE_PRICE_EUR} € (14 h) par participant. Même point de départ, prolongation possible. Pas d’abonnement.`,
+    title: "Devis prestations BTP BeWork",
+    description:
+      "Les prestations BeWork (conduite de travaux, équipes TP/VRD, ingénierie, formation) sont proposées sur devis après étude du besoin.",
   },
   faq: {
     path: "/faq",
-    title: "FAQ — Formation créer avec l’IA",
+    title: "FAQ — Prestations BTP BeWork",
     description:
-      "Faut-il savoir coder ? Que choisir entre 7 h et 14 h ? Réponses sur le programme, les prérequis, le matériel et les modalités BeWork.",
+      "Questions fréquentes sur la conduite de travaux externalisée, les équipes TP/VRD en régie, l’ingénierie et la formation BTP BeWork.",
   },
   contact: {
     path: "/contact",
-    title: "Participer à la formation — Demander une place",
-    description: `Demandez une place pour la formation BeWork, en présentiel ou en visio. Parcours 7 h (${BEWORK_SESSION_PRICE_EUR} €) ou 14 h (${BEWORK_COMPLETE_PRICE_EUR} €) par participant.`,
+    title: "Contact BeWork — Devis BTP",
+    description:
+      "Contactez BeWork pour une conduite de travaux, une équipe TP/VRD en régie, une assistance marchés ou une formation sur chantier.",
   },
   organismeFormation: {
     path: "/organisme-formation",
-    title: "Organisme de formation Qualiopi",
-    absoluteTitle: "Organisme de formation Qualiopi | BeWork",
+    title: "Organisme de formation BeWork",
+    absoluteTitle: "Organisme de formation BeWork | Formation BTP",
     description:
-      "Découvrez OFC Création d’entreprise, l’organisme certifié Qualiopi qui porte les formations BeWork au développement web assisté par intelligence artificielle.",
+      "Présentation de l’activité formation BeWork pour les entreprises du BTP. Aucune certification Qualiopi ni éligibilité CPF affirmée sans vérification.",
   },
 } as const;
 

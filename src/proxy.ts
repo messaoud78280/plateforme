@@ -210,7 +210,7 @@ export async function proxy(request: NextRequest) {
     });
   }
 
-  // Migration SEO — anciennes landings BTP / formation commerciale → site BTP.
+  // Migration SEO — anciennes landings BTP / formation IA → site BTP (301 permanent).
   if (
     isBeworkV3LegacyBtpPath(pathname) ||
     isBeworkFormationCommercialPath(pathname)
@@ -222,7 +222,9 @@ export async function proxy(request: NextRequest) {
     }
     url.pathname = resolveLegacyMarketingRedirect(pathname);
     url.search = "";
-    return NextResponse.redirect(url, 308);
+    const res = NextResponse.redirect(url, 301);
+    res.headers.set("X-Robots-Tag", "noindex, follow");
+    return res;
   }
 
   if (host && host !== canonicalHost && !PASSTHROUGH_HOSTS.has(host)) {

@@ -104,16 +104,16 @@ export const BEWORK_AEO_DEFINITION =
   "BeWork accompagne les entreprises du BTP avec deux prestations principales : la conduite de travaux externalisée (conducteur, chef de chantier, pilotage et coordination) et des équipes opérationnelles TP/VRD en régie (chefs d’équipe, maçons VRD). L’ingénierie et l’assistance aux marchés publics et privés complètent l’offre. La formation professionnelle BTP sur chantier est en développement. Les outils numériques et l’IA sont utilisés en interne. Les missions sont contractualisées — BeWork n’est pas une entreprise de travail temporaire.";
 
 export const SEO_SITE_TITLE_DEFAULT =
-  "BeWork | Conduite de travaux & équipes TP/VRD en régie";
+  "BeWork | Conduite de travaux externalisée & ingénierie BTP";
 
 export const SEO_SITE_TITLE_OG =
-  "BeWork — Conduite de travaux externalisée & équipes TP/VRD en régie";
+  "BeWork | Conduite de travaux externalisée & ingénierie BTP";
 
 export const SEO_VALUE_PROPOSITION =
-  "BeWork : conduite de travaux externalisée et équipes opérationnelles TP/VRD en régie pour les entreprises du BTP. Ingénierie, marchés et formation sur chantier en complément. Prestations sur devis — Yvelines et Île-de-France.";
+  "BeWork accompagne les entreprises du BTP : conduite de travaux externalisée, équipes TP/VRD en régie, ingénierie, marchés publics et formation sur chantier.";
 
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Conducteurs de travaux et équipes TP/VRD en régie — missions contractualisées sur devis.";
+  "Conduite de travaux externalisée, équipes TP/VRD en régie et ingénierie BTP — sur devis.";
 
 export const BEWORK_TECH_AROUND_YOU =
   "Expertise terrain. Méthode. Renforts opérationnels au service du chantier.";

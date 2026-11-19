@@ -81,7 +81,13 @@ export function FormationInterestForm({
         }),
       });
 
-      if (!res.ok) {
+      const json = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        emailNotificationSent?: boolean;
+      };
+
+      if (!res.ok || json.ok === false || json.emailNotificationSent === false) {
         setStatus("error");
         return;
       }

@@ -1,36 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { labelBtpServiceNeed } from "@/lib/bework-btp-services";
 import { labelMainNeed, labelMarketType, labelProjectStage } from "@/lib/contact-form-options";
+import {
+  createIpRateLimiter,
+  isHoneypotTriggered,
+  resolveContactRecipients,
+  validateContactBody,
+} from "@/lib/contact/contact-request";
 import { sendEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
-function envTrim(s: string | undefined | null): string {
-  return typeof s === "string" ? s.trim() : "";
-}
-
-/** Une ou plusieurs adresses séparées par virgule ou point-virgule */
-function parseEmailRecipients(raw: string): string[] {
-  return raw
-    .split(/[,;]+/)
-    .map((s) => s.trim())
-    .filter((s) => s.includes("@") && s.length > 4);
-}
-
-const PLACEHOLDER_CONTACT_EMAILS = new Set([
-  "contact@votredomaine.fr",
-  "contact@example.com",
-  "contact@yourdomain.com",
-]);
-
-function resolveContactRecipients(): string[] {
-  const raw = envTrim(process.env.CONTACT_EMAIL);
-  const parsed = raw ? parseEmailRecipients(raw) : [];
-  const usable = parsed.filter((e) => !PLACEHOLDER_CONTACT_EMAILS.has(e.toLowerCase()));
-  if (usable.length > 0) return usable;
-  return parseEmailRecipients("contact@bework.fr");
-}
-
-const contactRecipients = resolveContactRecipients();
+const contactRecipients = resolveContactRecipients(process.env.CONTACT_EMAIL);
+const isRateLimited = createIpRateLimiter();
 
 function escapeHtml(s: string): string {
   return s
@@ -39,27 +20,6 @@ function escapeHtml(s: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/\n/g, "<br>");
-}
-
-function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email);
-}
-
-/** Limite simple par IP (fenêtre glissante en mémoire). */
-const rateLimitWindowMs = 60 * 60 * 1000;
-const rateLimitMax = 8;
-const rateLimitByIp = new Map<string, number[]>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const hits = (rateLimitByIp.get(ip) ?? []).filter((t) => now - t < rateLimitWindowMs);
-  if (hits.length >= rateLimitMax) {
-    rateLimitByIp.set(ip, hits);
-    return true;
-  }
-  hits.push(now);
-  rateLimitByIp.set(ip, hits);
-  return false;
 }
 
 export async function POST(request: NextRequest) {
@@ -72,88 +32,31 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Trop de demandes. Réessayez plus tard." }, { status: 429 });
   }
 
-  let body: {
-    companyName?: string;
-    contactName?: string;
-    email?: string;
-    phone?: string;
-    marketType?: string;
-    tradeActivity?: string;
-    mainNeed?: string;
-    projectStage?: string;
-    message?: string;
-    consent?: boolean;
-    source?: string;
-    website?: string;
-    formKind?: string;
-  };
-
+  let body: Record<string, unknown>;
   try {
-    body = await request.json();
+    body = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: "Corps de requête invalide." }, { status: 400 });
   }
 
-  if (String(body.website ?? "").trim()) {
-    return NextResponse.json({ ok: true });
+  // Honeypot anti-spam : réponse neutre, aucune écriture.
+  if (isHoneypotTriggered(body)) {
+    return NextResponse.json({ ok: true, emailNotificationSent: true, honeypot: true });
   }
 
-  const companyName = String(body.companyName ?? "").trim();
-  const contactNameRaw = String(body.contactName ?? "").trim();
-  const email = String(body.email ?? "").trim().toLowerCase();
-  const phone = String(body.phone ?? "").trim();
-  const formKind = String(body.formKind ?? "").trim();
-  const source =
-    String(body.source ?? "homepage_contact_form").trim().slice(0, 120) ||
-    "homepage_contact_form";
-  const isIdea = formKind === "idea";
-  const isBtpDevis = formKind === "btp_devis" || source === "btp_devis_form";
-  const marketType = String(body.marketType ?? "").trim() || (isIdea || isBtpDevis ? "autre" : "");
-  const tradeActivity = String(body.tradeActivity ?? "").trim();
-  const mainNeed =
-    String(body.mainNeed ?? "").trim() || (isIdea ? "ne_sais_pas_encore" : "");
-  const projectStage = String(body.projectStage ?? "").trim();
-  const rawMessage = String(body.message ?? "").trim();
-  const stageLine = projectStage ? `Étape : ${labelProjectStage(projectStage)}` : "";
-  const message = [stageLine, rawMessage].filter(Boolean).join("\n\n").slice(0, 4000);
-  const isTrainingInterest = source === "formation_interest";
-  const consent = body.consent === true;
-  const contactName = contactNameRaw || companyName;
-  const needLabel = isBtpDevis ? labelBtpServiceNeed(mainNeed) : labelMainNeed(mainNeed);
-
-  if (!companyName || !email || !marketType || !mainNeed) {
-    return NextResponse.json(
-      {
-        error: isBtpDevis
-          ? "Entreprise, e-mail et prestation sont requis."
-          : "Nom / entreprise, email, type de marché et besoin principal sont requis.",
-      },
-      { status: 400 }
-    );
+  const validated = validateContactBody(body);
+  if (!validated.ok) {
+    return NextResponse.json({ error: validated.error }, { status: 400 });
   }
 
-  if ((isIdea || isBtpDevis) && !rawMessage) {
-    return NextResponse.json(
-      { error: isBtpDevis ? "Décrivez votre chantier ou votre besoin." : "Décrivez votre besoin ou votre idée." },
-      { status: 400 }
-    );
-  }
-
-  if (isBtpDevis && !contactNameRaw) {
-    return NextResponse.json({ error: "Le nom du contact est requis." }, { status: 400 });
-  }
-
-  if (isBtpDevis && !phone) {
-    return NextResponse.json({ error: "Le téléphone est requis." }, { status: 400 });
-  }
-
-  if (!isValidEmail(email)) {
-    return NextResponse.json({ error: "Adresse email invalide." }, { status: 400 });
-  }
-
-  if (!consent) {
-    return NextResponse.json({ error: "Le consentement est obligatoire." }, { status: 400 });
-  }
+  const data = validated.data;
+  const stageLine = data.projectStage
+    ? `Étape : ${labelProjectStage(data.projectStage)}`
+    : "";
+  const message = [stageLine, data.rawMessage].filter(Boolean).join("\n\n").slice(0, 4000);
+  const needLabel = data.isBtpDevis
+    ? labelBtpServiceNeed(data.mainNeed)
+    : labelMainNeed(data.mainNeed);
 
   const createdAt = new Date();
   let requestId: string | null = null;
@@ -161,16 +64,16 @@ export async function POST(request: NextRequest) {
   try {
     const created = await prisma.contactRequest.create({
       data: {
-        structure: companyName,
-        contactName,
-        email,
-        phone: phone || null,
-        marketType,
-        tradeActivity: tradeActivity || null,
-        mainNeed,
+        structure: data.companyName,
+        contactName: data.contactName,
+        email: data.email,
+        phone: data.phone || null,
+        marketType: data.marketType,
+        tradeActivity: data.tradeActivity || null,
+        mainNeed: data.mainNeed,
         message: message || null,
-        consent,
-        source,
+        consent: data.consent,
+        source: data.source,
       },
       select: { id: true },
     });
@@ -179,7 +82,7 @@ export async function POST(request: NextRequest) {
     console.error("[contact] ContactRequest create error");
     return NextResponse.json(
       { error: "Erreur lors de l’enregistrement de la demande." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -192,35 +95,35 @@ export async function POST(request: NextRequest) {
   const html = `
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>${isTrainingInterest ? "Nouvelle demande de place BeWork" : "Nouvelle demande de contact BeWork"}</title></head>
+<head><meta charset="utf-8"><title>${data.isTrainingInterest ? "Nouvelle demande de place BeWork" : "Nouvelle demande de contact BeWork"}</title></head>
 <body style="font-family: sans-serif; line-height: 1.5; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
   <h1 style="color: #0f172a;">${
-    isTrainingInterest
+    data.isTrainingInterest
       ? "Nouvelle demande de place"
-      : isBtpDevis
+      : data.isBtpDevis
         ? "Nouvelle demande de devis BTP"
         : "Nouvelle demande de contact"
   }</h1>
   <p>${
-    isTrainingInterest
+    data.isTrainingInterest
       ? "Une demande concerne la formation BeWork."
-      : isBtpDevis
+      : data.isBtpDevis
         ? "Une demande de devis prestations BTP a été envoyée."
         : "Une demande a été envoyée depuis le formulaire BeWork."
   }</p>
 
   <ul style="list-style: none; padding: 0;">
     ${requestId ? `<li><strong>Référence :</strong> ${escapeHtml(requestId)}</li>` : ""}
-    ${isTrainingInterest ? "" : `<li><strong>Entreprise :</strong> ${escapeHtml(companyName)}</li>`}
-    <li><strong>Contact :</strong> ${escapeHtml(contactName)}</li>
-    <li><strong>Email :</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></li>
-    ${phone ? `<li><strong>Téléphone :</strong> ${escapeHtml(phone)}</li>` : ""}
-    ${isTrainingInterest || isBtpDevis ? "" : `<li><strong>Effectif :</strong> ${escapeHtml(labelMarketType(marketType))}</li>`}
-    ${tradeActivity ? `<li><strong>Activité / opération :</strong> ${escapeHtml(tradeActivity)}</li>` : ""}
-    ${isTrainingInterest ? "" : `<li><strong>Besoin principal :</strong> ${escapeHtml(needLabel)}</li>`}
-    ${projectStage && !isTrainingInterest ? `<li><strong>Avancement du projet :</strong> ${escapeHtml(labelProjectStage(projectStage))}</li>` : ""}
+    ${data.isTrainingInterest ? "" : `<li><strong>Entreprise :</strong> ${escapeHtml(data.companyName)}</li>`}
+    <li><strong>Contact :</strong> ${escapeHtml(data.contactName)}</li>
+    <li><strong>Email :</strong> <a href="mailto:${escapeHtml(data.email)}">${escapeHtml(data.email)}</a></li>
+    ${data.phone ? `<li><strong>Téléphone :</strong> ${escapeHtml(data.phone)}</li>` : ""}
+    ${data.isTrainingInterest || data.isBtpDevis ? "" : `<li><strong>Effectif :</strong> ${escapeHtml(labelMarketType(data.marketType))}</li>`}
+    ${data.tradeActivity ? `<li><strong>Activité / opération :</strong> ${escapeHtml(data.tradeActivity)}</li>` : ""}
+    ${data.isTrainingInterest ? "" : `<li><strong>Besoin principal :</strong> ${escapeHtml(needLabel)}</li>`}
+    ${data.projectStage && !data.isTrainingInterest ? `<li><strong>Avancement du projet :</strong> ${escapeHtml(labelProjectStage(data.projectStage))}</li>` : ""}
     <li><strong>Date de demande :</strong> ${escapeHtml(dateLabel)}</li>
-    <li><strong>Source :</strong> ${escapeHtml(source)}</li>
+    <li><strong>Source :</strong> ${escapeHtml(data.source)}</li>
   </ul>
 
   ${
@@ -231,7 +134,7 @@ export async function POST(request: NextRequest) {
   }
 
   <p style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e0e4ea; font-size: 0.9em; color: #64748b;">
-    Répondez à <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a> pour recontacter le prospect.
+    Répondez à <a href="mailto:${escapeHtml(data.email)}">${escapeHtml(data.email)}</a> pour recontacter le prospect.
   </p>
 </body>
 </html>
@@ -241,17 +144,18 @@ export async function POST(request: NextRequest) {
   let providerErrorMessage: string | null = null;
 
   if (contactRecipients.length === 0) {
-    console.warn("[contact] CONTACT_EMAIL vide ou invalide (ex. contact@bework.fr).");
+    console.warn("[contact] CONTACT_EMAIL vide ou invalide.");
+    providerErrorMessage = "missing_contact_email";
   } else {
     try {
       const r = await sendEmail({
         to: contactRecipients,
-        replyTo: email,
-        subject: isTrainingInterest
-          ? `[BeWork] Demande de place – ${contactName}`
-          : isBtpDevis
-            ? `[BeWork] Devis BTP – ${needLabel} – ${companyName}`
-            : `[BeWork] Demande de contact – ${companyName}`,
+        replyTo: data.email,
+        subject: data.isTrainingInterest
+          ? `[BeWork] Demande de place – ${data.contactName}`
+          : data.isBtpDevis
+            ? `[BeWork] Devis BTP – ${needLabel} – ${data.companyName}`
+            : `[BeWork] Demande de contact – ${data.companyName}`,
         html,
       });
       if (!r.ok) {
@@ -259,7 +163,7 @@ export async function POST(request: NextRequest) {
         console.error("[contact] Email refusé:", r.reason);
       } else {
         emailSent = true;
-        console.info("[contact] Notification envoyée →", contactRecipients.join(", "));
+        console.info("[contact] Notification envoyée → destinataires configurés");
       }
     } catch {
       providerErrorMessage = "send_failed";
@@ -267,10 +171,24 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Demande bien enregistrée, mais sans notification : ne pas simuler un succès total.
+  if (!emailSent) {
+    return NextResponse.json(
+      {
+        ok: false,
+        id: requestId,
+        emailNotificationSent: false,
+        error:
+          "Votre demande est enregistrée, mais la notification e-mail a échoué. Écrivez-nous à contact@bework.fr en indiquant la référence.",
+        ...(providerErrorMessage ? { emailError: providerErrorMessage } : {}),
+      },
+      { status: 502 },
+    );
+  }
+
   return NextResponse.json({
     ok: true,
     id: requestId,
-    emailNotificationSent: emailSent,
-    ...(providerErrorMessage ? { emailError: providerErrorMessage } : {}),
+    emailNotificationSent: true,
   });
 }

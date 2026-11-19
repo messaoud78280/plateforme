@@ -14,7 +14,7 @@ import {
   type BtpServiceNeedId,
 } from "@/lib/bework-btp-services";
 
-type Status = "idle" | "loading" | "success" | "error";
+type Status = "idle" | "loading" | "success" | "error" | "saved_no_email";
 
 const STEP1_NEEDS: BtpServiceNeedId[] = [
   "conducteur_travaux",
@@ -88,6 +88,7 @@ export function BtpDevisForm() {
       setStep(2);
       return;
     }
+    if (status === "loading") return;
 
     setStatus("loading");
     setError(null);
@@ -194,9 +195,21 @@ export function BtpDevisForm() {
         error?: string;
         ok?: boolean;
         id?: string;
+        emailNotificationSent?: boolean;
       };
 
-      if (!res.ok) {
+      // Demande sauvée mais e-mail équipe non parti : ne pas afficher un succès total.
+      if (json.id && json.emailNotificationSent === false) {
+        setReference(json.id);
+        setStatus("saved_no_email");
+        setError(
+          json.error ||
+            "Demande enregistrée, mais la notification e-mail a échoué. Écrivez à contact@bework.fr.",
+        );
+        return;
+      }
+
+      if (!res.ok || json.ok === false) {
         setStatus("error");
         setError(json.error || "Impossible d’enregistrer la demande.");
         return;
@@ -231,6 +244,33 @@ export function BtpDevisForm() {
         {reference ? (
           <p className="mt-3 text-base font-medium text-[var(--btp-steel)]">
             Référence : {reference}
+          </p>
+        ) : null}
+        <Link href="/" className="bw-btp-btn bw-btp-btn-primary mt-6">
+          Retour à l’accueil
+        </Link>
+      </div>
+    );
+  }
+
+  if (status === "saved_no_email") {
+    return (
+      <div className="bw-btp-card border-amber-200 bg-amber-50">
+        <h2 className="text-xl font-bold text-[var(--btp-night)]">
+          Demande enregistrée — action complémentaire
+        </h2>
+        <p className="mt-3 text-[var(--btp-muted)]">
+          Votre demande est bien enregistrée
+          {reference ? ` (référence ${reference})` : ""}, mais la notification
+          automatique a échoué. Pour sécuriser le suivi, écrivez-nous à{" "}
+          <a href="mailto:contact@bework.fr" className="font-semibold underline">
+            contact@bework.fr
+          </a>{" "}
+          en indiquant cette référence.
+        </p>
+        {error ? (
+          <p className="mt-3 text-sm text-amber-900" role="status">
+            {error}
           </p>
         ) : null}
         <Link href="/" className="bw-btp-btn bw-btp-btn-primary mt-6">

@@ -24,6 +24,7 @@ export function ProspectContactForm({
   variant = "default",
 }: ProspectContactFormProps) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
   const isIdea = variant === "idea";
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -34,6 +35,7 @@ export function ProspectContactForm({
     const data = new FormData(form);
 
     setStatus("loading");
+    setErrorDetail(null);
 
     try {
       const res = await fetch("/api/contact", {
@@ -41,7 +43,7 @@ export function ProspectContactForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           companyName: data.get("companyName"),
-          contactName: data.get("contactName"),
+          contactName: data.get("contactName") || data.get("companyName"),
           email: data.get("email"),
           phone: data.get("phone"),
           marketType: data.get("marketType") || (isIdea ? "autre" : ""),
@@ -56,8 +58,19 @@ export function ProspectContactForm({
         }),
       });
 
-      if (!res.ok) {
+      const json = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        emailNotificationSent?: boolean;
+        id?: string;
+      };
+
+      if (!res.ok || json.ok === false || json.emailNotificationSent === false) {
         setStatus("error");
+        setErrorDetail(
+          json.error ||
+            "Envoi impossible. Écrivez-nous à contact@bework.fr.",
+        );
         return;
       }
 
@@ -65,6 +78,7 @@ export function ProspectContactForm({
       form.reset();
     } catch {
       setStatus("error");
+      setErrorDetail("Erreur réseau. Réessayez ou écrivez à contact@bework.fr.");
     }
   }
 
@@ -199,7 +213,7 @@ export function ProspectContactForm({
 
         {status === "error" && (
           <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-            Une erreur est survenue. Vous pouvez nous écrire directement à{" "}
+            {errorDetail || "Une erreur est survenue."} Vous pouvez aussi écrire à{" "}
             <a href="mailto:contact@bework.fr" className="font-semibold underline">
               contact@bework.fr
             </a>
@@ -360,7 +374,7 @@ export function ProspectContactForm({
 
       {status === "error" && (
         <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-          Une erreur est survenue. Vous pouvez nous écrire directement à{" "}
+          {errorDetail || "Une erreur est survenue."} Vous pouvez aussi écrire à{" "}
           <a href="mailto:contact@bework.fr" className="font-semibold underline">
             contact@bework.fr
           </a>

@@ -12,6 +12,8 @@ export const BEWORK_V3_CONFIDENTIAL_PREFIXES = [
   "/ressources/bework-maitrise-doeuvre",
   "/ressources/compte-rendu-chantier-guide-btp",
   "/ressources/pdf/",
+  /** Anciens programmes formation IA 7 h / 14 h. */
+  "/programmes/",
 ] as const;
 
 /** Hubs ressources encore indexés — retirer du public indexable. */
@@ -63,6 +65,9 @@ export const BEWORK_FORMATION_COMMERCIAL_EXACT = [
   "/pour-qui",
   "/tarifs",
   "/faq",
+  "/essayer",
+  "/essayer/confirmation",
+  "/notre-facon-de-travailler",
 ] as const;
 
 export const BEWORK_FORMATION_COMMERCIAL_PREFIXES = [
@@ -93,11 +98,15 @@ export const BEWORK_LEGACY_REDIRECT_MAP: Record<string, string> = {
   "/tarifs": "/demande-de-devis",
   "/demonstrations": "/plateforme-ia",
   "/faq": "/contact",
+  "/essayer": "/formation-professionnelle-btp",
+  "/essayer/confirmation": "/contact",
+  "/notre-facon-de-travailler": "/notre-methode",
 };
 
 export function isBeworkV3ConfidentialPath(pathname: string): boolean {
   const p = pathname.toLowerCase();
   if (p.startsWith("/ressources/pdf/")) return true;
+  if (p.startsWith("/programmes/")) return true;
   return BEWORK_V3_CONFIDENTIAL_PREFIXES.some((prefix) =>
     p.startsWith(prefix.toLowerCase()),
   );

@@ -1,10 +1,12 @@
 /**
- * Positionnement BeWork — formation pratique « créer avec l’IA ».
- * Contenu public aligné sur les programmes officiels (PDF).
+ * Legacy — ancien funnel formation « créer avec l’IA » (7 h / 14 h).
+ * Conservé pour pages redirigées / composants orphelins.
+ * L’offre publique active est la formation professionnelle BTP
+ * (`/formation-professionnelle-btp`). Les PDF `/programmes/*` sont en 410.
  * Aucun détail de stack, prompts ou procédures internes.
  */
 
-/** Chemins publics des programmes officiels (téléchargement libre). */
+/** Anciens chemins PDF — ne plus exposer (410 via proxy). */
 export const TRAINING_PROGRAM_PDF = {
   essential: "/programmes/programme-bework-7h.pdf",
   complete: "/programmes/programme-bework-14h.pdf",

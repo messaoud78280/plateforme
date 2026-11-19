@@ -1,6 +1,6 @@
 import { permanentRedirect } from "next/navigation";
 
-/** Ancien tunnel essai SaaS — redirigé vers l’intérêt formation. */
+/** Ancien tunnel essai SaaS / place formation IA — redirigé vers le hub formation BTP. */
 export default function EssayerRedirect() {
-  permanentRedirect("/contact#participer");
+  permanentRedirect("/formation-professionnelle-btp#demande-formation");
 }

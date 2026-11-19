@@ -103,8 +103,8 @@ export default function OrganismeFormationPage() {
         <BtpCtaBand
           title="Une question sur la formation BeWork ?"
           subtitle="Décrivez votre besoin. Nous précisons le cadre sans engagement sur des labels non vérifiés."
-          ctaHref="/contact"
-          ctaLabel="Nous contacter"
+          ctaHref="/formation-professionnelle-btp#demande-formation"
+          ctaLabel="Exprimer un besoin formation"
         />
       </main>
       <MarketingSiteFooter />

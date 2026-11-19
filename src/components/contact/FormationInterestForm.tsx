@@ -2,31 +2,29 @@
 
 import { useState, type FormEvent } from "react";
 import {
-  IT_LEVEL_OPTIONS,
-  LEARN_INTENT_OPTIONS,
-  TRAINING_OFFERS,
-  type TrainingOfferId,
-} from "@/lib/bework-formation";
+  FORMATION_BTP_DOMAIN_OPTIONS,
+  FORMATION_BTP_LOCATION_OPTIONS,
+  FORMATION_BTP_PARTICIPANT_OPTIONS,
+  labelFormationBtpDomain,
+  labelFormationBtpLocation,
+  labelFormationBtpParticipants,
+} from "@/lib/formation-btp-interest";
 
 const INPUT_CLASS =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/20";
 const LABEL_CLASS = "mb-2 block text-sm font-semibold text-slate-800";
-const CHOICE_CLASS =
-  "flex cursor-pointer items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 has-[:checked]:border-[#1d4ed8]/40 has-[:checked]:bg-[#eff6ff]";
 
-/** Formulaire d’intérêt formation — POST `/api/contact` avec source `formation_interest`. */
-export function FormationInterestForm({
-  initialOfferId = "essential",
-}: {
-  initialOfferId?: TrainingOfferId;
-}) {
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [intents, setIntents] = useState<string[]>([]);
-  const [offerId, setOfferId] = useState<TrainingOfferId>(initialOfferId);
-
-  function toggleIntent(value: string) {
-    setIntents((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
-  }
+/**
+ * Formulaire d’intérêt — formation professionnelle BTP.
+ * POST `/api/contact` avec source `formation_interest`.
+ * Pas de parcours IA 7 h / 14 h, pas d’affirmation Qualiopi / CPF.
+ */
+export function FormationInterestForm() {
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
+    "idle",
+  );
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
+  const [reference, setReference] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -42,37 +40,42 @@ export function FormationInterestForm({
     const prenom = String(data.get("prenom") ?? "").trim();
     const nom = String(data.get("nom") ?? "").trim();
     const contactName = [prenom, nom].filter(Boolean).join(" ");
-    const itLevel = String(data.get("itLevel") ?? "");
-    const hasIdea = String(data.get("hasIdea") ?? "");
-    const projectDesc = String(data.get("projectDesc") ?? "").trim();
-    const intentLabels = LEARN_INTENT_OPTIONS.filter((o) => intents.includes(o.value)).map((o) => o.label);
-    const itLabel = IT_LEVEL_OPTIONS.find((o) => o.value === itLevel)?.label ?? itLevel;
-    const selectedOffer = TRAINING_OFFERS[offerId];
+    const companyName = String(data.get("companyName") ?? "").trim();
+    const email = String(data.get("email") ?? "").trim();
+    const phone = String(data.get("phone") ?? "").trim();
+    const tradeActivity = String(data.get("tradeActivity") ?? "").trim();
+    const domain = String(data.get("formationDomain") ?? "").trim();
+    const participants = String(data.get("participants") ?? "").trim();
+    const location = String(data.get("location") ?? "").trim();
+    const needs = String(data.get("needs") ?? "").trim();
 
     const messageParts = [
-      "Demande de place — formation BeWork",
-      `Parcours souhaité : ${selectedOffer.label} · ${selectedOffer.hours} h · ${selectedOffer.price} €`,
-      `Niveau informatique : ${itLabel || "—"}`,
-      `A une idée de projet : ${hasIdea === "oui" ? "Oui" : hasIdea === "non" ? "Non" : "—"}`,
-      intentLabels.length ? `Souhaite apprendre à créer : ${intentLabels.join(", ")}` : null,
-      projectDesc ? `Description projet : ${projectDesc}` : null,
+      "Demande d’intérêt — formation professionnelle BTP",
+      `Domaine souhaité : ${labelFormationBtpDomain(domain)}`,
+      `Nombre de participants : ${labelFormationBtpParticipants(participants)}`,
+      `Lieu envisagé : ${labelFormationBtpLocation(location)}`,
+      tradeActivity ? `Métier / fonction : ${tradeActivity}` : null,
+      needs ? `Besoins techniques : ${needs}` : null,
+      "Note : aucune certification Qualiopi / CPF affirmée — à confirmer selon cadre validé.",
     ].filter(Boolean);
 
     setStatus("loading");
+    setErrorDetail(null);
+    setReference(null);
 
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          companyName: String(data.get("activite") ?? "").trim() || contactName,
+          companyName: companyName || contactName,
           contactName,
-          email: data.get("email"),
-          phone: data.get("phone"),
+          email,
+          phone,
           marketType: "autre",
-          tradeActivity: data.get("activite"),
-          mainNeed: "ne_sais_pas_encore",
-          projectStage: hasIdea === "oui" ? "idee_claire" : "exploration",
+          tradeActivity: tradeActivity || null,
+          mainNeed: "autre",
+          projectStage: location || "a_definir",
           message: messageParts.join("\n"),
           consent: data.get("consent") === "on",
           source: "formation_interest",
@@ -84,20 +87,34 @@ export function FormationInterestForm({
       const json = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
         error?: string;
+        id?: string;
         emailNotificationSent?: boolean;
       };
 
-      if (!res.ok || json.ok === false || json.emailNotificationSent === false) {
+      if (json.id && json.emailNotificationSent === false) {
+        setReference(json.id);
         setStatus("error");
+        setErrorDetail(
+          json.error ||
+            "Demande enregistrée, mais la notification e-mail a échoué. Écrivez à contact@bework.fr.",
+        );
         return;
       }
 
+      if (!res.ok || json.ok === false) {
+        setStatus("error");
+        setErrorDetail(
+          json.error || "Envoi impossible. Écrivez-nous à contact@bework.fr.",
+        );
+        return;
+      }
+
+      setReference(json.id ?? null);
       setStatus("success");
       form.reset();
-      setIntents([]);
-      setOfferId("essential");
     } catch {
       setStatus("error");
+      setErrorDetail("Erreur réseau. Réessayez ou écrivez à contact@bework.fr.");
     }
   }
 
@@ -108,9 +125,12 @@ export function FormationInterestForm({
         className="rounded-2xl border border-emerald-200 bg-emerald-50/90 px-6 py-8 text-center shadow-sm"
       >
         <p className="text-base font-semibold text-emerald-900">
-          Votre demande a bien été envoyée. BeWork vous recontactera rapidement
-          pour les prochaines dates.
+          Votre demande a bien été envoyée. BeWork vous recontactera pour cadrer
+          le besoin formation — sans engagement sur un catalogue de sessions.
         </p>
+        {reference ? (
+          <p className="mt-3 text-sm text-emerald-800">Référence : {reference}</p>
+        ) : null}
       </div>
     );
   }
@@ -120,6 +140,7 @@ export function FormationInterestForm({
       onSubmit={onSubmit}
       className="relative space-y-6"
       aria-busy={status === "loading"}
+      noValidate
     >
       <div hidden aria-hidden>
         <input
@@ -136,155 +157,168 @@ export function FormationInterestForm({
           <label htmlFor="prenom" className={LABEL_CLASS}>
             Prénom <span className="text-red-600">*</span>
           </label>
-          <input id="prenom" name="prenom" required autoComplete="given-name" className={INPUT_CLASS} />
+          <input
+            id="prenom"
+            name="prenom"
+            required
+            autoComplete="given-name"
+            className={INPUT_CLASS}
+          />
         </div>
         <div>
           <label htmlFor="nom" className={LABEL_CLASS}>
             Nom <span className="text-red-600">*</span>
           </label>
-          <input id="nom" name="nom" required autoComplete="family-name" className={INPUT_CLASS} />
+          <input
+            id="nom"
+            name="nom"
+            required
+            autoComplete="family-name"
+            className={INPUT_CLASS}
+          />
         </div>
+      </div>
+
+      <div>
+        <label htmlFor="companyName" className={LABEL_CLASS}>
+          Entreprise <span className="text-red-600">*</span>
+        </label>
+        <input
+          id="companyName"
+          name="companyName"
+          required
+          autoComplete="organization"
+          className={INPUT_CLASS}
+          placeholder="Ex. Entreprise TP Dupont"
+        />
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="email" className={LABEL_CLASS}>
-            E-mail <span className="text-red-600">*</span>
+            E-mail professionnel <span className="text-red-600">*</span>
           </label>
-          <input id="email" name="email" type="email" required autoComplete="email" className={INPUT_CLASS} />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            className={INPUT_CLASS}
+            placeholder="vous@entreprise.fr"
+          />
         </div>
         <div>
           <label htmlFor="phone" className={LABEL_CLASS}>
-            Téléphone
+            Téléphone <span className="text-red-600">*</span>
           </label>
-          <input id="phone" name="phone" type="tel" autoComplete="tel" className={INPUT_CLASS} />
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            required
+            autoComplete="tel"
+            className={INPUT_CLASS}
+            placeholder="06 12 34 56 78"
+          />
         </div>
       </div>
 
       <div>
-        <label htmlFor="activite" className={LABEL_CLASS}>
-          Activité <span className="text-red-600">*</span>
+        <label htmlFor="tradeActivity" className={LABEL_CLASS}>
+          Métier ou fonction <span className="text-red-600">*</span>
         </label>
         <input
-          id="activite"
-          name="activite"
+          id="tradeActivity"
+          name="tradeActivity"
           required
           className={INPUT_CLASS}
-          placeholder="Ex. artisan, indépendant, dirigeant TPE…"
+          placeholder="Ex. conducteur de travaux, chef d’équipe TP, compagnon VRD…"
         />
       </div>
 
-      <fieldset>
-        <legend className={`${LABEL_CLASS} mb-3`}>
-          Parcours souhaité <span className="text-red-600">*</span>
-        </legend>
-        <div className="grid gap-2.5 sm:grid-cols-2">
-          {Object.values(TRAINING_OFFERS).map((offer) => (
-              <label key={offer.id} className={CHOICE_CLASS}>
-                <input
-                  type="radio"
-                  name="trainingOffer"
-                  value={offer.id}
-                  checked={offerId === offer.id}
-                  onChange={() => setOfferId(offer.id)}
-                  required
-                  className="h-4 w-4 border-slate-300 text-[#1d4ed8] focus:ring-[#1d4ed8]"
-                />
-                <span>
-                  <strong className="block text-slate-900">{offer.label} · {offer.hours}&nbsp;h</strong>
-                  <span className="text-xs text-slate-500">{offer.price}&nbsp;€ par participant</span>
-                </span>
-              </label>
+      <div>
+        <label htmlFor="formationDomain" className={LABEL_CLASS}>
+          Domaine de formation souhaité <span className="text-red-600">*</span>
+        </label>
+        <select
+          id="formationDomain"
+          name="formationDomain"
+          required
+          className={INPUT_CLASS}
+          defaultValue=""
+        >
+          <option value="" disabled>
+            Sélectionnez…
+          </option>
+          {FORMATION_BTP_DOMAIN_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label htmlFor="participants" className={LABEL_CLASS}>
+            Nombre de participants <span className="text-red-600">*</span>
+          </label>
+          <select
+            id="participants"
+            name="participants"
+            required
+            className={INPUT_CLASS}
+            defaultValue=""
+          >
+            <option value="" disabled>
+              Sélectionnez…
+            </option>
+            {FORMATION_BTP_PARTICIPANT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
             ))}
+          </select>
         </div>
-        <p className="mt-2 text-xs leading-relaxed text-slate-500">
-          Vous pourrez prolonger le parcours 7&nbsp;h par une deuxième journée, sans pénalité.
-        </p>
-      </fieldset>
-
-      <fieldset>
-        <legend className={`${LABEL_CLASS} mb-3`}>
-          Niveau informatique <span className="text-red-600">*</span>
-        </legend>
-        <div className="flex flex-wrap gap-2.5">
-          {IT_LEVEL_OPTIONS.map((o) => (
-            <label key={o.value} className={CHOICE_CLASS}>
-              <input
-                type="radio"
-                name="itLevel"
-                value={o.value}
-                required
-                className="h-4 w-4 border-slate-300 text-[#1d4ed8] focus:ring-[#1d4ed8]"
-              />
-              {o.label}
-            </label>
-          ))}
+        <div>
+          <label htmlFor="location" className={LABEL_CLASS}>
+            Lieu de formation <span className="text-red-600">*</span>
+          </label>
+          <select
+            id="location"
+            name="location"
+            required
+            className={INPUT_CLASS}
+            defaultValue=""
+          >
+            <option value="" disabled>
+              Sélectionnez…
+            </option>
+            {FORMATION_BTP_LOCATION_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
         </div>
-      </fieldset>
-
-      <fieldset>
-        <legend className={`${LABEL_CLASS} mb-3`}>
-          Avez-vous déjà une idée de projet&nbsp;? <span className="text-red-600">*</span>
-        </legend>
-        <div className="flex flex-wrap gap-2.5">
-          {[
-            { value: "oui", label: "Oui" },
-            { value: "non", label: "Non" },
-          ].map((o) => (
-            <label key={o.value} className={CHOICE_CLASS}>
-              <input
-                type="radio"
-                name="hasIdea"
-                value={o.value}
-                required
-                className="h-4 w-4 border-slate-300 text-[#1d4ed8] focus:ring-[#1d4ed8]"
-              />
-              {o.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      </div>
 
       <div>
-        <label htmlFor="projectDesc" className={LABEL_CLASS}>
-          Description du projet{" "}
-          <span className="font-normal text-slate-500">(optionnel)</span>
+        <label htmlFor="needs" className={LABEL_CLASS}>
+          Description des besoins techniques{" "}
+          <span className="text-red-600">*</span>
         </label>
         <textarea
-          id="projectDesc"
-          name="projectDesc"
+          id="needs"
+          name="needs"
+          required
           rows={4}
           maxLength={2000}
           className={`${INPUT_CLASS} resize-y`}
-          placeholder="En quelques phrases, ce que vous aimeriez créer…"
+          placeholder="Ouvrages concernés, niveaux des équipes, modes opératoires à renforcer, contraintes chantier…"
         />
       </div>
-
-      <fieldset>
-        <legend className={`${LABEL_CLASS} mb-3`}>Je souhaite apprendre à créer</legend>
-        <div className="grid gap-2.5 sm:grid-cols-2">
-          {LEARN_INTENT_OPTIONS.map((o) => (
-            <label
-              key={o.value}
-              className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm transition ${
-                intents.includes(o.value)
-                  ? "border-[#1d4ed8]/40 bg-[#eff6ff] text-slate-900"
-                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
-              }`}
-            >
-              <input
-                type="checkbox"
-                name="learningIntent"
-                value={o.value}
-                checked={intents.includes(o.value)}
-                onChange={() => toggleIntent(o.value)}
-                className="h-4 w-4 rounded border-slate-300 text-[#1d4ed8] focus:ring-[#1d4ed8]"
-              />
-              {o.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
 
       <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-slate-700">
         <input
@@ -294,15 +328,31 @@ export function FormationInterestForm({
           className="mt-1 h-4 w-4 rounded border-slate-300 text-[#1d4ed8] focus:ring-[#1d4ed8]"
         />
         <span>
-          J&apos;accepte d&apos;être recontacté(e) au sujet de la formation BeWork.{" "}
+          J&apos;accepte d&apos;être recontacté(e) par BeWork au sujet de cette
+          demande de formation professionnelle BTP.{" "}
           <span className="text-red-600">*</span>
         </span>
       </label>
 
+      <p className="text-xs leading-relaxed text-slate-500">
+        BeWork ne présente ici aucun parcours comme certifiant, éligible CPF ou
+        Qualiopi. Ces mentions ne seront ajoutées qu&apos;après validation
+        explicite.
+      </p>
+
       {status === "error" ? (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700" role="alert">
-          L&apos;envoi a échoué. Réessayez dans un instant ou écrivez-nous
-          directement.
+        <p
+          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+          role="alert"
+        >
+          {errorDetail || "L’envoi a échoué."}
+          {reference ? ` Référence : ${reference}.` : ""}{" "}
+          <a
+            href="mailto:contact@bework.fr"
+            className="font-semibold underline"
+          >
+            contact@bework.fr
+          </a>
         </p>
       ) : null}
 
@@ -312,10 +362,11 @@ export function FormationInterestForm({
           disabled={status === "loading"}
           className="inline-flex w-full items-center justify-center rounded-xl bg-[#1d4ed8] px-6 py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-[#1e40af] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8] disabled:opacity-60"
         >
-          {status === "loading" ? "Envoi…" : "Demander une place"}
+          {status === "loading" ? "Envoi…" : "Exprimer un besoin formation"}
         </button>
         <p className="mt-3 text-center text-sm text-slate-500">
-          Nous vous recontactons pour vous proposer les prochaines dates.
+          Nous cadrons une proposition adaptée à votre chantier et à vos
+          équipes.
         </p>
       </div>
     </form>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { FormationInterestForm } from "@/components/contact/FormationInterestForm";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { BtpCtaBand } from "@/components/marketing-btp/BtpCtaBand";
@@ -38,7 +39,7 @@ export default function FormationProfessionnelleBtpPage() {
           eyebrow="FORMATION PROFESSIONNELLE BTP — EN DÉVELOPPEMENT"
           title="Formations pratiques sur chantier pour les entreprises du BTP."
           subtitle="BeWork prépare une offre de formation professionnelle orientée terrain : conducteurs de travaux, chefs de chantier, chefs d’équipe TP/VRD et compagnons. Priorité aux formations adaptées aux ouvrages et aux modes opératoires. Activation commerciale progressive — sans Qualiopi ni CPF affirmés ici."
-          primaryHref="/demande-de-devis?besoin=autre"
+          primaryHref="#demande-formation"
           primaryLabel="Exprimer un besoin formation"
           secondaryHref="/organisme-formation"
           secondaryLabel="Organisme de formation"
@@ -99,11 +100,33 @@ export default function FormationProfessionnelleBtpPage() {
           </div>
         </section>
 
+        <section
+          id="demande-formation"
+          className="bw-btp-section"
+          aria-labelledby="demande-formation-title"
+        >
+          <div className="bw-btp-container grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-start">
+            <div>
+              <h2 id="demande-formation-title" className="font-bold">
+                Exprimer un besoin formation.
+              </h2>
+              <p className="mt-3 text-base text-[var(--btp-muted)]">
+                Formulaire destiné aux entreprises du BTP : conduite de travaux,
+                encadrement, TP/VRD, lecture de plans, modes opératoires et
+                préparation de chantier. Aucune affirmation Qualiopi ou CPF ici.
+              </p>
+            </div>
+            <div className="bw-btp-card">
+              <FormationInterestForm />
+            </div>
+          </div>
+        </section>
+
         <BtpCtaBand
           title="Préparer une formation pour vos équipes ?"
           subtitle="Indiquez le métier, le niveau et le contexte chantier. Nous cadrons une proposition sans affirmer de financements non vérifiés."
-          ctaHref="/demande-de-devis?besoin=autre"
-          ctaLabel="Exprimer un besoin formation"
+          ctaHref="#demande-formation"
+          ctaLabel="Remplir le formulaire"
         />
       </main>
       <MarketingSiteFooter />

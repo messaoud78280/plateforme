@@ -7,6 +7,7 @@ import {
   resolveContactRecipients,
   validateContactBody,
 } from "@/lib/contact/contact-request";
+import { labelFormationBtpLocation } from "@/lib/formation-btp-interest";
 import { sendEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
@@ -51,7 +52,9 @@ export async function POST(request: NextRequest) {
 
   const data = validated.data;
   const stageLine = data.projectStage
-    ? `Étape : ${labelProjectStage(data.projectStage)}`
+    ? data.isTrainingInterest
+      ? `Lieu de formation : ${labelFormationBtpLocation(data.projectStage)}`
+      : `Étape : ${labelProjectStage(data.projectStage)}`
     : "";
   const message = [stageLine, data.rawMessage].filter(Boolean).join("\n\n").slice(0, 4000);
   const needLabel = data.isBtpDevis
@@ -95,18 +98,22 @@ export async function POST(request: NextRequest) {
   const html = `
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>${data.isTrainingInterest ? "Nouvelle demande de place BeWork" : "Nouvelle demande de contact BeWork"}</title></head>
+<head><meta charset="utf-8"><title>${
+    data.isTrainingInterest
+      ? "Nouvelle demande formation BTP BeWork"
+      : "Nouvelle demande de contact BeWork"
+  }</title></head>
 <body style="font-family: sans-serif; line-height: 1.5; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
   <h1 style="color: #0f172a;">${
     data.isTrainingInterest
-      ? "Nouvelle demande de place"
+      ? "Nouvelle demande — formation professionnelle BTP"
       : data.isBtpDevis
         ? "Nouvelle demande de devis BTP"
         : "Nouvelle demande de contact"
   }</h1>
   <p>${
     data.isTrainingInterest
-      ? "Une demande concerne la formation BeWork."
+      ? "Une entreprise a exprimé un besoin de formation professionnelle BTP (conduite de travaux, encadrement, TP/VRD, modes opératoires…)."
       : data.isBtpDevis
         ? "Une demande de devis prestations BTP a été envoyée."
         : "Une demande a été envoyée depuis le formulaire BeWork."
@@ -114,14 +121,20 @@ export async function POST(request: NextRequest) {
 
   <ul style="list-style: none; padding: 0;">
     ${requestId ? `<li><strong>Référence :</strong> ${escapeHtml(requestId)}</li>` : ""}
-    ${data.isTrainingInterest ? "" : `<li><strong>Entreprise :</strong> ${escapeHtml(data.companyName)}</li>`}
+    <li><strong>Entreprise :</strong> ${escapeHtml(data.companyName)}</li>
     <li><strong>Contact :</strong> ${escapeHtml(data.contactName)}</li>
     <li><strong>Email :</strong> <a href="mailto:${escapeHtml(data.email)}">${escapeHtml(data.email)}</a></li>
     ${data.phone ? `<li><strong>Téléphone :</strong> ${escapeHtml(data.phone)}</li>` : ""}
     ${data.isTrainingInterest || data.isBtpDevis ? "" : `<li><strong>Effectif :</strong> ${escapeHtml(labelMarketType(data.marketType))}</li>`}
-    ${data.tradeActivity ? `<li><strong>Activité / opération :</strong> ${escapeHtml(data.tradeActivity)}</li>` : ""}
+    ${data.tradeActivity ? `<li><strong>${data.isTrainingInterest ? "Métier / fonction" : "Activité / opération"} :</strong> ${escapeHtml(data.tradeActivity)}</li>` : ""}
     ${data.isTrainingInterest ? "" : `<li><strong>Besoin principal :</strong> ${escapeHtml(needLabel)}</li>`}
-    ${data.projectStage && !data.isTrainingInterest ? `<li><strong>Avancement du projet :</strong> ${escapeHtml(labelProjectStage(data.projectStage))}</li>` : ""}
+    ${
+      data.projectStage
+        ? data.isTrainingInterest
+          ? `<li><strong>Lieu de formation :</strong> ${escapeHtml(labelFormationBtpLocation(data.projectStage))}</li>`
+          : `<li><strong>Avancement du projet :</strong> ${escapeHtml(labelProjectStage(data.projectStage))}</li>`
+        : ""
+    }
     <li><strong>Date de demande :</strong> ${escapeHtml(dateLabel)}</li>
     <li><strong>Source :</strong> ${escapeHtml(data.source)}</li>
   </ul>
@@ -152,7 +165,7 @@ export async function POST(request: NextRequest) {
         to: contactRecipients,
         replyTo: data.email,
         subject: data.isTrainingInterest
-          ? `[BeWork] Demande de place – ${data.contactName}`
+          ? `[BeWork] Formation BTP – ${data.companyName} – ${data.contactName}`
           : data.isBtpDevis
             ? `[BeWork] Devis BTP – ${needLabel} – ${data.companyName}`
             : `[BeWork] Demande de contact – ${data.companyName}`,

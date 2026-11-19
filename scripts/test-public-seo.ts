@@ -5,6 +5,7 @@ import { BTP_SEO_PAGES } from "../src/lib/bework-btp-services";
 import {
   isBeworkFormationBtpAllowlisted,
   isBeworkFormationCommercialPath,
+  isBeworkV3ConfidentialPath,
   resolveLegacyMarketingRedirect,
 } from "../src/lib/bework-v3-public-gate";
 import { getIndexNowPriorityUrls } from "../src/lib/seo-ai-discovery";
@@ -90,6 +91,15 @@ assert.equal(
 assert.equal(resolveLegacyMarketingRedirect("/pour-qui"), "/a-propos");
 assert.equal(resolveLegacyMarketingRedirect("/tarifs"), "/demande-de-devis");
 assert.equal(resolveLegacyMarketingRedirect("/faq"), "/contact");
+assert.equal(
+  resolveLegacyMarketingRedirect("/essayer"),
+  "/formation-professionnelle-btp",
+);
+assert.equal(resolveLegacyMarketingRedirect("/essayer/confirmation"), "/contact");
+assert.equal(resolveLegacyMarketingRedirect("/notre-facon-de-travailler"), "/notre-methode");
+assert.equal(isBeworkV3ConfidentialPath("/programmes/programme-bework-7h.pdf"), true);
+assert.equal(isBeworkV3ConfidentialPath("/programmes/programme-bework-14h.pdf"), true);
+assert.equal(isBeworkFormationCommercialPath("/essayer"), true);
 
 const indexNow = getIndexNowPriorityUrls();
 assert.ok(

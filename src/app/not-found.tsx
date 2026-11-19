@@ -7,7 +7,7 @@ import { SEO_NOINDEX_ROBOTS } from "@/lib/seo-search-engines";
 export const metadata: Metadata = {
   title: { absolute: "Page introuvable | BeWork" },
   description:
-    "Cette page BeWork n’existe pas. Revenez à l’accueil ou consultez le programme de la formation.",
+    "Cette page BeWork n’existe pas. Revenez à l’accueil ou découvrez nos prestations BTP.",
   robots: SEO_NOINDEX_ROBOTS,
 };
 
@@ -28,8 +28,8 @@ export default function NotFound() {
             Cette page n’existe pas.
           </h1>
           <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-slate-600 sm:text-lg">
-            Le lien a peut-être changé. Revenez à l’accueil ou découvrez le programme de la
-            formation BeWork.
+            Le lien a peut-être changé. Revenez à l’accueil ou consultez nos
+            prestations de conduite de travaux et d’équipes TP/VRD.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
@@ -39,10 +39,10 @@ export default function NotFound() {
               Retour à l’accueil
             </Link>
             <Link
-              href="/formation#programme"
+              href="/conduite-de-travaux"
               className="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#275be8]"
             >
-              Voir le programme
+              Conduite de travaux
             </Link>
           </div>
         </div>

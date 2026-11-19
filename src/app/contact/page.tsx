@@ -70,13 +70,17 @@ export default function ContactPage() {
               </Link>
             </article>
             <article className="bw-btp-card">
-              <h2 className="text-xl font-bold">Accès plateforme</h2>
+              <h2 className="text-xl font-bold">Formation professionnelle BTP</h2>
               <p className="mt-3 text-base leading-relaxed text-[var(--btp-muted)]">
-                Espace collaboratif réservé aux missions et aux comptes
-                autorisés. Connexion sécurisée requise.
+                Besoin de formation terrain pour conducteurs, chefs d’équipe ou
+                compagnons ? Utilisez le formulaire dédié — sans affirmation
+                Qualiopi ou CPF.
               </p>
-              <Link href="/dashboard" className="bw-btp-btn bw-btp-btn-secondary-dark mt-6">
-                Accéder à la plateforme
+              <Link
+                href="/formation-professionnelle-btp#demande-formation"
+                className="bw-btp-btn bw-btp-btn-secondary-dark mt-6"
+              >
+                Exprimer un besoin formation
               </Link>
             </article>
           </div>

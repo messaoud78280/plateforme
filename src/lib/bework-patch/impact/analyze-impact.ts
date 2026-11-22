@@ -991,6 +991,14 @@ function analyzeSupplyLocal(
   ]);
 
   const directChanges: DirectChange[] = [];
+  const supplierRefsInPatch = new Set(
+    patch.operations
+      .filter(
+        (op): op is Extract<typeof op, { op: "add_supplier" }> =>
+          op.op === "add_supplier",
+      )
+      .map((op) => op.supplier.ref.trim()),
+  );
 
   if (!subgraph.supply) {
     errors.push(
@@ -1077,6 +1085,33 @@ function analyzeSupplyLocal(
       }
     } else if (op.op === "add_supply_offer") {
       const o = op.offer;
+      const hasSupplierId = Boolean(o.supplier_external_org_id?.trim());
+      const supplierRef = o.supplier_ref?.trim() || "";
+      if (!hasSupplierId && !supplierRef) {
+        errors.push(
+          issue(
+            "SUPPLIER_REQUIRED",
+            `Offre « ${o.product_label} » : fournisseur requis (supplier_external_org_id ou supplier_ref + add_supplier).`,
+            "error",
+          ),
+        );
+      } else if (supplierRef && !hasSupplierId && !supplierRefsInPatch.has(supplierRef)) {
+        errors.push(
+          issue(
+            "SUPPLIER_REF_UNRESOLVED",
+            `Offre « ${o.product_label} » : supplier_ref « ${supplierRef} » absent du patch. Ajoutez add_supplier { ref: "${supplierRef}", name, … } avant l’offre.`,
+            "error",
+          ),
+        );
+      } else if (supplierRef && supplierRefsInPatch.has(supplierRef)) {
+        warnings.push(
+          issue(
+            "SUPPLIER_REF_LINKED",
+            `Offre « ${o.product_label} » rattachée au fournisseur du patch (ref=${supplierRef}).`,
+            "warn",
+          ),
+        );
+      }
       if (o.unit_price != null && o.price_source_type === "WEB_VERIFIED") {
         if (!o.source_url || !/^https?:\/\//i.test(o.source_url)) {
           errors.push(
@@ -1101,6 +1136,28 @@ function analyzeSupplyLocal(
         errors.push(
           issue("INVALID_FIELD", "Prix négatif interdit.", "error"),
         );
+      }
+      if (o.image_url) {
+        if (!/^https?:\/\//i.test(o.image_url)) {
+          errors.push(
+            issue(
+              "INVALID_FIELD",
+              `image_url invalide pour « ${o.product_label} » (http/https requis).`,
+              "error",
+            ),
+          );
+        } else {
+          directChanges.push({
+            op: op.op,
+            section: "SUPPLY",
+            entityType: "SUPPLY_OFFER",
+            entityId: "(new)",
+            label: `${o.product_label} · image`,
+            field: "image_url",
+            before: null,
+            after: o.image_url,
+          });
+        }
       }
       if (o.delivery_fee === 0) {
         // ok — gratuit réel
@@ -1150,6 +1207,11 @@ function analyzeSupplyLocal(
           ),
         );
       }
+      const supplierLabel = hasSupplierId
+        ? `id:${o.supplier_external_org_id}`
+        : supplierRef
+          ? `ref:${supplierRef}`
+          : "fournisseur manquant";
       directChanges.push({
         op: op.op,
         section: "SUPPLY",
@@ -1160,8 +1222,8 @@ function analyzeSupplyLocal(
         before: null,
         after:
           o.unit_price == null
-            ? "Prix à renseigner"
-            : `${o.unit_price} ${o.price_unit ?? ""} ${o.price_tax_mode ?? ""}`.trim(),
+            ? `Prix à demander · ${supplierLabel}`
+            : `${o.unit_price} ${o.price_unit ?? ""} ${o.price_tax_mode ?? ""} · ${supplierLabel}`.trim(),
       });
       if (o.source_url) {
         directChanges.push({
@@ -1187,10 +1249,22 @@ function analyzeSupplyLocal(
         after: op.op === "archive_supply_offer" ? "archived" : "updated",
       });
     } else if (op.op === "add_supplier") {
+      if (
+        op.supplier.parent_supplier_ref?.trim() &&
+        !supplierRefsInPatch.has(op.supplier.parent_supplier_ref.trim())
+      ) {
+        errors.push(
+          issue(
+            "PARENT_SUPPLIER_REF_UNRESOLVED",
+            `Agence « ${op.supplier.name} » : parent_supplier_ref « ${op.supplier.parent_supplier_ref} » absent du patch.`,
+            "error",
+          ),
+        );
+      }
       warnings.push(
         issue(
           "NEW_SUPPLIER",
-          `NOUVEAU FOURNISSEUR proposé : ${op.supplier.name} (ref ${op.supplier.ref}) — création uniquement après Commit.`,
+          `NOUVEAU FOURNISSEUR proposé : ${op.supplier.name} (ref ${op.supplier.ref}${op.supplier.website ? ` · ${op.supplier.website}` : ""}${op.supplier.city ? ` · ${op.supplier.city}` : ""}) — création ou réutilisation après Commit.`,
           "warn",
         ),
       );
@@ -1202,7 +1276,14 @@ function analyzeSupplyLocal(
         label: op.supplier.name,
         field: "add_supplier",
         before: null,
-        after: op.supplier.city ?? op.supplier.name,
+        after: [
+          op.supplier.website,
+          op.supplier.address,
+          op.supplier.zip_code,
+          op.supplier.city,
+        ]
+          .filter(Boolean)
+          .join(" · ") || op.supplier.name,
       });
     }
   }

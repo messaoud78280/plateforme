@@ -660,6 +660,8 @@ export type OpAddSupplyOffer = {
     vat_rate?: number | null;
     price_source_type: "WEB_VERIFIED" | "SUPPLIER_QUOTE" | "USER_ENTERED" | "IMPORT";
     source_url?: string | null;
+    /** Photo officielle produit (https) — mappée vers productImageUrl */
+    image_url?: string | null;
     quote_number?: string | null;
     quote_document_ref?: string | null;
     source_note?: string | null;
@@ -729,7 +731,10 @@ export type OpAddSupplier = {
     ref: string;
     name: string;
     trade_name?: string | null;
+    /** Enseigne déjà en base */
     parent_external_org_id?: string | null;
+    /** Enseigne créée dans le même patch (ref d’un autre add_supplier) */
+    parent_supplier_ref?: string | null;
     address?: string | null;
     zip_code?: string | null;
     city?: string | null;

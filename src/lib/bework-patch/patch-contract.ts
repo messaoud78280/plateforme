@@ -257,6 +257,7 @@ function payloadContract(
       required_fields: ["product_label", "price_source_type"],
       allowed_fields: [
         "supplier_external_org_id",
+        "supplier_id",
         "supplier_ref",
         "product_label",
         "product_ref",
@@ -268,6 +269,7 @@ function payloadContract(
         "vat_rate",
         "price_source_type",
         "source_url",
+        "image_url",
         "quote_number",
         "quote_document_ref",
         "source_note",
@@ -283,7 +285,7 @@ function payloadContract(
         "other_fees",
       ],
       rule:
-        "WEB_VERIFIED exige une URL http(s) et une date observée réelles. Une absence de prix vaut null, jamais 0.",
+        "Fournisseur : supplier_external_org_id OU supplier_ref (+ add_supplier). WEB_VERIFIED exige URL http(s) + observed_at. Prix absent = null, jamais 0. Prix à demander = unit_price null.",
     },
     add_supplier: {
       key: "supplier",
@@ -293,6 +295,7 @@ function payloadContract(
         "name",
         "trade_name",
         "parent_external_org_id",
+        "parent_supplier_ref",
         "address",
         "zip_code",
         "city",
@@ -567,10 +570,53 @@ export function buildPatchOutputContract(input: {
     "TECHNICAL_OVERRIDE exige un reason explicite et reste soumis aux protections des données validées.",
     "Une modification de prix seule utilise COMMERCIAL_ADJUSTMENT ; FIELD_UPDATE ne peut jamais modifier un prix.",
     "Pour SUPPLY, WEB_VERIFIED exige une source URL http(s) et une date observée réelles ; une valeur inconnue reste null.",
-    "Pour SUPPLY, plusieurs add_supply_need sont autorisés dans un patch. Une offre exige toutefois un requirement_id déjà présent dans data.supply_needs : après création des besoins, valider puis recopier le contexte avant de proposer leurs offres.",
+    "Pour SUPPLY, chaque add_supply_offer exige supplier_external_org_id (fournisseur connu) OU supplier_ref + add_supplier dans le même patch.",
+    "Pour SUPPLY, plusieurs add_supply_need sont autorisés dans un patch. Une offre exige un requirement_id déjà présent dans data.supply_needs : après création des besoins, valider puis recopier le contexte avant de proposer leurs offres.",
     "La prévisualisation et la validation humaine sont obligatoires avant toute écriture.",
     "Ne jamais inventer prix, quantité, mesure, fournisseur, disponibilité ou information technique manquante.",
   ];
+
+  if (input.section === "SUPPLY") {
+    const need = firstRecordInArray(input.data ?? {}, "supply_needs");
+    const requirementId = need
+      ? text(need.requirement_id, "<REQUIREMENT_ID_FROM_DATA>")
+      : null;
+    if (requirementId) {
+      validPatchExample.operations = [
+        {
+          op: "add_supplier",
+          target: {
+            entity_type: "SUPPLY_WORKSPACE",
+            project_id: origin.project_id,
+          },
+          supplier: {
+            ref: "fournisseur_exemple",
+            name: "EXEMPLE STRUCTUREL — remplacer par un fournisseur réel",
+            website: "https://exemple.invalid",
+            city: "À confirmer",
+          },
+        },
+        {
+          op: "add_supply_offer",
+          target: {
+            entity_type: "MATERIAL_REQUIREMENT",
+            requirement_id: requirementId,
+          },
+          offer: {
+            supplier_ref: "fournisseur_exemple",
+            product_label: "EXEMPLE STRUCTUREL — produit à confirmer",
+            price_source_type: "USER_ENTERED",
+            unit_price: null,
+            source_note: "Tarif à demander — ne pas inventer de prix",
+            equivalence_status: "TO_VERIFY",
+            availability_note: "Disponibilité à confirmer",
+            delivery_fee: null,
+          },
+        },
+      ];
+      validPatchExample.change_intent = "TECHNICAL_CORRECTION";
+    }
+  }
 
   return {
     format: BEWORK_PATCH_FORMAT,

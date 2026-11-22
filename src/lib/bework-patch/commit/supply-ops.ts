@@ -153,13 +153,41 @@ export async function applySupplyDirectInTx(
   const createdOfferIds: string[] = [];
   const createdSupplierIds: string[] = [];
   const warnings: string[] = [];
-  /** ref → id fournisseur créé dans ce patch */
+  /** ref normalisée → id fournisseur créé / réutilisé dans ce patch */
   const supplierRefMap = new Map<string, string>();
+  const normRef = (r: string) => r.trim();
 
-  // 1) Fournisseurs d’abord
-  for (const op of patch.operations) {
-    if (op.op !== "add_supplier") continue;
-    const s = op.supplier;
+  async function upsertSupplierFromOp(
+    s: Extract<
+      BeworkPatchV1["operations"][number],
+      { op: "add_supplier" }
+    >["supplier"],
+  ): Promise<void> {
+    const refKey = normRef(s.ref);
+    if (supplierRefMap.has(refKey)) return;
+
+    let parentId: string | null = s.parent_external_org_id?.trim() || null;
+    if (s.parent_supplier_ref?.trim()) {
+      const parentFromPatch = supplierRefMap.get(normRef(s.parent_supplier_ref));
+      if (!parentFromPatch) {
+        fail(
+          `parent_supplier_ref « ${s.parent_supplier_ref} » introuvable — créez d’abord l’enseigne (add_supplier) dans le même patch.`,
+        );
+      }
+      parentId = parentFromPatch;
+    }
+    if (parentId) {
+      const parent = await tx.externalOrganization.findFirst({
+        where: {
+          id: parentId,
+          hostOrganizationId: orgId,
+          type: { in: ["SUPPLIER", "SUBCONTRACTOR"] },
+        },
+        select: { id: true },
+      });
+      if (!parent) fail("Enseigne parente introuvable ou hors organisation");
+    }
+
     // Matching ambigu : si plusieurs proches → refuse auto-fusion
     const candidates = await tx.externalOrganization.findMany({
       where: {
@@ -168,10 +196,24 @@ export async function applySupplyDirectInTx(
         OR: [
           { name: { equals: s.name, mode: "insensitive" } },
           ...(s.trade_name
-            ? [{ tradeName: { equals: s.trade_name, mode: "insensitive" as const } }]
+            ? [
+                {
+                  tradeName: {
+                    equals: s.trade_name,
+                    mode: "insensitive" as const,
+                  },
+                },
+              ]
             : []),
           ...(s.website
-            ? [{ website: { equals: s.website, mode: "insensitive" as const } }]
+            ? [
+                {
+                  website: {
+                    equals: s.website,
+                    mode: "insensitive" as const,
+                  },
+                },
+              ]
             : []),
         ],
       },
@@ -179,12 +221,12 @@ export async function applySupplyDirectInTx(
       take: 5,
     });
     if (candidates.length === 1) {
-      supplierRefMap.set(s.ref, candidates[0]!.id);
+      supplierRefMap.set(refKey, candidates[0]!.id);
       warnings.push(
         `FOURNISSEUR EXISTANT réutilisé pour ref=${s.ref} (${candidates[0]!.name})`,
       );
       appliedOps.push("add_supplier:reuse");
-      continue;
+      return;
     }
     if (candidates.length > 1) {
       fail(
@@ -192,24 +234,14 @@ export async function applySupplyDirectInTx(
         "SUPPLIER_MATCH_AMBIGUOUS",
       );
     }
-    if (s.parent_external_org_id) {
-      const parent = await tx.externalOrganization.findFirst({
-        where: {
-          id: s.parent_external_org_id,
-          hostOrganizationId: orgId,
-          type: "SUPPLIER",
-        },
-        select: { id: true },
-      });
-      if (!parent) fail("Enseigne parente introuvable ou hors organisation");
-    }
+
     const created = await tx.externalOrganization.create({
       data: {
         hostOrganizationId: orgId,
         name: s.name.trim(),
         type: "SUPPLIER",
         tradeName: s.trade_name?.trim() || null,
-        parentExternalOrgId: s.parent_external_org_id || null,
+        parentExternalOrgId: parentId,
         address: s.address?.trim() || null,
         zipCode: s.zip_code?.trim() || null,
         city: s.city?.trim() || null,
@@ -222,9 +254,23 @@ export async function applySupplyDirectInTx(
       },
       select: { id: true },
     });
-    supplierRefMap.set(s.ref, created.id);
+    supplierRefMap.set(refKey, created.id);
     createdSupplierIds.push(created.id);
     appliedOps.push("add_supplier");
+  }
+
+  // 1) Fournisseurs d’abord (enseignes sans parent_ref, puis agences liées)
+  const supplierOps = patch.operations.filter(
+    (op): op is Extract<BeworkPatchV1["operations"][number], { op: "add_supplier" }> =>
+      op.op === "add_supplier",
+  );
+  for (const op of supplierOps) {
+    if (op.supplier.parent_supplier_ref?.trim()) continue;
+    await upsertSupplierFromOp(op.supplier);
+  }
+  for (const op of supplierOps) {
+    if (!op.supplier.parent_supplier_ref?.trim()) continue;
+    await upsertSupplierFromOp(op.supplier);
   }
 
   // 2) Besoins
@@ -389,9 +435,19 @@ export async function applySupplyDirectInTx(
       const supplierId =
         op.offer.supplier_external_org_id?.trim() ||
         (op.offer.supplier_ref
-          ? supplierRefMap.get(op.offer.supplier_ref) ?? null
+          ? supplierRefMap.get(normRef(op.offer.supplier_ref)) ?? null
           : null);
-      if (!supplierId) fail("Fournisseur requis (id existant ou supplier_ref)");
+      if (!supplierId) {
+        const available =
+          [...supplierRefMap.keys()].join(", ") ||
+          "(aucune — ajoutez add_supplier avec le même supplier_ref avant les offres)";
+        fail(
+          `Fournisseur requis (id existant ou supplier_ref). ` +
+            (op.offer.supplier_ref
+              ? `ref « ${op.offer.supplier_ref} » introuvable dans le patch. Refs résolues : ${available}`
+              : `Ni supplier_external_org_id ni supplier_ref. Refs résolues : ${available}`),
+        );
+      }
       const supplier = await tx.externalOrganization.findFirst({
         where: {
           id: supplierId,
@@ -535,6 +591,10 @@ export async function applySupplyDirectInTx(
           deliveryFee: op.offer.delivery_fee ?? null,
           craneFee: op.offer.crane_fee ?? null,
           otherFees: op.offer.other_fees ?? null,
+          productImageUrl: op.offer.image_url?.trim() || null,
+          productImageOrigin: op.offer.image_url?.trim()
+            ? "SUPPLIER_URL"
+            : null,
         },
         select: { id: true },
       });

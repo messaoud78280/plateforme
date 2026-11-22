@@ -356,13 +356,21 @@ function parseOperation(
     );
     return null;
   }
-  const opName = str(raw.op ?? raw.operation, 60);
+  const rawOpName = str(raw.op ?? raw.operation, 60);
+  /** Alias ChatGPT / docs — même sémantique que add_supplier */
+  const OP_ALIASES: Record<string, string> = {
+    add_supply_supplier: "add_supplier",
+    create_supplier: "add_supplier",
+  };
+  const opName = rawOpName
+    ? (OP_ALIASES[rawOpName] ?? rawOpName)
+    : null;
   if (!opName || !(opName in OPERATION_CATALOG)) {
     issues.push(
       err(
         "UNKNOWN_OPERATION",
         `${path}.op`,
-        `Opération inconnue « ${opName ?? "?"} »`,
+        `Opération inconnue « ${rawOpName ?? "?"} »`,
         {
           expected: Object.keys(OPERATION_CATALOG).join(" | "),
           received: raw.op ?? raw.operation,
@@ -1434,6 +1442,32 @@ function parseOperation(
         issues.push(err("INVALID_FIELD", `${path}.offer.unit_price`, "prix négatif interdit"));
         return null;
       }
+      const supplierExternalOrgId =
+        str(raw.offer.supplier_external_org_id, 80) ??
+        str(raw.offer.supplier_id, 80) ??
+        null;
+      const supplierRef = str(raw.offer.supplier_ref, 80) ?? null;
+      if (!supplierExternalOrgId && !supplierRef) {
+        issues.push(
+          err(
+            "INVALID_FIELD",
+            `${path}.offer`,
+            "Fournisseur requis : supplier_external_org_id (connu) OU supplier_ref + opération add_supplier dans le même patch. Ne pas utiliser seulement supplier_name.",
+          ),
+        );
+        return null;
+      }
+      const imageUrl = str(raw.offer.image_url, 2000) ?? null;
+      if (imageUrl && !/^https?:\/\//i.test(imageUrl)) {
+        issues.push(
+          err(
+            "INVALID_FIELD",
+            `${path}.offer.image_url`,
+            "image_url doit être une URL http(s) officielle — aucune image inventée.",
+          ),
+        );
+        return null;
+      }
       return {
         op,
         target: {
@@ -1442,9 +1476,8 @@ function parseOperation(
           requirement_id: requirementId,
         },
         offer: {
-          supplier_external_org_id:
-            str(raw.offer.supplier_external_org_id, 80) ?? null,
-          supplier_ref: str(raw.offer.supplier_ref, 80) ?? null,
+          supplier_external_org_id: supplierExternalOrgId,
+          supplier_ref: supplierRef,
           product_label: productLabel,
           product_ref: str(raw.offer.product_ref, 120) ?? null,
           tech_attributes:
@@ -1468,6 +1501,7 @@ function parseOperation(
             | "USER_ENTERED"
             | "IMPORT",
           source_url: str(raw.offer.source_url, 2000) ?? null,
+          image_url: imageUrl,
           quote_number: str(raw.offer.quote_number, 120) ?? null,
           quote_document_ref: str(raw.offer.quote_document_ref, 200) ?? null,
           source_note: str(raw.offer.source_note, 2000) ?? null,
@@ -1651,6 +1685,8 @@ function parseOperation(
           trade_name: str(raw.supplier.trade_name, 200) ?? null,
           parent_external_org_id:
             str(raw.supplier.parent_external_org_id, 80) ?? null,
+          parent_supplier_ref:
+            str(raw.supplier.parent_supplier_ref, 80) ?? null,
           address: str(raw.supplier.address, 300) ?? null,
           zip_code: str(raw.supplier.zip_code, 20) ?? null,
           city: str(raw.supplier.city, 120) ?? null,

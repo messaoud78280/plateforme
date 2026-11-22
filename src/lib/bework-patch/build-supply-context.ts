@@ -12,20 +12,98 @@ import { calculateMaterialRequirementProgress } from "@/lib/materiaux/progress";
 const SUPPLY_ANTI_INVENTION_RULES = [
   "RÈGLE ABSOLUE — Ne jamais inventer : fournisseur, agence, produit, référence, prix, URL, stock, disponibilité, délai, conditionnement, frais de livraison, frais de grutage, minimum de commande, caractéristiques techniques.",
   "Si une information n’est pas réellement disponible : utiliser null ou « À confirmer ». ABSENCE D’INFORMATION ≠ 0.",
-  "Tout prix WEB_VERIFIED exige : fournisseur réel, produit réel, sourceUrl http(s) réelle, prix observé, unité tarifaire, HT ou TTC, date réelle du relevé (fiche produit / tarif officiel — pas un snippet Google).",
-  "Un fournisseur « sur devis » : unitPrice = null + note explicite. Mieux vaut un prix null qu’un prix inventé.",
+  "Tout prix WEB_VERIFIED exige : fournisseur réel, produit réel, source_url http(s) réelle, prix observé, unité tarifaire, HT ou TTC, date réelle du relevé (fiche produit / tarif officiel — pas un snippet Google).",
+  "Prix à demander (TO_QUOTE) : unit_price = null + price_source_type USER_ENTERED ou SUPPLIER_QUOTE + source_note explicite (« tarif à demander »). Jamais inventer un prix.",
+  "FOURNISSEURS — obligatoire pour chaque offre : soit supplier_external_org_id (id dans known_suppliers), soit supplier_ref qui pointe vers un add_supplier du MÊME patch. Ne jamais mettre seulement supplier_name sur l’offre.",
+  "Ordre dans le même patch : 1) add_supplier (enseignes puis agences avec parent_supplier_ref), 2) add_supply_need si besoin, 3) add_supply_offer avec supplier_ref ou supplier_external_org_id.",
+  "add_supplier : { ref, name, website?, address?, zip_code?, city?, phone?, email?, parent_supplier_ref? }. Alias accepté : add_supply_supplier → add_supplier.",
+  "Agence physique : add_supplier pour l’enseigne (ref=enseigne_x) puis add_supplier pour l’agence (ref=agence_y, parent_supplier_ref=enseigne_x, address/city).",
+  "image_url : URL http(s) de la photo officielle produit uniquement — jamais d’image inventée. Champ optionnel.",
   "Ne jamais modifier selectedOfferId, PurchaseOrder, métré, devis client ni Planning V2 via ce patch.",
-  "Ne jamais passer equivalenceStatus à CONFIRMED sans validation professionnelle — défaut TO_VERIFY (PROBABLE si caractéristiques clairement alignées).",
-  "deliveryFee / craneFee / otherFees : null = inconnu ; 0 = réellement gratuit. Ne jamais estimer.",
+  "Ne jamais passer equivalence_status à CONFIRMED sans validation professionnelle — défaut TO_VERIFY.",
+  "delivery_fee / crane_fee / other_fees : null = inconnu ; 0 = réellement gratuit. Ne jamais estimer.",
   "Disponibilité : ne pas écrire « Disponible » sans preuve source. Sinon null ou « Disponibilité à confirmer ».",
-  "unitsPerPack / conditionnement : uniquement si la source le permet — jamais déduire arbitrairement.",
-  "Priorité géographique : proximité pour béton, granulats, évacuation, engins, locations, transport lourd. Produits standards : livraisons nationales acceptables. Aucune enseigne hardcodée.",
-  "Hypothèses (ex. pelle 8 t / 2 j) : signaler is_hypothesis: true — jamais comme certitude.",
+  "units_per_pack / conditionnement : uniquement si la source le permet — jamais déduire arbitrairement.",
+  "Priorité géographique : proximité pour béton, granulats, évacuation, engins, locations, transport lourd.",
+  "Hypothèses : is_hypothesis: true — jamais comme certitude.",
   "Le prix de vente client (devis) n’est JAMAIS une preuve de prix fournisseur.",
-  "Un même patch peut contenir plusieurs add_supply_need. Chaque besoin doit rester distinct et traçable.",
-  "add_supply_offer exige un requirement_id déjà présent dans supply_needs. Après création de nouveaux besoins, valider le premier patch puis recopier le contexte avant de proposer leurs offres.",
-  "Sortie attendue : bework_patch_v1 uniquement (pas de format supply dédié).",
+  "add_supply_offer.requirement_id doit être un id de supply_needs (besoins existants). Pour de NOUVEAUX besoins créés dans le même patch : ce n’est pas supporté — d’abord commit des besoins, puis patch offres.",
+  "Sortie attendue : bework_patch_v1 uniquement.",
 ].join("\n");
+
+const SUPPLY_PATCH_EXAMPLE = {
+  schema: "bework_patch_v1",
+  origin: {
+    section: "SUPPLY",
+    entity_type: "SUPPLY_WORKSPACE",
+    entity_id: "<projectId>",
+    base_version: "<context_version>",
+  },
+  intent: "TECHNICAL_CORRECTION",
+  operations: [
+    {
+      op: "add_supplier",
+      target: { entity_type: "SUPPLY_WORKSPACE", project_id: "<projectId>" },
+      supplier: {
+        ref: "enseigne_pointp",
+        name: "POINT.P",
+        website: "https://www.pointp.fr",
+        activity: "Négoce matériaux",
+      },
+    },
+    {
+      op: "add_supplier",
+      target: { entity_type: "SUPPLY_WORKSPACE", project_id: "<projectId>" },
+      supplier: {
+        ref: "agence_pointp_trappes",
+        name: "POINT.P Trappes",
+        parent_supplier_ref: "enseigne_pointp",
+        address: "…",
+        zip_code: "78190",
+        city: "Trappes",
+        website: "https://www.pointp.fr",
+      },
+    },
+    {
+      op: "add_supply_offer",
+      target: {
+        entity_type: "MATERIAL_REQUIREMENT",
+        requirement_id: "<id besoin existant>",
+      },
+      offer: {
+        supplier_ref: "agence_pointp_trappes",
+        product_label: "Bloc béton creux 20 cm",
+        product_ref: "…",
+        price_source_type: "WEB_VERIFIED",
+        unit_price: 1.85,
+        price_unit: "U",
+        price_tax_mode: "HT",
+        vat_rate: 20,
+        source_url: "https://…",
+        image_url: "https://…",
+        observed_at: "2026-11-22",
+        equivalence_status: "TO_VERIFY",
+        availability_note: "Disponibilité à confirmer en agence",
+        delivery_fee: null,
+      },
+    },
+    {
+      op: "add_supply_offer",
+      target: {
+        entity_type: "MATERIAL_REQUIREMENT",
+        requirement_id: "<id besoin existant>",
+      },
+      offer: {
+        supplier_ref: "agence_pointp_trappes",
+        product_label: "Autre produit — tarif à demander",
+        price_source_type: "USER_ENTERED",
+        unit_price: null,
+        source_note: "Tarif à demander au fournisseur",
+        equivalence_status: "TO_VERIFY",
+      },
+    },
+  ],
+};
 
 function n(v: unknown): number | null {
   if (v == null || v === "") return null;
@@ -550,15 +628,17 @@ export async function buildSupplyContext(
       blocks_for_modifier_par_bloc: [
         "Besoin (add_supply_need / update_supply_need / cancel_supply_need)",
         "Offre fournisseur (add_supply_offer / update_supply_offer / archive_supply_offer)",
-        "Prix / source (champs unit_price, price_source_type, source_url, observed_at)",
+        "Prix / source (champs unit_price, price_source_type, source_url, observed_at, image_url)",
         "Logistique (delivery_fee, crane_fee, other_fees, lead_time_days, availability_note)",
-        "Fournisseur/agence (add_supplier)",
+        "Fournisseur/agence (add_supplier — obligatoire avant offre si nouveau fournisseur ; lier via supplier_ref)",
       ],
+      patch_example_supplier_and_offers: SUPPLY_PATCH_EXAMPLE,
     },
     relationships: {
       notes: [
         "selectedOfferId non modifiable via patch SUPPLY — le professionnel retient l’offre dans le cockpit.",
         "Actualisation prix : préférer archive + nouvelle offre (historique conservé) plutôt qu’écrasement silencieux.",
+        "Réutiliser known_suppliers[].id via supplier_external_org_id quand le fournisseur existe déjà.",
       ],
     },
   };

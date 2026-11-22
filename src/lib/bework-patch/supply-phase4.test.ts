@@ -550,4 +550,221 @@ function basePatch(ops: unknown[]) {
   console.log("T28 — stock non inventé OK");
 }
 
-console.log("\nTous les tests supply-phase4 T1–T28 OK");
+// T29 — offre sans fournisseur refusée au parse
+{
+  const parsed = parseBeworkPatch(
+    JSON.stringify(
+      basePatch([
+        {
+          op: "add_supply_offer",
+          target: {
+            entity_type: "MATERIAL_REQUIREMENT",
+            requirement_id: "req-1",
+          },
+          offer: {
+            product_label: "Bloc",
+            price_source_type: "USER_ENTERED",
+          },
+        },
+      ]),
+    ),
+  );
+  assert.equal(parsed.ok, false);
+  console.log("T29 — offre sans fournisseur refusée OK");
+}
+
+// T30 — add_supplier + supplier_ref résolu en Preview
+{
+  const subgraph = emptySubgraph("proj-1");
+  subgraph.supply = {
+    projectId: "proj-1",
+    contextVersion: 42,
+    needCount: 1,
+    offerCount: 0,
+    needsWithOrders: 0,
+  };
+  const parsed = parseBeworkPatch(
+    JSON.stringify(
+      basePatch([
+        {
+          op: "add_supplier",
+          target: { entity_type: "SUPPLY_WORKSPACE", project_id: "proj-1" },
+          supplier: {
+            ref: "pointp_trappes",
+            name: "POINT.P Trappes",
+            website: "https://www.pointp.fr",
+            city: "Trappes",
+          },
+        },
+        {
+          op: "add_supply_offer",
+          target: {
+            entity_type: "MATERIAL_REQUIREMENT",
+            requirement_id: "req-1",
+          },
+          offer: {
+            supplier_ref: "pointp_trappes",
+            product_label: "Bloc béton 20",
+            product_ref: "B20",
+            price_source_type: "WEB_VERIFIED",
+            unit_price: 1.85,
+            price_unit: "U",
+            price_tax_mode: "HT",
+            vat_rate: 20,
+            source_url: "https://www.pointp.fr/produit/exemple",
+            image_url: "https://cdn.example.com/bloc.jpg",
+            observed_at: "2026-11-22",
+            equivalence_status: "TO_VERIFY",
+            availability_note: "À confirmer en agence",
+            delivery_fee: null,
+          },
+        },
+        {
+          op: "add_supply_offer",
+          target: {
+            entity_type: "MATERIAL_REQUIREMENT",
+            requirement_id: "req-1",
+          },
+          offer: {
+            supplier_ref: "pointp_trappes",
+            product_label: "Produit sur devis",
+            price_source_type: "USER_ENTERED",
+            unit_price: null,
+            source_note: "Tarif à demander",
+          },
+        },
+      ]),
+    ),
+  );
+  assert.ok(parsed.ok);
+  if (parsed.ok) {
+    const impact = analyzePatchImpact({ patch: parsed.patch, subgraph });
+    assert.equal(impact.errors.length, 0);
+    assert.ok(
+      impact.warnings.some((w) => /SUPPLIER_REF_LINKED|rattachée/i.test(w.message)),
+    );
+    assert.ok(
+      impact.warnings.some((w) => /NOUVEAU FOURNISSEUR/i.test(w.message)),
+    );
+    assert.ok(
+      impact.directChanges.some(
+        (c) => c.field === "image_url" && String(c.after).includes("https://"),
+      ),
+    );
+    const offers = parsed.patch.operations.filter((o) => o.op === "add_supply_offer");
+    assert.equal(offers.length, 2);
+    if (offers[0]?.op === "add_supply_offer") {
+      assert.equal(offers[0].offer.supplier_ref, "pointp_trappes");
+      assert.equal(offers[0].offer.image_url, "https://cdn.example.com/bloc.jpg");
+    }
+    if (offers[1]?.op === "add_supply_offer") {
+      assert.equal(offers[1].offer.unit_price, null);
+    }
+  }
+  console.log("T30 — supplier_ref + prix vérifié + TO_QUOTE + image OK");
+}
+
+// T31 — supplier_ref orphelin détecté en Preview
+{
+  const subgraph = emptySubgraph("proj-1");
+  subgraph.supply = {
+    projectId: "proj-1",
+    contextVersion: 42,
+    needCount: 1,
+    offerCount: 0,
+    needsWithOrders: 0,
+  };
+  const parsed = parseBeworkPatch(
+    JSON.stringify(
+      basePatch([
+        {
+          op: "add_supply_offer",
+          target: {
+            entity_type: "MATERIAL_REQUIREMENT",
+            requirement_id: "req-1",
+          },
+          offer: {
+            supplier_ref: "inconnu",
+            product_label: "Bloc",
+            price_source_type: "USER_ENTERED",
+          },
+        },
+      ]),
+    ),
+  );
+  assert.ok(parsed.ok);
+  if (parsed.ok) {
+    const impact = analyzePatchImpact({ patch: parsed.patch, subgraph });
+    assert.ok(
+      impact.errors.some((e) => /SUPPLIER_REF_UNRESOLVED|absent du patch/i.test(e.message)),
+    );
+  }
+  console.log("T31 — supplier_ref orphelin Preview OK");
+}
+
+// T32 — alias add_supply_supplier
+{
+  const parsed = parseBeworkPatch(
+    JSON.stringify(
+      basePatch([
+        {
+          op: "add_supply_supplier",
+          target: { entity_type: "SUPPLY_WORKSPACE", project_id: "proj-1" },
+          supplier: { ref: "s1", name: "Fournisseur Test" },
+        },
+      ]),
+    ),
+  );
+  assert.ok(parsed.ok);
+  if (parsed.ok) {
+    assert.equal(parsed.patch.operations[0]?.op, "add_supplier");
+  }
+  console.log("T32 — alias add_supply_supplier OK");
+}
+
+// T33 — parent_supplier_ref + agence
+{
+  const subgraph = emptySubgraph("proj-1");
+  subgraph.supply = {
+    projectId: "proj-1",
+    contextVersion: 42,
+    needCount: 0,
+    offerCount: 0,
+    needsWithOrders: 0,
+  };
+  const parsed = parseBeworkPatch(
+    JSON.stringify(
+      basePatch([
+        {
+          op: "add_supplier",
+          target: { entity_type: "SUPPLY_WORKSPACE", project_id: "proj-1" },
+          supplier: { ref: "enseigne", name: "Enseigne", website: "https://a.example" },
+        },
+        {
+          op: "add_supplier",
+          target: { entity_type: "SUPPLY_WORKSPACE", project_id: "proj-1" },
+          supplier: {
+            ref: "agence",
+            name: "Agence",
+            parent_supplier_ref: "enseigne",
+            city: "Trappes",
+            address: "1 rue Test",
+          },
+        },
+      ]),
+    ),
+  );
+  assert.ok(parsed.ok);
+  if (parsed.ok) {
+    const impact = analyzePatchImpact({ patch: parsed.patch, subgraph });
+    assert.equal(impact.errors.length, 0);
+    const agence = parsed.patch.operations[1];
+    assert.equal(agence?.op, "add_supplier");
+    if (agence?.op === "add_supplier") {
+      assert.equal(agence.supplier.parent_supplier_ref, "enseigne");
+    }
+  }
+  console.log("T33 — parent_supplier_ref agence OK");
+}
+
+console.log("\nTous les tests supply-phase4 T1–T33 OK");

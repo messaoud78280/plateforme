@@ -15,13 +15,16 @@ import {
   Calculator,
   Calendar,
   Check,
+  ExternalLink,
   Eye,
   FileText,
   ImagePlus,
   Link2,
+  MapPin,
   MoreHorizontal,
   Package,
   Pencil,
+  Phone,
   Ruler,
   Search,
   ShoppingCart,
@@ -38,13 +41,20 @@ import { BeworkPatchToolbar } from "@/components/bework-patch/BeworkPatchToolbar
 import { getSectionCapability } from "@/lib/bework-patch/capability";
 import { SupplyAddOfferModal } from "@/components/projects/SupplyOffersPanel";
 import {
+  formatOfferPriceOrAsk,
   formatStudyDay,
   formatStudyMoney,
   isJustifiedPricedOffer,
   needStatusLabel,
   normalizeOfferUrl,
+  offerAgencyLabel,
+  offerFullAddress,
+  offerMapsItineraryUrl,
+  offerSupplierBrandLabel,
+  offerUnitPriceBreakdown,
   percentVsBest,
   qualifyOfferSourceLabel,
+  safeExternalHttpUrl,
   validateProductUrl,
 } from "@/components/projects/supply-study/supply-study-format";
 import {
@@ -212,6 +222,10 @@ export function SupplyStudyDialog({
   const [imageUrlDraft, setImageUrlDraft] = useState("");
   const [imageUrlPanelOpen, setImageUrlPanelOpen] = useState(false);
   const [imageBusy, setImageBusy] = useState(false);
+  const [imageLightbox, setImageLightbox] = useState<{
+    src: string;
+    alt: string;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const dirty = useMemo(() => {
@@ -1268,6 +1282,13 @@ export function SupplyStudyDialog({
                 const justified =
                   o.priceSourceType === "WEB_VERIFIED" &&
                   isJustifiedPricedOffer(o);
+                const productHref = safeExternalHttpUrl(o.sourceUrl);
+                const brand = offerSupplierBrandLabel(o);
+                const agency = offerAgencyLabel(o);
+                const priceLine =
+                  o.unitPrice == null
+                    ? "Prix à demander"
+                    : `${formatOfferPriceOrAsk(o.unitPrice)} / ${o.priceUnit} ${o.priceTaxMode}`;
                 return (
                   <div
                     key={o.id}
@@ -1277,79 +1298,118 @@ export function SupplyStudyDialog({
                         : "border-slate-200 bg-white hover:border-slate-300"
                     } ${o.archivedAt ? "opacity-60" : ""}`}
                   >
-                    <button
-                      type="button"
-                      onClick={() => setInspectedId(o.id)}
-                      className="w-full text-left"
-                    >
-                      <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setInspectedId(o.id)}
+                        className="mt-1 shrink-0"
+                        aria-label="Inspecter l’offre"
+                      >
                         <span
-                          className={`mt-1 h-4 w-4 shrink-0 rounded-full border-2 ${
+                          className={`block h-4 w-4 rounded-full border-2 ${
                             selected
                               ? "border-[#2563eb] bg-[#2563eb]"
                               : "border-slate-300"
                           }`}
                           aria-hidden
                         />
-                        {o.productImageDisplayUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={o.productImageDisplayUrl}
-                            alt=""
-                            className="h-12 w-12 shrink-0 rounded-lg border border-slate-200 object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50">
-                            <Package className="h-5 w-5 text-slate-300" />
-                          </div>
-                        )}
-                        <div className="min-w-0 flex-1 pr-16">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p className="truncate text-sm font-bold text-slate-900">
-                              {o.agencyDisplay || o.supplierName}
-                            </p>
-                            <span
-                              className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
-                                justified
-                                  ? "bg-emerald-100 text-emerald-800"
-                                  : o.priceSourceType === "SUPPLIER_QUOTE"
-                                    ? "bg-slate-200 text-slate-700"
-                                    : "bg-slate-100 text-slate-600"
-                              }`}
-                            >
-                              {qualifyOfferSourceLabel(o)}
-                            </span>
-                            {o.isSelected ? (
-                              <span className="rounded bg-[#1e3a5f] px-1.5 py-0.5 text-[10px] font-bold text-white">
-                                Retenue
-                              </span>
-                            ) : null}
-                          </div>
-                          <p className="mt-0.5 truncate text-xs text-slate-600">
+                      </button>
+                      <OfferProductThumb
+                        key={`${o.id}-${o.productImageDisplayUrl ?? "none"}`}
+                        src={o.productImageDisplayUrl}
+                        alt={o.productLabel}
+                        size="sm"
+                        onEnlarge={
+                          o.productImageDisplayUrl
+                            ? () =>
+                                setImageLightbox({
+                                  src: o.productImageDisplayUrl!,
+                                  alt: o.productLabel,
+                                })
+                            : undefined
+                        }
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setInspectedId(o.id)}
+                        className="min-w-0 flex-1 pr-16 text-left"
+                      >
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-bold leading-snug text-slate-900">
                             {o.productLabel}
-                            {o.productRef ? ` · ${o.productRef}` : ""}
                           </p>
-                          <div className="mt-1 flex flex-wrap items-baseline gap-2">
-                            <p className="text-sm font-bold tabular-nums text-slate-900">
-                              {o.unitPrice == null
-                                ? "Prix non reçu"
-                                : `${formatStudyMoney(o.unitPrice)}/${o.priceUnit} ${o.priceTaxMode}`}
-                            </p>
-                            {vs ? (
-                              <span className="text-[11px] font-semibold text-red-600">
-                                {vs}
-                              </span>
-                            ) : null}
-                          </div>
-                          <p className="mt-0.5 text-[11px] text-slate-500">
-                            {o.packagingLabel || "Conditionnement —"}
-                            {" · "}
-                            {formatStudyDay(o.observedAt || o.recordedAt)}
-                            {o.sourceUrl ? " · lien source" : ""}
-                          </p>
+                          <span
+                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                              justified
+                                ? "bg-emerald-100 text-emerald-800"
+                                : o.priceSourceType === "SUPPLIER_QUOTE"
+                                  ? "bg-slate-200 text-slate-700"
+                                  : "bg-slate-100 text-slate-600"
+                            }`}
+                          >
+                            {qualifyOfferSourceLabel(o)}
+                          </span>
+                          {o.isSelected ? (
+                            <span className="rounded bg-[#1e3a5f] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                              Retenue
+                            </span>
+                          ) : null}
                         </div>
-                      </div>
-                    </button>
+                        <p className="mt-0.5 text-xs text-slate-600">
+                          Référence :{" "}
+                          <span className="font-semibold text-slate-800">
+                            {o.productRef?.trim() || "à confirmer"}
+                          </span>
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-600">
+                          Fournisseur :{" "}
+                          <span className="font-semibold text-slate-800">
+                            {brand}
+                          </span>
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-600">
+                          Agence :{" "}
+                          <span className="font-semibold text-slate-800">
+                            {agency}
+                          </span>
+                        </p>
+                        <div className="mt-1 flex flex-wrap items-baseline gap-2">
+                          <p
+                            className={`text-sm font-bold tabular-nums ${
+                              o.unitPrice == null
+                                ? "text-amber-800"
+                                : justified
+                                  ? "text-emerald-800"
+                                  : "text-slate-900"
+                            }`}
+                          >
+                            Prix : {priceLine}
+                          </p>
+                          {vs ? (
+                            <span className="text-[11px] font-semibold text-red-600">
+                              {vs}
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="mt-0.5 text-[11px] text-slate-500">
+                          Stock : {o.availabilityNote?.trim() || "à confirmer"}
+                          {" · "}
+                          {formatStudyDay(o.observedAt || o.recordedAt)}
+                        </p>
+                      </button>
+                    </div>
+                    {productHref ? (
+                      <a
+                        href={productHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#2563eb]/30 bg-[#2563eb]/5 px-2.5 py-1.5 text-xs font-bold text-[#1d4ed8] hover:bg-[#2563eb]/10 sm:w-auto"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        Voir le produit
+                      </a>
+                    ) : null}
                     {canWrite && !o.archivedAt ? (
                       <div className="absolute right-2 top-2 flex items-center gap-0.5">
                         <button
@@ -1496,11 +1556,23 @@ export function SupplyStudyDialog({
               </p>
             ) : (
               <>
-                {/* Carte photo — toujours visible, hors scroll des détails */}
+                {(() => {
+                  const priceBreak = offerUnitPriceBreakdown(inspected);
+                  const productHref = safeExternalHttpUrl(inspected.sourceUrl);
+                  const mapsHref = offerMapsItineraryUrl(inspected);
+                  const fullAddress = offerFullAddress(inspected);
+                  const brand = offerSupplierBrandLabel(inspected);
+                  const agency = offerAgencyLabel(inspected);
+                  const websiteHref = safeExternalHttpUrl(
+                    inspected.supplierWebsite,
+                  );
+                  return (
+                    <>
+                {/* Photo + identification */}
                 <div className="mt-3 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                   <div className="flex items-center justify-between gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2">
                     <p className="text-[11px] font-bold uppercase tracking-wide text-slate-600">
-                      Photo de présentation
+                      Photo et identification
                     </p>
                     {imageBusy ? (
                       <span className="text-[10px] font-medium text-slate-500">
@@ -1508,23 +1580,33 @@ export function SupplyStudyDialog({
                       </span>
                     ) : null}
                   </div>
-                  {inspected.productImageDisplayUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={inspected.id}
-                      src={inspected.productImageDisplayUrl}
-                      alt={inspected.productLabel}
-                      className="h-36 w-full object-contain bg-white sm:h-40"
-                    />
-                  ) : (
-                    <div className="flex h-32 flex-col items-center justify-center gap-1.5 bg-slate-50/80 px-3 text-center text-slate-400 sm:h-36">
-                      <Package className="h-8 w-8" />
-                      <span className="text-xs font-semibold text-slate-500">
-                        Aucune photo de présentation
-                      </span>
-                    </div>
-                  )}
+                  <OfferProductThumb
+                    key={inspected.id}
+                    src={inspected.productImageDisplayUrl}
+                    alt={inspected.productLabel}
+                    size="lg"
+                    onEnlarge={
+                      inspected.productImageDisplayUrl
+                        ? () =>
+                            setImageLightbox({
+                              src: inspected.productImageDisplayUrl!,
+                              alt: inspected.productLabel,
+                            })
+                        : undefined
+                    }
+                  />
                   <div className="space-y-2 border-t border-slate-100 bg-white p-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-slate-900">
+                        {inspected.productLabel}
+                      </p>
+                      <p className="mt-0.5 text-xs text-slate-600">
+                        Référence :{" "}
+                        <span className="font-semibold text-slate-800">
+                          {inspected.productRef?.trim() || "à confirmer"}
+                        </span>
+                      </p>
+                    </div>
                     {canWrite && !inspected.archivedAt ? (
                       <>
                         <div className="flex flex-wrap gap-2">
@@ -1536,8 +1618,8 @@ export function SupplyStudyDialog({
                           >
                             <ImagePlus className="h-3.5 w-3.5" />
                             {inspected.productImageUrl
-                              ? "Remplacer"
-                              : "Importer une photo"}
+                              ? "Remplacer la photo"
+                              : "Ajouter une photo"}
                           </button>
                           <button
                             type="button"
@@ -1642,7 +1724,8 @@ export function SupplyStudyDialog({
                           </p>
                         ) : (
                           <p className="text-[10px] text-slate-400">
-                            Photo liée à cette offre uniquement.
+                            Photo liée à cette offre uniquement — jamais
+                            inventée.
                           </p>
                         )}
                       </>
@@ -1656,103 +1739,73 @@ export function SupplyStudyDialog({
                   </div>
                 </div>
 
-                {/* Détails — défilement indépendant sous la photo */}
                 <div className="mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto pr-0.5">
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-900">
-                      {inspected.agencyDisplay || inspected.supplierName}
-                    </p>
-                    <p className="text-sm text-slate-700">
-                      {inspected.productLabel}
-                    </p>
-                    {inspected.productRef ? (
-                      <p className="text-xs text-slate-500">
-                        Réf. {inspected.productRef}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  <dl className="space-y-2 rounded-xl border border-slate-200 p-3 text-sm">
-                    <DetailRow k="Fournisseur" v={inspected.supplierName} />
-                    <DetailRow
-                      k="Prix unitaire"
-                      v={
-                        inspected.unitPrice == null
-                          ? "Non renseigné"
-                          : `${formatStudyMoney(inspected.unitPrice)} / ${inspected.priceUnit} ${inspected.priceTaxMode}`
-                      }
-                    />
-                    <DetailRow
-                      k="Fiscalité"
-                      v={
-                        inspected.vatRate != null
-                          ? `TVA ${inspected.vatRate} %`
-                          : "À confirmer"
-                      }
-                    />
-                    <DetailRow
-                      k="Quantité commerciale"
-                      v={`${formatQty(need.validatedOrderQuantity)} ${need.unit}`}
-                    />
-                    <DetailRow
-                      k="Conditionnement"
-                      v={inspected.packagingLabel || "—"}
-                    />
-                    <DetailRow
-                      k="Disponibilité"
-                      v={inspected.availabilityNote || "À confirmer"}
-                    />
-                    <DetailRow
-                      k="Délai"
-                      v={
-                        inspected.leadTimeDays != null
-                          ? `${inspected.leadTimeDays} j`
-                          : "Inconnu"
-                      }
-                    />
-                    <DetailRow
-                      k="Livraison"
-                      v={
-                        inspected.deliveryFee == null
-                          ? "Non renseignée"
-                          : formatStudyMoney(inspected.deliveryFee, 2)
-                      }
-                    />
-                    <DetailRow
-                      k="Grutage"
-                      v={
-                        inspected.craneFee == null
-                          ? "Non renseigné"
-                          : formatStudyMoney(inspected.craneFee, 2)
-                      }
-                    />
-                  </dl>
-
-                  <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+                  {/* Prix et conditions */}
+                  <div className="rounded-xl border border-slate-200 p-3">
                     <p className="text-[11px] font-bold uppercase text-slate-500">
-                      Sous-total produit
+                      Prix et conditions commerciales
                     </p>
-                    <p className="mt-1 text-lg font-bold tabular-nums text-[#1e3a5f]">
-                      {inspected.productCost.displayLabel}
-                    </p>
-                    {inspected.productCost.status === "KNOWN" &&
-                    inspected.unitPrice != null ? (
-                      <p className="mt-1 text-[11px] text-slate-600">
-                        {formatQty(need.validatedOrderQuantity)} {need.unit} ×{" "}
-                        {formatStudyMoney(inspected.unitPrice)}/
-                        {inspected.priceUnit} {inspected.priceTaxMode}
-                      </p>
-                    ) : null}
-                    {inspected.productCost.status === "UNKNOWN" &&
-                    inspected.productCost.reason ? (
-                      <p className="mt-1 text-[11px] text-slate-500">
-                        {inspected.productCost.reason}
-                      </p>
-                    ) : null}
-                    <p className="mt-2 text-[11px] font-medium text-slate-700">
-                      {inspected.renderedCost.completeness === "COMPLETE"
-                        ? inspected.renderedCost.displayLabel
-                        : "Coût rendu chantier non disponible"}
+                    <dl className="mt-2 space-y-2 text-sm">
+                      <DetailRow
+                        k="Prix unitaire HT"
+                        v={
+                          inspected.unitPrice == null
+                            ? "Prix à demander"
+                            : priceBreak.ht
+                        }
+                      />
+                      <DetailRow
+                        k="Prix unitaire TTC"
+                        v={
+                          inspected.unitPrice == null
+                            ? "Prix à demander"
+                            : priceBreak.ttc
+                        }
+                      />
+                      <DetailRow k="TVA" v={priceBreak.vatLabel} />
+                      <DetailRow
+                        k="Unité tarifaire"
+                        v={priceBreak.unitLabel}
+                      />
+                      <DetailRow
+                        k="Quantité à commander"
+                        v={`${formatQty(need.validatedOrderQuantity)} ${need.unit}`}
+                      />
+                      <DetailRow
+                        k="Total prévisionnel"
+                        v={
+                          inspected.productCost.status === "KNOWN"
+                            ? inspected.productCost.displayLabel
+                            : "Prix à demander"
+                        }
+                      />
+                      <DetailRow
+                        k="Date de vérification"
+                        v={formatStudyDay(
+                          inspected.observedAt || inspected.recordedAt,
+                        )}
+                      />
+                      <DetailRow
+                        k="Provenance du prix"
+                        v={qualifyOfferSourceLabel(inspected)}
+                      />
+                    </dl>
+                    <p
+                      className={`mt-2 rounded-lg px-2 py-1.5 text-[11px] font-semibold ${
+                        priceBreak.verified
+                          ? "bg-emerald-50 text-emerald-800"
+                          : inspected.priceSourceType === "USER_ENTERED"
+                            ? "bg-amber-50 text-amber-900"
+                            : "bg-slate-50 text-slate-700"
+                      }`}
+                    >
+                      {priceBreak.verified
+                        ? "Prix vérifié sur fiche fournisseur"
+                        : inspected.priceSourceType === "USER_ENTERED"
+                          ? "Prix saisi manuellement — à confirmer"
+                          : inspected.unitPrice == null
+                            ? "Aucun prix enregistré — demander au fournisseur"
+                            : qualifyOfferSourceLabel(inspected)}
                     </p>
                     {inspected.priceHistory?.length ? (
                       <div className="mt-3 border-t border-slate-200 pt-2">
@@ -1766,7 +1819,7 @@ export function SupplyStudyDialog({
                             .map((h, i) => (
                               <li key={`${h.changedAt}-${i}`}>
                                 {h.unitPrice == null
-                                  ? "Prix non renseigné"
+                                  ? "Prix à demander"
                                   : `${formatStudyMoney(h.unitPrice)} / ${h.priceUnit} ${h.priceTaxMode}`}
                                 {" · "}
                                 {formatStudyDay(h.observedAt || h.recordedAt)}
@@ -1779,31 +1832,158 @@ export function SupplyStudyDialog({
                     ) : null}
                   </div>
 
+                  {/* Fournisseur et agence */}
                   <div className="rounded-xl border border-slate-200 p-3">
                     <p className="text-[11px] font-bold uppercase text-slate-500">
-                      Source
+                      Fournisseur et agence physique
                     </p>
-                    <p className="mt-1 text-xs text-slate-600">
-                      {qualifyOfferSourceLabel(inspected)} · relevé{" "}
-                      {formatStudyDay(
-                        inspected.observedAt || inspected.recordedAt,
-                      )}
+                    <dl className="mt-2 space-y-2 text-sm">
+                      <DetailRow k="Fournisseur" v={brand} />
+                      <DetailRow k="Agence" v={agency} />
+                      <DetailRow
+                        k="Adresse"
+                        v={fullAddress || "à confirmer"}
+                      />
+                      <DetailRow
+                        k="Ville"
+                        v={inspected.supplierCity?.trim() || "à confirmer"}
+                      />
+                      <DetailRow
+                        k="Téléphone"
+                        v={inspected.supplierPhone?.trim() || "à confirmer"}
+                      />
+                    </dl>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {inspected.supplierPhone?.trim() ? (
+                        <a
+                          href={`tel:${inspected.supplierPhone.trim()}`}
+                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-800 hover:bg-slate-50"
+                        >
+                          <Phone className="h-3.5 w-3.5" />
+                          Appeler
+                        </a>
+                      ) : null}
+                      {websiteHref ? (
+                        <a
+                          href={websiteHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-800 hover:bg-slate-50"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Site internet
+                        </a>
+                      ) : null}
+                      {mapsHref ? (
+                        <a
+                          href={mapsHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded-lg border border-[#2563eb]/25 bg-[#2563eb]/5 px-2.5 py-1.5 text-[11px] font-semibold text-[#1d4ed8] hover:bg-[#2563eb]/10"
+                        >
+                          <MapPin className="h-3.5 w-3.5" />
+                          Itinéraire
+                        </a>
+                      ) : null}
+                    </div>
+                    <p className="mt-2 text-[10px] text-slate-500">
+                      Magasin renseigné ≠ produit disponible en stock.
                     </p>
-                    {inspected.sourceUrl ? (
+                  </div>
+
+                  {/* Disponibilité et livraison */}
+                  <div className="rounded-xl border border-slate-200 p-3">
+                    <p className="text-[11px] font-bold uppercase text-slate-500">
+                      Disponibilité et livraison
+                    </p>
+                    <dl className="mt-2 space-y-2 text-sm">
+                      <DetailRow
+                        k="Disponibilité produit"
+                        v={
+                          inspected.availabilityNote?.trim() ||
+                          "à confirmer"
+                        }
+                      />
+                      <DetailRow
+                        k="Délai"
+                        v={
+                          inspected.leadTimeDays != null
+                            ? `${inspected.leadTimeDays} j`
+                            : "à confirmer"
+                        }
+                      />
+                      <DetailRow
+                        k="Conditionnement"
+                        v={inspected.packagingLabel || "—"}
+                      />
+                      <DetailRow
+                        k="Livraison"
+                        v={
+                          inspected.deliveryFee == null
+                            ? "Non renseignée"
+                            : formatStudyMoney(inspected.deliveryFee, 2)
+                        }
+                      />
+                      <DetailRow
+                        k="Grutage"
+                        v={
+                          inspected.craneFee == null
+                            ? "Non renseigné"
+                            : formatStudyMoney(inspected.craneFee, 2)
+                        }
+                      />
+                      <DetailRow
+                        k="Coût rendu chantier"
+                        v={
+                          inspected.renderedCost.completeness === "COMPLETE"
+                            ? inspected.renderedCost.displayLabel
+                            : "non disponible"
+                        }
+                      />
+                    </dl>
+                  </div>
+
+                  {/* Traçabilité */}
+                  <div className="rounded-xl border border-slate-200 p-3">
+                    <p className="text-[11px] font-bold uppercase text-slate-500">
+                      Traçabilité
+                    </p>
+                    <dl className="mt-2 space-y-2 text-sm">
+                      <DetailRow
+                        k="Statut de vérification"
+                        v={qualifyOfferSourceLabel(inspected)}
+                      />
+                      <DetailRow
+                        k="Date du relevé"
+                        v={formatStudyDay(
+                          inspected.observedAt || inspected.recordedAt,
+                        )}
+                      />
+                      {inspected.quoteNumber ? (
+                        <DetailRow
+                          k="Devis n°"
+                          v={inspected.quoteNumber}
+                        />
+                      ) : null}
+                    </dl>
+                    {productHref ? (
                       <a
-                        href={inspected.sourceUrl}
+                        href={productHref}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-1 block truncate text-xs font-semibold text-[#2563eb] hover:underline"
+                        className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#2563eb] px-3 py-2 text-xs font-bold text-white hover:bg-[#1d4ed8] sm:w-auto"
                       >
-                        Ouvrir la fiche fournisseur
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        Voir le produit
                       </a>
                     ) : (
-                      <p className="mt-1 text-xs text-slate-400">Pas d’URL</p>
+                      <p className="mt-2 text-xs text-slate-400">
+                        Aucune URL produit renseignée
+                      </p>
                     )}
-                    {inspected.quoteNumber ? (
-                      <p className="mt-1 text-xs text-slate-600">
-                        Devis n° {inspected.quoteNumber}
+                    {productHref ? (
+                      <p className="mt-1 truncate text-[10px] text-slate-500">
+                        {productHref}
                       </p>
                     ) : null}
                   </div>
@@ -1822,6 +2002,9 @@ export function SupplyStudyDialog({
                     </div>
                   )}
                 </div>
+                    </>
+                  );
+                })()}
               </>
             )}
           </section>
@@ -1875,6 +2058,32 @@ export function SupplyStudyDialog({
           </div>
         </footer>
       </div>
+
+      {imageLightbox ? (
+        <div
+          className="fixed inset-0 z-[85] flex items-center justify-center bg-black/70 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Photo produit agrandie"
+          onClick={() => setImageLightbox(null)}
+        >
+          <button
+            type="button"
+            className="absolute right-4 top-4 rounded-full bg-white/95 p-2 text-slate-800 shadow"
+            aria-label="Fermer"
+            onClick={() => setImageLightbox(null)}
+          >
+            <X className="h-5 w-5" />
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imageLightbox.src}
+            alt={imageLightbox.alt}
+            className="max-h-[90vh] max-w-[95vw] rounded-lg object-contain shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      ) : null}
 
       {addMode ? (
         <SupplyAddOfferModal
@@ -2468,5 +2677,90 @@ function DetailRow({ k, v }: { k: string; v: string }) {
       <dt className="text-xs text-slate-500">{k}</dt>
       <dd className="text-right text-xs font-semibold text-slate-800">{v}</dd>
     </div>
+  );
+}
+
+function OfferProductThumb({
+  src,
+  alt,
+  size,
+  onEnlarge,
+}: {
+  src: string | null;
+  alt: string;
+  size: "sm" | "lg";
+  onEnlarge?: () => void;
+}) {
+  const [broken, setBroken] = useState(false);
+  const showImg = Boolean(src) && !broken;
+
+  if (size === "lg") {
+    if (!showImg) {
+      return (
+        <div className="flex h-32 flex-col items-center justify-center gap-1.5 bg-slate-50/80 px-3 text-center text-slate-400 sm:h-36">
+          <Package className="h-8 w-8" />
+          <span className="text-xs font-semibold text-slate-500">
+            Aucune photo de présentation
+          </span>
+        </div>
+      );
+    }
+    const img = (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src!}
+        alt={alt}
+        className="mx-auto h-36 w-full object-contain sm:h-44"
+        onError={() => setBroken(true)}
+      />
+    );
+    if (!onEnlarge) return <div className="bg-white">{img}</div>;
+    return (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onEnlarge();
+        }}
+        className="block w-full cursor-zoom-in bg-white"
+        title="Agrandir la photo"
+        aria-label="Agrandir la photo produit"
+      >
+        {img}
+      </button>
+    );
+  }
+
+  if (!showImg) {
+    return (
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50">
+        <Package className="h-5 w-5 text-slate-300" />
+      </div>
+    );
+  }
+
+  const thumb = (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src!}
+      alt={alt}
+      className="h-14 w-14 rounded-lg border border-slate-200 object-cover"
+      onError={() => setBroken(true)}
+    />
+  );
+  if (!onEnlarge) return <div className="shrink-0">{thumb}</div>;
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onEnlarge();
+      }}
+      className="shrink-0 cursor-zoom-in"
+      title="Agrandir la photo"
+      aria-label="Agrandir la photo produit"
+    >
+      {thumb}
+    </button>
   );
 }

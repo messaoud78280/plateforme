@@ -84,6 +84,13 @@ export type SupplyOfferView = {
   supplierTradeName: string | null;
   parentSupplierName: string | null;
   agencyDisplay: string;
+  /** Coordonnées agence / siège lié — jamais inventées. */
+  supplierCity: string | null;
+  supplierAddress: string | null;
+  supplierZipCode: string | null;
+  supplierPhone: string | null;
+  supplierEmail: string | null;
+  supplierWebsite: string | null;
   productLabel: string;
   productRef: string | null;
   techAttributes: unknown;

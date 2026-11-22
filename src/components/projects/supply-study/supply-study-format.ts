@@ -25,6 +25,120 @@ export function formatStudyMoney(
   }).format(v);
 }
 
+/** Affichage achat : jamais 0 € inventé — « Prix à demander » si absent. */
+export function formatOfferPriceOrAsk(
+  v: number | null | undefined,
+  maxFrac = 4,
+): string {
+  if (v == null || !Number.isFinite(v)) return "Prix à demander";
+  return formatStudyMoney(v, maxFrac);
+}
+
+/** URL produit sûre pour ouverture externe (http/https uniquement). */
+export function safeExternalHttpUrl(
+  raw: string | null | undefined,
+): string | null {
+  const v = validateProductUrl(raw ?? "");
+  return v.ok ? v.url : null;
+}
+
+/** Marque / enseigne pour la carte (parent si agence). */
+export function offerSupplierBrandLabel(o: SupplyOfferView): string {
+  return (
+    o.parentSupplierName?.trim() ||
+    o.supplierTradeName?.trim() ||
+    o.supplierName.trim() ||
+    "Fournisseur à confirmer"
+  );
+}
+
+/** Libellé agence physique — jamais confondu avec le stock produit. */
+export function offerAgencyLabel(o: SupplyOfferView): string {
+  if (o.supplierCity?.trim()) {
+    return o.parentSupplierName
+      ? `Agence de ${o.supplierCity.trim()}`
+      : o.supplierCity.trim();
+  }
+  if (o.parentSupplierName && o.supplierTradeName?.trim()) {
+    return o.supplierTradeName.trim();
+  }
+  return "à confirmer";
+}
+
+export function offerFullAddress(o: SupplyOfferView): string | null {
+  const parts = [
+    o.supplierAddress?.trim(),
+    [o.supplierZipCode?.trim(), o.supplierCity?.trim()]
+      .filter(Boolean)
+      .join(" "),
+  ].filter(Boolean);
+  return parts.length ? parts.join(", ") : null;
+}
+
+/** Lien itinéraire Google Maps — uniquement si adresse réelle renseignée. */
+export function offerMapsItineraryUrl(o: SupplyOfferView): string | null {
+  const addr = offerFullAddress(o);
+  if (!addr) return null;
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`;
+}
+
+/**
+ * Découpe HT / TTC pour affichage — conversion uniquement si TVA connue.
+ * Ne invente jamais l’autre régime fiscal.
+ */
+export function offerUnitPriceBreakdown(o: SupplyOfferView): {
+  unitLabel: string;
+  ht: string;
+  ttc: string;
+  vatLabel: string;
+  verified: boolean;
+} {
+  const unit = (o.priceUnit || "U").trim() || "U";
+  const vatLabel =
+    o.vatRate != null && Number.isFinite(o.vatRate)
+      ? `TVA ${o.vatRate} %`
+      : "TVA à confirmer";
+  const verified =
+    o.priceSourceType === "WEB_VERIFIED" && isJustifiedPricedOffer(o);
+
+  if (o.unitPrice == null || !Number.isFinite(o.unitPrice)) {
+    return {
+      unitLabel: unit,
+      ht: "Prix à demander",
+      ttc: "Prix à demander",
+      vatLabel,
+      verified: false,
+    };
+  }
+
+  const money = formatStudyMoney(o.unitPrice);
+  const vat = o.vatRate;
+  if (o.priceTaxMode === "HT") {
+    const ttc =
+      vat != null && Number.isFinite(vat) && vat >= 0
+        ? formatStudyMoney(o.unitPrice * (1 + vat / 100))
+        : "TTC à confirmer";
+    return {
+      unitLabel: unit,
+      ht: `${money} HT`,
+      ttc,
+      vatLabel,
+      verified,
+    };
+  }
+  const ht =
+    vat != null && Number.isFinite(vat) && vat >= 0
+      ? formatStudyMoney(o.unitPrice / (1 + vat / 100))
+      : "HT à confirmer";
+  return {
+    unitLabel: unit,
+    ht,
+    ttc: `${money} TTC`,
+    vatLabel,
+    verified,
+  };
+}
+
 export function needStatusLabel(status: string): string {
   return SUPPLY_NEED_STATUS_LABELS[status] ?? status;
 }

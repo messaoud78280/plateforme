@@ -4,9 +4,15 @@
 import assert from "node:assert/strict";
 import { formatProductSubtotalLabel } from "@/lib/supply/offer-cost";
 import {
+  formatOfferPriceOrAsk,
   isJustifiedPricedOffer,
   normalizeOfferUrl,
+  offerAgencyLabel,
+  offerMapsItineraryUrl,
+  offerSupplierBrandLabel,
+  offerUnitPriceBreakdown,
   qualifyOfferSourceLabel,
+  safeExternalHttpUrl,
   validateProductUrl,
 } from "./supply-study-format";
 import type { SupplyOfferView } from "@/lib/supply/offer-types";
@@ -21,6 +27,12 @@ function base(over: Partial<SupplyOfferView> = {}): SupplyOfferView {
     supplierTradeName: null,
     parentSupplierName: null,
     agencyDisplay: "Test",
+    supplierCity: null,
+    supplierAddress: null,
+    supplierZipCode: null,
+    supplierPhone: null,
+    supplierEmail: null,
+    supplierWebsite: null,
     productLabel: "Bloc",
     productRef: null,
     techAttributes: null,
@@ -135,7 +147,66 @@ function base(over: Partial<SupplyOfferView> = {}): SupplyOfferView {
   assert.equal(validateProductUrl("ftp://x").ok, false);
   assert.equal(validateProductUrl("pas-une-url").ok, false);
   assert.ok(normalizeOfferUrl("https://A.com/Path/")?.includes("a.com"));
+  assert.equal(
+    safeExternalHttpUrl("https://www.rexel.fr/fr-fr/p/LEG600001"),
+    "https://www.rexel.fr/fr-fr/p/LEG600001",
+  );
+  assert.equal(safeExternalHttpUrl(null), null);
+  assert.equal(safeExternalHttpUrl("javascript:alert(1)"), null);
   console.log("URL helpers OK");
+}
+
+{
+  assert.equal(formatOfferPriceOrAsk(null), "Prix à demander");
+  assert.match(formatOfferPriceOrAsk(12.5), /12/);
+  const brand = offerSupplierBrandLabel(
+    base({
+      parentSupplierName: "Rexel France",
+      supplierName: "Rexel Limoges",
+      supplierCity: null,
+    }),
+  );
+  assert.equal(brand, "Rexel France");
+  assert.equal(
+    offerAgencyLabel(
+      base({
+        parentSupplierName: "Rexel France",
+        supplierCity: null,
+      }),
+    ),
+    "à confirmer",
+  );
+  assert.equal(
+    offerAgencyLabel(
+      base({
+        parentSupplierName: "Rexel France",
+        supplierCity: "Limoges",
+      }),
+    ),
+    "Agence de Limoges",
+  );
+  assert.equal(
+    offerMapsItineraryUrl(base({ supplierAddress: null, supplierCity: null })),
+    null,
+  );
+  assert.ok(
+    offerMapsItineraryUrl(
+      base({
+        supplierAddress: "12 rue Test",
+        supplierZipCode: "87000",
+        supplierCity: "Limoges",
+      }),
+    )?.includes("Limoges"),
+  );
+  const ask = offerUnitPriceBreakdown(base({ unitPrice: null }));
+  assert.equal(ask.ht, "Prix à demander");
+  const ht = offerUnitPriceBreakdown(
+    base({ unitPrice: 10, priceTaxMode: "HT", vatRate: 20 }),
+  );
+  assert.match(ht.ht, /HT/);
+  assert.match(ht.ttc, /12/);
+  assert.equal(ht.verified, true);
+  console.log("achat / agence helpers OK");
 }
 
 {
